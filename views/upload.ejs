@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSV Import</title>
+    <style>
+        .upload-container { max-width: 600px; margin: 50px auto; padding: 20px; }
+        .upload-box { border: 2px dashed #ccc; padding: 40px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <h1>Import Purchase Orders</h1>
+        <form action="/purchase-orders/upload" method="post" enctype="multipart/form-data">
+            <div class="upload-box">
+                <input type="file" name="csvFile" accept=".csv" required>
+                <p>Select your CSV file</p>
+                <button type="submit">Upload & Import</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
