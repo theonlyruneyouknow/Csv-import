@@ -7,8 +7,6 @@ const app = express();
 
 // Connect to MongoDB
 mongoose.connect('mongodb://localhost:27017/purchase-orders');
-
-mongoose.connect('mongodb://localhost:27017/purchase-orders');
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -19,6 +17,6 @@ app.use('/purchase-orders', purchaseOrderRoutes);
 app.get('/', (req, res) => res.redirect('/purchase-orders'));
 app.get('/upload', (req, res) => res.render('upload'));
 
-app.listen(3000, () => {
-    console.log('Server running on http://localhost:3003');
+app.listen(3001, () => {
+    console.log('Server running on http://localhost:3001');
 });
