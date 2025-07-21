@@ -25,7 +25,4 @@ const purchaseOrderSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
-// Create index on poNumber for faster lookups
-purchaseOrderSchema.index({ poNumber: 1 });
-
 module.exports = mongoose.model('PurchaseOrder', purchaseOrderSchema);
