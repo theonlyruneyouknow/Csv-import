@@ -8,6 +8,7 @@ const app = express();
 // Connect to MongoDB
 mongoose.connect('mongodb://localhost:27017/purchase-orders');
 
+mongoose.connect('mongodb://localhost:27017/purchase-orders');
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
