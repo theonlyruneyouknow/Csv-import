@@ -1,4 +1,5 @@
 // app.js
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const purchaseOrderRoutes = require('./routes/purchaseOrders');
@@ -6,9 +7,8 @@ const purchaseOrderRoutes = require('./routes/purchaseOrders');
 const app = express();
 
 // Connect to MongoDB
-// mongoose.connect('mongodb://localhost:27017/purchase-orders');
-// mongodb://localhost:27017/purchase-orders
-mongodb+srv://user:pass@cluster0.8elw1gh.mongodb.net/purchase-orders?retryWrites=true&w=majority
+mongoose.connect(process.env.MONGODB_URI);
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -19,6 +19,8 @@ app.use('/purchase-orders', purchaseOrderRoutes);
 app.get('/', (req, res) => res.redirect('/purchase-orders'));
 app.get('/upload', (req, res) => res.render('upload'));
 
-app.listen(3001, () => {
-    console.log('Server running on http://localhost:3001');
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
 });
