@@ -6,7 +6,9 @@ const purchaseOrderRoutes = require('./routes/purchaseOrders');
 const app = express();
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/purchase-orders');
+// mongoose.connect('mongodb://localhost:27017/purchase-orders');
+// mongodb://localhost:27017/purchase-orders
+mongodb+srv://user:pass@cluster0.8elw1gh.mongodb.net/purchase-orders?retryWrites=true&w=majority
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
