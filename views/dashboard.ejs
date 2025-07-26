@@ -135,26 +135,43 @@
             position: relative;
         }
 
-        /* Enhanced Notes Styles */
+        /* Enhanced Notes Styles - Notes appear below the row */
+        .notes-row {
+            display: none;
+            /* Hidden by default */
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+
+        .notes-row.expanded {
+            display: table-row;
+        }
+
+        .notes-cell-expanded {
+            padding: 15px;
+            border: none;
+            border-top: 1px solid #dee2e6;
+        }
+
         .notes-container {
             position: relative;
             width: 100%;
+            max-width: 100%;
         }
 
         .notes-input {
             width: 100%;
-            border: 1px solid transparent;
-            background: transparent;
-            padding: 6px 8px;
+            border: 1px solid #ddd;
+            background: white;
+            padding: 10px;
             border-radius: 4px;
-            min-height: 20px;
+            min-height: 80px;
             font-size: 16px;
-            resize: none;
-            transition: all 0.3s ease;
+            resize: vertical;
+            font-family: Arial, sans-serif;
         }
 
         .notes-input:focus {
-            background: white;
             border: 1px solid #007bff;
             outline: none;
             box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
@@ -170,73 +187,74 @@
             border-color: #bee5eb;
         }
 
-        /* Collapsed state - single line input */
-        .notes-input.collapsed {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            height: 32px;
-            padding-right: 35px;
-            /* Space for expand button */
+        /* Notes toggle in the main row */
+        .notes-toggle-cell {
+            text-align: center;
+            vertical-align: middle;
+            width: 50px;
         }
 
-        /* Expanded state - textarea */
-        .notes-input.expanded {
-            height: auto;
-            min-height: 80px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            padding-right: 35px;
-            /* Space for collapse button */
-        }
-
-        /* Expand/Collapse button */
         .notes-toggle {
-            position: absolute;
-            right: 8px;
-            top: 6px;
             background: #007bff;
             color: white;
             border: none;
-            border-radius: 3px;
-            width: 24px;
-            height: 24px;
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
             cursor: pointer;
-            font-size: 12px;
-            display: flex;
+            font-size: 14px;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            opacity: 0.7;
-            transition: opacity 0.2s ease;
-            z-index: 1;
+            transition: all 0.2s ease;
         }
 
         .notes-toggle:hover {
-            opacity: 1;
             background: #0056b3;
+            transform: scale(1.05);
         }
 
-        /* Show toggle button only when there are notes or when focused */
-        .notes-container:not(.has-content) .notes-toggle {
-            display: none;
+        .notes-toggle.has-notes {
+            background: #28a745;
         }
 
-        .notes-container.has-content .notes-toggle,
-        .notes-container.focused .notes-toggle {
+        .notes-toggle.has-notes:hover {
+            background: #218838;
+        }
+
+        /* Notes header with actions */
+        .notes-header {
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #dee2e6;
         }
 
-        /* Preview text for collapsed notes */
-        .notes-preview {
-            display: none;
-            color: #6c757d;
-            font-style: italic;
-            font-size: 14px;
-            margin-top: 4px;
+        .notes-title {
+            font-weight: bold;
+            color: #495057;
+            font-size: 16px;
         }
 
-        .notes-container.collapsed.has-long-content .notes-preview {
-            display: block;
+        .notes-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .notes-close {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .notes-close:hover {
+            background: #5a6268;
         }
 
         /* Status Dropdown - 16px font */
@@ -444,12 +462,13 @@
                                     <th class="sortable vendor" data-column="vendor">Vendor</th>
                                     <th class="ns-status-cell">NS Status</th>
                                     <th class="status-cell">Status</th>
-                                    <th class="notes-cell">Notes</th>
+                                    <th class="notes-toggle-cell">Notes</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <% purchaseOrders.forEach(po=> { %>
-                                    <tr data-po='<%= JSON.stringify(po) %>'>
+                                <% purchaseOrders.forEach((po, index)=> { %>
+                                    <!-- Main data row -->
+                                    <tr data-po='<%= JSON.stringify(po) %>' data-index="<%= index %>">
                                         <td class="date-cell">
                                             <%= po.date %>
                                         </td>
@@ -477,24 +496,32 @@
                                                     <% }); %>
                                             </select>
                                         </td>
-                                        <td class="notes-cell">
-                                            <div
-                                                class="notes-container <%= po.notes && po.notes.trim() ? 'has-content' : '' %>">
-                                                <textarea
-                                                    class="notes-input collapsed <%= po.notes && po.notes.trim() ? 'has-notes' : '' %>"
-                                                    data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
-                                                    placeholder="Add notes for <%= po.poNumber %>..."
-                                                    title="Notes for PO <%= po.poNumber %> (persists across CSV uploads)"
-                                                    rows="1"><%= po.notes %></textarea>
-                                                <button class="notes-toggle" type="button"
-                                                    title="Expand/Collapse notes">
-                                                    <span class="toggle-icon">⇓</span>
-                                                </button>
-                                                <div class="notes-preview">
-                                                    <% if (po.notes && po.notes.length> 50) { %>
-                                                        <%= po.notes.substring(50) %>...
-                                                            <% } %>
+                                        <td class="notes-toggle-cell">
+                                            <button
+                                                class="notes-toggle <%= po.notes && po.notes.trim() ? 'has-notes' : '' %>"
+                                                type="button" data-index="<%= index %>"
+                                                title="<%= po.notes && po.notes.trim() ? 'View/Edit notes' : 'Add notes' %>">
+                                                <%= po.notes && po.notes.trim() ? '📝' : '➕' %>
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Expandable notes row -->
+                                    <tr class="notes-row" id="notes-row-<%= index %>">
+                                        <td colspan="6" class="notes-cell-expanded">
+                                            <div class="notes-header">
+                                                <div class="notes-title">Notes for PO <%= po.poNumber %>
                                                 </div>
+                                                <div class="notes-actions">
+                                                    <button class="notes-close" data-index="<%= index %>">Close</button>
+                                                </div>
+                                            </div>
+                                            <div class="notes-container">
+                                                <textarea
+                                                    class="notes-input <%= po.notes && po.notes.trim() ? 'has-notes' : '' %>"
+                                                    data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
+                                                    data-index="<%= index %>"
+                                                    placeholder="Add detailed notes for <%= po.poNumber %>... (These notes persist across CSV uploads)"><%= po.notes %></textarea>
                                             </div>
                                         </td>
                                     </tr>
@@ -512,67 +539,57 @@
     <script>
         let currentSort = { column: null, direction: null };
 
-        // Enhanced Notes functionality with expand/collapse
-        document.querySelectorAll('.notes-input').forEach(input => {
-            let timeout;
-            const container = input.closest('.notes-container');
-            const toggleBtn = container.querySelector('.notes-toggle');
-            const toggleIcon = toggleBtn.querySelector('.toggle-icon');
+        // Enhanced Notes functionality - notes appear below each row
 
-            // Handle expand/collapse toggle
+        // Handle notes toggle buttons
+        document.querySelectorAll('.notes-toggle').forEach(toggleBtn => {
             toggleBtn.addEventListener('click', function () {
-                const isExpanded = input.classList.contains('expanded');
+                const index = this.dataset.index;
+                const notesRow = document.getElementById(`notes-row-${index}`);
+                const isExpanded = notesRow.classList.contains('expanded');
 
                 if (isExpanded) {
                     // Collapse
-                    input.classList.remove('expanded');
-                    input.classList.add('collapsed');
-                    input.rows = 1;
-                    toggleIcon.textContent = '⇓';
-                    toggleBtn.title = 'Expand notes';
+                    notesRow.classList.remove('expanded');
                 } else {
                     // Expand
-                    input.classList.remove('collapsed');
-                    input.classList.add('expanded');
-                    input.rows = Math.max(3, Math.ceil(input.value.length / 50));
-                    toggleIcon.textContent = '⇑';
-                    toggleBtn.title = 'Collapse notes';
-                    input.focus();
+                    notesRow.classList.add('expanded');
+                    // Focus on the textarea
+                    const textarea = notesRow.querySelector('.notes-input');
+                    setTimeout(() => textarea.focus(), 100);
                 }
             });
+        });
 
-            // Handle focus/blur for showing toggle button
-            input.addEventListener('focus', function () {
-                container.classList.add('focused');
+        // Handle close buttons
+        document.querySelectorAll('.notes-close').forEach(closeBtn => {
+            closeBtn.addEventListener('click', function () {
+                const index = this.dataset.index;
+                const notesRow = document.getElementById(`notes-row-${index}`);
+                notesRow.classList.remove('expanded');
             });
+        });
 
-            input.addEventListener('blur', function () {
-                container.classList.remove('focused');
-            });
+        // Handle notes input with auto-save
+        document.querySelectorAll('.notes-input').forEach(input => {
+            let timeout;
 
-            // Auto-resize textarea when typing in expanded mode
             input.addEventListener('input', function () {
-                if (this.classList.contains('expanded')) {
-                    // Auto-resize
-                    this.rows = Math.max(3, Math.ceil(this.value.length / 50));
-                }
-
-                // Update container classes based on content
                 const hasContent = this.value.trim().length > 0;
-                const hasLongContent = this.value.length > 50;
+                const index = this.dataset.index;
+                const toggleBtn = document.querySelector(`.notes-toggle[data-index="${index}"]`);
 
+                // Update visual state
                 if (hasContent) {
-                    container.classList.add('has-content');
                     this.classList.add('has-notes');
+                    toggleBtn.classList.add('has-notes');
+                    toggleBtn.innerHTML = '📝';
+                    toggleBtn.title = 'View/Edit notes';
                 } else {
-                    container.classList.remove('has-content');
                     this.classList.remove('has-notes');
-                }
-
-                if (hasLongContent) {
-                    container.classList.add('has-long-content');
-                } else {
-                    container.classList.remove('has-long-content');
+                    toggleBtn.classList.remove('has-notes');
+                    toggleBtn.innerHTML = '➕';
+                    toggleBtn.title = 'Add notes';
                 }
 
                 clearTimeout(timeout);
@@ -606,17 +623,6 @@
                         });
                 }, 1000);
             });
-
-            // Initialize state based on content
-            const hasContent = input.value.trim().length > 0;
-            const hasLongContent = input.value.length > 50;
-
-            if (hasContent) {
-                container.classList.add('has-content');
-            }
-            if (hasLongContent) {
-                container.classList.add('has-long-content');
-            }
         });
 
         // Auto-save Status when changed
@@ -667,7 +673,7 @@
             const statusFilter = document.getElementById('statusFilter').value;
             const notesFilter = document.getElementById('notesFilter').value;
 
-            const rows = document.querySelectorAll('#purchaseOrdersTable tbody tr');
+            const rows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]'); // Only main rows
             let visibleCount = 0;
 
             rows.forEach(row => {
@@ -677,6 +683,7 @@
                 const nsStatus = poData.nsStatus || '';
                 const status = poData.status || '';
                 const notes = poData.notes || '';
+                const index = row.dataset.index;
 
                 // Search filter
                 const matchesSearch = vendor.includes(searchTerm) || poNumber.includes(searchTerm);
@@ -697,9 +704,19 @@
 
                 if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes) {
                     row.classList.remove('hidden');
+                    // Also show the corresponding notes row if it's expanded
+                    const notesRow = document.getElementById(`notes-row-${index}`);
+                    if (notesRow && notesRow.classList.contains('expanded')) {
+                        notesRow.classList.remove('hidden');
+                    }
                     visibleCount++;
                 } else {
                     row.classList.add('hidden');
+                    // Also hide the corresponding notes row
+                    const notesRow = document.getElementById(`notes-row-${index}`);
+                    if (notesRow) {
+                        notesRow.classList.add('hidden');
+                    }
                 }
             });
 
@@ -729,7 +746,7 @@
 
         // Update statistics based on visible rows
         function updateStats() {
-            const visibleRows = document.querySelectorAll('#purchaseOrdersTable tbody tr:not(.hidden)');
+            const visibleRows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]:not(.hidden)');
             let notesCount = 0;
 
             visibleRows.forEach(row => {
