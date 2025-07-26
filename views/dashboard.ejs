@@ -53,20 +53,99 @@
         tr.hidden { display: none; }
         
         /* Improved font sizes - 16px for better readability */
+        .notes-cell { min-width: 200px; position: relative; }
+        
+        /* Enhanced Notes Styles */
+        .notes-container {
+            position: relative;
+            width: 100%;
+        }
+        
         .notes-input { 
             width: 100%; border: 1px solid transparent; 
             background: transparent; padding: 6px 8px; border-radius: 4px;
-            min-height: 20px; font-size: 16px;
+            min-height: 20px; font-size: 16px; resize: none;
+            transition: all 0.3s ease;
         }
+        
         .notes-input:focus { 
             background: white; border: 1px solid #007bff; outline: none;
             box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
         }
+        
         .notes-input.has-notes { 
             background: #fff3cd; border-color: #ffeaa7;
         }
+        
         .notes-input.saving { 
             background: #d1ecf1; border-color: #bee5eb;
+        }
+        
+        /* Collapsed state - single line input */
+        .notes-input.collapsed {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            height: 32px;
+            padding-right: 35px; /* Space for expand button */
+        }
+        
+        /* Expanded state - textarea */
+        .notes-input.expanded {
+            height: auto;
+            min-height: 80px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            padding-right: 35px; /* Space for collapse button */
+        }
+        
+        /* Expand/Collapse button */
+        .notes-toggle {
+            position: absolute;
+            right: 8px;
+            top: 6px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+            z-index: 1;
+        }
+        
+        .notes-toggle:hover {
+            opacity: 1;
+            background: #0056b3;
+        }
+        
+        /* Show toggle button only when there are notes or when focused */
+        .notes-container:not(.has-content) .notes-toggle {
+            display: none;
+        }
+        
+        .notes-container.has-content .notes-toggle,
+        .notes-container.focused .notes-toggle {
+            display: flex;
+        }
+        
+        /* Preview text for collapsed notes */
+        .notes-preview {
+            display: none;
+            color: #6c757d;
+            font-style: italic;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        
+        .notes-container.collapsed.has-long-content .notes-preview {
+            display: block;
         }
         
         /* Status Dropdown - 16px font */
@@ -239,15 +318,24 @@
                             </select>
                         </td>
                         <td class="notes-cell">
-                            <input 
-                                type="text" 
-                                class="notes-input <%= po.notes && po.notes.trim() ? 'has-notes' : '' %>" 
-                                value="<%= po.notes %>" 
-                                data-id="<%= po._id %>"
-                                data-po="<%= po.poNumber %>"
-                                placeholder="Add notes for <%= po.poNumber %>..."
-                                title="Notes for PO <%= po.poNumber %> (persists across CSV uploads)"
-                            >
+                            <div class="notes-container <%= po.notes && po.notes.trim() ? 'has-content' : '' %>">
+                                <textarea 
+                                    class="notes-input collapsed <%= po.notes && po.notes.trim() ? 'has-notes' : '' %>" 
+                                    data-id="<%= po._id %>"
+                                    data-po="<%= po.poNumber %>"
+                                    placeholder="Add notes for <%= po.poNumber %>..."
+                                    title="Notes for PO <%= po.poNumber %> (persists across CSV uploads)"
+                                    rows="1"
+                                ><%= po.notes %></textarea>
+                                <button class="notes-toggle" type="button" title="Expand/Collapse notes">
+                                    <span class="toggle-icon">⇓</span>
+                                </button>
+                                <div class="notes-preview">
+                                    <% if (po.notes && po.notes.length > 50) { %>
+                                        <%= po.notes.substring(50) %>...
+                                    <% } %>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                     <% }); %>
@@ -264,11 +352,69 @@
     <script>
         let currentSort = { column: null, direction: null };
 
-        // Auto-save notes when user stops typing
+        // Enhanced Notes functionality with expand/collapse
         document.querySelectorAll('.notes-input').forEach(input => {
             let timeout;
+            const container = input.closest('.notes-container');
+            const toggleBtn = container.querySelector('.notes-toggle');
+            const toggleIcon = toggleBtn.querySelector('.toggle-icon');
             
+            // Handle expand/collapse toggle
+            toggleBtn.addEventListener('click', function() {
+                const isExpanded = input.classList.contains('expanded');
+                
+                if (isExpanded) {
+                    // Collapse
+                    input.classList.remove('expanded');
+                    input.classList.add('collapsed');
+                    input.rows = 1;
+                    toggleIcon.textContent = '⇓';
+                    toggleBtn.title = 'Expand notes';
+                } else {
+                    // Expand
+                    input.classList.remove('collapsed');
+                    input.classList.add('expanded');
+                    input.rows = Math.max(3, Math.ceil(input.value.length / 50));
+                    toggleIcon.textContent = '⇑';
+                    toggleBtn.title = 'Collapse notes';
+                    input.focus();
+                }
+            });
+            
+            // Handle focus/blur for showing toggle button
+            input.addEventListener('focus', function() {
+                container.classList.add('focused');
+            });
+            
+            input.addEventListener('blur', function() {
+                container.classList.remove('focused');
+            });
+            
+            // Auto-resize textarea when typing in expanded mode
             input.addEventListener('input', function() {
+                if (this.classList.contains('expanded')) {
+                    // Auto-resize
+                    this.rows = Math.max(3, Math.ceil(this.value.length / 50));
+                }
+                
+                // Update container classes based on content
+                const hasContent = this.value.trim().length > 0;
+                const hasLongContent = this.value.length > 50;
+                
+                if (hasContent) {
+                    container.classList.add('has-content');
+                    this.classList.add('has-notes');
+                } else {
+                    container.classList.remove('has-content');
+                    this.classList.remove('has-notes');
+                }
+                
+                if (hasLongContent) {
+                    container.classList.add('has-long-content');
+                } else {
+                    container.classList.remove('has-long-content');
+                }
+                
                 clearTimeout(timeout);
                 
                 // Show saving state
@@ -286,14 +432,8 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        // Remove saving state and update appearance
+                        // Remove saving state
                         this.classList.remove('saving');
-                        
-                        if (notes.trim()) {
-                            this.classList.add('has-notes');
-                        } else {
-                            this.classList.remove('has-notes');
-                        }
                         
                         // Update stats after note change
                         updateStats();
@@ -306,6 +446,17 @@
                     });
                 }, 1000);
             });
+            
+            // Initialize state based on content
+            const hasContent = input.value.trim().length > 0;
+            const hasLongContent = input.value.length > 50;
+            
+            if (hasContent) {
+                container.classList.add('has-content');
+            }
+            if (hasLongContent) {
+                container.classList.add('has-long-content');
+            }
         });
 
         // Auto-save Status when changed
