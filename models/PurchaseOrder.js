@@ -21,6 +21,10 @@ const purchaseOrderSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  nextUpdateDate: {         // Next update date - user can set when this PO needs attention
+    type: Date,
+    default: null
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

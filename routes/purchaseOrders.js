@@ -13,31 +13,31 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
   try {
     const fs = require('fs');
     const fileContent = fs.readFileSync(req.file.path, 'utf8');
-    
+
     const parsed = Papa.parse(fileContent, { header: false });
     const reportDate = parsed.data[3][0]; // Extract report date
-    
+
     // Extract data rows (skip headers and totals)
     const dataStartIndex = 8;
     let dataEndIndex = parsed.data.length;
-    
+
     for (let i = dataStartIndex; i < parsed.data.length; i++) {
       if (parsed.data[i][0] && parsed.data[i][0].includes('Total')) {
         dataEndIndex = i;
         break;
       }
     }
-    
+
     const dataRows = parsed.data.slice(dataStartIndex, dataEndIndex);
-    
+
     // Process each PO individually to preserve notes and custom status
     for (const row of dataRows) {
       const poNumber = row[2]; // PO number is the unique identifier
       const csvStatus = row[4]; // Status from CSV (this goes to NS Status!)
-      
+
       // Find existing PO by PO number
       const existingPO = await PurchaseOrder.findOne({ poNumber: poNumber });
-      
+
       if (existingPO) {
         // Update existing PO - CSV status goes to nsStatus, preserve custom status
         await PurchaseOrder.findByIdAndUpdate(existingPO._id, {
@@ -71,21 +71,21 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
         console.log(`Created new PO ${poNumber} - NS Status: "${csvStatus}", Custom Status: empty`);
       }
     }
-    
+
     // Optional: Remove POs that are no longer in the CSV
     const currentPONumbers = dataRows.map(row => row[2]);
     const removedCount = await PurchaseOrder.deleteMany({
       reportDate: reportDate,
       poNumber: { $nin: currentPONumbers }
     });
-    
+
     if (removedCount.deletedCount > 0) {
       console.log(`Removed ${removedCount.deletedCount} POs that are no longer in the report`);
     }
-    
+
     // Clean up uploaded file
     fs.unlinkSync(req.file.path);
-    
+
     res.redirect('/purchase-orders');
   } catch (error) {
     console.error('Upload error:', error);
@@ -97,38 +97,38 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const purchaseOrders = await PurchaseOrder.find().sort({ date: 1 });
-    
+
     // Get unique NS Status values for filters (from CSV)
     const uniqueNSStatuses = [...new Set(purchaseOrders.map(po => po.nsStatus).filter(Boolean))];
-    
+
     // Get unique custom Status values for filters
     const uniqueStatuses = [...new Set(purchaseOrders.map(po => po.status).filter(Boolean))];
-    
+
     // Get status options from database
     let statusOptions = await StatusOption.find().sort({ name: 1 });
-    
+
     // If no status options exist, create default ones
     if (statusOptions.length === 0) {
       const defaultStatuses = [
         'In Progress',
-        'On Hold', 
+        'On Hold',
         'Approved',
         'Rejected',
         'Completed',
         'Cancelled'
       ];
-      
-      const statusPromises = defaultStatuses.map(name => 
+
+      const statusPromises = defaultStatuses.map(name =>
         StatusOption.create({ name, isDefault: true })
       );
-      
+
       statusOptions = await Promise.all(statusPromises);
     }
-    
+
     // Extract just the names for the dropdown
     const statusOptionNames = statusOptions.map(option => option.name);
-    
-    res.render('dashboard', { 
+
+    res.render('dashboard', {
       purchaseOrders,
       uniqueNSStatuses: uniqueNSStatuses.sort(),
       uniqueStatuses: uniqueStatuses.sort(),
@@ -172,6 +172,25 @@ router.put('/:id/status', async (req, res) => {
   }
 });
 
+// Update next update date
+router.put('/:id/next-update-date', async (req, res) => {
+  try {
+    const { nextUpdateDate } = req.body;
+    const dateValue = nextUpdateDate ? new Date(nextUpdateDate) : null;
+
+    const updated = await PurchaseOrder.findByIdAndUpdate(
+      req.params.id,
+      { nextUpdateDate: dateValue, updatedAt: new Date() },
+      { new: true }
+    );
+    console.log(`Updated next update date for PO ${updated.poNumber}: ${nextUpdateDate || 'cleared'}`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Next update date error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Status Options Management Routes
 
 // Get all status options
@@ -188,16 +207,16 @@ router.get('/status-options', async (req, res) => {
 router.post('/status-options', async (req, res) => {
   try {
     const { name } = req.body;
-    
+
     if (!name || !name.trim()) {
       return res.status(400).json({ error: 'Status name is required' });
     }
-    
-    const statusOption = await StatusOption.create({ 
+
+    const statusOption = await StatusOption.create({
       name: name.trim(),
-      isDefault: false 
+      isDefault: false
     });
-    
+
     console.log(`Added new status option: "${statusOption.name}"`);
     res.json({ success: true, statusOption });
   } catch (error) {
@@ -214,20 +233,20 @@ router.post('/status-options', async (req, res) => {
 router.delete('/status-options/:id', async (req, res) => {
   try {
     const statusOption = await StatusOption.findById(req.params.id);
-    
+
     if (!statusOption) {
       return res.status(404).json({ error: 'Status option not found' });
     }
-    
+
     // Check if this status is being used by any purchase orders
     const usageCount = await PurchaseOrder.countDocuments({ status: statusOption.name });
-    
+
     if (usageCount > 0) {
-      return res.status(400).json({ 
-        error: `Cannot delete "${statusOption.name}" - it's being used by ${usageCount} purchase order(s)` 
+      return res.status(400).json({
+        error: `Cannot delete "${statusOption.name}" - it's being used by ${usageCount} purchase order(s)`
       });
     }
-    
+
     await StatusOption.findByIdAndDelete(req.params.id);
     console.log(`Deleted status option: "${statusOption.name}"`);
     res.json({ success: true });

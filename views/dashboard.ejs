@@ -303,6 +303,64 @@
             width: 100px;
         }
 
+        .update-date-cell {
+            width: 130px;
+            font-size: 14px;
+        }
+
+        .next-update-cell {
+            width: 140px;
+        }
+
+        /* Date input styling */
+        .date-input {
+            width: 100%;
+            border: 1px solid transparent;
+            background: transparent;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .date-input:focus {
+            background: white;
+            border: 1px solid #007bff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        .date-input.has-date {
+            background: #e7f3ff;
+            border-color: #b3d9ff;
+        }
+
+        .date-input.saving {
+            background: #d1ecf1;
+            border-color: #bee5eb;
+        }
+
+        .date-input.overdue {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        /* Last updated display */
+        .last-updated {
+            font-size: 12px;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .last-updated.recent {
+            color: #28a745;
+        }
+
+        .last-updated.old {
+            color: #dc3545;
+        }
+
         .notes-cell {
             min-width: 200px;
         }
@@ -613,6 +671,8 @@
                                     <th class="sortable vendor" data-column="vendor">Vendor</th>
                                     <th class="ns-status-cell">NS Status</th>
                                     <th class="status-cell">Status</th>
+                                    <th class="sortable update-date-cell" data-column="updatedAt">Last Updated</th>
+                                    <th class="next-update-cell">Next Update</th>
                                     <th class="notes-toggle-cell">Notes</th>
                                 </tr>
                             </thead>
@@ -647,6 +707,23 @@
                                                     <% }); %>
                                             </select>
                                         </td>
+                                        <td class="update-date-cell">
+                                            <div
+                                                class="last-updated <%= new Date() - new Date(po.updatedAt) < 86400000 ? 'recent' : (new Date() - new Date(po.updatedAt) > 604800000 ? 'old' : '') %>">
+                                                <% if (po.updatedAt) { %>
+                                                    <%= new Date(po.updatedAt).toLocaleDateString() %>
+                                                        <% } else { %>
+                                                            Never
+                                                            <% } %>
+                                            </div>
+                                        </td>
+                                        <td class="next-update-cell">
+                                            <input type="date"
+                                                class="date-input <%= po.nextUpdateDate ? 'has-date' : '' %> <%= po.nextUpdateDate && new Date(po.nextUpdateDate) < new Date() ? 'overdue' : '' %>"
+                                                value="<%= po.nextUpdateDate ? new Date(po.nextUpdateDate).toISOString().split('T')[0] : '' %>"
+                                                data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
+                                                title="Set next update date for PO <%= po.poNumber %>">
+                                        </td>
                                         <td class="notes-toggle-cell">
                                             <button
                                                 class="notes-toggle <%= po.notes && po.notes.trim() ? 'has-notes' : '' %>"
@@ -659,7 +736,7 @@
 
                                     <!-- Expandable notes row -->
                                     <tr class="notes-row" id="notes-row-<%= index %>">
-                                        <td colspan="6" class="notes-cell-expanded">
+                                        <td colspan="8" class="notes-cell-expanded">
                                             <div class="notes-header">
                                                 <div class="notes-title">Notes for PO <%= po.poNumber %>
                                                 </div>
@@ -694,12 +771,13 @@
                 <div class="status-modal-title">Manage Status Options</div>
                 <button class="status-close" onclick="closeStatusModal()">&times;</button>
             </div>
-            
+
             <div class="status-form">
-                <input type="text" id="statusInput" class="status-input" placeholder="Enter new status option..." maxlength="50">
+                <input type="text" id="statusInput" class="status-input" placeholder="Enter new status option..."
+                    maxlength="50">
                 <button id="addStatusBtn" class="status-add-btn" onclick="addStatusOption()">Add</button>
             </div>
-            
+
             <div id="statusList" class="status-list">
                 <!-- Status options will be loaded here -->
             </div>
@@ -836,6 +914,52 @@
             });
         });
 
+        // Auto-save Next Update Date when changed
+        document.querySelectorAll('.date-input').forEach(dateInput => {
+            dateInput.addEventListener('change', function () {
+                const id = this.dataset.id;
+                const poNumber = this.dataset.po;
+                const nextUpdateDate = this.value;
+
+                // Show saving state
+                this.classList.add('saving');
+
+                fetch(`/purchase-orders/${id}/next-update-date`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nextUpdateDate })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Remove saving state and update appearance
+                        this.classList.remove('saving');
+
+                        if (nextUpdateDate) {
+                            this.classList.add('has-date');
+
+                            // Check if date is overdue
+                            const updateDate = new Date(nextUpdateDate);
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0); // Reset time for date comparison
+
+                            if (updateDate < today) {
+                                this.classList.add('overdue');
+                            } else {
+                                this.classList.remove('overdue');
+                            }
+                        } else {
+                            this.classList.remove('has-date', 'overdue');
+                        }
+
+                        console.log(`Next update date saved for PO ${poNumber}: ${nextUpdateDate || 'cleared'}`);
+                    })
+                    .catch(error => {
+                        this.classList.remove('saving');
+                        console.error('Error saving next update date:', error);
+                    });
+            });
+        });
+
         // Filtering functionality
         function applyFilters() {
             const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
@@ -968,6 +1092,10 @@
                         aValue = aData.poNumber.toLowerCase();
                         bValue = bData.poNumber.toLowerCase();
                         break;
+                    case 'updatedAt':
+                        aValue = new Date(aData.updatedAt || 0);
+                        bValue = new Date(bData.updatedAt || 0);
+                        break;
                 }
 
                 if (aValue < bValue) return direction === 'asc' ? -1 : 1;
@@ -1017,7 +1145,7 @@
         }
 
         // Close modal when clicking outside
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             const modal = document.getElementById('statusModal');
             if (event.target === modal) {
                 closeStatusModal();
@@ -1045,7 +1173,7 @@
             currentStatusOptions.forEach(option => {
                 const statusItem = document.createElement('div');
                 statusItem.className = `status-item ${option.isDefault ? 'default' : ''}`;
-                
+
                 statusItem.innerHTML = `
                     <span class="status-item-name">${option.name}</span>
                     <button class="status-delete-btn" onclick="deleteStatusOption('${option._id}')" 
@@ -1053,7 +1181,7 @@
                         Delete
                     </button>
                 `;
-                
+
                 statusList.appendChild(statusItem);
             });
         }
@@ -1128,7 +1256,7 @@
         }
 
         // Allow Enter key to add status
-        document.getElementById('statusInput').addEventListener('keypress', function(e) {
+        document.getElementById('statusInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 addStatusOption();
             }
