@@ -3,6 +3,7 @@ const express = require('express');
 const multer = require('multer');
 const Papa = require('papaparse');
 const PurchaseOrder = require('../models/PurchaseOrder');
+const StatusOption = require('../models/StatusOption');
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
@@ -103,27 +104,36 @@ router.get('/', async (req, res) => {
     // Get unique custom Status values for filters
     const uniqueStatuses = [...new Set(purchaseOrders.map(po => po.status).filter(Boolean))];
     
-    // Get existing custom status values from database
-    const existingStatuses = [...new Set(purchaseOrders.map(po => po.status).filter(Boolean))];
+    // Get status options from database
+    let statusOptions = await StatusOption.find().sort({ name: 1 });
     
-    // Default custom Status options that are always available
-    const defaultStatuses = [
-      'In Progress',
-      'On Hold', 
-      'Approved',
-      'Rejected',
-      'Completed',
-      'Cancelled'
-    ];
+    // If no status options exist, create default ones
+    if (statusOptions.length === 0) {
+      const defaultStatuses = [
+        'In Progress',
+        'On Hold', 
+        'Approved',
+        'Rejected',
+        'Completed',
+        'Cancelled'
+      ];
+      
+      const statusPromises = defaultStatuses.map(name => 
+        StatusOption.create({ name, isDefault: true })
+      );
+      
+      statusOptions = await Promise.all(statusPromises);
+    }
     
-    // Combine existing and default options, remove duplicates
-    const allStatusOptions = [...new Set([...existingStatuses, ...defaultStatuses])].sort();
+    // Extract just the names for the dropdown
+    const statusOptionNames = statusOptions.map(option => option.name);
     
     res.render('dashboard', { 
       purchaseOrders,
       uniqueNSStatuses: uniqueNSStatuses.sort(),
       uniqueStatuses: uniqueStatuses.sort(),
-      statusOptions: allStatusOptions
+      statusOptions: statusOptionNames,
+      allStatusOptions: statusOptions // Send full objects for management
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -158,6 +168,71 @@ router.put('/:id/status', async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error('Status update error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Status Options Management Routes
+
+// Get all status options
+router.get('/status-options', async (req, res) => {
+  try {
+    const statusOptions = await StatusOption.find().sort({ name: 1 });
+    res.json(statusOptions);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add new status option
+router.post('/status-options', async (req, res) => {
+  try {
+    const { name } = req.body;
+    
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Status name is required' });
+    }
+    
+    const statusOption = await StatusOption.create({ 
+      name: name.trim(),
+      isDefault: false 
+    });
+    
+    console.log(`Added new status option: "${statusOption.name}"`);
+    res.json({ success: true, statusOption });
+  } catch (error) {
+    if (error.code === 11000) {
+      res.status(400).json({ error: 'Status option already exists' });
+    } else {
+      console.error('Status option creation error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+});
+
+// Delete status option
+router.delete('/status-options/:id', async (req, res) => {
+  try {
+    const statusOption = await StatusOption.findById(req.params.id);
+    
+    if (!statusOption) {
+      return res.status(404).json({ error: 'Status option not found' });
+    }
+    
+    // Check if this status is being used by any purchase orders
+    const usageCount = await PurchaseOrder.countDocuments({ status: statusOption.name });
+    
+    if (usageCount > 0) {
+      return res.status(400).json({ 
+        error: `Cannot delete "${statusOption.name}" - it's being used by ${usageCount} purchase order(s)` 
+      });
+    }
+    
+    await StatusOption.findByIdAndDelete(req.params.id);
+    console.log(`Deleted status option: "${statusOption.name}"`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Status option deletion error:', error);
     res.status(500).json({ error: error.message });
   }
 });

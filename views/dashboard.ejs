@@ -364,6 +364,154 @@
             background: #f8f9fa;
             border-radius: 8px;
         }
+
+        /* Status Management Modal */
+        .status-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .status-modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .status-modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .status-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6c757d;
+        }
+
+        .status-close:hover {
+            color: #495057;
+        }
+
+        .status-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .status-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .status-add-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .status-add-btn:hover {
+            background: #218838;
+        }
+
+        .status-add-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .status-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            background: #f8f9fa;
+        }
+
+        .status-item.default {
+            background: #e7f3ff;
+            border-color: #b3d9ff;
+        }
+
+        .status-item-name {
+            font-size: 16px;
+        }
+
+        .status-item.default .status-item-name::after {
+            content: " (default)";
+            font-size: 12px;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .status-delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .status-delete-btn:hover {
+            background: #c82333;
+        }
+
+        .status-delete-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .manage-status-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .manage-status-btn:hover {
+            background: #5a6268;
+        }
     </style>
 </head>
 
@@ -371,7 +519,10 @@
     <div class="container">
         <div class="header">
             <h1>Purchase Orders Dashboard</h1>
-            <a href="/upload" class="upload-btn">📁 Import New CSV</a>
+            <div>
+                <button class="manage-status-btn" onclick="openStatusModal()">⚙️ Manage Status Options</button>
+                <a href="/upload" class="upload-btn">📁 Import New CSV</a>
+            </div>
         </div>
 
         <% if (purchaseOrders.length> 0) { %>
@@ -534,6 +685,25 @@
                             <p>Try adjusting your search criteria or clearing the filters.</p>
                         </div>
                         <% } %>
+    </div>
+
+    <!-- Status Management Modal -->
+    <div id="statusModal" class="status-modal">
+        <div class="status-modal-content">
+            <div class="status-modal-header">
+                <div class="status-modal-title">Manage Status Options</div>
+                <button class="status-close" onclick="closeStatusModal()">&times;</button>
+            </div>
+            
+            <div class="status-form">
+                <input type="text" id="statusInput" class="status-input" placeholder="Enter new status option..." maxlength="50">
+                <button id="addStatusBtn" class="status-add-btn" onclick="addStatusOption()">Add</button>
+            </div>
+            
+            <div id="statusList" class="status-list">
+                <!-- Status options will be loaded here -->
+            </div>
+        </div>
     </div>
 
     <script>
@@ -831,6 +1001,137 @@
             header.addEventListener('click', () => {
                 sortTable(header.dataset.column);
             });
+        });
+
+        // Status Management Functions
+        let currentStatusOptions = [];
+
+        function openStatusModal() {
+            document.getElementById('statusModal').style.display = 'block';
+            loadStatusOptions();
+        }
+
+        function closeStatusModal() {
+            document.getElementById('statusModal').style.display = 'none';
+            document.getElementById('statusInput').value = '';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('statusModal');
+            if (event.target === modal) {
+                closeStatusModal();
+            }
+        }
+
+        // Load status options from server
+        async function loadStatusOptions() {
+            try {
+                const response = await fetch('/purchase-orders/status-options');
+                const statusOptions = await response.json();
+                currentStatusOptions = statusOptions;
+                renderStatusList();
+            } catch (error) {
+                console.error('Error loading status options:', error);
+                alert('Error loading status options');
+            }
+        }
+
+        // Render the status options list
+        function renderStatusList() {
+            const statusList = document.getElementById('statusList');
+            statusList.innerHTML = '';
+
+            currentStatusOptions.forEach(option => {
+                const statusItem = document.createElement('div');
+                statusItem.className = `status-item ${option.isDefault ? 'default' : ''}`;
+                
+                statusItem.innerHTML = `
+                    <span class="status-item-name">${option.name}</span>
+                    <button class="status-delete-btn" onclick="deleteStatusOption('${option._id}')" 
+                            ${option.isDefault ? 'disabled title="Cannot delete default status"' : ''}>
+                        Delete
+                    </button>
+                `;
+                
+                statusList.appendChild(statusItem);
+            });
+        }
+
+        // Add new status option
+        async function addStatusOption() {
+            const input = document.getElementById('statusInput');
+            const addBtn = document.getElementById('addStatusBtn');
+            const name = input.value.trim();
+
+            if (!name) {
+                alert('Please enter a status name');
+                return;
+            }
+
+            addBtn.disabled = true;
+            addBtn.textContent = 'Adding...';
+
+            try {
+                const response = await fetch('/purchase-orders/status-options', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    input.value = '';
+                    await loadStatusOptions();
+                    // Refresh the page to update all dropdowns
+                    setTimeout(() => window.location.reload(), 500);
+                } else {
+                    alert(result.error || 'Error adding status option');
+                }
+            } catch (error) {
+                console.error('Error adding status option:', error);
+                alert('Error adding status option');
+            } finally {
+                addBtn.disabled = false;
+                addBtn.textContent = 'Add';
+            }
+        }
+
+        // Delete status option
+        async function deleteStatusOption(id) {
+            const option = currentStatusOptions.find(opt => opt._id === id);
+            if (!option) return;
+
+            if (!confirm(`Are you sure you want to delete "${option.name}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/purchase-orders/status-options/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    await loadStatusOptions();
+                    // Refresh the page to update all dropdowns
+                    setTimeout(() => window.location.reload(), 500);
+                } else {
+                    alert(result.error || 'Error deleting status option');
+                }
+            } catch (error) {
+                console.error('Error deleting status option:', error);
+                alert('Error deleting status option');
+            }
+        }
+
+        // Allow Enter key to add status
+        document.getElementById('statusInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addStatusOption();
+            }
         });
     </script>
 </body>
