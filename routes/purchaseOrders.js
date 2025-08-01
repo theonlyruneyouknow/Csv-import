@@ -5,6 +5,7 @@ const Papa = require('papaparse');
 const PurchaseOrder = require('../models/PurchaseOrder');
 const StatusOption = require('../models/StatusOption');
 const Note = require('../models/Note');
+const LineItem = require('../models/LineItem');
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
@@ -94,6 +95,119 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
   }
 });
 
+// Upload and parse Line Items CSV
+router.post('/upload-line-items', upload.single('lineItemsCsvFile'), async (req, res) => {
+  try {
+    const fs = require('fs');
+    const fileContent = fs.readFileSync(req.file.path, 'utf8');
+
+    const parsed = Papa.parse(fileContent, { header: false });
+
+    // Skip header rows and find data
+    let dataStartIndex = 0;
+
+    // Look for the first row that looks like data (has a PO number pattern)
+    for (let i = 0; i < parsed.data.length; i++) {
+      const row = parsed.data[i];
+      if (row[4] && row[4].toString().match(/^PO\d+$/)) { // Document number column with PO pattern
+        dataStartIndex = i;
+        break;
+      }
+    }
+
+    if (dataStartIndex === 0) {
+      throw new Error('No valid data found in CSV file');
+    }
+
+    const dataRows = parsed.data.slice(dataStartIndex);
+    let processedCount = 0;
+    let skippedCount = 0;
+    let errorCount = 0;
+
+    console.log(`Processing ${dataRows.length} line item rows...`);
+
+    for (const row of dataRows) {
+      try {
+        // Skip if not enough columns or missing key data
+        if (!row || row.length < 6 || !row[4] || !row[5]) {
+          skippedCount++;
+          continue;
+        }
+
+        const poNumber = row[4].toString().trim(); // Document number (PO)
+        const memo = row[5].toString().trim(); // Memo field
+        const date = row[2] ? row[2].toString().trim() : ''; // Date field
+
+        // Only process rows where memo starts with "1215" as specified
+        if (!memo.startsWith('1215')) {
+          skippedCount++;
+          continue;
+        }
+
+        // Find the corresponding PurchaseOrder
+        const purchaseOrder = await PurchaseOrder.findOne({ poNumber: poNumber });
+
+        if (!purchaseOrder) {
+          console.log(`Skipping line item for PO ${poNumber} - PO not found in database`);
+          skippedCount++;
+          continue;
+        }
+
+        // Check if this exact line item already exists to avoid duplicates
+        const existingLineItem = await LineItem.findOne({
+          poId: purchaseOrder._id,
+          poNumber: poNumber,
+          memo: memo,
+          date: date
+        });
+
+        if (existingLineItem) {
+          console.log(`Skipping duplicate line item for PO ${poNumber}: ${memo.substring(0, 50)}...`);
+          skippedCount++;
+          continue;
+        }
+
+        // Create new line item
+        await LineItem.create({
+          poId: purchaseOrder._id,
+          poNumber: poNumber,
+          date: date,
+          memo: memo,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+
+        processedCount++;
+        console.log(`Added line item for PO ${poNumber}: ${memo.substring(0, 50)}...`);
+
+      } catch (error) {
+        console.error(`Error processing line item row:`, error);
+        errorCount++;
+      }
+    }
+
+    // Clean up uploaded file
+    fs.unlinkSync(req.file.path);
+
+    console.log(`Line items import completed: ${processedCount} processed, ${skippedCount} skipped, ${errorCount} errors`);
+
+    res.json({
+      success: true,
+      message: `Line items import completed`,
+      stats: {
+        processed: processedCount,
+        skipped: skippedCount,
+        errors: errorCount,
+        total: dataRows.length
+      }
+    });
+
+  } catch (error) {
+    console.error('Line items upload error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get all purchase orders with unique status values
 router.get('/', async (req, res) => {
   try {
@@ -145,17 +259,17 @@ router.get('/', async (req, res) => {
 router.post('/:id/notes', async (req, res) => {
   try {
     const { notes } = req.body;
-    
+
     // Only create a note if there's actual content
     if (!notes || !notes.trim()) {
       return res.json({ success: true });
     }
-    
+
     const purchaseOrder = await PurchaseOrder.findById(req.params.id);
     if (!purchaseOrder) {
       return res.status(404).json({ error: 'Purchase order not found' });
     }
-    
+
     // Create new note record
     const note = await Note.create({
       poId: purchaseOrder._id,
@@ -163,13 +277,13 @@ router.post('/:id/notes', async (req, res) => {
       vendor: purchaseOrder.vendor,
       content: notes.trim()
     });
-    
+
     // Update the PO's notes field with the latest note for display
     await PurchaseOrder.findByIdAndUpdate(
       req.params.id,
       { notes: notes.trim(), updatedAt: new Date() }
     );
-    
+
     console.log(`Added note for PO ${purchaseOrder.poNumber}: "${notes.trim()}"`);
     res.json({ success: true, noteId: note._id });
   } catch (error) {
@@ -185,13 +299,31 @@ router.get('/:id/notes-history', async (req, res) => {
     if (!purchaseOrder) {
       return res.status(404).json({ error: 'Purchase order not found' });
     }
-    
+
     const notes = await Note.find({ poId: req.params.id })
       .sort({ createdAt: -1 }); // Most recent first
-    
+
     res.json(notes);
   } catch (error) {
     console.error('Notes history error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get line items for a PO
+router.get('/:id/line-items', async (req, res) => {
+  try {
+    const purchaseOrder = await PurchaseOrder.findById(req.params.id);
+    if (!purchaseOrder) {
+      return res.status(404).json({ error: 'Purchase order not found' });
+    }
+
+    const lineItems = await LineItem.find({ poId: req.params.id })
+      .sort({ createdAt: -1 }); // Most recent first
+
+    res.json(lineItems);
+  } catch (error) {
+    console.error('Line items error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -317,31 +449,31 @@ router.delete('/status-options/:id', async (req, res) => {
 // Get all notes with filtering
 router.get('/notes', async (req, res) => {
   try {
-    const { 
-      poNumber, 
-      vendor, 
-      dateFrom, 
-      dateTo, 
+    const {
+      poNumber,
+      vendor,
+      dateFrom,
+      dateTo,
       search,
       limit = 100,
-      skip = 0 
+      skip = 0
     } = req.query;
-    
+
     // Build filter query
     let filter = {};
-    
+
     if (poNumber) {
       filter.poNumber = new RegExp(poNumber, 'i');
     }
-    
+
     if (vendor) {
       filter.vendor = new RegExp(vendor, 'i');
     }
-    
+
     if (search) {
       filter.content = new RegExp(search, 'i');
     }
-    
+
     if (dateFrom || dateTo) {
       filter.createdAt = {};
       if (dateFrom) {
@@ -353,14 +485,14 @@ router.get('/notes', async (req, res) => {
         filter.createdAt.$lte = endDate;
       }
     }
-    
+
     const notes = await Note.find(filter)
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip(parseInt(skip));
-    
+
     const totalCount = await Note.countDocuments(filter);
-    
+
     res.json({
       notes,
       totalCount,
@@ -376,25 +508,25 @@ router.get('/notes', async (req, res) => {
 router.delete('/notes/:noteId', async (req, res) => {
   try {
     const note = await Note.findById(req.params.noteId);
-    
+
     if (!note) {
       return res.status(404).json({ error: 'Note not found' });
     }
-    
+
     await Note.findByIdAndDelete(req.params.noteId);
-    
+
     // Update the PO's current notes field with the most recent remaining note
     const latestNote = await Note.findOne({ poId: note.poId })
       .sort({ createdAt: -1 });
-    
+
     await PurchaseOrder.findByIdAndUpdate(
       note.poId,
-      { 
+      {
         notes: latestNote ? latestNote.content : '',
         updatedAt: new Date()
       }
     );
-    
+
     console.log(`Deleted note for PO ${note.poNumber}`);
     res.json({ success: true });
   } catch (error) {
@@ -411,11 +543,11 @@ router.get('/notes-manager', async (req, res) => {
     const recentNotes = await Note.countDocuments({
       createdAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } // Last 7 days
     });
-    
+
     // Get unique PO numbers and vendors for filtering
     const uniquePOs = await Note.distinct('poNumber');
     const uniqueVendors = await Note.distinct('vendor');
-    
+
     res.render('notes-manager', {
       totalNotes,
       recentNotes,
@@ -443,9 +575,9 @@ router.post('/migrate-notes', async (req, res) => {
     for (const po of purchaseOrdersWithNotes) {
       try {
         // Check if we already have a note for this PO (to avoid duplicates)
-        const existingNote = await Note.findOne({ 
+        const existingNote = await Note.findOne({
           poId: po._id,
-          content: po.notes 
+          content: po.notes
         });
 
         if (existingNote) {

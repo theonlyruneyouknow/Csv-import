@@ -27,9 +27,9 @@ async function migrateNotes() {
         for (const po of purchaseOrdersWithNotes) {
             try {
                 // Check if we already have a note for this PO (to avoid duplicates)
-                const existingNote = await Note.findOne({ 
+                const existingNote = await Note.findOne({
                     poId: po._id,
-                    content: po.notes 
+                    content: po.notes
                 });
 
                 if (existingNote) {
