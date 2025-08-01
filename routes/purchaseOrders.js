@@ -103,20 +103,44 @@ router.post('/upload-line-items', upload.single('lineItemsCsvFile'), async (req,
 
     const parsed = Papa.parse(fileContent, { header: false });
 
-    // Skip header rows and find data
-    let dataStartIndex = 0;
+    console.log(`CSV has ${parsed.data.length} total rows`);
+    console.log('First 10 rows for debugging:');
+    parsed.data.slice(0, 10).forEach((row, index) => {
+      console.log(`Row ${index}:`, row);
+    });
 
-    // Look for the first row that looks like data (has a PO number pattern)
-    for (let i = 0; i < parsed.data.length; i++) {
+    // Skip header rows and find data - be more flexible with PO detection
+    let dataStartIndex = -1;
+
+    // Look for the first row that has a PO number pattern in any reasonable column
+    for (let i = 0; i < Math.min(parsed.data.length, 50); i++) { // Check first 50 rows max
       const row = parsed.data[i];
-      if (row[4] && row[4].toString().match(/^PO\d+$/)) { // Document number column with PO pattern
-        dataStartIndex = i;
-        break;
+      if (row && row.length >= 5) {
+        // Check columns 3, 4, 5 for PO patterns (more flexible)
+        for (let col = 3; col <= 5; col++) {
+          if (row[col]) {
+            const cellValue = row[col].toString().trim();
+            // More flexible PO pattern - could be "PO12345", "12345", etc.
+            if (cellValue.match(/^(PO)?\d{4,6}$/) || cellValue.match(/^PO\d+$/)) {
+              console.log(`Found PO pattern "${cellValue}" at row ${i}, column ${col}`);
+              dataStartIndex = i;
+              break;
+            }
+          }
+        }
+        if (dataStartIndex >= 0) break;
       }
     }
 
-    if (dataStartIndex === 0) {
-      throw new Error('No valid data found in CSV file');
+    if (dataStartIndex === -1) {
+      // If no PO pattern found, let's see what we have
+      console.log('No PO pattern found. Sample of data:');
+      parsed.data.slice(0, 20).forEach((row, index) => {
+        if (row && row.length >= 4) {
+          console.log(`Row ${index}, columns 3-6:`, [row[3], row[4], row[5], row[6]]);
+        }
+      });
+      throw new Error('No valid data found in CSV file. Expected PO numbers in columns 4-6.');
     }
 
     const dataRows = parsed.data.slice(dataStartIndex);
@@ -124,22 +148,48 @@ router.post('/upload-line-items', upload.single('lineItemsCsvFile'), async (req,
     let skippedCount = 0;
     let errorCount = 0;
 
-    console.log(`Processing ${dataRows.length} line item rows...`);
-
-    for (const row of dataRows) {
+    console.log(`Processing ${dataRows.length} line item rows starting from row ${dataStartIndex}...`); for (const row of dataRows) {
       try {
         // Skip if not enough columns or missing key data
-        if (!row || row.length < 6 || !row[4] || !row[5]) {
+        if (!row || row.length < 6) {
           skippedCount++;
           continue;
         }
 
-        const poNumber = row[4].toString().trim(); // Document number (PO)
-        const memo = row[5].toString().trim(); // Memo field
+        // Try to find PO number in columns 3, 4, or 5 (more flexible)
+        let poNumber = null;
+        let poColumn = -1;
+
+        for (let col = 3; col <= 5; col++) {
+          if (row[col]) {
+            const cellValue = row[col].toString().trim();
+            if (cellValue.match(/^(PO)?\d{4,6}$/) || cellValue.match(/^PO\d+$/)) {
+              poNumber = cellValue.startsWith('PO') ? cellValue : `PO${cellValue}`;
+              poColumn = col;
+              break;
+            }
+          }
+        }
+
+        if (!poNumber) {
+          skippedCount++;
+          continue;
+        }
+
+        // Memo should be in the column after the PO number, or try common locations
+        let memo = '';
+        if (row[poColumn + 1]) {
+          memo = row[poColumn + 1].toString().trim();
+        } else if (row[5]) {
+          memo = row[5].toString().trim(); // Fallback to column 5
+        } else if (row[6]) {
+          memo = row[6].toString().trim(); // Fallback to column 6
+        }
+
         const date = row[2] ? row[2].toString().trim() : ''; // Date field
 
         // Only process rows where memo starts with "1215" as specified
-        if (!memo.startsWith('1215')) {
+        if (!memo || !memo.startsWith('1215')) {
           skippedCount++;
           continue;
         }

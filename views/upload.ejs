@@ -1,32 +1,117 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>CSV Import</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f8f9fa; margin: 0; padding: 20px; }
-        .upload-container { max-width: 800px; margin: 0 auto; }
-        .upload-section { background: white; margin-bottom: 30px; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .upload-box { border: 2px dashed #007bff; padding: 30px; text-align: center; border-radius: 8px; background: #f8f9ff; }
-        .upload-box.secondary { border-color: #28a745; background: #f8fff8; }
-        .upload-box input[type="file"] { margin: 10px 0; }
-        .upload-btn { background: #007bff; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
-        .upload-btn.secondary { background: #28a745; }
-        .upload-btn:hover { opacity: 0.9; }
-        .back-btn { background: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; margin-bottom: 20px; display: inline-block; }
-        .back-btn:hover { background: #5a6268; }
-        .description { color: #6c757d; font-size: 14px; margin-top: 10px; line-height: 1.4; }
-        h2 { color: #333; margin-top: 0; }
-        .result-message { padding: 15px; margin: 20px 0; border-radius: 4px; display: none; }
-        .result-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .result-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .upload-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .upload-section {
+            background: white;
+            margin-bottom: 30px;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-box {
+            border: 2px dashed #007bff;
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px;
+            background: #f8f9ff;
+        }
+
+        .upload-box.secondary {
+            border-color: #28a745;
+            background: #f8fff8;
+        }
+
+        .upload-box input[type="file"] {
+            margin: 10px 0;
+        }
+
+        .upload-btn {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .upload-btn.secondary {
+            background: #28a745;
+        }
+
+        .upload-btn:hover {
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+
+        .description {
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        .result-message {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .result-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
+
 <body>
     <div class="upload-container">
         <a href="/purchase-orders" class="back-btn">← Back to Dashboard</a>
-        
+
         <h1>CSV Import</h1>
-        
+
         <!-- Purchase Orders CSV Import -->
         <div class="upload-section">
             <h2>1. Purchase Orders Import</h2>
@@ -35,23 +120,25 @@
                     <input type="file" name="csvFile" accept=".csv" required>
                     <p><strong>Select your Purchase Orders CSV file</strong></p>
                     <div class="description">
-                        This CSV should contain the main purchase order data with columns for PO numbers, vendors, amounts, dates, etc.
+                        This CSV should contain the main purchase order data with columns for PO numbers, vendors,
+                        amounts, dates, etc.
                     </div>
                     <br>
                     <button type="submit" class="upload-btn">Upload Purchase Orders</button>
                 </div>
             </form>
         </div>
-        
+
         <!-- Line Items CSV Import -->
         <div class="upload-section">
             <h2>2. Line Items Import (Optional)</h2>
-            <form id="lineItemsForm" action="/purchase-orders/upload-line-items" method="post" enctype="multipart/form-data">
+            <form id="lineItemsForm" action="/purchase-orders/upload-line-items" method="post"
+                enctype="multipart/form-data">
                 <div class="upload-box secondary">
                     <input type="file" name="lineItemsCsvFile" accept=".csv" required>
                     <p><strong>Select your Line Items CSV file</strong></p>
                     <div class="description">
-                        This CSV should contain line item details with memo fields starting with "1215". 
+                        This CSV should contain line item details with memo fields starting with "1215".
                         Only items for existing PO numbers will be imported.
                         <br><br>
                         Expected columns: Order type, *, Date, Type, Document number (PO), Name account, Memo
@@ -66,26 +153,26 @@
 
     <script>
         // Handle line items form submission with AJAX for better feedback
-        document.getElementById('lineItemsForm').addEventListener('submit', async function(e) {
+        document.getElementById('lineItemsForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            
+
             const formData = new FormData(this);
             const submitBtn = this.querySelector('button[type="submit"]');
             const resultDiv = document.getElementById('lineItemsResult');
-            
+
             // Show loading state
             submitBtn.textContent = 'Uploading...';
             submitBtn.disabled = true;
             resultDiv.style.display = 'none';
-            
+
             try {
                 const response = await fetch('/purchase-orders/upload-line-items', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (response.ok) {
                     resultDiv.className = 'result-message result-success';
                     resultDiv.innerHTML = `
@@ -99,12 +186,12 @@
                     resultDiv.className = 'result-message result-error';
                     resultDiv.innerHTML = `<strong>Error:</strong> ${result.error}`;
                 }
-                
+
                 resultDiv.style.display = 'block';
-                
+
                 // Reset form
                 this.reset();
-                
+
             } catch (error) {
                 resultDiv.className = 'result-message result-error';
                 resultDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
@@ -116,4 +203,5 @@
         });
     </script>
 </body>
+
 </html>

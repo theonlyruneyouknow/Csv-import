@@ -1122,9 +1122,8 @@
                                         </td>
                                         <td class="notes-toggle-cell">
                                             <div style="display: flex; gap: 4px;">
-                                                <button
-                                                    class="line-items-toggle"
-                                                    type="button" data-index="<%= index %>" data-id="<%= po._id %>"
+                                                <button class="line-items-toggle" type="button"
+                                                    data-index="<%= index %>" data-id="<%= po._id %>"
                                                     title="View line items for PO <%= po.poNumber %>">
                                                     📦
                                                 </button>
@@ -1149,7 +1148,8 @@
                                                 <div class="line-items-title">Line Items for PO <%= po.poNumber %>
                                                 </div>
                                                 <div class="line-items-actions">
-                                                    <button class="line-items-close" data-index="<%= index %>">Close</button>
+                                                    <button class="line-items-close"
+                                                        data-index="<%= index %>">Close</button>
                                                 </div>
                                             </div>
                                             <div class="line-items-container" id="line-items-container-<%= index %>">
@@ -1662,13 +1662,13 @@
 
         async function loadLineItems(index, poId) {
             const container = document.getElementById(`line-items-container-${index}`);
-            
+
             try {
                 container.innerHTML = '<div class="loading-line-items">Loading line items...</div>';
-                
+
                 const response = await fetch(`/purchase-orders/${poId}/line-items`);
                 const lineItems = await response.json();
-                
+
                 if (lineItems.length === 0) {
                     container.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
                 } else {
