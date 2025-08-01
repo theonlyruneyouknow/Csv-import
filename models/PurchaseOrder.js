@@ -25,6 +25,10 @@ const purchaseOrderSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+  poUrl: {                  // URL associated with this PO - makes PO number clickable
+    type: String,
+    default: ''
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

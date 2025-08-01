@@ -4,6 +4,7 @@ const multer = require('multer');
 const Papa = require('papaparse');
 const PurchaseOrder = require('../models/PurchaseOrder');
 const StatusOption = require('../models/StatusOption');
+const Note = require('../models/Note');
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
@@ -140,18 +141,57 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Update notes
-router.put('/:id/notes', async (req, res) => {
+// Add new note (replaces the old update notes functionality)
+router.post('/:id/notes', async (req, res) => {
   try {
-    const updated = await PurchaseOrder.findByIdAndUpdate(
+    const { notes } = req.body;
+    
+    // Only create a note if there's actual content
+    if (!notes || !notes.trim()) {
+      return res.json({ success: true });
+    }
+    
+    const purchaseOrder = await PurchaseOrder.findById(req.params.id);
+    if (!purchaseOrder) {
+      return res.status(404).json({ error: 'Purchase order not found' });
+    }
+    
+    // Create new note record
+    const note = await Note.create({
+      poId: purchaseOrder._id,
+      poNumber: purchaseOrder.poNumber,
+      vendor: purchaseOrder.vendor,
+      content: notes.trim()
+    });
+    
+    // Update the PO's notes field with the latest note for display
+    await PurchaseOrder.findByIdAndUpdate(
       req.params.id,
-      { notes: req.body.notes, updatedAt: new Date() },
-      { new: true }
+      { notes: notes.trim(), updatedAt: new Date() }
     );
-    console.log(`Updated notes for PO ${updated.poNumber}: "${req.body.notes}"`);
-    res.json({ success: true });
+    
+    console.log(`Added note for PO ${purchaseOrder.poNumber}: "${notes.trim()}"`);
+    res.json({ success: true, noteId: note._id });
   } catch (error) {
-    console.error('Notes update error:', error);
+    console.error('Note creation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get notes history for a PO
+router.get('/:id/notes-history', async (req, res) => {
+  try {
+    const purchaseOrder = await PurchaseOrder.findById(req.params.id);
+    if (!purchaseOrder) {
+      return res.status(404).json({ error: 'Purchase order not found' });
+    }
+    
+    const notes = await Note.find({ poId: req.params.id })
+      .sort({ createdAt: -1 }); // Most recent first
+    
+    res.json(notes);
+  } catch (error) {
+    console.error('Notes history error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -191,9 +231,25 @@ router.put('/:id/next-update-date', async (req, res) => {
   }
 });
 
-// Status Options Management Routes
+// Update PO URL
+router.put('/:id/url', async (req, res) => {
+  try {
+    const { url } = req.body;
 
-// Get all status options
+    const updated = await PurchaseOrder.findByIdAndUpdate(
+      req.params.id,
+      { poUrl: url || '', updatedAt: new Date() },
+      { new: true }
+    );
+    console.log(`Updated URL for PO ${updated.poNumber}: ${url || 'cleared'}`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('URL update error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Status Options Management Routes// Get all status options
 router.get('/status-options', async (req, res) => {
   try {
     const statusOptions = await StatusOption.find().sort({ name: 1 });
@@ -252,6 +308,180 @@ router.delete('/status-options/:id', async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error('Status option deletion error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Notes Management Routes
+
+// Get all notes with filtering
+router.get('/notes', async (req, res) => {
+  try {
+    const { 
+      poNumber, 
+      vendor, 
+      dateFrom, 
+      dateTo, 
+      search,
+      limit = 100,
+      skip = 0 
+    } = req.query;
+    
+    // Build filter query
+    let filter = {};
+    
+    if (poNumber) {
+      filter.poNumber = new RegExp(poNumber, 'i');
+    }
+    
+    if (vendor) {
+      filter.vendor = new RegExp(vendor, 'i');
+    }
+    
+    if (search) {
+      filter.content = new RegExp(search, 'i');
+    }
+    
+    if (dateFrom || dateTo) {
+      filter.createdAt = {};
+      if (dateFrom) {
+        filter.createdAt.$gte = new Date(dateFrom);
+      }
+      if (dateTo) {
+        const endDate = new Date(dateTo);
+        endDate.setHours(23, 59, 59, 999); // End of day
+        filter.createdAt.$lte = endDate;
+      }
+    }
+    
+    const notes = await Note.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .skip(parseInt(skip));
+    
+    const totalCount = await Note.countDocuments(filter);
+    
+    res.json({
+      notes,
+      totalCount,
+      hasMore: totalCount > parseInt(skip) + parseInt(limit)
+    });
+  } catch (error) {
+    console.error('Notes query error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete a specific note
+router.delete('/notes/:noteId', async (req, res) => {
+  try {
+    const note = await Note.findById(req.params.noteId);
+    
+    if (!note) {
+      return res.status(404).json({ error: 'Note not found' });
+    }
+    
+    await Note.findByIdAndDelete(req.params.noteId);
+    
+    // Update the PO's current notes field with the most recent remaining note
+    const latestNote = await Note.findOne({ poId: note.poId })
+      .sort({ createdAt: -1 });
+    
+    await PurchaseOrder.findByIdAndUpdate(
+      note.poId,
+      { 
+        notes: latestNote ? latestNote.content : '',
+        updatedAt: new Date()
+      }
+    );
+    
+    console.log(`Deleted note for PO ${note.poNumber}`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Note deletion error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Notes Management Page
+router.get('/notes-manager', async (req, res) => {
+  try {
+    // Get summary statistics
+    const totalNotes = await Note.countDocuments();
+    const recentNotes = await Note.countDocuments({
+      createdAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } // Last 7 days
+    });
+    
+    // Get unique PO numbers and vendors for filtering
+    const uniquePOs = await Note.distinct('poNumber');
+    const uniqueVendors = await Note.distinct('vendor');
+    
+    res.render('notes-manager', {
+      totalNotes,
+      recentNotes,
+      uniquePOs: uniquePOs.sort(),
+      uniqueVendors: uniqueVendors.sort()
+    });
+  } catch (error) {
+    console.error('Notes manager error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Migration route to convert existing PO notes to individual Note records
+router.post('/migrate-notes', async (req, res) => {
+  try {
+    // Find all PurchaseOrders that have notes
+    const purchaseOrdersWithNotes = await PurchaseOrder.find({
+      notes: { $exists: true, $ne: '' }
+    });
+
+    let migratedCount = 0;
+    let errorCount = 0;
+    let skippedCount = 0;
+
+    for (const po of purchaseOrdersWithNotes) {
+      try {
+        // Check if we already have a note for this PO (to avoid duplicates)
+        const existingNote = await Note.findOne({ 
+          poId: po._id,
+          content: po.notes 
+        });
+
+        if (existingNote) {
+          skippedCount++;
+          continue;
+        }
+
+        // Create a new Note record
+        const newNote = new Note({
+          poId: po._id,
+          poNumber: po.poNumber,
+          vendor: po.vendor || 'Unknown Vendor',
+          content: po.notes,
+          createdAt: po.updatedAt || po.createdAt || new Date()
+        });
+
+        await newNote.save();
+        migratedCount++;
+
+      } catch (error) {
+        console.error(`Error migrating PO ${po.poNumber}:`, error.message);
+        errorCount++;
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Migration completed',
+      migrated: migratedCount,
+      errors: errorCount,
+      skipped: skippedCount,
+      total: purchaseOrdersWithNotes.length
+    });
+
+  } catch (error) {
+    console.error('Migration error:', error);
     res.status(500).json({ error: error.message });
   }
 });

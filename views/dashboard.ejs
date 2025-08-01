@@ -191,7 +191,7 @@
         .notes-toggle-cell {
             text-align: center;
             vertical-align: middle;
-            width: 50px;
+            width: 70px; /* Increased for two buttons */
         }
 
         .notes-toggle {
@@ -199,10 +199,10 @@
             color: white;
             border: none;
             border-radius: 4px;
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -220,6 +220,26 @@
 
         .notes-toggle.has-notes:hover {
             background: #218838;
+        }
+
+        .notes-history-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .notes-history-btn:hover {
+            background: #5a6268;
+            transform: scale(1.05);
         }
 
         /* Notes header with actions */
@@ -289,8 +309,182 @@
             color: #495057;
             font-size: 16px;
             font-weight: bold;
-            width: 120px;
-            /* Reduced from ~160px */
+            width: 140px;
+            /* Increased slightly for URL button */
+            position: relative;
+        }
+
+        /* PO Number URL functionality */
+        .po-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .po-link {
+            color: #007bff;
+            text-decoration: none;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .po-link:hover {
+            text-decoration: underline;
+            color: #0056b3;
+        }
+
+        .po-text {
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .url-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
+            transition: all 0.2s ease;
+        }
+
+        .url-btn:hover {
+            opacity: 1;
+            background: #5a6268;
+        }
+
+        .url-btn.has-url {
+            background: #28a745;
+        }
+
+        .url-btn.has-url:hover {
+            background: #218838;
+        }
+
+        /* URL Modal */
+        .url-modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .url-modal-content {
+            background-color: white;
+            margin: 20% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .url-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .url-modal-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .url-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #6c757d;
+        }
+
+        .url-close:hover {
+            color: #495057;
+        }
+
+        .url-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .url-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .url-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .url-save-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .url-save-btn:hover {
+            background: #0056b3;
+        }
+
+        .url-save-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .url-remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .url-remove-btn:hover {
+            background: #c82333;
+        }
+
+        .url-cancel-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .url-cancel-btn:hover {
+            background: #5a6268;
         }
 
         .vendor {
@@ -570,6 +764,76 @@
         .manage-status-btn:hover {
             background: #5a6268;
         }
+
+        .notes-manager-btn {
+            background: #28a745;
+            color: white;
+            padding: 6px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .notes-manager-btn:hover {
+            background: #218838;
+        }
+
+        /* Notes History Modal */
+        .notes-history-content {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .note-item {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            padding: 12px;
+            background: white;
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .note-date {
+            font-weight: bold;
+        }
+
+        .note-content {
+            padding: 8px 0;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #495057;
+            white-space: pre-wrap;
+        }
+
+        .note-delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 2px 6px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        .note-delete-btn:hover {
+            background: #c82333;
+        }
+
+        .no-notes {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 40px;
+        }
     </style>
 </head>
 
@@ -579,6 +843,7 @@
             <h1>Purchase Orders Dashboard</h1>
             <div>
                 <button class="manage-status-btn" onclick="openStatusModal()">⚙️ Manage Status Options</button>
+                <a href="/purchase-orders/notes-manager" class="notes-manager-btn">📝 Notes Manager</a>
                 <a href="/upload" class="upload-btn">📁 Import New CSV</a>
             </div>
         </div>
@@ -684,7 +949,25 @@
                                             <%= po.date %>
                                         </td>
                                         <td class="po-number">
-                                            <%= po.poNumber %>
+                                            <div class="po-container">
+                                                <% if (po.poUrl && po.poUrl.trim()) { %>
+                                                    <a href="<%= po.poUrl %>" target="_blank" class="po-link"
+                                                        title="Open <%= po.poNumber %> link">
+                                                        <%= po.poNumber %>
+                                                    </a>
+                                                    <% } else { %>
+                                                        <span class="po-text">
+                                                            <%= po.poNumber %>
+                                                        </span>
+                                                        <% } %>
+                                                            <button
+                                                                class="url-btn <%= po.poUrl && po.poUrl.trim() ? 'has-url' : '' %>"
+                                                                data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
+                                                                data-url="<%= po.poUrl || '' %>"
+                                                                title="<%= po.poUrl && po.poUrl.trim() ? 'Edit URL' : 'Add URL' %>">
+                                                                🔗
+                                                            </button>
+                                            </div>
                                         </td>
                                         <td class="vendor" title="<%= po.vendor %>">
                                             <%= po.vendor %>
@@ -725,12 +1008,22 @@
                                                 title="Set next update date for PO <%= po.poNumber %>">
                                         </td>
                                         <td class="notes-toggle-cell">
-                                            <button
-                                                class="notes-toggle <%= po.notes && po.notes.trim() ? 'has-notes' : '' %>"
-                                                type="button" data-index="<%= index %>"
-                                                title="<%= po.notes && po.notes.trim() ? 'View/Edit notes' : 'Add notes' %>">
-                                                <%= po.notes && po.notes.trim() ? '📝' : '➕' %>
-                                            </button>
+                                            <div style="display: flex; gap: 4px;">
+                                                <button
+                                                    class="notes-toggle <%= po.notes && po.notes.trim() ? 'has-notes' : '' %>"
+                                                    type="button" data-index="<%= index %>"
+                                                    title="<%= po.notes && po.notes.trim() ? 'View/Edit notes' : 'Add notes' %>">
+                                                    <%= po.notes && po.notes.trim() ? '📝' : '➕' %>
+                                                </button>
+                                                <button
+                                                    class="notes-history-btn"
+                                                    type="button" 
+                                                    data-id="<%= po._id %>"
+                                                    data-po="<%= po.poNumber %>"
+                                                    title="View notes history">
+                                                    📋
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
 
@@ -780,6 +1073,42 @@
 
             <div id="statusList" class="status-list">
                 <!-- Status options will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- URL Management Modal -->
+    <div id="urlModal" class="url-modal">
+        <div class="url-modal-content">
+            <div class="url-modal-header">
+                <div class="url-modal-title" id="urlModalTitle">Add URL for PO</div>
+                <button class="url-close" onclick="closeUrlModal()">&times;</button>
+            </div>
+
+            <div class="url-form">
+                <label for="urlInput">URL:</label>
+                <input type="url" id="urlInput" class="url-input" placeholder="https://example.com" autocomplete="off">
+
+                <div class="url-actions">
+                    <button id="urlRemoveBtn" class="url-remove-btn" onclick="removeUrl()" style="display: none;">Remove
+                        URL</button>
+                    <button class="url-cancel-btn" onclick="closeUrlModal()">Cancel</button>
+                    <button id="urlSaveBtn" class="url-save-btn" onclick="saveUrl()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes History Modal -->
+    <div id="notesHistoryModal" class="status-modal">
+        <div class="status-modal-content" style="max-width: 800px;">
+            <div class="status-modal-header">
+                <div class="status-modal-title" id="notesHistoryTitle">Notes History</div>
+                <button class="status-close" onclick="closeNotesHistoryModal()">&times;</button>
+            </div>
+            
+            <div id="notesHistoryContent" class="notes-history-content">
+                <!-- Notes history will be loaded here -->
             </div>
         </div>
     </div>
@@ -851,7 +1180,7 @@
                     const notes = this.value;
 
                     fetch(`/purchase-orders/${id}/notes`, {
-                        method: 'PUT',
+                        method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ notes })
                     })
@@ -959,6 +1288,224 @@
                     });
             });
         });
+
+        // URL Management functionality
+        let currentUrlData = { id: '', poNumber: '', url: '' };
+
+        // Handle URL button clicks
+        document.querySelectorAll('.url-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                currentUrlData = {
+                    id: this.dataset.id,
+                    poNumber: this.dataset.po,
+                    url: this.dataset.url || ''
+                };
+                openUrlModal();
+            });
+        });
+
+        function openUrlModal() {
+            const modal = document.getElementById('urlModal');
+            const title = document.getElementById('urlModalTitle');
+            const input = document.getElementById('urlInput');
+            const removeBtn = document.getElementById('urlRemoveBtn');
+
+            title.textContent = `${currentUrlData.url ? 'Edit' : 'Add'} URL for PO ${currentUrlData.poNumber}`;
+            input.value = currentUrlData.url;
+
+            if (currentUrlData.url) {
+                removeBtn.style.display = 'inline-block';
+            } else {
+                removeBtn.style.display = 'none';
+            }
+
+            modal.style.display = 'block';
+            setTimeout(() => input.focus(), 100);
+        }
+
+        function closeUrlModal() {
+            document.getElementById('urlModal').style.display = 'none';
+            document.getElementById('urlInput').value = '';
+            currentUrlData = { id: '', poNumber: '', url: '' };
+        }
+
+        async function saveUrl() {
+            const input = document.getElementById('urlInput');
+            const saveBtn = document.getElementById('urlSaveBtn');
+            const url = input.value.trim();
+
+            // Basic URL validation
+            if (url && !isValidUrl(url)) {
+                alert('Please enter a valid URL (e.g., https://example.com)');
+                return;
+            }
+
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+
+            try {
+                const response = await fetch(`/purchase-orders/${currentUrlData.id}/url`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    closeUrlModal();
+                    // Refresh the page to update the UI
+                    setTimeout(() => window.location.reload(), 300);
+                } else {
+                    alert(result.error || 'Error saving URL');
+                }
+            } catch (error) {
+                console.error('Error saving URL:', error);
+                alert('Error saving URL');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save';
+            }
+        }
+
+        async function removeUrl() {
+            if (!confirm(`Remove URL for PO ${currentUrlData.poNumber}?`)) {
+                return;
+            }
+
+            const removeBtn = document.getElementById('urlRemoveBtn');
+            removeBtn.disabled = true;
+            removeBtn.textContent = 'Removing...';
+
+            try {
+                const response = await fetch(`/purchase-orders/${currentUrlData.id}/url`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: '' })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    closeUrlModal();
+                    // Refresh the page to update the UI
+                    setTimeout(() => window.location.reload(), 300);
+                } else {
+                    alert(result.error || 'Error removing URL');
+                }
+            } catch (error) {
+                console.error('Error removing URL:', error);
+                alert('Error removing URL');
+            } finally {
+                removeBtn.disabled = false;
+                removeBtn.textContent = 'Remove URL';
+            }
+        }
+
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        // Allow Enter key to save URL
+        document.getElementById('urlInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                saveUrl();
+            }
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function (event) {
+            const urlModal = document.getElementById('urlModal');
+            const notesHistoryModal = document.getElementById('notesHistoryModal');
+            if (event.target === urlModal) {
+                closeUrlModal();
+            }
+            if (event.target === notesHistoryModal) {
+                closeNotesHistoryModal();
+            }
+        });
+
+        // Notes History functionality
+        document.querySelectorAll('.notes-history-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const poId = this.dataset.id;
+                const poNumber = this.dataset.po;
+                openNotesHistoryModal(poId, poNumber);
+            });
+        });
+
+        async function openNotesHistoryModal(poId, poNumber) {
+            const modal = document.getElementById('notesHistoryModal');
+            const title = document.getElementById('notesHistoryTitle');
+            const content = document.getElementById('notesHistoryContent');
+
+            title.textContent = `Notes History - PO ${poNumber}`;
+            content.innerHTML = '<div style="text-align: center; padding: 20px;">Loading...</div>';
+            modal.style.display = 'block';
+
+            try {
+                const response = await fetch(`/purchase-orders/${poId}/notes-history`);
+                const notes = await response.json();
+
+                if (notes.length === 0) {
+                    content.innerHTML = '<div class="no-notes">No notes found for this PO</div>';
+                } else {
+                    content.innerHTML = notes.map(note => `
+                        <div class="note-item">
+                            <div class="note-header">
+                                <span class="note-date">${new Date(note.createdAt).toLocaleString()}</span>
+                                <button class="note-delete-btn" onclick="deleteNote('${note._id}', '${poId}', '${poNumber}')">Delete</button>
+                            </div>
+                            <div class="note-content">${escapeHtml(note.content)}</div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading notes history:', error);
+                content.innerHTML = '<div class="no-notes">Error loading notes history</div>';
+            }
+        }
+
+        function closeNotesHistoryModal() {
+            document.getElementById('notesHistoryModal').style.display = 'none';
+        }
+
+        async function deleteNote(noteId, poId, poNumber) {
+            if (!confirm('Are you sure you want to delete this note?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/purchase-orders/notes/${noteId}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Refresh the notes history
+                    openNotesHistoryModal(poId, poNumber);
+                    // Refresh the page to update the main table
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    alert(result.error || 'Error deleting note');
+                }
+            } catch (error) {
+                console.error('Error deleting note:', error);
+                alert('Error deleting note');
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
         // Filtering functionality
         function applyFilters() {
