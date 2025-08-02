@@ -181,7 +181,38 @@
 
         .line-items-actions {
             display: flex;
+            align-items: center;
             gap: 10px;
+        }
+
+        .line-items-status {
+            font-size: 12px;
+            color: #28a745;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .show-received-toggle {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .show-received-toggle:hover {
+            background: #5a6268;
+        }
+
+        .show-received-toggle.active {
+            background: #007bff;
+        }
+
+        .show-received-toggle.active:hover {
+            background: #0056b3;
         }
 
         .line-items-close {
@@ -209,18 +240,115 @@
             border-radius: 4px;
             padding: 12px;
             margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .line-item.received {
+            background: #f8f9fa;
+            border-color: #28a745;
+            border-left: 4px solid #28a745;
+        }
+
+        .line-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
         }
 
         .line-item-date {
             font-size: 11px;
             color: #6c757d;
-            margin-bottom: 5px;
+        }
+
+        .line-item-status {
+            display: flex;
+            align-items: center;
+        }
+
+        .received-toggle {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .received-toggle:hover {
+            background: #5a6268;
+        }
+
+        .received-toggle.received {
+            background: #28a745;
+        }
+
+        .received-toggle.received:hover {
+            background: #218838;
         }
 
         .line-item-memo {
             font-size: 13px;
             color: #495057;
             line-height: 1.3;
+            margin-bottom: 8px;
+        }
+
+        .line-item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #f1f3f4;
+            font-size: 11px;
+        }
+
+        .line-item-eta {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .line-item-eta label {
+            color: #6c757d;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .eta-input {
+            border: 1px solid #ced4da;
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-size: 11px;
+            color: #495057;
+        }
+
+        .eta-input:focus {
+            outline: none;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        .received-date {
+            color: #28a745;
+            font-weight: 500;
+        }
+
+        .line-item.received.hidden {
+            display: none;
+        }
+
+        .all-received-message {
+            text-align: center;
+            padding: 20px;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            color: #155724;
+            font-weight: 500;
         }
 
         .no-line-items {
@@ -1146,8 +1274,15 @@
                                         <td colspan="8" class="line-items-cell-expanded">
                                             <div class="line-items-header">
                                                 <div class="line-items-title">Line Items for PO <%= po.poNumber %>
+                                                        <span class="line-items-status"
+                                                            id="line-items-status-<%= index %>"></span>
                                                 </div>
                                                 <div class="line-items-actions">
+                                                    <button class="show-received-toggle" id="show-received-<%= index %>"
+                                                        onclick="toggleReceivedItems(<%= index %>)"
+                                                        style="display: none;">
+                                                        👁️ Show Received
+                                                    </button>
                                                     <button class="line-items-close"
                                                         data-index="<%= index %>">Close</button>
                                                 </div>
@@ -1662,6 +1797,8 @@
 
         async function loadLineItems(index, poId) {
             const container = document.getElementById(`line-items-container-${index}`);
+            const statusElement = document.getElementById(`line-items-status-${index}`);
+            const toggleButton = document.getElementById(`show-received-${index}`);
 
             try {
                 container.innerHTML = '<div class="loading-line-items">Loading line items...</div>';
@@ -1671,17 +1808,134 @@
 
                 if (lineItems.length === 0) {
                     container.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
+                    statusElement.textContent = '';
+                    toggleButton.style.display = 'none';
                 } else {
-                    container.innerHTML = lineItems.map(item => `
-                        <div class="line-item">
-                            <div class="line-item-date">${item.date ? new Date(item.date).toLocaleDateString() : 'No date'}</div>
+                    const receivedCount = lineItems.filter(item => item.received).length;
+                    const totalCount = lineItems.length;
+                    const allReceived = receivedCount === totalCount;
+
+                    // Generate the HTML for line items
+                    const lineItemsHtml = lineItems.map(item => `
+                        <div class="line-item ${item.received ? 'received hidden' : ''}" data-item-id="${item._id}">
+                            <div class="line-item-header">
+                                <div class="line-item-date">${item.date ? new Date(item.date).toLocaleDateString() : 'No date'}</div>
+                                <div class="line-item-status">
+                                    <button class="received-toggle ${item.received ? 'received' : ''}" 
+                                            onclick="toggleReceived('${item._id}', ${!item.received}, ${index}, '${poId}')">
+                                        ${item.received ? '✅ Received' : '📦 Mark Received'}
+                                    </button>
+                                </div>
+                            </div>
                             <div class="line-item-memo">${escapeHtml(item.memo)}</div>
+                            <div class="line-item-footer">
+                                <div class="line-item-eta">
+                                    <label>ETA:</label>
+                                    <input type="date" class="eta-input" 
+                                           value="${item.eta ? new Date(item.eta).toISOString().split('T')[0] : ''}"
+                                           onchange="updateETA('${item._id}', this.value, ${index}, '${poId}')">
+                                </div>
+                                ${item.received && item.receivedDate ?
+                            `<div class="received-date">Received: ${new Date(item.receivedDate).toLocaleDateString()}</div>` : ''}
+                            </div>
                         </div>
                     `).join('');
+
+                    // Show completion message if all items received and none visible
+                    if (allReceived) {
+                        container.innerHTML = `
+                            <div class="all-received-message">
+                                🎉 All ${totalCount} items have been received! 
+                                <br><small>Use "Show Received" to view completed items.</small>
+                            </div>
+                        ` + lineItemsHtml;
+                        statusElement.textContent = `(${receivedCount}/${totalCount} received)`;
+                    } else {
+                        container.innerHTML = lineItemsHtml;
+                        statusElement.textContent = `(${receivedCount}/${totalCount} received)`;
+                    }
+
+                    // Show toggle button if there are received items
+                    if (receivedCount > 0) {
+                        toggleButton.style.display = 'inline-block';
+                        toggleButton.textContent = '👁️ Show Received';
+                        toggleButton.classList.remove('active');
+                    } else {
+                        toggleButton.style.display = 'none';
+                    }
                 }
             } catch (error) {
                 console.error('Error loading line items:', error);
                 container.innerHTML = '<div class="no-line-items">Error loading line items.</div>';
+                statusElement.textContent = '';
+                toggleButton.style.display = 'none';
+            }
+        }
+
+        function toggleReceivedItems(index) {
+            const container = document.getElementById(`line-items-container-${index}`);
+            const toggleButton = document.getElementById(`show-received-${index}`);
+            const receivedItems = container.querySelectorAll('.line-item.received');
+
+            if (toggleButton.classList.contains('active')) {
+                // Hide received items
+                receivedItems.forEach(item => item.classList.add('hidden'));
+                toggleButton.textContent = '👁️ Show Received';
+                toggleButton.classList.remove('active');
+            } else {
+                // Show received items
+                receivedItems.forEach(item => item.classList.remove('hidden'));
+                toggleButton.textContent = '🙈 Hide Received';
+                toggleButton.classList.add('active');
+            }
+        }
+
+        async function toggleReceived(lineItemId, received, index, poId) {
+            try {
+                const response = await fetch(`/purchase-orders/line-items/${lineItemId}/received`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ received })
+                });
+
+                if (response.ok) {
+                    // Reload line items to show updated status
+                    await loadLineItems(index, poId);
+                } else {
+                    const error = await response.json();
+                    alert('Error updating received status: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Error toggling received status:', error);
+                alert('Error updating received status');
+            }
+        }
+
+        async function updateETA(lineItemId, eta, index, poId) {
+            try {
+                const response = await fetch(`/purchase-orders/line-items/${lineItemId}/eta`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ eta: eta || null })
+                });
+
+                if (response.ok) {
+                    console.log('ETA updated successfully');
+                } else {
+                    const error = await response.json();
+                    alert('Error updating ETA: ' + error.error);
+                    // Reload line items to revert the input
+                    await loadLineItems(index, poId);
+                }
+            } catch (error) {
+                console.error('Error updating ETA:', error);
+                alert('Error updating ETA');
+                // Reload line items to revert the input
+                await loadLineItems(index, poId);
             }
         }
 

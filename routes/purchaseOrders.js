@@ -97,6 +97,9 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
 
 // Upload and parse Line Items CSV
 router.post('/upload-line-items', upload.single('lineItemsCsvFile'), async (req, res) => {
+  console.log('🚀 LINE ITEMS UPLOAD STARTED - File received!');
+  console.log('File info:', req.file ? { name: req.file.originalname, size: req.file.size } : 'NO FILE');
+
   try {
     const fs = require('fs');
     const fileContent = fs.readFileSync(req.file.path, 'utf8');
@@ -115,9 +118,9 @@ router.post('/upload-line-items', upload.single('lineItemsCsvFile'), async (req,
     // Look for the first row that has a PO number pattern in any reasonable column
     for (let i = 0; i < Math.min(parsed.data.length, 50); i++) { // Check first 50 rows max
       const row = parsed.data[i];
-      if (row && row.length >= 5) {
-        // Check columns 3, 4, 5 for PO patterns (more flexible)
-        for (let col = 3; col <= 5; col++) {
+      if (row && row.length >= 6) {
+        // Check columns 4, 5, 6 for PO patterns (Document Number is likely column 5)
+        for (let col = 4; col <= 6; col++) {
           if (row[col]) {
             const cellValue = row[col].toString().trim();
             // More flexible PO pattern - could be "PO12345", "12345", etc.
@@ -136,11 +139,11 @@ router.post('/upload-line-items', upload.single('lineItemsCsvFile'), async (req,
       // If no PO pattern found, let's see what we have
       console.log('No PO pattern found. Sample of data:');
       parsed.data.slice(0, 20).forEach((row, index) => {
-        if (row && row.length >= 4) {
-          console.log(`Row ${index}, columns 3-6:`, [row[3], row[4], row[5], row[6]]);
+        if (row && row.length >= 6) {
+          console.log(`Row ${index}, columns 4-8:`, [row[4], row[5], row[6], row[7], row[8]]);
         }
       });
-      throw new Error('No valid data found in CSV file. Expected PO numbers in columns 4-6.');
+      throw new Error('No valid data found in CSV file. Expected PO numbers in columns 5-6.');
     }
 
     const dataRows = parsed.data.slice(dataStartIndex);
@@ -148,19 +151,44 @@ router.post('/upload-line-items', upload.single('lineItemsCsvFile'), async (req,
     let skippedCount = 0;
     let errorCount = 0;
 
-    console.log(`Processing ${dataRows.length} line item rows starting from row ${dataStartIndex}...`); for (const row of dataRows) {
+    console.log(`Processing ${dataRows.length} line item rows starting from row ${dataStartIndex}...`);
+
+    // Add counters for different skip reasons
+    let skipReasons = {
+      notEnoughColumns: 0,
+      noPOFound: 0,
+      noAccount1215: 0,
+      poNotInDatabase: 0,
+      duplicate: 0
+    };
+
+    for (const row of dataRows) {
       try {
+        // Add detailed debugging for first few rows
+        if (processedCount + skippedCount < 5) {
+          console.log(`\n=== Debugging Row ${processedCount + skippedCount + 1} ===`);
+          console.log('Row data:', row);
+          console.log('Row length:', row.length);
+          console.log('Column 5 (PO):', row[5]);
+          console.log('Column 7 (Account):', row[7]);
+          console.log('Column 8 (Item Description):', row[8]);
+        }
+
         // Skip if not enough columns or missing key data
-        if (!row || row.length < 6) {
+        if (!row || row.length < 9) { // Need at least 9 columns for memo in column 8
+          if (processedCount + skippedCount < 5) {
+            console.log('❌ Skipped: Not enough columns');
+          }
+          skipReasons.notEnoughColumns++;
           skippedCount++;
           continue;
         }
 
-        // Try to find PO number in columns 3, 4, or 5 (more flexible)
+        // Try to find PO number in columns 4, 5, or 6 (Document Number is column 5)
         let poNumber = null;
         let poColumn = -1;
 
-        for (let col = 3; col <= 5; col++) {
+        for (let col = 4; col <= 6; col++) {
           if (row[col]) {
             const cellValue = row[col].toString().trim();
             if (cellValue.match(/^(PO)?\d{4,6}$/) || cellValue.match(/^PO\d+$/)) {
@@ -172,26 +200,55 @@ router.post('/upload-line-items', upload.single('lineItemsCsvFile'), async (req,
         }
 
         if (!poNumber) {
+          if (processedCount + skippedCount < 5) {
+            console.log('❌ Skipped: No PO number found in columns 4-6');
+          }
+          skipReasons.noPOFound++;
           skippedCount++;
           continue;
         }
 
-        // Memo should be in the column after the PO number, or try common locations
+        if (processedCount + skippedCount < 5) {
+          console.log('✓ Found PO:', poNumber, 'in column', poColumn);
+        }
+
+        // Check if this row has "1215" in the Account column (column 7)
+        let account = '';
+        if (row[7]) {
+          account = row[7].toString().trim();
+        }
+
+        // Item description is in column 8
         let memo = '';
-        if (row[poColumn + 1]) {
-          memo = row[poColumn + 1].toString().trim();
-        } else if (row[5]) {
-          memo = row[5].toString().trim(); // Fallback to column 5
-        } else if (row[6]) {
-          memo = row[6].toString().trim(); // Fallback to column 6
+        if (row[8]) {
+          memo = row[8].toString().trim();
         }
 
         const date = row[2] ? row[2].toString().trim() : ''; // Date field
 
-        // Only process rows where memo starts with "1215" as specified
-        if (!memo || !memo.startsWith('1215')) {
+        // Only process rows where account starts with "1215" as specified
+        if (!account || !account.startsWith('1215')) {
+          if (processedCount + skippedCount < 5) {
+            console.log('❌ Skipped: Account does not start with 1215. Account:', account ? `"${account.substring(0, 50)}..."` : 'empty');
+          }
+          skipReasons.noAccount1215++;
           skippedCount++;
           continue;
+        }
+
+        // Make sure we have a meaningful item description
+        if (!memo || memo.trim() === '') {
+          if (processedCount + skippedCount < 5) {
+            console.log('❌ Skipped: Empty item description');
+          }
+          skipReasons.noAccount1215++;
+          skippedCount++;
+          continue;
+        }
+
+        if (processedCount + skippedCount < 5) {
+          console.log('✓ Valid 1215 account found:', account.substring(0, 50) + '...');
+          console.log('✓ Item description:', memo);
         }
 
         // Find the corresponding PurchaseOrder
@@ -199,9 +256,15 @@ router.post('/upload-line-items', upload.single('lineItemsCsvFile'), async (req,
 
         if (!purchaseOrder) {
           console.log(`Skipping line item for PO ${poNumber} - PO not found in database`);
+          if (skipReasons.poNotInDatabase < 5) { // Only show first 5 to avoid spam
+            console.log(`Available PO numbers in database:`, await PurchaseOrder.distinct('poNumber'));
+          }
+          skipReasons.poNotInDatabase++;
           skippedCount++;
           continue;
         }
+
+        console.log(`Found matching PO: ${purchaseOrder.poNumber} (ID: ${purchaseOrder._id})`);
 
         // Check if this exact line item already exists to avoid duplicates
         const existingLineItem = await LineItem.findOne({
@@ -213,12 +276,20 @@ router.post('/upload-line-items', upload.single('lineItemsCsvFile'), async (req,
 
         if (existingLineItem) {
           console.log(`Skipping duplicate line item for PO ${poNumber}: ${memo.substring(0, 50)}...`);
+          skipReasons.duplicate++;
           skippedCount++;
           continue;
         }
 
         // Create new line item
-        await LineItem.create({
+        console.log(`Creating line item:`, {
+          poId: purchaseOrder._id,
+          poNumber: poNumber,
+          date: date,
+          memo: memo.substring(0, 100) + (memo.length > 100 ? '...' : '')
+        });
+
+        const newLineItem = await LineItem.create({
           poId: purchaseOrder._id,
           poNumber: poNumber,
           date: date,
@@ -228,10 +299,11 @@ router.post('/upload-line-items', upload.single('lineItemsCsvFile'), async (req,
         });
 
         processedCount++;
-        console.log(`Added line item for PO ${poNumber}: ${memo.substring(0, 50)}...`);
+        console.log(`✓ Successfully added line item for PO ${poNumber}: ${memo.substring(0, 50)}... (ID: ${newLineItem._id})`);
 
       } catch (error) {
         console.error(`Error processing line item row:`, error);
+        console.error(`Row data:`, row);
         errorCount++;
       }
     }
@@ -240,6 +312,12 @@ router.post('/upload-line-items', upload.single('lineItemsCsvFile'), async (req,
     fs.unlinkSync(req.file.path);
 
     console.log(`Line items import completed: ${processedCount} processed, ${skippedCount} skipped, ${errorCount} errors`);
+    console.log('Skip reasons breakdown:');
+    console.log(`  - Not enough columns: ${skipReasons.notEnoughColumns}`);
+    console.log(`  - No PO number found: ${skipReasons.noPOFound}`);
+    console.log(`  - No account starting with 1215: ${skipReasons.noAccount1215}`);
+    console.log(`  - PO not in database: ${skipReasons.poNotInDatabase}`);
+    console.log(`  - Duplicate entries: ${skipReasons.duplicate}`);
 
     res.json({
       success: true,
@@ -248,12 +326,53 @@ router.post('/upload-line-items', upload.single('lineItemsCsvFile'), async (req,
         processed: processedCount,
         skipped: skippedCount,
         errors: errorCount,
-        total: dataRows.length
+        total: dataRows.length,
+        skipReasons: skipReasons
       }
     });
 
   } catch (error) {
     console.error('Line items upload error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Quick debug route to check existing POs
+router.get('/debug/pos', async (req, res) => {
+  try {
+    const pos = await PurchaseOrder.find({}, 'poNumber vendor').limit(20);
+    res.json({
+      count: await PurchaseOrder.countDocuments(),
+      sample: pos
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Temporary debug route - remove after testing
+router.get('/debug/line-items/:poNumber', async (req, res) => {
+  try {
+    const { poNumber } = req.params;
+
+    // Find the PO
+    const po = await PurchaseOrder.findOne({ poNumber: poNumber });
+    if (!po) {
+      return res.json({ error: 'PO not found', poNumber });
+    }
+
+    // Find line items by both poId and poNumber
+    const lineItemsByPoId = await LineItem.find({ poId: po._id });
+    const lineItemsByPoNumber = await LineItem.find({ poNumber: poNumber });
+
+    res.json({
+      poNumber,
+      poId: po._id,
+      lineItemsByPoId: lineItemsByPoId.length,
+      lineItemsByPoNumber: lineItemsByPoNumber.length,
+      items: lineItemsByPoId.length > 0 ? lineItemsByPoId : lineItemsByPoNumber
+    });
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
@@ -374,6 +493,67 @@ router.get('/:id/line-items', async (req, res) => {
     res.json(lineItems);
   } catch (error) {
     console.error('Line items error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Mark line item as received
+router.put('/line-items/:lineItemId/received', async (req, res) => {
+  try {
+    const { received } = req.body;
+    const updateData = {
+      received: Boolean(received),
+      updatedAt: new Date()
+    };
+
+    // If marking as received, set receivedDate to now
+    if (received) {
+      updateData.receivedDate = new Date();
+    } else {
+      updateData.receivedDate = null;
+    }
+
+    const lineItem = await LineItem.findByIdAndUpdate(
+      req.params.lineItemId,
+      updateData,
+      { new: true }
+    );
+
+    if (!lineItem) {
+      return res.status(404).json({ error: 'Line item not found' });
+    }
+
+    console.log(`Line item ${lineItem._id} marked as ${received ? 'received' : 'not received'} for PO ${lineItem.poNumber}`);
+    res.json({ success: true, lineItem });
+  } catch (error) {
+    console.error('Line item received update error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update line item ETA
+router.put('/line-items/:lineItemId/eta', async (req, res) => {
+  try {
+    const { eta } = req.body;
+    const etaValue = eta ? new Date(eta) : null;
+
+    const lineItem = await LineItem.findByIdAndUpdate(
+      req.params.lineItemId,
+      {
+        eta: etaValue,
+        updatedAt: new Date()
+      },
+      { new: true }
+    );
+
+    if (!lineItem) {
+      return res.status(404).json({ error: 'Line item not found' });
+    }
+
+    console.log(`Updated ETA for line item ${lineItem._id} (PO ${lineItem.poNumber}): ${eta || 'cleared'}`);
+    res.json({ success: true, lineItem });
+  } catch (error) {
+    console.error('Line item ETA update error:', error);
     res.status(500).json({ error: error.message });
   }
 });

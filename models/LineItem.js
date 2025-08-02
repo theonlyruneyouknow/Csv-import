@@ -21,6 +21,20 @@ const lineItemSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    received: {
+        type: Boolean,
+        default: false,
+        index: true
+    },
+    receivedDate: {
+        type: Date,
+        default: null
+    },
+    eta: {
+        type: Date,
+        default: null,
+        index: true
+    },
     createdAt: {
         type: Date,
         default: Date.now
