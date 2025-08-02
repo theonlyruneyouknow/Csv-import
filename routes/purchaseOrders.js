@@ -3,6 +3,7 @@ const express = require('express');
 const multer = require('multer');
 const Papa = require('papaparse');
 const PurchaseOrder = require('../models/PurchaseOrder');
+const PrePurchaseOrder = require('../models/PrePurchaseOrder');
 const StatusOption = require('../models/StatusOption');
 const Note = require('../models/Note');
 const LineItem = require('../models/LineItem');
@@ -381,6 +382,7 @@ router.get('/debug/line-items/:poNumber', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const purchaseOrders = await PurchaseOrder.find().sort({ date: 1 });
+    const prePurchaseOrders = await PrePurchaseOrder.find({ convertedToPO: false }).sort({ createdAt: -1 });
 
     // Get unique NS Status values for filters (from CSV)
     const uniqueNSStatuses = [...new Set(purchaseOrders.map(po => po.nsStatus).filter(Boolean))];
@@ -388,18 +390,25 @@ router.get('/', async (req, res) => {
     // Get unique custom Status values for filters
     const uniqueStatuses = [...new Set(purchaseOrders.map(po => po.status).filter(Boolean))];
 
+    // Get unique vendors from both POs and pre-POs
+    const allVendors = [
+      ...purchaseOrders.map(po => po.vendor),
+      ...prePurchaseOrders.map(ppo => ppo.vendor)
+    ];
+    const uniqueVendors = [...new Set(allVendors.filter(Boolean))].sort();
+
     // Get status options from database
     let statusOptions = await StatusOption.find().sort({ name: 1 });
 
     // If no status options exist, create default ones
     if (statusOptions.length === 0) {
       const defaultStatuses = [
-        'In Progress',
+        'Planning',
+        'Approved for Purchase',
+        'Pending Approval',
         'On Hold',
-        'Approved',
-        'Rejected',
-        'Completed',
-        'Cancelled'
+        'Cancelled',
+        'Ready to Order'
       ];
 
       const statusPromises = defaultStatuses.map(name =>
@@ -414,12 +423,158 @@ router.get('/', async (req, res) => {
 
     res.render('dashboard', {
       purchaseOrders,
+      prePurchaseOrders,
       uniqueNSStatuses: uniqueNSStatuses.sort(),
       uniqueStatuses: uniqueStatuses.sort(),
+      uniqueVendors,
       statusOptions: statusOptionNames,
       allStatusOptions: statusOptions // Send full objects for management
     });
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Pre-Purchase Order Management Routes
+
+// Create new pre-purchase order
+router.post('/pre-purchase-orders', async (req, res) => {
+  try {
+    const { title, vendor, description, estimatedAmount, priority, targetDate, notes } = req.body;
+
+    if (!title || !title.trim()) {
+      return res.status(400).json({ error: 'Title is required' });
+    }
+
+    if (!vendor || !vendor.trim()) {
+      return res.status(400).json({ error: 'Vendor is required' });
+    }
+
+    const prePO = await PrePurchaseOrder.create({
+      title: title.trim(),
+      vendor: vendor.trim(),
+      description: description?.trim() || '',
+      estimatedAmount: parseFloat(estimatedAmount) || 0,
+      priority: priority || 'Medium',
+      targetDate: targetDate ? new Date(targetDate) : null,
+      notes: notes?.trim() || '',
+      nsStatus: 'Pre-Purchase Order',
+      status: 'Planning'
+    });
+
+    console.log(`Created pre-purchase order: "${prePO.title}" for vendor ${prePO.vendor}`);
+    res.json({ success: true, prePO });
+  } catch (error) {
+    console.error('Pre-purchase order creation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update pre-purchase order
+router.put('/pre-purchase-orders/:id', async (req, res) => {
+  try {
+    const { title, vendor, description, estimatedAmount, priority, targetDate, notes, status } = req.body;
+
+    const updateData = {
+      updatedAt: new Date()
+    };
+
+    if (title !== undefined) updateData.title = title.trim();
+    if (vendor !== undefined) updateData.vendor = vendor.trim();
+    if (description !== undefined) updateData.description = description.trim();
+    if (estimatedAmount !== undefined) updateData.estimatedAmount = parseFloat(estimatedAmount) || 0;
+    if (priority !== undefined) updateData.priority = priority;
+    if (targetDate !== undefined) updateData.targetDate = targetDate ? new Date(targetDate) : null;
+    if (notes !== undefined) updateData.notes = notes.trim();
+    if (status !== undefined) updateData.status = status;
+
+    const prePO = await PrePurchaseOrder.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+
+    if (!prePO) {
+      return res.status(404).json({ error: 'Pre-purchase order not found' });
+    }
+
+    console.log(`Updated pre-purchase order ${prePO._id}: "${prePO.title}"`);
+    res.json({ success: true, prePO });
+  } catch (error) {
+    console.error('Pre-purchase order update error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Convert pre-purchase order to actual PO
+router.post('/pre-purchase-orders/:id/convert', async (req, res) => {
+  try {
+    const { poNumber } = req.body;
+
+    if (!poNumber || !poNumber.trim()) {
+      return res.status(400).json({ error: 'PO number is required' });
+    }
+
+    // Check if PO number already exists
+    const existingPO = await PurchaseOrder.findOne({ poNumber: poNumber.trim() });
+    if (existingPO) {
+      return res.status(400).json({ error: 'PO number already exists' });
+    }
+
+    const prePO = await PrePurchaseOrder.findById(req.params.id);
+    if (!prePO) {
+      return res.status(404).json({ error: 'Pre-purchase order not found' });
+    }
+
+    if (prePO.convertedToPO) {
+      return res.status(400).json({ error: 'Pre-purchase order already converted' });
+    }
+
+    // Create actual PO
+    const newPO = await PurchaseOrder.create({
+      reportDate: new Date().toLocaleDateString(),
+      date: new Date().toLocaleDateString(),
+      poNumber: poNumber.trim(),
+      vendor: prePO.vendor,
+      nsStatus: 'Pending',
+      status: prePO.status,
+      amount: prePO.estimatedAmount,
+      location: '',
+      notes: prePO.notes,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+
+    // Mark pre-PO as converted
+    await PrePurchaseOrder.findByIdAndUpdate(req.params.id, {
+      convertedToPO: true,
+      convertedPONumber: poNumber.trim(),
+      convertedDate: new Date(),
+      updatedAt: new Date()
+    });
+
+    console.log(`Converted pre-purchase order "${prePO.title}" to PO ${poNumber}`);
+    res.json({ success: true, poNumber: newPO.poNumber, poId: newPO._id });
+  } catch (error) {
+    console.error('Pre-purchase order conversion error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete pre-purchase order
+router.delete('/pre-purchase-orders/:id', async (req, res) => {
+  try {
+    const prePO = await PrePurchaseOrder.findById(req.params.id);
+
+    if (!prePO) {
+      return res.status(404).json({ error: 'Pre-purchase order not found' });
+    }
+
+    await PrePurchaseOrder.findByIdAndDelete(req.params.id);
+    console.log(`Deleted pre-purchase order: "${prePO.title}"`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Pre-purchase order deletion error:', error);
     res.status(500).json({ error: error.message });
   }
 });
