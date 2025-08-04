@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Pre-Purchase Orders Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .pre-po {
+            border: 1px solid #ccc;
+            margin: 10px 0;
+            padding: 10px;
+        }
+
+        .count {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Pre-Purchase Orders Debug Page</h1>
+
+    <div class="count">Total Pre-Purchase Orders: <%= prePurchaseOrders.length %>
+    </div>
+
+    <% if (prePurchaseOrders.length===0) { %>
+        <p>❌ No pre-purchase orders found in database.</p>
+        <p>This means either:</p>
+        <ul>
+            <li>No pre-purchase orders have been created yet</li>
+            <li>There's an issue with the database query</li>
+            <li>All pre-purchase orders have been converted to POs</li>
+        </ul>
+        <% } else { %>
+            <p>✅ Found <%= prePurchaseOrders.length %> pre-purchase orders:</p>
+
+            <% prePurchaseOrders.forEach((prePO, index)=> { %>
+                <div class="pre-po">
+                    <h3>Pre-PO #<%= index + 1 %>
+                    </h3>
+                    <p><strong>ID:</strong>
+                        <%= prePO._id %>
+                    </p>
+                    <p><strong>Vendor:</strong>
+                        <%= prePO.vendor %>
+                    </p>
+                    <p><strong>Items:</strong>
+                        <%= prePO.items || 'None' %>
+                    </p>
+                    <p><strong>Status:</strong>
+                        <%= prePO.status %>
+                    </p>
+                    <p><strong>Priority:</strong>
+                        <%= prePO.priority %>
+                    </p>
+                    <p><strong>Receive Date:</strong>
+                        <%= prePO.receiveDate ? new Date(prePO.receiveDate).toLocaleDateString() : 'None' %>
+                    </p>
+                    <p><strong>Converted to PO:</strong>
+                        <%= prePO.convertedToPO %>
+                    </p>
+                    <p><strong>Created:</strong>
+                        <%= new Date(prePO.createdAt).toLocaleString() %>
+                    </p>
+                </div>
+                <% }); %>
+                    <% } %>
+
+                        <hr>
+                        <p><a href="/purchase-orders">← Back to Dashboard</a></p>
+                        <p><a href="/purchase-orders/debug/pre-pos">View Raw JSON Data</a></p>
+</body>
+
+</html>

@@ -67,7 +67,7 @@ prePurchaseOrderSchema.index({ priority: 1, receiveDate: 1 });
 prePurchaseOrderSchema.index({ status: 1, createdAt: -1 });
 
 // Update the updatedAt field before saving
-prePurchaseOrderSchema.pre('save', function() {
+prePurchaseOrderSchema.pre('save', function () {
     this.updatedAt = new Date();
 });
 

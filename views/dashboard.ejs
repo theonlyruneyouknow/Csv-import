@@ -398,14 +398,14 @@
             background: white;
             border-radius: 8px;
             padding: 16px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             border-left: 4px solid #6c757d;
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .pre-po-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
         .pre-po-card.priority-urgent {
@@ -1303,55 +1303,60 @@
         </div>
 
         <!-- Pre-Purchase Orders Section -->
-        <% if (prePurchaseOrders && prePurchaseOrders.length > 0) { %>
         <div class="pre-purchase-section">
             <div class="pre-purchase-header">
-                <h2>📋 Pre-Purchase Orders (<%= prePurchaseOrders.length %>)</h2>
-                <button class="add-pre-po-btn" onclick="openPrePOModal()">➕ Add Pre-PO</button>
-            </div>
-            
-            <div class="pre-purchase-orders">
-                <% prePurchaseOrders.forEach((prePO, index) => { %>
-                <div class="pre-po-card priority-<%= prePO.priority.toLowerCase() %>"
-                     data-id="<%= prePO._id %>"
-                     data-priority="<%= prePO.priority.toLowerCase() %>"
-                     data-receive-date="<%= prePO.receiveDate || '' %>"
-                     data-status="<%= prePO.status %>">
-                    <div class="pre-po-header">
-                        <div class="pre-po-title">📦 <strong><%= prePO.vendor %></strong></div>
-                        <div class="pre-po-priority <%= prePO.priority.toLowerCase() %>"><%= prePO.priority %></div>
-                    </div>
-                    <div class="pre-po-body">
-                        <% if (prePO.items) { %>
-                        <div class="pre-po-items"><%= prePO.items.substring(0, 100) %><%= prePO.items.length > 100 ? '...' : '' %></div>
-                        <% } %>
-                        <div class="pre-po-meta">
-                            <span class="pre-po-status">📋 <%= prePO.status %></span>
-                            <% if (prePO.receiveDate) { %>
-                            <span class="pre-po-date">🗓️ <%= new Date(prePO.receiveDate).toLocaleDateString() %></span>
-                            <% } %>
-                        </div>
-                    </div>
-                    <div class="pre-po-actions">
-                        <button class="edit-pre-po-btn" onclick="editPrePurchaseOrder('<%= prePO._id %>')">✏️ Edit</button>
-                        <button class="convert-pre-po-btn" onclick="convertPrePurchaseOrder('<%= prePO._id %>')">🔄 Convert to PO</button>
-                        <button class="delete-pre-po-btn" onclick="deletePrePurchaseOrder('<%= prePO._id %>')">🗑️ Delete</button>
-                    </div>
-                </div>
-                <% }); %>
-            </div>
-        </div>
-        <% } else { %>
-        <div class="pre-purchase-section">
-            <div class="pre-purchase-header">
-                <h2>📋 Pre-Purchase Orders</h2>
+                <h2>📋 Pre-Purchase Orders<% if (prePurchaseOrders && prePurchaseOrders.length> 0) { %> (<%=
+                            prePurchaseOrders.length %>)<% } %>
+                </h2>
                 <button class="add-pre-po-btn" onclick="addPrePurchaseOrder()">➕ Add Pre-PO</button>
             </div>
-            <div class="no-pre-pos">
-                <p>No pre-purchase orders yet. Start planning your purchases!</p>
-            </div>
+
+            <% if (prePurchaseOrders && prePurchaseOrders.length> 0) { %>
+                <div class="pre-purchase-orders">
+                    <% prePurchaseOrders.forEach((prePO, index)=> { %>
+                        <div class="pre-po-card priority-<%= prePO.priority.toLowerCase() %>" data-id="<%= prePO._id %>"
+                            data-priority="<%= prePO.priority.toLowerCase() %>"
+                            data-receive-date="<%= prePO.receiveDate || '' %>" data-status="<%= prePO.status %>">
+                            <div class="pre-po-header">
+                                <div class="pre-po-title">📦 <strong>
+                                        <%= prePO.vendor %>
+                                    </strong></div>
+                                <div class="pre-po-priority <%= prePO.priority.toLowerCase() %>">
+                                    <%= prePO.priority %>
+                                </div>
+                            </div>
+                            <div class="pre-po-body">
+                                <% if (prePO.items) { %>
+                                    <div class="pre-po-items">
+                                        <%= prePO.items.substring(0, 100) %>
+                                            <%= prePO.items.length> 100 ? '...' : '' %>
+                                    </div>
+                                    <% } %>
+                                        <div class="pre-po-meta">
+                                            <span class="pre-po-status">📋 <%= prePO.status %></span>
+                                            <% if (prePO.receiveDate) { %>
+                                                <span class="pre-po-date">🗓️ <%= new
+                                                        Date(prePO.receiveDate).toLocaleDateString() %></span>
+                                                <% } %>
+                                        </div>
+                            </div>
+                            <div class="pre-po-actions">
+                                <button class="edit-pre-po-btn" onclick="editPrePurchaseOrder('<%= prePO._id %>')">✏️
+                                    Edit</button>
+                                <button class="convert-pre-po-btn"
+                                    onclick="convertPrePurchaseOrder('<%= prePO._id %>')">🔄 Convert to PO</button>
+                                <button class="delete-pre-po-btn"
+                                    onclick="deletePrePurchaseOrder('<%= prePO._id %>')">🗑️ Delete</button>
+                            </div>
+                        </div>
+                        <% }); %>
+                </div>
+                <% } else { %>
+                    <div class="no-pre-pos">
+                        <p>No pre-purchase orders yet. Start planning your purchases!</p>
+                    </div>
+                    <% } %>
         </div>
-        <% } %>
 
         <% if (purchaseOrders.length> 0) { %>
             <!-- Filters Section -->
@@ -1392,6 +1397,22 @@
                         <option value="with-notes">With Notes Only</option>
                         <option value="without-notes">Without Notes Only</option>
                     </select>
+                </div>
+
+                <div class="filter-group">
+                    <label style="margin-bottom: 5px;">Show "Not my concern"</label>
+                    <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
+                        <input type="checkbox" id="showNotMyConcern" style="margin: 0;">
+                        <span style="font-size: 12px;">Show hidden POs</span>
+                    </label>
+                </div>
+
+                <div class="filter-group">
+                    <label style="margin-bottom: 5px;">Show "Pending Bill"</label>
+                    <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
+                        <input type="checkbox" id="showPendingBill" style="margin: 0;">
+                        <span style="font-size: 12px;">Show billed POs</span>
+                    </label>
                 </div>
 
                 <div class="filter-group">
@@ -2215,9 +2236,15 @@
             const nsStatusFilter = document.getElementById('nsStatusFilter').value;
             const statusFilter = document.getElementById('statusFilter').value;
             const notesFilter = document.getElementById('notesFilter').value;
+            const showNotMyConcernCheckbox = document.getElementById('showNotMyConcern');
+            const showNotMyConcern = showNotMyConcernCheckbox ? showNotMyConcernCheckbox.checked : false;
+            const showPendingBillCheckbox = document.getElementById('showPendingBill');
+            const showPendingBill = showPendingBillCheckbox ? showPendingBillCheckbox.checked : false;
 
             const rows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]'); // Only main rows
             let visibleCount = 0;
+            let hiddenNotMyConcernCount = 0;
+            let hiddenPendingBillCount = 0;
 
             rows.forEach(row => {
                 const poData = JSON.parse(row.dataset.po);
@@ -2237,6 +2264,22 @@
                 // Status filter
                 const matchesStatus = statusFilter === 'all' || status === statusFilter;
 
+                // "Not my concern" filter - hide by default unless checkbox is checked
+                const isNotMyConcern = status === 'Not my concern';
+                const shouldShowNotMyConcern = !isNotMyConcern || showNotMyConcern;
+
+                // "Pending Bill" NS Status filter - hide by default unless checkbox is checked
+                const isPendingBill = nsStatus === 'Pending Bill';
+                const shouldShowPendingBill = !isPendingBill || showPendingBill;
+
+                if (isNotMyConcern && !showNotMyConcern) {
+                    hiddenNotMyConcernCount++;
+                }
+                
+                if (isPendingBill && !showPendingBill) {
+                    hiddenPendingBillCount++;
+                }
+
                 // Notes filter
                 let matchesNotes = true;
                 if (notesFilter === 'with-notes') {
@@ -2245,7 +2288,7 @@
                     matchesNotes = notes.trim().length === 0;
                 }
 
-                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes) {
+                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && shouldShowNotMyConcern && shouldShowPendingBill) {
                     row.classList.remove('hidden');
                     // Also show the corresponding notes row if it's expanded
                     const notesRow = document.getElementById(`notes-row-${index}`);
@@ -2262,6 +2305,8 @@
                     }
                 }
             });
+
+            console.log(`🔍 Filter results: ${visibleCount} visible, ${hiddenNotMyConcernCount} "Not my concern" hidden, ${hiddenPendingBillCount} "Pending Bill" hidden`);
 
             // Update results info
             const totalCount = rows.length;
@@ -2364,6 +2409,8 @@
             document.getElementById('nsStatusFilter').value = 'all';
             document.getElementById('statusFilter').value = 'all';
             document.getElementById('notesFilter').value = 'all';
+            document.getElementById('showNotMyConcern').checked = false;
+            document.getElementById('showPendingBill').checked = false;
             applyFilters();
         }
 
@@ -2372,6 +2419,8 @@
         document.getElementById('nsStatusFilter').addEventListener('change', applyFilters);
         document.getElementById('statusFilter').addEventListener('change', applyFilters);
         document.getElementById('notesFilter').addEventListener('change', applyFilters);
+        document.getElementById('showNotMyConcern').addEventListener('change', applyFilters);
+        document.getElementById('showPendingBill').addEventListener('change', applyFilters);
 
         // Event listeners for sorting
         document.querySelectorAll('th.sortable').forEach(header => {
@@ -2542,7 +2591,7 @@
             document.getElementById('prePOItems').value = items;
             document.getElementById('prePOStatus').value = status;
             document.getElementById('prePOPriority').value = priority.charAt(0).toUpperCase() + priority.slice(1);
-            
+
             if (receiveDate) {
                 const date = new Date(receiveDate);
                 if (!isNaN(date.getTime())) {
@@ -2562,18 +2611,24 @@
         }
 
         // Handle form submission
-        document.getElementById('prePurchaseOrderForm').addEventListener('submit', function(e) {
+        document.getElementById('prePurchaseOrderForm').addEventListener('submit', function (e) {
             e.preventDefault();
-            
+
+            console.log('🔍 Form submitted!');
+
             const formData = new FormData(this);
             const data = {};
             for (let [key, value] of formData.entries()) {
                 if (value) data[key] = value;
             }
 
+            console.log('📝 Form data:', data);
+
             const isEdit = data.id;
             const url = isEdit ? `/purchase-orders/pre-purchase-orders/${data.id}` : '/purchase-orders/pre-purchase-orders';
             const method = isEdit ? 'PUT' : 'POST';
+
+            console.log(`🔗 Making ${method} request to ${url}`);
 
             fetch(url, {
                 method: method,
@@ -2582,23 +2637,28 @@
                 },
                 body: JSON.stringify(data)
             })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    closeModal('prePurchaseOrderModal');
-                    location.reload();
-                } else {
-                    alert('Error saving pre-purchase order: ' + result.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error saving pre-purchase order');
-            });
+                .then(response => {
+                    console.log('📡 Response received:', response.status);
+                    return response.json();
+                })
+                .then(result => {
+                    console.log('✅ Response data:', result);
+                    if (result.success) {
+                        alert('Pre-purchase order saved successfully!');
+                        closeModal('prePurchaseOrderModal');
+                        location.reload();
+                    } else {
+                        alert('Error saving pre-purchase order: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error:', error);
+                    alert('Error saving pre-purchase order: ' + error.message);
+                });
         });
 
         // Close modal when clicking outside
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             const modal = document.getElementById('prePurchaseOrderModal');
             if (event.target === modal) {
                 closeModal('prePurchaseOrderModal');
@@ -2613,19 +2673,19 @@
                         'Content-Type': 'application/json'
                     }
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Pre-purchase order converted successfully!');
-                        location.reload();
-                    } else {
-                        alert('Error converting pre-purchase order: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error converting pre-purchase order');
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Pre-purchase order converted successfully!');
+                            location.reload();
+                        } else {
+                            alert('Error converting pre-purchase order: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error converting pre-purchase order');
+                    });
             }
         }
 
@@ -2634,20 +2694,31 @@
                 fetch(`/purchase-orders/pre-purchase-orders/${id}`, {
                     method: 'DELETE'
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Pre-purchase order deleted successfully!');
-                        location.reload();
-                    } else {
-                        alert('Error deleting pre-purchase order: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error deleting pre-purchase order');
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Pre-purchase order deleted successfully!');
+                            location.reload();
+                        } else {
+                            alert('Error deleting pre-purchase order: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error deleting pre-purchase order');
+                    });
             }
+        }
+
+        // Initialize filters on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                // Apply filters when DOM is loaded
+                setTimeout(() => applyFilters(), 50);
+            });
+        } else {
+            // DOM is already loaded
+            setTimeout(() => applyFilters(), 50);
         }
     </script>
 
@@ -2658,7 +2729,7 @@
             <h3 id="prePurchaseOrderModalTitle">Add Pre-Purchase Order</h3>
             <form id="prePurchaseOrderForm">
                 <input type="hidden" id="prePOId" name="id">
-                
+
                 <div class="form-group">
                     <label for="prePOVendor">Vendor: <span style="color: red;">*</span></label>
                     <input type="text" id="prePOVendor" name="vendor" required>
@@ -2666,18 +2737,21 @@
 
                 <div class="form-group">
                     <label for="prePOItems">Items:</label>
-                    <textarea id="prePOItems" name="items" rows="4" placeholder="Paste item information here (will be used for NetSuite CSV import)"></textarea>
+                    <textarea id="prePOItems" name="items" rows="4"
+                        placeholder="Paste item information here (will be used for NetSuite CSV import)"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="prePOStatus">Status:</label>
                     <select id="prePOStatus" name="status">
                         <option value="Planning" selected>Planning</option>
-                        <% statusOptions.forEach(option => { %>
-                            <% if (option !== 'Planning') { %>
-                                <option value="<%= option %>"><%= option %></option>
-                            <% } %>
-                        <% }); %>
+                        <% statusOptions.forEach(option=> { %>
+                            <% if (option !=='Planning' ) { %>
+                                <option value="<%= option %>">
+                                    <%= option %>
+                                </option>
+                                <% } %>
+                                    <% }); %>
                     </select>
                 </div>
 
@@ -2712,7 +2786,7 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0, 0, 0, 0.5);
         }
 
         .modal-content {
@@ -2802,6 +2876,26 @@
             opacity: 0.9;
         }
     </style>
+    
+    <!-- Final initialization script to ensure DOM is ready -->
+    <script>
+        // Ensure filters are applied after everything is loaded
+        window.addEventListener('load', function() {
+            console.log('🔄 Window loaded, applying final filter initialization...');
+            
+            const notMyConcernCheckbox = document.getElementById('showNotMyConcern');
+            const pendingBillCheckbox = document.getElementById('showPendingBill');
+            
+            if (notMyConcernCheckbox && pendingBillCheckbox) {
+                notMyConcernCheckbox.checked = false; // Ensure unchecked
+                pendingBillCheckbox.checked = false; // Ensure unchecked
+                console.log('✅ Final filter initialization complete, applying filters...');
+                applyFilters();
+            } else {
+                console.log('❌ One or more checkboxes not found in final initialization');
+            }
+        });
+    </script>
 </body>
 
 </html>

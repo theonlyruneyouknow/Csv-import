@@ -351,6 +351,182 @@ router.get('/debug/pos', async (req, res) => {
   }
 });
 
+// Debug route for pre-purchase orders
+router.get('/debug/pre-pos', async (req, res) => {
+  try {
+    const prePOs = await PrePurchaseOrder.find().limit(20);
+    const count = await PrePurchaseOrder.countDocuments();
+
+    console.log(`🔍 DEBUG: Found ${count} pre-purchase orders in database`);
+    prePOs.forEach((prePO, index) => {
+      console.log(`  ${index + 1}. ID: ${prePO._id}, Vendor: ${prePO.vendor}, Status: ${prePO.status}, Priority: ${prePO.priority}`);
+    });
+
+    res.json({
+      count: count,
+      prePurchaseOrders: prePOs,
+      message: `Found ${count} pre-purchase orders`
+    });
+  } catch (error) {
+    console.error('Debug pre-PO route error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Debug route to see what the dashboard route finds
+router.get('/debug/dashboard-data', async (req, res) => {
+  try {
+    console.log('🔍 DASHBOARD DEBUG - Fetching same data as dashboard route...');
+
+    const purchaseOrders = await PurchaseOrder.find().sort({ date: 1 });
+    const prePurchaseOrders = await PrePurchaseOrder.find({ convertedToPO: false }).sort({ createdAt: -1 });
+
+    console.log(`📊 Purchase Orders: ${purchaseOrders.length}`);
+    console.log(`📋 Pre-Purchase Orders: ${prePurchaseOrders.length}`);
+
+    console.log('Pre-purchase orders details:');
+    prePurchaseOrders.forEach((prePO, index) => {
+      console.log(`  ${index + 1}. ${prePO.vendor} - ${prePO.status} - ${prePO.priority} - convertedToPO: ${prePO.convertedToPO}`);
+    });
+
+    res.json({
+      purchaseOrdersCount: purchaseOrders.length,
+      prePurchaseOrdersCount: prePurchaseOrders.length,
+      prePurchaseOrders: prePurchaseOrders,
+      message: 'Dashboard data debug'
+    });
+  } catch (error) {
+    console.error('Dashboard debug error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Debug page to show pre-purchase orders in a simple format
+router.get('/debug/pre-pos-page', async (req, res) => {
+  try {
+    const prePurchaseOrders = await PrePurchaseOrder.find({ convertedToPO: false }).sort({ createdAt: -1 });
+
+    console.log(`🔍 DEBUG PAGE: Found ${prePurchaseOrders.length} pre-purchase orders`);
+
+    res.render('debug-pre-pos', {
+      prePurchaseOrders
+    });
+  } catch (error) {
+    console.error('Debug page error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Test route to create a sample pre-purchase order
+router.post('/debug/create-test-pre-po', async (req, res) => {
+  try {
+    console.log('🧪 Creating test pre-purchase order...');
+
+    const testPrePO = await PrePurchaseOrder.create({
+      vendor: 'Test Vendor',
+      items: 'Test items for NetSuite import',
+      status: 'Planning',
+      priority: 'Medium',
+      receiveDate: new Date('2025-08-15'),
+      notes: 'This is a test pre-purchase order'
+    });
+
+    console.log('✅ Test pre-purchase order created:', testPrePO);
+    res.json({ success: true, testPrePO });
+  } catch (error) {
+    console.error('❌ Test pre-PO creation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Test route that simulates the exact form submission
+router.post('/debug/test-form-submission', async (req, res) => {
+  try {
+    console.log('🧪 Simulating form submission...');
+
+    // Simulate the exact data that would come from the form
+    const formData = {
+      vendor: 'Form Test Vendor',
+      items: 'Test items from form\nLine 1: Widget A\nLine 2: Widget B',
+      status: 'Planning',
+      priority: 'High',
+      receiveDate: '2025-08-20'
+    };
+
+    console.log('📝 Form data to save:', formData);
+
+    const prePO = await PrePurchaseOrder.create({
+      vendor: formData.vendor.trim(),
+      items: formData.items?.trim() || '',
+      status: formData.status || 'Planning',
+      priority: formData.priority || 'Medium',
+      receiveDate: formData.receiveDate ? new Date(formData.receiveDate) : null,
+      notes: ''
+    });
+
+    console.log('✅ Form simulation pre-purchase order created:', prePO);
+
+    // Immediately try to find it
+    const foundPrePO = await PrePurchaseOrder.findById(prePO._id);
+    console.log('🔍 Can we find it again?', !!foundPrePO);
+
+    // Check how many total pre-purchase orders exist
+    const totalCount = await PrePurchaseOrder.countDocuments();
+    const nonConvertedCount = await PrePurchaseOrder.countDocuments({ convertedToPO: false });
+
+    console.log(`📊 Total pre-purchase orders: ${totalCount}`);
+    console.log(`📊 Non-converted pre-purchase orders: ${nonConvertedCount}`);
+
+    res.json({
+      success: true,
+      prePO,
+      foundPrePO: !!foundPrePO,
+      totalCount,
+      nonConvertedCount,
+      message: 'Form simulation successful'
+    });
+  } catch (error) {
+    console.error('❌ Form simulation error:', error);
+    res.status(500).json({ error: error.message, stack: error.stack });
+  }
+});
+
+// Simple route to create and immediately test database operations
+router.post('/debug/create-and-verify', async (req, res) => {
+  try {
+    console.log('🧪 Creating and verifying pre-purchase order...');
+
+    // Create a simple pre-purchase order
+    const newPrePO = await PrePurchaseOrder.create({
+      vendor: `Test Vendor ${Date.now()}`,
+      items: 'Simple test items',
+      status: 'Planning',
+      priority: 'Medium'
+    });
+
+    console.log('✅ Created:', newPrePO);
+
+    // Immediately query all pre-purchase orders
+    const allPrePOs = await PrePurchaseOrder.find();
+    const nonConvertedPrePOs = await PrePurchaseOrder.find({ convertedToPO: false });
+
+    console.log(`📊 Total in database: ${allPrePOs.length}`);
+    console.log(`📊 Non-converted: ${nonConvertedPrePOs.length}`);
+
+    res.json({
+      success: true,
+      created: newPrePO,
+      totalInDB: allPrePOs.length,
+      nonConverted: nonConvertedPrePOs.length,
+      allPrePOs: allPrePOs.map(p => ({ id: p._id, vendor: p.vendor, convertedToPO: p.convertedToPO }))
+    });
+
+  } catch (error) {
+    console.error('❌ Create and verify error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Temporary debug route - remove after testing
 router.get('/debug/line-items/:poNumber', async (req, res) => {
   try {
@@ -381,8 +557,31 @@ router.get('/debug/line-items/:poNumber', async (req, res) => {
 // Get all purchase orders with unique status values
 router.get('/', async (req, res) => {
   try {
+    console.log('🔍 DASHBOARD ROUTE - Fetching data...');
+
     const purchaseOrders = await PurchaseOrder.find().sort({ date: 1 });
-    const prePurchaseOrders = await PrePurchaseOrder.find({ convertedToPO: false }).sort({ createdAt: -1 });
+
+    // Try multiple queries to see what's in the database
+    const allPrePurchaseOrders = await PrePurchaseOrder.find().sort({ createdAt: -1 });
+    const nonConvertedPrePOs = await PrePurchaseOrder.find({ convertedToPO: false }).sort({ createdAt: -1 });
+    const convertedPrePOs = await PrePurchaseOrder.find({ convertedToPO: true }).sort({ createdAt: -1 });
+
+    console.log(`📊 Found ${purchaseOrders.length} purchase orders`);
+    console.log(`📋 Found ${allPrePurchaseOrders.length} total pre-purchase orders in database`);
+    console.log(`📋 Found ${nonConvertedPrePOs.length} non-converted pre-purchase orders`);
+    console.log(`📋 Found ${convertedPrePOs.length} converted pre-purchase orders`);
+
+    if (allPrePurchaseOrders.length > 0) {
+      console.log('ALL Pre-purchase orders in database:');
+      allPrePurchaseOrders.forEach((prePO, index) => {
+        console.log(`  ${index + 1}. ID: ${prePO._id}, Vendor: ${prePO.vendor}, ConvertedToPO: ${prePO.convertedToPO}`);
+      });
+    } else {
+      console.log('❌ No pre-purchase orders found in database at all');
+    }
+
+    // Use all pre-purchase orders for now to see if the filter is the issue
+    const prePurchaseOrders = allPrePurchaseOrders;
 
     // Get unique NS Status values for filters (from CSV)
     const uniqueNSStatuses = [...new Set(purchaseOrders.map(po => po.nsStatus).filter(Boolean))];
@@ -402,6 +601,7 @@ router.get('/', async (req, res) => {
 
     // If no status options exist, create default ones
     if (statusOptions.length === 0) {
+      console.log('Creating default status options...');
       const defaultStatuses = [
         'Planning',
         'Approved for Purchase',
@@ -420,7 +620,9 @@ router.get('/', async (req, res) => {
 
     // Extract just the names for the dropdown
     const statusOptionNames = statusOptions.map(option => option.name);
+    console.log('📝 Status options:', statusOptionNames);
 
+    console.log(`🎨 Rendering dashboard with ${prePurchaseOrders.length} pre-purchase orders...`);
     res.render('dashboard', {
       purchaseOrders,
       prePurchaseOrders,
@@ -431,6 +633,7 @@ router.get('/', async (req, res) => {
       allStatusOptions: statusOptions // Send full objects for management
     });
   } catch (error) {
+    console.error('❌ Dashboard route error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -440,53 +643,76 @@ router.get('/', async (req, res) => {
 // Create new pre-purchase order
 router.post('/pre-purchase-orders', async (req, res) => {
   try {
-    const { title, vendor, description, estimatedAmount, priority, targetDate, notes } = req.body;
+    console.log('🔍 PRE-PO CREATION REQUEST RECEIVED');
+    console.log('Request body:', req.body);
+    console.log('Request headers:', req.headers);
 
-    if (!title || !title.trim()) {
-      return res.status(400).json({ error: 'Title is required' });
-    }
+    const { vendor, items, status, priority, receiveDate, notes } = req.body;
 
+    // Validation
     if (!vendor || !vendor.trim()) {
-      return res.status(400).json({ error: 'Vendor is required' });
+      console.log('❌ Validation failed: Vendor is required');
+      return res.status(400).json({ success: false, error: 'Vendor is required' });
     }
 
-    const prePO = await PrePurchaseOrder.create({
-      title: title.trim(),
+    console.log('✅ Validation passed. Creating pre-purchase order with data:', {
       vendor: vendor.trim(),
-      description: description?.trim() || '',
-      estimatedAmount: parseFloat(estimatedAmount) || 0,
+      items: items?.trim() || '',
+      status: status || 'Planning',
       priority: priority || 'Medium',
-      targetDate: targetDate ? new Date(targetDate) : null,
-      notes: notes?.trim() || '',
-      nsStatus: 'Pre-Purchase Order',
-      status: 'Planning'
+      receiveDate: receiveDate ? new Date(receiveDate) : null,
+      notes: notes?.trim() || ''
     });
 
-    console.log(`Created pre-purchase order: "${prePO.title}" for vendor ${prePO.vendor}`);
-    res.json({ success: true, prePO });
+    // Create the pre-purchase order
+    const prePO = await PrePurchaseOrder.create({
+      vendor: vendor.trim(),
+      items: items?.trim() || '',
+      status: status || 'Planning',
+      priority: priority || 'Medium',
+      receiveDate: receiveDate ? new Date(receiveDate) : null,
+      notes: notes?.trim() || ''
+    });
+
+    console.log(`✅ Successfully created pre-purchase order:`, {
+      id: prePO._id,
+      vendor: prePO.vendor,
+      status: prePO.status,
+      priority: prePO.priority,
+      convertedToPO: prePO.convertedToPO
+    });
+
+    // Verify it was saved
+    const verification = await PrePurchaseOrder.findById(prePO._id);
+    console.log('🔍 Verification - Pre-PO exists in database:', !!verification);
+
+    // Count total pre-purchase orders
+    const totalCount = await PrePurchaseOrder.countDocuments({ convertedToPO: false });
+    console.log(`📊 Total non-converted pre-purchase orders in database: ${totalCount}`);
+
+    res.json({ success: true, prePO, message: 'Pre-purchase order created successfully' });
   } catch (error) {
-    console.error('Pre-purchase order creation error:', error);
-    res.status(500).json({ error: error.message });
+    console.error('❌ Pre-purchase order creation error:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
 // Update pre-purchase order
 router.put('/pre-purchase-orders/:id', async (req, res) => {
   try {
-    const { title, vendor, description, estimatedAmount, priority, targetDate, notes, status } = req.body;
+    const { vendor, items, status, priority, receiveDate, notes } = req.body;
 
     const updateData = {
       updatedAt: new Date()
     };
 
-    if (title !== undefined) updateData.title = title.trim();
     if (vendor !== undefined) updateData.vendor = vendor.trim();
-    if (description !== undefined) updateData.description = description.trim();
-    if (estimatedAmount !== undefined) updateData.estimatedAmount = parseFloat(estimatedAmount) || 0;
-    if (priority !== undefined) updateData.priority = priority;
-    if (targetDate !== undefined) updateData.targetDate = targetDate ? new Date(targetDate) : null;
-    if (notes !== undefined) updateData.notes = notes.trim();
+    if (items !== undefined) updateData.items = items.trim();
     if (status !== undefined) updateData.status = status;
+    if (priority !== undefined) updateData.priority = priority;
+    if (receiveDate !== undefined) updateData.receiveDate = receiveDate ? new Date(receiveDate) : null;
+    if (notes !== undefined) updateData.notes = notes.trim();
 
     const prePO = await PrePurchaseOrder.findByIdAndUpdate(
       req.params.id,
@@ -498,7 +724,7 @@ router.put('/pre-purchase-orders/:id', async (req, res) => {
       return res.status(404).json({ error: 'Pre-purchase order not found' });
     }
 
-    console.log(`Updated pre-purchase order ${prePO._id}: "${prePO.title}"`);
+    console.log(`Updated pre-purchase order ${prePO._id} for vendor: ${prePO.vendor}`);
     res.json({ success: true, prePO });
   } catch (error) {
     console.error('Pre-purchase order update error:', error);
