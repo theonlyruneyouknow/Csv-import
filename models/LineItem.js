@@ -21,6 +21,28 @@ const lineItemSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    sku: {
+        type: String,
+        default: '',
+        index: true
+    },
+    itemStatus: {
+        type: String,
+        enum: [
+            '', // Default/no status
+            'In Stock',
+            'Backordered',
+            'Find Different Vendor',
+            'Substitute Product',
+            'Discontinued',
+            'Delivery Delay',
+            'On Order',
+            'Cancelled',
+            'Special Order'
+        ],
+        default: '',
+        index: true
+    },
     received: {
         type: Boolean,
         default: false,
@@ -34,6 +56,10 @@ const lineItemSchema = new mongoose.Schema({
         type: Date,
         default: null,
         index: true
+    },
+    notes: {
+        type: String,
+        default: ''
     },
     createdAt: {
         type: Date,

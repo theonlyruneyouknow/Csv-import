@@ -296,6 +296,65 @@
             margin-bottom: 8px;
         }
 
+        .line-item-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 8px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .line-item-sku {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .line-item-sku label {
+            font-size: 11px;
+            color: #6c757d;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .sku-input {
+            padding: 4px 6px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .line-item-status-dropdown {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .line-item-status-dropdown label {
+            font-size: 11px;
+            color: #6c757d;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .item-status-select {
+            padding: 4px 6px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .line-item-notes {
+            font-size: 12px;
+            color: #495057;
+            background: #e9ecef;
+            padding: 6px 8px;
+            border-radius: 3px;
+            margin-bottom: 8px;
+        }
+
         .line-item-footer {
             display: flex;
             justify-content: space-between;
@@ -316,6 +375,26 @@
             color: #6c757d;
             font-weight: 500;
             margin: 0;
+        }
+
+        .line-item-notes-input {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .line-item-notes-input label {
+            color: #6c757d;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .notes-input {
+            padding: 4px 6px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 11px;
+            min-width: 150px;
         }
 
         .eta-input {
@@ -1297,6 +1376,7 @@
             <h1>Purchase Orders Dashboard</h1>
             <div>
                 <button class="manage-status-btn" onclick="openStatusModal()">⚙️ Manage Status Options</button>
+                <a href="/purchase-orders/line-items-manager" class="notes-manager-btn">📦 Line Items Manager</a>
                 <a href="/purchase-orders/notes-manager" class="notes-manager-btn">📝 Notes Manager</a>
                 <a href="/upload" class="upload-btn">📁 Import New CSV</a>
             </div>
@@ -2113,12 +2193,45 @@
                                 </div>
                             </div>
                             <div class="line-item-memo">${escapeHtml(item.memo)}</div>
+                            <div class="line-item-details">
+                                <div class="line-item-sku">
+                                    <label>SKU:</label>
+                                    <input type="text" class="sku-input" placeholder="Enter SKU"
+                                           value="${escapeHtml(item.sku || '')}"
+                                           onchange="updateSKU('${item._id}', this.value, ${index}, '${poId}')">
+                                </div>
+                                <div class="line-item-status-dropdown">
+                                    <label>Item Status:</label>
+                                    <select class="item-status-select" 
+                                            onchange="updateItemStatus('${item._id}', this.value, ${index}, '${poId}')">
+                                        <option value="" ${!item.itemStatus ? 'selected' : ''}>Select Status</option>
+                                        <option value="In Stock" ${item.itemStatus === 'In Stock' ? 'selected' : ''}>In Stock</option>
+                                        <option value="Backordered" ${item.itemStatus === 'Backordered' ? 'selected' : ''}>Backordered</option>
+                                        <option value="Find Different Vendor" ${item.itemStatus === 'Find Different Vendor' ? 'selected' : ''}>Find Different Vendor</option>
+                                        <option value="Substitute Product" ${item.itemStatus === 'Substitute Product' ? 'selected' : ''}>Substitute Product</option>
+                                        <option value="Discontinued" ${item.itemStatus === 'Discontinued' ? 'selected' : ''}>Discontinued</option>
+                                        <option value="Delivery Delay" ${item.itemStatus === 'Delivery Delay' ? 'selected' : ''}>Delivery Delay</option>
+                                        <option value="On Order" ${item.itemStatus === 'On Order' ? 'selected' : ''}>On Order</option>
+                                        <option value="Cancelled" ${item.itemStatus === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                        <option value="Special Order" ${item.itemStatus === 'Special Order' ? 'selected' : ''}>Special Order</option>
+                                    </select>
+                                </div>
+                            </div>
+                            ${item.notes ? `<div class="line-item-notes">
+                                <strong>Notes:</strong> ${escapeHtml(item.notes)}
+                            </div>` : ''}
                             <div class="line-item-footer">
                                 <div class="line-item-eta">
                                     <label>ETA:</label>
                                     <input type="date" class="eta-input" 
                                            value="${item.eta ? new Date(item.eta).toISOString().split('T')[0] : ''}"
                                            onchange="updateETA('${item._id}', this.value, ${index}, '${poId}')">
+                                </div>
+                                <div class="line-item-notes-input">
+                                    <label>Notes:</label>
+                                    <input type="text" class="notes-input" placeholder="Add notes..."
+                                           value="${escapeHtml(item.notes || '')}"
+                                           onchange="updateItemNotes('${item._id}', this.value, ${index}, '${poId}')">
                                 </div>
                                 ${item.received && item.receivedDate ?
                             `<div class="received-date">Received: ${new Date(item.receivedDate).toLocaleDateString()}</div>` : ''}
@@ -2224,6 +2337,80 @@
             }
         }
 
+        async function updateSKU(lineItemId, sku, index, poId) {
+            try {
+                const response = await fetch(`/purchase-orders/line-items/${lineItemId}/sku`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ sku: sku || '' })
+                });
+
+                if (response.ok) {
+                    console.log('SKU updated successfully');
+                } else {
+                    const error = await response.json();
+                    alert('Error updating SKU: ' + error.error);
+                    await loadLineItems(index, poId);
+                }
+            } catch (error) {
+                console.error('Error updating SKU:', error);
+                alert('Error updating SKU');
+                await loadLineItems(index, poId);
+            }
+        }
+
+        async function updateItemStatus(lineItemId, itemStatus, index, poId) {
+            try {
+                const response = await fetch(`/purchase-orders/line-items/${lineItemId}/item-status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ itemStatus: itemStatus || '' })
+                });
+
+                if (response.ok) {
+                    console.log('Item status updated successfully');
+                } else {
+                    const error = await response.json();
+                    alert('Error updating item status: ' + error.error);
+                    await loadLineItems(index, poId);
+                }
+            } catch (error) {
+                console.error('Error updating item status:', error);
+                alert('Error updating item status');
+                await loadLineItems(index, poId);
+            }
+        }
+
+        async function updateItemNotes(lineItemId, notes, index, poId) {
+            try {
+                const response = await fetch(`/purchase-orders/line-items/${lineItemId}/notes`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ notes: notes || '' })
+                });
+
+                if (response.ok) {
+                    console.log('Item notes updated successfully');
+                    // Refresh the line items to show the updated notes
+                    await loadLineItems(index, poId);
+                } else {
+                    const error = await response.json();
+                    alert('Error updating item notes: ' + error.error);
+                    await loadLineItems(index, poId);
+                }
+            } catch (error) {
+                console.error('Error updating item notes:', error);
+                alert('Error updating item notes');
+                await loadLineItems(index, poId);
+            }
+        }
+
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
@@ -2275,7 +2462,7 @@
                 if (isNotMyConcern && !showNotMyConcern) {
                     hiddenNotMyConcernCount++;
                 }
-                
+
                 if (isPendingBill && !showPendingBill) {
                     hiddenPendingBillCount++;
                 }
@@ -2712,7 +2899,7 @@
 
         // Initialize filters on page load
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 // Apply filters when DOM is loaded
                 setTimeout(() => applyFilters(), 50);
             });
@@ -2876,16 +3063,16 @@
             opacity: 0.9;
         }
     </style>
-    
+
     <!-- Final initialization script to ensure DOM is ready -->
     <script>
         // Ensure filters are applied after everything is loaded
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             console.log('🔄 Window loaded, applying final filter initialization...');
-            
+
             const notMyConcernCheckbox = document.getElementById('showNotMyConcern');
             const pendingBillCheckbox = document.getElementById('showPendingBill');
-            
+
             if (notMyConcernCheckbox && pendingBillCheckbox) {
                 notMyConcernCheckbox.checked = false; // Ensure unchecked
                 pendingBillCheckbox.checked = false; // Ensure unchecked

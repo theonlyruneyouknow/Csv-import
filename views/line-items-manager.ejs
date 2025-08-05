@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Line Items Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #333;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            padding: 8px 16px;
+            text-decoration: none;
+            background: #6c757d;
+            color: white;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .nav-links a:hover {
+            background: #5a6268;
+        }
+
+        /* Stats Section */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        /* Filters Section */
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .filters h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Results Section */
+        .results {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .results-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .results-header h3 {
+            margin: 0;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        /* Table Styles */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .items-table th,
+        .items-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .items-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #495057;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .items-table th:hover {
+            background: #e9ecef;
+        }
+
+        .items-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .item-row {
+            font-size: 14px;
+        }
+
+        .item-memo {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .sku-input {
+            border: 1px solid #ddd;
+            padding: 4px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            width: 100px;
+        }
+
+        .status-select {
+            border: 1px solid #ddd;
+            padding: 4px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            min-width: 120px;
+        }
+
+        .notes-input {
+            border: 1px solid #ddd;
+            padding: 4px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            width: 150px;
+        }
+
+        .received-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .received-badge.yes {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .received-badge.no {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .status-badge.in-stock {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.backordered {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.find-vendor {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-badge.substitute {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-badge.discontinued {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .status-badge.delayed {
+            background: #ffeaa7;
+            color: #6c5ce7;
+        }
+
+        .status-badge.on-order {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-badge.cancelled {
+            background: #f5c6cb;
+            color: #721c24;
+        }
+
+        .status-badge.special {
+            background: #e7e3ff;
+            color: #6f42c1;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .pagination {
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .pagination button:hover {
+            background: #f8f9fa;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Line Items Manager</h1>
+            <div class="nav-links">
+                <a href="/purchase-orders">← Back to Dashboard</a>
+                <a href="/purchase-orders/notes-manager">Notes Manager</a>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">
+                    <%= totalLineItems %>
+                </div>
+                <div class="stat-label">Total Line Items</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">
+                    <%= receivedItems %>
+                </div>
+                <div class="stat-label">Items Received</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">
+                    <%= itemsWithSKU %>
+                </div>
+                <div class="stat-label">Items with SKU</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">
+                    <%= itemsWithStatus %>
+                </div>
+                <div class="stat-label">Items with Status</div>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters">
+            <h3>Filters</h3>
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label>Search</label>
+                    <input type="text" id="searchFilter" placeholder="Search memo, SKU, PO number, notes...">
+                </div>
+                <div class="filter-group">
+                    <label>PO Number</label>
+                    <select id="poNumberFilter">
+                        <option value="">All PO Numbers</option>
+                        <% uniquePONumbers.forEach(poNumber=> { %>
+                            <option value="<%= poNumber %>">
+                                <%= poNumber %>
+                            </option>
+                            <% }); %>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Vendor</label>
+                    <select id="vendorFilter">
+                        <option value="">All Vendors</option>
+                        <% uniqueVendors.forEach(vendor=> { %>
+                            <option value="<%= vendor %>">
+                                <%= vendor %>
+                            </option>
+                            <% }); %>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Item Status</label>
+                    <select id="statusFilter">
+                        <option value="">All Statuses</option>
+                        <% uniqueStatuses.forEach(status=> { %>
+                            <option value="<%= status %>">
+                                <%= status %>
+                            </option>
+                            <% }); %>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>SKU</label>
+                    <select id="skuFilter">
+                        <option value="">All SKUs</option>
+                        <% uniqueSKUs.forEach(sku=> { %>
+                            <option value="<%= sku %>">
+                                <%= sku %>
+                            </option>
+                            <% }); %>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Received Status</label>
+                    <select id="receivedFilter">
+                        <option value="">All Items</option>
+                        <option value="true">Received Only</option>
+                        <option value="false">Not Received Only</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+                <button class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
+                <span id="loading" class="loading" style="display: none;">Loading...</span>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results">
+            <div class="results-header">
+                <h3>Line Items</h3>
+                <div class="pagination-info" id="paginationInfo">Loading...</div>
+            </div>
+
+            <div id="tableContainer">
+                <div class="loading">Loading line items...</div>
+            </div>
+
+            <div class="pagination" id="pagination" style="display: none;">
+                <button id="prevBtn" onclick="previousPage()">← Previous</button>
+                <span id="pageInfo"></span>
+                <button id="nextBtn" onclick="nextPage()">Next →</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 0;
+        let itemsPerPage = 50;
+        let totalItems = 0;
+        let currentFilters = {};
+
+        function getStatusBadgeClass(status) {
+            const classMap = {
+                'In Stock': 'in-stock',
+                'Backordered': 'backordered',
+                'Find Different Vendor': 'find-vendor',
+                'Substitute Product': 'substitute',
+                'Discontinued': 'discontinued',
+                'Delivery Delay': 'delayed',
+                'On Order': 'on-order',
+                'Cancelled': 'cancelled',
+                'Special Order': 'special'
+            };
+            return classMap[status] || '';
+        }
+
+        async function loadLineItems() {
+            const loadingElement = document.getElementById('loading');
+            const tableContainer = document.getElementById('tableContainer');
+
+            loadingElement.style.display = 'inline';
+
+            try {
+                const params = new URLSearchParams({
+                    limit: itemsPerPage,
+                    skip: currentPage * itemsPerPage,
+                    ...currentFilters
+                });
+
+                console.log('Making request to:', `/purchase-orders/line-items-api?${params}`);
+                const response = await fetch(`/purchase-orders/line-items-api?${params}`);
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                if (response.ok) {
+                    totalItems = data.totalCount;
+                    renderTable(data.lineItems);
+                    updatePaginationInfo();
+                } else {
+                    console.error('Server error:', data);
+                    tableContainer.innerHTML = `<div class="no-results">Error loading line items: ${data.error || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                console.error('Network/parsing error:', error);
+                tableContainer.innerHTML = `<div class="no-results">Error loading line items: ${error.message}</div>`;
+            } finally {
+                loadingElement.style.display = 'none';
+            }
+        }
+
+        function renderTable(lineItems) {
+            const tableContainer = document.getElementById('tableContainer');
+
+            if (lineItems.length === 0) {
+                tableContainer.innerHTML = '<div class="no-results">No line items found</div>';
+                return;
+            }
+
+            const tableHtml = `
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>PO Number</th>
+                            <th>Vendor</th>
+                            <th>Item Description</th>
+                            <th>SKU</th>
+                            <th>Status</th>
+                            <th>Received</th>
+                            <th>ETA</th>
+                            <th>Notes</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${lineItems.map(item => `
+                            <tr class="item-row">
+                                <td><strong>${item.poNumber}</strong></td>
+                                <td>${escapeHtml(item.vendor || 'N/A')}</td>
+                                <td class="item-memo" title="${escapeHtml(item.memo)}">${escapeHtml(item.memo)}</td>
+                                <td>
+                                    <input type="text" class="sku-input" 
+                                           value="${escapeHtml(item.sku || '')}"
+                                           onchange="updateSKU('${item._id}', this.value)"
+                                           placeholder="Enter SKU">
+                                </td>
+                                <td>
+                                    <select class="status-select" onchange="updateItemStatus('${item._id}', this.value)">
+                                        <option value="" ${!item.itemStatus ? 'selected' : ''}>Select Status</option>
+                                        <option value="In Stock" ${item.itemStatus === 'In Stock' ? 'selected' : ''}>In Stock</option>
+                                        <option value="Backordered" ${item.itemStatus === 'Backordered' ? 'selected' : ''}>Backordered</option>
+                                        <option value="Find Different Vendor" ${item.itemStatus === 'Find Different Vendor' ? 'selected' : ''}>Find Different Vendor</option>
+                                        <option value="Substitute Product" ${item.itemStatus === 'Substitute Product' ? 'selected' : ''}>Substitute Product</option>
+                                        <option value="Discontinued" ${item.itemStatus === 'Discontinued' ? 'selected' : ''}>Discontinued</option>
+                                        <option value="Delivery Delay" ${item.itemStatus === 'Delivery Delay' ? 'selected' : ''}>Delivery Delay</option>
+                                        <option value="On Order" ${item.itemStatus === 'On Order' ? 'selected' : ''}>On Order</option>
+                                        <option value="Cancelled" ${item.itemStatus === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                        <option value="Special Order" ${item.itemStatus === 'Special Order' ? 'selected' : ''}>Special Order</option>
+                                    </select>
+                                    ${item.itemStatus ? `<br><span class="status-badge ${getStatusBadgeClass(item.itemStatus)}">${item.itemStatus}</span>` : ''}
+                                </td>
+                                <td>
+                                    <span class="received-badge ${item.received ? 'yes' : 'no'}">
+                                        ${item.received ? 'Yes' : 'No'}
+                                    </span>
+                                    ${item.received && item.receivedDate ? `<br><small>${new Date(item.receivedDate).toLocaleDateString()}</small>` : ''}
+                                </td>
+                                <td>
+                                    <input type="date" 
+                                           value="${item.eta ? new Date(item.eta).toISOString().split('T')[0] : ''}"
+                                           onchange="updateETA('${item._id}', this.value)">
+                                </td>
+                                <td>
+                                    <input type="text" class="notes-input" 
+                                           value="${escapeHtml(item.notes || '')}"
+                                           onchange="updateItemNotes('${item._id}', this.value)"
+                                           placeholder="Add notes...">
+                                </td>
+                                <td>${item.date ? new Date(item.date).toLocaleDateString() : 'N/A'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            tableContainer.innerHTML = tableHtml;
+        }
+
+        function updatePaginationInfo() {
+            const paginationInfo = document.getElementById('paginationInfo');
+            const pagination = document.getElementById('pagination');
+            const pageInfo = document.getElementById('pageInfo');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            const startItem = currentPage * itemsPerPage + 1;
+            const endItem = Math.min((currentPage + 1) * itemsPerPage, totalItems);
+
+            paginationInfo.textContent = `Showing ${startItem}-${endItem} of ${totalItems} items`;
+            pageInfo.textContent = `Page ${currentPage + 1} of ${Math.ceil(totalItems / itemsPerPage)}`;
+
+            prevBtn.disabled = currentPage === 0;
+            nextBtn.disabled = endItem >= totalItems;
+
+            pagination.style.display = totalItems > itemsPerPage ? 'block' : 'none';
+        }
+
+        function applyFilters() {
+            currentFilters = {
+                search: document.getElementById('searchFilter').value,
+                poNumber: document.getElementById('poNumberFilter').value,
+                vendor: document.getElementById('vendorFilter').value,
+                itemStatus: document.getElementById('statusFilter').value,
+                sku: document.getElementById('skuFilter').value,
+                received: document.getElementById('receivedFilter').value
+            };
+
+            // Remove empty filters
+            Object.keys(currentFilters).forEach(key => {
+                if (!currentFilters[key]) {
+                    delete currentFilters[key];
+                }
+            });
+
+            currentPage = 0; // Reset to first page
+            loadLineItems();
+        }
+
+        function clearFilters() {
+            document.getElementById('searchFilter').value = '';
+            document.getElementById('poNumberFilter').value = '';
+            document.getElementById('vendorFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('skuFilter').value = '';
+            document.getElementById('receivedFilter').value = '';
+
+            currentFilters = {};
+            currentPage = 0;
+            loadLineItems();
+        }
+
+        function previousPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                loadLineItems();
+            }
+        }
+
+        function nextPage() {
+            if ((currentPage + 1) * itemsPerPage < totalItems) {
+                currentPage++;
+                loadLineItems();
+            }
+        }
+
+        async function updateSKU(lineItemId, sku) {
+            try {
+                const response = await fetch(`/purchase-orders/line-items/${lineItemId}/sku`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sku: sku || '' })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert('Error updating SKU: ' + error.error);
+                    loadLineItems(); // Reload to revert changes
+                }
+            } catch (error) {
+                console.error('Error updating SKU:', error);
+                alert('Error updating SKU');
+                loadLineItems();
+            }
+        }
+
+        async function updateItemStatus(lineItemId, itemStatus) {
+            try {
+                const response = await fetch(`/purchase-orders/line-items/${lineItemId}/item-status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ itemStatus: itemStatus || '' })
+                });
+
+                if (response.ok) {
+                    // Reload the current view to show the status badge
+                    loadLineItems();
+                } else {
+                    const error = await response.json();
+                    alert('Error updating item status: ' + error.error);
+                    loadLineItems();
+                }
+            } catch (error) {
+                console.error('Error updating item status:', error);
+                alert('Error updating item status');
+                loadLineItems();
+            }
+        }
+
+        async function updateETA(lineItemId, eta) {
+            try {
+                const response = await fetch(`/purchase-orders/line-items/${lineItemId}/eta`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ eta: eta || null })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert('Error updating ETA: ' + error.error);
+                    loadLineItems();
+                }
+            } catch (error) {
+                console.error('Error updating ETA:', error);
+                alert('Error updating ETA');
+                loadLineItems();
+            }
+        }
+
+        async function updateItemNotes(lineItemId, notes) {
+            try {
+                const response = await fetch(`/purchase-orders/line-items/${lineItemId}/notes`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notes: notes || '' })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert('Error updating notes: ' + error.error);
+                    loadLineItems();
+                }
+            } catch (error) {
+                console.error('Error updating notes:', error);
+                alert('Error updating notes');
+                loadLineItems();
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Add event listeners for filter inputs
+        document.getElementById('searchFilter').addEventListener('input', () => {
+            clearTimeout(window.searchTimeout);
+            window.searchTimeout = setTimeout(applyFilters, 500);
+        });
+
+        // Load initial data
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLineItems();
+        });
+    </script>
+</body>
+
+</html>

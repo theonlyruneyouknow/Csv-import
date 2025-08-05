@@ -527,6 +527,136 @@ router.post('/debug/create-and-verify', async (req, res) => {
   }
 });
 
+// Line Items Manager - This must come before parameterized routes!
+router.get('/line-items-manager', async (req, res) => {
+  try {
+    // Get statistics
+    const totalLineItems = await LineItem.countDocuments();
+    const receivedItems = await LineItem.countDocuments({ status: 'Received' });
+    const itemsWithSKU = await LineItem.countDocuments({ sku: { $exists: true, $ne: '' } });
+    const itemsWithStatus = await LineItem.countDocuments({ itemStatus: { $exists: true, $ne: null } });
+
+    // Get unique values for filters
+    const uniquePONumbers = await LineItem.distinct('poNumber');
+    const uniqueStatuses = await LineItem.distinct('status');
+    const uniqueSKUs = await LineItem.distinct('sku');
+    
+    // Get vendor info from purchase orders
+    const vendorInfo = await PurchaseOrder.distinct('vendor');
+
+    res.render('line-items-manager', {
+      totalLineItems,
+      receivedItems,
+      itemsWithSKU,
+      itemsWithStatus,
+      uniquePONumbers: uniquePONumbers.filter(Boolean).sort(),
+      uniqueStatuses: uniqueStatuses.filter(Boolean).sort(),
+      uniqueSKUs: uniqueSKUs.filter(Boolean).sort(),
+      uniqueVendors: vendorInfo.filter(Boolean).sort()
+    });
+  } catch (error) {
+    console.error('Line items manager error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API route for line items - This must also come before parameterized routes!
+router.get('/line-items-api', async (req, res) => {
+  console.log('🚀 Line Items API called with params:', req.query);
+  try {
+    // First, let's check if we have any line items at all
+    const totalLineItems = await LineItem.countDocuments();
+    console.log(`📊 Total line items in database: ${totalLineItems}`);
+    
+    if (totalLineItems === 0) {
+      console.log('⚠️ No line items found in database');
+      return res.json({
+        lineItems: [],
+        totalCount: 0,
+        hasMore: false,
+        message: 'No line items found in database'
+      });
+    }
+
+    const {
+      poNumber,
+      sku,
+      itemStatus,
+      received,
+      vendor,
+      search,
+      limit = 50,
+      skip = 0,
+      sortBy = 'createdAt',
+      sortOrder = 'desc'
+    } = req.query;
+
+    // Build filter query
+    let filter = {};
+
+    if (poNumber) {
+      filter.poNumber = new RegExp(poNumber, 'i');
+    }
+
+    if (sku) {
+      filter.sku = new RegExp(sku, 'i');
+    }
+
+    if (itemStatus) {
+      filter.itemStatus = itemStatus;
+    }
+
+    if (received !== undefined) {
+      filter.received = received === 'true';
+    }
+
+    if (search) {
+      filter.$or = [
+        { memo: new RegExp(search, 'i') },
+        { sku: new RegExp(search, 'i') },
+        { poNumber: new RegExp(search, 'i') },
+        { notes: new RegExp(search, 'i') }
+      ];
+    }
+
+    console.log('🔍 Filter being applied:', filter);
+
+    // Simplified approach - let's first try without aggregation
+    const lineItems = await LineItem.find(filter)
+      .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
+      .skip(parseInt(skip))
+      .limit(parseInt(limit))
+      .lean();
+
+    const totalCount = await LineItem.countDocuments(filter);
+
+    console.log(`✅ Line Items API: Found ${lineItems.length} items, total: ${totalCount}`);
+    
+    res.json({
+      lineItems,
+      totalCount,
+      hasMore: totalCount > parseInt(skip) + parseInt(limit)
+    });
+  } catch (error) {
+    console.error('Line items API error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get line item status options - This must also come before parameterized routes!
+router.get('/line-items/status-options', async (req, res) => {
+  try {
+    const statusOptions = [
+      '', 'In Stock', 'Backordered', 'Find Different Vendor',
+      'Substitute Product', 'Discontinued', 'Delivery Delay',
+      'On Order', 'Cancelled', 'Special Order'
+    ];
+    res.json(statusOptions);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Temporary debug route - remove after testing
 router.get('/debug/line-items/:poNumber', async (req, res) => {
   try {
@@ -805,78 +935,7 @@ router.delete('/pre-purchase-orders/:id', async (req, res) => {
   }
 });
 
-// Add new note (replaces the old update notes functionality)
-router.post('/:id/notes', async (req, res) => {
-  try {
-    const { notes } = req.body;
-
-    // Only create a note if there's actual content
-    if (!notes || !notes.trim()) {
-      return res.json({ success: true });
-    }
-
-    const purchaseOrder = await PurchaseOrder.findById(req.params.id);
-    if (!purchaseOrder) {
-      return res.status(404).json({ error: 'Purchase order not found' });
-    }
-
-    // Create new note record
-    const note = await Note.create({
-      poId: purchaseOrder._id,
-      poNumber: purchaseOrder.poNumber,
-      vendor: purchaseOrder.vendor,
-      content: notes.trim()
-    });
-
-    // Update the PO's notes field with the latest note for display
-    await PurchaseOrder.findByIdAndUpdate(
-      req.params.id,
-      { notes: notes.trim(), updatedAt: new Date() }
-    );
-
-    console.log(`Added note for PO ${purchaseOrder.poNumber}: "${notes.trim()}"`);
-    res.json({ success: true, noteId: note._id });
-  } catch (error) {
-    console.error('Note creation error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Get notes history for a PO
-router.get('/:id/notes-history', async (req, res) => {
-  try {
-    const purchaseOrder = await PurchaseOrder.findById(req.params.id);
-    if (!purchaseOrder) {
-      return res.status(404).json({ error: 'Purchase order not found' });
-    }
-
-    const notes = await Note.find({ poId: req.params.id })
-      .sort({ createdAt: -1 }); // Most recent first
-
-    res.json(notes);
-  } catch (error) {
-    console.error('Notes history error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Get line items for a PO
-router.get('/:id/line-items', async (req, res) => {
-  try {
-    const purchaseOrder = await PurchaseOrder.findById(req.params.id);
-    if (!purchaseOrder) {
-      return res.status(404).json({ error: 'Purchase order not found' });
-    }
-
-    const lineItems = await LineItem.find({ poId: req.params.id })
-      .sort({ createdAt: -1 }); // Most recent first
-
-    res.json(lineItems);
-  } catch (error) {
-    console.error('Line items error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
+// NOTE: Parameterized routes (/:id/*) moved to end of file to avoid conflicts
 
 // Mark line item as received
 router.put('/line-items/:lineItemId/received', async (req, res) => {
@@ -939,58 +998,96 @@ router.put('/line-items/:lineItemId/eta', async (req, res) => {
   }
 });
 
-// Update custom Status
-router.put('/:id/status', async (req, res) => {
+// Update line item SKU
+router.put('/line-items/:lineItemId/sku', async (req, res) => {
   try {
-    const updated = await PurchaseOrder.findByIdAndUpdate(
-      req.params.id,
-      { status: req.body.status, updatedAt: new Date() },
+    const { sku } = req.body;
+
+    const lineItem = await LineItem.findByIdAndUpdate(
+      req.params.lineItemId,
+      {
+        sku: sku || '',
+        updatedAt: new Date()
+      },
       { new: true }
     );
-    console.log(`Updated custom Status for PO ${updated.poNumber}: "${req.body.status}"`);
-    res.json({ success: true });
+
+    if (!lineItem) {
+      return res.status(404).json({ error: 'Line item not found' });
+    }
+
+    console.log(`Updated SKU for line item ${lineItem._id} (PO ${lineItem.poNumber}): ${sku || 'cleared'}`);
+    res.json({ success: true, lineItem });
   } catch (error) {
-    console.error('Status update error:', error);
+    console.error('Line item SKU update error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Update next update date
-router.put('/:id/next-update-date', async (req, res) => {
+// Update line item status
+router.put('/line-items/:lineItemId/item-status', async (req, res) => {
   try {
-    const { nextUpdateDate } = req.body;
-    const dateValue = nextUpdateDate ? new Date(nextUpdateDate) : null;
+    const { itemStatus } = req.body;
 
-    const updated = await PurchaseOrder.findByIdAndUpdate(
-      req.params.id,
-      { nextUpdateDate: dateValue, updatedAt: new Date() },
+    // Validate the status
+    const validStatuses = [
+      '', 'In Stock', 'Backordered', 'Find Different Vendor',
+      'Substitute Product', 'Discontinued', 'Delivery Delay',
+      'On Order', 'Cancelled', 'Special Order'
+    ];
+
+    if (itemStatus && !validStatuses.includes(itemStatus)) {
+      return res.status(400).json({ error: 'Invalid item status' });
+    }
+
+    const lineItem = await LineItem.findByIdAndUpdate(
+      req.params.lineItemId,
+      {
+        itemStatus: itemStatus || '',
+        updatedAt: new Date()
+      },
       { new: true }
     );
-    console.log(`Updated next update date for PO ${updated.poNumber}: ${nextUpdateDate || 'cleared'}`);
-    res.json({ success: true });
+
+    if (!lineItem) {
+      return res.status(404).json({ error: 'Line item not found' });
+    }
+
+    console.log(`Updated item status for line item ${lineItem._id} (PO ${lineItem.poNumber}): ${itemStatus || 'cleared'}`);
+    res.json({ success: true, lineItem });
   } catch (error) {
-    console.error('Next update date error:', error);
+    console.error('Line item status update error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Update PO URL
-router.put('/:id/url', async (req, res) => {
+// Update line item notes
+router.put('/line-items/:lineItemId/notes', async (req, res) => {
   try {
-    const { url } = req.body;
+    const { notes } = req.body;
 
-    const updated = await PurchaseOrder.findByIdAndUpdate(
-      req.params.id,
-      { poUrl: url || '', updatedAt: new Date() },
+    const lineItem = await LineItem.findByIdAndUpdate(
+      req.params.lineItemId,
+      {
+        notes: notes || '',
+        updatedAt: new Date()
+      },
       { new: true }
     );
-    console.log(`Updated URL for PO ${updated.poNumber}: ${url || 'cleared'}`);
-    res.json({ success: true });
+
+    if (!lineItem) {
+      return res.status(404).json({ error: 'Line item not found' });
+    }
+
+    console.log(`Updated notes for line item ${lineItem._id} (PO ${lineItem.poNumber})`);
+    res.json({ success: true, lineItem });
   } catch (error) {
-    console.error('URL update error:', error);
+    console.error('Line item notes update error:', error);
     res.status(500).json({ error: error.message });
   }
 });
+
+// NOTE: Parameterized routes for PO management (/:id/*) moved to end of file to avoid conflicts
 
 // Status Options Management Routes// Get all status options
 router.get('/status-options', async (req, res) => {
@@ -1225,6 +1322,136 @@ router.post('/migrate-notes', async (req, res) => {
 
   } catch (error) {
     console.error('Migration error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// =============================================================================
+// PARAMETERIZED ROUTES (/:id/*) - These MUST be at the end to avoid conflicts
+// =============================================================================
+
+// Add new note (replaces the old update notes functionality)
+router.post('/:id/notes', async (req, res) => {
+  try {
+    const { notes } = req.body;
+
+    // Only create a note if there's actual content
+    if (!notes || !notes.trim()) {
+      return res.json({ success: true });
+    }
+
+    const purchaseOrder = await PurchaseOrder.findById(req.params.id);
+    if (!purchaseOrder) {
+      return res.status(404).json({ error: 'Purchase order not found' });
+    }
+
+    // Create new note record
+    const note = await Note.create({
+      poId: purchaseOrder._id,
+      poNumber: purchaseOrder.poNumber,
+      vendor: purchaseOrder.vendor,
+      content: notes.trim()
+    });
+
+    // Update the PO's notes field with the latest note for display
+    await PurchaseOrder.findByIdAndUpdate(
+      req.params.id,
+      { notes: notes.trim(), updatedAt: new Date() }
+    );
+
+    console.log(`Added note for PO ${purchaseOrder.poNumber}: "${notes.trim()}"`);
+    res.json({ success: true, noteId: note._id });
+  } catch (error) {
+    console.error('Note creation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get notes history for a PO
+router.get('/:id/notes-history', async (req, res) => {
+  try {
+    const purchaseOrder = await PurchaseOrder.findById(req.params.id);
+    if (!purchaseOrder) {
+      return res.status(404).json({ error: 'Purchase order not found' });
+    }
+
+    const notes = await Note.find({ poId: req.params.id })
+      .sort({ createdAt: -1 }); // Most recent first
+
+    res.json(notes);
+  } catch (error) {
+    console.error('Notes history error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get line items for a PO
+router.get('/:id/line-items', async (req, res) => {
+  try {
+    const purchaseOrder = await PurchaseOrder.findById(req.params.id);
+    if (!purchaseOrder) {
+      return res.status(404).json({ error: 'Purchase order not found' });
+    }
+
+    const lineItems = await LineItem.find({ poId: req.params.id })
+      .sort({ createdAt: -1 }); // Most recent first
+
+    res.json(lineItems);
+  } catch (error) {
+    console.error('Line items error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update custom Status
+router.put('/:id/status', async (req, res) => {
+  try {
+    const updated = await PurchaseOrder.findByIdAndUpdate(
+      req.params.id,
+      { status: req.body.status, updatedAt: new Date() },
+      { new: true }
+    );
+    console.log(`Updated custom Status for PO ${updated.poNumber}: "${req.body.status}"`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Status update error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update next update date
+router.put('/:id/next-update-date', async (req, res) => {
+  try {
+    const { nextUpdateDate } = req.body;
+    const dateValue = nextUpdateDate ? new Date(nextUpdateDate) : null;
+
+    const updated = await PurchaseOrder.findByIdAndUpdate(
+      req.params.id,
+      { nextUpdateDate: dateValue, updatedAt: new Date() },
+      { new: true }
+    );
+    console.log(`Updated next update date for PO ${updated.poNumber}: ${nextUpdateDate || 'cleared'}`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Next update date error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update PO URL
+router.put('/:id/url', async (req, res) => {
+  try {
+    const { url } = req.body;
+
+    const updated = await PurchaseOrder.findByIdAndUpdate(
+      req.params.id,
+      { poUrl: url || '', updatedAt: new Date() },
+      { new: true }
+    );
+    console.log(`Updated URL for PO ${updated.poNumber}: ${url || 'cleared'}`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('URL update error:', error);
     res.status(500).json({ error: error.message });
   }
 });
