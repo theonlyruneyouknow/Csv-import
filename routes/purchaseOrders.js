@@ -588,7 +588,7 @@ router.get('/line-items-api', async (req, res) => {
       limit = 50,
       skip = 0,
       sortBy = 'createdAt',
-      sortOrder = 'desc'
+      sortOrder = 'asc'  // Changed from 'desc' to 'asc' for chronological order
     } = req.query;
 
     // Build filter query
@@ -610,6 +610,13 @@ router.get('/line-items-api', async (req, res) => {
       filter.received = received === 'true';
     }
 
+    // Handle vendor filtering separately since it requires a join
+    let vendorFilter = null;
+    if (vendor) {
+      vendorFilter = new RegExp(vendor, 'i');
+      // Don't add vendor to main filter since line items don't have vendor field
+    }
+
     if (search) {
       filter.$or = [
         { memo: new RegExp(search, 'i') },
@@ -621,16 +628,66 @@ router.get('/line-items-api', async (req, res) => {
 
     console.log('🔍 Filter being applied:', filter);
 
-    // Simplified approach - let's first try without aggregation
-    const lineItems = await LineItem.find(filter)
-      .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
-      .skip(parseInt(skip))
-      .limit(parseInt(limit))
-      .lean();
+    // Use aggregation to join with purchase orders and get vendor info
+    const aggregationPipeline = [
+      { $match: filter },
+      {
+        $lookup: {
+          from: 'purchaseorders',
+          localField: 'poId',
+          foreignField: '_id',
+          as: 'purchaseOrder'
+        }
+      },
+      {
+        $addFields: {
+          vendor: { $arrayElemAt: ['$purchaseOrder.vendor', 0] },
+          poAmount: { $arrayElemAt: ['$purchaseOrder.amount', 0] },
+          poNsStatus: { $arrayElemAt: ['$purchaseOrder.nsStatus', 0] }
+        }
+      },
+      // Add vendor filter if specified
+      ...(vendorFilter ? [{ $match: { vendor: vendorFilter } }] : []),
+      {
+        $project: {
+          purchaseOrder: 0 // Remove the full purchase order object to keep response clean
+        }
+      },
+      { $sort: { [sortBy]: sortOrder === 'desc' ? -1 : 1 } },
+      { $skip: parseInt(skip) },
+      { $limit: parseInt(limit) }
+    ];
 
-    const totalCount = await LineItem.countDocuments(filter);
+    const lineItems = await LineItem.aggregate(aggregationPipeline);
+    
+    // For total count with vendor filter, we need a separate aggregation
+    let totalCount;
+    if (vendorFilter) {
+      const countPipeline = [
+        { $match: filter },
+        {
+          $lookup: {
+            from: 'purchaseorders',
+            localField: 'poId',
+            foreignField: '_id',
+            as: 'purchaseOrder'
+          }
+        },
+        {
+          $addFields: {
+            vendor: { $arrayElemAt: ['$purchaseOrder.vendor', 0] }
+          }
+        },
+        { $match: { vendor: vendorFilter } },
+        { $count: "total" }
+      ];
+      const countResult = await LineItem.aggregate(countPipeline);
+      totalCount = countResult.length > 0 ? countResult[0].total : 0;
+    } else {
+      totalCount = await LineItem.countDocuments(filter);
+    }
 
-    console.log(`✅ Line Items API: Found ${lineItems.length} items, total: ${totalCount}`);
+    console.log(`✅ Line Items API: Found ${lineItems.length} items with vendor info, total: ${totalCount}`);
     
     res.json({
       lineItems,
@@ -1394,7 +1451,7 @@ router.get('/:id/line-items', async (req, res) => {
     }
 
     const lineItems = await LineItem.find({ poId: req.params.id })
-      .sort({ createdAt: -1 }); // Most recent first
+      .sort({ createdAt: 1 }); // Changed from -1 to 1 for chronological order (oldest first)
 
     res.json(lineItems);
   } catch (error) {
