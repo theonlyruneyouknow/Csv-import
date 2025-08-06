@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Trouble Seed Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #d73527;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header h1::before {
+            content: "⚠️";
+            font-size: 1.2em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            padding: 8px 16px;
+            text-decoration: none;
+            background: #6c757d;
+            color: white;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .nav-links a:hover {
+            background: #5a6268;
+        }
+
+        /* Stats Section */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-number.warning {
+            color: #dc3545;
+        }
+
+        .stat-number.info {
+            color: #007bff;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        /* Email Generator Section */
+        .email-generator {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .email-generator h3 {
+            margin-top: 0;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .email-generator h3::before {
+            content: "📧";
+        }
+
+        .email-content {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            margin-bottom: 15px;
+            min-height: 200px;
+        }
+
+        .email-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        /* PO Selection */
+        .po-selector {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .po-selector h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .po-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .po-card {
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .po-card:hover {
+            border-color: #007bff;
+            background: #f8f9fa;
+        }
+
+        .po-card.selected {
+            border-color: #007bff;
+            background: #e3f2fd;
+        }
+
+        .po-card.has-issues {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .po-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .po-number {
+            font-weight: bold;
+            font-size: 16px;
+            color: #007bff;
+        }
+
+        .po-vendor {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .issue-count {
+            background: #dc3545;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .issue-summary {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .issue-type {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin-right: 5px;
+            margin-bottom: 3px;
+        }
+
+        .delay-issue {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .discontinued-issue {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Item Details */
+        .item-details {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .item-details h3 {
+            background: #f8f9fa;
+            margin: 0;
+            padding: 15px 20px;
+            border-bottom: 1px solid #dee2e6;
+            color: #333;
+        }
+
+        .items-list {
+            padding: 20px;
+        }
+
+        .item-group {
+            margin-bottom: 25px;
+        }
+
+        .item-group h4 {
+            color: #dc3545;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .item-group h4.delay::before {
+            content: "⏰";
+        }
+
+        .item-group h4.discontinued::before {
+            content: "❌";
+        }
+
+        .item {
+            background: #f8f9fa;
+            border-left: 4px solid #dc3545;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .item-memo {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .item-sku {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .no-issues {
+            text-align: center;
+            padding: 40px;
+            color: #28a745;
+            font-size: 18px;
+        }
+
+        .no-issues::before {
+            content: "✅";
+            font-size: 24px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Trouble Seed Dashboard</h1>
+            <div class="nav-links">
+                <a href="/purchase-orders">← Back to Dashboard</a>
+                <a href="/purchase-orders/line-items-manager">Line Items Manager</a>
+                <a href="/purchase-orders/notes-manager">Notes Manager</a>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number info">
+                    <%= stats.totalPartiallyReceivedPOs %>
+                </div>
+                <div class="stat-label">Partially Received POs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number warning">
+                    <%= stats.posWithTroubleItems %>
+                </div>
+                <div class="stat-label">POs with Issues</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number warning">
+                    <%= stats.totalDelayItems %>
+                </div>
+                <div class="stat-label">Delivery Delays (No ETA)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number warning">
+                    <%= stats.totalDiscontinuedItems %>
+                </div>
+                <div class="stat-label">Discontinued Items</div>
+            </div>
+        </div>
+
+        <!-- Email Generator Section -->
+        <div class="email-generator">
+            <h3>Email Content Generator</h3>
+            <div class="email-content" id="emailContent">Select a PO below to generate email content for vendor communication...</div>
+            <div class="email-actions">
+                <button class="btn btn-success" onclick="copyToClipboard()" id="copyBtn" disabled>📋 Copy to Clipboard</button>
+                <button class="btn btn-secondary" onclick="clearSelection()">🔄 Clear Selection</button>
+                <button class="btn btn-primary" onclick="generateAllPOsEmail()">📧 Generate Summary for All POs</button>
+            </div>
+        </div>
+
+        <!-- PO Selection -->
+        <div class="po-selector">
+            <h3>Select Purchase Order (Partially Received POs with Issues)</h3>
+            <% if (troubleByPO.length === 0) { %>
+                <div class="no-issues">
+                    No POs currently have trouble items!<br>
+                    <small>All partially received POs are on track.</small>
+                </div>
+            <% } else { %>
+                <div class="po-grid">
+                    <% troubleByPO.forEach(po => { %>
+                        <div class="po-card has-issues" onclick="selectPO('<%= po.poNumber %>')">
+                            <div class="po-header">
+                                <div>
+                                    <div class="po-number"><%= po.poNumber %></div>
+                                    <div class="po-vendor"><%= po.vendor %></div>
+                                </div>
+                                <div class="issue-count"><%= po.delayItems.length + po.discontinuedItems.length %></div>
+                            </div>
+                            <div class="issue-summary">
+                                <% if (po.delayItems.length > 0) { %>
+                                    <span class="issue-type delay-issue">
+                                        <%= po.delayItems.length %> Delayed
+                                    </span>
+                                <% } %>
+                                <% if (po.discontinuedItems.length > 0) { %>
+                                    <span class="issue-type discontinued-issue">
+                                        <%= po.discontinuedItems.length %> Discontinued
+                                    </span>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Item Details (Hidden by default) -->
+        <div class="item-details" id="itemDetails" style="display: none;">
+            <h3 id="itemDetailsTitle">PO Details</h3>
+            <div class="items-list" id="itemsList">
+                <!-- Items will be populated here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store trouble data for JavaScript access
+        const troubleData = <%- JSON.stringify(troubleByPO) %>;
+        let selectedPO = null;
+
+        function selectPO(poNumber) {
+            selectedPO = troubleData.find(po => po.poNumber === poNumber);
+            
+            if (!selectedPO) return;
+
+            // Update UI
+            document.querySelectorAll('.po-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+
+            // Generate email content
+            generateEmailContent(selectedPO);
+
+            // Show item details
+            showItemDetails(selectedPO);
+
+            // Enable copy button
+            document.getElementById('copyBtn').disabled = false;
+        }
+
+        function generateEmailContent(po) {
+            const emailContent = `Subject: UPDATE NEEDED - Purchase Order ${po.poNumber} - Outstanding Items
+
+Dear ${po.vendor},
+
+I hope this email finds you well. I am writing to request an update on Purchase Order ${po.poNumber}, which currently shows as "Partially Received" in our system.
+
+We have identified several items that require immediate attention:
+
+${po.delayItems.length > 0 ? `DELIVERY DELAYS (No ETA Provided):
+${po.delayItems.map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''}`).join('\n')}
+
+We urgently need estimated delivery dates for these items to update our customers and plan accordingly.
+
+` : ''}${po.discontinuedItems.length > 0 ? `DISCONTINUED ITEMS:
+${po.discontinuedItems.map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''}`).join('\n')}
+
+Please confirm these items are discontinued and provide alternative product recommendations if available.
+
+` : ''}Could you please provide:
+1. Updated delivery dates for delayed items
+2. Alternative products for discontinued items
+3. Any other issues preventing completion of this order
+
+This information is critical for our operations and customer commitments. Please respond within 24-48 hours.
+
+Thank you for your prompt attention to this matter.
+
+Best regards,
+[Your Name]
+[Your Title]
+[Your Contact Information]
+
+---
+Purchase Order: ${po.poNumber}
+Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
+
+            document.getElementById('emailContent').textContent = emailContent;
+        }
+
+        function showItemDetails(po) {
+            const itemDetails = document.getElementById('itemDetails');
+            const itemsList = document.getElementById('itemsList');
+            const title = document.getElementById('itemDetailsTitle');
+
+            title.textContent = `${po.poNumber} - ${po.vendor} - Trouble Items`;
+
+            let html = '';
+
+            if (po.delayItems.length > 0) {
+                html += `
+                    <div class="item-group">
+                        <h4 class="delay">Delivery Delays (No ETA)</h4>
+                        ${po.delayItems.map(item => `
+                            <div class="item">
+                                <div class="item-memo">${escapeHtml(item.memo)}</div>
+                                ${item.sku ? `<div class="item-sku">SKU: ${escapeHtml(item.sku)}</div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            if (po.discontinuedItems.length > 0) {
+                html += `
+                    <div class="item-group">
+                        <h4 class="discontinued">Discontinued Items</h4>
+                        ${po.discontinuedItems.map(item => `
+                            <div class="item">
+                                <div class="item-memo">${escapeHtml(item.memo)}</div>
+                                ${item.sku ? `<div class="item-sku">SKU: ${escapeHtml(item.sku)}</div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            itemsList.innerHTML = html;
+            itemDetails.style.display = 'block';
+        }
+
+        function generateAllPOsEmail() {
+            if (troubleData.length === 0) {
+                alert('No POs with trouble items found!');
+                return;
+            }
+
+            const totalDelayItems = troubleData.reduce((sum, po) => sum + po.delayItems.length, 0);
+            const totalDiscontinuedItems = troubleData.reduce((sum, po) => sum + po.discontinuedItems.length, 0);
+
+            const emailContent = `Subject: URGENT - Multiple Purchase Orders Requiring Updates
+
+Dear Team,
+
+We have identified ${troubleData.length} Purchase Orders with outstanding issues requiring immediate vendor communication:
+
+SUMMARY:
+• Total POs requiring updates: ${troubleData.length}
+• Items with delivery delays (no ETA): ${totalDelayItems}
+• Discontinued items: ${totalDiscontinuedItems}
+
+PURCHASE ORDERS REQUIRING ACTION:
+
+${troubleData.map(po => `PO ${po.poNumber} - ${po.vendor}
+• Delivery delays: ${po.delayItems.length}
+• Discontinued items: ${po.discontinuedItems.length}
+• Total issues: ${po.delayItems.length + po.discontinuedItems.length}`).join('\n\n')}
+
+RECOMMENDED ACTIONS:
+1. Contact each vendor immediately for updates
+2. Request ETAs for all delayed items
+3. Obtain alternative products for discontinued items
+4. Update customers on any potential delays
+
+Please use the individual PO email templates to contact each vendor separately.
+
+Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
+
+            document.getElementById('emailContent').textContent = emailContent;
+            document.getElementById('copyBtn').disabled = false;
+        }
+
+        function copyToClipboard() {
+            const emailContent = document.getElementById('emailContent').textContent;
+            navigator.clipboard.writeText(emailContent).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                btn.style.background = '#28a745';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#28a745';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy to clipboard. Please select and copy manually.');
+            });
+        }
+
+        function clearSelection() {
+            selectedPO = null;
+            document.querySelectorAll('.po-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.getElementById('emailContent').textContent = 'Select a PO below to generate email content for vendor communication...';
+            document.getElementById('itemDetails').style.display = 'none';
+            document.getElementById('copyBtn').disabled = true;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Trouble Seed Dashboard loaded');
+            console.log('Found', troubleData.length, 'POs with trouble items');
+        });
+    </script>
+</body>
+
+</html>

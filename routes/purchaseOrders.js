@@ -560,6 +560,102 @@ router.get('/line-items-manager', async (req, res) => {
   }
 });
 
+// Trouble Seed Dashboard - This must come before parameterized routes!
+router.get('/trouble-seed', async (req, res) => {
+  try {
+    console.log('🚨 Loading Trouble Seed Dashboard...');
+
+    // Find POs with "Partially Received" status
+    const partiallyReceivedPOs = await PurchaseOrder.find({ 
+      nsStatus: 'Partially Received' 
+    }).sort({ poNumber: 1 });
+
+    console.log(`Found ${partiallyReceivedPOs.length} partially received POs`);
+
+    // Get problematic line items for these POs
+    const troubleItems = await LineItem.aggregate([
+      {
+        $lookup: {
+          from: 'purchaseorders',
+          localField: 'poId',
+          foreignField: '_id',
+          as: 'purchaseOrder'
+        }
+      },
+      {
+        $addFields: {
+          vendor: { $arrayElemAt: ['$purchaseOrder.vendor', 0] },
+          poNsStatus: { $arrayElemAt: ['$purchaseOrder.nsStatus', 0] },
+          poUrl: { $arrayElemAt: ['$purchaseOrder.poUrl', 0] }
+        }
+      },
+      {
+        $match: {
+          poNsStatus: 'Partially Received',
+          $or: [
+            // Delivery delay items with no ETA
+            {
+              itemStatus: 'Delivery Delay',
+              $or: [
+                { eta: { $exists: false } },
+                { eta: null },
+                { eta: '' }
+              ]
+            },
+            // Discontinued items
+            { itemStatus: 'Discontinued' }
+          ]
+        }
+      },
+      {
+        $sort: { poNumber: 1, itemStatus: 1, memo: 1 }
+      }
+    ]);
+
+    console.log(`Found ${troubleItems.length} trouble items`);
+
+    // Group items by PO for better organization
+    const troubleByPO = {};
+    troubleItems.forEach(item => {
+      if (!troubleByPO[item.poNumber]) {
+        troubleByPO[item.poNumber] = {
+          poNumber: item.poNumber,
+          vendor: item.vendor,
+          poUrl: item.poUrl,
+          delayItems: [],
+          discontinuedItems: []
+        };
+      }
+
+      if (item.itemStatus === 'Delivery Delay') {
+        troubleByPO[item.poNumber].delayItems.push(item);
+      } else if (item.itemStatus === 'Discontinued') {
+        troubleByPO[item.poNumber].discontinuedItems.push(item);
+      }
+    });
+
+    // Calculate statistics
+    const stats = {
+      totalPartiallyReceivedPOs: partiallyReceivedPOs.length,
+      posWithTroubleItems: Object.keys(troubleByPO).length,
+      totalDelayItems: troubleItems.filter(item => item.itemStatus === 'Delivery Delay').length,
+      totalDiscontinuedItems: troubleItems.filter(item => item.itemStatus === 'Discontinued').length
+    };
+
+    console.log('Trouble Seed stats:', stats);
+
+    res.render('trouble-seed', {
+      troubleByPO: Object.values(troubleByPO),
+      stats,
+      partiallyReceivedPOs
+    });
+
+  } catch (error) {
+    console.error('Trouble Seed dashboard error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // API route for line items - This must also come before parameterized routes!
 router.get('/line-items-api', async (req, res) => {
   console.log('🚀 Line Items API called with params:', req.query);
