@@ -385,7 +385,7 @@
                 <% } else { %>
                     <div class="po-grid">
                         <% troubleByPO.forEach(po=> { %>
-                            <div class="po-card has-issues" onclick="selectPO('<%= po.poNumber %>', this)">>
+                            <div class="po-card has-issues" onclick="selectPO('<%= po.poNumber %>', this)">
                                 <div class="po-header">
                                     <div>
                                         <div class="po-number">
@@ -445,9 +445,14 @@
         let selectedPO = null;
 
         function selectPO(poNumber, element) {
+            console.log('selectPO called with:', poNumber, element);
             selectedPO = troubleData.find(po => po.poNumber === poNumber);
+            console.log('Found selectedPO:', selectedPO);
 
-            if (!selectedPO) return;
+            if (!selectedPO) {
+                console.log('No PO found for:', poNumber);
+                return;
+            }
 
             // Update UI
             document.querySelectorAll('.po-card').forEach(card => {
@@ -624,6 +629,14 @@ Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
         document.addEventListener('DOMContentLoaded', () => {
             console.log('Trouble Seed Dashboard loaded');
             console.log('Found', troubleData.length, 'POs with trouble items');
+            console.log('Trouble data:', troubleData);
+
+            // Test if data exists
+            if (troubleData.length === 0) {
+                alert('No trouble data found!');
+            } else {
+                alert('Loaded ' + troubleData.length + ' POs with issues');
+            }
         });
     </script>
 </body>
