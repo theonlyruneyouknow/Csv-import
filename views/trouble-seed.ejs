@@ -385,7 +385,7 @@
                 <% } else { %>
                     <div class="po-grid">
                         <% troubleByPO.forEach(po=> { %>
-                            <div class="po-card has-issues" onclick="selectPO('<%= po.poNumber %>')">
+                            <div class="po-card has-issues" onclick="selectPO('<%= po.poNumber %>', this)">>
                                 <div class="po-header">
                                     <div>
                                         <div class="po-number">
@@ -444,7 +444,7 @@
         const troubleData = <% - JSON.stringify(troubleByPO) %>;
         let selectedPO = null;
 
-        function selectPO(poNumber) {
+        function selectPO(poNumber, element) {
             selectedPO = troubleData.find(po => po.poNumber === poNumber);
 
             if (!selectedPO) return;
@@ -453,7 +453,7 @@
             document.querySelectorAll('.po-card').forEach(card => {
                 card.classList.remove('selected');
             });
-            event.currentTarget.classList.add('selected');
+            element.classList.add('selected');
 
             // Generate email content
             generateEmailContent(selectedPO);
