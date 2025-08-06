@@ -207,6 +207,26 @@
             font-size: 14px;
         }
 
+        .po-link {
+            color: #007bff;
+            text-decoration: none;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .po-link:hover {
+            text-decoration: underline;
+            color: #0056b3;
+        }
+
+        .po-text {
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
         .item-memo {
             max-width: 300px;
             overflow: hidden;
@@ -306,6 +326,26 @@
         .status-badge.special {
             background: #e7e3ff;
             color: #6f42c1;
+        }
+
+        .status-badge.not-my-concern {
+            background: #f8d7da;
+            color: #721c24;
+            font-weight: bold;
+        }
+
+        .status-badge.pending-bill {
+            background: #fff3cd;
+            color: #856404;
+            font-weight: bold;
+        }
+
+        .po-status-column {
+            min-width: 120px;
+        }
+
+        .ns-status-column {
+            min-width: 120px;
         }
 
         .loading {
@@ -444,6 +484,19 @@
                         <option value="false">Not Received Only</option>
                     </select>
                 </div>
+                <div class="filter-group">
+                    <label>Hide Filters</label>
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                        <label style="font-size: 11px; display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" id="hideNotMyConcern" checked>
+                            Hide "Not my concern" POs
+                        </label>
+                        <label style="font-size: 11px; display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" id="hidePendingBill" checked>
+                            Hide "Pending Bill" NS Status POs
+                        </label>
+                    </div>
+                </div>
             </div>
             <div class="filter-actions">
                 <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
@@ -544,6 +597,8 @@
                         <tr>
                             <th>PO Number</th>
                             <th>Vendor</th>
+                            <th>PO Status</th>
+                            <th>NS Status</th>
                             <th>Item Description</th>
                             <th>SKU</th>
                             <th>Status</th>
@@ -556,8 +611,23 @@
                     <tbody>
                         ${lineItems.map(item => `
                             <tr class="item-row">
-                                <td><strong>${item.poNumber}</strong></td>
+                                <td>
+                                    ${item.poUrl && item.poUrl.trim() ?
+                    `<a href="${escapeHtml(item.poUrl)}" target="_blank" class="po-link" title="Open ${item.poNumber} link">${item.poNumber}</a>` :
+                    `<span class="po-text">${item.poNumber}</span>`
+                }
+                                </td>
                                 <td>${escapeHtml(item.vendor || 'N/A')}</td>
+                                <td class="po-status-column">
+                                    <span class="status-badge ${item.poStatus === 'Not my concern' ? 'not-my-concern' : item.poStatus ? 'in-stock' : ''}">
+                                        ${escapeHtml(item.poStatus || 'No Status')}
+                                    </span>
+                                </td>
+                                <td class="ns-status-column">
+                                    <span class="status-badge ${item.poNsStatus === 'Pending Bill' ? 'pending-bill' : item.poNsStatus ? 'on-order' : ''}">
+                                        ${escapeHtml(item.poNsStatus || 'No NS Status')}
+                                    </span>
+                                </td>
                                 <td class="item-memo" title="${escapeHtml(item.memo)}">${escapeHtml(item.memo)}</td>
                                 <td>
                                     <input type="text" class="sku-input" 
@@ -633,12 +703,14 @@
                 vendor: document.getElementById('vendorFilter').value,
                 itemStatus: document.getElementById('statusFilter').value,
                 sku: document.getElementById('skuFilter').value,
-                received: document.getElementById('receivedFilter').value
+                received: document.getElementById('receivedFilter').value,
+                hideNotMyConcern: document.getElementById('hideNotMyConcern').checked ? 'true' : 'false',
+                hidePendingBill: document.getElementById('hidePendingBill').checked ? 'true' : 'false'
             };
 
-            // Remove empty filters
+            // Remove empty filters (but keep hide filters even if false)
             Object.keys(currentFilters).forEach(key => {
-                if (!currentFilters[key]) {
+                if (!currentFilters[key] && !key.startsWith('hide')) {
                     delete currentFilters[key];
                 }
             });
@@ -654,6 +726,8 @@
             document.getElementById('statusFilter').value = '';
             document.getElementById('skuFilter').value = '';
             document.getElementById('receivedFilter').value = '';
+            document.getElementById('hideNotMyConcern').checked = true;
+            document.getElementById('hidePendingBill').checked = true;
 
             currentFilters = {};
             currentPage = 0;
@@ -769,8 +843,17 @@
             window.searchTimeout = setTimeout(applyFilters, 500);
         });
 
+        // Add event listeners for hide filter checkboxes
+        document.getElementById('hideNotMyConcern').addEventListener('change', applyFilters);
+        document.getElementById('hidePendingBill').addEventListener('change', applyFilters);
+
         // Load initial data
         document.addEventListener('DOMContentLoaded', () => {
+            // Set initial filters to match the default checkbox states
+            currentFilters = {
+                hideNotMyConcern: 'true',
+                hidePendingBill: 'true'
+            };
             loadLineItems();
         });
     </script>

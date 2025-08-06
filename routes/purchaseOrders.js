@@ -585,6 +585,8 @@ router.get('/line-items-api', async (req, res) => {
       received,
       vendor,
       search,
+      hideNotMyConcern = 'true',
+      hidePendingBill = 'true',
       limit = 50,
       skip = 0,
       sortBy = 'createdAt',
@@ -627,6 +629,7 @@ router.get('/line-items-api', async (req, res) => {
     }
 
     console.log('🔍 Filter being applied:', filter);
+    console.log('📊 Hide filters:', { hideNotMyConcern, hidePendingBill });
 
     // Use aggregation to join with purchase orders and get vendor info
     const aggregationPipeline = [
@@ -643,11 +646,36 @@ router.get('/line-items-api', async (req, res) => {
         $addFields: {
           vendor: { $arrayElemAt: ['$purchaseOrder.vendor', 0] },
           poAmount: { $arrayElemAt: ['$purchaseOrder.amount', 0] },
-          poNsStatus: { $arrayElemAt: ['$purchaseOrder.nsStatus', 0] }
+          poNsStatus: { $arrayElemAt: ['$purchaseOrder.nsStatus', 0] },
+          poUrl: { $arrayElemAt: ['$purchaseOrder.poUrl', 0] },
+          poStatus: { $arrayElemAt: ['$purchaseOrder.status', 0] }
         }
       },
       // Add vendor filter if specified
       ...(vendorFilter ? [{ $match: { vendor: vendorFilter } }] : []),
+      // Add PO status filters
+      ...(hideNotMyConcern === 'true' || hidePendingBill === 'true' ? [{
+        $match: {
+          $and: [
+            ...(hideNotMyConcern === 'true' ? [{
+              $or: [
+                { poStatus: { $ne: 'Not my concern' } },
+                { poStatus: { $exists: false } },
+                { poStatus: null },
+                { poStatus: '' }
+              ]
+            }] : []),
+            ...(hidePendingBill === 'true' ? [{
+              $or: [
+                { poNsStatus: { $ne: 'Pending Bill' } },
+                { poNsStatus: { $exists: false } },
+                { poNsStatus: null },
+                { poNsStatus: '' }
+              ]
+            }] : [])
+          ]
+        }
+      }] : []),
       {
         $project: {
           purchaseOrder: 0 // Remove the full purchase order object to keep response clean
@@ -660,9 +688,9 @@ router.get('/line-items-api', async (req, res) => {
 
     const lineItems = await LineItem.aggregate(aggregationPipeline);
 
-    // For total count with vendor filter, we need a separate aggregation
+    // For total count with any PO-related filters, we need a separate aggregation
     let totalCount;
-    if (vendorFilter) {
+    if (vendorFilter || hideNotMyConcern === 'true' || hidePendingBill === 'true') {
       const countPipeline = [
         { $match: filter },
         {
@@ -675,10 +703,36 @@ router.get('/line-items-api', async (req, res) => {
         },
         {
           $addFields: {
-            vendor: { $arrayElemAt: ['$purchaseOrder.vendor', 0] }
+            vendor: { $arrayElemAt: ['$purchaseOrder.vendor', 0] },
+            poStatus: { $arrayElemAt: ['$purchaseOrder.status', 0] },
+            poNsStatus: { $arrayElemAt: ['$purchaseOrder.nsStatus', 0] }
           }
         },
-        { $match: { vendor: vendorFilter } },
+        // Add vendor filter if specified
+        ...(vendorFilter ? [{ $match: { vendor: vendorFilter } }] : []),
+        // Add PO status filters
+        ...(hideNotMyConcern === 'true' || hidePendingBill === 'true' ? [{
+          $match: {
+            $and: [
+              ...(hideNotMyConcern === 'true' ? [{
+                $or: [
+                  { poStatus: { $ne: 'Not my concern' } },
+                  { poStatus: { $exists: false } },
+                  { poStatus: null },
+                  { poStatus: '' }
+                ]
+              }] : []),
+              ...(hidePendingBill === 'true' ? [{
+                $or: [
+                  { poNsStatus: { $ne: 'Pending Bill' } },
+                  { poNsStatus: { $exists: false } },
+                  { poNsStatus: null },
+                  { poNsStatus: '' }
+                ]
+              }] : [])
+            ]
+          }
+        }] : []),
         { $count: "total" }
       ];
       const countResult = await LineItem.aggregate(countPipeline);
