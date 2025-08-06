@@ -540,7 +540,7 @@ router.get('/line-items-manager', async (req, res) => {
     const uniquePONumbers = await LineItem.distinct('poNumber');
     const uniqueStatuses = await LineItem.distinct('status');
     const uniqueSKUs = await LineItem.distinct('sku');
-    
+
     // Get vendor info from purchase orders
     const vendorInfo = await PurchaseOrder.distinct('vendor');
 
@@ -567,7 +567,7 @@ router.get('/line-items-api', async (req, res) => {
     // First, let's check if we have any line items at all
     const totalLineItems = await LineItem.countDocuments();
     console.log(`📊 Total line items in database: ${totalLineItems}`);
-    
+
     if (totalLineItems === 0) {
       console.log('⚠️ No line items found in database');
       return res.json({
@@ -659,7 +659,7 @@ router.get('/line-items-api', async (req, res) => {
     ];
 
     const lineItems = await LineItem.aggregate(aggregationPipeline);
-    
+
     // For total count with vendor filter, we need a separate aggregation
     let totalCount;
     if (vendorFilter) {
@@ -688,7 +688,7 @@ router.get('/line-items-api', async (req, res) => {
     }
 
     console.log(`✅ Line Items API: Found ${lineItems.length} items with vendor info, total: ${totalCount}`);
-    
+
     res.json({
       lineItems,
       totalCount,

@@ -507,10 +507,10 @@
 
                 console.log('Making request to:', `/purchase-orders/line-items-api?${params}`);
                 const response = await fetch(`/purchase-orders/line-items-api?${params}`);
-                
+
                 console.log('Response status:', response.status);
                 console.log('Response headers:', [...response.headers.entries()]);
-                
+
                 const data = await response.json();
                 console.log('Response data:', data);
 
