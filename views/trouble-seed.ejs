@@ -374,52 +374,60 @@
             </div>
         </div>
 
-        <!-- Email Generator Section -->
-        <div class="email-generator">
-            <h3>Email Content Generator</h3>
-            <div class="email-content" id="emailContent">Select a PO below to generate email content for vendor communication...</div>
-            <div class="email-actions">
-                <button class="btn btn-success" onclick="copyToClipboard()" id="copyBtn" disabled>📋 Copy to Clipboard</button>
-                <button class="btn btn-secondary" onclick="clearSelection()">🔄 Clear Selection</button>
-                <button class="btn btn-primary" onclick="generateAllPOsEmail()">📧 Generate Summary for All POs</button>
-            </div>
-        </div>
-
         <!-- PO Selection -->
         <div class="po-selector">
             <h3>Select Purchase Order (Partially Received POs with Issues)</h3>
-            <% if (troubleByPO.length === 0) { %>
+            <% if (troubleByPO.length===0) { %>
                 <div class="no-issues">
                     No POs currently have trouble items!<br>
                     <small>All partially received POs are on track.</small>
                 </div>
-            <% } else { %>
-                <div class="po-grid">
-                    <% troubleByPO.forEach(po => { %>
-                        <div class="po-card has-issues" onclick="selectPO('<%= po.poNumber %>')">
-                            <div class="po-header">
-                                <div>
-                                    <div class="po-number"><%= po.poNumber %></div>
-                                    <div class="po-vendor"><%= po.vendor %></div>
+                <% } else { %>
+                    <div class="po-grid">
+                        <% troubleByPO.forEach(po=> { %>
+                            <div class="po-card has-issues" onclick="selectPO('<%= po.poNumber %>')">
+                                <div class="po-header">
+                                    <div>
+                                        <div class="po-number">
+                                            <%= po.poNumber %>
+                                        </div>
+                                        <div class="po-vendor">
+                                            <%= po.vendor %>
+                                        </div>
+                                    </div>
+                                    <div class="issue-count">
+                                        <%= po.delayItems.length + po.discontinuedItems.length %>
+                                    </div>
                                 </div>
-                                <div class="issue-count"><%= po.delayItems.length + po.discontinuedItems.length %></div>
+                                <div class="issue-summary">
+                                    <% if (po.delayItems.length> 0) { %>
+                                        <span class="issue-type delay-issue">
+                                            <%= po.delayItems.length %> Delayed
+                                        </span>
+                                        <% } %>
+                                            <% if (po.discontinuedItems.length> 0) { %>
+                                                <span class="issue-type discontinued-issue">
+                                                    <%= po.discontinuedItems.length %> Discontinued
+                                                </span>
+                                                <% } %>
+                                </div>
                             </div>
-                            <div class="issue-summary">
-                                <% if (po.delayItems.length > 0) { %>
-                                    <span class="issue-type delay-issue">
-                                        <%= po.delayItems.length %> Delayed
-                                    </span>
-                                <% } %>
-                                <% if (po.discontinuedItems.length > 0) { %>
-                                    <span class="issue-type discontinued-issue">
-                                        <%= po.discontinuedItems.length %> Discontinued
-                                    </span>
-                                <% } %>
-                            </div>
-                        </div>
-                    <% }); %>
-                </div>
-            <% } %>
+                            <% }); %>
+                    </div>
+                    <% } %>
+        </div>
+
+        <!-- Email Generator Section -->
+        <div class="email-generator">
+            <h3>Email Content Generator</h3>
+            <div class="email-content" id="emailContent">Select a PO below to generate email content for vendor
+                communication...</div>
+            <div class="email-actions">
+                <button class="btn btn-success" onclick="copyToClipboard()" id="copyBtn" disabled>📋 Copy to
+                    Clipboard</button>
+                <button class="btn btn-secondary" onclick="clearSelection()">🔄 Clear Selection</button>
+                <button class="btn btn-primary" onclick="generateAllPOsEmail()">📧 Generate Summary for All POs</button>
+            </div>
         </div>
 
         <!-- Item Details (Hidden by default) -->
@@ -433,12 +441,12 @@
 
     <script>
         // Store trouble data for JavaScript access
-        const troubleData = <%- JSON.stringify(troubleByPO) %>;
+        const troubleData = <% - JSON.stringify(troubleByPO) %>;
         let selectedPO = null;
 
         function selectPO(poNumber) {
             selectedPO = troubleData.find(po => po.poNumber === poNumber);
-            
+
             if (!selectedPO) return;
 
             // Update UI

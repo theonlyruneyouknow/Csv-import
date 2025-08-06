@@ -566,8 +566,8 @@ router.get('/trouble-seed', async (req, res) => {
     console.log('🚨 Loading Trouble Seed Dashboard...');
 
     // Find POs with "Partially Received" status
-    const partiallyReceivedPOs = await PurchaseOrder.find({ 
-      nsStatus: 'Partially Received' 
+    const partiallyReceivedPOs = await PurchaseOrder.find({
+      nsStatus: 'Partially Received'
     }).sort({ poNumber: 1 });
 
     console.log(`Found ${partiallyReceivedPOs.length} partially received POs`);
