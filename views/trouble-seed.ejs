@@ -441,7 +441,7 @@
 
     <script>
         // Store trouble data for JavaScript access
-        const troubleData = <% - JSON.stringify(troubleByPO) %>;
+        const troubleData = <%- JSON.stringify(troubleByPO) %>;
         let selectedPO = null;
 
         function selectPO(poNumber, element) {
@@ -630,13 +630,6 @@ Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
             console.log('Trouble Seed Dashboard loaded');
             console.log('Found', troubleData.length, 'POs with trouble items');
             console.log('Trouble data:', troubleData);
-
-            // Test if data exists
-            if (troubleData.length === 0) {
-                alert('No trouble data found!');
-            } else {
-                alert('Loaded ' + troubleData.length + ' POs with issues');
-            }
         });
     </script>
 </body>
