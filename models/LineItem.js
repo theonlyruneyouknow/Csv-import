@@ -28,18 +28,6 @@ const lineItemSchema = new mongoose.Schema({
     },
     itemStatus: {
         type: String,
-        enum: [
-            '', // Default/no status
-            'In Stock',
-            'Backordered',
-            'Find Different Vendor',
-            'Substitute Product',
-            'Discontinued',
-            'Delivery Delay',
-            'On Order',
-            'Cancelled',
-            'Special Order'
-        ],
         default: '',
         index: true
     },

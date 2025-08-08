@@ -1376,8 +1376,11 @@
             <h1>Purchase Orders Dashboard</h1>
             <div>
                 <button class="manage-status-btn" onclick="openStatusModal()">⚙️ Manage Status Options</button>
+                <button class="manage-status-btn" onclick="openLineItemStatusModal()">🏷️ Line Item Status
+                    Options</button>
                 <a href="/purchase-orders/trouble-seed" class="notes-manager-btn">⚠️ Trouble Seed</a>
                 <a href="/purchase-orders/line-items-manager" class="notes-manager-btn">📦 Line Items Manager</a>
+                <a href="/purchase-orders/orphaned-line-items" class="notes-manager-btn">🧹 Orphaned Items</a>
                 <a href="/purchase-orders/notes-manager" class="notes-manager-btn">📝 Notes Manager</a>
                 <a href="/upload" class="upload-btn">📁 Import New CSV</a>
             </div>
@@ -1705,6 +1708,27 @@
 
             <div id="statusList" class="status-list">
                 <!-- Status options will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Line Item Status Management Modal -->
+    <div id="lineItemStatusModal" class="status-modal">
+        <div class="status-modal-content">
+            <div class="status-modal-header">
+                <div class="status-modal-title">Manage Line Item Status Options</div>
+                <button class="status-close" onclick="closeLineItemStatusModal()">&times;</button>
+            </div>
+
+            <div class="status-form">
+                <input type="text" id="lineItemStatusInput" class="status-input"
+                    placeholder="Enter new line item status option..." maxlength="50">
+                <button id="addLineItemStatusBtn" class="status-add-btn"
+                    onclick="addLineItemStatusOption()">Add</button>
+            </div>
+
+            <div id="lineItemStatusList" class="status-list">
+                <!-- Line item status options will be loaded here -->
             </div>
         </div>
     </div>
@@ -2161,6 +2185,27 @@
             }
         }
 
+        // Global variable to store line item status options
+        let globalLineItemStatusOptions = [];
+
+        // Function to load line item status options for dropdowns
+        async function loadGlobalLineItemStatusOptions() {
+            try {
+                const response = await fetch('/purchase-orders/line-items/status-options');
+                globalLineItemStatusOptions = await response.json();
+            } catch (error) {
+                console.error('Error loading line item status options:', error);
+                globalLineItemStatusOptions = ['', 'In Stock', 'Backordered', 'Find Different Vendor', 'Substitute Product', 'Discontinued', 'Delivery Delay', 'On Order', 'Cancelled', 'Special Order'];
+            }
+        }
+
+        // Function to generate status dropdown options
+        function generateStatusOptions(currentStatus) {
+            return globalLineItemStatusOptions.map(status =>
+                `<option value="${status}" ${currentStatus === status ? 'selected' : ''}>${status || 'Select Status'}</option>`
+            ).join('');
+        }
+
         async function loadLineItems(index, poId) {
             const container = document.getElementById(`line-items-container-${index}`);
             const statusElement = document.getElementById(`line-items-status-${index}`);
@@ -2205,16 +2250,7 @@
                                     <label>Item Status:</label>
                                     <select class="item-status-select" 
                                             onchange="updateItemStatus('${item._id}', this.value, ${index}, '${poId}')">
-                                        <option value="" ${!item.itemStatus ? 'selected' : ''}>Select Status</option>
-                                        <option value="In Stock" ${item.itemStatus === 'In Stock' ? 'selected' : ''}>In Stock</option>
-                                        <option value="Backordered" ${item.itemStatus === 'Backordered' ? 'selected' : ''}>Backordered</option>
-                                        <option value="Find Different Vendor" ${item.itemStatus === 'Find Different Vendor' ? 'selected' : ''}>Find Different Vendor</option>
-                                        <option value="Substitute Product" ${item.itemStatus === 'Substitute Product' ? 'selected' : ''}>Substitute Product</option>
-                                        <option value="Discontinued" ${item.itemStatus === 'Discontinued' ? 'selected' : ''}>Discontinued</option>
-                                        <option value="Delivery Delay" ${item.itemStatus === 'Delivery Delay' ? 'selected' : ''}>Delivery Delay</option>
-                                        <option value="On Order" ${item.itemStatus === 'On Order' ? 'selected' : ''}>On Order</option>
-                                        <option value="Cancelled" ${item.itemStatus === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-                                        <option value="Special Order" ${item.itemStatus === 'Special Order' ? 'selected' : ''}>Special Order</option>
+                                        ${generateStatusOptions(item.itemStatus)}
                                     </select>
                                 </div>
                             </div>
@@ -2632,9 +2668,13 @@
 
         // Close modal when clicking outside
         window.onclick = function (event) {
-            const modal = document.getElementById('statusModal');
-            if (event.target === modal) {
+            const statusModal = document.getElementById('statusModal');
+            const lineItemStatusModal = document.getElementById('lineItemStatusModal');
+            if (event.target === statusModal) {
                 closeStatusModal();
+            }
+            if (event.target === lineItemStatusModal) {
+                closeLineItemStatusModal();
             }
         }
 
@@ -2745,6 +2785,127 @@
         document.getElementById('statusInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 addStatusOption();
+            }
+        });
+
+        // Line Item Status Management Functions
+        let currentLineItemStatusOptions = [];
+
+        function openLineItemStatusModal() {
+            document.getElementById('lineItemStatusModal').style.display = 'block';
+            loadLineItemStatusOptions();
+        }
+
+        function closeLineItemStatusModal() {
+            document.getElementById('lineItemStatusModal').style.display = 'none';
+            document.getElementById('lineItemStatusInput').value = '';
+        }
+
+        // Load line item status options from server
+        async function loadLineItemStatusOptions() {
+            try {
+                const response = await fetch('/purchase-orders/line-item-status-options');
+                const statusOptions = await response.json();
+                currentLineItemStatusOptions = statusOptions;
+                renderLineItemStatusList();
+            } catch (error) {
+                console.error('Error loading line item status options:', error);
+                alert('Error loading line item status options');
+            }
+        }
+
+        // Render the line item status options list
+        function renderLineItemStatusList() {
+            const statusList = document.getElementById('lineItemStatusList');
+            statusList.innerHTML = '';
+
+            currentLineItemStatusOptions.forEach(option => {
+                const statusItem = document.createElement('div');
+                statusItem.className = `status-item ${option.isDefault ? 'default' : ''}`;
+
+                statusItem.innerHTML = `
+                    <span class="status-item-name">${option.name}</span>
+                    <button class="status-delete-btn" onclick="deleteLineItemStatusOption('${option._id}')" 
+                            ${option.isDefault ? 'disabled title="Cannot delete default status"' : ''}>
+                        Delete
+                    </button>
+                `;
+
+                statusList.appendChild(statusItem);
+            });
+        }
+
+        // Add new line item status option
+        async function addLineItemStatusOption() {
+            const input = document.getElementById('lineItemStatusInput');
+            const addBtn = document.getElementById('addLineItemStatusBtn');
+            const name = input.value.trim();
+
+            if (!name) {
+                alert('Please enter a status name');
+                return;
+            }
+
+            addBtn.disabled = true;
+            addBtn.textContent = 'Adding...';
+
+            try {
+                const response = await fetch('/purchase-orders/line-item-status-options', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    input.value = '';
+                    await loadLineItemStatusOptions();
+                    alert('Line item status option added successfully');
+                } else {
+                    alert(result.error || 'Error adding line item status option');
+                }
+            } catch (error) {
+                console.error('Error adding line item status option:', error);
+                alert('Error adding line item status option');
+            } finally {
+                addBtn.disabled = false;
+                addBtn.textContent = 'Add';
+            }
+        }
+
+        // Delete line item status option
+        async function deleteLineItemStatusOption(id) {
+            const option = currentLineItemStatusOptions.find(opt => opt._id === id);
+            if (!option) return;
+
+            if (!confirm(`Are you sure you want to delete "${option.name}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/purchase-orders/line-item-status-options/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    await loadLineItemStatusOptions();
+                    alert('Line item status option deleted successfully');
+                } else {
+                    alert(result.error || 'Error deleting line item status option');
+                }
+            } catch (error) {
+                console.error('Error deleting line item status option:', error);
+                alert('Error deleting line item status option');
+            }
+        }
+
+        // Allow Enter key to add line item status
+        document.getElementById('lineItemStatusInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                addLineItemStatusOption();
             }
         });
 
@@ -2901,6 +3062,8 @@
         // Initialize filters on page load
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function () {
+                // Load line item status options for dropdowns
+                loadGlobalLineItemStatusOptions();
                 // Apply filters when DOM is loaded
                 setTimeout(() => applyFilters(), 50);
             });

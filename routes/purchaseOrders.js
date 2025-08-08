@@ -5,6 +5,7 @@ const Papa = require('papaparse');
 const PurchaseOrder = require('../models/PurchaseOrder');
 const PrePurchaseOrder = require('../models/PrePurchaseOrder');
 const StatusOption = require('../models/StatusOption');
+const LineItemStatusOption = require('../models/LineItemStatusOption');
 const Note = require('../models/Note');
 const LineItem = require('../models/LineItem');
 
@@ -853,13 +854,36 @@ router.get('/line-items-api', async (req, res) => {
 // Get line item status options - This must also come before parameterized routes!
 router.get('/line-items/status-options', async (req, res) => {
   try {
-    const statusOptions = [
-      '', 'In Stock', 'Backordered', 'Find Different Vendor',
-      'Substitute Product', 'Discontinued', 'Delivery Delay',
-      'On Order', 'Cancelled', 'Special Order'
-    ];
-    res.json(statusOptions);
+    // Get status options from database
+    let statusOptions = await LineItemStatusOption.find().sort({ name: 1 });
+
+    // If no status options exist, create default ones
+    if (statusOptions.length === 0) {
+      console.log('Creating default line item status options...');
+      const defaultStatuses = [
+        'In Stock',
+        'Backordered',
+        'Find Different Vendor',
+        'Substitute Product',
+        'Discontinued',
+        'Delivery Delay',
+        'On Order',
+        'Cancelled',
+        'Special Order'
+      ];
+
+      const statusPromises = defaultStatuses.map(name =>
+        LineItemStatusOption.create({ name, isDefault: true })
+      );
+
+      statusOptions = await Promise.all(statusPromises);
+    }
+
+    // Return array of status names with empty string first
+    const statusNames = ['', ...statusOptions.map(option => option.name)];
+    res.json(statusNames);
   } catch (error) {
+    console.error('Line item status options error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -1236,15 +1260,12 @@ router.put('/line-items/:lineItemId/item-status', async (req, res) => {
   try {
     const { itemStatus } = req.body;
 
-    // Validate the status
-    const validStatuses = [
-      '', 'In Stock', 'Backordered', 'Find Different Vendor',
-      'Substitute Product', 'Discontinued', 'Delivery Delay',
-      'On Order', 'Cancelled', 'Special Order'
-    ];
-
-    if (itemStatus && !validStatuses.includes(itemStatus)) {
-      return res.status(400).json({ error: 'Invalid item status' });
+    // Validate the status against database options
+    if (itemStatus && itemStatus.trim()) {
+      const validStatus = await LineItemStatusOption.findOne({ name: itemStatus.trim() });
+      if (!validStatus) {
+        return res.status(400).json({ error: 'Invalid item status' });
+      }
     }
 
     const lineItem = await LineItem.findByIdAndUpdate(
@@ -1355,6 +1376,71 @@ router.delete('/status-options/:id', async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error('Status option deletion error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Line Item Status Options Management Routes
+
+// Get all line item status options
+router.get('/line-item-status-options', async (req, res) => {
+  try {
+    const statusOptions = await LineItemStatusOption.find().sort({ name: 1 });
+    res.json(statusOptions);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add new line item status option
+router.post('/line-item-status-options', async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Status name is required' });
+    }
+
+    const statusOption = await LineItemStatusOption.create({
+      name: name.trim(),
+      isDefault: false
+    });
+
+    console.log(`Added new line item status option: "${statusOption.name}"`);
+    res.json({ success: true, statusOption });
+  } catch (error) {
+    if (error.code === 11000) {
+      res.status(400).json({ error: 'Line item status option already exists' });
+    } else {
+      console.error('Line item status option creation error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+});
+
+// Delete line item status option
+router.delete('/line-item-status-options/:id', async (req, res) => {
+  try {
+    const statusOption = await LineItemStatusOption.findById(req.params.id);
+
+    if (!statusOption) {
+      return res.status(404).json({ error: 'Line item status option not found' });
+    }
+
+    // Check if this status is being used by any line items
+    const usageCount = await LineItem.countDocuments({ itemStatus: statusOption.name });
+
+    if (usageCount > 0) {
+      return res.status(400).json({
+        error: `Cannot delete "${statusOption.name}" - it's being used by ${usageCount} line item(s)`
+      });
+    }
+
+    await LineItemStatusOption.findByIdAndDelete(req.params.id);
+    console.log(`Deleted line item status option: "${statusOption.name}"`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Line item status option deletion error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -1663,4 +1749,286 @@ router.put('/:id/url', async (req, res) => {
   }
 });
 
-module.exports = router;
+// Route to identify and manage orphaned line items
+router.get('/orphaned-line-items', async (req, res) => {
+  try {
+    console.log('🔍 Finding orphaned line items...');
+
+    // Find line items with missing or problematic PO data
+    const orphanedItems = await LineItem.aggregate([
+      {
+        $lookup: {
+          from: 'purchaseorders',
+          localField: 'poId',
+          foreignField: '_id',
+          as: 'purchaseOrder'
+        }
+      },
+      {
+        $addFields: {
+          vendor: { $arrayElemAt: ['$purchaseOrder.vendor', 0] },
+          poStatus: { $arrayElemAt: ['$purchaseOrder.status', 0] },
+          poNsStatus: { $arrayElemAt: ['$purchaseOrder.nsStatus', 0] },
+          poExists: { $gt: [{ $size: '$purchaseOrder' }, 0] }
+        }
+      },
+      {
+        $match: {
+          $or: [
+            { poExists: false }, // No matching PO found
+            { vendor: { $in: [null, '', 'N/A'] } }, // Missing vendor
+            { $and: [{ poStatus: { $in: [null, '', 'No Status'] } }, { poNsStatus: { $in: [null, '', 'No NS Status'] } }] } // No statuses
+          ]
+        }
+      },
+      {
+        $project: {
+          purchaseOrder: 0 // Remove full PO object for cleaner response
+        }
+      },
+      { $sort: { poNumber: 1, createdAt: 1 } }
+    ]);
+
+    // Group by PO number for better organization
+    const orphanedByPO = {};
+    orphanedItems.forEach(item => {
+      if (!orphanedByPO[item.poNumber]) {
+        orphanedByPO[item.poNumber] = {
+          poNumber: item.poNumber,
+          vendor: item.vendor || 'N/A',
+          poStatus: item.poStatus || 'No Status',
+          poNsStatus: item.poNsStatus || 'No NS Status',
+          poExists: item.poExists,
+          items: []
+        };
+      }
+      orphanedByPO[item.poNumber].items.push(item);
+    });
+
+    const stats = {
+      totalOrphanedItems: orphanedItems.length,
+      totalOrphanedPOs: Object.keys(orphanedByPO).length,
+      itemsWithoutPO: orphanedItems.filter(item => !item.poExists).length,
+      itemsWithMissingVendor: orphanedItems.filter(item => item.poExists && (!item.vendor || item.vendor === 'N/A')).length,
+      itemsWithNoStatus: orphanedItems.filter(item => item.poExists && (!item.poStatus || item.poStatus === 'No Status') && (!item.poNsStatus || item.poNsStatus === 'No NS Status')).length
+    };
+
+    res.render('orphaned-line-items', {
+      orphanedByPO: Object.values(orphanedByPO),
+      stats,
+      orphanedItems
+    });
+
+  } catch (error) {
+    console.error('Error finding orphaned line items:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Route to archive/delete orphaned line items
+router.post('/archive-orphaned-items', async (req, res) => {
+  try {
+    const { itemIds, action } = req.body; // action can be 'archive' or 'delete'
+
+    if (!itemIds || !Array.isArray(itemIds)) {
+      return res.status(400).json({ error: 'Item IDs required' });
+    }
+
+    if (action === 'delete') {
+      const result = await LineItem.deleteMany({ _id: { $in: itemIds } });
+      res.json({
+        success: true,
+        message: `Deleted ${result.deletedCount} orphaned line items`,
+        deletedCount: result.deletedCount
+      });
+    } else if (action === 'archive') {
+      // Add an 'archived' field instead of deleting
+      const result = await LineItem.updateMany(
+        { _id: { $in: itemIds } },
+        { $set: { archived: true, archivedDate: new Date() } }
+      );
+      res.json({
+        success: true,
+        message: `Archived ${result.modifiedCount} orphaned line items`,
+        archivedCount: result.modifiedCount
+      });
+    } else {
+      res.status(400).json({ error: 'Invalid action. Use "archive" or "delete"' });
+    }
+
+  } catch (error) {
+    console.error('Error archiving orphaned items:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Route to fix orphaned line items by creating or linking POs
+router.post('/fix-orphaned-items', async (req, res) => {
+  try {
+    const { poNumber, action, vendor, status, itemIds } = req.body;
+
+    if (!poNumber || !action || !itemIds || !Array.isArray(itemIds)) {
+      return res.status(400).json({ error: 'PO number, action, and item IDs required' });
+    }
+
+    if (action === 'create-po') {
+      // Validate required fields for creating new PO
+      if (!vendor) {
+        return res.status(400).json({ error: 'Vendor is required for creating new PO' });
+      }
+      if (!status) {
+        return res.status(400).json({ error: 'Status is required for creating new PO' });
+      }
+
+      // Check if PO number already exists
+      const existingPO = await PurchaseOrder.findOne({ poNumber: poNumber });
+      if (existingPO) {
+        return res.status(400).json({ error: 'PO number already exists' });
+      }
+
+      // Create a new PO for these orphaned items
+      const lineItems = await LineItem.find({ _id: { $in: itemIds } });
+
+      if (lineItems.length === 0) {
+        return res.status(404).json({ error: 'No line items found' });
+      }
+
+      // Calculate total amount from line items
+      const totalAmount = lineItems.reduce((sum, item) => {
+        const amount = parseFloat(item.amount) || 0;
+        return sum + amount;
+      }, 0);
+
+      // Create new PO with user-selected status
+      const newPO = new PurchaseOrder({
+        poNumber: poNumber,
+        vendor: vendor,
+        amount: totalAmount,
+        status: status, // Use user-selected status
+        nsStatus: 'Open', // Default NS status
+        date: lineItems[0].date || new Date(),
+        reportDate: new Date().toLocaleDateString(),
+        location: '',
+        notes: `Created from orphaned line items - ${lineItems.length} items recovered`,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      const savedPO = await newPO.save();
+
+      // Update line items to reference the new PO
+      const updateResult = await LineItem.updateMany(
+        { _id: { $in: itemIds } },
+        { $set: { poId: savedPO._id, poNumber: poNumber, updatedAt: new Date() } }
+      );
+
+      console.log(`✅ Created new PO ${poNumber} with status: ${status} and linked ${updateResult.modifiedCount} items`);
+
+      res.json({
+        success: true,
+        message: `Created new PO ${poNumber} with status "${status}" and linked ${updateResult.modifiedCount} line items`,
+        poId: savedPO._id,
+        linkedItems: updateResult.modifiedCount
+      });
+
+    } else if (action === 'link-existing') {
+      // Link to existing PO
+      const existingPO = await PurchaseOrder.findOne({ poNumber: poNumber });
+
+      if (!existingPO) {
+        return res.status(404).json({ error: `PO ${poNumber} not found` });
+      }
+
+      // Update line items to reference the existing PO
+      const updateResult = await LineItem.updateMany(
+        { _id: { $in: itemIds } },
+        { $set: { poId: existingPO._id, poNumber: poNumber, updatedAt: new Date() } }
+      );
+
+      console.log(`✅ Linked ${updateResult.modifiedCount} items to existing PO ${poNumber}`);
+
+      res.json({
+        success: true,
+        message: `Linked ${updateResult.modifiedCount} line items to existing PO ${poNumber}`,
+        poId: existingPO._id,
+        linkedItems: updateResult.modifiedCount
+      });
+
+    } else {
+      res.status(400).json({ error: 'Invalid action. Use "create-po" or "link-existing"' });
+    }
+
+  } catch (error) {
+    console.error('Error fixing orphaned items:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Route to export orphaned items data before deletion
+router.get('/export-orphaned-items', async (req, res) => {
+  try {
+    const orphanedItems = await LineItem.aggregate([
+      {
+        $lookup: {
+          from: 'purchaseorders',
+          localField: 'poId',
+          foreignField: '_id',
+          as: 'purchaseOrder'
+        }
+      },
+      {
+        $addFields: {
+          vendor: { $arrayElemAt: ['$purchaseOrder.vendor', 0] },
+          poStatus: { $arrayElemAt: ['$purchaseOrder.status', 0] },
+          poNsStatus: { $arrayElemAt: ['$purchaseOrder.nsStatus', 0] },
+          poExists: { $gt: [{ $size: '$purchaseOrder' }, 0] }
+        }
+      },
+      {
+        $match: {
+          $or: [
+            { poExists: false },
+            { vendor: { $in: [null, '', 'N/A'] } },
+            { $and: [{ poStatus: { $in: [null, '', 'No Status'] } }, { poNsStatus: { $in: [null, '', 'No NS Status'] } }] }
+          ]
+        }
+      },
+      {
+        $project: {
+          purchaseOrder: 0
+        }
+      },
+      { $sort: { poNumber: 1, createdAt: 1 } }
+    ]);
+
+    // Set headers for CSV download
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="orphaned-line-items.csv"');
+
+    // Create CSV content
+    const csvHeaders = 'PO Number,Vendor,Item Description,SKU,Amount,Received,Item Status,Date,Notes,Issue Type\n';
+    const csvRows = orphanedItems.map(item => {
+      const issueType = !item.poExists ? 'No PO' :
+        (!item.vendor || item.vendor === 'N/A') ? 'No Vendor' : 'No Status';
+
+      return [
+        item.poNumber || '',
+        item.vendor || 'N/A',
+        `"${(item.memo || '').replace(/"/g, '""')}"`, // Escape quotes
+        item.sku || '',
+        item.amount || '',
+        item.received ? 'Yes' : 'No',
+        item.itemStatus || '',
+        item.date ? new Date(item.date).toLocaleDateString() : '',
+        `"${(item.notes || '').replace(/"/g, '""')}"`, // Escape quotes
+        issueType
+      ].join(',');
+    }).join('\n');
+
+    res.send(csvHeaders + csvRows);
+
+  } catch (error) {
+    console.error('Error exporting orphaned items:', error);
+    res.status(500).json({ error: error.message });
+  }
+}); module.exports = router;

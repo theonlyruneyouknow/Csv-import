@@ -458,11 +458,7 @@
                     <label>Item Status</label>
                     <select id="statusFilter">
                         <option value="">All Statuses</option>
-                        <% uniqueStatuses.forEach(status=> { %>
-                            <option value="<%= status %>">
-                                <%= status %>
-                            </option>
-                            <% }); %>
+                        <!-- Options will be loaded dynamically -->
                     </select>
                 </div>
                 <div class="filter-group">
@@ -529,6 +525,42 @@
         let itemsPerPage = 50;
         let totalItems = 0;
         let currentFilters = {};
+        let globalLineItemStatusOptions = [];
+
+        // Load line item status options
+        async function loadLineItemStatusOptions() {
+            try {
+                const response = await fetch('/purchase-orders/line-items/status-options');
+                globalLineItemStatusOptions = await response.json();
+                populateStatusFilter();
+            } catch (error) {
+                console.error('Error loading status options:', error);
+                globalLineItemStatusOptions = ['', 'In Stock', 'Backordered', 'Find Different Vendor', 'Substitute Product', 'Discontinued', 'Delivery Delay', 'On Order', 'Cancelled', 'Special Order'];
+                populateStatusFilter();
+            }
+        }
+
+        // Populate the status filter dropdown
+        function populateStatusFilter() {
+            const statusFilter = document.getElementById('statusFilter');
+            statusFilter.innerHTML = '<option value="">All Statuses</option>';
+
+            globalLineItemStatusOptions.slice(1).forEach(status => { // Skip empty string
+                if (status) {
+                    const option = document.createElement('option');
+                    option.value = status;
+                    option.textContent = status;
+                    statusFilter.appendChild(option);
+                }
+            });
+        }
+
+        // Generate status options for table dropdowns
+        function generateStatusDropdownOptions(currentStatus) {
+            return globalLineItemStatusOptions.map(status =>
+                `<option value="${status}" ${currentStatus === status ? 'selected' : ''}>${status || 'Select Status'}</option>`
+            ).join('');
+        }
 
         function getStatusBadgeClass(status) {
             const classMap = {
@@ -637,16 +669,7 @@
                                 </td>
                                 <td>
                                     <select class="status-select" onchange="updateItemStatus('${item._id}', this.value)">
-                                        <option value="" ${!item.itemStatus ? 'selected' : ''}>Select Status</option>
-                                        <option value="In Stock" ${item.itemStatus === 'In Stock' ? 'selected' : ''}>In Stock</option>
-                                        <option value="Backordered" ${item.itemStatus === 'Backordered' ? 'selected' : ''}>Backordered</option>
-                                        <option value="Find Different Vendor" ${item.itemStatus === 'Find Different Vendor' ? 'selected' : ''}>Find Different Vendor</option>
-                                        <option value="Substitute Product" ${item.itemStatus === 'Substitute Product' ? 'selected' : ''}>Substitute Product</option>
-                                        <option value="Discontinued" ${item.itemStatus === 'Discontinued' ? 'selected' : ''}>Discontinued</option>
-                                        <option value="Delivery Delay" ${item.itemStatus === 'Delivery Delay' ? 'selected' : ''}>Delivery Delay</option>
-                                        <option value="On Order" ${item.itemStatus === 'On Order' ? 'selected' : ''}>On Order</option>
-                                        <option value="Cancelled" ${item.itemStatus === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-                                        <option value="Special Order" ${item.itemStatus === 'Special Order' ? 'selected' : ''}>Special Order</option>
+                                        ${generateStatusDropdownOptions(item.itemStatus)}
                                     </select>
                                     ${item.itemStatus ? `<br><span class="status-badge ${getStatusBadgeClass(item.itemStatus)}">${item.itemStatus}</span>` : ''}
                                 </td>
@@ -849,6 +872,9 @@
 
         // Load initial data
         document.addEventListener('DOMContentLoaded', () => {
+            // Load status options first
+            loadLineItemStatusOptions();
+
             // Set initial filters to match the default checkbox states
             currentFilters = {
                 hideNotMyConcern: 'true',
