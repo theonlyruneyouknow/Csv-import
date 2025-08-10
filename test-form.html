@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Form Fields</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h2>Test - New USDA Integration Fields</h2>
+        <form>
+            <!-- USDA Integration Section -->
+            <div class="row">
+                <div class="col-12">
+                    <h6 class="text-muted mb-3 mt-3">
+                        <i class="fas fa-database"></i> USDA Database Integration
+                    </h6>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="mb-3">
+                        <label class="form-label">Manual USDA Link</label>
+                        <input type="url" class="form-control" name="manualUSDALink"
+                            placeholder="Paste link from https://organic.ams.usda.gov/integrity/Home search results">
+                        <div class="form-text">
+                            Search for vendor at <a href="https://organic.ams.usda.gov/integrity/Home"
+                                target="_blank">USDA Organic Database</a> and paste the direct link here
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="mb-3">
+                        <label class="form-label">Organic Seeds Data (Raw)</label>
+                        <textarea class="form-control" name="organicSeedsRawData" rows="8"
+                            placeholder="Paste organic seeds data from USDA database here..."></textarea>
+                        <div class="form-text">
+                            Copy and paste the organic seeds data directly from the USDA database page.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>

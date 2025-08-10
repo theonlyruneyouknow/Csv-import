@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const purchaseOrderRoutes = require('./routes/purchaseOrders');
+const organicVendorRoutes = require('./routes/organicVendors');
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.set('view engine', 'ejs');
 
 // Routes
 app.use('/purchase-orders', purchaseOrderRoutes);
+app.use('/organic-vendors', organicVendorRoutes);
 app.get('/', (req, res) => res.redirect('/purchase-orders'));
 app.get('/upload', (req, res) => res.render('upload'));
 

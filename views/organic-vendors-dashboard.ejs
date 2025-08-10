@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organic Vendors Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .vendor-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .vendor-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .certification-status {
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .status-current {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-expiring {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-expired {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-unknown {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+
+        .vendor-status {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.85em;
+        }
+
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .document-viewer {
+            display: none;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .document-viewer iframe {
+            width: 100%;
+            height: 400px;
+            border: none;
+        }
+
+        .organic-link {
+            color: #28a745;
+            text-decoration: none;
+        }
+
+        .organic-link:hover {
+            text-decoration: underline;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-radius: 10px;
+        }
+
+        .filter-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .organic-seeds-list {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .seed-item {
+            background-color: #e8f5e8;
+            padding: 4px 8px;
+            margin: 2px;
+            border-radius: 3px;
+            display: inline-block;
+            font-size: 0.85em;
+        }
+
+        .parsed-seeds-content {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .seed-product {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+
+        .seed-product-header {
+            font-weight: bold;
+            color: #2d5a2d;
+            margin-bottom: 5px;
+        }
+
+        .seed-product-details {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .seed-certificate {
+            background-color: #e8f5e8;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            display: inline-block;
+            margin: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-4">
+                    <i class="fas fa-leaf text-success"></i>
+                    Organic Vendors Dashboard
+                </h1>
+                <p class="lead text-muted">Manage organic vendor certifications and compliance</p>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <h3>
+                            <%= stats.total %>
+                        </h3>
+                        <p class="mb-0">Total Vendors</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <h3>
+                            <%= stats.active %>
+                        </h3>
+                        <p class="mb-0">Active Vendors</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body text-center">
+                        <h3>
+                            <%= stats.expiringSoon %>
+                        </h3>
+                        <p class="mb-0">Expiring Soon</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body text-center">
+                        <h3>
+                            <%= stats.expired %>
+                        </h3>
+                        <p class="mb-0">Expired Certs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters and Controls -->
+        <div class="filter-section">
+            <div class="row align-items-center">
+                <div class="col-md-3">
+                    <label class="form-label">Filter by Status:</label>
+                    <select id="statusFilter" class="form-select">
+                        <option value="all" <%=currentFilters.status==='all' ? 'selected' : '' %>>All Statuses</option>
+                        <% uniqueStatuses.forEach(status=> { %>
+                            <option value="<%= status %>" <%=currentFilters.status===status ? 'selected' : '' %>><%=
+                                    status %>
+                            </option>
+                            <% }); %>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Sort by:</label>
+                    <select id="sortBy" class="form-select">
+                        <option value="vendorName" <%=currentFilters.sortBy==='vendorName' ? 'selected' : '' %>>Vendor
+                            Name</option>
+                        <option value="lastOrganicCertificationDate"
+                            <%=currentFilters.sortBy==='lastOrganicCertificationDate' ? 'selected' : '' %>>Certification
+                            Date</option>
+                        <option value="internalId" <%=currentFilters.sortBy==='internalId' ? 'selected' : '' %>>Internal
+                            ID</option>
+                        <option value="status" <%=currentFilters.sortBy==='status' ? 'selected' : '' %>>Status</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Order:</label>
+                    <select id="sortOrder" class="form-select">
+                        <option value="asc" <%=currentFilters.sortOrder==='asc' ? 'selected' : '' %>>Ascending</option>
+                        <option value="desc" <%=currentFilters.sortOrder==='desc' ? 'selected' : '' %>>Descending
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Search:</label>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search vendors...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal"
+                        data-bs-target="#addVendorModal" onclick="resetFormForAdd()">
+                        <i class="fas fa-plus"></i> Add Vendor
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vendors List -->
+        <div id="vendorsList" class="row">
+            <% vendors.forEach(vendor=> { %>
+                <div class="col-12 mb-3">
+                    <div class="card vendor-card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <!-- Basic Info -->
+                                <div class="col-md-2">
+                                    <h5 class="card-title mb-1">
+                                        <%= vendor.vendorName %>
+                                    </h5>
+                                    <small class="text-muted">ID: <%= vendor.internalId %></small>
+                                    <br>
+                                    <span
+                                        class="vendor-status status-<%= vendor.status.toLowerCase().replace(' ', '-') %>">
+                                        <%= vendor.status %>
+                                    </span>
+                                </div>
+
+                                <!-- Certification Info -->
+                                <div class="col-md-2">
+                                    <strong>Last Cert Date:</strong><br>
+                                    <%= new Date(vendor.lastOrganicCertificationDate).toLocaleDateString() %><br>
+                                        <small class="text-muted">
+                                            <%= vendor.daysSinceLastCertification %> days ago
+                                        </small><br>
+                                        <span
+                                            class="certification-status status-<%= vendor.certificationStatus.toLowerCase().replace(' ', '-') %>">
+                                            <%= vendor.certificationStatus %>
+                                        </span>
+                                </div>
+
+                                <!-- TSC Info -->
+                                <div class="col-md-2">
+                                    <strong>TSC Item:</strong><br>
+                                    <%= vendor.tscItem || 'N/A' %><br>
+                                        <small class="text-muted">
+                                            <%= vendor.tscDescription ? vendor.tscDescription.substring(0, 50) +
+                                                (vendor.tscDescription.length> 50 ? '...' : '') : 'No description' %>
+                                        </small>
+                                </div>
+
+                                <!-- Organic Seeds -->
+                                <div class="col-md-2">
+                                    <strong>Organic Seeds:</strong><br>
+                                    <div class="organic-seeds-list">
+                                        <% if (vendor.organicSeedsRawData && vendor.organicSeedsRawData.trim()) { %>
+                                            <button type="button" class="btn btn-sm btn-outline-success"
+                                                onclick="toggleOrganicSeeds('<%= vendor._id %>')">
+                                                <i class="fas fa-seedling"></i> View Seeds Data
+                                            </button>
+                                            <% } else if (vendor.organicSeeds && vendor.organicSeeds.length> 0) { %>
+                                                <% vendor.organicSeeds.forEach(seed=> { %>
+                                                    <span class="seed-item">
+                                                        <%= seed.name %>
+                                                    </span>
+                                                    <% }); %>
+                                                        <% } else { %>
+                                                            <span class="text-muted">No seeds listed</span>
+                                                            <% } %>
+                                    </div>
+                                </div>
+
+                                <!-- Documents and Links -->
+                                <div class="col-md-2">
+                                    <div class="btn-group-vertical w-100" role="group">
+                                        <% if (vendor.certificate) { %>
+                                            <button type="button" class="btn btn-sm btn-outline-primary mb-1"
+                                                onclick="toggleDocument('<%= vendor._id %>', 'certificate')">
+                                                <i class="fas fa-certificate"></i> Certificate
+                                            </button>
+                                            <% } %>
+                                                <% if (vendor.operationsProfile) { %>
+                                                    <button type="button" class="btn btn-sm btn-outline-info mb-1"
+                                                        onclick="toggleDocument('<%= vendor._id %>', 'operations-profile')">
+                                                        <i class="fas fa-file-alt"></i> Operations
+                                                    </button>
+                                                    <% } %>
+                                                        <% if (vendor.organicDatabaseUrl) { %>
+                                                            <a href="<%= vendor.organicDatabaseUrl %>" target="_blank"
+                                                                class="btn btn-sm btn-outline-success organic-link">
+                                                                <i class="fas fa-external-link-alt"></i> Organic DB
+                                                            </a>
+                                                            <% if (vendor.organicDatabaseId) { %>
+                                                                <button type="button"
+                                                                    class="btn btn-sm btn-outline-warning mb-1"
+                                                                    onclick="fetchUSDADocuments('<%= vendor._id %>', '<%= vendor.vendorName %>')">
+                                                                    <i class="fas fa-download"></i> Sync USDA
+                                                                </button>
+                                                                <% } %>
+                                                                    <% } else { %>
+                                                                        <a href="https://organic.ams.usda.gov/integrity/CertificationSearch.aspx"
+                                                                            target="_blank"
+                                                                            class="btn btn-sm btn-outline-secondary">
+                                                                            <i class="fas fa-search"></i> Find in DB
+                                                                        </a>
+                                                                        <% } %>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="col-md-2">
+                                    <div class="btn-group w-100" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                            onclick="editVendor('<%= vendor._id %>')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                            onclick="deleteVendor('<%= vendor._id %>', '<%= vendor.vendorName %>')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Document Viewer (Hidden by default) -->
+                            <div id="docViewer-<%= vendor._id %>" class="document-viewer">
+                                <iframe id="docFrame-<%= vendor._id %>"></iframe>
+                            </div>
+
+                            <!-- Organic Seeds Viewer (Hidden by default) -->
+                            <div id="seedsViewer-<%= vendor._id %>" class="document-viewer" style="display: none;">
+                                <div class="p-3">
+                                    <h6><i class="fas fa-seedling text-success"></i> Organic Seeds Data</h6>
+                                    <div id="seedsContent-<%= vendor._id %>" class="parsed-seeds-content">
+                                        <!-- Parsed seeds data will be displayed here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+        </div>
+    </div>
+
+    <!-- Add/Edit Vendor Modal -->
+    <div class="modal fade" id="addVendorModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Organic Vendor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="vendorForm" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Vendor Name *</label>
+                                    <input type="text" class="form-control" name="vendorName" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Internal ID *</label>
+                                    <input type="text" class="form-control" name="internalId" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Last Organic Certification Date *</label>
+                                    <input type="date" class="form-control" name="lastOrganicCertificationDate"
+                                        required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-select" name="status">
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                        <option value="Pending Review">Pending Review</option>
+                                        <option value="Certification Expired">Certification Expired</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">TSC Item</label>
+                                    <input type="text" class="form-control" name="tscItem">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">TSC Description</label>
+                                    <textarea class="form-control" name="tscDescription" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Organic Database ID</label>
+                                    <input type="text" class="form-control" name="organicDatabaseId">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Organic Database URL</label>
+                                    <input type="url" class="form-control" name="organicDatabaseUrl">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Certificate Upload</label>
+                                    <input type="file" class="form-control" name="certificate"
+                                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Operations Profile Upload</label>
+                                    <input type="file" class="form-control" name="operationsProfile"
+                                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- USDA Integration Section -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3 mt-3">
+                                    <i class="fas fa-database"></i> USDA Database Integration
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Manual USDA Link</label>
+                                    <input type="url" class="form-control" name="manualUSDALink"
+                                        placeholder="Paste link from https://organic.ams.usda.gov/integrity/Home search results">
+                                    <div class="form-text">
+                                        Search for vendor at <a href="https://organic.ams.usda.gov/integrity/Home"
+                                            target="_blank">USDA Organic Database</a> and paste the direct link here
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Organic Seeds Data (Raw)</label>
+                                    <textarea class="form-control" name="organicSeedsRawData" rows="8" placeholder="Paste organic seeds data from USDA database here...
+
+Example format:
+HANDLING
+No. 1 | Category: Other
+#Importing, handling, repackaging, and distribution of seed - Organic:
+Certificate No.: 4583
+--	--	--	
+Certified
+12/22/2011
+
+HANDLING
+No. 2 | Category: Other
+* Basil (Purple Dark Opal)
+Certificate No.: 4583
+--	Yes	--	
+Certified
+12/22/2011"></textarea>
+                                    <div class="form-text">
+                                        Copy and paste the organic seeds data directly from the USDA database page. This
+                                        will be parsed and used for TSC references.
+                                        <button type="button" class="btn btn-sm btn-outline-info ms-2"
+                                            onclick="parseOrganicSeedsData()">
+                                            <i class="fas fa-magic"></i> Parse Data
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Parsed Results Preview -->
+                        <div class="row" id="parsedResultsSection" style="display: none;">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Parsed Organic Products</label>
+                                    <div id="parsedResults" class="border rounded p-3 bg-light">
+                                        <!-- Parsed results will appear here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" name="notes" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Vendor</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle document viewer
+        function toggleDocument(vendorId, docType) {
+            const viewer = document.getElementById(`docViewer-${vendorId}`);
+            const frame = document.getElementById(`docFrame-${vendorId}`);
+
+            if (viewer.style.display === 'none' || !viewer.style.display) {
+                frame.src = `/organic-vendors/${vendorId}/${docType}`;
+                viewer.style.display = 'block';
+            } else {
+                viewer.style.display = 'none';
+                frame.src = '';
+            }
+        }
+
+        // Toggle organic seeds viewer
+        async function toggleOrganicSeeds(vendorId) {
+            const viewer = document.getElementById(`seedsViewer-${vendorId}`);
+            const content = document.getElementById(`seedsContent-${vendorId}`);
+
+            if (viewer.style.display === 'none' || !viewer.style.display) {
+                // Show viewer and load data
+                try {
+                    const response = await fetch(`/organic-vendors/${vendorId}/edit`);
+                    const vendor = await response.json();
+
+                    if (vendor && vendor.organicSeedsRawData) {
+                        const products = parseUSDAOrganicData(vendor.organicSeedsRawData);
+                        displaySeedsData(content, products);
+                        viewer.style.display = 'block';
+                    } else {
+                        content.innerHTML = '<p class="text-muted">No organic seeds data available</p>';
+                        viewer.style.display = 'block';
+                    }
+                } catch (error) {
+                    content.innerHTML = '<p class="text-danger">Error loading seeds data</p>';
+                    viewer.style.display = 'block';
+                }
+            } else {
+                viewer.style.display = 'none';
+            }
+        }
+
+        // Display parsed seeds data in a nice format
+        function displaySeedsData(container, products) {
+            let html = '';
+
+            if (products.length === 0) {
+                html = '<p class="text-muted">No parsed products found</p>';
+            } else {
+                products.forEach((product, index) => {
+                    html += `
+                        <div class="seed-product">
+                            <div class="seed-product-header">
+                                <i class="fas fa-seedling"></i> Product ${product.number || index + 1}
+                            </div>
+                            <div class="seed-product-details">
+                                ${product.description ? `<div><strong>Description:</strong> ${product.description}</div>` : ''}
+                                ${product.category ? `<div><strong>Category:</strong> ${product.category}</div>` : ''}
+                                ${product.certificateNumber ? `<span class="seed-certificate">Certificate: ${product.certificateNumber}</span>` : ''}
+                                ${product.status ? `<span class="seed-certificate">${product.status}</span>` : ''}
+                                ${product.dateAdded ? `<span class="seed-certificate">Date: ${product.dateAdded}</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Filter and search functionality
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        document.getElementById('sortBy').addEventListener('change', applyFilters);
+        document.getElementById('sortOrder').addEventListener('change', applyFilters);
+
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(applyFilters, 500);
+        });
+
+        function applyFilters() {
+            const params = new URLSearchParams();
+            params.set('status', document.getElementById('statusFilter').value);
+            params.set('sortBy', document.getElementById('sortBy').value);
+            params.set('sortOrder', document.getElementById('sortOrder').value);
+
+            const search = document.getElementById('searchInput').value;
+            if (search) params.set('search', search);
+
+            window.location.search = params.toString();
+        }
+
+        // Reset form for adding new vendor
+        function resetFormForAdd() {
+            const form = document.getElementById('vendorForm');
+            form.reset();
+            form.removeAttribute('data-edit-id');
+            document.querySelector('#addVendorModal .modal-title').textContent = 'Add New Organic Vendor';
+        }
+
+        // Form submission
+        document.getElementById('vendorForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const editId = this.getAttribute('data-edit-id');
+
+            try {
+                let response;
+                if (editId) {
+                    // Update existing vendor
+                    response = await fetch(`/organic-vendors/${editId}`, {
+                        method: 'PUT',
+                        body: formData
+                    });
+                } else {
+                    // Create new vendor
+                    response = await fetch('/organic-vendors', {
+                        method: 'POST',
+                        body: formData
+                    });
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Reset form for next use
+                    this.reset();
+                    this.removeAttribute('data-edit-id');
+                    document.querySelector('#addVendorModal .modal-title').textContent = 'Add New Organic Vendor';
+
+                    // Close modal and reload page
+                    bootstrap.Modal.getInstance(document.getElementById('addVendorModal')).hide();
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error saving vendor: ' + error.message);
+            }
+        });
+
+        // Edit vendor function
+        async function editVendor(vendorId) {
+            try {
+                // Fetch vendor data
+                const response = await fetch(`/organic-vendors/${vendorId}/edit`);
+                const vendor = await response.json();
+
+                if (!vendor || vendor.error) {
+                    alert('Error loading vendor data: ' + (vendor?.error || 'Unknown error'));
+                    return;
+                }
+
+                // Update modal title
+                document.querySelector('#addVendorModal .modal-title').textContent = 'Edit Organic Vendor';
+
+                // Fill form with vendor data
+                const form = document.getElementById('vendorForm');
+                form.querySelector('[name="vendorName"]').value = vendor.vendorName || '';
+                form.querySelector('[name="internalId"]').value = vendor.internalId || '';
+                form.querySelector('[name="lastOrganicCertificationDate"]').value = vendor.lastOrganicCertificationDate ? vendor.lastOrganicCertificationDate.split('T')[0] : '';
+                form.querySelector('[name="tscItem"]').value = vendor.tscItem || '';
+                form.querySelector('[name="tscDescription"]').value = vendor.tscDescription || '';
+                form.querySelector('[name="organicDatabaseId"]').value = vendor.organicDatabaseId || '';
+                form.querySelector('[name="organicDatabaseUrl"]').value = vendor.organicDatabaseUrl || '';
+
+                // Handle multiple manualUSDALink fields (use the first one)
+                const usdaLinkField = form.querySelector('[name="manualUSDALink"]');
+                if (usdaLinkField) {
+                    usdaLinkField.value = vendor.manualUSDALink || '';
+                }
+
+                form.querySelector('[name="organicSeedsRawData"]').value = vendor.organicSeedsRawData || '';
+                form.querySelector('[name="status"]').value = vendor.status || 'Active';
+                form.querySelector('[name="notes"]').value = vendor.notes || '';
+
+                // Set form to edit mode
+                form.setAttribute('data-edit-id', vendorId);
+
+                // Show modal
+                const modal = new bootstrap.Modal(document.getElementById('addVendorModal'));
+                modal.show();
+
+            } catch (error) {
+                alert('Error loading vendor for edit: ' + error.message);
+            }
+        }
+
+        // Delete vendor function
+        async function deleteVendor(vendorId, vendorName) {
+            console.log(`🗑️ Delete function called for: ${vendorName} (ID: ${vendorId})`);
+
+            if (confirm(`Are you sure you want to delete vendor "${vendorName}"?`)) {
+                try {
+                    console.log(`🗑️ User confirmed deletion, sending DELETE request...`);
+
+                    const response = await fetch(`/organic-vendors/${vendorId}`, {
+                        method: 'DELETE'
+                    });
+
+                    console.log(`🗑️ Response status: ${response.status}`);
+
+                    const result = await response.json();
+                    console.log(`🗑️ Response result:`, result);
+
+                    if (result.success) {
+                        console.log(`✅ Delete successful, reloading page...`);
+                        location.reload();
+                    } else {
+                        console.error(`❌ Delete failed:`, result.error);
+                        alert('Error: ' + result.error);
+                    }
+                } catch (error) {
+                    console.error(`❌ Delete error:`, error);
+                    alert('Error deleting vendor: ' + error.message);
+                }
+            } else {
+                console.log(`🗑️ User cancelled deletion`);
+            }
+        }
+
+        // Fetch USDA documents for a vendor
+        async function fetchUSDADocuments(vendorId, vendorName) {
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+
+            try {
+                // Show loading state
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+                button.disabled = true;
+
+                const response = await fetch(`/organic-vendors/${vendorId}/fetch-usda-documents`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(`✅ Success: ${result.message}`);
+                    // Reload the page to show updated documents
+                    location.reload();
+                } else {
+                    alert(`⚠️ ${result.message}`);
+                }
+
+            } catch (error) {
+                alert('❌ Error fetching USDA documents: ' + error.message);
+            } finally {
+                // Restore button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+
+        // Parse organic seeds data from USDA format
+        function parseOrganicSeedsData() {
+            const textarea = document.querySelector('textarea[name="organicSeedsRawData"]');
+            const rawData = textarea.value.trim();
+
+            if (!rawData) {
+                alert('Please paste organic seeds data first');
+                return;
+            }
+
+            try {
+                const products = parseUSDAOrganicData(rawData);
+                displayParsedResults(products);
+
+                // Generate TSC description from parsed data
+                generateTSCDescription(products);
+
+            } catch (error) {
+                alert('Error parsing data: ' + error.message);
+            }
+        }
+
+        // Parser for USDA organic data format
+        function parseUSDAOrganicData(rawData) {
+            const products = [];
+            const sections = rawData.split(/HANDLING\s*\n/);
+
+            sections.forEach((section, index) => {
+                if (index === 0 && !section.includes('No.')) return; // Skip empty first section
+
+                const lines = section.split('\n').map(line => line.trim()).filter(line => line);
+                if (lines.length === 0) return;
+
+                const product = {
+                    number: '',
+                    category: '',
+                    description: '',
+                    certificateNumber: '',
+                    status: '',
+                    dateAdded: ''
+                };
+
+                // Parse number and category from first line
+                const firstLine = lines[0];
+                const numberMatch = firstLine.match(/No\.\s*(\d+)/);
+                const categoryMatch = firstLine.match(/Category:\s*(.+)/);
+
+                if (numberMatch) product.number = numberMatch[1];
+                if (categoryMatch) product.category = categoryMatch[1];
+
+                // Parse description (lines starting with # or *)
+                lines.forEach(line => {
+                    if (line.startsWith('#') || line.startsWith('*')) {
+                        product.description = line.substring(1).trim();
+                    }
+
+                    // Parse certificate number
+                    const certMatch = line.match(/Certificate No\.\:\s*(\d+)/);
+                    if (certMatch) product.certificateNumber = certMatch[1];
+
+                    // Parse status and date (usually in last lines)
+                    if (line.includes('Certified') || line.includes('Suspended') || line.includes('Surrendered')) {
+                        product.status = line;
+                    }
+
+                    // Parse date
+                    const dateMatch = line.match(/(\d{1,2}\/\d{1,2}\/\d{4})/);
+                    if (dateMatch) product.dateAdded = dateMatch[1];
+                });
+
+                if (product.number || product.description) {
+                    products.push(product);
+                }
+            });
+
+            return products;
+        }
+
+        // Display parsed results
+        function displayParsedResults(products) {
+            const resultsDiv = document.getElementById('parsedResults');
+            const sectionDiv = document.getElementById('parsedResultsSection');
+
+            let html = '<h6>Parsed Products:</h6>';
+
+            products.forEach((product, index) => {
+                html += `
+                    <div class="border rounded p-2 mb-2 bg-white">
+                        <strong>Product ${product.number || index + 1}:</strong> ${product.description || 'No description'}<br>
+                        <small class="text-muted">
+                            Category: ${product.category} | 
+                            Certificate: ${product.certificateNumber} | 
+                            Status: ${product.status} | 
+                            Date: ${product.dateAdded}
+                        </small>
+                    </div>
+                `;
+            });
+
+            resultsDiv.innerHTML = html;
+            sectionDiv.style.display = 'block';
+        }
+
+        // Generate TSC description from parsed products
+        function generateTSCDescription(products) {
+            const categories = [...new Set(products.map(p => p.category).filter(c => c))];
+            const descriptions = products.map(p => p.description).filter(d => d);
+
+            let tscDescription = '';
+
+            if (categories.length > 0) {
+                tscDescription += `Categories: ${categories.join(', ')}. `;
+            }
+
+            if (descriptions.length > 0) {
+                tscDescription += `Products: ${descriptions.slice(0, 3).join('; ')}`;
+                if (descriptions.length > 3) {
+                    tscDescription += ` and ${descriptions.length - 3} more`;
+                }
+            }
+
+            // Update TSC description field
+            const tscField = document.querySelector('textarea[name="tscDescription"]');
+            if (tscField && tscDescription) {
+                tscField.value = tscDescription;
+            }
+        }
+    </script>
+</body>
+
+</html>
