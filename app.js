@@ -18,6 +18,7 @@ app.set('view engine', 'ejs');
 // Routes
 app.use('/purchase-orders', purchaseOrderRoutes);
 app.use('/organic-vendors', organicVendorRoutes);
+app.use('/api', purchaseOrderRoutes); // API routes for AJAX calls
 app.get('/', (req, res) => res.redirect('/purchase-orders'));
 app.get('/upload', (req, res) => res.render('upload'));
 

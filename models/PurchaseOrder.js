@@ -29,6 +29,18 @@ const purchaseOrderSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  lineItems: [{             // Array of line items for this PO
+    sku: String,
+    memo: String,
+    itemStatus: String,
+    received: Boolean,
+    lineItemId: mongoose.Schema.Types.ObjectId,
+    // NetSuite specific fields for reference
+    netsuiteQuantity: Number,
+    netsuiteReceived: Number,
+    netsuiteBilled: Number,
+    vendorDescription: String
+  }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

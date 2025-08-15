@@ -22,6 +22,311 @@
             margin-bottom: 20px;
         }
 
+        /* Enhanced Navigation Styles */
+        .navigation-container {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .nav-section {
+            position: relative;
+        }
+
+        /* Accordion Styles */
+        .nav-accordion-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            justify-content: space-between;
+        }
+
+        .nav-accordion-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-accordion-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            min-width: 220px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 5px;
+        }
+
+        .nav-accordion-content.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .nav-accordion-item {
+            display: block;
+            padding: 12px 16px;
+            color: #495057;
+            text-decoration: none;
+            border-bottom: 1px solid #f1f3f4;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .nav-accordion-item:last-child {
+            border-bottom: none;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .nav-accordion-item:first-child {
+            border-radius: 6px 6px 0 0;
+        }
+
+        .nav-accordion-item:hover {
+            background: #f8f9fa;
+            color: #28a745;
+            text-decoration: none;
+            padding-left: 20px;
+        }
+
+        /* Options Button Styles */
+        .nav-options-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 100px;
+            justify-content: space-between;
+        }
+
+        .nav-options-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Imports Button Styles */
+        .nav-imports-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 100px;
+            justify-content: space-between;
+        }
+
+        .nav-imports-btn:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Dropdown Styles */
+        .nav-dropdown-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 5px;
+        }
+
+        .nav-dropdown-content.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .nav-dropdown-item {
+            display: block;
+            padding: 12px 16px;
+            color: #495057;
+            text-decoration: none;
+            border-bottom: 1px solid #f1f3f4;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            background: none;
+            border-left: none;
+            border-right: none;
+            border-top: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .nav-dropdown-item:last-child {
+            border-bottom: none;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .nav-dropdown-item:first-child {
+            border-radius: 6px 6px 0 0;
+        }
+
+        .nav-dropdown-item:hover {
+            background: #f8f9fa;
+            color: #007bff;
+            text-decoration: none;
+            padding-left: 20px;
+        }
+
+        /* Icon animations */
+        .accordion-icon, .dropdown-icon {
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+
+        .accordion-icon.rotated, .dropdown-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .navigation-container {
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .nav-section {
+                width: 100%;
+            }
+
+            .nav-accordion-btn,
+            .nav-options-btn,
+            .nav-imports-btn {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .nav-accordion-content,
+            .nav-dropdown-content {
+                position: static;
+                min-width: 100%;
+                margin-top: 0;
+                box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            }
+        }
+
+        /* Hide old button styles */
+        .manage-status-btn,
+        .notes-manager-btn {
+            display: none;
+        }
+
+        /* NetSuite Import Modal Styles */
+        .netsuite-import-modal {
+            max-width: 800px;
+            width: 90%;
+        }
+
+        .netsuite-import-modal textarea {
+            width: 100%;
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+
+        .netsuite-import-modal .form-group {
+            margin-bottom: 20px;
+        }
+
+        .netsuite-import-modal .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .netsuite-import-modal select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .netsuite-import-modal .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .netsuite-import-modal .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .netsuite-import-modal .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .netsuite-import-modal .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .netsuite-import-modal .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .netsuite-import-modal .btn-secondary:hover {
+            background: #545b62;
+        }
+
         .upload-btn {
             background: #007bff;
             color: white;
@@ -145,6 +450,92 @@
 
         .notes-row.expanded {
             display: table-row;
+        }
+
+        /* Line Items Count Column Styles */
+        .line-items-count-cell {
+            width: 80px;
+            text-align: center;
+            padding: 8px 4px;
+            vertical-align: middle;
+        }
+
+        .line-items-count-display,
+        .no-line-items-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .line-items-count-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 50px;
+            justify-content: center;
+        }
+
+        .line-items-count-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+
+        .line-items-count-btn .count-number {
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .import-netsuite-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            min-height: 36px;
+        }
+
+        .import-netsuite-btn:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+
+        /* Responsive design for Line Items column */
+        @media (max-width: 768px) {
+            .line-items-count-cell {
+                width: 60px;
+                padding: 4px 2px;
+            }
+            
+            .line-items-count-btn,
+            .import-netsuite-btn {
+                padding: 6px 8px;
+                font-size: 12px;
+                min-width: 35px;
+                min-height: 30px;
+            }
+            
+            .line-items-count-btn .count-number {
+                font-size: 13px;
+            }
         }
 
         /* Line Items Styles */
@@ -1374,16 +1765,105 @@
     <div class="container">
         <div class="header">
             <h1>Purchase Orders Dashboard</h1>
-            <div>
-                <button class="manage-status-btn" onclick="openStatusModal()">⚙️ Manage Status Options</button>
-                <button class="manage-status-btn" onclick="openLineItemStatusModal()">🏷️ Line Item Status
-                    Options</button>
-                <a href="/organic-vendors" class="notes-manager-btn" style="background: #28a745;">🌱 Organic Vendors</a>
-                <a href="/purchase-orders/trouble-seed" class="notes-manager-btn">⚠️ Trouble Seed</a>
-                <a href="/purchase-orders/line-items-manager" class="notes-manager-btn">📦 Line Items Manager</a>
-                <a href="/purchase-orders/orphaned-line-items" class="notes-manager-btn">🧹 Orphaned Items</a>
-                <a href="/purchase-orders/notes-manager" class="notes-manager-btn">📝 Notes Manager</a>
-                <a href="/upload" class="upload-btn">📁 Import New CSV</a>
+            <div class="navigation-container">
+                <!-- Managers Accordion -->
+                <div class="nav-section">
+                    <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion')">
+                        📊 Managers <span class="accordion-icon">▼</span>
+                    </button>
+                    <div id="managersAccordion" class="nav-accordion-content">
+                        <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
+                        <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items Manager</a>
+                        <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
+                        <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
+                        <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
+                    </div>
+                </div>
+
+                <!-- Combined Options Button -->
+                <div class="nav-section">
+                    <button class="nav-options-btn" onclick="toggleOptionsDropdown()">
+                        ⚙️ Options <span class="dropdown-icon">▼</span>
+                    </button>
+                    <div id="optionsDropdown" class="nav-dropdown-content">
+                        <button class="nav-dropdown-item" onclick="openStatusModal()">
+                            🏷️ Manage PO Status Options
+                        </button>
+                        <button class="nav-dropdown-item" onclick="openLineItemStatusModal()">
+                            � Manage Line Item Status Options
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Imports Section -->
+                <div class="nav-section">
+                    <button class="nav-imports-btn" onclick="toggleImportsDropdown()">
+                        📁 Import <span class="dropdown-icon">▼</span>
+                    </button>
+                    <div id="importsDropdown" class="nav-dropdown-content">
+                        <a href="/upload" class="nav-dropdown-item">📄 Purchase Orders CSV</a>
+                        <a href="/upload-line-items" class="nav-dropdown-item">📦 Line Items CSV</a>
+                        <button class="nav-dropdown-item" onclick="openNetSuiteImportModal()">🏢 NetSuite PO Form</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NetSuite Import Modal -->
+        <div id="netsuiteImportModal" class="modal" style="display: none;">
+            <div class="modal-content netsuite-import-modal">
+                <div class="modal-header">
+                    <h3>Import NetSuite PO Form Data</h3>
+                    <span class="close" onclick="closeNetSuiteImportModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p>Paste your NetSuite PO form data below. The system will automatically parse the line items and associate them with the corresponding purchase order.</p>
+                    
+                    <div class="form-group">
+                        <label for="netsuiteData">NetSuite PO Form Data:</label>
+                        <textarea id="netsuiteData" placeholder="Paste your NetSuite PO form data here...
+
+Format Option 1 (Headers in single line):
+Item	Vendor Name	Quantity	Description	VENDOR DESC	Rate	Units	On Hand	Available	Received	Billed	Amount	Match Bill To Receipt	Expected Receipt Date	Bill Variance Status	Closed	Expected Arrival Date	History
+BR114 : BR114/OR.M		250	ASPABROC (ordering)	ASPABROC (ordering)	26.25	M	58.142	58.142	0	0	6,562.50		3/13/2025				History
+
+Format Option 2 (Headers on separate lines):
+Item
+Vendor Name
+Quantity
+Description
+VENDOR DESC
+Rate
+Units
+On Hand
+Available
+Received
+Billed
+Amount
+Match Bill To Receipt
+Expected Receipt Date
+Bill Variance Status
+Closed
+Expected Arrival Date
+History
+FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIESTA DEL SOL	24.78	M	157.32	157.32	100	100	2,478.00	 	8/6/2025	No Variances	 	 	History"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="targetPO">Target Purchase Order (Optional):</label>
+                        <select id="targetPO">
+                            <option value="">Auto-detect from data...</option>
+                            <% purchaseOrders.forEach(po => { %>
+                                <option value="<%= po._id %>"><%= po.poNumber %> - <%= po.vendor %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button class="btn btn-secondary" onclick="closeNetSuiteImportModal()">Cancel</button>
+                        <button class="btn btn-primary" onclick="processNetSuiteImport()">Import Line Items</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1545,6 +2025,7 @@
                                     <th class="sortable date-cell" data-column="date">Date</th>
                                     <th class="sortable po-number" data-column="poNumber">PO Number</th>
                                     <th class="sortable vendor" data-column="vendor">Vendor</th>
+                                    <th class="line-items-count-cell">Line Items</th>
                                     <th class="ns-status-cell">NS Status</th>
                                     <th class="status-cell">Status</th>
                                     <th class="sortable update-date-cell" data-column="updatedAt">Last Updated</th>
@@ -1582,6 +2063,27 @@
                                         </td>
                                         <td class="vendor" title="<%= po.vendor %>">
                                             <%= po.vendor %>
+                                        </td>
+                                        <td class="line-items-count-cell">
+                                            <% if (po.lineItems && po.lineItems.length > 0) { %>
+                                                <div class="line-items-count-display">
+                                                    <button class="line-items-count-btn" 
+                                                            data-index="<%= index %>" 
+                                                            data-id="<%= po._id %>"
+                                                            title="View <%= po.lineItems.length %> line items">
+                                                        📦 <span class="count-number"><%= po.lineItems.length %></span>
+                                                    </button>
+                                                </div>
+                                            <% } else { %>
+                                                <div class="no-line-items-display">
+                                                    <button class="import-netsuite-btn" 
+                                                            data-po-id="<%= po._id %>" 
+                                                            data-po-number="<%= po.poNumber %>"
+                                                            title="Import NetSuite line items for PO <%= po.poNumber %>">
+                                                        📥
+                                                    </button>
+                                                </div>
+                                            <% } %>
                                         </td>
                                         <td class="ns-status-cell">
                                             <span class="ns-status-display">
@@ -1641,7 +2143,7 @@
 
                                     <!-- Expandable line items row -->
                                     <tr class="line-items-row" id="line-items-row-<%= index %>">
-                                        <td colspan="8" class="line-items-cell-expanded">
+                                        <td colspan="9" class="line-items-cell-expanded">
                                             <div class="line-items-header">
                                                 <div class="line-items-title">Line Items for PO <%= po.poNumber %>
                                                         <span class="line-items-status"
@@ -1665,7 +2167,7 @@
 
                                     <!-- Expandable notes row -->
                                     <tr class="notes-row" id="notes-row-<%= index %>">
-                                        <td colspan="8" class="notes-cell-expanded">
+                                        <td colspan="9" class="notes-cell-expanded">
                                             <div class="notes-header">
                                                 <div class="notes-title">Notes for PO <%= po.poNumber %>
                                                 </div>
@@ -1771,6 +2273,135 @@
     </div>
 
     <script>
+        // Navigation Functions
+        function toggleAccordion() {
+            const content = document.getElementById('managersAccordion');
+            const icon = document.querySelector('.accordion-icon');
+            
+            content.classList.toggle('show');
+            icon.classList.toggle('rotated');
+        }
+
+        function toggleOptionsDropdown() {
+            const content = document.getElementById('optionsDropdown');
+            const icon = document.querySelector('.nav-options-btn .dropdown-icon');
+            
+            content.classList.toggle('show');
+            icon.classList.toggle('rotated');
+            
+            // Close other dropdowns
+            document.getElementById('importsDropdown').classList.remove('show');
+            document.querySelector('.nav-imports-btn .dropdown-icon').classList.remove('rotated');
+        }
+
+        function toggleImportsDropdown() {
+            const content = document.getElementById('importsDropdown');
+            const icon = document.querySelector('.nav-imports-btn .dropdown-icon');
+            
+            content.classList.toggle('show');
+            icon.classList.toggle('rotated');
+            
+            // Close other dropdowns
+            document.getElementById('optionsDropdown').classList.remove('show');
+            document.querySelector('.nav-options-btn .dropdown-icon').classList.remove('rotated');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const managersSection = document.querySelector('.nav-section:first-child');
+            const optionsSection = document.querySelector('.nav-section:nth-child(2)');
+            const importsSection = document.querySelector('.nav-section:nth-child(3)');
+            
+            if (!managersSection.contains(event.target)) {
+                document.getElementById('managersAccordion').classList.remove('show');
+                document.querySelector('.accordion-icon').classList.remove('rotated');
+            }
+            
+            if (!optionsSection.contains(event.target)) {
+                document.getElementById('optionsDropdown').classList.remove('show');
+                document.querySelector('.nav-options-btn .dropdown-icon').classList.remove('rotated');
+            }
+            
+            if (!importsSection.contains(event.target)) {
+                document.getElementById('importsDropdown').classList.remove('show');
+                document.querySelector('.nav-imports-btn .dropdown-icon').classList.remove('rotated');
+            }
+        });
+
+        // NetSuite Import Functions
+        function openNetSuiteImportModal() {
+            document.getElementById('netsuiteImportModal').style.display = 'block';
+            // Close imports dropdown
+            document.getElementById('importsDropdown').classList.remove('show');
+            document.querySelector('.nav-imports-btn .dropdown-icon').classList.remove('rotated');
+        }
+
+        function closeNetSuiteImportModal() {
+            document.getElementById('netsuiteImportModal').style.display = 'none';
+            document.getElementById('netsuiteData').value = '';
+            document.getElementById('targetPO').value = '';
+        }
+
+        async function processNetSuiteImport() {
+            const netsuiteData = document.getElementById('netsuiteData').value.trim();
+            const targetPOId = document.getElementById('targetPO').value;
+            
+            if (!netsuiteData) {
+                alert('Please paste the NetSuite PO form data');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/import-netsuite', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        data: netsuiteData,
+                        targetPOId: targetPOId
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(`Successfully imported ${result.imported} line items`);
+                    closeNetSuiteImportModal();
+                    location.reload(); // Refresh to show updated data
+                } else {
+                    alert(`Import failed: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Import error:', error);
+                alert('Import failed: Network error');
+            }
+        }
+
+        // Line Items Count Button Click Handler
+        document.addEventListener('click', function(event) {
+            if (event.target.closest('.line-items-count-btn')) {
+                const btn = event.target.closest('.line-items-count-btn');
+                const index = btn.dataset.index;
+                
+                // Trigger the line items view
+                const lineItemsToggle = document.querySelector(`[data-index="${index}"][title*="View line items"]`);
+                if (lineItemsToggle) {
+                    lineItemsToggle.click();
+                }
+            }
+            
+            if (event.target.closest('.import-netsuite-btn')) {
+                const btn = event.target.closest('.import-netsuite-btn');
+                const poId = btn.dataset.poId;
+                const poNumber = btn.dataset.poNumber;
+                
+                // Set the target PO and open modal
+                document.getElementById('targetPO').value = poId;
+                openNetSuiteImportModal();
+            }
+        });
+
         let currentSort = { column: null, direction: null };
 
         // Enhanced Notes functionality - notes appear below each row

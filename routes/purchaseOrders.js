@@ -2031,4 +2031,252 @@ router.get('/export-orphaned-items', async (req, res) => {
     console.error('Error exporting orphaned items:', error);
     res.status(500).json({ error: error.message });
   }
-}); module.exports = router;
+});
+
+// NetSuite PO Form Import Route
+router.post('/import-netsuite', async (req, res) => {
+  console.log('🏢 NetSuite import route called with body:', req.body);
+  try {
+    const { data, targetPOId } = req.body;
+    
+    // Debug: Log the target PO details
+    if (targetPOId) {
+      console.log('🎯 Target PO ID received:', targetPOId);
+      const targetPO = await PurchaseOrder.findById(targetPOId);
+      if (targetPO) {
+        console.log('✅ Target PO found:', targetPO.poNumber, '-', targetPO.vendor);
+        console.log('📋 Current lineItems count:', targetPO.lineItems ? targetPO.lineItems.length : 0);
+      } else {
+        console.log('❌ Target PO not found with ID:', targetPOId);
+      }
+    } else {
+      console.log('⚠️ No target PO ID provided');
+    }
+    
+    if (!data || !data.trim()) {
+      return res.status(400).json({ error: 'No data provided' });
+    }
+    
+    // Parse the NetSuite data (tab-separated values)
+    const lines = data.trim().split('\n');
+    if (lines.length < 2) {
+      return res.status(400).json({ error: 'Invalid data format - need header and at least one data row' });
+    }
+    
+    console.log('🔍 First few lines:', lines.slice(0, 5));
+    
+    // Check if headers are in a single line (tab-separated) or multiple lines
+    let headers = [];
+    let dataStartIndex = 1;
+    
+    if (lines[0].includes('\t')) {
+      // Headers are tab-separated in first line
+      headers = lines[0].split('\t');
+      dataStartIndex = 1;
+    } else {
+      // Headers are on separate lines, find the start of data
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].includes('\t') && lines[i].split('\t').length > 3) {
+          // This line has tabs and multiple columns, treat as data
+          // Reconstruct headers from the previous lines
+          headers = lines.slice(0, i);
+          dataStartIndex = i;
+          break;
+        }
+      }
+    }
+    
+    console.log('📊 Parsed headers:', headers);
+    console.log('📍 Data starts at line:', dataStartIndex);
+    
+    // Find column indices for the data we need
+    const getColumnIndex = (headerName) => {
+      return headers.findIndex(h => h.toLowerCase().includes(headerName.toLowerCase()));
+    };
+    
+    const itemIndex = getColumnIndex('item');
+    const vendorNameIndex = getColumnIndex('vendor name');
+    const quantityIndex = getColumnIndex('quantity');
+    const descriptionIndex = getColumnIndex('description');
+    const vendorDescIndex = getColumnIndex('vendor desc');
+    const receivedIndex = getColumnIndex('received');
+    const billedIndex = getColumnIndex('billed');
+    const expectedReceiptIndex = getColumnIndex('expected receipt date');
+    const expectedArrivalIndex = getColumnIndex('expected arrival date');
+    const closedIndex = getColumnIndex('closed');
+    
+    console.log('🔍 Column indices:', { itemIndex, quantityIndex, descriptionIndex });
+    
+    if (itemIndex === -1 || quantityIndex === -1 || descriptionIndex === -1) {
+      console.log('❌ Missing required columns. Available headers:', headers);
+      return res.status(400).json({ 
+        error: 'Required columns (Item, Quantity, Description) not found',
+        availableHeaders: headers,
+        foundIndices: { itemIndex, quantityIndex, descriptionIndex }
+      });
+    }
+    
+    let imported = 0;
+    let targetPO = null;
+    
+    // If specific PO provided, verify it exists
+    if (targetPOId) {
+      targetPO = await PurchaseOrder.findById(targetPOId);
+      if (!targetPO) {
+        return res.status(400).json({ error: 'Target purchase order not found' });
+      }
+    }
+    
+    // Process each data line
+    for (let i = dataStartIndex; i < lines.length; i++) {
+      const row = lines[i].split('\t');
+      
+      console.log(`🔍 Processing line ${i}:`, row.slice(0, 5)); // Log first 5 columns
+      
+      // Skip empty rows, but don't skip rows just because they end with "History"
+      if (row.length < 3 || row.join('').trim() === '') {
+        console.log(`⏭️ Skipping line ${i}: empty row`);
+        continue;
+      }
+      
+      // Skip if this is just the word "History" alone (not a data row)
+      if (row.length === 1 && row[0] === 'History') {
+        console.log(`⏭️ Skipping line ${i}: standalone History`);
+        continue;
+      }
+      
+      // Extract item data
+      const itemCode = row[itemIndex] || '';
+      const vendorName = row[vendorNameIndex] || '';
+      const quantity = parseFloat(row[quantityIndex]) || 0;
+      const description = row[descriptionIndex] || '';
+      const vendorDescription = row[vendorDescIndex] || '';
+      const received = parseFloat(row[receivedIndex]) || 0;
+      const billed = parseFloat(row[billedIndex]) || 0;
+      const expectedReceiptDate = row[expectedReceiptIndex] || '';
+      const expectedArrivalDate = row[expectedArrivalIndex] || '';
+      const closed = row[closedIndex] || '';
+      
+      console.log(`📦 Extracted data:`, { 
+        itemCode, 
+        quantity, 
+        description: description.substring(0, 30) + '...',
+        expectedReceiptDate,
+        expectedArrivalDate
+      });
+      
+      // Helper function to safely parse dates
+      const parseDate = (dateStr) => {
+        if (!dateStr || dateStr.trim() === '' || dateStr.trim() === ' ') {
+          return null;
+        }
+        const parsed = new Date(dateStr.trim());
+        return isNaN(parsed.getTime()) ? null : parsed;
+      };
+      
+      // Skip if essential data is missing
+      if (!itemCode && !description) {
+        console.log(`⏭️ Skipping line ${i}: missing essential data`);
+        continue;
+      }
+      
+      // Try to find the PO if not specified
+      let poToUse = targetPO;
+      if (!poToUse && vendorName) {
+        // Try to find PO by vendor name
+        console.log(`🔍 Looking for PO with vendor: ${vendorName}`);
+        poToUse = await PurchaseOrder.findOne({ 
+          vendor: { $regex: vendorName, $options: 'i' } 
+        }).sort({ date: -1 });
+        console.log(`🔍 Found PO by vendor search:`, poToUse ? poToUse.poNumber : 'None');
+      } else if (targetPO) {
+        console.log(`🎯 Using target PO: ${targetPO.poNumber}`);
+      }
+      
+      if (!poToUse) {
+        console.log(`❌ No PO found for item: ${itemCode} - ${description.substring(0, 30)}...`);
+        continue;
+      }
+      
+      console.log(`✅ Processing item ${itemCode} for PO ${poToUse.poNumber}`);
+      
+      // Create the line item
+      const lineItem = new LineItem({
+        poId: poToUse._id,
+        poNumber: poToUse.poNumber,
+        date: expectedReceiptDate || expectedArrivalDate || new Date().toISOString().split('T')[0],
+        memo: description, // Use description as memo (required field)
+        sku: itemCode,
+        itemStatus: closed === 'T' ? 'Closed' : (received >= quantity ? 'Received' : 'Pending'),
+        received: received >= quantity, // Convert to boolean - true if fully received
+        receivedDate: received > 0 ? new Date() : null,
+        eta: parseDate(expectedArrivalDate), // Use safe date parsing
+        notes: `NetSuite Import - Qty: ${quantity}, Received: ${received}, Billed: ${billed}${vendorDescription ? `, Vendor Desc: ${vendorDescription}` : ''}`
+      });
+      
+      console.log(`💾 Creating LineItem with eta:`, parseDate(expectedArrivalDate));
+      
+      await lineItem.save();
+      console.log(`✅ LineItem saved with ID: ${lineItem._id}`);
+      
+      // Update the PO's lineItems array if it doesn't already contain this line item
+      if (!poToUse.lineItems) {
+        poToUse.lineItems = [];
+      }
+      
+      // Check if line item already exists in PO
+      const existingIndex = poToUse.lineItems.findIndex(li => 
+        li.sku === itemCode && li.memo === description
+      );
+      
+      if (existingIndex === -1) {
+        const lineItemData = {
+          sku: itemCode,
+          memo: description,
+          itemStatus: closed === 'T' ? 'Closed' : (received >= quantity ? 'Received' : 'Pending'),
+          received: received >= quantity,
+          lineItemId: lineItem._id,
+          // NetSuite specific data for reference
+          netsuiteQuantity: quantity,
+          netsuiteReceived: received,
+          netsuiteBilled: billed,
+          vendorDescription: vendorDescription
+        };
+        
+        poToUse.lineItems.push(lineItemData);
+        console.log(`➕ Added new line item to PO: ${itemCode}`);
+      } else {
+        // Update existing line item
+        poToUse.lineItems[existingIndex] = {
+          ...poToUse.lineItems[existingIndex],
+          sku: itemCode,
+          memo: description,
+          itemStatus: closed === 'T' ? 'Closed' : (received >= quantity ? 'Received' : 'Pending'),
+          received: received >= quantity,
+          lineItemId: lineItem._id,
+          netsuiteQuantity: quantity,
+          netsuiteReceived: received,
+          netsuiteBilled: billed,
+          vendorDescription: vendorDescription
+        };
+        console.log(`🔄 Updated existing line item in PO: ${itemCode}`);
+      }
+      
+      await poToUse.save();
+      console.log(`💾 PO updated with ${poToUse.lineItems.length} line items`);
+      imported++;
+    }
+    
+    res.json({ 
+      success: true, 
+      imported,
+      message: `Successfully imported ${imported} line items` 
+    });
+    
+  } catch (error) {
+    console.error('NetSuite import error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+module.exports = router;
