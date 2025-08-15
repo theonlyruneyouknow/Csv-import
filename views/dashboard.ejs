@@ -54,7 +54,7 @@
         .nav-accordion-btn:hover {
             background: #218838;
             transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .nav-accordion-content {
@@ -63,7 +63,7 @@
             left: 0;
             background: white;
             min-width: 220px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border-radius: 6px;
             border: 1px solid #dee2e6;
             z-index: 1000;
@@ -127,7 +127,7 @@
         .nav-options-btn:hover {
             background: #5a6268;
             transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         /* Imports Button Styles */
@@ -151,7 +151,7 @@
         .nav-imports-btn:hover {
             background: #0056b3;
             transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         /* Dropdown Styles */
@@ -161,7 +161,7 @@
             left: 0;
             background: white;
             min-width: 200px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border-radius: 6px;
             border: 1px solid #dee2e6;
             z-index: 1000;
@@ -212,12 +212,14 @@
         }
 
         /* Icon animations */
-        .accordion-icon, .dropdown-icon {
+        .accordion-icon,
+        .dropdown-icon {
             transition: transform 0.3s ease;
             font-size: 12px;
         }
 
-        .accordion-icon.rotated, .dropdown-icon.rotated {
+        .accordion-icon.rotated,
+        .dropdown-icon.rotated {
             transform: rotate(180deg);
         }
 
@@ -245,7 +247,7 @@
                 position: static;
                 min-width: 100%;
                 margin-top: 0;
-                box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+                box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
             }
         }
 
@@ -487,7 +489,7 @@
         .line-items-count-btn:hover {
             background: #218838;
             transform: translateY(-1px);
-            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
         }
 
         .line-items-count-btn .count-number {
@@ -515,7 +517,7 @@
         .import-netsuite-btn:hover {
             background: #0056b3;
             transform: translateY(-1px);
-            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
         }
 
         /* Responsive design for Line Items column */
@@ -524,7 +526,7 @@
                 width: 60px;
                 padding: 4px 2px;
             }
-            
+
             .line-items-count-btn,
             .import-netsuite-btn {
                 padding: 6px 8px;
@@ -532,7 +534,7 @@
                 min-width: 35px;
                 min-height: 30px;
             }
-            
+
             .line-items-count-btn .count-number {
                 font-size: 13px;
             }
@@ -1773,7 +1775,8 @@
                     </button>
                     <div id="managersAccordion" class="nav-accordion-content">
                         <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
-                        <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items Manager</a>
+                        <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items
+                            Manager</a>
                         <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
                         <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
                         <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
@@ -1803,7 +1806,8 @@
                     <div id="importsDropdown" class="nav-dropdown-content">
                         <a href="/upload" class="nav-dropdown-item">📄 Purchase Orders CSV</a>
                         <a href="/upload-line-items" class="nav-dropdown-item">📦 Line Items CSV</a>
-                        <button class="nav-dropdown-item" onclick="openNetSuiteImportModal()">🏢 NetSuite PO Form</button>
+                        <button class="nav-dropdown-item" onclick="openNetSuiteImportModal()">🏢 NetSuite PO
+                            Form</button>
                     </div>
                 </div>
             </div>
@@ -1817,11 +1821,13 @@
                     <span class="close" onclick="closeNetSuiteImportModal()">&times;</span>
                 </div>
                 <div class="modal-body">
-                    <p>Paste your NetSuite PO form data below. The system will automatically parse the line items and associate them with the corresponding purchase order.</p>
-                    
+                    <p>Paste your NetSuite PO form data below. The system will automatically parse the line items and
+                        associate them with the corresponding purchase order.</p>
+
                     <div class="form-group">
                         <label for="netsuiteData">NetSuite PO Form Data:</label>
-                        <textarea id="netsuiteData" placeholder="Paste your NetSuite PO form data here...
+                        <textarea id="netsuiteData"
+                            placeholder="Paste your NetSuite PO form data here...
 
 Format Option 1 (Headers in single line):
 Item	Vendor Name	Quantity	Description	VENDOR DESC	Rate	Units	On Hand	Available	Received	Billed	Amount	Match Bill To Receipt	Expected Receipt Date	Bill Variance Status	Closed	Expected Arrival Date	History
@@ -1848,17 +1854,19 @@ Expected Arrival Date
 History
 FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIESTA DEL SOL	24.78	M	157.32	157.32	100	100	2,478.00	 	8/6/2025	No Variances	 	 	History"></textarea>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="targetPO">Target Purchase Order (Optional):</label>
                         <select id="targetPO">
                             <option value="">Auto-detect from data...</option>
-                            <% purchaseOrders.forEach(po => { %>
-                                <option value="<%= po._id %>"><%= po.poNumber %> - <%= po.vendor %></option>
-                            <% }); %>
+                            <% purchaseOrders.forEach(po=> { %>
+                                <option value="<%= po._id %>">
+                                    <%= po.poNumber %> - <%= po.vendor %>
+                                </option>
+                                <% }); %>
                         </select>
                     </div>
-                    
+
                     <div class="form-actions">
                         <button class="btn btn-secondary" onclick="closeNetSuiteImportModal()">Cancel</button>
                         <button class="btn btn-primary" onclick="processNetSuiteImport()">Import Line Items</button>
@@ -2065,25 +2073,25 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                             <%= po.vendor %>
                                         </td>
                                         <td class="line-items-count-cell">
-                                            <% if (po.lineItems && po.lineItems.length > 0) { %>
+                                            <% if (po.lineItems && po.lineItems.length> 0) { %>
                                                 <div class="line-items-count-display">
-                                                    <button class="line-items-count-btn" 
-                                                            data-index="<%= index %>" 
-                                                            data-id="<%= po._id %>"
-                                                            title="View <%= po.lineItems.length %> line items">
-                                                        📦 <span class="count-number"><%= po.lineItems.length %></span>
+                                                    <button class="line-items-count-btn" data-index="<%= index %>"
+                                                        data-id="<%= po._id %>"
+                                                        title="View <%= po.lineItems.length %> line items">
+                                                        📦 <span class="count-number">
+                                                            <%= po.lineItems.length %>
+                                                        </span>
                                                     </button>
                                                 </div>
-                                            <% } else { %>
-                                                <div class="no-line-items-display">
-                                                    <button class="import-netsuite-btn" 
-                                                            data-po-id="<%= po._id %>" 
+                                                <% } else { %>
+                                                    <div class="no-line-items-display">
+                                                        <button class="import-netsuite-btn" data-po-id="<%= po._id %>"
                                                             data-po-number="<%= po.poNumber %>"
                                                             title="Import NetSuite line items for PO <%= po.poNumber %>">
-                                                        📥
-                                                    </button>
-                                                </div>
-                                            <% } %>
+                                                            📥
+                                                        </button>
+                                                    </div>
+                                                    <% } %>
                                         </td>
                                         <td class="ns-status-cell">
                                             <span class="ns-status-display">
@@ -2277,7 +2285,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function toggleAccordion() {
             const content = document.getElementById('managersAccordion');
             const icon = document.querySelector('.accordion-icon');
-            
+
             content.classList.toggle('show');
             icon.classList.toggle('rotated');
         }
@@ -2285,10 +2293,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function toggleOptionsDropdown() {
             const content = document.getElementById('optionsDropdown');
             const icon = document.querySelector('.nav-options-btn .dropdown-icon');
-            
+
             content.classList.toggle('show');
             icon.classList.toggle('rotated');
-            
+
             // Close other dropdowns
             document.getElementById('importsDropdown').classList.remove('show');
             document.querySelector('.nav-imports-btn .dropdown-icon').classList.remove('rotated');
@@ -2297,31 +2305,31 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function toggleImportsDropdown() {
             const content = document.getElementById('importsDropdown');
             const icon = document.querySelector('.nav-imports-btn .dropdown-icon');
-            
+
             content.classList.toggle('show');
             icon.classList.toggle('rotated');
-            
+
             // Close other dropdowns
             document.getElementById('optionsDropdown').classList.remove('show');
             document.querySelector('.nav-options-btn .dropdown-icon').classList.remove('rotated');
         }
 
         // Close dropdowns when clicking outside
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const managersSection = document.querySelector('.nav-section:first-child');
             const optionsSection = document.querySelector('.nav-section:nth-child(2)');
             const importsSection = document.querySelector('.nav-section:nth-child(3)');
-            
+
             if (!managersSection.contains(event.target)) {
                 document.getElementById('managersAccordion').classList.remove('show');
                 document.querySelector('.accordion-icon').classList.remove('rotated');
             }
-            
+
             if (!optionsSection.contains(event.target)) {
                 document.getElementById('optionsDropdown').classList.remove('show');
                 document.querySelector('.nav-options-btn .dropdown-icon').classList.remove('rotated');
             }
-            
+
             if (!importsSection.contains(event.target)) {
                 document.getElementById('importsDropdown').classList.remove('show');
                 document.querySelector('.nav-imports-btn .dropdown-icon').classList.remove('rotated');
@@ -2345,12 +2353,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         async function processNetSuiteImport() {
             const netsuiteData = document.getElementById('netsuiteData').value.trim();
             const targetPOId = document.getElementById('targetPO').value;
-            
+
             if (!netsuiteData) {
                 alert('Please paste the NetSuite PO form data');
                 return;
             }
-            
+
             try {
                 const response = await fetch('/api/import-netsuite', {
                     method: 'POST',
@@ -2362,9 +2370,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         targetPOId: targetPOId
                     })
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (response.ok) {
                     alert(`Successfully imported ${result.imported} line items`);
                     closeNetSuiteImportModal();
@@ -2379,23 +2387,23 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         }
 
         // Line Items Count Button Click Handler
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             if (event.target.closest('.line-items-count-btn')) {
                 const btn = event.target.closest('.line-items-count-btn');
                 const index = btn.dataset.index;
-                
+
                 // Trigger the line items view
                 const lineItemsToggle = document.querySelector(`[data-index="${index}"][title*="View line items"]`);
                 if (lineItemsToggle) {
                     lineItemsToggle.click();
                 }
             }
-            
+
             if (event.target.closest('.import-netsuite-btn')) {
                 const btn = event.target.closest('.import-netsuite-btn');
                 const poId = btn.dataset.poId;
                 const poNumber = btn.dataset.poNumber;
-                
+
                 // Set the target PO and open modal
                 document.getElementById('targetPO').value = poId;
                 openNetSuiteImportModal();
