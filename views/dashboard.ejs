@@ -2395,8 +2395,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                         <% } %>
                                                             <button
                                                                 class="url-btn <%= po.poUrl && po.poUrl.trim() ? 'has-url' : '' %>"
-                                                                data-id="<%- po._id %>" 
-                                                                data-po="<%- po.poNumber %>"
+                                                                data-id="<%- po._id %>" data-po="<%- po.poNumber %>"
                                                                 data-url="<%- po.poUrl || '' %>"
                                                                 title="<%= po.poUrl && po.poUrl.trim() ? 'Edit URL' : 'Add URL' %>">
                                                                 🔗
@@ -2851,6 +2850,32 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 // Set the target PO and open modal for updating
                 document.getElementById('targetPO').value = poId;
                 openNetSuiteImportModal(true, poNumber); // true = update mode
+            }
+
+            // Handle URL button clicks using event delegation
+            if (event.target.closest('.url-btn')) {
+                console.log('🔗 URL button clicked via event delegation!');
+                const btn = event.target.closest('.url-btn');
+                
+                console.log('📋 Button data:', {
+                    id: btn.getAttribute('data-id'),
+                    po: btn.getAttribute('data-po'),
+                    url: btn.getAttribute('data-url'),
+                    className: btn.className
+                });
+
+                try {
+                    currentUrlData = {
+                        id: btn.getAttribute('data-id'),
+                        poNumber: btn.getAttribute('data-po'),
+                        url: btn.getAttribute('data-url') || ''
+                    };
+                    console.log('📝 Opening URL modal with data:', currentUrlData);
+                    openUrlModal();
+                    console.log('✅ URL modal opened successfully');
+                } catch (error) {
+                    console.error('❌ Error in URL button handler:', error);
+                }
             }
         });
 
@@ -3491,18 +3516,18 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             console.log('🔧 Initializing URL buttons...');
             const urlButtons = document.querySelectorAll('.url-btn');
             console.log(`📊 Found ${urlButtons.length} URL buttons`);
-            
+
             if (urlButtons.length === 0) {
                 console.warn('⚠️ No URL buttons found - checking DOM structure');
                 const allButtons = document.querySelectorAll('button');
                 console.log(`📊 Found ${allButtons.length} total buttons`);
                 const tableRows = document.querySelectorAll('tbody tr');
                 console.log(`📊 Found ${tableRows.length} table rows`);
-                
+
                 // Let's also check if buttons with the link emoji exist
                 const linkButtons = document.querySelectorAll('button:contains("🔗")');
                 console.log(`🔍 Found ${linkButtons.length} buttons with 🔗`);
-                
+
                 // Check for buttons in the po-container
                 const poContainers = document.querySelectorAll('.po-container');
                 console.log(`📦 Found ${poContainers.length} po-containers`);
@@ -3511,7 +3536,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     console.log(`Container ${i + 1} has ${buttonsInContainer.length} buttons`);
                 });
             }
-            
+
             urlButtons.forEach((btn, index) => {
                 console.log(`🔗 Setting up button ${index + 1}:`, {
                     element: btn,
@@ -3520,18 +3545,18 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     url: btn.getAttribute('data-url'),
                     classes: btn.className
                 });
-                
+
                 btn.addEventListener('click', function (event) {
                     event.preventDefault();
                     event.stopPropagation();
-                    
+
                     console.log('�️ URL button clicked!');
                     console.log('Button attributes:', {
                         id: this.getAttribute('data-id'),
                         po: this.getAttribute('data-po'),
                         url: this.getAttribute('data-url')
                     });
-                    
+
                     try {
                         currentUrlData = {
                             id: this.getAttribute('data-id'),
@@ -3545,7 +3570,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     }
                 });
             });
-            
+
             console.log('✅ URL button initialization complete');
         }
 
@@ -3554,21 +3579,21 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             console.log('🧪 Testing URL button functionality...');
             const urlButtons = document.querySelectorAll('.url-btn');
             console.log(`Found ${urlButtons.length} URL buttons for testing`);
-            
+
             urlButtons.forEach((btn, index) => {
                 console.log(`Button ${index + 1}:`, {
                     hasClickListener: btn.onclick !== null,
                     hasEventListeners: getEventListeners ? getEventListeners(btn) : 'DevTools required',
                     attributes: {
                         id: btn.getAttribute('data-id'),
-                        po: btn.getAttribute('data-po'), 
+                        po: btn.getAttribute('data-po'),
                         url: btn.getAttribute('data-url')
                     },
                     isVisible: btn.offsetParent !== null,
                     className: btn.className
                 });
             });
-            
+
             // Test clicking the first button programmatically
             if (urlButtons.length > 0) {
                 console.log('🖱️ Testing programmatic click on first URL button...');
@@ -3723,7 +3748,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function initNotesHistoryButtons() {
             const notesHistoryButtons = document.querySelectorAll('.notes-history-btn');
             console.log(`🔧 Initializing ${notesHistoryButtons.length} notes history buttons`);
-            
+
             notesHistoryButtons.forEach(btn => {
                 btn.addEventListener('click', function () {
                     console.log('📋 Notes history button clicked for PO:', this.dataset.po);
@@ -3732,7 +3757,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     openNotesHistoryModal(poId, poNumber);
                 });
             });
-            
+
             console.log('✅ Notes history buttons initialized');
         }
 
@@ -4993,16 +5018,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 console.log('DOMContentLoaded event fired');
                 // Load line item status options for dropdowns
                 loadGlobalLineItemStatusOptions();
-                // Initialize URL buttons
-                console.log('About to call initUrlButtons');
-                initUrlButtons();
-                console.log('initUrlButtons called');
+                // Initialize URL buttons - now using event delegation instead
+                // console.log('About to call initUrlButtons');
+                // initUrlButtons();
+                // console.log('initUrlButtons called');
                 // Initialize URL input listeners
                 initUrlInputListeners();
                 // Initialize notes history buttons
                 initNotesHistoryButtons();
-                // Test URL buttons functionality
-                setTimeout(() => testUrlButtons(), 1000);
+                // Test URL buttons functionality - now using event delegation
+                // setTimeout(() => testUrlButtons(), 1000);
                 // Apply filters when DOM is loaded
                 setTimeout(() => applyFilters(), 50);
             });
@@ -5010,9 +5035,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             console.log('DOM already loaded, initializing immediately');
             // DOM is already loaded
             loadGlobalLineItemStatusOptions();
-            console.log('About to call initUrlButtons (immediate)');
-            initUrlButtons();
-            console.log('initUrlButtons called (immediate)');
+            // Initialize URL buttons - now using event delegation instead
+            // console.log('About to call initUrlButtons (immediate)');
+            // initUrlButtons();
+            // console.log('initUrlButtons called (immediate)');
             // Initialize URL input listeners
             initUrlInputListeners();
             // Initialize notes history buttons
