@@ -49,6 +49,36 @@ const lineItemSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    // 17track integration fields
+    trackingNumber: {
+        type: String,
+        default: '',
+        index: true
+    },
+    trackingCarrier: {
+        type: String,
+        default: ''
+    },
+    trackingStatus: {
+        type: String,
+        default: ''
+    },
+    trackingStatusDescription: {
+        type: String,
+        default: ''
+    },
+    trackingLastUpdate: {
+        type: Date,
+        default: null
+    },
+    trackingLocation: {
+        type: String,
+        default: ''
+    },
+    trackingEstimatedDelivery: {
+        type: Date,
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now

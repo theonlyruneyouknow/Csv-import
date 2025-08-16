@@ -33,6 +33,10 @@ const purchaseOrderSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  shippingCarrier: {        // Shipping carrier (FedEx, UPS, USPS, etc.)
+    type: String,
+    default: 'FedEx'          // Default to FedEx as most vendors use it
+  },
   lineItems: [{             // Array of line items for this PO
     sku: String,
     memo: String,
