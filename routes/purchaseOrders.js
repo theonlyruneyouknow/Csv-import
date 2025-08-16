@@ -2218,18 +2218,18 @@ router.post('/import-netsuite', async (req, res) => {
       // Handle clearing existing line items for this PO (only once per PO)
       if (poToUse && !addToExisting && !clearedPOs.has(poToUse._id.toString())) {
         console.log(`🗑️ Clearing ${poToUse.lineItems ? poToUse.lineItems.length : 0} existing line items from PO ${poToUse.poNumber} (replace mode)`);
-        
+
         // Delete existing LineItem documents for this PO
         if (poToUse.lineItems && poToUse.lineItems.length > 0) {
           await LineItem.deleteMany({ poId: poToUse._id });
           console.log(`🗑️ Deleted existing LineItem documents for PO ${poToUse.poNumber}`);
         }
-        
+
         // Clear the lineItems array in the PO
         poToUse.lineItems = [];
         await poToUse.save();
         console.log(`✅ PO ${poToUse.poNumber} lineItems array cleared`);
-        
+
         // Mark this PO as cleared
         clearedPOs.add(poToUse._id.toString());
       }

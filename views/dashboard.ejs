@@ -1958,7 +1958,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                 Add to existing line items (instead of replacing them)
                             </label>
                             <p class="option-description">
-                                <strong>Unchecked (Default):</strong> Replace all existing line items with the new data<br>
+                                <strong>Unchecked (Default):</strong> Replace all existing line items with the new
+                                data<br>
                                 <strong>Checked:</strong> Add the imported items to any existing line items
                             </p>
                         </div>
@@ -2133,7 +2134,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     <th class="line-items-count-cell">Line Items</th>
                                     <th class="ns-status-cell">NS Status</th>
                                     <th class="status-cell">Status</th>
-                                    <th class="sortable shipping-tracking-cell" data-column="shippingTracking">Shipping Tracking</th>
+                                    <th class="sortable shipping-tracking-cell" data-column="shippingTracking">Shipping
+                                        Tracking</th>
                                     <th class="next-update-cell">Next Update</th>
                                     <th class="notes-toggle-cell">Notes</th>
                                 </tr>
@@ -2174,9 +2176,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                 <div class="line-items-count-display">
                                                     <button class="line-items-count-btn" data-index="<%= index %>"
                                                         data-id="<%= po._id %>"
-                                                        title="View <%= po.lineItems.length %> line items">
+                                                        title="View line items: <%= po.lineItems.filter(item => item.received).length %> received / <%= po.lineItems.length %> total">
                                                         📦 <span class="count-number">
-                                                            <%= po.lineItems.length %>
+                                                            <% const totalItems=po.lineItems.length; const
+                                                                receivedItems=po.lineItems.filter(item=>
+                                                                item.received).length;
+                                                                %>
+                                                                <%= receivedItems %>/<%= totalItems %>
                                                         </span>
                                                     </button>
                                                     <button class="update-netsuite-btn" data-po-id="<%= po._id %>"
@@ -2214,10 +2220,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                             </select>
                                         </td>
                                         <td class="shipping-tracking-cell">
-                                            <input type="text" 
-                                                class="shipping-tracking-input form-control-sm"
-                                                placeholder="Enter tracking #"
-                                                value="<%= po.shippingTracking || '' %>"
+                                            <input type="text" class="shipping-tracking-input form-control-sm"
+                                                placeholder="Enter tracking #" value="<%= po.shippingTracking || '' %>"
                                                 data-po-id="<%= po._id %>"
                                                 style="font-size: 12px; border: 1px solid #ddd; padding: 4px 8px;">
                                         </td>
@@ -2458,7 +2462,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             }
 
             modal.style.display = 'block';
-            
+
             // Close imports dropdown if it's open
             const importsDropdown = document.getElementById('importsDropdown');
             const dropdownIcon = document.querySelector('.nav-imports-btn .dropdown-icon');
@@ -2770,7 +2774,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     .then(data => {
                         // Remove saving state
                         this.style.backgroundColor = '';
-                        
+
                         // Update appearance based on content
                         if (shippingTracking) {
                             this.classList.add('has-tracking');
@@ -2789,7 +2793,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             });
 
             // Also save on Enter key
-            trackingInput.addEventListener('keydown', function(e) {
+            trackingInput.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter') {
                     this.blur(); // Trigger the blur event
                 }
