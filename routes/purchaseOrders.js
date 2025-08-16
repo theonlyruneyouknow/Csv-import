@@ -1749,6 +1749,24 @@ router.put('/:id/url', async (req, res) => {
   }
 });
 
+// Update shipping tracking
+router.put('/:id/shipping-tracking', async (req, res) => {
+  try {
+    const { shippingTracking } = req.body;
+
+    const updated = await PurchaseOrder.findByIdAndUpdate(
+      req.params.id,
+      { shippingTracking: shippingTracking || '', updatedAt: new Date() },
+      { new: true }
+    );
+    console.log(`Updated shipping tracking for PO ${updated.poNumber}: ${shippingTracking || 'cleared'}`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Shipping tracking update error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Route to identify and manage orphaned line items
 router.get('/orphaned-line-items', async (req, res) => {
   try {

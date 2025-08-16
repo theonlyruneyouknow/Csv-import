@@ -29,6 +29,10 @@ const purchaseOrderSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  shippingTracking: {       // Shipping tracking number/URL - for future implementation
+    type: String,
+    default: ''
+  },
   lineItems: [{             // Array of line items for this PO
     sku: String,
     memo: String,
