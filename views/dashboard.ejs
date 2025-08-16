@@ -329,6 +329,38 @@
             background: #545b62;
         }
 
+        .import-mode-options {
+            margin-top: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 10px;
+            margin-top: 2px;
+            transform: scale(1.2);
+        }
+
+        .option-description {
+            font-size: 12px;
+            color: #666;
+            margin: 0;
+            padding-left: 22px;
+            line-height: 1.4;
+        }
+
+        .option-description strong {
+            color: #333;
+        }
+
         .upload-btn {
             background: #007bff;
             color: white;
@@ -1918,6 +1950,20 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         </select>
                     </div>
 
+                    <div class="form-group">
+                        <div class="import-mode-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="addToExisting" />
+                                <span class="checkmark"></span>
+                                Add to existing line items (instead of replacing them)
+                            </label>
+                            <p class="option-description">
+                                <strong>Unchecked (Default):</strong> Replace all existing line items with the new data<br>
+                                <strong>Checked:</strong> Add the imported items to any existing line items
+                            </p>
+                        </div>
+                    </div>
+
                     <div class="form-actions">
                         <button class="btn btn-secondary" onclick="closeNetSuiteImportModal()">Cancel</button>
                         <button class="btn btn-primary" onclick="processNetSuiteImport()">Import Line Items</button>
@@ -2428,11 +2474,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById('netsuiteImportModal').style.display = 'none';
             document.getElementById('netsuiteData').value = '';
             document.getElementById('targetPO').value = '';
+            document.getElementById('addToExisting').checked = false;
         }
 
         async function processNetSuiteImport() {
             const netsuiteData = document.getElementById('netsuiteData').value.trim();
             const targetPOId = document.getElementById('targetPO').value;
+            const addToExisting = document.getElementById('addToExisting').checked;
 
             if (!netsuiteData) {
                 alert('Please paste the NetSuite PO form data');
@@ -2447,7 +2495,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     },
                     body: JSON.stringify({
                         data: netsuiteData,
-                        targetPOId: targetPOId
+                        targetPOId: targetPOId,
+                        addToExisting: addToExisting
                     })
                 });
 

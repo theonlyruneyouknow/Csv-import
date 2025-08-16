@@ -2055,7 +2055,8 @@ router.get('/export-orphaned-items', async (req, res) => {
 router.post('/import-netsuite', async (req, res) => {
   console.log('🏢 NetSuite import route called with body:', req.body);
   try {
-    const { data, targetPOId } = req.body;
+    const { data, targetPOId, addToExisting } = req.body;
+    console.log(`🔄 Import mode: ${addToExisting ? 'ADD to existing' : 'REPLACE existing'} line items`);
 
     // Debug: Log the target PO details
     if (targetPOId) {
@@ -2136,6 +2137,7 @@ router.post('/import-netsuite', async (req, res) => {
 
     let imported = 0;
     let targetPO = null;
+    let clearedPOs = new Set(); // Track which POs we've already cleared
 
     // If specific PO provided, verify it exists
     if (targetPOId) {
@@ -2143,6 +2145,8 @@ router.post('/import-netsuite', async (req, res) => {
       if (!targetPO) {
         return res.status(400).json({ error: 'Target purchase order not found' });
       }
+
+
     }
 
     // Process each data line
@@ -2209,6 +2213,25 @@ router.post('/import-netsuite', async (req, res) => {
         console.log(`🔍 Found PO by vendor search:`, poToUse ? poToUse.poNumber : 'None');
       } else if (targetPO) {
         console.log(`🎯 Using target PO: ${targetPO.poNumber}`);
+      }
+
+      // Handle clearing existing line items for this PO (only once per PO)
+      if (poToUse && !addToExisting && !clearedPOs.has(poToUse._id.toString())) {
+        console.log(`🗑️ Clearing ${poToUse.lineItems ? poToUse.lineItems.length : 0} existing line items from PO ${poToUse.poNumber} (replace mode)`);
+        
+        // Delete existing LineItem documents for this PO
+        if (poToUse.lineItems && poToUse.lineItems.length > 0) {
+          await LineItem.deleteMany({ poId: poToUse._id });
+          console.log(`🗑️ Deleted existing LineItem documents for PO ${poToUse.poNumber}`);
+        }
+        
+        // Clear the lineItems array in the PO
+        poToUse.lineItems = [];
+        await poToUse.save();
+        console.log(`✅ PO ${poToUse.poNumber} lineItems array cleared`);
+        
+        // Mark this PO as cleared
+        clearedPOs.add(poToUse._id.toString());
       }
 
       if (!poToUse) {
