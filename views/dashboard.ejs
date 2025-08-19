@@ -2364,13 +2364,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     <th class="sortable date-cell" data-column="date">Date</th>
                                     <th class="sortable po-number" data-column="poNumber">PO Number</th>
                                     <th class="sortable vendor" data-column="vendor">Vendor</th>
-                                    <th class="line-items-count-cell">Line Items</th>
-                                    <th class="ns-status-cell">NS Status</th>
-                                    <th class="status-cell">Status</th>
+                                    <th class="sortable line-items-count-cell" data-column="lineItemsCount">Line Items</th>
+                                    <th class="sortable ns-status-cell" data-column="nsStatus">NS Status</th>
+                                    <th class="sortable status-cell" data-column="status">Status</th>
                                     <th class="sortable shipping-tracking-cell" data-column="shippingTracking">Tracking
                                         <br><small style="font-weight: normal;">(Carrier & #)</small>
                                     </th>
-                                    <th class="next-update-cell">Next Update</th>
+                                    <th class="sortable next-update-cell" data-column="nextUpdateDate">Next Update</th>
                                     <th class="notes-toggle-cell">Notes</th>
                                 </tr>
                             </thead>
@@ -4451,9 +4451,25 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         aValue = aData.poNumber.toLowerCase();
                         bValue = bData.poNumber.toLowerCase();
                         break;
+                    case 'lineItemsCount':
+                        aValue = aData.lineItems ? aData.lineItems.length : 0;
+                        bValue = bData.lineItems ? bData.lineItems.length : 0;
+                        break;
+                    case 'nsStatus':
+                        aValue = (aData.nsStatus || '').toLowerCase();
+                        bValue = (bData.nsStatus || '').toLowerCase();
+                        break;
+                    case 'status':
+                        aValue = (aData.status || '').toLowerCase();
+                        bValue = (bData.status || '').toLowerCase();
+                        break;
                     case 'shippingTracking':
                         aValue = (aData.shippingTracking || '').toLowerCase();
                         bValue = (bData.shippingTracking || '').toLowerCase();
+                        break;
+                    case 'nextUpdateDate':
+                        aValue = aData.nextUpdateDate ? new Date(aData.nextUpdateDate) : new Date(0);
+                        bValue = bData.nextUpdateDate ? new Date(bData.nextUpdateDate) : new Date(0);
                         break;
                     case 'updatedAt':
                         aValue = new Date(aData.updatedAt || 0);
