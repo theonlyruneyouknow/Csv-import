@@ -26,38 +26,84 @@ router.get('/', async (req, res) => {
     try {
         console.log('🌱 Loading Organic Vendors Dashboard...');
 
-        // Get all organic vendors with sorting
-        const { sortBy = 'vendorName', sortOrder = 'asc', status = 'all' } = req.query;
+        // Get organic vendors with sorting and optional pagination
+        const { 
+            sortBy = 'vendorName', 
+            sortOrder = 'asc', 
+            status = 'all',
+            page = 1,
+            limit = 50 // Default to 50 vendors per page for larger datasets
+        } = req.query;
 
         let filter = {};
         if (status !== 'all') {
             filter.status = status;
         }
 
-        const vendors = await OrganicVendor.find(filter)
-            .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 });
+        const skip = (parseInt(page) - 1) * parseInt(limit);
 
-        // Calculate summary statistics
-        const totalVendors = vendors.length;
-        const activeVendors = vendors.filter(v => v.status === 'Active').length;
-        const expiredCertifications = vendors.filter(v => v.certificationStatus === 'Expired').length;
-        const expiringSoon = vendors.filter(v => v.certificationStatus === 'Expiring Soon').length;
+        // Performance optimization: Exclude heavy data fields from initial load
+        const vendors = await OrganicVendor.find(filter, {
+            // Exclude large base64 certificate and profile data from initial load
+            'certificate.data': 0,
+            'operationsProfile.data': 0,
+            // Also exclude large raw text data that can be fetched on-demand
+            'organicSeedsRawData': 0,
+            // Keep metadata about files but not the content
+            'certificate.filename': 1,
+            'certificate.mimeType': 1,
+            'certificate.uploadDate': 1,
+            'certificate.source': 1,
+            'operationsProfile.filename': 1,
+            'operationsProfile.mimeType': 1,
+            'operationsProfile.uploadDate': 1,
+            'operationsProfile.source': 1
+        })
+        .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
+        .skip(skip)
+        .limit(parseInt(limit));
+
+        // Calculate summary statistics (for all vendors, not just current page)
+        const totalVendors = await OrganicVendor.countDocuments(filter);
+        const allVendorStats = await OrganicVendor.aggregate([
+            { $match: filter },
+            {
+                $group: {
+                    _id: null,
+                    total: { $sum: 1 },
+                    active: { $sum: { $cond: [{ $eq: ['$status', 'Active'] }, 1, 0] } }
+                }
+            }
+        ]);
+
+        // Calculate certification status stats using virtual fields
+        const currentPageStats = {
+            expired: vendors.filter(v => v.certificationStatus === 'Expired').length,
+            expiringSoon: vendors.filter(v => v.certificationStatus === 'Expiring Soon').length
+        };
 
         // Get unique statuses for filter dropdown
         const uniqueStatuses = await OrganicVendor.distinct('status');
 
-        console.log(`📊 Found ${totalVendors} organic vendors`);
+        console.log(`📊 Found ${totalVendors} organic vendors (page ${page}/${Math.ceil(totalVendors / limit)})`);
 
         res.render('organic-vendors-dashboard', {
             vendors,
             stats: {
                 total: totalVendors,
-                active: activeVendors,
-                expired: expiredCertifications,
-                expiringSoon: expiringSoon
+                active: allVendorStats[0] ? allVendorStats[0].active : 0,
+                expired: currentPageStats.expired,
+                expiringSoon: currentPageStats.expiringSoon
             },
             uniqueStatuses,
-            currentFilters: { sortBy, sortOrder, status }
+            currentFilters: { sortBy, sortOrder, status, page, limit },
+            pagination: {
+                currentPage: parseInt(page),
+                totalPages: Math.ceil(totalVendors / limit),
+                totalVendors: totalVendors,
+                hasNextPage: parseInt(page) < Math.ceil(totalVendors / limit),
+                hasPrevPage: parseInt(page) > 1
+            }
         });
 
     } catch (error) {
@@ -76,6 +122,32 @@ router.get('/:id/edit', async (req, res) => {
         res.json(vendor);
     } catch (error) {
         console.error('Get vendor error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get organic seeds data for a specific vendor (on-demand loading)
+router.get('/:id/seeds-data', async (req, res) => {
+    try {
+        const vendor = await OrganicVendor.findById(req.params.id, {
+            organicSeedsRawData: 1,
+            organicProducts: 1,
+            organicSeeds: 1,
+            vendorName: 1
+        });
+        
+        if (!vendor) {
+            return res.status(404).json({ error: 'Vendor not found' });
+        }
+        
+        res.json({
+            vendorName: vendor.vendorName,
+            organicSeedsRawData: vendor.organicSeedsRawData,
+            organicProducts: vendor.organicProducts,
+            organicSeeds: vendor.organicSeeds
+        });
+    } catch (error) {
+        console.error('Get seeds data error:', error);
         res.status(500).json({ error: error.message });
     }
 });
