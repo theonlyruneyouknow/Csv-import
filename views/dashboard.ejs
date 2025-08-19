@@ -2856,7 +2856,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             if (event.target.closest('.url-btn')) {
                 console.log('🔗 URL button clicked via event delegation!');
                 const btn = event.target.closest('.url-btn');
-                
+
                 console.log('📋 Button data:', {
                     id: btn.getAttribute('data-id'),
                     po: btn.getAttribute('data-po'),
@@ -4416,7 +4416,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         // Sorting functionality
         function sortTable(column) {
             const tbody = document.querySelector('#purchaseOrdersTable tbody');
-            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const mainRows = Array.from(tbody.querySelectorAll('tr[data-po]'));
 
             // Determine sort direction
             let direction = 'asc';
@@ -4431,8 +4431,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const headerElement = document.querySelector(`th[data-column="${column}"]`);
             headerElement.classList.add(direction === 'asc' ? 'sort-asc' : 'sort-desc');
 
-            // Sort rows
-            rows.sort((a, b) => {
+            // Sort main rows with their data
+            mainRows.sort((a, b) => {
                 const aData = JSON.parse(a.dataset.po);
                 const bData = JSON.parse(b.dataset.po);
 
@@ -4451,6 +4451,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         aValue = aData.poNumber.toLowerCase();
                         bValue = bData.poNumber.toLowerCase();
                         break;
+                    case 'shippingTracking':
+                        aValue = (aData.shippingTracking || '').toLowerCase();
+                        bValue = (bData.shippingTracking || '').toLowerCase();
+                        break;
                     case 'updatedAt':
                         aValue = new Date(aData.updatedAt || 0);
                         bValue = new Date(bData.updatedAt || 0);
@@ -4462,8 +4466,23 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 return 0;
             });
 
-            // Reappend sorted rows
-            rows.forEach(row => tbody.appendChild(row));
+            // Reappend sorted rows in groups (main row + line items row + notes row)
+            mainRows.forEach(mainRow => {
+                const index = mainRow.dataset.index;
+                const lineItemsRow = document.getElementById(`line-items-row-${index}`);
+                const notesRow = document.getElementById(`notes-row-${index}`);
+
+                // Append the main row first
+                tbody.appendChild(mainRow);
+
+                // Then append its associated expandable rows
+                if (lineItemsRow) {
+                    tbody.appendChild(lineItemsRow);
+                }
+                if (notesRow) {
+                    tbody.appendChild(notesRow);
+                }
+            });
 
             currentSort = { column, direction };
         }
