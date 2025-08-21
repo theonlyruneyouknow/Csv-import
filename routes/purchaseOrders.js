@@ -1830,6 +1830,30 @@ router.put('/:id/shipping-tracking', async (req, res) => {
   }
 });
 
+// Update priority
+router.put('/:id/priority', async (req, res) => {
+  try {
+    const { priority } = req.body;
+    
+    // Validate priority is between 1-5 or null/undefined to clear
+    if (priority !== null && priority !== undefined && (isNaN(priority) || priority < 1 || priority > 5)) {
+      return res.status(400).json({ error: 'Priority must be between 1 and 5, or null to clear' });
+    }
+
+    const updated = await PurchaseOrder.findByIdAndUpdate(
+      req.params.id,
+      { priority: priority, updatedAt: new Date() },
+      { new: true }
+    );
+    
+    console.log(`Updated priority for PO ${updated.poNumber}: ${priority || 'cleared'}`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Priority update error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Route to identify and manage orphaned line items
 router.get('/orphaned-line-items', async (req, res) => {
   try {

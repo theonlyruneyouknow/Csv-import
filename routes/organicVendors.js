@@ -27,9 +27,9 @@ router.get('/', async (req, res) => {
         console.log('🌱 Loading Organic Vendors Dashboard...');
 
         // Get organic vendors with sorting and optional pagination
-        const { 
-            sortBy = 'vendorName', 
-            sortOrder = 'asc', 
+        const {
+            sortBy = 'vendorName',
+            sortOrder = 'asc',
             status = 'all',
             page = 1,
             limit = 50 // Default to 50 vendors per page for larger datasets
@@ -59,9 +59,9 @@ router.get('/', async (req, res) => {
             'operationsProfile.uploadDate': 1,
             'operationsProfile.source': 1
         })
-        .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
-        .skip(skip)
-        .limit(parseInt(limit));
+            .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
+            .skip(skip)
+            .limit(parseInt(limit));
 
         // Calculate summary statistics (for all vendors, not just current page)
         const totalVendors = await OrganicVendor.countDocuments(filter);
@@ -135,11 +135,11 @@ router.get('/:id/seeds-data', async (req, res) => {
             organicSeeds: 1,
             vendorName: 1
         });
-        
+
         if (!vendor) {
             return res.status(404).json({ error: 'Vendor not found' });
         }
-        
+
         res.json({
             vendorName: vendor.vendorName,
             organicSeedsRawData: vendor.organicSeedsRawData,

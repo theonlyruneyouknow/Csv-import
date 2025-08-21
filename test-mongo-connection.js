@@ -11,20 +11,20 @@ async function testConnection() {
     for (const uri of connections) {
         try {
             console.log(`Testing: ${uri}`);
-            await mongoose.connect(uri, { 
+            await mongoose.connect(uri, {
                 serverSelectionTimeoutMS: 3000,
-                connectTimeoutMS: 3000 
+                connectTimeoutMS: 3000
             });
             console.log('✅ Connected successfully');
-            
+
             const collections = await mongoose.connection.db.listCollections().toArray();
             console.log('Collections:', collections.map(c => c.name));
-            
+
             await mongoose.disconnect();
             return uri;
         } catch (error) {
             console.log(`❌ Failed: ${error.message}`);
-            try { await mongoose.disconnect(); } catch {}
+            try { await mongoose.disconnect(); } catch { }
         }
     }
     return null;

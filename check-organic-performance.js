@@ -6,7 +6,7 @@ const OrganicVendor = require('./models/OrganicVendor');
 async function checkPerformance() {
     try {
         console.log('🔍 Organic Vendors Dashboard Performance Analysis\n');
-        
+
         await mongoose.connect('mongodb://localhost:27017/purchase-orders');
         console.log('✅ Connected to MongoDB');
 
@@ -48,7 +48,7 @@ async function checkPerformance() {
             if (optimizedDoc.certificate) delete optimizedDoc.certificate.data;
             if (optimizedDoc.operationsProfile) delete optimizedDoc.operationsProfile.data;
             delete optimizedDoc.organicSeedsRawData;
-            
+
             totalOptimizedSize += JSON.stringify(optimizedDoc).length;
             totalFullSize += JSON.stringify(vendor.toObject()).length;
 
@@ -72,7 +72,7 @@ async function checkPerformance() {
 
         // Test index usage
         console.log('\n🔍 Testing Index Performance:');
-        
+
         const startIndex = Date.now();
         await OrganicVendor.find({ status: 'Active' }).sort({ vendorName: 1 });
         const indexTime = Date.now() - startIndex;

@@ -37,6 +37,12 @@ const purchaseOrderSchema = new mongoose.Schema({
     type: String,
     default: 'FedEx'          // Default to FedEx as most vendors use it
   },
+  priority: {               // Priority level (1-5, where 1 is highest priority)
+    type: Number,
+    min: 1,
+    max: 5,
+    default: null             // No priority by default
+  },
   lineItems: [{             // Array of line items for this PO
     sku: String,
     memo: String,

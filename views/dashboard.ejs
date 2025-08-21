@@ -1494,6 +1494,104 @@
             background: #218838;
         }
 
+        .copy-po-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
+            transition: all 0.2s ease;
+            margin-left: 2px;
+        }
+
+        .copy-po-btn:hover {
+            opacity: 1;
+            background: #0056b3;
+        }
+
+        .copy-po-btn.copied {
+            background: #28a745;
+        }
+
+        /* Priority System */
+        .priority-cell {
+            width: 80px;
+            text-align: center;
+        }
+
+        .priority-select {
+            width: 70px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 2px 4px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .priority-select option.priority-1 {
+            background-color: #ffe6e6;
+            color: #d63384;
+        }
+
+        .priority-select option.priority-2 {
+            background-color: #fce8f3;
+            color: #e83e8c;
+        }
+
+        .priority-select option.priority-3 {
+            background-color: #fff3cd;
+            color: #fd7e14;
+        }
+
+        .priority-select option.priority-4 {
+            background-color: #fff9db;
+            color: #ffc107;
+        }
+
+        .priority-select option.priority-5 {
+            background-color: #d4edda;
+            color: #198754;
+        }
+
+        /* Priority select background colors based on value */
+        .priority-select[data-priority="1"] {
+            background-color: #ffe6e6;
+            color: #d63384;
+            border-color: #d63384;
+        }
+
+        .priority-select[data-priority="2"] {
+            background-color: #fce8f3;
+            color: #e83e8c;
+            border-color: #e83e8c;
+        }
+
+        .priority-select[data-priority="3"] {
+            background-color: #fff3cd;
+            color: #fd7e14;
+            border-color: #fd7e14;
+        }
+
+        .priority-select[data-priority="4"] {
+            background-color: #fff9db;
+            color: #ffc107;
+            border-color: #ffc107;
+        }
+
+        .priority-select[data-priority="5"] {
+            background-color: #d4edda;
+            color: #198754;
+            border-color: #198754;
+        }
+
         /* URL Modal */
         .url-modal {
             display: none;
@@ -2267,6 +2365,18 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 </div>
 
                 <div class="filter-group">
+                    <label>Priority Filter</label>
+                    <select id="priorityFilter">
+                        <option value="all">All Priorities</option>
+                        <option value="1">🔴 1 (Highest)</option>
+                        <option value="2">🩷 2 (High)</option>
+                        <option value="3">🟠 3 (Medium)</option>
+                        <option value="4">🟡 4 (Low)</option>
+                        <option value="5">🟢 5 (Lowest)</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
                     <label>NS Status Filter</label>
                     <select id="nsStatusFilter">
                         <option value="all">All NS Statuses</option>
@@ -2363,6 +2473,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                 <tr>
                                     <th class="sortable date-cell" data-column="date">Date</th>
                                     <th class="sortable po-number" data-column="poNumber">PO Number</th>
+                                    <th class="sortable priority-cell" data-column="priority">Priority</th>
                                     <th class="sortable vendor" data-column="vendor">Vendor</th>
                                     <th class="sortable line-items-count-cell" data-column="lineItemsCount">Line Items
                                     </th>
@@ -2401,7 +2512,23 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                                 title="<%= po.poUrl && po.poUrl.trim() ? 'Edit URL' : 'Add URL' %>">
                                                                 🔗
                                                             </button>
+                                                            <button
+                                                                class="copy-po-btn"
+                                                                data-po="<%- po.poNumber %>"
+                                                                title="Copy PO Number">
+                                                                📋
+                                                            </button>
                                             </div>
+                                        </td>
+                                        <td class="priority-cell">
+                                            <select class="priority-select" data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
+                                                title="Set priority for PO <%= po.poNumber %>">
+                                                <option value="1" <%= (po.priority || 3) == 1 ? 'selected' : '' %> class="priority-1">🔴 1</option>
+                                                <option value="2" <%= (po.priority || 3) == 2 ? 'selected' : '' %> class="priority-2">🩷 2</option>
+                                                <option value="3" <%= (po.priority || 3) == 3 ? 'selected' : '' %> class="priority-3">🟠 3</option>
+                                                <option value="4" <%= (po.priority || 3) == 4 ? 'selected' : '' %> class="priority-4">🟡 4</option>
+                                                <option value="5" <%= (po.priority || 3) == 5 ? 'selected' : '' %> class="priority-5">🟢 5</option>
+                                            </select>
                                         </td>
                                         <td class="vendor" title="<%= po.vendor %>">
                                             <%= po.vendor %>
@@ -2878,6 +3005,37 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     console.error('❌ Error in URL button handler:', error);
                 }
             }
+
+            // Handle Copy PO button clicks using event delegation
+            if (event.target.closest('.copy-po-btn')) {
+                const btn = event.target.closest('.copy-po-btn');
+                const poNumber = btn.getAttribute('data-po');
+                
+                try {
+                    // Copy to clipboard
+                    navigator.clipboard.writeText(poNumber).then(() => {
+                        // Visual feedback
+                        btn.classList.add('copied');
+                        const originalTitle = btn.title;
+                        btn.title = 'Copied!';
+                        
+                        // Reset visual feedback after 2 seconds
+                        setTimeout(() => {
+                            btn.classList.remove('copied');
+                            btn.title = originalTitle;
+                        }, 2000);
+                        
+                        console.log(`📋 Copied PO Number: ${poNumber}`);
+                    }).catch(error => {
+                        console.error('Failed to copy PO number:', error);
+                        // Fallback for older browsers
+                        fallbackCopyTextToClipboard(poNumber);
+                    });
+                } catch (error) {
+                    console.error('❌ Error in copy PO button handler:', error);
+                    fallbackCopyTextToClipboard(poNumber);
+                }
+            }
         });
 
         let currentSort = { column: null, direction: null };
@@ -3035,6 +3193,48 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         console.error('Error saving Status:', error);
                     });
             });
+        });
+
+        // Auto-save Priority when changed
+        document.querySelectorAll('.priority-select').forEach(select => {
+            select.addEventListener('change', function () {
+                const id = this.dataset.id;
+                const poNumber = this.dataset.po;
+                const priority = this.value;
+
+                // Show saving state
+                this.classList.add('saving');
+
+                // Update visual appearance immediately
+                this.setAttribute('data-priority', priority);
+
+                fetch(`/purchase-orders/${id}/priority`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ priority: parseInt(priority) })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Remove saving state
+                        this.classList.remove('saving');
+
+                        // Update the data attribute for filtering
+                        const row = this.closest('tr');
+                        const poData = JSON.parse(row.dataset.po);
+                        poData.priority = parseInt(priority);
+                        row.dataset.po = JSON.stringify(poData);
+
+                        console.log(`Priority saved for PO ${poNumber}: ${priority}`);
+                    })
+                    .catch(error => {
+                        this.classList.remove('saving');
+                        console.error('Error saving Priority:', error);
+                    });
+            });
+
+            // Set initial data-priority attribute
+            const initialPriority = select.value || '3';
+            select.setAttribute('data-priority', initialPriority);
         });
 
         // Auto-save Next Update Date when changed
@@ -4302,6 +4502,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const nsStatusFilter = document.getElementById('nsStatusFilter').value;
             const statusFilter = document.getElementById('statusFilter').value;
             const notesFilter = document.getElementById('notesFilter').value;
+            const priorityFilter = document.getElementById('priorityFilter').value;
             const showNotMyConcernCheckbox = document.getElementById('showNotMyConcern');
             const showNotMyConcern = showNotMyConcernCheckbox ? showNotMyConcernCheckbox.checked : false;
             const showPendingBillCheckbox = document.getElementById('showPendingBill');
@@ -4354,7 +4555,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     matchesNotes = notes.trim().length === 0;
                 }
 
-                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && shouldShowNotMyConcern && shouldShowPendingBill) {
+                // Priority filter
+                const matchesPriority = priorityFilter === 'all' || (poData.priority && poData.priority.toString() === priorityFilter);
+
+                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill) {
                     row.classList.remove('hidden');
                     // Also show the corresponding notes row if it's expanded
                     const notesRow = document.getElementById(`notes-row-${index}`);
@@ -4476,6 +4680,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         aValue = new Date(aData.updatedAt || 0);
                         bValue = new Date(bData.updatedAt || 0);
                         break;
+                    case 'priority':
+                        aValue = parseInt(aData.priority) || 999; // Default to 999 for no priority (sorts to bottom)
+                        bValue = parseInt(bData.priority) || 999;
+                        break;
                 }
 
                 if (aValue < bValue) return direction === 'asc' ? -1 : 1;
@@ -4510,6 +4718,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById('nsStatusFilter').value = 'all';
             document.getElementById('statusFilter').value = 'all';
             document.getElementById('notesFilter').value = 'all';
+            document.getElementById('priorityFilter').value = 'all';
             document.getElementById('showNotMyConcern').checked = false;
             document.getElementById('showPendingBill').checked = false;
             applyFilters();
@@ -4520,6 +4729,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         document.getElementById('nsStatusFilter').addEventListener('change', applyFilters);
         document.getElementById('statusFilter').addEventListener('change', applyFilters);
         document.getElementById('notesFilter').addEventListener('change', applyFilters);
+        document.getElementById('priorityFilter').addEventListener('change', applyFilters);
         document.getElementById('showNotMyConcern').addEventListener('change', applyFilters);
         document.getElementById('showPendingBill').addEventListener('change', applyFilters);
 
@@ -5080,6 +5290,34 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             // Initialize notes history buttons
             initNotesHistoryButtons();
             setTimeout(() => applyFilters(), 50);
+        }
+
+        // Fallback copy function for older browsers
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            
+            // Avoid scrolling to bottom
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    console.log(`📋 Fallback copy successful: ${text}`);
+                } else {
+                    console.error('❌ Fallback copy failed');
+                }
+            } catch (err) {
+                console.error('❌ Fallback copy error:', err);
+            }
+            
+            document.body.removeChild(textArea);
         }
     </script>
 
