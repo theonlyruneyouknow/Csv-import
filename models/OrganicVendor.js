@@ -11,8 +11,7 @@ const organicVendorSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        trim: true,
-        index: false // Disable auto-index since we define it manually below
+        trim: true
     },
 
     // Organic certification information
@@ -170,7 +169,6 @@ organicVendorSchema.set('toObject', { virtuals: true });
 organicVendorSchema.index({ vendorName: 1 }); // For sorting by vendor name
 organicVendorSchema.index({ status: 1 }); // For filtering by status
 organicVendorSchema.index({ lastOrganicCertificationDate: -1 }); // For sorting by certification date
-organicVendorSchema.index({ internalId: 1 }); // For sorting by internal ID
 organicVendorSchema.index({ createdAt: -1 }); // For general sorting
 organicVendorSchema.index({ status: 1, vendorName: 1 }); // Compound index for filtered sorting
 
