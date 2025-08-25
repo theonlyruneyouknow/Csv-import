@@ -1329,39 +1329,22 @@
             background: #218838;
         }
 
-        .line-items-toggle {
-            background: #17a2b8;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            width: 32px;
-            height: 28px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-
-        .line-items-toggle:hover {
-            background: #138496;
-            transform: scale(1.05);
-        }
-
-        .notes-history-btn {
+        .po-details-btn {
             background: #6c757d;
             color: white;
             border: none;
             border-radius: 4px;
-            width: 28px;
-            height: 28px;
+            padding: 6px 12px;
             cursor: pointer;
             font-size: 12px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            gap: 4px;
             transition: all 0.2s ease;
         }
 
-        .notes-history-btn:hover {
+        .po-details-btn:hover {
             background: #5a6268;
             transform: scale(1.05);
         }
@@ -1799,6 +1782,91 @@
             max-width: 180px;
         }
 
+        /* Responsive tracking column - hide on smaller screens */
+        @media (max-width: 1400px) {
+            .shipping-tracking-cell {
+                display: none;
+            }
+            
+            /* Show a hint that tracking column can be toggled */
+            #toggleTrackingBtn {
+                position: relative;
+            }
+            
+            #toggleTrackingBtn::after {
+                content: "📱";
+                position: absolute;
+                top: -2px;
+                right: -2px;
+                font-size: 10px;
+            }
+        }
+
+        /* Show tracking column when tracking is explicitly enabled */
+        .show-tracking .shipping-tracking-cell {
+            display: table-cell !important;
+            background-color: #f8f9fa; /* Light background to indicate it's active */
+            border-left: 3px solid #28a745; /* Green border to indicate active state */
+        }
+
+        /* Tracking column header indicator when visible */
+        .show-tracking .shipping-tracking-cell .toggle-tracking-column-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        /* On larger screens, show a subtle indicator that tracking can be toggled */
+        @media (min-width: 1401px) {
+            .show-tracking .shipping-tracking-cell {
+                border-left: none; /* Remove border on larger screens where it's naturally visible */
+                background-color: transparent;
+            }
+        }
+
+        /* Tracking toggle button styles */
+        .tracking-toggle-btn {
+            background: #ffc107; /* Yellow for no status */
+            color: #212529;
+            border: none;
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            margin-left: 4px;
+        }
+
+        .tracking-toggle-btn.has-status {
+            background: #007bff; /* Blue when there's tracking status */
+            color: white;
+        }
+
+        .tracking-toggle-btn:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+
+        /* Toggle tracking visibility button */
+        .toggle-tracking-column-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-left: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-tracking-column-btn:hover {
+            background: #5a6268;
+        }
+
         .tracking-container {
             position: relative;
         }
@@ -2159,6 +2227,147 @@
             background: #c82333;
         }
 
+        /* PO Details Modal Tabs */
+        .po-details-tabs {
+            display: flex;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-bottom: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #495057;
+            border-radius: 5px 5px 0 0;
+            margin-right: 2px;
+            transition: all 0.2s ease;
+        }
+
+        .tab-button:hover {
+            background: #e9ecef;
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #007bff;
+            border-color: #dee2e6;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: white;
+        }
+
+        .tab-content {
+            display: none;
+            min-height: 300px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .po-details-line-items {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .po-details-notes-history {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .line-items-summary {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        /* Tracking Details Modal */
+        .tracking-details-content {
+            padding: 20px 0;
+        }
+
+        .tracking-info-section {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .tracking-info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .tracking-number {
+            font-size: 16px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .carrier-info {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .tracking-status-display {
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .tracking-actions-section {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .tracking-action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .tracking-action-btn.primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .tracking-action-btn.secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .tracking-action-btn:hover {
+            transform: translateY(-1px);
+            opacity: 0.9;
+        }
+
         .no-notes {
             text-align: center;
             color: #6c757d;
@@ -2431,6 +2640,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         id="bulkTrackingBtn" title="Update all shipping tracking with 17track">
                         🚚 Update Tracking
                     </button>
+                    <button class="btn btn-sm btn-outline-secondary ms-2" onclick="toggleTrackingColumn()"
+                        id="toggleTrackingBtn" title="Show/Hide tracking column">
+                        👁️ <span id="trackingColumnText">Show Tracking</span>
+                    </button>
                 </div>
             </div>
 
@@ -2481,6 +2694,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     <th class="sortable status-cell" data-column="status">Status</th>
                                     <th class="sortable shipping-tracking-cell" data-column="shippingTracking">Tracking
                                         <br><small style="font-weight: normal;">(Carrier & #)</small>
+                                        <button class="toggle-tracking-column-btn" onclick="toggleTrackingColumn()" title="Show/Hide tracking column">
+                                            👁️
+                                        </button>
                                     </th>
                                     <th class="sortable next-update-cell" data-column="nextUpdateDate">Next Update</th>
                                     <th class="notes-toggle-cell">Notes</th>
@@ -2536,9 +2752,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                         <td class="line-items-count-cell">
                                             <% if (po.lineItems && po.lineItems.length> 0) { %>
                                                 <div class="line-items-count-display">
-                                                    <button class="line-items-count-btn" data-index="<%= index %>"
-                                                        data-id="<%= po._id %>"
-                                                        title="View line items: <%= po.lineItems.filter(item => item.received).length %> received / <%= po.lineItems.length %> total">
+                                                    <button class="po-details-btn" data-index="<%= index %>"
+                                                        data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
+                                                        title="View PO details: <%= po.lineItems.filter(item => item.received).length %> received / <%= po.lineItems.length %> total">
                                                         📦 <span class="count-number">
                                                             <% const totalItems=po.lineItems.length; const
                                                                 receivedItems=po.lineItems.filter(item=>
@@ -2555,6 +2771,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                 </div>
                                                 <% } else { %>
                                                     <div class="no-line-items-display">
+                                                        <button class="po-details-btn" data-index="<%= index %>"
+                                                            data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
+                                                            title="View PO details for <%= po.poNumber %>">
+                                                            📋 Details
+                                                        </button>
                                                         <button class="import-netsuite-btn" data-po-id="<%= po._id %>"
                                                             data-po-number="<%= po.poNumber %>"
                                                             title="Import NetSuite line items for PO <%= po.poNumber %>">
@@ -2642,20 +2863,20 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                         </td>
                                         <td class="notes-toggle-cell">
                                             <div style="display: flex; gap: 4px;">
-                                                <button class="line-items-toggle" type="button"
-                                                    data-index="<%= index %>" data-id="<%= po._id %>"
-                                                    title="View line items for PO <%= po.poNumber %>">
-                                                    📦
-                                                </button>
                                                 <button
                                                     class="notes-toggle <%= po.notes && po.notes.trim() ? 'has-notes' : '' %>"
                                                     type="button" data-index="<%= index %>"
                                                     title="<%= po.notes && po.notes.trim() ? 'View/Edit notes' : 'Add notes' %>">
                                                     <%= po.notes && po.notes.trim() ? '📝' : '➕' %>
                                                 </button>
-                                                <button class="notes-history-btn" type="button" data-id="<%= po._id %>"
-                                                    data-po="<%= po.poNumber %>" title="View notes history">
-                                                    📋
+                                                <button class="tracking-toggle-btn <%= po.shippingTracking ? 'has-status' : '' %>"
+                                                    type="button" 
+                                                    data-po-id="<%= po._id %>"
+                                                    data-tracking="<%= po.shippingTracking || '' %>"
+                                                    data-carrier="<%= po.shippingCarrier || 'FedEx' %>"
+                                                    onclick="toggleTrackingDetails('<%= po._id %>')"
+                                                    title="<%= po.shippingTracking ? `Tracking: ${po.shippingTracking} (${po.shippingCarrier || 'FedEx'})` : 'No tracking information' %>">
+                                                    🚚
                                                 </button>
                                             </div>
                                         </td>
@@ -2798,16 +3019,43 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         </div>
     </div>
 
-    <!-- Notes History Modal -->
-    <div id="notesHistoryModal" class="status-modal">
-        <div class="status-modal-content" style="max-width: 800px;">
+    <!-- PO Details Modal -->
+    <div id="poDetailsModal" class="status-modal">
+        <div class="status-modal-content" style="max-width: 1000px;">
             <div class="status-modal-header">
-                <div class="status-modal-title" id="notesHistoryTitle">Notes History</div>
-                <button class="status-close" onclick="closeNotesHistoryModal()">&times;</button>
+                <div class="status-modal-title" id="poDetailsTitle">PO Details</div>
+                <button class="status-close" onclick="closePoDetailsModal()">&times;</button>
             </div>
 
-            <div id="notesHistoryContent" class="notes-history-content">
-                <!-- Notes history will be loaded here -->
+            <div class="po-details-tabs">
+                <button class="tab-button active" onclick="showTab('lineItems')">📦 Line Items</button>
+                <button class="tab-button" onclick="showTab('notesHistory')">📋 Notes History</button>
+            </div>
+
+            <div id="lineItemsTab" class="tab-content active">
+                <div id="poDetailsLineItems" class="po-details-line-items">
+                    <!-- Line items will be loaded here -->
+                </div>
+            </div>
+
+            <div id="notesHistoryTab" class="tab-content">
+                <div id="poDetailsNotesHistory" class="po-details-notes-history">
+                    <!-- Notes history will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tracking Details Modal -->
+    <div id="trackingDetailsModal" class="status-modal">
+        <div class="status-modal-content" style="max-width: 600px;">
+            <div class="status-modal-header">
+                <div class="status-modal-title" id="trackingDetailsTitle">Tracking Information</div>
+                <button class="status-close" onclick="closeTrackingDetailsModal()">&times;</button>
+            </div>
+
+            <div id="trackingDetailsContent" class="tracking-details-content">
+                <!-- Tracking details will be loaded here -->
             </div>
         </div>
     </div>
@@ -3062,22 +3310,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             });
         });
 
-        // Handle line items toggle buttons
-        document.querySelectorAll('.line-items-toggle').forEach(toggleBtn => {
-            toggleBtn.addEventListener('click', async function () {
+        // Handle PO details buttons
+        document.querySelectorAll('.po-details-btn').forEach(detailsBtn => {
+            detailsBtn.addEventListener('click', async function () {
                 const index = this.dataset.index;
                 const poId = this.dataset.id;
-                const lineItemsRow = document.getElementById(`line-items-row-${index}`);
-                const isExpanded = lineItemsRow.classList.contains('expanded');
-
-                if (isExpanded) {
-                    // Collapse
-                    lineItemsRow.classList.remove('expanded');
-                } else {
-                    // Expand and load line items
-                    lineItemsRow.classList.add('expanded');
-                    await loadLineItems(index, poId);
-                }
+                const poNumber = this.dataset.po;
+                openPoDetailsModal(poId, poNumber);
             });
         });
 
@@ -3936,49 +4175,404 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         // Close modal when clicking outside
         window.addEventListener('click', function (event) {
             const urlModal = document.getElementById('urlModal');
-            const notesHistoryModal = document.getElementById('notesHistoryModal');
+            const poDetailsModal = document.getElementById('poDetailsModal');
+            const trackingDetailsModal = document.getElementById('trackingDetailsModal');
+            
             if (event.target === urlModal) {
                 closeUrlModal();
             }
-            if (event.target === notesHistoryModal) {
-                closeNotesHistoryModal();
+            if (event.target === poDetailsModal) {
+                closePoDetailsModal();
+            }
+            if (event.target === trackingDetailsModal) {
+                closeTrackingDetailsModal();
             }
         });
 
-        // Function to initialize notes history button listeners
-        function initNotesHistoryButtons() {
-            const notesHistoryButtons = document.querySelectorAll('.notes-history-btn');
-            console.log(`🔧 Initializing ${notesHistoryButtons.length} notes history buttons`);
-
-            notesHistoryButtons.forEach(btn => {
-                btn.addEventListener('click', function () {
-                    console.log('📋 Notes history button clicked for PO:', this.dataset.po);
-                    const poId = this.dataset.id;
-                    const poNumber = this.dataset.po;
-                    openNotesHistoryModal(poId, poNumber);
-                });
-            });
-
-            console.log('✅ Notes history buttons initialized');
+        // PO Details Modal Functions
+        async function openPoDetailsModal(poId, poNumber) {
+            const modal = document.getElementById('poDetailsModal');
+            const title = document.getElementById('poDetailsTitle');
+            
+            title.textContent = `PO Details - ${poNumber}`;
+            modal.dataset.poId = poId; // Store poId for later use
+            modal.style.display = 'block';
+            
+            // Reset to line items tab
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('lineItemsTab').classList.add('active');
+            document.querySelector('.tab-button').classList.add('active');
+            
+            // Load line items by default
+            await loadPoDetailsLineItems(poId);
         }
 
-        async function openNotesHistoryModal(poId, poNumber) {
-            const modal = document.getElementById('notesHistoryModal');
-            const title = document.getElementById('notesHistoryTitle');
-            const content = document.getElementById('notesHistoryContent');
+        function closePoDetailsModal() {
+            document.getElementById('poDetailsModal').style.display = 'none';
+        }
 
-            title.textContent = `Notes History - PO ${poNumber}`;
-            content.innerHTML = '<div style="text-align: center; padding: 20px;">Loading...</div>';
+        // Tracking Functions
+        function toggleTrackingColumn() {
+            const table = document.getElementById('purchaseOrdersTable');
+            const isCurrentlyVisible = table.classList.contains('show-tracking');
+            
+            if (isCurrentlyVisible) {
+                // Hide tracking column
+                table.classList.remove('show-tracking');
+            } else {
+                // Show tracking column
+                table.classList.add('show-tracking');
+            }
+            
+            // Update button state
+            updateTrackingButtonState(!isCurrentlyVisible);
+            
+            // Show a toast notification
+            const message = isCurrentlyVisible ? '👁️ Tracking column hidden' : '👁️ Tracking column shown';
+            showTrackingToast(message, 'success');
+        }
+
+        async function toggleTrackingDetails(poId) {
+            // Find the PO data from the page
+            const trackingBtn = document.querySelector(`[data-po-id="${poId}"].tracking-toggle-btn`);
+            const tracking = trackingBtn.dataset.tracking;
+            const carrier = trackingBtn.dataset.carrier;
+            
+            if (!tracking) {
+                // Show a simple message if no tracking
+                showTrackingDetailsModal(poId, null, null, 'No tracking information available for this PO.');
+                return;
+            }
+            
+            showTrackingDetailsModal(poId, tracking, carrier);
+        }
+
+        function showTrackingDetailsModal(poId, trackingNumber, carrier, message = null) {
+            const modal = document.getElementById('trackingDetailsModal');
+            const title = document.getElementById('trackingDetailsTitle');
+            const content = document.getElementById('trackingDetailsContent');
+            
+            title.textContent = trackingNumber ? `Tracking: ${trackingNumber}` : 'Tracking Information';
+            
+            if (message) {
+                content.innerHTML = `<div style="text-align: center; padding: 20px; color: #6c757d;">${message}</div>`;
+            } else {
+                content.innerHTML = `
+                    <div class="tracking-info-section">
+                        <div class="tracking-info-header">
+                            <div class="tracking-number">${trackingNumber}</div>
+                            <div class="carrier-info">${carrier}</div>
+                        </div>
+                        <div class="tracking-status-display" style="background: #ffc107; color: #212529;">
+                            Click "Check Status" to get latest tracking information
+                        </div>
+                        <div class="tracking-actions-section">
+                            <button class="tracking-action-btn primary" onclick="checkTrackingStatus('${poId}', '${trackingNumber}', '${carrier}')">
+                                🔍 Check Status
+                            </button>
+                            <button class="tracking-action-btn secondary" onclick="updateTrackingInfo('${poId}')">
+                                🔄 Update from 17track
+                            </button>
+                            <button class="tracking-action-btn secondary" onclick="openTrackingUrl('${trackingNumber}', '${carrier}')">
+                                🌐 View on ${carrier} Website
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
             modal.style.display = 'block';
+        }
 
+        function closeTrackingDetailsModal() {
+            document.getElementById('trackingDetailsModal').style.display = 'none';
+        }
+
+        async function checkTrackingStatus(poId, trackingNumber, carrier) {
+            const statusDiv = document.querySelector('.tracking-status-display');
+            statusDiv.innerHTML = '🔄 Checking status...';
+            statusDiv.style.background = '#007bff';
+            statusDiv.style.color = 'white';
+            
             try {
+                // This would call your existing tracking API
+                const response = await fetch('/purchase-orders/tracking-info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ trackingNumber, carrier })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.trackingInfo) {
+                    statusDiv.innerHTML = `📦 ${result.trackingInfo.status || 'In Transit'}`;
+                    statusDiv.style.background = '#28a745';
+                    
+                    if (result.trackingInfo.description) {
+                        statusDiv.innerHTML += `<br><small>${result.trackingInfo.description}</small>`;
+                    }
+                } else {
+                    statusDiv.innerHTML = '❌ Unable to get tracking status';
+                    statusDiv.style.background = '#dc3545';
+                }
+            } catch (error) {
+                console.error('Error checking tracking:', error);
+                statusDiv.innerHTML = '❌ Error checking status';
+                statusDiv.style.background = '#dc3545';
+            }
+        }
+
+        async function updateTrackingInfo(poId) {
+            try {
+                const response = await fetch(`/purchase-orders/${poId}/update-tracking`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showTrackingToast('📦 Tracking information updated', 'success');
+                    // Refresh the modal content or page as needed
+                } else {
+                    showTrackingToast('❌ Failed to update tracking', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating tracking:', error);
+                showTrackingToast('❌ Error updating tracking', 'error');
+            }
+        }
+
+        function openTrackingUrl(trackingNumber, carrier) {
+            let url = '';
+            
+            switch (carrier.toLowerCase()) {
+                case 'fedex':
+                    url = `https://www.fedex.com/apps/fedextrack/?tracknumbers=${trackingNumber}`;
+                    break;
+                case 'ups':
+                    url = `https://www.ups.com/track?tracknum=${trackingNumber}`;
+                    break;
+                case 'usps':
+                    url = `https://tools.usps.com/go/TrackConfirmAction?qtc_tLabels1=${trackingNumber}`;
+                    break;
+                case 'dhl':
+                    url = `https://www.dhl.com/us-en/home/tracking.html?tracking-id=${trackingNumber}`;
+                    break;
+                default:
+                    alert('Tracking URL not available for this carrier');
+                    return;
+            }
+            
+            window.open(url, '_blank');
+        }
+
+        function showTrackingToast(message, type) {
+            // Create a simple toast notification
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 4px;
+                color: white;
+                z-index: 10000;
+                font-size: 14px;
+                background: ${type === 'success' ? '#28a745' : '#dc3545'};
+            `;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 3000);
+        }
+
+        // Initialize tracking column state and add keyboard shortcut
+        function initializeTrackingColumn() {
+            // Set initial state based on screen size
+            const table = document.getElementById('purchaseOrdersTable');
+            const isLargeScreen = window.innerWidth > 1400;
+            
+            if (isLargeScreen) {
+                // On large screens, show tracking by default
+                table.classList.add('show-tracking');
+                updateTrackingButtonState(true);
+            } else {
+                // On smaller screens, hide tracking by default
+                table.classList.remove('show-tracking');
+                updateTrackingButtonState(false);
+            }
+            
+            // Add keyboard shortcut (Ctrl+T)
+            document.addEventListener('keydown', function(event) {
+                if (event.ctrlKey && event.key === 't') {
+                    event.preventDefault();
+                    toggleTrackingColumn();
+                }
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                const newIsLargeScreen = window.innerWidth > 1400;
+                const currentlyVisible = table.classList.contains('show-tracking');
+                
+                // Auto-show on large screens if not manually hidden
+                if (newIsLargeScreen && !currentlyVisible) {
+                    table.classList.add('show-tracking');
+                    updateTrackingButtonState(true);
+                }
+            });
+        }
+
+        function updateTrackingButtonState(isVisible) {
+            const toggleBtn = document.getElementById('toggleTrackingBtn');
+            const buttonText = document.getElementById('trackingColumnText');
+            
+            if (!toggleBtn || !buttonText) return; // Elements might not exist yet
+            
+            if (isVisible) {
+                toggleBtn.classList.remove('btn-outline-secondary');
+                toggleBtn.classList.add('btn-outline-success');
+                buttonText.textContent = 'Hide Tracking';
+                toggleBtn.title = 'Hide tracking column (Ctrl+T)';
+            } else {
+                toggleBtn.classList.remove('btn-outline-success');
+                toggleBtn.classList.add('btn-outline-secondary');
+                buttonText.textContent = 'Show Tracking';
+                toggleBtn.title = 'Show tracking column (Ctrl+T)';
+            }
+        }
+
+        // Enhanced tab function that loads content when switching
+        async function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            // Load content if needed
+            if (tabName === 'notesHistory') {
+                const modal = document.getElementById('poDetailsModal');
+                const titleElement = document.getElementById('poDetailsTitle');
+                const title = titleElement.textContent;
+                const poNumber = title.split(' - ')[1];
+                const poId = modal.dataset.poId;
+                
+                if (poId && poNumber) {
+                    await loadPoDetailsNotesHistory(poId, poNumber);
+                }
+            }
+        }
+
+        async function loadPoDetailsLineItems(poId) {
+            const container = document.getElementById('poDetailsLineItems');
+            
+            try {
+                container.innerHTML = '<div class="loading-line-items">Loading line items...</div>';
+                
+                const response = await fetch(`/purchase-orders/${poId}/line-items`);
+                const lineItems = await response.json();
+                
+                if (lineItems.length === 0) {
+                    container.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
+                } else {
+                    const receivedCount = lineItems.filter(item => item.received).length;
+                    const totalCount = lineItems.length;
+                    
+                    // Generate the HTML for line items
+                    const lineItemsHtml = lineItems.map(item => `
+                        <div class="line-item ${item.received ? 'received' : ''}" data-item-id="${item._id}">
+                            <div class="line-item-header">
+                                <div class="line-item-date">${item.date ? new Date(item.date).toLocaleDateString() : 'No date'}</div>
+                                <div class="line-item-status">
+                                    <button class="received-toggle ${item.received ? 'received' : ''}" 
+                                            onclick="toggleReceivedInModal('${item._id}', ${!item.received}, '${poId}')">
+                                        ${item.received ? '✅ Received' : '📦 Mark Received'}
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="line-item-memo">${escapeHtml(item.memo)}</div>
+                            <div class="line-item-tracking ${!item.trackingNumber ? 'no-tracking' : ''}">
+                                <div class="line-item-tracking-header">
+                                    <span class="line-item-tracking-number">
+                                        ${item.trackingNumber ? `📦 ${item.trackingNumber}` : '📦 No tracking assigned'}
+                                    </span>
+                                    <button class="line-item-tracking-update-btn" 
+                                            onclick="updateLineItemTrackingInModal('${item._id}', '${poId}')"
+                                            data-item-id="${item._id}"
+                                            ${!item.trackingNumber ? 'disabled' : ''}>
+                                        🔄 Update
+                                    </button>
+                                </div>
+                                ${item.trackingNumber ? `
+                                    <div class="line-item-tracking-status">
+                                        <span class="status-badge ${getTrackingStatusClass(item.trackingStatus)}">
+                                            ${item.trackingStatus || 'Pending'}
+                                        </span>
+                                        ${item.trackingStatusDescription ? item.trackingStatusDescription : ''}
+                                    </div>
+                                    ${item.trackingLastUpdate ?
+                                        `<div class="line-item-tracking-info">
+                                            Last updated: ${new Date(item.trackingLastUpdate).toLocaleDateString()}
+                                            ${item.trackingLocation ? ` • ${item.trackingLocation}` : ''}
+                                        </div>` : ''}
+                                ` : `
+                                    <div class="line-item-tracking-status">
+                                        <span class="status-badge status-pending">No Tracking</span>
+                                        Enter tracking number below to enable tracking updates
+                                    </div>
+                                `}
+                                <div class="line-item-tracking-input">
+                                    <input type="text" placeholder="Enter tracking number" 
+                                           value="${item.trackingNumber || ''}" 
+                                           onchange="updateTrackingNumber('${item._id}', this.value, '${poId}')">
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    container.innerHTML = `
+                        <div class="line-items-summary">
+                            <strong>Summary:</strong> ${receivedCount}/${totalCount} items received
+                            ${receivedCount === totalCount ? ' ✅' : ''}
+                        </div>
+                        ${lineItemsHtml}
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading line items:', error);
+                container.innerHTML = '<div class="no-line-items">Error loading line items</div>';
+            }
+        }
+
+        async function loadPoDetailsNotesHistory(poId, poNumber) {
+            const container = document.getElementById('poDetailsNotesHistory');
+            
+            try {
+                container.innerHTML = '<div style="text-align: center; padding: 20px;">Loading...</div>';
+                
                 const response = await fetch(`/purchase-orders/${poId}/notes-history`);
                 const notes = await response.json();
-
+                
                 if (notes.length === 0) {
-                    content.innerHTML = '<div class="no-notes">No notes found for this PO</div>';
+                    container.innerHTML = '<div class="no-notes">No notes found for this PO</div>';
                 } else {
-                    content.innerHTML = notes.map(note => `
+                    container.innerHTML = notes.map(note => `
                         <div class="note-item">
                             <div class="note-header">
                                 <span class="note-date">${new Date(note.createdAt).toLocaleString()}</span>
@@ -3990,12 +4584,65 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
             } catch (error) {
                 console.error('Error loading notes history:', error);
-                content.innerHTML = '<div class="no-notes">Error loading notes history</div>';
+                container.innerHTML = '<div class="no-notes">Error loading notes history</div>';
             }
         }
 
-        function closeNotesHistoryModal() {
-            document.getElementById('notesHistoryModal').style.display = 'none';
+        // Helper functions for the modal
+        async function toggleReceivedInModal(itemId, received, poId) {
+            try {
+                const response = await fetch(`/purchase-orders/line-items/${itemId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ received })
+                });
+
+                if (response.ok) {
+                    // Reload line items to reflect changes
+                    await loadPoDetailsLineItems(poId);
+                } else {
+                    console.error('Failed to update received status');
+                }
+            } catch (error) {
+                console.error('Error updating received status:', error);
+            }
+        }
+
+        async function updateLineItemTrackingInModal(itemId, poId) {
+            try {
+                const response = await fetch(`/purchase-orders/line-items/${itemId}/update-tracking`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    // Reload line items to reflect changes
+                    await loadPoDetailsLineItems(poId);
+                } else {
+                    console.error('Failed to update tracking');
+                }
+            } catch (error) {
+                console.error('Error updating tracking:', error);
+            }
+        }
+
+        async function updateTrackingNumber(itemId, trackingNumber, poId) {
+            try {
+                const response = await fetch(`/purchase-orders/line-items/${itemId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ trackingNumber })
+                });
+
+                if (response.ok) {
+                    // Reload line items to reflect changes
+                    await loadPoDetailsLineItems(poId);
+                } else {
+                    console.error('Failed to update tracking number');
+                }
+            } catch (error) {
+                console.error('Error updating tracking number:', error);
+            }
         }
 
         async function deleteNote(noteId, poId, poNumber) {
@@ -5270,12 +5917,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 // console.log('initUrlButtons called');
                 // Initialize URL input listeners
                 initUrlInputListeners();
-                // Initialize notes history buttons
-                initNotesHistoryButtons();
-                // Test URL buttons functionality - now using event delegation
-                // setTimeout(() => testUrlButtons(), 1000);
                 // Apply filters when DOM is loaded
                 setTimeout(() => applyFilters(), 50);
+                
+                // Initialize tracking column state
+                initializeTrackingColumn();
             });
         } else {
             console.log('DOM already loaded, initializing immediately');
@@ -5287,9 +5933,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             // console.log('initUrlButtons called (immediate)');
             // Initialize URL input listeners
             initUrlInputListeners();
-            // Initialize notes history buttons
-            initNotesHistoryButtons();
             setTimeout(() => applyFilters(), 50);
+            
+            // Initialize tracking column state
+            initializeTrackingColumn();
         }
 
         // Fallback copy function for older browsers
