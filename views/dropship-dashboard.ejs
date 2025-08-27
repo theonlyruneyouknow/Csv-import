@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropship Data Processor</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background-color: #f5f5f5; 
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            color: #333; 
+        }
+        .header h1 {
+            margin-bottom: 10px;
+        }
+        .navigation-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .nav-link {
+            background: #007bff;
+            color: white;
+            padding: 8px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+        .nav-link:hover {
+            background: #0056b3;
+        }
+        .description {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .upload-section { 
+            border: 2px dashed #ccc; 
+            padding: 30px; 
+            text-align: center; 
+            margin-bottom: 30px; 
+            border-radius: 8px; 
+            background-color: #fafafa; 
+        }
+        .upload-section.dragover { 
+            border-color: #007bff; 
+            background-color: #e7f3ff; 
+        }
+        .file-input { 
+            margin: 20px 0; 
+        }
+        .upload-btn { 
+            background: #007bff; 
+            color: white; 
+            padding: 12px 30px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 16px; 
+        }
+        .upload-btn:hover { 
+            background: #0056b3; 
+        }
+        .upload-btn:disabled { 
+            background: #ccc; 
+            cursor: not-allowed; 
+        }
+        .files-section { 
+            margin-top: 30px; 
+        }
+        .files-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+            gap: 20px; 
+            margin-top: 20px; 
+        }
+        .file-card { 
+            border: 1px solid #ddd; 
+            padding: 15px; 
+            border-radius: 8px; 
+            background: #fafafa; 
+        }
+        .file-name { 
+            font-weight: bold; 
+            color: #333; 
+            margin-bottom: 5px; 
+        }
+        .file-details { 
+            font-size: 12px; 
+            color: #666; 
+            margin-bottom: 10px; 
+        }
+        .file-actions { 
+            display: flex; 
+            gap: 10px; 
+        }
+        .btn { 
+            padding: 5px 15px; 
+            border: none; 
+            border-radius: 3px; 
+            cursor: pointer; 
+            font-size: 12px; 
+        }
+        .btn-analyze { 
+            background: #28a745; 
+            color: white; 
+        }
+        .btn-delete { 
+            background: #dc3545; 
+            color: white; 
+        }
+        .btn-archive { 
+            background: #6c757d; 
+            color: white; 
+        }
+        .btn:hover { 
+            opacity: 0.8; 
+        }
+        .process-section { 
+            margin-top: 30px; 
+            padding: 20px; 
+            background: #e9f7ef; 
+            border-radius: 8px; 
+            text-align: center; 
+        }
+        .process-btn { 
+            background: #28a745; 
+            color: white; 
+            padding: 15px 40px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 18px; 
+            margin-top: 10px; 
+        }
+        .process-btn:hover { 
+            background: #218838; 
+        }
+        .message { 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+        }
+        .success { 
+            background: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb; 
+        }
+        .error { 
+            background: #f8d7da; 
+            color: #721c24; 
+            border: 1px solid #f5c6cb; 
+        }
+        .progress-bar { 
+            width: 100%; 
+            height: 20px; 
+            background: #f0f0f0; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            margin: 10px 0; 
+        }
+        .progress-fill { 
+            height: 100%; 
+            background: #007bff; 
+            width: 0%; 
+            transition: width 0.3s ease; 
+        }
+        .output-file-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .file-icon {
+            font-size: 24px;
+        }
+        .file-details h5 {
+            margin: 0;
+            color: #333;
+        }
+        .file-details p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+        .download-btn {
+            background: #007bff;
+            color: white;
+        }
+        .download-btn:hover {
+            background: #0056b3;
+        }
+        .preview-btn {
+            background: #28a745;
+            color: white;
+        }
+        .preview-btn:hover {
+            background: #218838;
+        }
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+        .delete-btn:hover {
+            background: #c82333;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-height: 80%;
+            overflow: auto;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        .preview-content {
+            max-height: 500px;
+            overflow: auto;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation Header -->
+        <div class="header">
+            <h1>🚚 Dropship Data Processor</h1>
+            <div class="navigation-links">
+                <a href="/purchase-orders" class="nav-link">← Back to Dashboard</a>
+                <a href="/organic-vendors" class="nav-link">🌱 Organic Vendors</a>
+                <a href="/upload" class="nav-link">📄 Upload CSV</a>
+            </div>
+        </div>
+        
+        <div class="description">
+            <p>Upload your 4 data files to compile them into CSV and PDF reports</p>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="upload-section" id="uploadArea">
+            <h3>📁 Upload Files</h3>
+            <p>Drag and drop files here or click to select</p>
+            <p><small>Supported formats: CSV, Excel (.xlsx, .xls), PDF, TXT</small></p>
+            
+            <input type="file" id="fileInput" multiple accept=".csv,.xlsx,.xls,.pdf,.txt" class="file-input" style="display: none;">
+            <button type="button" class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                Select Files
+            </button>
+            <button type="button" class="upload-btn" id="uploadBtn" style="display: none;" onclick="uploadFiles()">
+                Upload Selected Files
+            </button>
+            
+            <div id="uploadProgress" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p id="progressText">Uploading...</p>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div id="messages"></div>
+
+        <!-- Uploaded Files Section -->
+        <div class="files-section">
+            <h3>📋 Uploaded Files (<span id="fileCount"><%= uploadedFiles.length %></span>)</h3>
+            
+            <% if (uploadedFiles.length === 0) { %>
+                <p style="text-align: center; color: #666; font-style: italic;">
+                    No files uploaded yet. Upload your 4 data files to get started.
+                </p>
+            <% } else { %>
+                <div class="files-grid" id="filesGrid">
+                    <% uploadedFiles.forEach(file => { %>
+                        <div class="file-card" data-filename="<%= file.filename %>">
+                            <div class="file-name"><%= file.originalName %></div>
+                            <div class="file-details">
+                                Size: <%= file.size %> | Uploaded: <%= file.uploadDate %>
+                            </div>
+                            <div class="file-actions">
+                                <button class="btn btn-analyze" onclick="analyzeFile('<%= file.filename %>')">
+                                    🔍 Analyze
+                                </button>
+                                <button class="btn btn-archive" onclick="archiveFile('<%= file.filename %>')">
+                                    📦 Archive
+                                </button>
+                                <button class="btn btn-delete" onclick="deleteFile('<%= file.filename %>')">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Processing Section -->
+        <% if (uploadedFiles.length > 0) { %>
+            <div class="process-section">
+                <h3>⚙️ Data Analysis & Processing</h3>
+                
+                <!-- Analysis Section -->
+                <div style="margin-bottom: 20px;">
+                    <button class="btn btn-analyze" onclick="analyzeAllFiles()" style="margin-right: 10px;">
+                        🔍 Analyze All Files & Relationships
+                    </button>
+                    <button class="process-btn" onclick="processFiles()">
+                        🚀 Process All Files Into Output Format
+                    </button>
+                </div>
+                
+                <!-- Analysis Results Area -->
+                <div id="analysisResults" style="display: none; margin-top: 20px;">
+                    <h4>📊 Analysis Results</h4>
+                    <div id="analysisContent" style="background: #f8f9fa; padding: 15px; border-radius: 5px; max-height: 400px; overflow-y: auto;"></div>
+                </div>
+
+                <!-- Output Files Section -->
+                <div id="outputFilesSection" style="display: none; margin-top: 20px;">
+                    <h4>📁 Generated Output Files</h4>
+                    <div id="outputFilesList" style="background: #f8f9fa; padding: 15px; border-radius: 5px;"></div>
+                </div>
+
+                <!-- Existing Processed Files Section -->
+                <% if (processedFiles && processedFiles.length > 0) { %>
+                <div id="existingFilesSection" style="margin-top: 20px;">
+                    <h4>📂 Previously Generated Files</h4>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 5px;">
+                        <% processedFiles.forEach(file => { %>
+                            <div class="output-file-item">
+                                <div class="file-info">
+                                    <span class="file-icon">
+                                        <% if (file.extension === '.csv') { %>📊
+                                        <% } else if (file.extension === '.xlsx') { %>📈
+                                        <% } else { %>📄<% } %>
+                                    </span>
+                                    <div class="file-details">
+                                        <h5><%= file.filename %></h5>
+                                        <p><%= file.size %> • <%= file.extension.toUpperCase().substring(1) %> file • Modified: <%= file.modified %></p>
+                                    </div>
+                                </div>
+                                <div class="file-actions">
+                                    <button class="action-btn preview-btn" onclick="previewFile('<%= file.filename %>')">
+                                        👁️ Preview
+                                    </button>
+                                    <a href="/dropship/download/<%= encodeURIComponent(file.filename) %>" 
+                                       class="action-btn download-btn" download>
+                                        ⬇️ Download
+                                    </a>
+                                    <button class="action-btn delete-btn" onclick="deleteProcessedFile('<%= file.filename %>')">
+                                        🗑️ Delete
+                                    </button>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+                <% } %>
+            </div>
+        <% } %>
+    </div>
+
+    <script>
+        // File input handling
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadArea = document.getElementById('uploadArea');
+
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                uploadBtn.style.display = 'inline-block';
+                uploadBtn.textContent = `Upload ${this.files.length} File(s)`;
+            } else {
+                uploadBtn.style.display = 'none';
+            }
+        });
+
+        // Drag and drop handling
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            fileInput.files = files;
+            
+            if (files.length > 0) {
+                uploadBtn.style.display = 'inline-block';
+                uploadBtn.textContent = `Upload ${files.length} File(s)`;
+            }
+        });
+
+        // Upload files function
+        function uploadFiles() {
+            const files = fileInput.files;
+            if (files.length === 0) return;
+
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
+
+            // Show progress
+            document.getElementById('uploadProgress').style.display = 'block';
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+
+            fetch('/dropship/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    setTimeout(() => {
+                        location.reload(); // Refresh to show new files
+                    }, 1000);
+                } else {
+                    showMessage(data.error || 'Upload failed', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Upload failed: ' + error.message, 'error');
+            })
+            .finally(() => {
+                document.getElementById('uploadProgress').style.display = 'none';
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload Files';
+                uploadBtn.style.display = 'none';
+                fileInput.value = '';
+            });
+        }
+
+        // Analyze file function
+        function analyzeFile(filename) {
+            fetch(`/dropship/analyze/${filename}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const analysis = data.analysis;
+                    let message = `File Analysis: ${analysis.filename}\n\n`;
+                    message += `Type: ${analysis.data?.type || 'Unknown'}\n`;
+                    message += `Size: ${(analysis.size / 1024).toFixed(2)} KB\n`;
+                    
+                    if (analysis.data?.headers) {
+                        message += `Headers: ${analysis.data.headers.join(', ')}\n`;
+                    }
+                    
+                    if (analysis.data?.rowCount) {
+                        message += `Rows: ${analysis.data.rowCount}\n`;
+                    }
+                    
+                    if (data.isOutputFile) {
+                        message += `\n📋 This is an OUTPUT/RESULTS file`;
+                    } else {
+                        message += `\n📁 This is an INPUT file`;
+                    }
+                    
+                    alert(message);
+                } else {
+                    showMessage(data.error || 'Analysis failed', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Analysis failed: ' + error.message, 'error');
+            });
+        }
+
+        // Analyze all files function
+        function analyzeAllFiles() {
+            document.getElementById('analysisResults').style.display = 'block';
+            document.getElementById('analysisContent').innerHTML = 'Analyzing files and relationships...';
+            
+            fetch('/dropship/analyze-all')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayAnalysisResults(data.analysis, data.processingPlan);
+                    showMessage('Analysis completed successfully!', 'success');
+                } else {
+                    showMessage(data.error || 'Analysis failed', 'error');
+                    document.getElementById('analysisResults').style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Analysis failed: ' + error.message, 'error');
+                document.getElementById('analysisResults').style.display = 'none';
+            });
+        }
+
+        // Display analysis results
+        function displayAnalysisResults(analysis, plan) {
+            let html = '<h5>📂 File Summary</h5>';
+            html += `<p><strong>Input Files:</strong> ${analysis.inputFiles.length} | <strong>Output Files:</strong> ${analysis.outputFiles.length}</p>`;
+            
+            html += '<h5>📥 Input Files Structure</h5>';
+            analysis.inputFiles.forEach(file => {
+                html += `<div style="margin: 10px 0; padding: 10px; background: #e3f2fd; border-radius: 3px;">`;
+                html += `<strong>${file.filename}</strong><br>`;
+                html += `Type: ${file.data?.type || 'Unknown'}`;
+                
+                if (file.data?.type === 'Excel') {
+                    html += ` (Sheets: ${Object.keys(file.data.sheets).join(', ')})`;
+                }
+                
+                if (file.data?.headers) {
+                    html += `<br>Headers: ${file.data.headers.slice(0, 5).join(', ')}${file.data.headers.length > 5 ? '...' : ''}`;
+                }
+                
+                if (file.data?.rowCount !== undefined) {
+                    html += `<br>Rows: ${file.data.rowCount}`;
+                }
+                
+                html += '</div>';
+            });
+            
+            html += '<h5>📤 Target Output Files</h5>';
+            analysis.outputFiles.forEach(file => {
+                html += `<div style="margin: 10px 0; padding: 10px; background: #e8f5e8; border-radius: 3px;">`;
+                html += `<strong>${file.filename}</strong><br>`;
+                html += `Type: ${file.data?.type || 'Unknown'}`;
+                
+                if (file.data?.headers) {
+                    html += `<br>Expected Headers: ${file.data.headers.join(', ')}`;
+                }
+                
+                html += '</div>';
+            });
+            
+            html += '<h5>🔗 Processing Plan</h5>';
+            plan.steps.forEach(step => {
+                html += `<div style="margin: 10px 0; padding: 10px; background: #fff3cd; border-radius: 3px;">`;
+                html += `<strong>Generate:</strong> ${step.outputFile}<br>`;
+                html += `<strong>Method:</strong> ${step.processingMethod}<br>`;
+                html += `<strong>Input Sources:</strong> ${step.inputSources.length} file(s)<br>`;
+                html += `<strong>Transformations:</strong> ${step.requiredTransformations.join(', ')}`;
+                html += '</div>';
+            });
+            
+            document.getElementById('analysisContent').innerHTML = html;
+        }
+
+        // Delete file function
+        function deleteFile(filename) {
+            if (!confirm('Are you sure you want to delete this file?')) return;
+
+            fetch(`/dropship/delete/${filename}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    // Remove the file card from the grid
+                    const fileCard = document.querySelector(`[data-filename="${filename}"]`);
+                    if (fileCard) {
+                        fileCard.remove();
+                    }
+                    // Update file count
+                    const fileCount = document.getElementById('fileCount');
+                    fileCount.textContent = parseInt(fileCount.textContent) - 1;
+                } else {
+                    showMessage(data.error || 'Delete failed', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Delete failed: ' + error.message, 'error');
+            });
+        }
+
+        // Process files function
+        function processFiles() {
+            if (!confirm('Process all uploaded files and generate output files in the same format as your uploaded results?')) return;
+
+            showMessage('Processing files... This may take a moment.', 'success');
+            
+            fetch('/dropship/process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    let message = 'Processing completed successfully!\n\n';
+                    if (data.results) {
+                        data.results.forEach(result => {
+                            if (result.success) {
+                                message += `✅ ${result.outputFile}: ${result.recordCount || 0} records\n`;
+                            } else {
+                                message += `❌ ${result.outputFile}: ${result.error}\n`;
+                            }
+                        });
+                    }
+                    showMessage(message, 'success');
+                    
+                    // Show detailed results if available
+                    if (data.analysis && data.processingPlan) {
+                        document.getElementById('analysisResults').style.display = 'block';
+                        displayAnalysisResults(data.analysis, data.processingPlan);
+                    }
+
+                    // Show output files
+                    if (data.results && data.results.length > 0) {
+                        displayOutputFiles(data.results);
+                    }
+                } else {
+                    showMessage('Processing failed: ' + (data.error || 'Unknown error'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Processing failed: ' + error.message, 'error');
+            });
+        }
+
+        // Show message function
+        function showMessage(message, type) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            messagesDiv.appendChild(messageDiv);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        // Display output files with download and preview options
+        function displayOutputFiles(results) {
+            const outputSection = document.getElementById('outputFilesSection');
+            const outputList = document.getElementById('outputFilesList');
+            
+            outputSection.style.display = 'block';
+            
+            let html = '';
+            results.forEach(result => {
+                if (result.success && result.outputFile) {
+                    const fileExt = result.outputFile.split('.').pop().toLowerCase();
+                    const icon = fileExt === 'csv' ? '📊' : fileExt === 'xlsx' ? '📈' : '📄';
+                    
+                    html += `
+                        <div class="output-file-item">
+                            <div class="file-info">
+                                <span class="file-icon">${icon}</span>
+                                <div class="file-details">
+                                    <h5>${result.outputFile}</h5>
+                                    <p>${result.recordCount || 0} records • ${fileExt.toUpperCase()} file</p>
+                                </div>
+                            </div>
+                            <div class="file-actions">
+                                <button class="action-btn preview-btn" onclick="previewFile('${result.outputFile}')">
+                                    👁️ Preview
+                                </button>
+                                <a href="/dropship/download/${encodeURIComponent(result.outputFile)}" 
+                                   class="action-btn download-btn" download>
+                                    ⬇️ Download
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            outputList.innerHTML = html;
+        }
+
+        // Preview file content
+        function previewFile(filename) {
+            const fileExt = filename.split('.').pop().toLowerCase();
+            
+            if (fileExt === 'pdf') {
+                // For PDF files, open in new window/tab for native browser PDF viewer
+                window.open(`/dropship/preview/${encodeURIComponent(filename)}`, '_blank');
+            } else {
+                // For other files, show in modal
+                fetch(`/dropship/preview/${encodeURIComponent(filename)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showFilePreview(filename, data.content, data.fileType);
+                    } else {
+                        showMessage('Failed to preview file: ' + (data.error || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('Preview failed: ' + error.message, 'error');
+                });
+            }
+        }
+
+        // Show file preview in modal
+        function showFilePreview(filename, content, fileType) {
+            // Create modal if it doesn't exist
+            let modal = document.getElementById('previewModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'previewModal';
+                modal.className = 'modal';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <span class="close" onclick="closePreview()">&times;</span>
+                        <h3 id="previewTitle"></h3>
+                        <div id="previewContent" class="preview-content"></div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+            
+            document.getElementById('previewTitle').textContent = `Preview: ${filename}`;
+            
+            if (fileType === 'csv') {
+                // Format CSV as table
+                const lines = content.split('\n').filter(line => line.trim());
+                if (lines.length > 0) {
+                    const headers = lines[0].split(',');
+                    let tableHtml = '<table border="1" style="border-collapse: collapse; width: 100%;">';
+                    tableHtml += '<tr>' + headers.map(h => `<th style="padding: 8px; background: #f0f0f0;">${h.trim()}</th>`).join('') + '</tr>';
+                    
+                    // Show first 50 rows
+                    for (let i = 1; i < Math.min(lines.length, 51); i++) {
+                        const cells = lines[i].split(',');
+                        tableHtml += '<tr>' + cells.map(c => `<td style="padding: 8px;">${c.trim()}</td>`).join('') + '</tr>';
+                    }
+                    
+                    if (lines.length > 51) {
+                        tableHtml += `<tr><td colspan="${headers.length}" style="padding: 8px; font-style: italic; text-align: center;">... and ${lines.length - 51} more rows</td></tr>`;
+                    }
+                    
+                    tableHtml += '</table>';
+                    document.getElementById('previewContent').innerHTML = tableHtml;
+                }
+            } else {
+                // Show raw content for other file types
+                document.getElementById('previewContent').textContent = content;
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        // Delete uploaded file
+        function deleteFile(filename) {
+            if (confirm(`Are you sure you want to delete "${filename}"?`)) {
+                fetch(`/dropship/file/${encodeURIComponent(filename)}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('File deleted successfully', 'success');
+                        // Remove file card from UI
+                        const fileCard = document.querySelector(`[data-filename="${filename}"]`);
+                        if (fileCard) {
+                            fileCard.remove();
+                        }
+                    } else {
+                        showMessage('Failed to delete file: ' + (data.error || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('Delete failed: ' + error.message, 'error');
+                });
+            }
+        }
+
+        // Archive uploaded file
+        function archiveFile(filename) {
+            if (confirm(`Archive "${filename}"? This will move it out of the active upload folder.`)) {
+                fetch(`/dropship/file/${encodeURIComponent(filename)}/archive`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('File archived successfully', 'success');
+                        // Remove file card from UI
+                        const fileCard = document.querySelector(`[data-filename="${filename}"]`);
+                        if (fileCard) {
+                            fileCard.remove();
+                        }
+                    } else {
+                        showMessage('Failed to archive file: ' + (data.error || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('Archive failed: ' + error.message, 'error');
+                });
+            }
+        }
+
+        // Delete processed file
+        function deleteProcessedFile(filename) {
+            if (confirm(`Are you sure you want to delete the processed file "${filename}"?`)) {
+                fetch(`/dropship/processed/${encodeURIComponent(filename)}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Processed file deleted successfully', 'success');
+                        location.reload(); // Refresh to update the processed files list
+                    } else {
+                        showMessage('Failed to delete processed file: ' + (data.error || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('Delete failed: ' + error.message, 'error');
+                });
+            }
+        }
+
+        // Close preview modal
+        function closePreview() {
+            document.getElementById('previewModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('previewModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

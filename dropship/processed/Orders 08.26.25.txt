@@ -1,0 +1,148 @@
+DIXONDALE ORDERS REPORT
+==================================================
+
+Generated: 8/26/2025, 7:53:16 PM
+Total Records: 1364
+
+Source: OFFSITEDIXONDALEORDERSTOPROCESS 4.14.25.xlsx
+------------------------------
+Records: 676
+
+Record 1:
+  Row Labels: XN500/C
+  Sum of QTY_ORDERED: 68
+
+Record 2:
+  Row Labels: XN500/D
+  Sum of QTY_ORDERED: 5
+
+Record 3:
+  Row Labels: XN501/C
+  Sum of QTY_ORDERED: 27
+
+Record 4:
+  Row Labels: XN501/D
+  Sum of QTY_ORDERED: 1
+
+Record 5:
+  Row Labels: XN504/C
+  Sum of QTY_ORDERED: 42
+
+Source: OFFSITEDIXONDALEORDERSPRINT 4.14.25.xls.xlsx
+------------------------------
+Records: 641
+
+Record 1:
+  Internal ID: 14047733
+  ORDER_NO: NS2980889
+  ShippingAddressName: JC Montroy
+  Company Name: 
+  ShippingAddressLine1: 217 Lewiston Rd
+  ShippingAddressLine2: 
+  ShippingAddressCity: MIDDLEPORT
+  ShippingAddressState: NY
+  ShippingAddressZIP: 14105
+  TSC_SKU: XN514/C
+  ITEM_DESC: ONION REDWING PLANTS 1 bunch
+  QTY_COMMITTED: 1
+  Zip & Order: 14105NS2980889
+  SYS_INTERNAL_ID: 14047733
+  SYS_ITEM_INTERNAL_ID: 21148
+  SYS_OS_QTY: 1
+
+Record 2:
+  Internal ID: 14047733
+  ORDER_NO: NS2980889
+  ShippingAddressName: JC Montroy
+  Company Name: 
+  ShippingAddressLine1: 217 Lewiston Rd
+  ShippingAddressLine2: 
+  ShippingAddressCity: MIDDLEPORT
+  ShippingAddressState: NY
+  ShippingAddressZIP: 14105
+  TSC_SKU: XN521/C
+  ITEM_DESC: ONION PATTERSON PLANTS 1 bunch
+  QTY_COMMITTED: 1
+  Zip & Order: 14105NS2980889
+  SYS_INTERNAL_ID: 14047733
+  SYS_ITEM_INTERNAL_ID: 21160
+  SYS_OS_QTY: 1
+
+Record 3:
+  Internal ID: 14057634
+  ORDER_NO: NS2981223
+  ShippingAddressName: Susan Jones
+  Company Name: 
+  ShippingAddressLine1: 1000 E CORNELL ST
+  ShippingAddressLine2: 
+  ShippingAddressCity: DILLON
+  ShippingAddressState: MT
+  ShippingAddressZIP: 59725
+  TSC_SKU: XN500/C
+  ITEM_DESC: ONION AILSA CRAIG PLANTS 1 bunch
+  QTY_COMMITTED: 1
+  Zip & Order: 59725NS2981223
+  SYS_INTERNAL_ID: 14057634
+  SYS_ITEM_INTERNAL_ID: 21131
+  SYS_OS_QTY: 1
+
+Record 4:
+  Internal ID: 14057634
+  ORDER_NO: NS2981223
+  ShippingAddressName: Susan Jones
+  Company Name: 
+  ShippingAddressLine1: 1000 E CORNELL ST
+  ShippingAddressLine2: 
+  ShippingAddressCity: DILLON
+  ShippingAddressState: MT
+  ShippingAddressZIP: 59725
+  TSC_SKU: XN509/C
+  ITEM_DESC: ONION NORTHERN MIXED BUNCH PLANTS 1 mixed bunch
+  QTY_COMMITTED: 1
+  Zip & Order: 59725NS2981223
+  SYS_INTERNAL_ID: 14057634
+  SYS_ITEM_INTERNAL_ID: 21143
+  SYS_OS_QTY: 1
+
+Record 5:
+  Internal ID: 14064927
+  ORDER_NO: NS2981403
+  ShippingAddressName: Jennifer Hall
+  Company Name: 
+  ShippingAddressLine1: 6730 GHARRETT AVE
+  ShippingAddressLine2: 
+  ShippingAddressCity: MISSOULA
+  ShippingAddressState: MT
+  ShippingAddressZIP: 59803
+  TSC_SKU: XN535/C
+  ITEM_DESC: ONION DAY NEUTRAL MIXED BUNCH PLANTS 1 mixed bunch
+  QTY_COMMITTED: 1
+  Zip & Order: 59803NS2981403
+  SYS_INTERNAL_ID: 14064927
+  SYS_ITEM_INTERNAL_ID: 21166
+  SYS_OS_QTY: 1
+
+Source: OFFSITEDIXONDALEORDERSFUTURESHIP 4.14.25.xlsx
+------------------------------
+Records: 47
+
+Record 1:
+  Row Labels: 45763
+  Sum of QTY_ORDERED: 2
+
+Record 2:
+  Row Labels: XN501/C
+  Sum of QTY_ORDERED: 1
+
+Record 3:
+  Row Labels: XN509/C
+  Sum of QTY_ORDERED: 1
+
+Record 4:
+  Row Labels: 45768
+  Sum of QTY_ORDERED: 32
+
+Record 5:
+  Row Labels: XN500/C
+  Sum of QTY_ORDERED: 7
+
