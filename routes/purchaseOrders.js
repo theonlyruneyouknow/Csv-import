@@ -658,6 +658,33 @@ router.get('/trouble-seed', async (req, res) => {
   }
 });
 
+// API route to validate PO number exists
+router.get('/api/validate-po/:poNumber', async (req, res) => {
+  try {
+    const { poNumber } = req.params;
+    console.log(`🔍 Validating PO: ${poNumber}`);
+    
+    const po = await PurchaseOrder.findOne({ poNumber: poNumber });
+    
+    if (po) {
+      res.json({ 
+        exists: true, 
+        po: {
+          poNumber: po.poNumber,
+          vendor: po.vendor,
+          totalCost: po.totalCost,
+          expectedShipDate: po.expectedShipDate
+        }
+      });
+    } else {
+      res.json({ exists: false });
+    }
+  } catch (error) {
+    console.error('PO validation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // API route for line items - This must also come before parameterized routes!
 router.get('/line-items-api', async (req, res) => {
   console.log('🚀 Line Items API called with params:', req.query);

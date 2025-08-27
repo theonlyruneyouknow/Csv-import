@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Management Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: white !important;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+        }
+
+        .stat-card.total { border-left-color: #6c757d; }
+        .stat-card.pending { border-left-color: #ffc107; }
+        .stat-card.in-progress { border-left-color: #17a2b8; }
+        .stat-card.completed { border-left-color: #28a745; }
+        .stat-card.overdue { border-left-color: #dc3545; }
+        .stat-card.critical { border-left-color: #e74c3c; }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .task-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+            transition: transform 0.2s;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .task-card.priority-low { border-left-color: #28a745; }
+        .task-card.priority-medium { border-left-color: #ffc107; }
+        .task-card.priority-high { border-left-color: #fd7e14; }
+        .task-card.priority-critical { border-left-color: #dc3545; }
+
+        .task-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .task-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+
+        .task-tags {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .task-tag {
+            background: #e9ecef;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: #495057;
+        }
+
+        .priority-badge {
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .priority-low { background: #d4edda; color: #155724; }
+        .priority-medium { background: #fff3cd; color: #856404; }
+        .priority-high { background: #f8d7da; color: #721c24; }
+        .priority-critical { background: #f5c6cb; color: #721c24; font-weight: bold; }
+
+        .status-badge {
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-in-progress { background: #d1ecf1; color: #0c5460; }
+        .status-completed { background: #d4edda; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        .status-on-hold { background: #e2e3e5; color: #383d41; }
+
+        .overdue {
+            background: #f8d7da !important;
+            border-left-color: #dc3545 !important;
+        }
+
+        .due-soon {
+            background: #fff3cd !important;
+        }
+
+        .filters-section {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filters-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .btn-create-task {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+        }
+
+        .related-items {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .related-po {
+            color: #17a2b8;
+            text-decoration: none;
+            margin-right: 0.5rem;
+        }
+
+        .related-po:hover {
+            text-decoration: underline;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .days-until {
+            font-weight: 500;
+        }
+
+        .days-until.overdue {
+            color: #dc3545;
+        }
+
+        .days-until.due-soon {
+            color: #fd7e14;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .form-floating label {
+            color: #6c757d;
+        }
+
+        #taskForm .form-control:focus,
+        #taskForm .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/purchase-orders">
+                📋 Task Management
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link text-white" href="/purchase-orders">🏠 Purchase Orders</a>
+                <a class="nav-link text-white" href="/organic-vendors">🌱 Organic Vendors</a>
+                <a class="nav-link text-white" href="/dropship">📦 Dropship</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- Statistics Grid -->
+        <div class="stats-grid">
+            <div class="stat-card total">
+                <div class="stat-number"><%= stats.total %></div>
+                <div class="stat-label">Total Tasks</div>
+            </div>
+            <div class="stat-card pending">
+                <div class="stat-number"><%= stats.pending %></div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card in-progress">
+                <div class="stat-number"><%= stats.inProgress %></div>
+                <div class="stat-label">In Progress</div>
+            </div>
+            <div class="stat-card completed">
+                <div class="stat-number"><%= stats.completed %></div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card overdue">
+                <div class="stat-number"><%= stats.overdue %></div>
+                <div class="stat-label">Overdue</div>
+            </div>
+            <div class="stat-card critical">
+                <div class="stat-number"><%= stats.critical %></div>
+                <div class="stat-label">Critical Priority</div>
+            </div>
+        </div>
+
+        <!-- Filters and Actions -->
+        <div class="filters-section">
+            <form method="GET" id="filterForm">
+                <div class="filters-row">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="<%= filters.search %>" placeholder="Search tasks...">
+                        <label for="search">Search Tasks</label>
+                    </div>
+
+                    <div class="form-floating">
+                        <select class="form-select" id="status" name="status">
+                            <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Statuses</option>
+                            <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                            <option value="in-progress" <%= filters.status === 'in-progress' ? 'selected' : '' %>>In Progress</option>
+                            <option value="completed" <%= filters.status === 'completed' ? 'selected' : '' %>>Completed</option>
+                            <option value="on-hold" <%= filters.status === 'on-hold' ? 'selected' : '' %>>On Hold</option>
+                            <option value="cancelled" <%= filters.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                        </select>
+                        <label for="status">Status</label>
+                    </div>
+
+                    <div class="form-floating">
+                        <select class="form-select" id="priority" name="priority">
+                            <option value="all" <%= filters.priority === 'all' ? 'selected' : '' %>>All Priorities</option>
+                            <option value="low" <%= filters.priority === 'low' ? 'selected' : '' %>>Low</option>
+                            <option value="medium" <%= filters.priority === 'medium' ? 'selected' : '' %>>Medium</option>
+                            <option value="high" <%= filters.priority === 'high' ? 'selected' : '' %>>High</option>
+                            <option value="critical" <%= filters.priority === 'critical' ? 'selected' : '' %>>Critical</option>
+                        </select>
+                        <label for="priority">Priority</label>
+                    </div>
+
+                    <div class="form-floating">
+                        <select class="form-select" id="category" name="category">
+                            <option value="all" <%= filters.category === 'all' ? 'selected' : '' %>>All Categories</option>
+                            <option value="seed-sourcing" <%= filters.category === 'seed-sourcing' ? 'selected' : '' %>>Seed Sourcing</option>
+                            <option value="po-management" <%= filters.category === 'po-management' ? 'selected' : '' %>>PO Management</option>
+                            <option value="vendor-contact" <%= filters.category === 'vendor-contact' ? 'selected' : '' %>>Vendor Contact</option>
+                            <option value="quality-check" <%= filters.category === 'quality-check' ? 'selected' : '' %>>Quality Check</option>
+                            <option value="inventory" <%= filters.category === 'inventory' ? 'selected' : '' %>>Inventory</option>
+                            <option value="shipping" <%= filters.category === 'shipping' ? 'selected' : '' %>>Shipping</option>
+                            <option value="general" <%= filters.category === 'general' ? 'selected' : '' %>>General</option>
+                        </select>
+                        <label for="category">Category</label>
+                    </div>
+
+                    <div class="form-floating">
+                        <select class="form-select" id="sortBy" name="sortBy">
+                            <option value="dueDate" <%= filters.sortBy === 'dueDate' ? 'selected' : '' %>>Due Date</option>
+                            <option value="priority" <%= filters.sortBy === 'priority' ? 'selected' : '' %>>Priority</option>
+                            <option value="createdAt" <%= filters.sortBy === 'createdAt' ? 'selected' : '' %>>Created Date</option>
+                            <option value="title" <%= filters.sortBy === 'title' ? 'selected' : '' %>>Title</option>
+                        </select>
+                        <label for="sortBy">Sort By</label>
+                    </div>
+
+                    <div>
+                        <button type="submit" class="btn btn-outline-primary me-2">Filter</button>
+                        <button type="button" class="btn btn-create-task" data-bs-toggle="modal" data-bs-target="#taskModal">
+                            <i class="fas fa-plus"></i> New Task
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tasks List -->
+        <div class="row">
+            <div class="col-12">
+                <% if (tasks.length === 0) { %>
+                    <div class="text-center py-5">
+                        <h4 class="text-muted">No tasks found</h4>
+                        <p class="text-muted">Create your first task to get started!</p>
+                        <button class="btn btn-create-task" data-bs-toggle="modal" data-bs-target="#taskModal">
+                            <i class="fas fa-plus"></i> Create First Task
+                        </button>
+                    </div>
+                <% } else { %>
+                    <% tasks.forEach(function(task) { 
+                        const daysUntil = Math.ceil((new Date(task.dueDate) - currentDate) / (1000 * 60 * 60 * 24));
+                        const isOverdue = daysUntil < 0;
+                        const isDueSoon = daysUntil >= 0 && daysUntil <= 3;
+                    %>
+                        <div class="task-card priority-<%= task.priority %> <%= isOverdue ? 'overdue' : '' %> <%= isDueSoon ? 'due-soon' : '' %>">
+                            <div class="task-header">
+                                <div class="flex-grow-1">
+                                    <div class="task-title"><%= task.title %></div>
+                                    <div class="task-meta">
+                                        <span class="priority-badge priority-<%= task.priority %>">
+                                            <%= task.priority.charAt(0).toUpperCase() + task.priority.slice(1) %>
+                                        </span>
+                                        <span class="status-badge status-<%= task.status %>">
+                                            <%= task.status.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) %>
+                                        </span>
+                                        <span class="days-until <%= isOverdue ? 'overdue' : isDueSoon ? 'due-soon' : '' %>">
+                                            <i class="fas fa-calendar"></i>
+                                            <% if (isOverdue) { %>
+                                                <%= Math.abs(daysUntil) %> days overdue
+                                            <% } else if (daysUntil === 0) { %>
+                                                Due today
+                                            <% } else if (daysUntil === 1) { %>
+                                                Due tomorrow
+                                            <% } else { %>
+                                                Due in <%= daysUntil %> days
+                                            <% } %>
+                                        </span>
+                                        <% if (task.assignedTo) { %>
+                                            <span><i class="fas fa-user"></i> <%= task.assignedTo %></span>
+                                        <% } %>
+                                        <span><i class="fas fa-tag"></i> <%= task.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) %></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <% if (task.description) { %>
+                                <div class="task-description text-muted mb-2">
+                                    <%= task.description %>
+                                </div>
+                            <% } %>
+
+                            <% if (task.relatedPOs && task.relatedPOs.length > 0) { %>
+                                <div class="related-items">
+                                    <strong>Related POs:</strong>
+                                    <% task.relatedPOs.forEach(function(po) { %>
+                                        <a href="/purchase-orders?poNumber=<%= po.poNumber %>" class="related-po">
+                                            <%= po.poNumber %> (<%= po.vendor %>)
+                                        </a>
+                                    <% }); %>
+                                </div>
+                            <% } %>
+
+                            <% if (task.relatedSeeds && task.relatedSeeds.length > 0) { %>
+                                <div class="related-items">
+                                    <strong>Related Seeds:</strong>
+                                    <% task.relatedSeeds.forEach(function(seed, index) { %>
+                                        <%= seed.itemName %><% if (seed.sku) { %> (<%= seed.sku %>)<% } %><% if (index < task.relatedSeeds.length - 1) { %>, <% } %>
+                                    <% }); %>
+                                </div>
+                            <% } %>
+
+                            <% if (task.tags && task.tags.length > 0) { %>
+                                <div class="task-tags">
+                                    <% task.tags.forEach(function(tag) { %>
+                                        <span class="task-tag"><%= tag %></span>
+                                    <% }); %>
+                                </div>
+                            <% } %>
+
+                            <div class="task-actions">
+                                <button class="btn btn-sm btn-outline-primary" onclick="editTask('<%= task._id %>')">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <% if (task.status !== 'completed') { %>
+                                    <button class="btn btn-sm btn-outline-success" onclick="markCompleted('<%= task._id %>')">
+                                        <i class="fas fa-check"></i> Complete
+                                    </button>
+                                <% } %>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteTask('<%= task._id %>')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal fade" id="taskModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="taskModalTitle">Create New Task</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="taskForm">
+                        <input type="hidden" id="taskId" name="taskId">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="title" name="title" required>
+                                    <label for="title">Task Title *</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <select class="form-select" id="priority" name="priority" required>
+                                        <option value="low">Low</option>
+                                        <option value="medium" selected>Medium</option>
+                                        <option value="high">High</option>
+                                        <option value="critical">Critical</option>
+                                    </select>
+                                    <label for="priority">Priority</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <textarea class="form-control" id="description" name="description" style="height: 100px;"></textarea>
+                                <label for="description">Description</label>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <select class="form-select" id="category" name="category" required>
+                                        <option value="general">General</option>
+                                        <option value="seed-sourcing">Seed Sourcing</option>
+                                        <option value="po-management">PO Management</option>
+                                        <option value="vendor-contact">Vendor Contact</option>
+                                        <option value="quality-check">Quality Check</option>
+                                        <option value="inventory">Inventory</option>
+                                        <option value="shipping">Shipping</option>
+                                    </select>
+                                    <label for="category">Category</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control" id="dueDate" name="dueDate" required>
+                                    <label for="dueDate">Due Date *</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="assignedTo" name="assignedTo">
+                                    <label for="assignedTo">Assigned To</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="datetime-local" class="form-control" id="reminderDate" name="reminderDate">
+                                    <label for="reminderDate">Reminder Date</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control" id="estimatedHours" name="estimatedHours" min="0" step="0.5">
+                                    <label for="estimatedHours">Estimated Hours</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="tags" name="tags" placeholder="e.g., urgent, seeds, vendor">
+                                <label for="tags">Tags (comma-separated)</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Related Purchase Orders</label>
+                            <div id="relatedPOsContainer">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addRelatedPO()">
+                                    <i class="fas fa-plus"></i> Add PO
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Related Seeds</label>
+                            <div id="relatedSeedsContainer">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addRelatedSeed()">
+                                    <i class="fas fa-plus"></i> Add Seed
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveTask()">Save Task</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-submit filters when changed
+        document.querySelectorAll('#filterForm select, #filterForm input').forEach(element => {
+            element.addEventListener('change', function() {
+                if (this.type !== 'text') {
+                    document.getElementById('filterForm').submit();
+                }
+            });
+        });
+
+        // Search with delay
+        let searchTimeout;
+        document.getElementById('search').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                document.getElementById('filterForm').submit();
+            }, 500);
+        });
+
+        // Set default due date to today
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dueDate').value = today;
+        });
+
+        // Task management functions
+        async function saveTask() {
+            const form = document.getElementById('taskForm');
+            const formData = new FormData(form);
+            const taskId = formData.get('taskId');
+            
+            const taskData = Object.fromEntries(formData.entries());
+            
+            // Collect related PO numbers
+            const relatedPONumbers = [];
+            const poInputs = document.querySelectorAll('input[name="relatedPONumber"]');
+            poInputs.forEach(input => {
+                if (input.value.trim()) {
+                    relatedPONumbers.push(input.value.trim());
+                }
+            });
+            taskData.relatedPONumbers = relatedPONumbers;
+            
+            // Collect related seeds
+            const relatedSeeds = [];
+            const seedCards = document.querySelectorAll('#relatedSeedsContainer .card');
+            seedCards.forEach(card => {
+                const itemName = card.querySelector('input[name="seedItemName"]')?.value?.trim();
+                const sku = card.querySelector('input[name="seedSku"]')?.value?.trim();
+                const quantity = card.querySelector('input[name="seedQuantity"]')?.value?.trim();
+                const unit = card.querySelector('select[name="seedUnit"]')?.value;
+                
+                if (itemName || sku) {
+                    relatedSeeds.push({
+                        itemName: itemName || '',
+                        sku: sku || '',
+                        quantity: quantity ? parseInt(quantity) : 0,
+                        unit: unit || 'each'
+                    });
+                }
+            });
+            taskData.relatedSeeds = relatedSeeds;
+            
+            try {
+                const url = taskId ? `/tasks/${taskId}` : '/tasks/create';
+                const method = taskId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(taskData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert('Error saving task: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Save task error:', error);
+                alert('Error saving task');
+            }
+        }
+
+        async function editTask(taskId) {
+            try {
+                const response = await fetch(`/tasks/${taskId}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const task = result.task;
+                    
+                    // Populate form
+                    document.getElementById('taskId').value = task._id;
+                    document.getElementById('title').value = task.title;
+                    document.getElementById('description').value = task.description || '';
+                    document.getElementById('priority').value = task.priority;
+                    document.getElementById('category').value = task.category;
+                    document.getElementById('dueDate').value = task.dueDate.split('T')[0];
+                    document.getElementById('assignedTo').value = task.assignedTo || '';
+                    document.getElementById('estimatedHours').value = task.estimatedHours || '';
+                    document.getElementById('tags').value = task.tags ? task.tags.join(', ') : '';
+                    
+                    if (task.reminderDate) {
+                        const reminderDate = new Date(task.reminderDate);
+                        document.getElementById('reminderDate').value = reminderDate.toISOString().slice(0, 16);
+                    }
+                    
+                    document.getElementById('taskModalTitle').textContent = 'Edit Task';
+                    new bootstrap.Modal(document.getElementById('taskModal')).show();
+                }
+            } catch (error) {
+                console.error('Edit task error:', error);
+                alert('Error loading task');
+            }
+        }
+
+        async function markCompleted(taskId) {
+            try {
+                const response = await fetch(`/tasks/${taskId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: 'completed' })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert('Error updating task: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Complete task error:', error);
+                alert('Error completing task');
+            }
+        }
+
+        async function deleteTask(taskId) {
+            if (!confirm('Are you sure you want to delete this task?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/tasks/${taskId}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert('Error deleting task: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Delete task error:', error);
+                alert('Error deleting task');
+            }
+        }
+
+        function addRelatedPO() {
+            // Create PO selection interface
+            const container = document.getElementById('relatedPOsContainer');
+            const poDiv = document.createElement('div');
+            poDiv.className = 'input-group mb-2';
+            poDiv.innerHTML = `
+                <input type="text" class="form-control" name="relatedPONumber" placeholder="Enter PO Number" 
+                       onblur="validatePO(this)">
+                <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.insertBefore(poDiv, container.lastElementChild);
+        }
+
+        function addRelatedSeed() {
+            // Create seed input interface
+            const container = document.getElementById('relatedSeedsContainer');
+            const seedDiv = document.createElement('div');
+            seedDiv.className = 'card mb-2';
+            seedDiv.innerHTML = `
+                <div class="card-body p-2">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control form-control-sm" name="seedItemName" placeholder="Item Name">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control form-control-sm" name="seedSku" placeholder="SKU">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" class="form-control form-control-sm" name="seedQuantity" placeholder="Qty">
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-control form-control-sm" name="seedUnit">
+                                <option value="lbs">lbs</option>
+                                <option value="oz">oz</option>
+                                <option value="each">each</option>
+                                <option value="packets">packets</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.card').remove()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertBefore(seedDiv, container.lastElementChild);
+        }
+
+        // Validate PO number exists
+        async function validatePO(input) {
+            const poNumber = input.value.trim();
+            if (!poNumber) return;
+
+            try {
+                const response = await fetch(`/purchase-orders/api/validate-po/${poNumber}`);
+                const data = await response.json();
+                
+                if (data.exists) {
+                    input.classList.remove('is-invalid');
+                    input.classList.add('is-valid');
+                    input.title = `Vendor: ${data.po.vendor || 'Unknown'}`;
+                } else {
+                    input.classList.remove('is-valid');
+                    input.classList.add('is-invalid');
+                    input.title = 'PO not found';
+                }
+            } catch (error) {
+                console.error('Error validating PO:', error);
+                input.classList.remove('is-valid');
+                input.classList.add('is-invalid');
+                input.title = 'Error validating PO';
+            }
+        }
+
+        // Clear form when modal is hidden
+        document.getElementById('taskModal').addEventListener('hidden.bs.modal', function() {
+            document.getElementById('taskForm').reset();
+            document.getElementById('taskId').value = '';
+            document.getElementById('taskModalTitle').textContent = 'Create New Task';
+            
+            // Reset due date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dueDate').value = today;
+        });
+    </script>
+</body>
+</html>

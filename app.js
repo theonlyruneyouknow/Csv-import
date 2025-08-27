@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const purchaseOrderRoutes = require('./routes/purchaseOrders');
 const organicVendorRoutes = require('./routes/organicVendors');
+const taskRoutes = require('./routes/tasks');
 
 console.log('🔄 Loading dropship routes...');
 const dropshipRoutes = require('./routes/dropship');
@@ -32,6 +33,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/purchase-orders', purchaseOrderRoutes);
 app.use('/organic-vendors', organicVendorRoutes);
+app.use('/tasks', taskRoutes);
 app.use('/dropship', dropshipRoutes);
 app.use('/dropship-test', dropshipTestRoutes);
 app.use('/api', purchaseOrderRoutes); // API routes for AJAX calls

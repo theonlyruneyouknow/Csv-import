@@ -1782,12 +1782,20 @@
             max-width: 180px;
         }
 
-        /* Responsive tracking column - hide on smaller screens */
+        /* Default behavior: tracking column hidden until explicitly shown */
+        .shipping-tracking-cell {
+            display: none;
+        }
+
+        /* Show tracking column when tracking is explicitly enabled */
+        .show-tracking .shipping-tracking-cell {
+            display: table-cell !important;
+            background-color: #f8f9fa; /* Light background to indicate it's active */
+            border-left: 3px solid #28a745; /* Green border to indicate active state */
+        }
+
+        /* On smaller screens, add mobile indicator */
         @media (max-width: 1400px) {
-            .shipping-tracking-cell {
-                display: none;
-            }
-            
             /* Show a hint that tracking column can be toggled */
             #toggleTrackingBtn {
                 position: relative;
@@ -1802,20 +1810,13 @@
             }
         }
 
-        /* Show tracking column when tracking is explicitly enabled */
-        .show-tracking .shipping-tracking-cell {
-            display: table-cell !important;
-            background-color: #f8f9fa; /* Light background to indicate it's active */
-            border-left: 3px solid #28a745; /* Green border to indicate active state */
-        }
-
         /* Tracking column header indicator when visible */
         .show-tracking .shipping-tracking-cell .toggle-tracking-column-btn {
             background: #28a745;
             color: white;
         }
 
-        /* On larger screens, show a subtle indicator that tracking can be toggled */
+        /* On larger screens, remove the green border for cleaner look */
         @media (min-width: 1401px) {
             .show-tracking .shipping-tracking-cell {
                 border-left: none; /* Remove border on larger screens where it's naturally visible */
@@ -2434,6 +2435,13 @@
                 <div class="nav-section">
                     <a href="/dropship" class="nav-accordion-btn" style="text-decoration: none;">
                         🚚 Dropship Processor
+                    </a>
+                </div>
+
+                <!-- Task Management -->
+                <div class="nav-section">
+                    <a href="/tasks" class="nav-accordion-btn" style="text-decoration: none;">
+                        ✅ Task Management
                     </a>
                 </div>
             </div>
