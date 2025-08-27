@@ -228,7 +228,9 @@
                 📋 Task Management
             </a>
             <div class="navbar-nav ms-auto">
-                <a class="nav-link text-white" href="/purchase-orders">🏠 Purchase Orders</a>
+                <a class="nav-link text-white btn btn-outline-light me-2" href="/purchase-orders">
+                    ← Back to Purchase Orders Dashboard
+                </a>
                 <a class="nav-link text-white" href="/organic-vendors">🌱 Organic Vendors</a>
                 <a class="nav-link text-white" href="/dropship">📦 Dropship</a>
             </div>
@@ -724,8 +726,8 @@
             const poDiv = document.createElement('div');
             poDiv.className = 'input-group mb-2';
             poDiv.innerHTML = `
-                <input type="text" class="form-control" name="relatedPONumber" placeholder="Enter PO Number" 
-                       onblur="validatePO(this)">
+                <input type="text" class="form-control" name="relatedPONumber" placeholder="Enter PO Number (e.g., PO10946)" 
+                       oninput="clearValidation(this)" onblur="validatePO(this)">
                 <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()">
                     <i class="fas fa-times"></i>
                 </button>
@@ -769,29 +771,50 @@
             container.insertBefore(seedDiv, container.lastElementChild);
         }
 
+        // Clear validation state while typing
+        function clearValidation(input) {
+            input.classList.remove('is-valid', 'is-invalid');
+            input.title = '';
+        }
+
         // Validate PO number exists
         async function validatePO(input) {
             const poNumber = input.value.trim();
-            if (!poNumber) return;
+            
+            // Clear validation if empty
+            if (!poNumber) {
+                input.classList.remove('is-valid', 'is-invalid');
+                input.title = '';
+                return;
+            }
+
+            // Show loading state
+            input.classList.remove('is-valid', 'is-invalid');
+            input.title = 'Validating...';
 
             try {
                 const response = await fetch(`/purchase-orders/api/validate-po/${poNumber}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 
                 if (data.exists) {
                     input.classList.remove('is-invalid');
                     input.classList.add('is-valid');
-                    input.title = `Vendor: ${data.po.vendor || 'Unknown'}`;
+                    input.title = `✓ Valid PO - Vendor: ${data.po.vendor || 'Unknown'}`;
                 } else {
                     input.classList.remove('is-valid');
                     input.classList.add('is-invalid');
-                    input.title = 'PO not found';
+                    input.title = '✗ PO not found in database';
                 }
             } catch (error) {
                 console.error('Error validating PO:', error);
                 input.classList.remove('is-valid');
                 input.classList.add('is-invalid');
-                input.title = 'Error validating PO';
+                input.title = '✗ Error validating PO - check connection';
             }
         }
 
