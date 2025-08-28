@@ -118,7 +118,6 @@ router.post('/create', async (req, res) => {
             assignedTo,
             createdBy: 'User', // TODO: Replace with actual user system
             relatedPOs: relatedPOs,
-            relatedPONumbers: relatedPONumbers || [],
             relatedVendors: relatedVendors || [],
             relatedSeeds: relatedSeeds || [],
             relatedContacts: relatedContacts || [],

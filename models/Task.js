@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+﻿const mongoose = require('mongoose');
 
 const taskSchema = new mongoose.Schema({
     title: {
@@ -46,8 +46,11 @@ const taskSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'PurchaseOrder'
     }],
+    relatedPONumbers: [{
+        type: String
+    }],
     relatedVendors: [{
-        type: String  // Vendor names or IDs
+        type: String
     }],
     relatedSeeds: [{
         itemName: String,
@@ -100,14 +103,12 @@ const taskSchema = new mongoose.Schema({
     }
 });
 
-// Indexes for better performance
 taskSchema.index({ dueDate: 1 });
 taskSchema.index({ priority: 1, status: 1 });
 taskSchema.index({ assignedTo: 1 });
 taskSchema.index({ category: 1 });
 taskSchema.index({ status: 1, dueDate: 1 });
 
-// Update updatedAt before saving
 taskSchema.pre('save', function(next) {
     this.updatedAt = Date.now();
     if (this.status === 'completed' && !this.completedAt) {
@@ -116,12 +117,10 @@ taskSchema.pre('save', function(next) {
     next();
 });
 
-// Virtual for overdue tasks
 taskSchema.virtual('isOverdue').get(function() {
     return this.dueDate < new Date() && this.status !== 'completed';
 });
 
-// Virtual for days until due
 taskSchema.virtual('daysUntilDue').get(function() {
     const now = new Date();
     const due = new Date(this.dueDate);
