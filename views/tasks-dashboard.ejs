@@ -182,6 +182,15 @@
             text-decoration: underline;
         }
 
+        .related-vendor {
+            color: #6f42c1;
+            background-color: #f8f9fa;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-weight: 500;
+            margin-right: 0.25rem;
+        }
+
         .task-actions {
             display: flex;
             gap: 0.5rem;
@@ -398,6 +407,15 @@
                                 </div>
                             <% } %>
 
+                            <% if (task.relatedVendors && task.relatedVendors.length > 0) { %>
+                                <div class="related-items">
+                                    <strong>Related Vendors:</strong>
+                                    <% task.relatedVendors.forEach(function(vendor, index) { %>
+                                        <span class="related-vendor"><%= vendor %></span><% if (index < task.relatedVendors.length - 1) { %>, <% } %>
+                                    <% }); %>
+                                </div>
+                            <% } %>
+
                             <% if (task.relatedSeeds && task.relatedSeeds.length > 0) { %>
                                 <div class="related-items">
                                     <strong>Related Seeds:</strong>
@@ -446,6 +464,18 @@
                 <div class="modal-body">
                     <form id="taskForm">
                         <input type="hidden" id="taskId" name="taskId">
+                        
+                        <!-- Vendor suggestions datalist -->
+                        <datalist id="vendorSuggestions">
+                            <option value="SLOOT FARM">
+                            <option value="NEW WORLD TRUFFIERES">
+                            <option value="MEADOWLARK HEARTH">
+                            <option value="SEED SAVERS EXCHANGE">
+                            <option value="JOHNNY'S SEEDS">
+                            <option value="HIGH MOWING SEEDS">
+                            <option value="SOUTHERN EXPOSURE">
+                            <option value="FEDCO SEEDS">
+                        </datalist>
                         
                         <div class="row mb-3">
                             <div class="col-md-8">
@@ -535,6 +565,15 @@
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label">Related Vendors</label>
+                            <div id="relatedVendorsContainer">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addRelatedVendor()">
+                                    <i class="fas fa-plus"></i> Add Vendor
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label">Related Seeds</label>
                             <div id="relatedSeedsContainer">
                                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addRelatedSeed()">
@@ -595,6 +634,16 @@
                 }
             });
             taskData.relatedPONumbers = relatedPONumbers;
+            
+            // Collect related vendors
+            const relatedVendors = [];
+            const vendorInputs = document.querySelectorAll('input[name="relatedVendor"]');
+            vendorInputs.forEach(input => {
+                if (input.value.trim()) {
+                    relatedVendors.push(input.value.trim());
+                }
+            });
+            taskData.relatedVendors = relatedVendors;
             
             // Collect related seeds
             const relatedSeeds = [];
@@ -687,6 +736,28 @@
                         });
                     }
                     
+                    // Clear and populate related vendors
+                    const relatedVendorsContainer = document.getElementById('relatedVendorsContainer');
+                    // Remove all existing vendor inputs (keep only the "Add Vendor" button)
+                    const existingVendorInputs = relatedVendorsContainer.querySelectorAll('.input-group');
+                    existingVendorInputs.forEach(input => input.remove());
+                    
+                    // Add existing related vendors to the form
+                    if (task.relatedVendors && task.relatedVendors.length > 0) {
+                        task.relatedVendors.forEach(vendor => {
+                            const vendorDiv = document.createElement('div');
+                            vendorDiv.className = 'input-group mb-2';
+                            vendorDiv.innerHTML = `
+                                <input type="text" class="form-control" name="relatedVendor" placeholder="Enter Vendor Name" 
+                                       value="${vendor}" list="vendorSuggestions">
+                                <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            `;
+                            relatedVendorsContainer.insertBefore(vendorDiv, relatedVendorsContainer.lastElementChild);
+                        });
+                    }
+                    
                     document.getElementById('taskModalTitle').textContent = 'Edit Task';
                     new bootstrap.Modal(document.getElementById('taskModal')).show();
                 }
@@ -755,6 +826,21 @@
                 </button>
             `;
             container.insertBefore(poDiv, container.lastElementChild);
+        }
+
+        function addRelatedVendor() {
+            // Create vendor input interface
+            const container = document.getElementById('relatedVendorsContainer');
+            const vendorDiv = document.createElement('div');
+            vendorDiv.className = 'input-group mb-2';
+            vendorDiv.innerHTML = `
+                <input type="text" class="form-control" name="relatedVendor" placeholder="Enter Vendor Name" 
+                       list="vendorSuggestions">
+                <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.insertBefore(vendorDiv, container.lastElementChild);
         }
 
         function addRelatedSeed() {
@@ -854,6 +940,11 @@
             const relatedPOsContainer = document.getElementById('relatedPOsContainer');
             const existingInputs = relatedPOsContainer.querySelectorAll('.input-group');
             existingInputs.forEach(input => input.remove());
+            
+            // Clear related vendors container (remove all input groups, keep only the "Add Vendor" button)
+            const relatedVendorsContainer = document.getElementById('relatedVendorsContainer');
+            const existingVendorInputs = relatedVendorsContainer.querySelectorAll('.input-group');
+            existingVendorInputs.forEach(input => input.remove());
         });
     </script>
 </body>
