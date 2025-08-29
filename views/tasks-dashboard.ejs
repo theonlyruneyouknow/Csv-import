@@ -584,7 +584,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="handleCancelButton()">Cancel</button>
                     <button type="button" class="btn btn-primary" onclick="saveTask()">Save Task</button>
                 </div>
             </div>
@@ -617,6 +617,17 @@
             document.getElementById('dueDate').value = today;
         });
 
+        // Handle cancel button to return to previous dashboard
+        function handleCancelButton() {
+            const returnUrl = sessionStorage.getItem('taskReturnUrl');
+            if (returnUrl) {
+                sessionStorage.removeItem('taskReturnUrl');
+                console.log('🔄 Cancel: Redirecting back to:', returnUrl);
+                window.location.href = returnUrl;
+            }
+            // If no return URL, just close modal (default Bootstrap behavior)
+        }
+
         // Task management functions
         async function saveTask() {
             const form = document.getElementById('taskForm');
@@ -624,6 +635,9 @@
             const taskId = formData.get('taskId');
             
             const taskData = Object.fromEntries(formData.entries());
+            
+            // Debug: Log the form data
+            console.log('📝 Form data being sent:', taskData);
             
             // Collect related PO numbers
             const relatedPONumbers = [];
@@ -634,6 +648,7 @@
                 }
             });
             taskData.relatedPONumbers = relatedPONumbers;
+            console.log('🔗 Related PO Numbers:', relatedPONumbers);
             
             // Collect related vendors
             const relatedVendors = [];
@@ -664,6 +679,8 @@
                 }
             });
             taskData.relatedSeeds = relatedSeeds;
+            
+            console.log('📋 Final task data to send:', taskData);
             
             try {
                 const url = taskId ? `/tasks/${taskId}` : '/tasks/create';

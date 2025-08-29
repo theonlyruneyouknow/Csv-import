@@ -139,7 +139,9 @@ router.post('/create', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const updateData = req.body;
+        const updateData = { ...req.body }; // Create a copy to avoid mutating the original
+
+        console.log('📝 Updating task with data:', updateData);
 
         // Handle date fields
         if (updateData.dueDate) {
@@ -161,11 +163,17 @@ router.put('/:id', async (req, res) => {
             }).select('_id poNumber vendor');
             updateData.relatedPOs = foundPOs.map(po => po._id);
             
-            // Remove the relatedPONumbers field as it's not part of the schema
-            delete updateData.relatedPONumbers;
-            
-            console.log(`🔗 Updated task with ${foundPOs.length} POs`);
+            console.log(`🔗 Updated task with ${foundPOs.length} POs out of ${updateData.relatedPONumbers.length} requested`);
+            console.log(`📋 PO Numbers requested: ${updateData.relatedPONumbers.join(', ')}`);
+            console.log(`✅ POs found: ${foundPOs.map(po => po.poNumber).join(', ')}`);
+        } else {
+            // If no PO numbers provided, clear the related POs
+            updateData.relatedPOs = [];
+            console.log('� No PO numbers provided, clearing related POs');
         }
+
+        // Remove the relatedPONumbers field as it's not part of the schema
+        delete updateData.relatedPONumbers;
 
         const task = await Task.findByIdAndUpdate(id, updateData, { new: true })
             .populate('relatedPOs', 'poNumber vendor expectedShipDate');
@@ -175,6 +183,11 @@ router.put('/:id', async (req, res) => {
         }
 
         console.log('✅ Task updated:', task.title);
+        console.log('📊 Updated task data:', {
+            category: task.category,
+            relatedPOs: task.relatedPOs?.map(po => po.poNumber),
+            relatedVendors: task.relatedVendors
+        });
         res.json({ success: true, task });
     } catch (error) {
         console.error('Update task error:', error);
