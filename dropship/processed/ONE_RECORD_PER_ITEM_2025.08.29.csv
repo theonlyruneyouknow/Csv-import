@@ -1,0 +1,38 @@
+Internal ID,ORDER_NO,Customer Name,Company,Address Line 1,Address Line 2,City,State,ZIP,TSC_SKU,Item Description,Quantity,Unit Price,Line Total,Category,Vendor Code
+,ORDER_20250829,Bulk Order,,,,,,,XN500/C,ONION AILSA CRAIG PLANTS 1 bunch,68,2.50,170,Onion Plants,TSC
+,ORDER_20250829,Bulk Order,,,,,,,XN500/D,,5,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN501/C,,27,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN501/D,,1,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN504/C,,42,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN504/D,,1,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN505/C,,5,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN506/C,,20,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN507/C,,28,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN507/D,,1,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN509/C,ONION NORTHERN MIXED BUNCH PLANTS 1 mixed bunch,39,2.75,107.25,Onion Plants,TSC
+,ORDER_20250829,Bulk Order,,,,,,,XN510/C,,51,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN510/D,,2,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN512/C,,12,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN514/C,ONION REDWING PLANTS 1 bunch,71,2.50,177.5,Onion Plants,TSC
+,ORDER_20250829,Bulk Order,,,,,,,XN514/D,,1,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN515/C,,5,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN515/D,,1,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN516/C,,3,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN517/C,,1,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN517/D,,2,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN518/C,,25,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN519/C,,18,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN519/D,,1,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN520/C,,7,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN520/D,,3,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN521/C,ONION PATTERSON PLANTS 1 bunch,155,2.50,387.5,Onion Plants,TSC
+,ORDER_20250829,Bulk Order,,,,,,,XN521/D,,4,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN527/C,,13,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN527/D,,1,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN534/C,,7,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN535/C,ONION DAY NEUTRAL MIXED BUNCH PLANTS 1 mixed bunch,30,2.75,82.5,Onion Plants,TSC
+,ORDER_20250829,Bulk Order,,,,,,,XN536/C,,17,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN536/D,,3,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN542/C,,54,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,XN542/D,,1,,0,,
+,ORDER_20250829,Bulk Order,,,,,,,Grand Total,,725,,0,,

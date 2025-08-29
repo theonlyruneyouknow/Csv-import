@@ -1718,13 +1718,8 @@
             width: 140px;
         }
 
-        .eta-cell {
-            width: 140px;
-        }
-
         /* Date input styling */
-        .date-input,
-        .eta-date-input {
+        .date-input {
             width: 100%;
             border: 1px solid transparent;
             background: transparent;
@@ -1734,28 +1729,24 @@
             color: #495057;
         }
 
-        .date-input:focus,
-        .eta-date-input:focus {
+        .date-input:focus {
             background: white;
             border: 1px solid #007bff;
             outline: none;
             box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
         }
 
-        .date-input.has-date,
-        .eta-date-input.has-date {
+        .date-input.has-date {
             background: #e7f3ff;
             border-color: #b3d9ff;
         }
 
-        .date-input.saving,
-        .eta-date-input.saving {
+        .date-input.saving {
             background: #d1ecf1;
             border-color: #bee5eb;
         }
 
-        .date-input.overdue,
-        .eta-date-input.overdue {
+        .date-input.overdue {
             background: #f8d7da;
             border-color: #f5c6cb;
             color: #721c24;
@@ -1803,23 +1794,11 @@
             display: none;
         }
 
-        /* Default behavior: ns status column hidden until explicitly shown */
-        .ns-status-cell {
-            display: none;
-        }
-
         /* Show tracking column when tracking is explicitly enabled */
         .show-tracking .shipping-tracking-cell {
             display: table-cell !important;
             background-color: #f8f9fa; /* Light background to indicate it's active */
             border-left: 3px solid #28a745; /* Green border to indicate active state */
-        }
-
-        /* Show NS status column when explicitly enabled */
-        .show-ns-status .ns-status-cell {
-            display: table-cell !important;
-            background-color: #f8f9fa; /* Light background to indicate it's active */
-            border-left: 3px solid #007bff; /* Blue border to indicate active state */
         }
 
         /* On smaller screens, add mobile indicator */
@@ -1893,23 +1872,6 @@
         }
 
         .toggle-tracking-column-btn:hover {
-            background: #5a6268;
-        }
-
-        /* Toggle NS Status visibility button */
-        .toggle-ns-status-column-btn {
-            background: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
-            cursor: pointer;
-            font-size: 11px;
-            margin-left: 10px;
-            transition: all 0.2s ease;
-        }
-
-        .toggle-ns-status-column-btn:hover {
             background: #5a6268;
         }
 
@@ -2704,10 +2666,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         id="toggleTrackingBtn" title="Show/Hide tracking column">
                         👁️ <span id="trackingColumnText">Show Tracking</span>
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary ms-2" onclick="toggleNsStatusColumn()"
-                        id="toggleNsStatusBtn" title="Show/Hide NS Status column">
-                        👁️ <span id="nsStatusColumnText">Show NS Status</span>
-                    </button>
                 </div>
             </div>
 
@@ -2754,12 +2712,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     <th class="sortable vendor" data-column="vendor">Vendor</th>
                                     <th class="sortable line-items-count-cell" data-column="lineItemsCount">Line Items
                                     </th>
-                                    <th class="sortable eta-cell" data-column="eta">ETA</th>
-                                    <th class="sortable ns-status-cell" data-column="nsStatus">NS Status
-                                        <button class="toggle-ns-status-column-btn" onclick="toggleNsStatusColumn()" title="Show/Hide NS Status column">
-                                            👁️
-                                        </button>
-                                    </th>
+                                    <th class="sortable ns-status-cell" data-column="nsStatus">NS Status</th>
                                     <th class="sortable status-cell" data-column="status">Status</th>
                                     <th class="sortable shipping-tracking-cell" data-column="shippingTracking">Tracking
                                         <br><small style="font-weight: normal;">(Carrier & #)</small>
@@ -2768,7 +2721,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                         </button>
                                     </th>
                                     <th class="sortable next-update-cell" data-column="nextUpdateDate">Next Update</th>
-                                    <th class="notes-toggle-cell">Notes +</th>
+                                    <th class="notes-toggle-cell">Notes</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -2852,13 +2805,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                         </button>
                                                     </div>
                                                     <% } %>
-                                        </td>
-                                        <td class="eta-cell">
-                                            <input type="date"
-                                                class="eta-date-input <%= po.eta ? 'has-date' : '' %> <%= po.eta && new Date(po.eta) < new Date() ? 'overdue' : '' %>"
-                                                value="<%= po.eta ? new Date(po.eta).toISOString().split('T')[0] : '' %>"
-                                                data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
-                                                title="Set ETA for PO <%= po.poNumber %>">
                                         </td>
                                         <td class="ns-status-cell">
                                             <span class="ns-status-display">
@@ -3598,52 +3544,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             });
         });
 
-        // Auto-save ETA when changed
-        document.querySelectorAll('.eta-date-input').forEach(etaInput => {
-            etaInput.addEventListener('change', function () {
-                const id = this.dataset.id;
-                const poNumber = this.dataset.po;
-                const eta = this.value;
-
-                // Show saving state
-                this.classList.add('saving');
-
-                fetch(`/purchase-orders/${id}/eta`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ eta })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        // Remove saving state and update appearance
-                        this.classList.remove('saving');
-
-                        if (eta) {
-                            this.classList.add('has-date');
-
-                            // Check if date is overdue
-                            const etaDate = new Date(eta);
-                            const today = new Date();
-                            today.setHours(0, 0, 0, 0); // Reset time for date comparison
-
-                            if (etaDate < today) {
-                                this.classList.add('overdue');
-                            } else {
-                                this.classList.remove('overdue');
-                            }
-                        } else {
-                            this.classList.remove('has-date', 'overdue');
-                        }
-
-                        console.log(`ETA saved for PO ${poNumber}: ${eta || 'cleared'}`);
-                    })
-                    .catch(error => {
-                        this.classList.remove('saving');
-                        console.error('Error saving ETA:', error);
-                    });
-            });
-        });
-
         // Auto-save Shipping Tracking when changed with 17track integration
         document.querySelectorAll('.shipping-tracking-input').forEach(trackingInput => {
             trackingInput.addEventListener('blur', function () {
@@ -4355,26 +4255,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             showTrackingToast(message, 'success');
         }
 
-        function toggleNsStatusColumn() {
-            const table = document.getElementById('purchaseOrdersTable');
-            const isCurrentlyVisible = table.classList.contains('show-ns-status');
-            
-            if (isCurrentlyVisible) {
-                // Hide NS status column
-                table.classList.remove('show-ns-status');
-            } else {
-                // Show NS status column
-                table.classList.add('show-ns-status');
-            }
-            
-            // Update button state
-            updateNsStatusButtonState(!isCurrentlyVisible);
-            
-            // Show a toast notification
-            const message = isCurrentlyVisible ? '👁️ NS Status column hidden' : '👁️ NS Status column shown';
-            showTrackingToast(message, 'success');
-        }
-
         async function toggleTrackingDetails(poId) {
             // Find the PO data from the page
             const trackingBtn = document.querySelector(`[data-po-id="${poId}"].tracking-toggle-btn`);
@@ -4555,10 +4435,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     event.preventDefault();
                     toggleTrackingColumn();
                 }
-                if (event.ctrlKey && event.key === 'n') {
-                    event.preventDefault();
-                    toggleNsStatusColumn();
-                }
             });
             
             // Handle window resize
@@ -4572,16 +4448,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     updateTrackingButtonState(true);
                 }
             });
-        }
-
-        // Initialize NS Status column state
-        function initializeNsStatusColumn() {
-            // Set initial state - hidden by default for all screen sizes
-            const table = document.getElementById('purchaseOrdersTable');
-            
-            // NS Status column is hidden by default
-            table.classList.remove('show-ns-status');
-            updateNsStatusButtonState(false);
         }
 
         function updateTrackingButtonState(isVisible) {
@@ -4600,25 +4466,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 toggleBtn.classList.add('btn-outline-secondary');
                 buttonText.textContent = 'Show Tracking';
                 toggleBtn.title = 'Show tracking column (Ctrl+T)';
-            }
-        }
-
-        function updateNsStatusButtonState(isVisible) {
-            const toggleBtn = document.getElementById('toggleNsStatusBtn');
-            const buttonText = document.getElementById('nsStatusColumnText');
-            
-            if (!toggleBtn || !buttonText) return; // Elements might not exist yet
-            
-            if (isVisible) {
-                toggleBtn.classList.remove('btn-outline-secondary');
-                toggleBtn.classList.add('btn-outline-success');
-                buttonText.textContent = 'Hide NS Status';
-                toggleBtn.title = 'Hide NS Status column (Ctrl+N)';
-            } else {
-                toggleBtn.classList.remove('btn-outline-success');
-                toggleBtn.classList.add('btn-outline-secondary');
-                buttonText.textContent = 'Show NS Status';
-                toggleBtn.title = 'Show NS Status column (Ctrl+N)';
             }
         }
 
@@ -6097,9 +5944,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 
                 // Initialize tracking column state
                 initializeTrackingColumn();
-                
-                // Initialize NS Status column state
-                initializeNsStatusColumn();
             });
         } else {
             console.log('DOM already loaded, initializing immediately');
@@ -6323,6 +6167,3 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 </body>
 
 </html>
-^
-^
-^

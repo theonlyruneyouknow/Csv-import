@@ -25,10 +25,6 @@ const purchaseOrderSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
-  eta: {                    // Expected Time of Arrival - estimated delivery date
-    type: Date,
-    default: null
-  },
   poUrl: {                  // URL associated with this PO - makes PO number clickable
     type: String,
     default: ''

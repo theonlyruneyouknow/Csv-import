@@ -21,7 +21,14 @@
         .header { 
             text-align: center; 
             margin-bottom: 30px; 
-            color: #333; 
+            color: #333;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1000;
+            padding: 15px 0;
+            border-bottom: 1px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .header h1 {
             margin-bottom: 10px;
@@ -365,8 +372,11 @@
                     <button class="btn btn-analyze" onclick="analyzeAllFiles()" style="margin-right: 10px;">
                         🔍 Analyze All Files & Relationships
                     </button>
-                    <button class="process-btn" onclick="processFiles()">
+                    <button class="process-btn" onclick="processFiles()" style="margin-right: 10px;">
                         🚀 Process All Files Into Output Format
+                    </button>
+                    <button class="process-btn" onclick="processSimplified()" style="background-color: #28a745;">
+                        ⚡ Simplified Process (CSV + PDF)
                     </button>
                 </div>
                 
@@ -687,6 +697,48 @@
             .catch(error => {
                 console.error('Error:', error);
                 showMessage('Processing failed: ' + error.message, 'error');
+            });
+        }
+
+        // Simplified processing function
+        function processSimplified() {
+            if (!confirm('Process the latest uploaded file and generate CSV + PDF outputs?')) return;
+
+            showMessage('Processing with simplified method... This may take a moment.', 'success');
+            
+            fetch('/dropship/process-simplified', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    let message = `Processing completed successfully!\n\n`;
+                    message += `✅ Orders processed: ${data.ordersProcessed}\n`;
+                    message += `✅ Items processed: ${data.itemsProcessed}\n`;
+                    message += `📄 CSV Output: ${data.csvOutput}\n`;
+                    message += `📋 PDF Output: ${data.pdfOutput}`;
+                    
+                    showMessage(message, 'success');
+                    
+                    // Show output files
+                    const outputFiles = [
+                        { outputFile: data.csvOutput, type: 'CSV' },
+                        { outputFile: data.pdfOutput, type: 'PDF' }
+                    ];
+                    displayOutputFiles(outputFiles);
+                    
+                    // Refresh the uploaded files list
+                    loadUploadedFiles();
+                } else {
+                    showMessage('Simplified processing failed: ' + (data.error || 'Unknown error'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Simplified processing failed: ' + error.message, 'error');
             });
         }
 

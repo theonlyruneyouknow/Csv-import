@@ -1759,6 +1759,25 @@ router.put('/:id/next-update-date', async (req, res) => {
   }
 });
 
+// Update ETA
+router.put('/:id/eta', async (req, res) => {
+  try {
+    const { eta } = req.body;
+    const dateValue = eta ? new Date(eta) : null;
+
+    const updated = await PurchaseOrder.findByIdAndUpdate(
+      req.params.id,
+      { eta: dateValue, updatedAt: new Date() },
+      { new: true }
+    );
+    console.log(`Updated ETA for PO ${updated.poNumber}: ${eta || 'cleared'}`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('ETA update error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Update PO URL
 router.put('/:id/url', async (req, res) => {
   try {
