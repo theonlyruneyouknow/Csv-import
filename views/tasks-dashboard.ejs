@@ -665,6 +665,28 @@
                         document.getElementById('reminderDate').value = reminderDate.toISOString().slice(0, 16);
                     }
                     
+                    // Clear and populate related POs
+                    const relatedPOsContainer = document.getElementById('relatedPOsContainer');
+                    // Remove all existing PO inputs (keep only the "Add Related PO" button)
+                    const existingInputs = relatedPOsContainer.querySelectorAll('.input-group');
+                    existingInputs.forEach(input => input.remove());
+                    
+                    // Add existing related POs to the form
+                    if (task.relatedPOs && task.relatedPOs.length > 0) {
+                        task.relatedPOs.forEach(po => {
+                            const poDiv = document.createElement('div');
+                            poDiv.className = 'input-group mb-2';
+                            poDiv.innerHTML = `
+                                <input type="text" class="form-control" name="relatedPONumber" placeholder="Enter PO Number (e.g., PO10946)" 
+                                       value="${po.poNumber}" oninput="clearValidation(this)" onblur="validatePO(this)">
+                                <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            `;
+                            relatedPOsContainer.insertBefore(poDiv, relatedPOsContainer.lastElementChild);
+                        });
+                    }
+                    
                     document.getElementById('taskModalTitle').textContent = 'Edit Task';
                     new bootstrap.Modal(document.getElementById('taskModal')).show();
                 }
@@ -827,6 +849,11 @@
             // Reset due date to today
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('dueDate').value = today;
+            
+            // Clear related POs container (remove all input groups, keep only the "Add Related PO" button)
+            const relatedPOsContainer = document.getElementById('relatedPOsContainer');
+            const existingInputs = relatedPOsContainer.querySelectorAll('.input-group');
+            existingInputs.forEach(input => input.remove());
         });
     </script>
 </body>
