@@ -114,7 +114,18 @@ const organicVendorSchema = new mongoose.Schema({
         city: String,
         state: String,
         zipCode: String,
-        country: String
+        country: {
+            type: String,
+            default: 'United States'
+        }
+    },
+    
+    // Custom expiring soon threshold (in days)
+    expiringSoonThreshold: {
+        type: Number,
+        default: 35, // Default to 35 days before expiration
+        min: 1,
+        max: 365
     },
 
     // Status and notes
@@ -146,12 +157,15 @@ organicVendorSchema.virtual('daysSinceLastCertification').get(function () {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 });
 
-// Virtual field for certification status based on date
+// Virtual field for certification status based on date and custom threshold
 organicVendorSchema.virtual('certificationStatus').get(function () {
     const days = this.daysSinceLastCertification;
     if (!days) return 'Unknown';
     if (days > 365) return 'Expired';
-    if (days > 330) return 'Expiring Soon';
+    
+    // Use custom threshold or default (35 days)
+    const threshold = this.expiringSoonThreshold || 35;
+    if (days > (365 - threshold)) return 'Expiring Soon';
     return 'Current';
 });
 

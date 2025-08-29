@@ -524,43 +524,71 @@
 
             <!-- Filters and Controls -->
             <div class="filter-section">
-                <div class="row align-items-center">
-                    <div class="col-md-3">
-                        <label class="form-label">Filter by Status:</label>
-                        <select id="statusFilter" class="form-select">
-                            <option value="all" <%=currentFilters.status==='all' ? 'selected' : '' %>>All Statuses
-                            </option>
-                            <% uniqueStatuses.forEach(status=> { %>
-                                <option value="<%= status %>" <%=currentFilters.status===status ? 'selected' : '' %>><%=
-                                        status %>
-                                </option>
-                                <% }); %>
-                        </select>
+                <!-- Quick Filter Buttons -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="d-flex gap-2 align-items-center flex-wrap">
+                            <span class="fw-bold text-muted">Quick Filters:</span>
+                            <button type="button" id="expiringSoonToggle" 
+                                    class="btn <%= currentFilters.certificationStatus === 'Expiring Soon' ? 'btn-warning' : 'btn-outline-warning' %> btn-sm"
+                                    onclick="toggleExpiringSoonFilter()">
+                                <i class="fas fa-clock"></i> 
+                                Expiring Soon (<%= stats.expiringSoon %>)
+                            </button>
+                            <button type="button" id="expiredToggle" 
+                                    class="btn <%= currentFilters.certificationStatus === 'Expired' ? 'btn-danger' : 'btn-outline-danger' %> btn-sm"
+                                    onclick="toggleExpiredFilter()">
+                                <i class="fas fa-exclamation-triangle"></i> 
+                                Expired (<%= stats.expired %>)
+                            </button>
+                            <button type="button" id="currentToggle" 
+                                    class="btn <%= currentFilters.certificationStatus === 'Current' ? 'btn-success' : 'btn-outline-success' %> btn-sm"
+                                    onclick="toggleCurrentFilter()">
+                                <i class="fas fa-check-circle"></i> 
+                                Current (<%= stats.current %>)
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearAllFilters()">
+                                <i class="fas fa-times"></i> Clear Filters
+                            </button>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Sort by:</label>
-                        <select id="sortBy" class="form-select">
-                            <option value="vendorName" <%=currentFilters.sortBy==='vendorName' ? 'selected' : '' %>
-                                >Vendor
-                                Name</option>
-                            <option value="lastOrganicCertificationDate"
-                                <%=currentFilters.sortBy==='lastOrganicCertificationDate' ? 'selected' : '' %>
-                                >Certification
-                                Date</option>
-                            <option value="internalId" <%=currentFilters.sortBy==='internalId' ? 'selected' : '' %>
-                                >Internal
-                                ID</option>
-                            <option value="status" <%=currentFilters.sortBy==='status' ? 'selected' : '' %>>Status
-                            </option>
+                </div>
+                
+                <!-- Advanced Filters -->
+                <div class="row align-items-center">
+                    <div class="col-md-2">
+                        <label class="form-label">Status:</label>
+                        <select id="statusFilter" class="form-select">
+                            <option value="all" <%=currentFilters.status==='all' ? 'selected' : '' %>>All Statuses</option>
+                            <% uniqueStatuses.forEach(status=> { %>
+                                <option value="<%= status %>" <%=currentFilters.status===status ? 'selected' : '' %>><%=status %></option>
+                            <% }); %>
                         </select>
                     </div>
                     <div class="col-md-2">
+                        <label class="form-label">Country:</label>
+                        <select id="countryFilter" class="form-select">
+                            <option value="all" <%=currentFilters.country==='all' ? 'selected' : '' %>>All Countries</option>
+                            <% uniqueCountries.forEach(country=> { %>
+                                <option value="<%= country %>" <%=currentFilters.country===country ? 'selected' : '' %>><%=country %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Sort by:</label>
+                        <select id="sortBy" class="form-select">
+                            <option value="vendorName" <%=currentFilters.sortBy==='vendorName' ? 'selected' : '' %>>Vendor Name</option>
+                            <option value="lastOrganicCertificationDate" <%=currentFilters.sortBy==='lastOrganicCertificationDate' ? 'selected' : '' %>>Certification Date</option>
+                            <option value="internalId" <%=currentFilters.sortBy==='internalId' ? 'selected' : '' %>>Internal ID</option>
+                            <option value="status" <%=currentFilters.sortBy==='status' ? 'selected' : '' %>>Status</option>
+                            <option value="address.country" <%=currentFilters.sortBy==='address.country' ? 'selected' : '' %>>Country</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
                         <label class="form-label">Order:</label>
                         <select id="sortOrder" class="form-select">
-                            <option value="asc" <%=currentFilters.sortOrder==='asc' ? 'selected' : '' %>>Ascending
-                            </option>
-                            <option value="desc" <%=currentFilters.sortOrder==='desc' ? 'selected' : '' %>>Descending
-                            </option>
+                            <option value="asc" <%=currentFilters.sortOrder==='asc' ? 'selected' : '' %>>Asc</option>
+                            <option value="desc" <%=currentFilters.sortOrder==='desc' ? 'selected' : '' %>>Desc</option>
                         </select>
                     </div>
                     <div class="col-md-2">
@@ -568,11 +596,15 @@
                         <input type="text" id="searchInput" class="form-control" placeholder="Search vendors...">
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label">&nbsp;</label>
-                        <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal"
-                            data-bs-target="#addVendorModal" onclick="resetFormForAdd()">
-                            <i class="fas fa-plus"></i> Add Vendor
-                        </button>
+                        <label class="form-label">Settings:</label>
+                        <div class="d-flex gap-1">
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addVendorModal" onclick="resetFormForAdd()">
+                                <i class="fas fa-plus"></i> Add
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -591,8 +623,11 @@
                                         </h5>
                                         <small class="text-muted">ID: <%= vendor.internalId %></small>
                                         <br>
-                                        <span
-                                            class="vendor-status status-<%= vendor.status.toLowerCase().replace(' ', '-') %>">
+                                        <% if (vendor.address && vendor.address.country) { %>
+                                            <small class="text-primary"><i class="fas fa-globe"></i> <%= vendor.address.country %></small>
+                                            <br>
+                                        <% } %>
+                                        <span class="vendor-status status-<%= vendor.status.toLowerCase().replace(' ', '-') %>">
                                             <%= vendor.status %>
                                         </span>
                                     </div>
@@ -792,6 +827,99 @@
                                 </div>
                             </div>
 
+                            <!-- Contact and Address Information -->
+                            <hr>
+                            <h6 class="mb-3">Contact & Address Information</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Contact Person</label>
+                                        <input type="text" class="form-control" name="contactPerson">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-control" name="email">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Phone</label>
+                                        <input type="tel" class="form-control" name="phone">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Country</label>
+                                        <select class="form-select" name="address.country">
+                                            <option value="">Select Country...</option>
+                                            <option value="United States">United States</option>
+                                            <option value="Canada">Canada</option>
+                                            <option value="Mexico">Mexico</option>
+                                            <option value="United Kingdom">United Kingdom</option>
+                                            <option value="Germany">Germany</option>
+                                            <option value="France">France</option>
+                                            <option value="Italy">Italy</option>
+                                            <option value="Spain">Spain</option>
+                                            <option value="Netherlands">Netherlands</option>
+                                            <option value="Australia">Australia</option>
+                                            <option value="New Zealand">New Zealand</option>
+                                            <option value="Japan">Japan</option>
+                                            <option value="South Korea">South Korea</option>
+                                            <option value="China">China</option>
+                                            <option value="India">India</option>
+                                            <option value="Brazil">Brazil</option>
+                                            <option value="Argentina">Argentina</option>
+                                            <option value="Chile">Chile</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Street Address</label>
+                                        <input type="text" class="form-control" name="address.street">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">City</label>
+                                        <input type="text" class="form-control" name="address.city">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">State/Province</label>
+                                        <input type="text" class="form-control" name="address.state">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">ZIP/Postal Code</label>
+                                        <input type="text" class="form-control" name="address.zipCode">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Expiring Soon Threshold (days)</label>
+                                        <input type="number" class="form-control" name="expiringSoonThreshold" 
+                                               min="1" max="365" placeholder="35">
+                                        <small class="form-text text-muted">Leave blank to use global default</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -893,8 +1021,120 @@ Certified
             </div>
         </div>
 
+        <!-- Settings Modal -->
+        <div class="modal fade" id="settingsModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Global Settings</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="settingsForm">
+                            <div class="mb-3">
+                                <label class="form-label">Default "Expiring Soon" Threshold (days before expiration):</label>
+                                <input type="number" class="form-control" id="defaultExpiringSoonThreshold" 
+                                       value="<%= defaultExpiringSoonThreshold %>" min="1" max="365">
+                                <small class="form-text text-muted">
+                                    Certifications will be marked as "Expiring Soon" when they are within this many days of expiring (365 days from certification date).
+                                </small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Quick Stats:</label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card bg-light">
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title">Total Vendors</h6>
+                                                <h4 class="text-primary"><%= stats.total %></h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card bg-light">
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title">Active Vendors</h6>
+                                                <h4 class="text-success"><%= stats.active %></h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
         <script>
+            // Filter toggle functions
+            function toggleExpiringSoonFilter() {
+                const currentStatus = '<%= currentFilters.certificationStatus %>';
+                const newStatus = currentStatus === 'Expiring Soon' ? 'all' : 'Expiring Soon';
+                updateUrlParam('certificationStatus', newStatus);
+            }
+
+            function toggleExpiredFilter() {
+                const currentStatus = '<%= currentFilters.certificationStatus %>';
+                const newStatus = currentStatus === 'Expired' ? 'all' : 'Expired';
+                updateUrlParam('certificationStatus', newStatus);
+            }
+
+            function toggleCurrentFilter() {
+                const currentStatus = '<%= currentFilters.certificationStatus %>';
+                const newStatus = currentStatus === 'Current' ? 'all' : 'Current';
+                updateUrlParam('certificationStatus', newStatus);
+            }
+
+            function clearAllFilters() {
+                const url = new URL(window.location);
+                url.searchParams.delete('status');
+                url.searchParams.delete('certificationStatus');
+                url.searchParams.delete('country');
+                url.searchParams.delete('sortBy');
+                url.searchParams.delete('sortOrder');
+                window.location.href = url.toString();
+            }
+
+            function updateUrlParam(param, value) {
+                const url = new URL(window.location);
+                if (value === 'all' || value === '') {
+                    url.searchParams.delete(param);
+                } else {
+                    url.searchParams.set(param, value);
+                }
+                window.location.href = url.toString();
+            }
+
+            function saveSettings() {
+                const threshold = document.getElementById('defaultExpiringSoonThreshold').value;
+                const url = new URL(window.location);
+                url.searchParams.set('defaultExpiringSoonThreshold', threshold);
+                window.location.href = url.toString();
+            }
+
+            // Update filter dropdowns to use URL params
+            document.getElementById('statusFilter').addEventListener('change', function() {
+                updateUrlParam('status', this.value);
+            });
+
+            document.getElementById('countryFilter').addEventListener('change', function() {
+                updateUrlParam('country', this.value);
+            });
+
+            document.getElementById('sortBy').addEventListener('change', function() {
+                updateUrlParam('sortBy', this.value);
+            });
+
+            document.getElementById('sortOrder').addEventListener('change', function() {
+                updateUrlParam('sortOrder', this.value);
+            });
+
             // Navigation Functions
             function toggleAccordion() {
                 const content = document.getElementById('managersAccordion');
@@ -1147,6 +1387,21 @@ Certified
                     form.querySelector('[name="organicSeedsRawData"]').value = vendor.organicSeedsRawData || '';
                     form.querySelector('[name="status"]').value = vendor.status || 'Active';
                     form.querySelector('[name="notes"]').value = vendor.notes || '';
+                    
+                    // Populate contact and address fields
+                    form.querySelector('[name="contactPerson"]').value = vendor.contactPerson || '';
+                    form.querySelector('[name="email"]').value = vendor.email || '';
+                    form.querySelector('[name="phone"]').value = vendor.phone || '';
+                    form.querySelector('[name="expiringSoonThreshold"]').value = vendor.expiringSoonThreshold || '';
+                    
+                    // Populate address fields
+                    if (vendor.address) {
+                        form.querySelector('[name="address.street"]').value = vendor.address.street || '';
+                        form.querySelector('[name="address.city"]').value = vendor.address.city || '';
+                        form.querySelector('[name="address.state"]').value = vendor.address.state || '';
+                        form.querySelector('[name="address.zipCode"]').value = vendor.address.zipCode || '';
+                        form.querySelector('[name="address.country"]').value = vendor.address.country || '';
+                    }
 
                     // Set form to edit mode
                     form.setAttribute('data-edit-id', vendorId);

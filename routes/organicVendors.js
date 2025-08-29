@@ -31,13 +31,20 @@ router.get('/', async (req, res) => {
             sortBy = 'vendorName',
             sortOrder = 'asc',
             status = 'all',
+            certificationStatus = 'all',
+            country = 'all',
             page = 1,
-            limit = 50 // Default to 50 vendors per page for larger datasets
+            limit = 50, // Default to 50 vendors per page for larger datasets
+            defaultExpiringSoonThreshold = 35 // Global default setting
         } = req.query;
 
         let filter = {};
         if (status !== 'all') {
             filter.status = status;
+        }
+        
+        if (country !== 'all') {
+            filter['address.country'] = country;
         }
 
         const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -53,6 +60,12 @@ router.get('/', async (req, res) => {
             .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
             .skip(skip)
             .limit(parseInt(limit));
+
+        // Filter by certification status (done in memory since it's a virtual field)
+        let filteredVendors = vendors;
+        if (certificationStatus !== 'all') {
+            filteredVendors = vendors.filter(vendor => vendor.certificationStatus === certificationStatus);
+        }
 
         // Calculate summary statistics (for all vendors, not just current page)
         const totalVendors = await OrganicVendor.countDocuments(filter);
@@ -70,31 +83,36 @@ router.get('/', async (req, res) => {
         // Calculate certification status stats using virtual fields
         const currentPageStats = {
             expired: vendors.filter(v => v.certificationStatus === 'Expired').length,
-            expiringSoon: vendors.filter(v => v.certificationStatus === 'Expiring Soon').length
+            expiringSoon: vendors.filter(v => v.certificationStatus === 'Expiring Soon').length,
+            current: vendors.filter(v => v.certificationStatus === 'Current').length
         };
 
-        // Get unique statuses for filter dropdown
+        // Get unique statuses and countries for filter dropdowns
         const uniqueStatuses = await OrganicVendor.distinct('status');
+        const uniqueCountries = await OrganicVendor.distinct('address.country');
 
         console.log(`📊 Found ${totalVendors} organic vendors (page ${page}/${Math.ceil(totalVendors / limit)})`);
 
         res.render('organic-vendors-dashboard', {
-            vendors,
+            vendors: filteredVendors,
             stats: {
                 total: totalVendors,
                 active: allVendorStats[0] ? allVendorStats[0].active : 0,
                 expired: currentPageStats.expired,
-                expiringSoon: currentPageStats.expiringSoon
+                expiringSoon: currentPageStats.expiringSoon,
+                current: currentPageStats.current
             },
             uniqueStatuses,
-            currentFilters: { sortBy, sortOrder, status, page, limit },
+            uniqueCountries: uniqueCountries.filter(country => country), // Remove null/empty values
+            currentFilters: { sortBy, sortOrder, status, certificationStatus, country, page, limit, defaultExpiringSoonThreshold },
             pagination: {
                 currentPage: parseInt(page),
                 totalPages: Math.ceil(totalVendors / limit),
                 totalVendors: totalVendors,
                 hasNextPage: parseInt(page) < Math.ceil(totalVendors / limit),
                 hasPrevPage: parseInt(page) > 1
-            }
+            },
+            defaultExpiringSoonThreshold: parseInt(defaultExpiringSoonThreshold)
         });
 
     } catch (error) {
