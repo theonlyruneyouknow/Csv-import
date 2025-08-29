@@ -48,16 +48,7 @@ router.get('/', async (req, res) => {
             'certificate.data': 0,
             'operationsProfile.data': 0,
             // Also exclude large raw text data that can be fetched on-demand
-            'organicSeedsRawData': 0,
-            // Keep metadata about files but not the content
-            'certificate.filename': 1,
-            'certificate.mimeType': 1,
-            'certificate.uploadDate': 1,
-            'certificate.source': 1,
-            'operationsProfile.filename': 1,
-            'operationsProfile.mimeType': 1,
-            'operationsProfile.uploadDate': 1,
-            'operationsProfile.source': 1
+            'organicSeedsRawData': 0
         })
             .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
             .skip(skip)
