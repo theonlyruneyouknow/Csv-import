@@ -3,6 +3,7 @@
 
 <head>
     <title>Purchase Orders Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -1879,6 +1880,68 @@
             opacity: 0.9;
         }
 
+        /* Task management button styles */
+        .task-toggle-btn {
+            background: #28a745; /* Green for task management */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            margin-left: 4px;
+            position: relative;
+        }
+
+        .task-toggle-btn.has-tasks {
+            background: #17a2b8; /* Teal when tasks exist */
+        }
+
+        .task-toggle-btn:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+
+        .task-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            font-size: 10px;
+            min-width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .task-management-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .task-management-container .dropdown-menu {
+            font-size: 14px;
+            min-width: 200px;
+        }
+
+        .task-management-container .dropdown-item {
+            padding: 8px 16px;
+            white-space: nowrap;
+        }
+
+        .task-management-container .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
         /* Toggle tracking visibility button */
         .toggle-tracking-column-btn {
             background: #6c757d;
@@ -2945,6 +3008,37 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                     title="<%= po.notes && po.notes.trim() ? 'View/Edit notes' : 'Add notes' %>">
                                                     <%= po.notes && po.notes.trim() ? '📝' : '➕' %>
                                                 </button>
+                                                <div class="task-management-container">
+                                                    <% if (po.relatedTasks && po.relatedTasks.length > 0) { %>
+                                                        <div class="dropdown">
+                                                            <button class="task-toggle-btn has-tasks dropdown-toggle" 
+                                                                    type="button" 
+                                                                    data-bs-toggle="dropdown" 
+                                                                    aria-expanded="false"
+                                                                    data-po-id="<%= po._id %>"
+                                                                    title="<%= po.relatedTasks.length %> task(s) for this PO">
+                                                                📋<span class="task-count"><%= po.relatedTasks.length %></span>
+                                                            </button>
+                                                            <ul class="dropdown-menu">
+                                                                <% po.relatedTasks.forEach(function(task) { %>
+                                                                    <li><a class="dropdown-item" href="/tasks?editTask=<%= task._id %>&returnUrl=<%= encodeURIComponent('/purchase-orders') %>">
+                                                                        ✏️ Edit: <%= task.title %>
+                                                                    </a></li>
+                                                                <% }); %>
+                                                                <li><hr class="dropdown-divider"></li>
+                                                                <li><a class="dropdown-item" href="/tasks?createTaskForPO=<%= po._id %>&poNumber=<%= po.poNumber %>&returnUrl=<%= encodeURIComponent('/purchase-orders') %>">
+                                                                    ➕ Create New Task
+                                                                </a></li>
+                                                            </ul>
+                                                        </div>
+                                                    <% } else { %>
+                                                        <a href="/tasks?createTaskForPO=<%= po._id %>&poNumber=<%= po.poNumber %>&returnUrl=<%= encodeURIComponent('/purchase-orders') %>" 
+                                                           class="task-toggle-btn" 
+                                                           title="Create task for this PO">
+                                                            ➕
+                                                        </a>
+                                                    <% } %>
+                                                </div>
                                                 <button class="tracking-toggle-btn <%= po.shippingTracking ? 'has-status' : '' %>"
                                                     type="button" 
                                                     data-po-id="<%= po._id %>"
@@ -6320,6 +6414,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             }
         });
     </script>
+
+    <!-- Bootstrap JavaScript for dropdown functionality -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

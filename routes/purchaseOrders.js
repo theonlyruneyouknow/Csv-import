@@ -8,6 +8,7 @@ const StatusOption = require('../models/StatusOption');
 const LineItemStatusOption = require('../models/LineItemStatusOption');
 const Note = require('../models/Note');
 const LineItem = require('../models/LineItem');
+const Task = require('../models/Task');
 const trackingService = require('../services/17trackService');
 
 const router = express.Router();
@@ -949,6 +950,29 @@ router.get('/', async (req, res) => {
     console.log('🔍 DASHBOARD ROUTE - Fetching data...');
 
     const purchaseOrders = await PurchaseOrder.find().sort({ date: 1 });
+
+    // Get all tasks that are related to purchase orders
+    const allTasks = await Task.find({ 
+      relatedPOs: { $exists: true, $ne: [] } 
+    }).populate('relatedPOs', 'poNumber');
+
+    // Create a map of PO ObjectId to tasks
+    const tasksByPOId = {};
+    allTasks.forEach(task => {
+      task.relatedPOs.forEach(po => {
+        if (!tasksByPOId[po._id]) {
+          tasksByPOId[po._id] = [];
+        }
+        tasksByPOId[po._id].push(task);
+      });
+    });
+
+    // Add task data to each purchase order
+    purchaseOrders.forEach(po => {
+      po.relatedTasks = tasksByPOId[po._id] || [];
+    });
+
+    console.log(`📋 Found ${allTasks.length} tasks related to purchase orders`);
 
     // Try multiple queries to see what's in the database
     const allPrePurchaseOrders = await PrePurchaseOrder.find().sort({ createdAt: -1 });
@@ -2850,6 +2874,90 @@ router.get('/tracking-dashboard', async (req, res) => {
     });
   } catch (error) {
     console.error('Tracking dashboard error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Task Management API endpoints for dashboard
+// Get tasks for a specific PO
+router.get('/api/po/:poId/tasks', async (req, res) => {
+  try {
+    const { poId } = req.params;
+    const tasks = await Task.find({ 
+      relatedPOs: poId 
+    }).populate('relatedPOs', 'poNumber vendor');
+    
+    res.json({ success: true, tasks });
+  } catch (error) {
+    console.error('Get PO tasks error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create a new task for a PO from the dashboard
+router.post('/api/po/:poId/tasks', async (req, res) => {
+  try {
+    const { poId } = req.params;
+    const {
+      title,
+      description,
+      priority = 'medium',
+      category = 'po-management',
+      dueDate,
+      assignedTo = ''
+    } = req.body;
+
+    // Verify the PO exists
+    const po = await PurchaseOrder.findById(poId);
+    if (!po) {
+      return res.status(404).json({ error: 'Purchase order not found' });
+    }
+
+    const task = new Task({
+      title,
+      description,
+      priority,
+      category,
+      dueDate: new Date(dueDate),
+      assignedTo,
+      createdBy: 'Dashboard User',
+      relatedPOs: [poId],
+      relatedPONumbers: [po.poNumber]
+    });
+
+    await task.save();
+    await task.populate('relatedPOs', 'poNumber vendor');
+    
+    console.log(`✅ Task created from dashboard for PO ${po.poNumber}:`, task.title);
+    res.json({ success: true, task });
+  } catch (error) {
+    console.error('Create PO task error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update a task from the dashboard
+router.put('/api/tasks/:taskId', async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const updateData = req.body;
+
+    // Handle date fields
+    if (updateData.dueDate) {
+      updateData.dueDate = new Date(updateData.dueDate);
+    }
+
+    const task = await Task.findByIdAndUpdate(taskId, updateData, { new: true })
+      .populate('relatedPOs', 'poNumber vendor');
+
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+
+    console.log(`✅ Task updated from dashboard:`, task.title);
+    res.json({ success: true, task });
+  } catch (error) {
+    console.error('Update task error:', error);
     res.status(500).json({ error: error.message });
   }
 });

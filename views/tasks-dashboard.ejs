@@ -680,13 +680,16 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    location.reload();
+                    // Don't reload immediately, let the caller handle navigation
+                    return { success: true, result };
                 } else {
                     alert('Error saving task: ' + result.error);
+                    return { success: false, error: result.error };
                 }
             } catch (error) {
                 console.error('Save task error:', error);
                 alert('Error saving task');
+                return { success: false, error: error.message };
             }
         }
 
@@ -945,6 +948,119 @@
             const relatedVendorsContainer = document.getElementById('relatedVendorsContainer');
             const existingVendorInputs = relatedVendorsContainer.querySelectorAll('.input-group');
             existingVendorInputs.forEach(input => input.remove());
+        });
+
+        // Handle URL parameters for task management from other dashboards
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Check if we should create a task for a specific PO
+            if (urlParams.has('createTaskForPO')) {
+                const poId = urlParams.get('createTaskForPO');
+                const poNumber = urlParams.get('poNumber');
+                const returnUrl = urlParams.get('returnUrl');
+                
+                console.log('🎯 Creating task for PO:', poNumber);
+                
+                // Pre-fill the form with PO information
+                setTimeout(() => {
+                    // Set task title with PO reference
+                    document.getElementById('title').value = `Task for ${poNumber}`;
+                    
+                    // Add the PO to related POs
+                    addRelatedPO();
+                    const poInputs = document.querySelectorAll('input[name="relatedPONumber"]');
+                    if (poInputs.length > 0) {
+                        poInputs[poInputs.length - 1].value = poNumber;
+                    }
+                    
+                    // Set category to PO management
+                    document.getElementById('category').value = 'po-management';
+                    
+                    // Store return URL for later use
+                    if (returnUrl) {
+                        sessionStorage.setItem('taskReturnUrl', returnUrl);
+                    }
+                    
+                    // Open the task creation modal
+                    document.getElementById('taskModalTitle').textContent = `Create Task for ${poNumber}`;
+                    new bootstrap.Modal(document.getElementById('taskModal')).show();
+                }, 500);
+            }
+            
+            // Check if we should edit a specific task
+            if (urlParams.has('editTask')) {
+                const taskId = urlParams.get('editTask');
+                const returnUrl = urlParams.get('returnUrl');
+                
+                console.log('✏️ Editing task:', taskId);
+                
+                if (returnUrl) {
+                    sessionStorage.setItem('taskReturnUrl', returnUrl);
+                }
+                
+                // Trigger edit task after a short delay to ensure page is loaded
+                setTimeout(() => {
+                    editTask(taskId);
+                }, 500);
+            }
+        });
+
+        // Override the saveTask function to handle return navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            const originalSaveTask = window.saveTask;
+            
+            window.saveTask = async function() {
+                const result = await originalSaveTask();
+                
+                if (result && result.success) {
+                    // After successful save, check if we should redirect back
+                    const returnUrl = sessionStorage.getItem('taskReturnUrl');
+                    if (returnUrl) {
+                        sessionStorage.removeItem('taskReturnUrl');
+                        console.log('🔄 Redirecting back to:', returnUrl);
+                        // Add a small delay to ensure the save is complete
+                        setTimeout(() => {
+                            window.location.href = returnUrl;
+                        }, 1000);
+                    } else {
+                        // Default behavior - reload the page
+                        location.reload();
+                    }
+                }
+                
+                return result;
+            };
+        });
+
+        // Add a back button to the modal when coming from another dashboard
+        function addBackButtonToModal() {
+            const returnUrl = sessionStorage.getItem('taskReturnUrl');
+            if (returnUrl) {
+                const modalFooter = document.querySelector('#taskModal .modal-footer');
+                const backButton = document.createElement('button');
+                backButton.type = 'button';
+                backButton.className = 'btn btn-outline-secondary me-auto';
+                backButton.innerHTML = '<i class="fas fa-arrow-left"></i> Back to Dashboard';
+                backButton.onclick = function() {
+                    sessionStorage.removeItem('taskReturnUrl');
+                    window.location.href = returnUrl;
+                };
+                modalFooter.insertBefore(backButton, modalFooter.firstChild);
+            }
+        }
+
+        // Add back button when modal is shown
+        document.getElementById('taskModal').addEventListener('shown.bs.modal', function() {
+            addBackButtonToModal();
+        });
+
+        // Remove back button when modal is hidden
+        document.getElementById('taskModal').addEventListener('hidden.bs.modal', function() {
+            const backButton = document.querySelector('#taskModal .btn-outline-secondary');
+            if (backButton && backButton.innerHTML.includes('Back to Dashboard')) {
+                backButton.remove();
+            }
         });
     </script>
 </body>
