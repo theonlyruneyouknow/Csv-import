@@ -164,13 +164,10 @@ router.get('/:id/certificate', async (req, res) => {
         const buffer = Buffer.from(vendor.certificate.data, 'base64');
         console.log(`📤 Serving certificate: ${vendor.certificate.filename} (${buffer.length} bytes)`);
         
-        // Set headers optimized for iframe PDF viewing
+        // Set headers for PDF viewing in iframe
         res.setHeader('Content-Type', vendor.certificate.mimeType || 'application/pdf');
         res.setHeader('Content-Length', buffer.length);
-        // Remove Content-Disposition or use attachment for debugging
-        // res.setHeader('Content-Disposition', `inline; filename="${vendor.certificate.filename}"`);
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('Content-Disposition', `inline; filename="${vendor.certificate.filename}"`);
         
         res.end(buffer);
     } catch (error) {
@@ -208,13 +205,10 @@ router.get('/:id/operations-profile', async (req, res) => {
         const buffer = Buffer.from(vendor.operationsProfile.data, 'base64');
         console.log(`📤 Serving operations profile: ${vendor.operationsProfile.filename} (${buffer.length} bytes)`);
         
-        // Set headers optimized for iframe PDF viewing
+        // Set headers for PDF viewing in iframe
         res.setHeader('Content-Type', vendor.operationsProfile.mimeType || 'application/pdf');
         res.setHeader('Content-Length', buffer.length);
-        // Remove Content-Disposition or use attachment for debugging
-        // res.setHeader('Content-Disposition', `inline; filename="${vendor.operationsProfile.filename}"`);
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('Content-Disposition', `inline; filename="${vendor.operationsProfile.filename}"`);
         
         res.end(buffer);
     } catch (error) {

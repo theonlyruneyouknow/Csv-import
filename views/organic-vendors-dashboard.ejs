@@ -760,6 +760,9 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <form id="vendorForm" enctype="multipart/form-data">
+                        <!-- Hidden field to store vendor ID for file management -->
+                        <input type="hidden" name="vendorId" id="vendorIdField">
+                        
                         <div class="modal-body">
                             <div class="row">
                                 <div class="col-md-6">
@@ -855,7 +858,7 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label class="form-label">Country</label>
-                                        <select class="form-select" name="address.country">
+                                        <select class="form-select" name="country">
                                             <option value="">Select Country...</option>
                                             <option value="United States">United States</option>
                                             <option value="Canada">Canada</option>
@@ -885,13 +888,13 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label class="form-label">Street Address</label>
-                                        <input type="text" class="form-control" name="address.street">
+                                        <input type="text" class="form-control" name="street">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label class="form-label">City</label>
-                                        <input type="text" class="form-control" name="address.city">
+                                        <input type="text" class="form-control" name="city">
                                     </div>
                                 </div>
                             </div>
@@ -900,13 +903,13 @@
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label class="form-label">State/Province</label>
-                                        <input type="text" class="form-control" name="address.state">
+                                        <input type="text" class="form-control" name="state">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label class="form-label">ZIP/Postal Code</label>
-                                        <input type="text" class="form-control" name="address.zipCode">
+                                        <input type="text" class="form-control" name="zipCode">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -923,16 +926,90 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label">Certificate Upload</label>
-                                        <input type="file" class="form-control" name="certificate"
-                                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                        <label class="form-label">
+                                            <i class="fas fa-certificate text-primary"></i> Certificate Management
+                                        </label>
+                                        
+                                        <!-- Existing Certificate Display -->
+                                        <div id="existingCertificate" class="border rounded p-2 mb-2 bg-light" style="display: none;">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <small class="text-muted">Current Certificate:</small><br>
+                                                    <span id="currentCertName" class="fw-bold"></span><br>
+                                                    <small id="currentCertDate" class="text-muted"></small>
+                                                </div>
+                                                <div>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="viewCurrentCert()">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-warning" onclick="archiveCert()">
+                                                        <i class="fas fa-archive"></i> Archive
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Upload New Certificate -->
+                                        <input type="file" class="form-control" name="certificate" id="certificateInput"
+                                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="showCertificateUploadInfo()">
+                                        <div class="mt-1">
+                                            <small class="text-muted">
+                                                <i class="fas fa-info-circle"></i> 
+                                                <span id="certUploadInfo">Upload a new certificate (will replace current)</span>
+                                            </small>
+                                        </div>
+                                        
+                                        <!-- Version/Notes for new upload -->
+                                        <div id="certVersionInput" style="display: none;" class="mt-2">
+                                            <input type="text" class="form-control form-control-sm mb-1" name="certificateVersion" 
+                                                placeholder="Version (e.g., 2024, Renewal, Amendment)">
+                                            <input type="text" class="form-control form-control-sm" name="certificateNotes" 
+                                                placeholder="Notes (optional)">
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label">Operations Profile Upload</label>
-                                        <input type="file" class="form-control" name="operationsProfile"
-                                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                        <label class="form-label">
+                                            <i class="fas fa-file-alt text-info"></i> Operations Profile Management
+                                        </label>
+                                        
+                                        <!-- Existing Operations Profile Display -->
+                                        <div id="existingProfile" class="border rounded p-2 mb-2 bg-light" style="display: none;">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <small class="text-muted">Current Profile:</small><br>
+                                                    <span id="currentProfileName" class="fw-bold"></span><br>
+                                                    <small id="currentProfileDate" class="text-muted"></small>
+                                                </div>
+                                                <div>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="viewCurrentProfile()">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-warning" onclick="archiveProfile()">
+                                                        <i class="fas fa-archive"></i> Archive
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Upload New Operations Profile -->
+                                        <input type="file" class="form-control" name="operationsProfile" id="profileInput"
+                                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="showProfileUploadInfo()">
+                                        <div class="mt-1">
+                                            <small class="text-muted">
+                                                <i class="fas fa-info-circle"></i> 
+                                                <span id="profileUploadInfo">Upload a new operations profile (will replace current)</span>
+                                            </small>
+                                        </div>
+                                        
+                                        <!-- Version/Notes for new upload -->
+                                        <div id="profileVersionInput" style="display: none;" class="mt-2">
+                                            <input type="text" class="form-control form-control-sm mb-1" name="profileVersion" 
+                                                placeholder="Version (e.g., 2024, Updated, Corrected)">
+                                            <input type="text" class="form-control form-control-sm" name="profileNotes" 
+                                                placeholder="Notes (optional)">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1309,6 +1386,15 @@ Certified
                 form.reset();
                 form.removeAttribute('data-edit-id');
                 document.querySelector('#addVendorModal .modal-title').textContent = 'Add New Organic Vendor';
+                
+                // Reset file management displays
+                document.getElementById('vendorIdField').value = '';
+                document.getElementById('existingCertificate').style.display = 'none';
+                document.getElementById('existingProfile').style.display = 'none';
+                document.getElementById('certVersionInput').style.display = 'none';
+                document.getElementById('profileVersionInput').style.display = 'none';
+                document.getElementById('certUploadInfo').textContent = 'Upload a certificate file';
+                document.getElementById('profileUploadInfo').textContent = 'Upload an operations profile file';
             }
 
             // Form submission
@@ -1396,15 +1482,21 @@ Certified
                     
                     // Populate address fields
                     if (vendor.address) {
-                        form.querySelector('[name="address.street"]').value = vendor.address.street || '';
-                        form.querySelector('[name="address.city"]').value = vendor.address.city || '';
-                        form.querySelector('[name="address.state"]').value = vendor.address.state || '';
-                        form.querySelector('[name="address.zipCode"]').value = vendor.address.zipCode || '';
-                        form.querySelector('[name="address.country"]').value = vendor.address.country || '';
+                        form.querySelector('[name="street"]').value = vendor.address.street || '';
+                        form.querySelector('[name="city"]').value = vendor.address.city || '';
+                        form.querySelector('[name="state"]').value = vendor.address.state || '';
+                        form.querySelector('[name="zipCode"]').value = vendor.address.zipCode || '';
+                        form.querySelector('[name="country"]').value = vendor.address.country || '';
                     }
 
                     // Set form to edit mode
                     form.setAttribute('data-edit-id', vendorId);
+                    
+                    // Set vendor ID in hidden field for file management
+                    document.getElementById('vendorIdField').value = vendorId;
+
+                    // Populate file management displays
+                    populateEditForm(vendor);
 
                     // Show modal
                     const modal = new bootstrap.Modal(document.getElementById('addVendorModal'));
@@ -1609,6 +1701,90 @@ Certified
                 const tscField = document.querySelector('textarea[name="tscDescription"]');
                 if (tscField && tscDescription) {
                     tscField.value = tscDescription;
+                }
+            }
+
+            // File Management Functions
+            function showCertificateUploadInfo() {
+                const input = document.getElementById('certificateInput');
+                const info = document.getElementById('certUploadInfo');
+                const versionInput = document.getElementById('certVersionInput');
+                
+                if (input.files.length > 0) {
+                    const file = input.files[0];
+                    info.innerHTML = `📁 Selected: <strong>${file.name}</strong> (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                    versionInput.style.display = 'block';
+                } else {
+                    info.textContent = 'Upload a new certificate (will replace current)';
+                    versionInput.style.display = 'none';
+                }
+            }
+
+            function showProfileUploadInfo() {
+                const input = document.getElementById('profileInput');
+                const info = document.getElementById('profileUploadInfo');
+                const versionInput = document.getElementById('profileVersionInput');
+                
+                if (input.files.length > 0) {
+                    const file = input.files[0];
+                    info.innerHTML = `📁 Selected: <strong>${file.name}</strong> (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                    versionInput.style.display = 'block';
+                } else {
+                    info.textContent = 'Upload a new operations profile (will replace current)';
+                    versionInput.style.display = 'none';
+                }
+            }
+
+            function viewCurrentCert() {
+                const vendorId = document.querySelector('input[name="vendorId"]')?.value;
+                if (vendorId) {
+                    toggleDocument(vendorId, 'certificate');
+                }
+            }
+
+            function viewCurrentProfile() {
+                const vendorId = document.querySelector('input[name="vendorId"]')?.value;
+                if (vendorId) {
+                    toggleDocument(vendorId, 'operations-profile');
+                }
+            }
+
+            function archiveCert() {
+                if (confirm('Archive the current certificate? It will be moved to archive but not deleted.')) {
+                    // TODO: Implement archive functionality
+                    alert('Archive functionality will be implemented in the next update.');
+                }
+            }
+
+            function archiveProfile() {
+                if (confirm('Archive the current operations profile? It will be moved to archive but not deleted.')) {
+                    // TODO: Implement archive functionality
+                    alert('Archive functionality will be implemented in the next update.');
+                }
+            }
+
+            // Update edit form to show existing files
+            function populateEditForm(vendor) {
+                // ... existing form population code ...
+                
+                // Show existing certificate info
+                if (vendor.certificate && vendor.certificate.filename) {
+                    document.getElementById('existingCertificate').style.display = 'block';
+                    document.getElementById('currentCertName').textContent = vendor.certificate.filename;
+                    const certDate = new Date(vendor.certificate.uploadDate).toLocaleDateString();
+                    document.getElementById('currentCertDate').textContent = `Uploaded: ${certDate}`;
+                } else {
+                    document.getElementById('existingCertificate').style.display = 'none';
+                }
+
+                // Show existing operations profile info
+                if (vendor.operationsProfile && vendor.operationsProfile.filename) {
+                    document.getElementById('existingProfile').style.display = 'block';
+                    document.getElementById('currentProfileName').textContent = vendor.operationsProfile.filename;
+                    const profileDate = new Date(vendor.operationsProfile.uploadDate).toLocaleDateString();
+                    document.getElementById('currentProfileDate').textContent = `Uploaded: ${profileDate}`;
+                } else {
+                    document.getElementById('existingProfile').style.display = 'none';
                 }
             }
         </script>

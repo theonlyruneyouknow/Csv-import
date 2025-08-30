@@ -37,6 +37,29 @@ const organicVendorSchema = new mongoose.Schema({
         source: String // 'Upload' or 'USDA Organic Database'
     },
 
+    // Multiple certificates and operations profiles for version management
+    certificates: [{
+        filename: String,
+        data: String, // base64 encoded file data
+        mimeType: String,
+        uploadDate: { type: Date, default: Date.now },
+        source: String, // 'Upload' or 'USDA Organic Database'
+        isActive: { type: Boolean, default: true },
+        notes: String,
+        version: String // e.g., "2024", "Renewal", "Amendment"
+    }],
+
+    operationsProfiles: [{
+        filename: String,
+        data: String, // base64 encoded file data
+        mimeType: String,
+        uploadDate: { type: Date, default: Date.now },
+        source: String, // 'Upload' or 'USDA Organic Database'
+        isActive: { type: Boolean, default: true },
+        notes: String,
+        version: String // e.g., "2024", "Updated", "Corrected"
+    }],
+
     // USDA direct download links
     usdaDownloadLinks: {
         certificate: String,
