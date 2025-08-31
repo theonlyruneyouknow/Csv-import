@@ -2393,9 +2393,42 @@
             overflow-y: auto;
         }
 
+        .po-details-line-items-table {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
         .po-details-notes-history {
             max-height: 500px;
             overflow-y: auto;
+        }
+
+        /* PO Modal Table Styles */
+        .po-modal-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0;
+        }
+
+        .po-modal-table th,
+        .po-modal-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .po-modal-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #495057;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .po-modal-table tr:hover {
+            background: #f8f9fa;
         }
 
         .line-items-summary {
@@ -3198,13 +3231,20 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             </div>
 
             <div class="po-details-tabs">
-                <button class="tab-button active" onclick="showTab('lineItems')">📦 Line Items</button>
+                <button class="tab-button active" onclick="showTab('lineItemsTable')">📦 Line Items - Table View</button>
+                <button class="tab-button" onclick="showTab('lineItems')">📦 Line Items - Card View</button>
                 <button class="tab-button" onclick="showTab('notesHistory')">📋 Notes History</button>
             </div>
 
-            <div id="lineItemsTab" class="tab-content active">
+            <div id="lineItemsTableTab" class="tab-content active">
+                <div id="poDetailsLineItemsTable" class="po-details-line-items-table">
+                    <!-- Table view will be loaded here -->
+                </div>
+            </div>
+
+            <div id="lineItemsTab" class="tab-content">
                 <div id="poDetailsLineItems" class="po-details-line-items">
-                    <!-- Line items will be loaded here -->
+                    <!-- Card view will be loaded here -->
                 </div>
             </div>
 
@@ -4414,10 +4454,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             modal.dataset.poId = poId; // Store poId for later use
             modal.style.display = 'block';
             
-            // Reset to line items tab
+            // Reset to line items table tab (new default)
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('lineItemsTab').classList.add('active');
+            document.getElementById('lineItemsTableTab').classList.add('active');
             document.querySelector('.tab-button').classList.add('active');
             
             // Load line items by default
@@ -4426,6 +4466,85 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         function closePoDetailsModal() {
             document.getElementById('poDetailsModal').style.display = 'none';
+        }
+
+        // Render PO modal table view
+        function renderPoModalTableView(lineItems) {
+            const tableContainer = document.getElementById('poDetailsLineItemsTable');
+            
+            if (!lineItems || lineItems.length === 0) {
+                tableContainer.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
+                return;
+            }
+
+            const tableHtml = `
+                <table class="po-modal-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Memo</th>
+                            <th>Quantity</th>
+                            <th>SKU</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                            <th>Received</th>
+                            <th>Tracking</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${lineItems.map(item => `
+                            <tr class="line-item-row ${item.received ? 'received' : ''}" data-item-id="${item._id}">
+                                <td>${item.date ? new Date(item.date).toLocaleDateString() : 'No date'}</td>
+                                <td class="item-memo" title="${escapeHtml(item.memo)}">${escapeHtml(item.memo)}</td>
+                                <td>${item.quantity || 'N/A'}</td>
+                                <td>
+                                    <input type="text" 
+                                           class="sku-input" 
+                                           placeholder="SKU" 
+                                           value="${escapeHtml(item.sku || '')}"
+                                           onchange="updateLineItemField('${item._id}', 'sku', this.value)">
+                                </td>
+                                <td>
+                                    <select class="status-select" 
+                                            onchange="updateLineItemField('${item._id}', 'status', this.value)">
+                                        <option value="">Select Status</option>
+                                        ${globalLineItemStatusOptions.map(status => 
+                                            `<option value="${escapeHtml(status)}" ${item.status === status ? 'selected' : ''}>${escapeHtml(status)}</option>`
+                                        ).join('')}
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="text" 
+                                           class="notes-input" 
+                                           placeholder="Notes" 
+                                           value="${escapeHtml(item.notes || '')}"
+                                           onchange="updateLineItemField('${item._id}', 'notes', this.value)">
+                                </td>
+                                <td>
+                                    <button class="received-toggle ${item.received ? 'received' : ''}" 
+                                            onclick="toggleReceivedInModal('${item._id}', ${!item.received}, '${getPoIdFromModal()}')">
+                                        ${item.received ? '✅ Received' : '📦 Mark Received'}
+                                    </button>
+                                </td>
+                                <td class="line-item-tracking ${!item.trackingNumber ? 'no-tracking' : ''}">
+                                    ${item.trackingNumber ? 
+                                        `<a href="#" onclick="openTrackingDetails('${item.trackingNumber}', '${item.carrier || 'Unknown'}')" class="tracking-link">${item.trackingNumber}</a>` :
+                                        `<button class="tracking-add-btn" onclick="addTrackingInModal('${item._id}')">Add Tracking</button>`
+                                    }
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            tableContainer.innerHTML = tableHtml;
+        }
+
+        // Helper function to get PO ID from modal
+        function getPoIdFromModal() {
+            const modal = document.getElementById('poDetailsModal');
+            return modal.dataset.poId;
         }
 
         // Tracking Functions
@@ -4749,21 +4868,31 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         }
 
         async function loadPoDetailsLineItems(poId) {
-            const container = document.getElementById('poDetailsLineItems');
+            const cardContainer = document.getElementById('poDetailsLineItems');
+            const tableContainer = document.getElementById('poDetailsLineItemsTable');
             
             try {
-                container.innerHTML = '<div class="loading-line-items">Loading line items...</div>';
+                // Show loading in both containers
+                cardContainer.innerHTML = '<div class="loading-line-items">Loading line items...</div>';
+                tableContainer.innerHTML = '<div class="loading-line-items">Loading line items...</div>';
                 
                 const response = await fetch(`/purchase-orders/${poId}/line-items`);
                 const lineItems = await response.json();
                 
                 if (lineItems.length === 0) {
-                    container.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
+                    cardContainer.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
+                    tableContainer.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
                 } else {
+                    // Store line items globally for the modal
+                    window.currentPoLineItems = lineItems;
+                    
                     const receivedCount = lineItems.filter(item => item.received).length;
                     const totalCount = lineItems.length;
                     
-                    // Generate the HTML for line items
+                    // Render table view
+                    renderPoModalTableView(lineItems);
+                    
+                    // Generate the HTML for card view (existing format)
                     const lineItemsHtml = lineItems.map(item => `
                         <div class="line-item ${item.received ? 'received' : ''}" data-item-id="${item._id}">
                             <div class="line-item-header">
@@ -4815,7 +4944,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         </div>
                     `).join('');
                     
-                    container.innerHTML = `
+                    // Populate card view
+                    cardContainer.innerHTML = `
                         <div class="line-items-summary">
                             <strong>Summary:</strong> ${receivedCount}/${totalCount} items received
                             ${receivedCount === totalCount ? ' ✅' : ''}
@@ -4825,7 +4955,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
             } catch (error) {
                 console.error('Error loading line items:', error);
-                container.innerHTML = '<div class="no-line-items">Error loading line items</div>';
+                cardContainer.innerHTML = '<div class="no-line-items">Error loading line items</div>';
+                tableContainer.innerHTML = '<div class="no-line-items">Error loading line items</div>';
             }
         }
 
