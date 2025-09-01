@@ -232,6 +232,31 @@
             transform: rotate(90deg);
         }
 
+        .po-select-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.2s;
+        }
+
+        .po-select-btn:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .po-select-btn.all-selected {
+            background: #28a745;
+        }
+
+        .po-select-btn.all-selected:hover {
+            background: #1e7e34;
+        }
+
         .po-items {
             display: none;
             padding: 0;
@@ -412,13 +437,20 @@
                                                                     <% } %>
                                     </div>
                                 </div>
-                                <div class="toggle-indicator" id="toggle-<%= index %>">▶</div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <button class="po-select-btn" id="po-select-<%= index %>" 
+                                            onclick="event.stopPropagation(); togglePOSelection(<%= index %>)">
+                                        Select All
+                                    </button>
+                                    <div class="toggle-indicator" id="toggle-<%= index %>">▶</div>
+                                </div>
                             </div>
                             <div class="po-items" id="items-<%= index %>">
                                 <% poGroup.items.forEach(item=> { %>
                                     <div class="item-row">
                                         <input type="checkbox" class="item-checkbox" value="<%= item._id %>"
-                                            onchange="updateSelectedCount()">
+                                            data-po-group="<%= index %>"
+                                            onchange="updateSelectedCount(); updatePOButtonState(<%= index %>)">
                                         <div class="item-details">
                                             <div class="item-memo">
                                                 <%= item.memo %>
@@ -526,6 +558,47 @@
             });
 
             updateSelectedCount();
+            updateAllPOButtonStates();
+        }
+
+        function togglePOSelection(poIndex) {
+            const checkboxes = document.querySelectorAll(`.item-checkbox[data-po-group="${poIndex}"]`);
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+            checkboxes.forEach(cb => {
+                cb.checked = !allChecked;
+            });
+
+            updateSelectedCount();
+            updatePOButtonState(poIndex);
+        }
+
+        function updatePOButtonState(poIndex) {
+            const checkboxes = document.querySelectorAll(`.item-checkbox[data-po-group="${poIndex}"]`);
+            const button = document.getElementById(`po-select-${poIndex}`);
+            
+            if (!button || checkboxes.length === 0) return;
+
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+
+            if (allChecked) {
+                button.textContent = 'Deselect All';
+                button.classList.add('all-selected');
+            } else if (anyChecked) {
+                button.textContent = 'Select All';
+                button.classList.remove('all-selected');
+            } else {
+                button.textContent = 'Select All';
+                button.classList.remove('all-selected');
+            }
+        }
+
+        function updateAllPOButtonStates() {
+            const poGroups = document.querySelectorAll('.po-group');
+            poGroups.forEach((group, index) => {
+                updatePOButtonState(index);
+            });
         }
 
         function updateSelectedCount() {
@@ -605,6 +678,7 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             updateSelectedCount();
+            updateAllPOButtonStates();
 
             // Show/hide vendor section based on radio selection
             document.getElementById('createPO').addEventListener('change', () => {
