@@ -105,15 +105,55 @@ app.use('/dropship', ensureAuthenticated, ensureApproved, dropshipRoutes);
 app.use('/dropship-test', ensureAuthenticated, ensureApproved, dropshipTestRoutes);
 app.use('/api', ensureAuthenticated, ensureApproved, purchaseOrderRoutes); // API routes for AJAX calls
 
-// Root route - redirect to login if not authenticated, otherwise to dashboard
+// Root route - show splash page for visitors, redirect authenticated users
 app.get('/', (req, res) => {
     if (!req.isAuthenticated()) {
-        return res.redirect('/auth/login');
+        return res.render('splash', { 
+            user: null,
+            messages: {
+                error: req.flash('error'),
+                success: req.flash('success'),
+                info: req.flash('info')
+            }
+        });
     }
     if (req.user.status !== 'approved') {
         return res.redirect('/auth/pending-approval');
     }
     res.redirect('/purchase-orders');
+});
+
+// Splash page route (can be accessed directly)
+app.get('/splash', (req, res) => {
+    res.render('splash', { 
+        user: req.isAuthenticated() ? req.user : null,
+        messages: {
+            error: req.flash('error'),
+            success: req.flash('success'),
+            info: req.flash('info')
+        }
+    });
+});
+
+// Welcome route for new users
+app.get('/welcome', (req, res) => {
+    req.flash('success', 'Welcome to TSC Management System! Please sign in to get started.');
+    res.redirect('/splash');
+});
+
+// System status route (for debugging)
+app.get('/status', (req, res) => {
+    res.json({
+        server: 'Running',
+        mongodb: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+        authenticated: req.isAuthenticated(),
+        user: req.isAuthenticated() ? {
+            username: req.user.username,
+            role: req.user.role,
+            status: req.user.status
+        } : null,
+        timestamp: new Date().toISOString()
+    });
 });
 
 // Upload route (require authentication)
@@ -128,12 +168,10 @@ app.use((err, req, res, next) => {
     });
 });
 
-// 404 handler
+// 404 handler - redirect to splash with helpful message
 app.use((req, res) => {
-    res.status(404).render('error', { 
-        message: 'Page not found', 
-        error: { status: 404, stack: '' } 
-    });
+    req.flash('info', `The page "${req.originalUrl}" was not found. Here's what you can do from here:`);
+    res.redirect('/splash');
 });
 
 const PORT = process.env.PORT || 3001;

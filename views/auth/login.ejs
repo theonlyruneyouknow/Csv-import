@@ -130,6 +130,32 @@
                 </div>
             <% } %>
             
+            <% if (typeof messages !== 'undefined') { %>
+                <% if (messages.error && messages.error.length > 0) { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <%= messages.error[0] %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+                
+                <% if (messages.success && messages.success.length > 0) { %>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <%= messages.success[0] %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+                
+                <% if (messages.info && messages.info.length > 0) { %>
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <%= messages.info[0] %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+            <% } %>
+            
             <form action="/auth/login" method="POST">
                 <div class="form-floating">
                     <input type="text" class="form-control" id="username" name="username" placeholder="Username or Email" required>
@@ -152,6 +178,7 @@
         
         <div class="login-footer">
             <p>Don't have an account? <a href="/auth/register">Register here</a></p>
+            <p><a href="/auth/forgot-password">Forgot your password?</a></p>
         </div>
     </div>
     

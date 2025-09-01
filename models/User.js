@@ -64,6 +64,19 @@ const userSchema = new mongoose.Schema({
     lockUntil: {
         type: Date
     },
+    emailVerified: {
+        type: Boolean,
+        default: false
+    },
+    emailVerificationToken: {
+        type: String
+    },
+    passwordResetToken: {
+        type: String
+    },
+    passwordResetExpires: {
+        type: Date
+    },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
@@ -74,6 +87,16 @@ const userSchema = new mongoose.Schema({
     },
     approvedAt: {
         type: Date
+    },
+    rejectedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    rejectedAt: {
+        type: Date
+    },
+    rejectionReason: {
+        type: String
     }
 }, {
     timestamps: true
@@ -103,6 +126,21 @@ userSchema.pre('save', async function(next) {
 // Compare password method
 userSchema.methods.comparePassword = async function(candidatePassword) {
     return bcrypt.compare(candidatePassword, this.password);
+};
+
+// Generate email verification token
+userSchema.methods.generateEmailVerificationToken = function() {
+    const crypto = require('crypto');
+    this.emailVerificationToken = crypto.randomBytes(32).toString('hex');
+    return this.emailVerificationToken;
+};
+
+// Generate password reset token
+userSchema.methods.generatePasswordResetToken = function() {
+    const crypto = require('crypto');
+    this.passwordResetToken = crypto.randomBytes(32).toString('hex');
+    this.passwordResetExpires = Date.now() + 3600000; // 1 hour
+    return this.passwordResetToken;
 };
 
 // Increment login attempts
