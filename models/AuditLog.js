@@ -18,6 +18,9 @@ const auditLogSchema = new mongoose.Schema({
             'LOGIN',
             'LOGOUT',
             'LOGIN_FAILED',
+            
+            // System actions
+            'PAGE_VIEW',
             'PASSWORD_CHANGED',
             'ACCOUNT_LOCKED',
             

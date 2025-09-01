@@ -313,4 +313,34 @@ router.get('/admin/audit-logs', ensureAuthenticated, requireRole(['admin', 'mana
     }
 });
 
+// Authentication status endpoint
+router.get('/status', (req, res) => {
+    if (req.isAuthenticated()) {
+        res.json({
+            authenticated: true,
+            user: {
+                id: req.user._id,
+                username: req.user.username,
+                firstName: req.user.firstName,
+                lastName: req.user.lastName,
+                email: req.user.email,
+                role: req.user.role,
+                permissions: req.user.permissions,
+                status: req.user.status,
+                lastLogin: req.user.lastLogin
+            }
+        });
+    } else {
+        res.json({
+            authenticated: false,
+            user: null
+        });
+    }
+});
+
+// Authentication status page
+router.get('/check', (req, res) => {
+    res.render('auth/status');
+});
+
 module.exports = router;

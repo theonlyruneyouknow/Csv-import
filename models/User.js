@@ -79,9 +79,7 @@ const userSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Indexes
-userSchema.index({ username: 1 });
-userSchema.index({ email: 1 });
+// Indexes (username and email already have unique: true, so only add status index)
 userSchema.index({ status: 1 });
 
 // Virtual for account locked

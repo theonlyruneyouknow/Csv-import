@@ -26,8 +26,28 @@ console.log('✅ Dropship test routes loaded successfully');
 
 const app = express();
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/csv-import-test');
+// Connect to MongoDB with proper error handling
+const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/csv-import-test';
+console.log('🔄 Connecting to MongoDB...');
+
+mongoose.connect(mongoURI)
+    .then(() => {
+        console.log('✅ Connected to MongoDB successfully');
+    })
+    .catch((error) => {
+        console.error('❌ MongoDB connection error:', error.message);
+        console.error('💡 Please check your MONGODB_URI in .env file');
+        process.exit(1);
+    });
+
+// Handle MongoDB connection events
+mongoose.connection.on('error', (error) => {
+    console.error('❌ MongoDB connection error:', error);
+});
+
+mongoose.connection.on('disconnected', () => {
+    console.log('⚠️ MongoDB disconnected');
+});
 
 // Session configuration
 app.use(session({
@@ -35,7 +55,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-        mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/csv-import-test',
+        mongoUrl: mongoURI,
         touchAfter: 24 * 3600 // lazy session update
     }),
     cookie: {
@@ -49,6 +69,7 @@ app.use(session({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
+app.set('views', __dirname + '/views'); // Set the views directory explicitly
 
 // Flash messages
 app.use(flash());

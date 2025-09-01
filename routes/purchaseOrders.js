@@ -555,7 +555,8 @@ router.get('/line-items-manager', async (req, res) => {
       uniquePONumbers: uniquePONumbers.filter(Boolean).sort(),
       uniqueStatuses: uniqueStatuses.filter(Boolean).sort(),
       uniqueSKUs: uniqueSKUs.filter(Boolean).sort(),
-      uniqueVendors: vendorInfo.filter(Boolean).sort()
+      uniqueVendors: vendorInfo.filter(Boolean).sort(),
+      user: req.user // Pass user information for authentication status
     });
   } catch (error) {
     console.error('Line items manager error:', error);
@@ -1043,7 +1044,8 @@ router.get('/', async (req, res) => {
       uniqueStatuses: uniqueStatuses.sort(),
       uniqueVendors,
       statusOptions: statusOptionNames,
-      allStatusOptions: statusOptions // Send full objects for management
+      allStatusOptions: statusOptions, // Send full objects for management
+      user: req.user // Pass user information for authentication status
     });
   } catch (error) {
     console.error('❌ Dashboard route error:', error);
