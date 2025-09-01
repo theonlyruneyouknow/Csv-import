@@ -2,9 +2,19 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+const passport = require('./config/passport');
+const flash = require('connect-flash');
+
+// Import routes
 const purchaseOrderRoutes = require('./routes/purchaseOrders');
 const organicVendorRoutes = require('./routes/organicVendors');
 const taskRoutes = require('./routes/tasks');
+const authRoutes = require('./routes/auth');
+
+// Import authentication middleware
+const { ensureAuthenticated, ensureApproved, logPageView } = require('./middleware/auth');
 
 console.log('🔄 Loading dropship routes...');
 const dropshipRoutes = require('./routes/dropship');
@@ -19,26 +29,91 @@ const app = express();
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/csv-import-test');
 
+// Session configuration
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key-change-this-in-production',
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/csv-import-test',
+        touchAfter: 24 * 3600 // lazy session update
+    }),
+    cookie: {
+        secure: false, // Set to true in production with HTTPS
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 
-// Debug middleware to log all requests
+// Flash messages
+app.use(flash());
+
+// Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Make user available in all templates
 app.use((req, res, next) => {
-    console.log(`📨 ${req.method} ${req.path}`);
+    res.locals.user = req.user || null;
+    res.locals.isAuthenticated = req.isAuthenticated();
     next();
 });
 
+// Debug middleware to log all requests
+app.use((req, res, next) => {
+    console.log(`📨 ${req.method} ${req.path}${req.user ? ` (${req.user.username})` : ' (anonymous)'}`);
+    next();
+});
+
+// Page view logging middleware
+app.use(logPageView);
+
 // Routes
-app.use('/purchase-orders', purchaseOrderRoutes);
-app.use('/organic-vendors', organicVendorRoutes);
-app.use('/tasks', taskRoutes);
-app.use('/dropship', dropshipRoutes);
-app.use('/dropship-test', dropshipTestRoutes);
-app.use('/api', purchaseOrderRoutes); // API routes for AJAX calls
-app.get('/', (req, res) => res.redirect('/purchase-orders'));
-app.get('/upload', (req, res) => res.render('upload'));
+app.use('/auth', authRoutes);
+
+// Protected routes - require authentication and approval
+app.use('/purchase-orders', ensureAuthenticated, ensureApproved, purchaseOrderRoutes);
+app.use('/organic-vendors', ensureAuthenticated, ensureApproved, organicVendorRoutes);
+app.use('/tasks', ensureAuthenticated, ensureApproved, taskRoutes);
+app.use('/dropship', ensureAuthenticated, ensureApproved, dropshipRoutes);
+app.use('/dropship-test', ensureAuthenticated, ensureApproved, dropshipTestRoutes);
+app.use('/api', ensureAuthenticated, ensureApproved, purchaseOrderRoutes); // API routes for AJAX calls
+
+// Root route - redirect to login if not authenticated, otherwise to dashboard
+app.get('/', (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.redirect('/auth/login');
+    }
+    if (req.user.status !== 'approved') {
+        return res.redirect('/auth/pending-approval');
+    }
+    res.redirect('/purchase-orders');
+});
+
+// Upload route (require authentication)
+app.get('/upload', ensureAuthenticated, ensureApproved, (req, res) => res.render('upload'));
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).render('error', { 
+        message: 'Something went wrong!', 
+        error: process.env.NODE_ENV === 'development' ? err : {} 
+    });
+});
+
+// 404 handler
+app.use((req, res) => {
+    res.status(404).render('error', { 
+        message: 'Page not found', 
+        error: { status: 404, stack: '' } 
+    });
+});
 
 const PORT = process.env.PORT || 3001;
 
