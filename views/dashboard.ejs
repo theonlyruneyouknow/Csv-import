@@ -2697,8 +2697,8 @@
                             ⚙️ Options <span class="accordion-icon">▼</span>
                         </button>
                         <div id="optionsAccordion" class="nav-accordion-content">
-                            <a href="/purchase-orders/upload" class="nav-accordion-item">📤 Upload CSV</a>
-                            <a href="/purchase-orders/tasks-dashboard" class="nav-accordion-item">📋 Tasks Dashboard</a>
+                            <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
+                            <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
                             <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
                         </div>
                     </div>
@@ -3471,12 +3471,17 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
     <script>
         // Navigation Functions
-        function toggleAccordion() {
-            const content = document.getElementById('managersAccordion');
-            const icon = document.querySelector('.accordion-icon');
+        function toggleAccordion(accordionId) {
+            const content = document.getElementById(accordionId);
+            const button = document.querySelector(`button[onclick="toggleAccordion('${accordionId}')"]`);
+            const icon = button ? button.querySelector('.accordion-icon') : null;
 
-            content.classList.toggle('show');
-            icon.classList.toggle('rotated');
+            if (content) {
+                content.classList.toggle('show');
+            }
+            if (icon) {
+                icon.classList.toggle('rotated');
+            }
         }
 
         function toggleOptionsDropdown() {
