@@ -1105,10 +1105,99 @@
             margin-bottom: 20px;
         }
 
+        .pre-purchase-title-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
         .pre-purchase-header h2 {
             margin: 0;
             color: #495057;
             font-size: 1.3em;
+        }
+
+        .toggle-pre-purchase-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .toggle-pre-purchase-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        .toggle-pre-purchase-btn.active {
+            background: #007bff;
+        }
+
+        .toggle-pre-purchase-btn.active:hover {
+            background: #0056b3;
+        }
+
+        .pre-purchase-badge {
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-left: 3px;
+            min-width: 18px;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .toggle-pre-purchase-btn.active .pre-purchase-badge {
+            display: none;
+        }
+
+        .pre-purchase-content {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .pre-purchase-content.slide-up {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .pre-purchase-content.slide-down {
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                max-height: 0;
+                margin-bottom: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 1000px;
+                margin-bottom: 20px;
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 1;
+                max-height: 1000px;
+                margin-bottom: 20px;
+            }
+            to {
+                opacity: 0;
+                max-height: 0;
+                margin-bottom: 0;
+            }
         }
 
         .add-pre-po-btn {
@@ -2767,14 +2856,24 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         <!-- Pre-Purchase Orders Section -->
         <div class="pre-purchase-section">
             <div class="pre-purchase-header">
-                <h2>📋 Pre-Purchase Orders<% if (prePurchaseOrders && prePurchaseOrders.length> 0) { %> (<%=
-                            prePurchaseOrders.length %>)<% } %>
-                </h2>
+                <div class="pre-purchase-title-area">
+                    <h2>📋 Pre-Purchase Orders<% if (prePurchaseOrders && prePurchaseOrders.length> 0) { %> (<%=
+                                prePurchaseOrders.length %>)<% } %>
+                    </h2>
+                    <button class="toggle-pre-purchase-btn" onclick="togglePrePurchaseOrders()" title="Show/Hide Pre-Purchase Orders">
+                        <i class="fas fa-eye-slash" id="pre-purchase-toggle-icon"></i>
+                        <span id="pre-purchase-toggle-text">Show</span>
+                        <% if (prePurchaseOrders && prePurchaseOrders.length > 0) { %>
+                            <span class="pre-purchase-badge" id="pre-purchase-badge"><%= prePurchaseOrders.length %></span>
+                        <% } %>
+                    </button>
+                </div>
                 <button class="add-pre-po-btn" onclick="addPrePurchaseOrder()">➕ Add Pre-PO</button>
             </div>
 
-            <% if (prePurchaseOrders && prePurchaseOrders.length> 0) { %>
-                <div class="pre-purchase-orders">
+            <div class="pre-purchase-content" id="pre-purchase-content" style="display: none;">
+                <% if (prePurchaseOrders && prePurchaseOrders.length> 0) { %>
+                    <div class="pre-purchase-orders">
                     <% prePurchaseOrders.forEach((prePO, index)=> { %>
                         <div class="pre-po-card priority-<%= prePO.priority.toLowerCase() %>" data-id="<%= prePO._id %>"
                             data-priority="<%= prePO.priority.toLowerCase() %>"
@@ -2818,6 +2917,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         <p>No pre-purchase orders yet. Start planning your purchases!</p>
                     </div>
                     <% } %>
+            </div> <!-- End pre-purchase-content -->
         </div>
 
         <% if (purchaseOrders.length> 0) { %>
@@ -6250,9 +6350,76 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     }
                 });
             }
+            
+            // Initialize pre-purchase orders visibility
+            initializePrePurchaseOrdersVisibility();
         });
 
         // Pre-Purchase Order Functions
+        function togglePrePurchaseOrders() {
+            const content = document.getElementById('pre-purchase-content');
+            const icon = document.getElementById('pre-purchase-toggle-icon');
+            const text = document.getElementById('pre-purchase-toggle-text');
+            const button = document.querySelector('.toggle-pre-purchase-btn');
+            const badge = document.getElementById('pre-purchase-badge');
+            
+            if (content.style.display === 'none') {
+                // Show the section with animation
+                content.style.display = 'block';
+                content.classList.remove('slide-down');
+                content.classList.add('slide-up');
+                
+                icon.className = 'fas fa-eye';
+                text.textContent = 'Hide';
+                button.classList.add('active');
+                if (badge) badge.style.display = 'none';
+                
+                // Store the preference
+                localStorage.setItem('prePurchaseOrdersVisible', 'true');
+            } else {
+                // Hide the section with animation
+                content.classList.remove('slide-up');
+                content.classList.add('slide-down');
+                
+                setTimeout(() => {
+                    content.style.display = 'none';
+                }, 300); // Match animation duration
+                
+                icon.className = 'fas fa-eye-slash';
+                text.textContent = 'Show';
+                button.classList.remove('active');
+                if (badge) badge.style.display = 'inline-block';
+                
+                // Store the preference
+                localStorage.setItem('prePurchaseOrdersVisible', 'false');
+            }
+        }
+
+        // Initialize pre-purchase orders visibility on page load
+        function initializePrePurchaseOrdersVisibility() {
+            const isVisible = localStorage.getItem('prePurchaseOrdersVisible');
+            const content = document.getElementById('pre-purchase-content');
+            const icon = document.getElementById('pre-purchase-toggle-icon');
+            const text = document.getElementById('pre-purchase-toggle-text');
+            const button = document.querySelector('.toggle-pre-purchase-btn');
+            const badge = document.getElementById('pre-purchase-badge');
+            
+            // Default to hidden if no preference is stored
+            if (isVisible === 'true') {
+                content.style.display = 'block';
+                icon.className = 'fas fa-eye';
+                text.textContent = 'Hide';
+                button.classList.add('active');
+                if (badge) badge.style.display = 'none';
+            } else {
+                content.style.display = 'none';
+                icon.className = 'fas fa-eye-slash';
+                text.textContent = 'Show';
+                button.classList.remove('active');
+                if (badge) badge.style.display = 'inline-block';
+            }
+        }
+
         function addPrePurchaseOrder() {
             document.getElementById('prePurchaseOrderModalTitle').textContent = 'Add Pre-Purchase Order';
             document.getElementById('prePOId').value = '';
