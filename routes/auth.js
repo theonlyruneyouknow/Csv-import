@@ -523,6 +523,27 @@ router.get('/test-email-public', async (req, res) => {
     }
 });
 
+// Test email to specific user address
+router.get('/test-email-to-user', async (req, res) => {
+    try {
+        const userEmail = 'theonlyruneyouknow@gmail.com';
+        const testResult = await emailService.sendTestEmail(userEmail);
+        res.json({ 
+            success: true, 
+            message: `Test email sent successfully to ${userEmail}`,
+            details: testResult,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Error sending test email to user:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Failed to send test email',
+            details: error.message 
+        });
+    }
+});
+
 // Forgot password - show form
 router.get('/forgot-password', (req, res) => {
     res.render('auth/forgot-password', { 

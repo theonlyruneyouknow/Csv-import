@@ -4,7 +4,6 @@ const path = require('path');
 const fs = require('fs');
 const DropshipFileAnalyzer = require('../dropship/DropshipFileAnalyzer');
 const DropshipProcessor = require('../dropship/DropshipProcessor');
-const SimplifiedDropshipProcessor = require('../dropship/SimplifiedDropshipProcessor');
 const router = express.Router();
 
 // Configure multer for file uploads
@@ -462,76 +461,6 @@ router.delete('/processed/:filename', (req, res) => {
     } catch (error) {
         console.error('Delete processed file error:', error);
         res.status(500).json({ success: false, error: 'Failed to delete processed file: ' + error.message });
-    }
-});
-
-// Simplified processing route - processes single input file to generate CSV and PDF outputs
-router.post('/process-simplified', async (req, res) => {
-    try {
-        const processor = new SimplifiedDropshipProcessor();
-        const result = await processor.processLatestFile();
-        
-        if (result.success) {
-            res.json({
-                success: true,
-                message: `Successfully processed ${result.ordersProcessed} orders with ${result.itemsProcessed} items`,
-                csvOutput: path.basename(result.csvOutput),
-                pdfOutput: path.basename(result.pdfOutput),
-                ordersProcessed: result.ordersProcessed,
-                itemsProcessed: result.itemsProcessed
-            });
-        } else {
-            res.status(400).json({
-                success: false,
-                error: result.error
-            });
-        }
-    } catch (error) {
-        console.error('Simplified processing error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Processing failed: ' + error.message
-        });
-    }
-});
-
-// Process specific file with simplified processor
-router.post('/process-simplified/:filename', async (req, res) => {
-    try {
-        const filename = req.params.filename;
-        const filePath = path.join(__dirname, '../dropship/uploads', filename);
-        
-        if (!fs.existsSync(filePath)) {
-            return res.status(404).json({
-                success: false,
-                error: 'File not found'
-            });
-        }
-        
-        const processor = new SimplifiedDropshipProcessor();
-        const result = await processor.processDropshipFile(filePath);
-        
-        if (result.success) {
-            res.json({
-                success: true,
-                message: `Successfully processed ${result.ordersProcessed} orders with ${result.itemsProcessed} items`,
-                csvOutput: path.basename(result.csvOutput),
-                pdfOutput: path.basename(result.pdfOutput),
-                ordersProcessed: result.ordersProcessed,
-                itemsProcessed: result.itemsProcessed
-            });
-        } else {
-            res.status(400).json({
-                success: false,
-                error: result.error
-            });
-        }
-    } catch (error) {
-        console.error('Simplified processing error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Processing failed: ' + error.message
-        });
     }
 });
 

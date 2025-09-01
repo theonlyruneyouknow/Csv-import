@@ -24,13 +24,6 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            position: sticky;
-            top: 0;
-            background: white;
-            z-index: 1000;
-            padding: 15px 0;
-            border-bottom: 1px solid #dee2e6;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         /* Enhanced Navigation Styles */
@@ -77,7 +70,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border-radius: 6px;
             border: 1px solid #dee2e6;
-            z-index: 1001;
+            z-index: 1000;
             opacity: 0;
             visibility: hidden;
             transform: translateY(-10px);
@@ -524,71 +517,43 @@
 
             <!-- Filters and Controls -->
             <div class="filter-section">
-                <!-- Quick Filter Buttons -->
-                <div class="row mb-3">
-                    <div class="col-12">
-                        <div class="d-flex gap-2 align-items-center flex-wrap">
-                            <span class="fw-bold text-muted">Quick Filters:</span>
-                            <button type="button" id="expiringSoonToggle" 
-                                    class="btn <%= currentFilters.certificationStatus === 'Expiring Soon' ? 'btn-warning' : 'btn-outline-warning' %> btn-sm"
-                                    onclick="toggleExpiringSoonFilter()">
-                                <i class="fas fa-clock"></i> 
-                                Expiring Soon (<%= stats.expiringSoon %>)
-                            </button>
-                            <button type="button" id="expiredToggle" 
-                                    class="btn <%= currentFilters.certificationStatus === 'Expired' ? 'btn-danger' : 'btn-outline-danger' %> btn-sm"
-                                    onclick="toggleExpiredFilter()">
-                                <i class="fas fa-exclamation-triangle"></i> 
-                                Expired (<%= stats.expired %>)
-                            </button>
-                            <button type="button" id="currentToggle" 
-                                    class="btn <%= currentFilters.certificationStatus === 'Current' ? 'btn-success' : 'btn-outline-success' %> btn-sm"
-                                    onclick="toggleCurrentFilter()">
-                                <i class="fas fa-check-circle"></i> 
-                                Current (<%= stats.current %>)
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearAllFilters()">
-                                <i class="fas fa-times"></i> Clear Filters
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Advanced Filters -->
                 <div class="row align-items-center">
-                    <div class="col-md-2">
-                        <label class="form-label">Status:</label>
+                    <div class="col-md-3">
+                        <label class="form-label">Filter by Status:</label>
                         <select id="statusFilter" class="form-select">
-                            <option value="all" <%=currentFilters.status==='all' ? 'selected' : '' %>>All Statuses</option>
+                            <option value="all" <%=currentFilters.status==='all' ? 'selected' : '' %>>All Statuses
+                            </option>
                             <% uniqueStatuses.forEach(status=> { %>
-                                <option value="<%= status %>" <%=currentFilters.status===status ? 'selected' : '' %>><%=status %></option>
-                            <% }); %>
+                                <option value="<%= status %>" <%=currentFilters.status===status ? 'selected' : '' %>><%=
+                                        status %>
+                                </option>
+                                <% }); %>
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Country:</label>
-                        <select id="countryFilter" class="form-select">
-                            <option value="all" <%=currentFilters.country==='all' ? 'selected' : '' %>>All Countries</option>
-                            <% uniqueCountries.forEach(country=> { %>
-                                <option value="<%= country %>" <%=currentFilters.country===country ? 'selected' : '' %>><%=country %></option>
-                            <% }); %>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label class="form-label">Sort by:</label>
                         <select id="sortBy" class="form-select">
-                            <option value="vendorName" <%=currentFilters.sortBy==='vendorName' ? 'selected' : '' %>>Vendor Name</option>
-                            <option value="lastOrganicCertificationDate" <%=currentFilters.sortBy==='lastOrganicCertificationDate' ? 'selected' : '' %>>Certification Date</option>
-                            <option value="internalId" <%=currentFilters.sortBy==='internalId' ? 'selected' : '' %>>Internal ID</option>
-                            <option value="status" <%=currentFilters.sortBy==='status' ? 'selected' : '' %>>Status</option>
-                            <option value="address.country" <%=currentFilters.sortBy==='address.country' ? 'selected' : '' %>>Country</option>
+                            <option value="vendorName" <%=currentFilters.sortBy==='vendorName' ? 'selected' : '' %>
+                                >Vendor
+                                Name</option>
+                            <option value="lastOrganicCertificationDate"
+                                <%=currentFilters.sortBy==='lastOrganicCertificationDate' ? 'selected' : '' %>
+                                >Certification
+                                Date</option>
+                            <option value="internalId" <%=currentFilters.sortBy==='internalId' ? 'selected' : '' %>
+                                >Internal
+                                ID</option>
+                            <option value="status" <%=currentFilters.sortBy==='status' ? 'selected' : '' %>>Status
+                            </option>
                         </select>
                     </div>
-                    <div class="col-md-1">
+                    <div class="col-md-2">
                         <label class="form-label">Order:</label>
                         <select id="sortOrder" class="form-select">
-                            <option value="asc" <%=currentFilters.sortOrder==='asc' ? 'selected' : '' %>>Asc</option>
-                            <option value="desc" <%=currentFilters.sortOrder==='desc' ? 'selected' : '' %>>Desc</option>
+                            <option value="asc" <%=currentFilters.sortOrder==='asc' ? 'selected' : '' %>>Ascending
+                            </option>
+                            <option value="desc" <%=currentFilters.sortOrder==='desc' ? 'selected' : '' %>>Descending
+                            </option>
                         </select>
                     </div>
                     <div class="col-md-2">
@@ -596,15 +561,11 @@
                         <input type="text" id="searchInput" class="form-control" placeholder="Search vendors...">
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label">Settings:</label>
-                        <div class="d-flex gap-1">
-                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#settingsModal">
-                                <i class="fas fa-cog"></i>
-                            </button>
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addVendorModal" onclick="resetFormForAdd()">
-                                <i class="fas fa-plus"></i> Add
-                            </button>
-                        </div>
+                        <label class="form-label">&nbsp;</label>
+                        <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal"
+                            data-bs-target="#addVendorModal" onclick="resetFormForAdd()">
+                            <i class="fas fa-plus"></i> Add Vendor
+                        </button>
                     </div>
                 </div>
             </div>
@@ -623,11 +584,8 @@
                                         </h5>
                                         <small class="text-muted">ID: <%= vendor.internalId %></small>
                                         <br>
-                                        <% if (vendor.address && vendor.address.country) { %>
-                                            <small class="text-primary"><i class="fas fa-globe"></i> <%= vendor.address.country %></small>
-                                            <br>
-                                        <% } %>
-                                        <span class="vendor-status status-<%= vendor.status.toLowerCase().replace(' ', '-') %>">
+                                        <span
+                                            class="vendor-status status-<%= vendor.status.toLowerCase().replace(' ', '-') %>">
                                             <%= vendor.status %>
                                         </span>
                                     </div>
@@ -760,9 +718,6 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <form id="vendorForm" enctype="multipart/form-data">
-                        <!-- Hidden field to store vendor ID for file management -->
-                        <input type="hidden" name="vendorId" id="vendorIdField">
-                        
                         <div class="modal-body">
                             <div class="row">
                                 <div class="col-md-6">
@@ -830,186 +785,19 @@
                                 </div>
                             </div>
 
-                            <!-- Contact and Address Information -->
-                            <hr>
-                            <h6 class="mb-3">Contact & Address Information</h6>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label">Contact Person</label>
-                                        <input type="text" class="form-control" name="contactPerson">
+                                        <label class="form-label">Certificate Upload</label>
+                                        <input type="file" class="form-control" name="certificate"
+                                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label">Email</label>
-                                        <input type="email" class="form-control" name="email">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Phone</label>
-                                        <input type="tel" class="form-control" name="phone">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Country</label>
-                                        <select class="form-select" name="country">
-                                            <option value="">Select Country...</option>
-                                            <option value="United States">United States</option>
-                                            <option value="Canada">Canada</option>
-                                            <option value="Mexico">Mexico</option>
-                                            <option value="United Kingdom">United Kingdom</option>
-                                            <option value="Germany">Germany</option>
-                                            <option value="France">France</option>
-                                            <option value="Italy">Italy</option>
-                                            <option value="Spain">Spain</option>
-                                            <option value="Netherlands">Netherlands</option>
-                                            <option value="Australia">Australia</option>
-                                            <option value="New Zealand">New Zealand</option>
-                                            <option value="Japan">Japan</option>
-                                            <option value="South Korea">South Korea</option>
-                                            <option value="China">China</option>
-                                            <option value="India">India</option>
-                                            <option value="Brazil">Brazil</option>
-                                            <option value="Argentina">Argentina</option>
-                                            <option value="Chile">Chile</option>
-                                            <option value="Other">Other</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Street Address</label>
-                                        <input type="text" class="form-control" name="street">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">City</label>
-                                        <input type="text" class="form-control" name="city">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label class="form-label">State/Province</label>
-                                        <input type="text" class="form-control" name="state">
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label class="form-label">ZIP/Postal Code</label>
-                                        <input type="text" class="form-control" name="zipCode">
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label class="form-label">Expiring Soon Threshold (days)</label>
-                                        <input type="number" class="form-control" name="expiringSoonThreshold" 
-                                               min="1" max="365" placeholder="35">
-                                        <small class="form-text text-muted">Leave blank to use global default</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <hr>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">
-                                            <i class="fas fa-certificate text-primary"></i> Certificate Management
-                                        </label>
-                                        
-                                        <!-- Existing Certificate Display -->
-                                        <div id="existingCertificate" class="border rounded p-2 mb-2 bg-light" style="display: none;">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <small class="text-muted">Current Certificate:</small><br>
-                                                    <span id="currentCertName" class="fw-bold"></span><br>
-                                                    <small id="currentCertDate" class="text-muted"></small>
-                                                </div>
-                                                <div>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="viewCurrentCert()">
-                                                        <i class="fas fa-eye"></i> View
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-outline-warning" onclick="archiveCert()">
-                                                        <i class="fas fa-archive"></i> Archive
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Upload New Certificate -->
-                                        <input type="file" class="form-control" name="certificate" id="certificateInput"
-                                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="showCertificateUploadInfo()">
-                                        <div class="mt-1">
-                                            <small class="text-muted">
-                                                <i class="fas fa-info-circle"></i> 
-                                                <span id="certUploadInfo">Upload a new certificate (will replace current)</span>
-                                            </small>
-                                        </div>
-                                        
-                                        <!-- Version/Notes for new upload -->
-                                        <div id="certVersionInput" style="display: none;" class="mt-2">
-                                            <input type="text" class="form-control form-control-sm mb-1" name="certificateVersion" 
-                                                placeholder="Version (e.g., 2024, Renewal, Amendment)">
-                                            <input type="text" class="form-control form-control-sm" name="certificateNotes" 
-                                                placeholder="Notes (optional)">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">
-                                            <i class="fas fa-file-alt text-info"></i> Operations Profile Management
-                                        </label>
-                                        
-                                        <!-- Existing Operations Profile Display -->
-                                        <div id="existingProfile" class="border rounded p-2 mb-2 bg-light" style="display: none;">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <small class="text-muted">Current Profile:</small><br>
-                                                    <span id="currentProfileName" class="fw-bold"></span><br>
-                                                    <small id="currentProfileDate" class="text-muted"></small>
-                                                </div>
-                                                <div>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="viewCurrentProfile()">
-                                                        <i class="fas fa-eye"></i> View
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-outline-warning" onclick="archiveProfile()">
-                                                        <i class="fas fa-archive"></i> Archive
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Upload New Operations Profile -->
-                                        <input type="file" class="form-control" name="operationsProfile" id="profileInput"
-                                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="showProfileUploadInfo()">
-                                        <div class="mt-1">
-                                            <small class="text-muted">
-                                                <i class="fas fa-info-circle"></i> 
-                                                <span id="profileUploadInfo">Upload a new operations profile (will replace current)</span>
-                                            </small>
-                                        </div>
-                                        
-                                        <!-- Version/Notes for new upload -->
-                                        <div id="profileVersionInput" style="display: none;" class="mt-2">
-                                            <input type="text" class="form-control form-control-sm mb-1" name="profileVersion" 
-                                                placeholder="Version (e.g., 2024, Updated, Corrected)">
-                                            <input type="text" class="form-control form-control-sm" name="profileNotes" 
-                                                placeholder="Notes (optional)">
-                                        </div>
+                                        <label class="form-label">Operations Profile Upload</label>
+                                        <input type="file" class="form-control" name="operationsProfile"
+                                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
                                     </div>
                                 </div>
                             </div>
@@ -1098,120 +886,8 @@ Certified
             </div>
         </div>
 
-        <!-- Settings Modal -->
-        <div class="modal fade" id="settingsModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Global Settings</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="settingsForm">
-                            <div class="mb-3">
-                                <label class="form-label">Default "Expiring Soon" Threshold (days before expiration):</label>
-                                <input type="number" class="form-control" id="defaultExpiringSoonThreshold" 
-                                       value="<%= defaultExpiringSoonThreshold %>" min="1" max="365">
-                                <small class="form-text text-muted">
-                                    Certifications will be marked as "Expiring Soon" when they are within this many days of expiring (365 days from certification date).
-                                </small>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Quick Stats:</label>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="card bg-light">
-                                            <div class="card-body text-center">
-                                                <h6 class="card-title">Total Vendors</h6>
-                                                <h4 class="text-primary"><%= stats.total %></h4>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="card bg-light">
-                                            <div class="card-body text-center">
-                                                <h6 class="card-title">Active Vendors</h6>
-                                                <h4 class="text-success"><%= stats.active %></h4>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-            // Filter toggle functions
-            function toggleExpiringSoonFilter() {
-                const currentStatus = '<%= currentFilters.certificationStatus %>';
-                const newStatus = currentStatus === 'Expiring Soon' ? 'all' : 'Expiring Soon';
-                updateUrlParam('certificationStatus', newStatus);
-            }
-
-            function toggleExpiredFilter() {
-                const currentStatus = '<%= currentFilters.certificationStatus %>';
-                const newStatus = currentStatus === 'Expired' ? 'all' : 'Expired';
-                updateUrlParam('certificationStatus', newStatus);
-            }
-
-            function toggleCurrentFilter() {
-                const currentStatus = '<%= currentFilters.certificationStatus %>';
-                const newStatus = currentStatus === 'Current' ? 'all' : 'Current';
-                updateUrlParam('certificationStatus', newStatus);
-            }
-
-            function clearAllFilters() {
-                const url = new URL(window.location);
-                url.searchParams.delete('status');
-                url.searchParams.delete('certificationStatus');
-                url.searchParams.delete('country');
-                url.searchParams.delete('sortBy');
-                url.searchParams.delete('sortOrder');
-                window.location.href = url.toString();
-            }
-
-            function updateUrlParam(param, value) {
-                const url = new URL(window.location);
-                if (value === 'all' || value === '') {
-                    url.searchParams.delete(param);
-                } else {
-                    url.searchParams.set(param, value);
-                }
-                window.location.href = url.toString();
-            }
-
-            function saveSettings() {
-                const threshold = document.getElementById('defaultExpiringSoonThreshold').value;
-                const url = new URL(window.location);
-                url.searchParams.set('defaultExpiringSoonThreshold', threshold);
-                window.location.href = url.toString();
-            }
-
-            // Update filter dropdowns to use URL params
-            document.getElementById('statusFilter').addEventListener('change', function() {
-                updateUrlParam('status', this.value);
-            });
-
-            document.getElementById('countryFilter').addEventListener('change', function() {
-                updateUrlParam('country', this.value);
-            });
-
-            document.getElementById('sortBy').addEventListener('change', function() {
-                updateUrlParam('sortBy', this.value);
-            });
-
-            document.getElementById('sortOrder').addEventListener('change', function() {
-                updateUrlParam('sortOrder', this.value);
-            });
-
             // Navigation Functions
             function toggleAccordion() {
                 const content = document.getElementById('managersAccordion');
@@ -1386,15 +1062,6 @@ Certified
                 form.reset();
                 form.removeAttribute('data-edit-id');
                 document.querySelector('#addVendorModal .modal-title').textContent = 'Add New Organic Vendor';
-                
-                // Reset file management displays
-                document.getElementById('vendorIdField').value = '';
-                document.getElementById('existingCertificate').style.display = 'none';
-                document.getElementById('existingProfile').style.display = 'none';
-                document.getElementById('certVersionInput').style.display = 'none';
-                document.getElementById('profileVersionInput').style.display = 'none';
-                document.getElementById('certUploadInfo').textContent = 'Upload a certificate file';
-                document.getElementById('profileUploadInfo').textContent = 'Upload an operations profile file';
             }
 
             // Form submission
@@ -1473,30 +1140,9 @@ Certified
                     form.querySelector('[name="organicSeedsRawData"]').value = vendor.organicSeedsRawData || '';
                     form.querySelector('[name="status"]').value = vendor.status || 'Active';
                     form.querySelector('[name="notes"]').value = vendor.notes || '';
-                    
-                    // Populate contact and address fields
-                    form.querySelector('[name="contactPerson"]').value = vendor.contactPerson || '';
-                    form.querySelector('[name="email"]').value = vendor.email || '';
-                    form.querySelector('[name="phone"]').value = vendor.phone || '';
-                    form.querySelector('[name="expiringSoonThreshold"]').value = vendor.expiringSoonThreshold || '';
-                    
-                    // Populate address fields
-                    if (vendor.address) {
-                        form.querySelector('[name="street"]').value = vendor.address.street || '';
-                        form.querySelector('[name="city"]').value = vendor.address.city || '';
-                        form.querySelector('[name="state"]').value = vendor.address.state || '';
-                        form.querySelector('[name="zipCode"]').value = vendor.address.zipCode || '';
-                        form.querySelector('[name="country"]').value = vendor.address.country || '';
-                    }
 
                     // Set form to edit mode
                     form.setAttribute('data-edit-id', vendorId);
-                    
-                    // Set vendor ID in hidden field for file management
-                    document.getElementById('vendorIdField').value = vendorId;
-
-                    // Populate file management displays
-                    populateEditForm(vendor);
 
                     // Show modal
                     const modal = new bootstrap.Modal(document.getElementById('addVendorModal'));
@@ -1701,90 +1347,6 @@ Certified
                 const tscField = document.querySelector('textarea[name="tscDescription"]');
                 if (tscField && tscDescription) {
                     tscField.value = tscDescription;
-                }
-            }
-
-            // File Management Functions
-            function showCertificateUploadInfo() {
-                const input = document.getElementById('certificateInput');
-                const info = document.getElementById('certUploadInfo');
-                const versionInput = document.getElementById('certVersionInput');
-                
-                if (input.files.length > 0) {
-                    const file = input.files[0];
-                    info.innerHTML = `📁 Selected: <strong>${file.name}</strong> (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
-                    versionInput.style.display = 'block';
-                } else {
-                    info.textContent = 'Upload a new certificate (will replace current)';
-                    versionInput.style.display = 'none';
-                }
-            }
-
-            function showProfileUploadInfo() {
-                const input = document.getElementById('profileInput');
-                const info = document.getElementById('profileUploadInfo');
-                const versionInput = document.getElementById('profileVersionInput');
-                
-                if (input.files.length > 0) {
-                    const file = input.files[0];
-                    info.innerHTML = `📁 Selected: <strong>${file.name}</strong> (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
-                    versionInput.style.display = 'block';
-                } else {
-                    info.textContent = 'Upload a new operations profile (will replace current)';
-                    versionInput.style.display = 'none';
-                }
-            }
-
-            function viewCurrentCert() {
-                const vendorId = document.querySelector('input[name="vendorId"]')?.value;
-                if (vendorId) {
-                    toggleDocument(vendorId, 'certificate');
-                }
-            }
-
-            function viewCurrentProfile() {
-                const vendorId = document.querySelector('input[name="vendorId"]')?.value;
-                if (vendorId) {
-                    toggleDocument(vendorId, 'operations-profile');
-                }
-            }
-
-            function archiveCert() {
-                if (confirm('Archive the current certificate? It will be moved to archive but not deleted.')) {
-                    // TODO: Implement archive functionality
-                    alert('Archive functionality will be implemented in the next update.');
-                }
-            }
-
-            function archiveProfile() {
-                if (confirm('Archive the current operations profile? It will be moved to archive but not deleted.')) {
-                    // TODO: Implement archive functionality
-                    alert('Archive functionality will be implemented in the next update.');
-                }
-            }
-
-            // Update edit form to show existing files
-            function populateEditForm(vendor) {
-                // ... existing form population code ...
-                
-                // Show existing certificate info
-                if (vendor.certificate && vendor.certificate.filename) {
-                    document.getElementById('existingCertificate').style.display = 'block';
-                    document.getElementById('currentCertName').textContent = vendor.certificate.filename;
-                    const certDate = new Date(vendor.certificate.uploadDate).toLocaleDateString();
-                    document.getElementById('currentCertDate').textContent = `Uploaded: ${certDate}`;
-                } else {
-                    document.getElementById('existingCertificate').style.display = 'none';
-                }
-
-                // Show existing operations profile info
-                if (vendor.operationsProfile && vendor.operationsProfile.filename) {
-                    document.getElementById('existingProfile').style.display = 'block';
-                    document.getElementById('currentProfileName').textContent = vendor.operationsProfile.filename;
-                    const profileDate = new Date(vendor.operationsProfile.uploadDate).toLocaleDateString();
-                    document.getElementById('currentProfileDate').textContent = `Uploaded: ${profileDate}`;
-                } else {
-                    document.getElementById('existingProfile').style.display = 'none';
                 }
             }
         </script>
