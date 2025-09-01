@@ -174,6 +174,13 @@
             padding-left: 20px;
         }
 
+        /* Divider for admin section */
+        .nav-accordion-divider {
+            height: 1px;
+            background: #dee2e6;
+            margin: 8px 12px;
+        }
+
         /* Options Button Styles */
         .nav-options-btn {
             background: #6c757d;
@@ -232,7 +239,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border-radius: 6px;
             border: 1px solid #dee2e6;
-            z-index: 1000;
+            z-index: 10001;
             opacity: 0;
             visibility: hidden;
             transform: translateY(-10px);
@@ -2700,6 +2707,29 @@
                             <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
                             <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
                             <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
+                            
+                            <!-- Admin Options (only for admin/manager users) -->
+                            <% if (typeof user !== 'undefined' && user && (user.role === 'admin' || user.role === 'manager')) { %>
+                            <div class="nav-accordion-divider"></div>
+                            <a href="/auth/admin/users" class="nav-accordion-item">👥 User Management</a>
+                            <a href="/auth/admin/audit-logs" class="nav-accordion-item">📊 Audit Logs</a>
+                            <% if (user.role === 'admin') { %>
+                            <a href="/auth/admin/test-email" class="nav-accordion-item">📧 Test Email</a>
+                            <% } %>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Import Section -->
+                    <div class="nav-section">
+                        <button class="nav-imports-btn" onclick="toggleImportsDropdown()">
+                            📁 Import <span class="dropdown-icon">▼</span>
+                        </button>
+                        <div id="importsDropdown" class="nav-dropdown-content">
+                            <a href="/upload" class="nav-dropdown-item">📄 Purchase Orders CSV</a>
+                            <a href="/upload" class="nav-dropdown-item">📦 Line Items CSV</a>
+                            <button class="nav-dropdown-item" onclick="openNetSuiteImportModal()">🏢 NetSuite PO
+                                Form</button>
                         </div>
                     </div>
                 </div>
@@ -2745,34 +2775,6 @@
                     <a href="/auth/login" class="btn btn-primary btn-sm">Login</a>
                 </div>
                 <% } %>
-            </div>
-        </div>
-
-        <!-- Main Content Area -->
-                    <button class="nav-imports-btn" onclick="toggleImportsDropdown()">
-                        📁 Import <span class="dropdown-icon">▼</span>
-                    </button>
-                    <div id="importsDropdown" class="nav-dropdown-content">
-                        <a href="/upload" class="nav-dropdown-item">📄 Purchase Orders CSV</a>
-                        <a href="/upload-line-items" class="nav-dropdown-item">📦 Line Items CSV</a>
-                        <button class="nav-dropdown-item" onclick="openNetSuiteImportModal()">🏢 NetSuite PO
-                            Form</button>
-                    </div>
-                </div>
-
-                <!-- Dropship Module -->
-                <div class="nav-section">
-                    <a href="/dropship" class="nav-accordion-btn" style="text-decoration: none;">
-                        🚚 Dropship Processor
-                    </a>
-                </div>
-
-                <!-- Task Management -->
-                <div class="nav-section">
-                    <a href="/tasks" class="nav-accordion-btn" style="text-decoration: none;">
-                        ✅ Task Management
-                    </a>
-                </div>
             </div>
         </div>
 
@@ -3484,18 +3486,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             }
         }
 
-        function toggleOptionsDropdown() {
-            const content = document.getElementById('optionsDropdown');
-            const icon = document.querySelector('.nav-options-btn .dropdown-icon');
-
-            content.classList.toggle('show');
-            icon.classList.toggle('rotated');
-
-            // Close other dropdowns
-            document.getElementById('importsDropdown').classList.remove('show');
-            document.querySelector('.nav-imports-btn .dropdown-icon').classList.remove('rotated');
-        }
-
         function toggleImportsDropdown() {
             const content = document.getElementById('importsDropdown');
             const icon = document.querySelector('.nav-imports-btn .dropdown-icon');
@@ -3503,30 +3493,47 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             content.classList.toggle('show');
             icon.classList.toggle('rotated');
 
-            // Close other dropdowns
-            document.getElementById('optionsDropdown').classList.remove('show');
-            document.querySelector('.nav-options-btn .dropdown-icon').classList.remove('rotated');
+            // Close other dropdowns/accordions
+            const optionsAccordion = document.getElementById('optionsAccordion');
+            if (optionsAccordion) {
+                optionsAccordion.classList.remove('show');
+            }
+            const optionsIcon = document.querySelector('.nav-accordion-btn .accordion-icon');
+            if (optionsIcon) {
+                optionsIcon.classList.remove('rotated');
+            }
         }
 
         // Close dropdowns when clicking outside
         document.addEventListener('click', function (event) {
-            const managersSection = document.querySelector('.nav-section:first-child');
-            const optionsSection = document.querySelector('.nav-section:nth-child(2)');
-            const importsSection = document.querySelector('.nav-section:nth-child(3)');
+            const navigationContainer = document.querySelector('.navigation-container');
+            
+            // If click is outside navigation container, close all dropdowns/accordions
+            if (navigationContainer && !navigationContainer.contains(event.target)) {
+                // Close all accordions
+                const accordions = ['managersAccordion', 'optionsAccordion'];
+                accordions.forEach(accordionId => {
+                    const accordion = document.getElementById(accordionId);
+                    if (accordion) {
+                        accordion.classList.remove('show');
+                    }
+                });
 
-            if (!managersSection.contains(event.target)) {
-                document.getElementById('managersAccordion').classList.remove('show');
-                document.querySelector('.accordion-icon').classList.remove('rotated');
-            }
+                // Reset all accordion icons
+                const accordionIcons = document.querySelectorAll('.accordion-icon');
+                accordionIcons.forEach(icon => {
+                    icon.classList.remove('rotated');
+                });
 
-            if (!optionsSection.contains(event.target)) {
-                document.getElementById('optionsDropdown').classList.remove('show');
-                document.querySelector('.nav-options-btn .dropdown-icon').classList.remove('rotated');
-            }
-
-            if (!importsSection.contains(event.target)) {
-                document.getElementById('importsDropdown').classList.remove('show');
-                document.querySelector('.nav-imports-btn .dropdown-icon').classList.remove('rotated');
+                // Close import dropdown
+                const importsDropdown = document.getElementById('importsDropdown');
+                if (importsDropdown) {
+                    importsDropdown.classList.remove('show');
+                }
+                const importsIcon = document.querySelector('.nav-imports-btn .dropdown-icon');
+                if (importsIcon) {
+                    importsIcon.classList.remove('rotated');
+                }
             }
         });
 
