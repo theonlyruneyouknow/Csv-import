@@ -3,6 +3,8 @@
 
 <head>
     <title>Purchase Orders Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,6 +22,118 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1000;
+            padding: 15px 0;
+            border-bottom: 1px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            flex-shrink: 0;
+        }
+        
+        .navigation-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #007bff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+            position: relative;
+        }
+        
+        .user-status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #28a745;
+            position: absolute;
+            bottom: -1px;
+            right: -1px;
+            border: 2px solid white;
+        }
+
+        .dropdown-user-info {
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dropdown-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #007bff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .dropdown-user-details {
+            flex: 1;
+        }
+
+        .dropdown-user-name {
+            font-weight: bold;
+            font-size: 14px;
+            color: #212529;
+            margin: 0;
+        }
+
+        .dropdown-user-role {
+            font-size: 12px;
+            color: #6c757d;
+            margin: 0;
+            text-transform: capitalize;
+        }
+
+        .dropdown-user-status {
+            font-size: 11px;
+            color: #28a745;
+            margin: 2px 0 0 0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .dropdown-user-status::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #28a745;
         }
 
         /* Enhanced Navigation Styles */
@@ -66,7 +180,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border-radius: 6px;
             border: 1px solid #dee2e6;
-            z-index: 1000;
+            z-index: 1001;
             opacity: 0;
             visibility: hidden;
             transform: translateY(-10px);
@@ -104,6 +218,13 @@
             color: #28a745;
             text-decoration: none;
             padding-left: 20px;
+        }
+
+        /* Divider for admin section */
+        .nav-accordion-divider {
+            height: 1px;
+            background: #dee2e6;
+            margin: 8px 12px;
         }
 
         /* Options Button Styles */
@@ -164,7 +285,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border-radius: 6px;
             border: 1px solid #dee2e6;
-            z-index: 1000;
+            z-index: 10001;
             opacity: 0;
             visibility: hidden;
             transform: translateY(-10px);
@@ -1037,10 +1158,99 @@
             margin-bottom: 20px;
         }
 
+        .pre-purchase-title-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
         .pre-purchase-header h2 {
             margin: 0;
             color: #495057;
             font-size: 1.3em;
+        }
+
+        .toggle-pre-purchase-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .toggle-pre-purchase-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        .toggle-pre-purchase-btn.active {
+            background: #007bff;
+        }
+
+        .toggle-pre-purchase-btn.active:hover {
+            background: #0056b3;
+        }
+
+        .pre-purchase-badge {
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-left: 3px;
+            min-width: 18px;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .toggle-pre-purchase-btn.active .pre-purchase-badge {
+            display: none;
+        }
+
+        .pre-purchase-content {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .pre-purchase-content.slide-up {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .pre-purchase-content.slide-down {
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                max-height: 0;
+                margin-bottom: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 1000px;
+                margin-bottom: 20px;
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 1;
+                max-height: 1000px;
+                margin-bottom: 20px;
+            }
+            to {
+                opacity: 0;
+                max-height: 0;
+                margin-bottom: 0;
+            }
         }
 
         .add-pre-po-btn {
@@ -1711,8 +1921,13 @@
             width: 140px;
         }
 
+        .eta-cell {
+            width: 140px;
+        }
+
         /* Date input styling */
-        .date-input {
+        .date-input,
+        .eta-date-input {
             width: 100%;
             border: 1px solid transparent;
             background: transparent;
@@ -1722,24 +1937,28 @@
             color: #495057;
         }
 
-        .date-input:focus {
+        .date-input:focus,
+        .eta-date-input:focus {
             background: white;
             border: 1px solid #007bff;
             outline: none;
             box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
         }
 
-        .date-input.has-date {
+        .date-input.has-date,
+        .eta-date-input.has-date {
             background: #e7f3ff;
             border-color: #b3d9ff;
         }
 
-        .date-input.saving {
+        .date-input.saving,
+        .eta-date-input.saving {
             background: #d1ecf1;
             border-color: #bee5eb;
         }
 
-        .date-input.overdue {
+        .date-input.overdue,
+        .eta-date-input.overdue {
             background: #f8d7da;
             border-color: #f5c6cb;
             color: #721c24;
@@ -1787,11 +2006,23 @@
             display: none;
         }
 
+        /* Default behavior: ns status column hidden until explicitly shown */
+        .ns-status-cell {
+            display: none;
+        }
+
         /* Show tracking column when tracking is explicitly enabled */
         .show-tracking .shipping-tracking-cell {
             display: table-cell !important;
             background-color: #f8f9fa; /* Light background to indicate it's active */
             border-left: 3px solid #28a745; /* Green border to indicate active state */
+        }
+
+        /* Show NS status column when explicitly enabled */
+        .show-ns-status .ns-status-cell {
+            display: table-cell !important;
+            background-color: #f8f9fa; /* Light background to indicate it's active */
+            border-left: 3px solid #007bff; /* Blue border to indicate active state */
         }
 
         /* On smaller screens, add mobile indicator */
@@ -1851,6 +2082,68 @@
             opacity: 0.9;
         }
 
+        /* Task management button styles */
+        .task-toggle-btn {
+            background: #28a745; /* Green for task management */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            margin-left: 4px;
+            position: relative;
+        }
+
+        .task-toggle-btn.has-tasks {
+            background: #17a2b8; /* Teal when tasks exist */
+        }
+
+        .task-toggle-btn:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+
+        .task-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            font-size: 10px;
+            min-width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .task-management-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .task-management-container .dropdown-menu {
+            font-size: 14px;
+            min-width: 200px;
+        }
+
+        .task-management-container .dropdown-item {
+            padding: 8px 16px;
+            white-space: nowrap;
+        }
+
+        .task-management-container .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
         /* Toggle tracking visibility button */
         .toggle-tracking-column-btn {
             background: #6c757d;
@@ -1865,6 +2158,23 @@
         }
 
         .toggle-tracking-column-btn:hover {
+            background: #5a6268;
+        }
+
+        /* Toggle NS Status visibility button */
+        .toggle-ns-status-column-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-left: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-ns-status-column-btn:hover {
             background: #5a6268;
         }
 
@@ -2285,9 +2595,42 @@
             overflow-y: auto;
         }
 
+        .po-details-line-items-table {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
         .po-details-notes-history {
             max-height: 500px;
             overflow-y: auto;
+        }
+
+        /* PO Modal Table Styles */
+        .po-modal-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0;
+        }
+
+        .po-modal-table th,
+        .po-modal-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .po-modal-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #495057;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .po-modal-table tr:hover {
+            background: #f8f9fa;
         }
 
         .line-items-summary {
@@ -2382,68 +2725,111 @@
     <div class="container">
         <div class="header">
             <h1>Purchase Orders Dashboard</h1>
-            <div class="navigation-container">
-                <!-- Managers Accordion -->
-                <div class="nav-section">
-                    <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion')">
-                        📊 Managers <span class="accordion-icon">▼</span>
-                    </button>
-                    <div id="managersAccordion" class="nav-accordion-content">
-                        <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
-                        <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items
-                            Manager</a>
-                        <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 17Track
-                            Dashboard</a>
-                        <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
-                        <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
-                        <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
+            
+            <div class="d-flex align-items-center justify-content-between flex-grow-1">
+                <!-- Navigation Container -->
+                <div class="navigation-container">
+                    <!-- Managers Accordion -->
+                    <div class="nav-section">
+                        <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion')">
+                            📊 Managers <span class="accordion-icon">▼</span>
+                        </button>
+                        <div id="managersAccordion" class="nav-accordion-content">
+                            <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
+                            <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items Manager</a>
+                            <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 17Track Dashboard</a>
+                            <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
+                            <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
+                            <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
+                        </div>
+                    </div>
+
+                    <!-- Combined Options Button -->
+                    <div class="nav-section">
+                        <button class="nav-accordion-btn" onclick="toggleAccordion('optionsAccordion')">
+                            ⚙️ Options <span class="accordion-icon">▼</span>
+                        </button>
+                        <div id="optionsAccordion" class="nav-accordion-content">
+                            <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
+                            <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
+                            <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
+                            
+                            <!-- Admin Options (only for admin/manager users) -->
+                            <% if (typeof user !== 'undefined' && user && (user.role === 'admin' || user.role === 'manager')) { %>
+                            <div class="nav-accordion-divider"></div>
+                            <a href="/auth/admin/users" class="nav-accordion-item">👥 User Management</a>
+                            <a href="/auth/admin/audit-logs" class="nav-accordion-item">📊 Audit Logs</a>
+                            <% if (user.role === 'admin') { %>
+                            <a href="/auth/admin/test-email" class="nav-accordion-item">📧 Test Email</a>
+                            <% } %>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Import Section -->
+                    <div class="nav-section">
+                        <button class="nav-imports-btn" onclick="toggleImportsDropdown()">
+                            📁 Import <span class="dropdown-icon">▼</span>
+                        </button>
+                        <div id="importsDropdown" class="nav-dropdown-content">
+                            <a href="/upload" class="nav-dropdown-item">📄 Purchase Orders CSV</a>
+                            <a href="/upload" class="nav-dropdown-item">📦 Line Items CSV</a>
+                            <button class="nav-dropdown-item" onclick="openNetSuiteImportModal()">🏢 NetSuite PO
+                                Form</button>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Combined Options Button -->
-                <div class="nav-section">
-                    <button class="nav-options-btn" onclick="toggleOptionsDropdown()">
-                        ⚙️ Options <span class="dropdown-icon">▼</span>
-                    </button>
-                    <div id="optionsDropdown" class="nav-dropdown-content">
-                        <button class="nav-dropdown-item" onclick="openStatusModal()">
-                            🏷️ Manage PO Status Options
+                
+                <!-- User Info -->
+                <% if (typeof user !== 'undefined' && user) { %>
+                <div class="user-info" title="<%= user.firstName %> <%= user.lastName %> (<%= user.role %>) - Online">
+                    <div class="user-avatar">
+                        <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                        <div class="user-status-indicator" title="Online"></div>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user"></i>
                         </button>
-                        <button class="nav-dropdown-item" onclick="openLineItemStatusModal()">
-                            📋 Manage Line Item Status Options
-                        </button>
-                        <button class="nav-dropdown-item" onclick="openCarrierModal()">
-                            🚚 Manage Carriers
-                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <!-- User Info Header -->
+                            <li class="dropdown-user-info">
+                                <div class="dropdown-user-avatar">
+                                    <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                                </div>
+                                <div class="dropdown-user-details">
+                                    <div class="dropdown-user-name"><%= user.firstName %> <%= user.lastName %></div>
+                                    <div class="dropdown-user-role"><%= user.role %></div>
+                                    <div class="dropdown-user-status">Online</div>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider" style="margin: 0;"></li>
+                            
+                            <% if (user.permissions && user.permissions.manageUsers) { %>
+                            <li><a class="dropdown-item" href="/auth/admin/users">
+                                <i class="fas fa-users me-2"></i>User Management
+                            </a></li>
+                            <li><a class="dropdown-item" href="/auth/admin/audit-logs">
+                                <i class="fas fa-history me-2"></i>Audit Logs
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <% } %>
+                            <li>
+                                <form action="/auth/logout" method="POST" style="margin: 0;">
+                                    <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-
-                <!-- Imports Section -->
-                <div class="nav-section">
-                    <button class="nav-imports-btn" onclick="toggleImportsDropdown()">
-                        📁 Import <span class="dropdown-icon">▼</span>
-                    </button>
-                    <div id="importsDropdown" class="nav-dropdown-content">
-                        <a href="/upload" class="nav-dropdown-item">📄 Purchase Orders CSV</a>
-                        <a href="/upload-line-items" class="nav-dropdown-item">📦 Line Items CSV</a>
-                        <button class="nav-dropdown-item" onclick="openNetSuiteImportModal()">🏢 NetSuite PO
-                            Form</button>
-                    </div>
+                <% } else { %>
+                <div class="user-info">
+                    <span class="auth-status bg-warning text-dark">Not Authenticated</span>
+                    <a href="/auth/login" class="btn btn-primary btn-sm">Login</a>
                 </div>
-
-                <!-- Dropship Module -->
-                <div class="nav-section">
-                    <a href="/dropship" class="nav-accordion-btn" style="text-decoration: none;">
-                        🚚 Dropship Processor
-                    </a>
-                </div>
-
-                <!-- Task Management -->
-                <div class="nav-section">
-                    <a href="/tasks" class="nav-accordion-btn" style="text-decoration: none;">
-                        ✅ Task Management
-                    </a>
-                </div>
+                <% } %>
             </div>
         </div>
 
@@ -2527,14 +2913,24 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         <!-- Pre-Purchase Orders Section -->
         <div class="pre-purchase-section">
             <div class="pre-purchase-header">
-                <h2>📋 Pre-Purchase Orders<% if (prePurchaseOrders && prePurchaseOrders.length> 0) { %> (<%=
-                            prePurchaseOrders.length %>)<% } %>
-                </h2>
+                <div class="pre-purchase-title-area">
+                    <h2>📋 Pre-Purchase Orders<% if (prePurchaseOrders && prePurchaseOrders.length> 0) { %> (<%=
+                                prePurchaseOrders.length %>)<% } %>
+                    </h2>
+                    <button class="toggle-pre-purchase-btn" onclick="togglePrePurchaseOrders()" title="Show/Hide Pre-Purchase Orders">
+                        <i class="fas fa-eye-slash" id="pre-purchase-toggle-icon"></i>
+                        <span id="pre-purchase-toggle-text">Show</span>
+                        <% if (prePurchaseOrders && prePurchaseOrders.length > 0) { %>
+                            <span class="pre-purchase-badge" id="pre-purchase-badge"><%= prePurchaseOrders.length %></span>
+                        <% } %>
+                    </button>
+                </div>
                 <button class="add-pre-po-btn" onclick="addPrePurchaseOrder()">➕ Add Pre-PO</button>
             </div>
 
-            <% if (prePurchaseOrders && prePurchaseOrders.length> 0) { %>
-                <div class="pre-purchase-orders">
+            <div class="pre-purchase-content" id="pre-purchase-content" style="display: none;">
+                <% if (prePurchaseOrders && prePurchaseOrders.length> 0) { %>
+                    <div class="pre-purchase-orders">
                     <% prePurchaseOrders.forEach((prePO, index)=> { %>
                         <div class="pre-po-card priority-<%= prePO.priority.toLowerCase() %>" data-id="<%= prePO._id %>"
                             data-priority="<%= prePO.priority.toLowerCase() %>"
@@ -2578,6 +2974,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         <p>No pre-purchase orders yet. Start planning your purchases!</p>
                     </div>
                     <% } %>
+            </div> <!-- End pre-purchase-content -->
         </div>
 
         <% if (purchaseOrders.length> 0) { %>
@@ -2659,6 +3056,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         id="toggleTrackingBtn" title="Show/Hide tracking column">
                         👁️ <span id="trackingColumnText">Show Tracking</span>
                     </button>
+                    <button class="btn btn-sm btn-outline-secondary ms-2" onclick="toggleNsStatusColumn()"
+                        id="toggleNsStatusBtn" title="Show/Hide NS Status column">
+                        👁️ <span id="nsStatusColumnText">Show NS Status</span>
+                    </button>
                 </div>
             </div>
 
@@ -2705,7 +3106,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     <th class="sortable vendor" data-column="vendor">Vendor</th>
                                     <th class="sortable line-items-count-cell" data-column="lineItemsCount">Line Items
                                     </th>
-                                    <th class="sortable ns-status-cell" data-column="nsStatus">NS Status</th>
+                                    <th class="sortable eta-cell" data-column="eta">ETA</th>
+                                    <th class="sortable ns-status-cell" data-column="nsStatus">NS Status
+                                        <button class="toggle-ns-status-column-btn" onclick="toggleNsStatusColumn()" title="Show/Hide NS Status column">
+                                            👁️
+                                        </button>
+                                    </th>
                                     <th class="sortable status-cell" data-column="status">Status</th>
                                     <th class="sortable shipping-tracking-cell" data-column="shippingTracking">Tracking
                                         <br><small style="font-weight: normal;">(Carrier & #)</small>
@@ -2714,7 +3120,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                         </button>
                                     </th>
                                     <th class="sortable next-update-cell" data-column="nextUpdateDate">Next Update</th>
-                                    <th class="notes-toggle-cell">Notes</th>
+                                    <th class="notes-toggle-cell">Notes +</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -2798,6 +3204,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                         </button>
                                                     </div>
                                                     <% } %>
+                                        </td>
+                                        <td class="eta-cell">
+                                            <input type="date"
+                                                class="eta-date-input <%= po.eta ? 'has-date' : '' %> <%= po.eta && new Date(po.eta) < new Date() ? 'overdue' : '' %>"
+                                                value="<%= po.eta ? new Date(po.eta).toISOString().split('T')[0] : '' %>"
+                                                data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
+                                                title="Set ETA for PO <%= po.poNumber %>">
                                         </td>
                                         <td class="ns-status-cell">
                                             <span class="ns-status-display">
@@ -2884,6 +3297,37 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                     title="<%= po.notes && po.notes.trim() ? 'View/Edit notes' : 'Add notes' %>">
                                                     <%= po.notes && po.notes.trim() ? '📝' : '➕' %>
                                                 </button>
+                                                <div class="task-management-container">
+                                                    <% if (po.relatedTasks && po.relatedTasks.length > 0) { %>
+                                                        <div class="dropdown">
+                                                            <button class="task-toggle-btn has-tasks dropdown-toggle" 
+                                                                    type="button" 
+                                                                    data-bs-toggle="dropdown" 
+                                                                    aria-expanded="false"
+                                                                    data-po-id="<%= po._id %>"
+                                                                    title="<%= po.relatedTasks.length %> task(s) for this PO">
+                                                                📋<span class="task-count"><%= po.relatedTasks.length %></span>
+                                                            </button>
+                                                            <ul class="dropdown-menu">
+                                                                <% po.relatedTasks.forEach(function(task) { %>
+                                                                    <li><a class="dropdown-item" href="/tasks?editTask=<%= task._id %>&returnUrl=<%= encodeURIComponent('/purchase-orders') %>">
+                                                                        ✏️ Edit: <%= task.title %>
+                                                                    </a></li>
+                                                                <% }); %>
+                                                                <li><hr class="dropdown-divider"></li>
+                                                                <li><a class="dropdown-item" href="/tasks?createTaskForPO=<%= po._id %>&poNumber=<%= po.poNumber %>&returnUrl=<%= encodeURIComponent('/purchase-orders') %>">
+                                                                    ➕ Create New Task
+                                                                </a></li>
+                                                            </ul>
+                                                        </div>
+                                                    <% } else { %>
+                                                        <a href="/tasks?createTaskForPO=<%= po._id %>&poNumber=<%= po.poNumber %>&returnUrl=<%= encodeURIComponent('/purchase-orders') %>" 
+                                                           class="task-toggle-btn" 
+                                                           title="Create task for this PO">
+                                                            ➕
+                                                        </a>
+                                                    <% } %>
+                                                </div>
                                                 <button class="tracking-toggle-btn <%= po.shippingTracking ? 'has-status' : '' %>"
                                                     type="button" 
                                                     data-po-id="<%= po._id %>"
@@ -3043,13 +3487,20 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             </div>
 
             <div class="po-details-tabs">
-                <button class="tab-button active" onclick="showTab('lineItems')">📦 Line Items</button>
+                <button class="tab-button active" onclick="showTab('lineItemsTable')">📦 Line Items - Table View</button>
+                <button class="tab-button" onclick="showTab('lineItems')">📦 Line Items - Card View</button>
                 <button class="tab-button" onclick="showTab('notesHistory')">📋 Notes History</button>
             </div>
 
-            <div id="lineItemsTab" class="tab-content active">
+            <div id="lineItemsTableTab" class="tab-content active">
+                <div id="poDetailsLineItemsTable" class="po-details-line-items-table">
+                    <!-- Table view will be loaded here -->
+                </div>
+            </div>
+
+            <div id="lineItemsTab" class="tab-content">
                 <div id="poDetailsLineItems" class="po-details-line-items">
-                    <!-- Line items will be loaded here -->
+                    <!-- Card view will be loaded here -->
                 </div>
             </div>
 
@@ -3077,24 +3528,17 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
     <script>
         // Navigation Functions
-        function toggleAccordion() {
-            const content = document.getElementById('managersAccordion');
-            const icon = document.querySelector('.accordion-icon');
+        function toggleAccordion(accordionId) {
+            const content = document.getElementById(accordionId);
+            const button = document.querySelector(`button[onclick="toggleAccordion('${accordionId}')"]`);
+            const icon = button ? button.querySelector('.accordion-icon') : null;
 
-            content.classList.toggle('show');
-            icon.classList.toggle('rotated');
-        }
-
-        function toggleOptionsDropdown() {
-            const content = document.getElementById('optionsDropdown');
-            const icon = document.querySelector('.nav-options-btn .dropdown-icon');
-
-            content.classList.toggle('show');
-            icon.classList.toggle('rotated');
-
-            // Close other dropdowns
-            document.getElementById('importsDropdown').classList.remove('show');
-            document.querySelector('.nav-imports-btn .dropdown-icon').classList.remove('rotated');
+            if (content) {
+                content.classList.toggle('show');
+            }
+            if (icon) {
+                icon.classList.toggle('rotated');
+            }
         }
 
         function toggleImportsDropdown() {
@@ -3104,30 +3548,47 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             content.classList.toggle('show');
             icon.classList.toggle('rotated');
 
-            // Close other dropdowns
-            document.getElementById('optionsDropdown').classList.remove('show');
-            document.querySelector('.nav-options-btn .dropdown-icon').classList.remove('rotated');
+            // Close other dropdowns/accordions
+            const optionsAccordion = document.getElementById('optionsAccordion');
+            if (optionsAccordion) {
+                optionsAccordion.classList.remove('show');
+            }
+            const optionsIcon = document.querySelector('.nav-accordion-btn .accordion-icon');
+            if (optionsIcon) {
+                optionsIcon.classList.remove('rotated');
+            }
         }
 
         // Close dropdowns when clicking outside
         document.addEventListener('click', function (event) {
-            const managersSection = document.querySelector('.nav-section:first-child');
-            const optionsSection = document.querySelector('.nav-section:nth-child(2)');
-            const importsSection = document.querySelector('.nav-section:nth-child(3)');
+            const navigationContainer = document.querySelector('.navigation-container');
+            
+            // If click is outside navigation container, close all dropdowns/accordions
+            if (navigationContainer && !navigationContainer.contains(event.target)) {
+                // Close all accordions
+                const accordions = ['managersAccordion', 'optionsAccordion'];
+                accordions.forEach(accordionId => {
+                    const accordion = document.getElementById(accordionId);
+                    if (accordion) {
+                        accordion.classList.remove('show');
+                    }
+                });
 
-            if (!managersSection.contains(event.target)) {
-                document.getElementById('managersAccordion').classList.remove('show');
-                document.querySelector('.accordion-icon').classList.remove('rotated');
-            }
+                // Reset all accordion icons
+                const accordionIcons = document.querySelectorAll('.accordion-icon');
+                accordionIcons.forEach(icon => {
+                    icon.classList.remove('rotated');
+                });
 
-            if (!optionsSection.contains(event.target)) {
-                document.getElementById('optionsDropdown').classList.remove('show');
-                document.querySelector('.nav-options-btn .dropdown-icon').classList.remove('rotated');
-            }
-
-            if (!importsSection.contains(event.target)) {
-                document.getElementById('importsDropdown').classList.remove('show');
-                document.querySelector('.nav-imports-btn .dropdown-icon').classList.remove('rotated');
+                // Close import dropdown
+                const importsDropdown = document.getElementById('importsDropdown');
+                if (importsDropdown) {
+                    importsDropdown.classList.remove('show');
+                }
+                const importsIcon = document.querySelector('.nav-imports-btn .dropdown-icon');
+                if (importsIcon) {
+                    importsIcon.classList.remove('rotated');
+                }
             }
         });
 
@@ -3533,6 +3994,52 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     .catch(error => {
                         this.classList.remove('saving');
                         console.error('Error saving next update date:', error);
+                    });
+            });
+        });
+
+        // Auto-save ETA when changed
+        document.querySelectorAll('.eta-date-input').forEach(etaInput => {
+            etaInput.addEventListener('change', function () {
+                const id = this.dataset.id;
+                const poNumber = this.dataset.po;
+                const eta = this.value;
+
+                // Show saving state
+                this.classList.add('saving');
+
+                fetch(`/purchase-orders/${id}/eta`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ eta })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Remove saving state and update appearance
+                        this.classList.remove('saving');
+
+                        if (eta) {
+                            this.classList.add('has-date');
+
+                            // Check if date is overdue
+                            const etaDate = new Date(eta);
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0); // Reset time for date comparison
+
+                            if (etaDate < today) {
+                                this.classList.add('overdue');
+                            } else {
+                                this.classList.remove('overdue');
+                            }
+                        } else {
+                            this.classList.remove('has-date', 'overdue');
+                        }
+
+                        console.log(`ETA saved for PO ${poNumber}: ${eta || 'cleared'}`);
+                    })
+                    .catch(error => {
+                        this.classList.remove('saving');
+                        console.error('Error saving ETA:', error);
                     });
             });
         });
@@ -4213,10 +4720,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             modal.dataset.poId = poId; // Store poId for later use
             modal.style.display = 'block';
             
-            // Reset to line items tab
+            // Reset to line items table tab (new default)
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('lineItemsTab').classList.add('active');
+            document.getElementById('lineItemsTableTab').classList.add('active');
             document.querySelector('.tab-button').classList.add('active');
             
             // Load line items by default
@@ -4225,6 +4732,85 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         function closePoDetailsModal() {
             document.getElementById('poDetailsModal').style.display = 'none';
+        }
+
+        // Render PO modal table view
+        function renderPoModalTableView(lineItems) {
+            const tableContainer = document.getElementById('poDetailsLineItemsTable');
+            
+            if (!lineItems || lineItems.length === 0) {
+                tableContainer.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
+                return;
+            }
+
+            const tableHtml = `
+                <table class="po-modal-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Memo</th>
+                            <th>Quantity</th>
+                            <th>SKU</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                            <th>Received</th>
+                            <th>Tracking</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${lineItems.map(item => `
+                            <tr class="line-item-row ${item.received ? 'received' : ''}" data-item-id="${item._id}">
+                                <td>${item.date ? new Date(item.date).toLocaleDateString() : 'No date'}</td>
+                                <td class="item-memo" title="${escapeHtml(item.memo)}">${escapeHtml(item.memo)}</td>
+                                <td>${item.quantity || 'N/A'}</td>
+                                <td>
+                                    <input type="text" 
+                                           class="sku-input" 
+                                           placeholder="SKU" 
+                                           value="${escapeHtml(item.sku || '')}"
+                                           onchange="updateLineItemField('${item._id}', 'sku', this.value)">
+                                </td>
+                                <td>
+                                    <select class="status-select" 
+                                            onchange="updateLineItemField('${item._id}', 'status', this.value)">
+                                        <option value="">Select Status</option>
+                                        ${globalLineItemStatusOptions.map(status => 
+                                            `<option value="${escapeHtml(status)}" ${item.status === status ? 'selected' : ''}>${escapeHtml(status)}</option>`
+                                        ).join('')}
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="text" 
+                                           class="notes-input" 
+                                           placeholder="Notes" 
+                                           value="${escapeHtml(item.notes || '')}"
+                                           onchange="updateLineItemField('${item._id}', 'notes', this.value)">
+                                </td>
+                                <td>
+                                    <button class="received-toggle ${item.received ? 'received' : ''}" 
+                                            onclick="toggleReceivedInModal('${item._id}', ${!item.received}, '${getPoIdFromModal()}')">
+                                        ${item.received ? '✅ Received' : '📦 Mark Received'}
+                                    </button>
+                                </td>
+                                <td class="line-item-tracking ${!item.trackingNumber ? 'no-tracking' : ''}">
+                                    ${item.trackingNumber ? 
+                                        `<a href="#" onclick="openTrackingDetails('${item.trackingNumber}', '${item.carrier || 'Unknown'}')" class="tracking-link">${item.trackingNumber}</a>` :
+                                        `<button class="tracking-add-btn" onclick="addTrackingInModal('${item._id}')">Add Tracking</button>`
+                                    }
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            tableContainer.innerHTML = tableHtml;
+        }
+
+        // Helper function to get PO ID from modal
+        function getPoIdFromModal() {
+            const modal = document.getElementById('poDetailsModal');
+            return modal.dataset.poId;
         }
 
         // Tracking Functions
@@ -4245,6 +4831,26 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             
             // Show a toast notification
             const message = isCurrentlyVisible ? '👁️ Tracking column hidden' : '👁️ Tracking column shown';
+            showTrackingToast(message, 'success');
+        }
+
+        function toggleNsStatusColumn() {
+            const table = document.getElementById('purchaseOrdersTable');
+            const isCurrentlyVisible = table.classList.contains('show-ns-status');
+            
+            if (isCurrentlyVisible) {
+                // Hide NS status column
+                table.classList.remove('show-ns-status');
+            } else {
+                // Show NS status column
+                table.classList.add('show-ns-status');
+            }
+            
+            // Update button state
+            updateNsStatusButtonState(!isCurrentlyVisible);
+            
+            // Show a toast notification
+            const message = isCurrentlyVisible ? '👁️ NS Status column hidden' : '👁️ NS Status column shown';
             showTrackingToast(message, 'success');
         }
 
@@ -4428,6 +5034,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     event.preventDefault();
                     toggleTrackingColumn();
                 }
+                if (event.ctrlKey && event.key === 'n') {
+                    event.preventDefault();
+                    toggleNsStatusColumn();
+                }
             });
             
             // Handle window resize
@@ -4441,6 +5051,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     updateTrackingButtonState(true);
                 }
             });
+        }
+
+        // Initialize NS Status column state
+        function initializeNsStatusColumn() {
+            // Set initial state - hidden by default for all screen sizes
+            const table = document.getElementById('purchaseOrdersTable');
+            
+            // NS Status column is hidden by default
+            table.classList.remove('show-ns-status');
+            updateNsStatusButtonState(false);
         }
 
         function updateTrackingButtonState(isVisible) {
@@ -4459,6 +5079,25 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 toggleBtn.classList.add('btn-outline-secondary');
                 buttonText.textContent = 'Show Tracking';
                 toggleBtn.title = 'Show tracking column (Ctrl+T)';
+            }
+        }
+
+        function updateNsStatusButtonState(isVisible) {
+            const toggleBtn = document.getElementById('toggleNsStatusBtn');
+            const buttonText = document.getElementById('nsStatusColumnText');
+            
+            if (!toggleBtn || !buttonText) return; // Elements might not exist yet
+            
+            if (isVisible) {
+                toggleBtn.classList.remove('btn-outline-secondary');
+                toggleBtn.classList.add('btn-outline-success');
+                buttonText.textContent = 'Hide NS Status';
+                toggleBtn.title = 'Hide NS Status column (Ctrl+N)';
+            } else {
+                toggleBtn.classList.remove('btn-outline-success');
+                toggleBtn.classList.add('btn-outline-secondary');
+                buttonText.textContent = 'Show NS Status';
+                toggleBtn.title = 'Show NS Status column (Ctrl+N)';
             }
         }
 
@@ -4495,21 +5134,31 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         }
 
         async function loadPoDetailsLineItems(poId) {
-            const container = document.getElementById('poDetailsLineItems');
+            const cardContainer = document.getElementById('poDetailsLineItems');
+            const tableContainer = document.getElementById('poDetailsLineItemsTable');
             
             try {
-                container.innerHTML = '<div class="loading-line-items">Loading line items...</div>';
+                // Show loading in both containers
+                cardContainer.innerHTML = '<div class="loading-line-items">Loading line items...</div>';
+                tableContainer.innerHTML = '<div class="loading-line-items">Loading line items...</div>';
                 
                 const response = await fetch(`/purchase-orders/${poId}/line-items`);
                 const lineItems = await response.json();
                 
                 if (lineItems.length === 0) {
-                    container.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
+                    cardContainer.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
+                    tableContainer.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
                 } else {
+                    // Store line items globally for the modal
+                    window.currentPoLineItems = lineItems;
+                    
                     const receivedCount = lineItems.filter(item => item.received).length;
                     const totalCount = lineItems.length;
                     
-                    // Generate the HTML for line items
+                    // Render table view
+                    renderPoModalTableView(lineItems);
+                    
+                    // Generate the HTML for card view (existing format)
                     const lineItemsHtml = lineItems.map(item => `
                         <div class="line-item ${item.received ? 'received' : ''}" data-item-id="${item._id}">
                             <div class="line-item-header">
@@ -4561,7 +5210,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         </div>
                     `).join('');
                     
-                    container.innerHTML = `
+                    // Populate card view
+                    cardContainer.innerHTML = `
                         <div class="line-items-summary">
                             <strong>Summary:</strong> ${receivedCount}/${totalCount} items received
                             ${receivedCount === totalCount ? ' ✅' : ''}
@@ -4571,7 +5221,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
             } catch (error) {
                 console.error('Error loading line items:', error);
-                container.innerHTML = '<div class="no-line-items">Error loading line items</div>';
+                cardContainer.innerHTML = '<div class="no-line-items">Error loading line items</div>';
+                tableContainer.innerHTML = '<div class="no-line-items">Error loading line items</div>';
             }
         }
 
@@ -5766,9 +6417,76 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     }
                 });
             }
+            
+            // Initialize pre-purchase orders visibility
+            initializePrePurchaseOrdersVisibility();
         });
 
         // Pre-Purchase Order Functions
+        function togglePrePurchaseOrders() {
+            const content = document.getElementById('pre-purchase-content');
+            const icon = document.getElementById('pre-purchase-toggle-icon');
+            const text = document.getElementById('pre-purchase-toggle-text');
+            const button = document.querySelector('.toggle-pre-purchase-btn');
+            const badge = document.getElementById('pre-purchase-badge');
+            
+            if (content.style.display === 'none') {
+                // Show the section with animation
+                content.style.display = 'block';
+                content.classList.remove('slide-down');
+                content.classList.add('slide-up');
+                
+                icon.className = 'fas fa-eye';
+                text.textContent = 'Hide';
+                button.classList.add('active');
+                if (badge) badge.style.display = 'none';
+                
+                // Store the preference
+                localStorage.setItem('prePurchaseOrdersVisible', 'true');
+            } else {
+                // Hide the section with animation
+                content.classList.remove('slide-up');
+                content.classList.add('slide-down');
+                
+                setTimeout(() => {
+                    content.style.display = 'none';
+                }, 300); // Match animation duration
+                
+                icon.className = 'fas fa-eye-slash';
+                text.textContent = 'Show';
+                button.classList.remove('active');
+                if (badge) badge.style.display = 'inline-block';
+                
+                // Store the preference
+                localStorage.setItem('prePurchaseOrdersVisible', 'false');
+            }
+        }
+
+        // Initialize pre-purchase orders visibility on page load
+        function initializePrePurchaseOrdersVisibility() {
+            const isVisible = localStorage.getItem('prePurchaseOrdersVisible');
+            const content = document.getElementById('pre-purchase-content');
+            const icon = document.getElementById('pre-purchase-toggle-icon');
+            const text = document.getElementById('pre-purchase-toggle-text');
+            const button = document.querySelector('.toggle-pre-purchase-btn');
+            const badge = document.getElementById('pre-purchase-badge');
+            
+            // Default to hidden if no preference is stored
+            if (isVisible === 'true') {
+                content.style.display = 'block';
+                icon.className = 'fas fa-eye';
+                text.textContent = 'Hide';
+                button.classList.add('active');
+                if (badge) badge.style.display = 'none';
+            } else {
+                content.style.display = 'none';
+                icon.className = 'fas fa-eye-slash';
+                text.textContent = 'Show';
+                button.classList.remove('active');
+                if (badge) badge.style.display = 'inline-block';
+            }
+        }
+
         function addPrePurchaseOrder() {
             document.getElementById('prePurchaseOrderModalTitle').textContent = 'Add Pre-Purchase Order';
             document.getElementById('prePOId').value = '';
@@ -5937,6 +6655,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 
                 // Initialize tracking column state
                 initializeTrackingColumn();
+                
+                // Initialize NS Status column state
+                initializeNsStatusColumn();
             });
         } else {
             console.log('DOM already loaded, initializing immediately');
@@ -6157,6 +6878,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             }
         });
     </script>
+
+    <!-- Bootstrap JavaScript for dropdown functionality -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
+^
+^
+^
