@@ -483,8 +483,8 @@ router.get('/check', (req, res) => {
     res.render('auth/status');
 });
 
-// Test email functionality (admin only)
-router.get('/admin/test-email', ensureAuthenticated, requireRole(['admin']), async (req, res) => {
+// Test email functionality (admin and manager)
+router.get('/admin/test-email', ensureAuthenticated, requireRole(['admin', 'manager']), async (req, res) => {
     try {
         const testResult = await emailService.sendTestEmail(req.user.email);
         res.json({ 

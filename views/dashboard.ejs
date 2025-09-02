@@ -2759,7 +2759,7 @@
                             <div class="nav-accordion-divider"></div>
                             <a href="/auth/admin/users" class="nav-accordion-item">👥 User Management</a>
                             <a href="/auth/admin/audit-logs" class="nav-accordion-item">📊 Audit Logs</a>
-                            <% if (user.role === 'admin') { %>
+                            <% if (user.role === 'admin' || user.role === 'manager') { %>
                             <a href="/auth/admin/test-email" class="nav-accordion-item">📧 Test Email</a>
                             <% } %>
                             <% } %>
@@ -2812,6 +2812,13 @@
                             <li><a class="dropdown-item" href="/auth/admin/audit-logs">
                                 <i class="fas fa-history me-2"></i>Audit Logs
                             </a></li>
+                            <% } %>
+                            <% if (user.role === 'admin' || user.role === 'manager') { %>
+                            <li><a class="dropdown-item" href="/auth/admin/test-email">
+                                <i class="fas fa-envelope me-2"></i>Test Email
+                            </a></li>
+                            <% } %>
+                            <% if ((user.permissions && user.permissions.manageUsers) || user.role === 'admin' || user.role === 'manager') { %>
                             <li><hr class="dropdown-divider"></li>
                             <% } %>
                             <li>
@@ -3528,7 +3535,30 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
     <script>
         // Navigation Functions
+        function closeAllDropdowns() {
+            // Close accordions
+            document.querySelectorAll('.nav-accordion-content.show').forEach(content => {
+                content.classList.remove('show');
+            });
+            document.querySelectorAll('.accordion-icon.rotated').forEach(icon => {
+                icon.classList.remove('rotated');
+            });
+            
+            // Close import dropdown
+            const importsDropdown = document.getElementById('importsDropdown');
+            if (importsDropdown) {
+                importsDropdown.classList.remove('show');
+            }
+            const importsIcon = document.querySelector('.nav-imports-btn .dropdown-icon');
+            if (importsIcon) {
+                importsIcon.classList.remove('rotated');
+            }
+        }
+
         function toggleAccordion(accordionId) {
+            // Close all other dropdowns first
+            closeAllDropdowns();
+            
             const content = document.getElementById(accordionId);
             const button = document.querySelector(`button[onclick="toggleAccordion('${accordionId}')"]`);
             const icon = button ? button.querySelector('.accordion-icon') : null;
@@ -3542,21 +3572,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         }
 
         function toggleImportsDropdown() {
+            // Close all other dropdowns first
+            closeAllDropdowns();
+            
             const content = document.getElementById('importsDropdown');
             const icon = document.querySelector('.nav-imports-btn .dropdown-icon');
 
             content.classList.toggle('show');
             icon.classList.toggle('rotated');
-
-            // Close other dropdowns/accordions
-            const optionsAccordion = document.getElementById('optionsAccordion');
-            if (optionsAccordion) {
-                optionsAccordion.classList.remove('show');
-            }
-            const optionsIcon = document.querySelector('.nav-accordion-btn .accordion-icon');
-            if (optionsIcon) {
-                optionsIcon.classList.remove('rotated');
-            }
         }
 
         // Close dropdowns when clicking outside
@@ -3565,30 +3588,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             
             // If click is outside navigation container, close all dropdowns/accordions
             if (navigationContainer && !navigationContainer.contains(event.target)) {
-                // Close all accordions
-                const accordions = ['managersAccordion', 'optionsAccordion'];
-                accordions.forEach(accordionId => {
-                    const accordion = document.getElementById(accordionId);
-                    if (accordion) {
-                        accordion.classList.remove('show');
-                    }
-                });
-
-                // Reset all accordion icons
-                const accordionIcons = document.querySelectorAll('.accordion-icon');
-                accordionIcons.forEach(icon => {
-                    icon.classList.remove('rotated');
-                });
-
-                // Close import dropdown
-                const importsDropdown = document.getElementById('importsDropdown');
-                if (importsDropdown) {
-                    importsDropdown.classList.remove('show');
-                }
-                const importsIcon = document.querySelector('.nav-imports-btn .dropdown-icon');
-                if (importsIcon) {
-                    importsIcon.classList.remove('rotated');
-                }
+                closeAllDropdowns();
             }
         });
 
