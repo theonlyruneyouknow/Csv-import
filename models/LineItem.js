@@ -79,6 +79,25 @@ const lineItemSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
+    // Soft delete/hide functionality
+    isHidden: {
+        type: Boolean,
+        default: false,
+        index: true
+    },
+    hiddenDate: {
+        type: Date,
+        default: null
+    },
+    hiddenReason: {
+        type: String,
+        default: '',
+        enum: ['', 'Not in import', 'Manually hidden', 'Completed', 'Cancelled', 'Parent PO hidden', 'Other']
+    },
+    hiddenBy: {
+        type: String,
+        default: ''
+    },
     createdAt: {
         type: Date,
         default: Date.now

@@ -78,15 +78,56 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
       }
     }
 
-    // Optional: Remove POs that are no longer in the CSV
+    // Hide POs that are no longer in the CSV (soft delete)
     const currentPONumbers = dataRows.map(row => row[2]);
-    const removedCount = await PurchaseOrder.deleteMany({
-      reportDate: reportDate,
-      poNumber: { $nin: currentPONumbers }
-    });
+    const hiddenResult = await PurchaseOrder.updateMany(
+      {
+        reportDate: reportDate,
+        poNumber: { $nin: currentPONumbers },
+        isHidden: { $ne: true } // Only hide POs that aren't already hidden
+      },
+      {
+        $set: {
+          isHidden: true,
+          hiddenDate: new Date(),
+          hiddenReason: 'Not in import',
+          hiddenBy: 'System'
+        }
+      }
+    );
 
-    if (removedCount.deletedCount > 0) {
-      console.log(`Removed ${removedCount.deletedCount} POs that are no longer in the report`);
+    if (hiddenResult.modifiedCount > 0) {
+      console.log(`Hidden ${hiddenResult.modifiedCount} POs that are no longer in the report`);
+      
+      // Also hide line items for these hidden POs
+      const hiddenPONumbers = await PurchaseOrder.find({
+        reportDate: reportDate,
+        poNumber: { $nin: currentPONumbers },
+        isHidden: true
+      }, 'poNumber');
+      
+      const hiddenPONumbersArray = hiddenPONumbers.map(po => po.poNumber);
+      
+      if (hiddenPONumbersArray.length > 0) {
+        const hiddenLineItemsResult = await LineItem.updateMany(
+          {
+            poNumber: { $in: hiddenPONumbersArray },
+            isHidden: { $ne: true }
+          },
+          {
+            $set: {
+              isHidden: true,
+              hiddenDate: new Date(),
+              hiddenReason: 'Parent PO hidden',
+              hiddenBy: 'System'
+            }
+          }
+        );
+        
+        if (hiddenLineItemsResult.modifiedCount > 0) {
+          console.log(`Also hidden ${hiddenLineItemsResult.modifiedCount} line items for hidden POs`);
+        }
+      }
     }
 
     // Clean up uploaded file
@@ -950,7 +991,15 @@ router.get('/', async (req, res) => {
   try {
     console.log('🔍 DASHBOARD ROUTE - Fetching data...');
 
-    const purchaseOrders = await PurchaseOrder.find().sort({ date: 1 });
+    // Check if we should include hidden POs
+    const includeHidden = req.query.includeHidden === 'true';
+    
+    let query = {};
+    if (!includeHidden) {
+      query.isHidden = { $ne: true }; // Only show non-hidden POs by default
+    }
+
+    const purchaseOrders = await PurchaseOrder.find(query).sort({ date: 1 });
 
     // Get all tasks that are related to purchase orders
     const allTasks = await Task.find({ 
@@ -1050,6 +1099,46 @@ router.get('/', async (req, res) => {
   } catch (error) {
     console.error('❌ Dashboard route error:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// API route to get purchase orders with hidden filter
+router.get('/api/purchase-orders', async (req, res) => {
+  try {
+    const includeHidden = req.query.includeHidden === 'true';
+    
+    let query = {};
+    if (!includeHidden) {
+      query.isHidden = { $ne: true };
+    }
+    
+    const purchaseOrders = await PurchaseOrder.find(query).sort({ date: 1 });
+    
+    // Get all tasks that are related to purchase orders
+    const allTasks = await Task.find({ 
+      relatedPOs: { $exists: true, $ne: [] } 
+    }).populate('relatedPOs', 'poNumber');
+
+    // Create a map of PO ObjectId to tasks
+    const tasksByPOId = {};
+    allTasks.forEach(task => {
+      task.relatedPOs.forEach(po => {
+        if (!tasksByPOId[po._id]) {
+          tasksByPOId[po._id] = [];
+        }
+        tasksByPOId[po._id].push(task);
+      });
+    });
+
+    // Add task data to each purchase order
+    purchaseOrders.forEach(po => {
+      po.relatedTasks = tasksByPOId[po._id] || [];
+    });
+    
+    res.json({ success: true, purchaseOrders });
+  } catch (error) {
+    console.error('❌ API purchase orders error:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
@@ -2961,6 +3050,83 @@ router.put('/api/tasks/:taskId', async (req, res) => {
   } catch (error) {
     console.error('Update task error:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Manual hide/unhide PO routes
+router.post('/hide/:poId', async (req, res) => {
+  try {
+    const { poId } = req.params;
+    const { reason = 'Manually hidden' } = req.body;
+    const hiddenBy = req.user ? req.user.username : 'Unknown User';
+
+    const po = await PurchaseOrder.findByIdAndUpdate(poId, {
+      $set: {
+        isHidden: true,
+        hiddenDate: new Date(),
+        hiddenReason: reason,
+        hiddenBy: hiddenBy
+      }
+    }, { new: true });
+
+    if (!po) {
+      return res.status(404).json({ success: false, error: 'PO not found' });
+    }
+
+    // Also hide associated line items
+    await LineItem.updateMany(
+      { poNumber: po.poNumber, isHidden: { $ne: true } },
+      {
+        $set: {
+          isHidden: true,
+          hiddenDate: new Date(),
+          hiddenReason: 'Parent PO hidden',
+          hiddenBy: hiddenBy
+        }
+      }
+    );
+
+    res.json({ success: true, message: `PO ${po.poNumber} has been hidden` });
+  } catch (error) {
+    console.error('Hide PO error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post('/unhide/:poId', async (req, res) => {
+  try {
+    const { poId } = req.params;
+
+    const po = await PurchaseOrder.findByIdAndUpdate(poId, {
+      $unset: {
+        isHidden: 1,
+        hiddenDate: 1,
+        hiddenReason: 1,
+        hiddenBy: 1
+      }
+    }, { new: true });
+
+    if (!po) {
+      return res.status(404).json({ success: false, error: 'PO not found' });
+    }
+
+    // Also unhide associated line items that were hidden due to parent PO
+    await LineItem.updateMany(
+      { poNumber: po.poNumber, hiddenReason: 'Parent PO hidden' },
+      {
+        $unset: {
+          isHidden: 1,
+          hiddenDate: 1,
+          hiddenReason: 1,
+          hiddenBy: 1
+        }
+      }
+    );
+
+    res.json({ success: true, message: `PO ${po.poNumber} has been unhidden` });
+  } catch (error) {
+    console.error('Unhide PO error:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

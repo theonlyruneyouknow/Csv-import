@@ -59,6 +59,25 @@ const purchaseOrderSchema = new mongoose.Schema({
     netsuiteBilled: Number,
     vendorDescription: String
   }],
+  // Soft delete/hide functionality
+  isHidden: {
+    type: Boolean,
+    default: false,
+    index: true                // Index for efficient filtering
+  },
+  hiddenDate: {
+    type: Date,
+    default: null
+  },
+  hiddenReason: {
+    type: String,
+    default: '',
+    enum: ['', 'Not in import', 'Manually hidden', 'Completed', 'Cancelled', 'Other']
+  },
+  hiddenBy: {                 // Track who hid the PO (for audit purposes)
+    type: String,
+    default: ''
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

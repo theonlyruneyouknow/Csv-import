@@ -2718,6 +2718,33 @@
             font-style: italic;
             padding: 40px;
         }
+
+        /* Hidden PO Styles */
+        .hidden-po {
+            background-color: #f8f9fa !important;
+            opacity: 0.7;
+            border-left: 4px solid #dc3545;
+        }
+
+        .hidden-po-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #dc3545;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .hidden-po-reason {
+            font-size: 11px;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 2px;
+        }
     </style>
 </head>
 
@@ -3038,6 +3065,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 </div>
 
                 <div class="filter-group">
+                    <label style="margin-bottom: 5px;">Show Hidden POs</label>
+                    <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
+                        <input type="checkbox" id="showHiddenPOs" style="margin: 0;">
+                        <span style="font-size: 12px;">Include soft deleted POs</span>
+                    </label>
+                </div>
+
+                <div class="filter-group">
                     <label style="margin-bottom: 5px;">Show "Not my concern"</label>
                     <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
                         <input type="checkbox" id="showNotMyConcern" style="margin: 0;">
@@ -3133,7 +3168,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             <tbody>
                                 <% purchaseOrders.forEach((po, index)=> { %>
                                     <!-- Main data row -->
-                                    <tr data-po='<%= JSON.stringify(po) %>' data-index="<%= index %>">
+                                    <tr data-po='<%= JSON.stringify(po) %>' data-index="<%= index %>" <% if (po.isHidden) { %>class="hidden-po"<% } %>>
                                         <td class="date-cell">
                                             <%= po.date %>
                                         </td>
@@ -3163,6 +3198,17 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                                 📋
                                                             </button>
                                             </div>
+                                            <% if (po.isHidden) { %>
+                                                <span class="hidden-po-indicator">
+                                                    🚫 HIDDEN
+                                                </span>
+                                                <div class="hidden-po-reason">
+                                                    Reason: <%= po.hiddenReason || 'Not specified' %>
+                                                    <% if (po.hiddenDate) { %>
+                                                        <br>Hidden: <%= new Date(po.hiddenDate).toLocaleDateString() %>
+                                                    <% } %>
+                                                </div>
+                                            <% } %>
                                         </td>
                                         <td class="priority-cell">
                                             <select class="priority-select" data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
@@ -6037,6 +6083,21 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             applyFilters();
         }
 
+        // Toggle hidden POs functionality
+        function toggleHiddenPOs() {
+            const checkbox = document.getElementById('showHiddenPOs');
+            const includeHidden = checkbox.checked;
+            
+            // Reload page with hidden parameter
+            const url = new URL(window.location);
+            if (includeHidden) {
+                url.searchParams.set('includeHidden', 'true');
+            } else {
+                url.searchParams.delete('includeHidden');
+            }
+            window.location.href = url.toString();
+        }
+
         // Event listeners for filters
         document.getElementById('searchFilter').addEventListener('input', applyFilters);
         document.getElementById('nsStatusFilter').addEventListener('change', applyFilters);
@@ -6045,6 +6106,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         document.getElementById('priorityFilter').addEventListener('change', applyFilters);
         document.getElementById('showNotMyConcern').addEventListener('change', applyFilters);
         document.getElementById('showPendingBill').addEventListener('change', applyFilters);
+        document.getElementById('showHiddenPOs').addEventListener('change', toggleHiddenPOs);
 
         // Event listeners for sorting
         document.querySelectorAll('th.sortable').forEach(header => {
@@ -6867,10 +6929,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             const notMyConcernCheckbox = document.getElementById('showNotMyConcern');
             const pendingBillCheckbox = document.getElementById('showPendingBill');
+            const hiddenPOsCheckbox = document.getElementById('showHiddenPOs');
 
-            if (notMyConcernCheckbox && pendingBillCheckbox) {
+            if (notMyConcernCheckbox && pendingBillCheckbox && hiddenPOsCheckbox) {
                 notMyConcernCheckbox.checked = false; // Ensure unchecked
                 pendingBillCheckbox.checked = false; // Ensure unchecked
+                
+                // Set hidden POs checkbox based on URL parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                hiddenPOsCheckbox.checked = urlParams.get('includeHidden') === 'true';
+                
                 console.log('✅ Final filter initialization complete, applying filters...');
                 applyFilters();
             } else {
