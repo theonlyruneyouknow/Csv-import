@@ -5,6 +5,43 @@ const LineItem = require('../models/LineItem');
 
 const router = express.Router();
 
+// Helper function to calculate the earliest upcoming ETA from line items
+const calculateUpcomingETA = (lineItems) => {
+  if (!lineItems || lineItems.length === 0) return null;
+  
+  const now = new Date();
+  const upcomingETAs = lineItems
+    .filter(item => 
+      item.eta && 
+      new Date(item.eta) > now && 
+      !item.billVarianceField // Only consider items without Bill Variance Field values
+    )
+    .map(item => new Date(item.eta))
+    .sort((a, b) => a - b); // Sort chronologically
+  
+  return upcomingETAs.length > 0 ? upcomingETAs[0] : null;
+};
+
+// Helper function to format ETA display
+const formatETA = (eta) => {
+  if (!eta) return 'No ETA';
+  
+  const etaDate = new Date(eta);
+  const now = new Date();
+  const diffDays = Math.ceil((etaDate - now) / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 0) return 'Past Due';
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Tomorrow';
+  if (diffDays <= 7) return `${diffDays} days`;
+  
+  return etaDate.toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric',
+    year: etaDate.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+  });
+};
+
 // Receiving Dashboard - Main route
 router.get('/', async (req, res) => {
   try {
@@ -41,7 +78,7 @@ router.get('/', async (req, res) => {
       lineItemsByPO[item.poNumber].push(item);
     });
 
-    // Add line item data to each PO
+    // Add line item data to each PO and calculate ETA
     receivingPOs.forEach(po => {
       po.lineItemsData = lineItemsByPO[po.poNumber] || [];
       
@@ -56,6 +93,11 @@ router.get('/', async (req, res) => {
         pending: pendingItems,
         percentComplete: totalItems > 0 ? Math.round((receivedItems / totalItems) * 100) : 0
       };
+      
+      // Calculate and format ETA based on line items
+      const upcomingETA = calculateUpcomingETA(po.lineItemsData);
+      po.upcomingETA = upcomingETA;
+      po.formattedETA = formatETA(upcomingETA);
     });
 
     // Get unique vendors for filtering

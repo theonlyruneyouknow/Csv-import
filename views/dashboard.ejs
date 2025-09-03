@@ -2001,6 +2001,43 @@
             color: #721c24;
         }
 
+        /* Calculated ETA from line items */
+        .calculated-eta {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            border: 1px solid #bbdefb;
+        }
+
+        .calculated-eta.overdue {
+            background: #ffebee;
+            color: #c62828;
+            border-color: #ffcdd2;
+        }
+
+        .calculated-eta.today {
+            background: #fff3e0;
+            color: #ef6c00;
+            border-color: #ffcc02;
+        }
+
+        .calculated-eta.tomorrow {
+            background: #f3e5f5;
+            color: #7b1fa2;
+            border-color: #ce93d8;
+        }
+
+        .eta-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
         /* Shipping tracking display */
         .shipping-tracking {
             font-size: 13px;
@@ -3305,11 +3342,21 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                     <% } %>
                                         </td>
                                         <td class="eta-cell">
+                                            <% if (po.formattedETA && po.formattedETA !== 'No ETA') { %>
+                                                <span class="calculated-eta 
+                                                    <%= po.formattedETA === 'Past Due' ? 'overdue' : '' %>
+                                                    <%= po.formattedETA === 'Today' ? 'today' : '' %>
+                                                    <%= po.formattedETA === 'Tomorrow' ? 'tomorrow' : '' %>"
+                                                    title="Calculated from line items with Expected Arrival Dates (no Bill Variance Field)">
+                                                    🕒 <%= po.formattedETA %>
+                                                </span>
+                                            <% } %>
                                             <input type="date"
                                                 class="eta-date-input <%= po.eta ? 'has-date' : '' %> <%= po.eta && new Date(po.eta) < new Date() ? 'overdue' : '' %>"
                                                 value="<%= po.eta ? new Date(po.eta).toISOString().split('T')[0] : '' %>"
                                                 data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
-                                                title="Set ETA for PO <%= po.poNumber %>">
+                                                title="Manual ETA override for PO <%= po.poNumber %>"
+                                                placeholder="Manual ETA">
                                         </td>
                                         <td class="ns-status-cell">
                                             <span class="ns-status-display">

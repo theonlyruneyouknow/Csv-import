@@ -14,6 +14,43 @@ const trackingService = require('../services/17trackService');
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
+// Helper function to calculate the earliest upcoming ETA from line items
+const calculateUpcomingETA = (lineItems) => {
+  if (!lineItems || lineItems.length === 0) return null;
+  
+  const now = new Date();
+  const upcomingETAs = lineItems
+    .filter(item => 
+      item.eta && 
+      new Date(item.eta) > now && 
+      !item.billVarianceField // Only consider items without Bill Variance Field values
+    )
+    .map(item => new Date(item.eta))
+    .sort((a, b) => a - b); // Sort chronologically
+  
+  return upcomingETAs.length > 0 ? upcomingETAs[0] : null;
+};
+
+// Helper function to format ETA display
+const formatETA = (eta) => {
+  if (!eta) return 'No ETA';
+  
+  const etaDate = new Date(eta);
+  const now = new Date();
+  const diffDays = Math.ceil((etaDate - now) / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 0) return 'Past Due';
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Tomorrow';
+  if (diffDays <= 7) return `${diffDays} days`;
+  
+  return etaDate.toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric',
+    year: etaDate.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+  });
+};
+
 // Upload and parse CSV
 router.post('/upload', upload.single('csvFile'), async (req, res) => {
   try {
@@ -1041,6 +1078,23 @@ router.get('/', async (req, res) => {
 
     const purchaseOrders = await PurchaseOrder.find(query).sort({ date: 1 });
 
+    // Fetch line items for each PO and calculate ETAs
+    const purchaseOrdersWithETA = await Promise.all(
+      purchaseOrders.map(async (po) => {
+        const lineItems = await LineItem.find({ poId: po._id, isHidden: { $ne: true } });
+        const upcomingETA = calculateUpcomingETA(lineItems);
+        const formattedETA = formatETA(upcomingETA);
+        
+        return {
+          ...po.toObject(),
+          lineItems,
+          upcomingETA,
+          formattedETA,
+          lineItemCount: lineItems.length
+        };
+      })
+    );
+
     // Get all tasks that are related to purchase orders
     const allTasks = await Task.find({ 
       relatedPOs: { $exists: true, $ne: [] } 
@@ -1058,7 +1112,7 @@ router.get('/', async (req, res) => {
     });
 
     // Add task data to each purchase order
-    purchaseOrders.forEach(po => {
+    purchaseOrdersWithETA.forEach(po => {
       po.relatedTasks = tasksByPOId[po._id] || [];
     });
 
@@ -1069,7 +1123,7 @@ router.get('/', async (req, res) => {
     const nonConvertedPrePOs = await PrePurchaseOrder.find({ convertedToPO: false }).sort({ createdAt: -1 });
     const convertedPrePOs = await PrePurchaseOrder.find({ convertedToPO: true }).sort({ createdAt: -1 });
 
-    console.log(`📊 Found ${purchaseOrders.length} purchase orders`);
+    console.log(`📊 Found ${purchaseOrdersWithETA.length} purchase orders`);
     console.log(`📋 Found ${allPrePurchaseOrders.length} total pre-purchase orders in database`);
     console.log(`📋 Found ${nonConvertedPrePOs.length} non-converted pre-purchase orders`);
     console.log(`📋 Found ${convertedPrePOs.length} converted pre-purchase orders`);
@@ -1087,14 +1141,14 @@ router.get('/', async (req, res) => {
     const prePurchaseOrders = allPrePurchaseOrders;
 
     // Get unique NS Status values for filters (from CSV)
-    const uniqueNSStatuses = [...new Set(purchaseOrders.map(po => po.nsStatus).filter(Boolean))];
+    const uniqueNSStatuses = [...new Set(purchaseOrdersWithETA.map(po => po.nsStatus).filter(Boolean))];
 
     // Get unique custom Status values for filters
-    const uniqueStatuses = [...new Set(purchaseOrders.map(po => po.status).filter(Boolean))];
+    const uniqueStatuses = [...new Set(purchaseOrdersWithETA.map(po => po.status).filter(Boolean))];
 
     // Get unique vendors from both POs and pre-POs
     const allVendors = [
-      ...purchaseOrders.map(po => po.vendor),
+      ...purchaseOrdersWithETA.map(po => po.vendor),
       ...prePurchaseOrders.map(ppo => ppo.vendor)
     ];
     const uniqueVendors = [...new Set(allVendors.filter(Boolean))].sort();
@@ -1127,7 +1181,7 @@ router.get('/', async (req, res) => {
 
     console.log(`🎨 Rendering dashboard with ${prePurchaseOrders.length} pre-purchase orders...`);
     res.render('dashboard', {
-      purchaseOrders,
+      purchaseOrders: purchaseOrdersWithETA,
       prePurchaseOrders,
       uniqueNSStatuses: uniqueNSStatuses.sort(),
       uniqueStatuses: uniqueStatuses.sort(),
@@ -2411,6 +2465,8 @@ router.post('/import-netsuite', async (req, res) => {
     const billedIndex = getColumnIndex('billed');
     const expectedReceiptIndex = getColumnIndex('expected receipt date');
     const expectedArrivalIndex = getColumnIndex('expected arrival date');
+    const billVarianceStatusIndex = getColumnIndex('bill variance status');
+    const billVarianceFieldIndex = getColumnIndex('bill variance');
     const closedIndex = getColumnIndex('closed');
 
     console.log('🔍 Column indices:', { itemIndex, quantityIndex, descriptionIndex });
@@ -2459,14 +2515,39 @@ router.post('/import-netsuite', async (req, res) => {
       // Extract item data
       const itemCode = row[itemIndex] || '';
       const vendorName = row[vendorNameIndex] || '';
-      const quantity = parseFloat(row[quantityIndex]) || 0;
+      
+      // Parse quantity with comma support (e.g., "6,000" -> 6000)
+      let quantity = 0;
+      if (row[quantityIndex]) {
+        const quantityStr = row[quantityIndex].toString().trim();
+        const cleanQuantityStr = quantityStr.replace(/,/g, ''); // Remove commas
+        quantity = parseFloat(cleanQuantityStr) || 0;
+      }
+      
       const description = row[descriptionIndex] || '';
       const vendorDescription = row[vendorDescIndex] || '';
       const units = row[unitsIndex] || '';
-      const received = parseFloat(row[receivedIndex]) || 0;
-      const billed = parseFloat(row[billedIndex]) || 0;
+      
+      // Parse received with comma support
+      let received = 0;
+      if (row[receivedIndex]) {
+        const receivedStr = row[receivedIndex].toString().trim();
+        const cleanReceivedStr = receivedStr.replace(/,/g, '');
+        received = parseFloat(cleanReceivedStr) || 0;
+      }
+      
+      // Parse billed with comma support  
+      let billed = 0;
+      if (row[billedIndex]) {
+        const billedStr = row[billedIndex].toString().trim();
+        const cleanBilledStr = billedStr.replace(/,/g, '');
+        billed = parseFloat(cleanBilledStr) || 0;
+      }
+      
       const expectedReceiptDate = row[expectedReceiptIndex] || '';
       const expectedArrivalDate = row[expectedArrivalIndex] || '';
+      const billVarianceStatus = row[billVarianceStatusIndex] || '';
+      const billVarianceField = row[billVarianceFieldIndex] || '';
       const closed = row[closedIndex] || '';
 
       console.log(`📦 Extracted data:`, {
@@ -2532,6 +2613,32 @@ router.post('/import-netsuite', async (req, res) => {
 
       console.log(`✅ Processing item ${itemCode} for PO ${poToUse.poNumber}`);
 
+      // Implement ETA logic and quantity discrepancy detection
+      let calculatedEta = parseDate(expectedArrivalDate);
+      let notesArray = [`NetSuite Import - Qty: ${quantity}, Received: ${received}, Billed: ${billed}`];
+      
+      // Add vendor description if available
+      if (vendorDescription) {
+        notesArray.push(`Vendor Desc: ${vendorDescription}`);
+      }
+      
+      // Quantity Discrepancy Detection:
+      // If Bill Variance Status is empty BUT there's a value in Bill Variance Field
+      if (!billVarianceStatus && billVarianceField) {
+        notesArray.push('Quantity Discrepancy');
+        console.log(`⚠️ Quantity discrepancy detected for ${itemCode}: No variance status but variance field has value`);
+      }
+      
+      // ETA Logic: Use Expected Arrival Date only if no Bill Variance Field value
+      if (!billVarianceField && expectedArrivalDate) {
+        calculatedEta = parseDate(expectedArrivalDate);
+        console.log(`📅 Setting ETA from Expected Arrival Date for ${itemCode}: ${expectedArrivalDate}`);
+      } else if (billVarianceField) {
+        // Don't worry about Expected Arrival Date if there's a Bill Variance Field value
+        calculatedEta = null;
+        console.log(`🚫 Ignoring Expected Arrival Date for ${itemCode} due to Bill Variance Field value`);
+      }
+
       // Create the line item
       const lineItem = new LineItem({
         poId: poToUse._id,
@@ -2541,11 +2648,14 @@ router.post('/import-netsuite', async (req, res) => {
         sku: itemCode,
         quantityExpected: quantity, // Store the quantity from CSV
         unit: units, // Store the unit from CSV
+        billVarianceStatus: billVarianceStatus,
+        billVarianceField: billVarianceField,
+        expectedArrivalDate: parseDate(expectedArrivalDate),
         itemStatus: closed === 'T' ? 'Closed' : (received >= quantity ? 'Received' : 'Pending'),
         received: received >= quantity, // Convert to boolean - true if fully received
         receivedDate: received > 0 ? new Date() : null,
-        eta: parseDate(expectedArrivalDate), // Use safe date parsing
-        notes: `NetSuite Import - Qty: ${quantity}, Received: ${received}, Billed: ${billed}${vendorDescription ? `, Vendor Desc: ${vendorDescription}` : ''}`
+        eta: calculatedEta, // Use calculated ETA based on logic
+        notes: notesArray.join(', ')
       });
 
       console.log(`💾 Creating LineItem with eta:`, parseDate(expectedArrivalDate));

@@ -60,6 +60,18 @@ const lineItemSchema = new mongoose.Schema({
         type: Number,
         default: null
     },
+    billVarianceStatus: {       // NetSuite Bill Variance Status (e.g., "No Variances")
+        type: String,
+        default: ''
+    },
+    billVarianceField: {        // NetSuite Bill Variance Field value
+        type: String,
+        default: ''
+    },
+    expectedArrivalDate: {      // Expected arrival date from NetSuite
+        type: Date,
+        default: null
+    },
     receivingDiscrepancy: {     // Notes about any discrepancies
         type: String,
         default: ''
