@@ -78,6 +78,41 @@ const purchaseOrderSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  // File attachments for PO documents and PDFs
+  attachments: [{
+    filename: {               // Original filename
+      type: String,
+      required: true
+    },
+    savedFilename: {          // Saved filename (with timestamp prefix)
+      type: String,
+      required: true
+    },
+    filePath: {               // Path to the file on disk
+      type: String,
+      required: true
+    },
+    fileSize: {               // File size in bytes
+      type: Number,
+      required: true
+    },
+    fileType: {               // MIME type
+      type: String,
+      required: true
+    },
+    uploadedBy: {             // Who uploaded the file
+      type: String,
+      default: 'Unknown User'
+    },
+    uploadedAt: {             // When was it uploaded
+      type: Date,
+      default: Date.now
+    },
+    description: {            // Optional description of what this file is
+      type: String,
+      default: ''
+    }
+  }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

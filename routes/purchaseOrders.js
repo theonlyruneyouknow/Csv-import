@@ -3130,4 +3130,195 @@ router.post('/unhide/:poId', async (req, res) => {
   }
 });
 
+// File attachment routes
+const path = require('path');
+const fs = require('fs');
+
+// Configure multer for file uploads
+const attachmentUpload = multer({
+  dest: 'uploads/po-attachments/',
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Check file type
+    const allowedTypes = /\.(pdf|jpg|jpeg|png|doc|docx|xls|xlsx|txt)$/i;
+    const isValidType = allowedTypes.test(file.originalname);
+    
+    if (isValidType) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only PDF, images, Word, Excel, and text files are allowed.'));
+    }
+  }
+});
+
+// Upload attachment
+router.post('/upload-attachment', attachmentUpload.single('attachment'), async (req, res) => {
+  try {
+    const { poId, description } = req.body;
+    const uploadedBy = req.user ? req.user.username : 'Unknown User';
+    
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No file uploaded' });
+    }
+    
+    if (!poId) {
+      return res.status(400).json({ success: false, error: 'PO ID is required' });
+    }
+    
+    // Find the PO
+    const po = await PurchaseOrder.findById(poId);
+    if (!po) {
+      // Clean up uploaded file
+      fs.unlinkSync(req.file.path);
+      return res.status(404).json({ success: false, error: 'Purchase Order not found' });
+    }
+    
+    // Create unique filename with timestamp
+    const timestamp = Date.now();
+    const fileExtension = path.extname(req.file.originalname);
+    const savedFilename = `${timestamp}-${req.file.originalname}`;
+    const finalPath = path.join('uploads/po-attachments', savedFilename);
+    
+    // Move file to final location
+    fs.renameSync(req.file.path, finalPath);
+    
+    // Add attachment to PO
+    const attachment = {
+      filename: req.file.originalname,
+      savedFilename: savedFilename,
+      filePath: finalPath,
+      fileSize: req.file.size,
+      fileType: req.file.mimetype,
+      uploadedBy: uploadedBy,
+      uploadedAt: new Date(),
+      description: description || ''
+    };
+    
+    po.attachments.push(attachment);
+    await po.save();
+    
+    console.log(`📎 File uploaded: ${req.file.originalname} for PO ${po.poNumber}`);
+    
+    res.json({ 
+      success: true, 
+      message: 'File uploaded successfully',
+      attachment: attachment
+    });
+    
+  } catch (error) {
+    console.error('Upload attachment error:', error);
+    
+    // Clean up uploaded file if it exists
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get attachments for a PO
+router.get('/attachments/:poId', async (req, res) => {
+  try {
+    const { poId } = req.params;
+    
+    const po = await PurchaseOrder.findById(poId);
+    if (!po) {
+      return res.status(404).json({ success: false, error: 'Purchase Order not found' });
+    }
+    
+    res.json({ 
+      success: true, 
+      attachments: po.attachments || []
+    });
+    
+  } catch (error) {
+    console.error('Get attachments error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Download attachment
+router.get('/download-attachment/:attachmentId', async (req, res) => {
+  try {
+    const { attachmentId } = req.params;
+    
+    // Find PO with this attachment
+    const po = await PurchaseOrder.findOne({
+      'attachments._id': attachmentId
+    });
+    
+    if (!po) {
+      return res.status(404).json({ success: false, error: 'Attachment not found' });
+    }
+    
+    // Find the specific attachment
+    const attachment = po.attachments.id(attachmentId);
+    if (!attachment) {
+      return res.status(404).json({ success: false, error: 'Attachment not found' });
+    }
+    
+    // Check if file exists
+    if (!fs.existsSync(attachment.filePath)) {
+      return res.status(404).json({ success: false, error: 'File not found on disk' });
+    }
+    
+    // Set headers for download
+    res.setHeader('Content-Disposition', `attachment; filename="${attachment.filename}"`);
+    res.setHeader('Content-Type', attachment.fileType);
+    
+    // Stream the file
+    const fileStream = fs.createReadStream(attachment.filePath);
+    fileStream.pipe(res);
+    
+  } catch (error) {
+    console.error('Download attachment error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Delete attachment
+router.delete('/attachments/:attachmentId', async (req, res) => {
+  try {
+    const { attachmentId } = req.params;
+    
+    // Find PO with this attachment
+    const po = await PurchaseOrder.findOne({
+      'attachments._id': attachmentId
+    });
+    
+    if (!po) {
+      return res.status(404).json({ success: false, error: 'Attachment not found' });
+    }
+    
+    // Find the specific attachment
+    const attachment = po.attachments.id(attachmentId);
+    if (!attachment) {
+      return res.status(404).json({ success: false, error: 'Attachment not found' });
+    }
+    
+    // Delete file from disk if it exists
+    if (fs.existsSync(attachment.filePath)) {
+      fs.unlinkSync(attachment.filePath);
+    }
+    
+    // Remove attachment from PO
+    po.attachments.pull(attachmentId);
+    await po.save();
+    
+    console.log(`🗑️ Attachment deleted: ${attachment.filename} from PO ${po.poNumber}`);
+    
+    res.json({ 
+      success: true, 
+      message: 'Attachment deleted successfully'
+    });
+    
+  } catch (error) {
+    console.error('Delete attachment error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;
