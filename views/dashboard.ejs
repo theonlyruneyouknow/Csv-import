@@ -2815,6 +2815,7 @@
                         </button>
                         <div id="optionsAccordion" class="nav-accordion-content">
                             <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
+                            <a href="/receiving" class="nav-accordion-item">🚚 Receiving Dashboard</a>
                             <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
                             <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
                             
@@ -4853,7 +4854,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             <tr class="line-item-row ${item.received ? 'received' : ''}" data-item-id="${item._id}">
                                 <td>${item.date ? new Date(item.date).toLocaleDateString() : 'No date'}</td>
                                 <td class="item-memo" title="${escapeHtml(item.memo)}">${escapeHtml(item.memo)}</td>
-                                <td>${item.quantity || 'N/A'}</td>
+                                <td>${item.quantityExpected || item.quantity || 'N/A'}${item.unit ? ' ' + item.unit : ''}</td>
                                 <td>
                                     <input type="text" 
                                            class="sku-input" 
@@ -6304,6 +6305,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             // Reset form
             document.getElementById('attachmentUploadForm').reset();
             document.getElementById('attachmentPOId').value = poId; // Reset the hidden field
+            document.getElementById('documentType').value = 'Other'; // Reset document type to default
             
             // Load existing attachments
             loadAttachments(poId);
@@ -6340,10 +6342,30 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 return;
             }
             
+            // Document type badges with icons
+            function getDocumentTypeBadge(documentType) {
+                const badges = {
+                    'Purchase Order': '<span class="doc-type-badge po">📄 PO</span>',
+                    'Invoice': '<span class="doc-type-badge invoice">🧾 Invoice</span>',
+                    'Packing Slip': '<span class="doc-type-badge packing-slip">📦 Packing Slip</span>',
+                    'Bill of Lading (BOL)': '<span class="doc-type-badge bol">🚛 BOL</span>',
+                    'Shipping Confirmation': '<span class="doc-type-badge shipping">🚚 Shipping</span>',
+                    'Receipt': '<span class="doc-type-badge receipt">🧾 Receipt</span>',
+                    'Quote': '<span class="doc-type-badge quote">💰 Quote</span>',
+                    'Contract': '<span class="doc-type-badge contract">📋 Contract</span>',
+                    'Specification Sheet': '<span class="doc-type-badge spec">📊 Spec Sheet</span>',
+                    'Other': '<span class="doc-type-badge other">📄 Other</span>'
+                };
+                return badges[documentType] || badges['Other'];
+            }
+            
             const attachmentsHtml = attachments.map(attachment => `
                 <div class="attachment-item">
                     <div class="attachment-info">
-                        <div class="attachment-name">${escapeHtml(attachment.filename)}</div>
+                        <div class="attachment-name">
+                            ${escapeHtml(attachment.filename)}
+                            ${getDocumentTypeBadge(attachment.documentType)}
+                        </div>
                         <div class="attachment-meta">
                             ${formatFileSize(attachment.fileSize)} • 
                             ${formatDate(attachment.uploadedAt)} • 
@@ -6457,6 +6479,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     // Reset form
                     document.getElementById('attachmentFile').value = '';
                     document.getElementById('attachmentDescription').value = '';
+                    document.getElementById('documentType').value = 'Other';
                     
                     // Reload attachments
                     const poId = document.getElementById('attachmentPOId').value;
@@ -7084,6 +7107,22 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                placeholder="e.g., Purchase Order Document, Invoice, Receipt...">
                     </div>
                     
+                    <div class="form-group">
+                        <label for="attachmentDocumentType">Document Type:</label>
+                        <select id="attachmentDocumentType" name="documentType" required>
+                            <option value="Purchase Order">Purchase Order</option>
+                            <option value="Invoice">Invoice</option>
+                            <option value="Packing Slip">Packing Slip</option>
+                            <option value="Bill of Lading (BOL)">Bill of Lading (BOL)</option>
+                            <option value="Shipping Confirmation">Shipping Confirmation</option>
+                            <option value="Receipt">Receipt</option>
+                            <option value="Quote">Quote</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Specification Sheet">Specification Sheet</option>
+                            <option value="Other" selected>Other</option>
+                        </select>
+                    </div>
+                    
                     <div class="form-actions">
                         <button type="submit" id="uploadAttachmentBtn">
                             📤 Upload File
@@ -7255,6 +7294,78 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             font-weight: 500;
             color: #212529;
             margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .doc-type-badge {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .doc-type-badge.po {
+            background: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #bbdefb;
+        }
+
+        .doc-type-badge.invoice {
+            background: #f3e5f5;
+            color: #6a1b9a;
+            border: 1px solid #ce93d8;
+        }
+
+        .doc-type-badge.packing-slip {
+            background: #e8f5e8;
+            color: #2e7d2e;
+            border: 1px solid #a5d6a7;
+        }
+
+        .doc-type-badge.bol {
+            background: #fff3e0;
+            color: #ef6c00;
+            border: 1px solid #ffcc02;
+        }
+
+        .doc-type-badge.shipping {
+            background: #e0f2f1;
+            color: #00695c;
+            border: 1px solid #80cbc4;
+        }
+
+        .doc-type-badge.receipt {
+            background: #fce4ec;
+            color: #c2185b;
+            border: 1px solid #f8bbd9;
+        }
+
+        .doc-type-badge.quote {
+            background: #f1f8e9;
+            color: #558b2f;
+            border: 1px solid #c5e1a5;
+        }
+
+        .doc-type-badge.contract {
+            background: #fff8e1;
+            color: #f57f17;
+            border: 1px solid #fff176;
+        }
+
+        .doc-type-badge.spec {
+            background: #e8eaf6;
+            color: #3f51b5;
+            border: 1px solid #c5cae9;
+        }
+
+        .doc-type-badge.other {
+            background: #f5f5f5;
+            color: #616161;
+            border: 1px solid #e0e0e0;
         }
 
         .attachment-meta {

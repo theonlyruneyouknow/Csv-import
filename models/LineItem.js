@@ -40,6 +40,30 @@ const lineItemSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
+    receivedBy: {               // Track who marked item as received
+        type: String,
+        default: ''
+    },
+    receivingNotes: {           // Notes specific to receiving process
+        type: String,
+        default: ''
+    },
+    quantityExpected: {         // Expected quantity from PO
+        type: Number,
+        default: null
+    },
+    unit: {                     // Unit of measure (EA, LB, KG, etc.)
+        type: String,
+        default: ''
+    },
+    quantityReceived: {         // Actual quantity received
+        type: Number,
+        default: null
+    },
+    receivingDiscrepancy: {     // Notes about any discrepancies
+        type: String,
+        default: ''
+    },
     eta: {
         type: Date,
         default: null,

@@ -111,6 +111,22 @@ const purchaseOrderSchema = new mongoose.Schema({
     description: {            // Optional description of what this file is
       type: String,
       default: ''
+    },
+    documentType: {           // Type of document (PO, Invoice, Packing Slip, etc.)
+      type: String,
+      default: 'Other',
+      enum: [
+        'Purchase Order',
+        'Invoice', 
+        'Packing Slip',
+        'Bill of Lading (BOL)',
+        'Shipping Confirmation',
+        'Receipt',
+        'Quote',
+        'Contract',
+        'Specification Sheet',
+        'Other'
+      ]
     }
   }],
   createdAt: { type: Date, default: Date.now },

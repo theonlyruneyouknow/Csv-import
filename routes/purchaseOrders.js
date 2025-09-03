@@ -214,6 +214,7 @@ router.post('/upload-line-items', upload.single('lineItemsCsvFile'), async (req,
           console.log(`\n=== Debugging Row ${processedCount + skippedCount + 1} ===`);
           console.log('Row data:', row);
           console.log('Row length:', row.length);
+          console.log('Column 3 (Quantity):', row[3]);
           console.log('Column 5 (PO):', row[5]);
           console.log('Column 7 (Account):', row[7]);
           console.log('Column 8 (Item Description):', row[8]);
@@ -270,6 +271,24 @@ router.post('/upload-line-items', upload.single('lineItemsCsvFile'), async (req,
         }
 
         const date = row[2] ? row[2].toString().trim() : ''; // Date field
+
+        // Extract quantity (typically in column 3 for NetSuite exports)
+        let quantity = null;
+        if (row[3]) {
+          const quantityStr = row[3].toString().trim();
+          // Remove commas from number strings like "6,000" -> "6000"
+          const cleanQuantityStr = quantityStr.replace(/,/g, '');
+          const quantityNum = parseFloat(cleanQuantityStr);
+          if (!isNaN(quantityNum) && quantityNum > 0) {
+            quantity = quantityNum;
+          }
+        }
+
+        // Extract unit of measure if available (often in column 4)
+        let unit = '';
+        if (row[4] && row[4].toString().trim() !== '') {
+          unit = row[4].toString().trim();
+        }
 
         // Only process rows where account starts with "1215" as specified
         if (!account || !account.startsWith('1215')) {
@@ -331,17 +350,38 @@ router.post('/upload-line-items', upload.single('lineItemsCsvFile'), async (req,
           poId: purchaseOrder._id,
           poNumber: poNumber,
           date: date,
-          memo: memo.substring(0, 100) + (memo.length > 100 ? '...' : '')
+          memo: memo.substring(0, 100) + (memo.length > 100 ? '...' : ''),
+          quantity: quantity,
+          unit: unit
         });
 
-        const newLineItem = await LineItem.create({
+        // Extract SKU from column 0 (first column)
+        let sku = '';
+        if (row[0]) {
+          sku = row[0].toString().trim();
+        }
+
+        const lineItemData = {
           poId: purchaseOrder._id,
           poNumber: poNumber,
+          sku: sku,
           date: date,
           memo: memo,
           createdAt: new Date(),
           updatedAt: new Date()
-        });
+        };
+
+        // Add quantity if we found one
+        if (quantity !== null) {
+          lineItemData.quantityExpected = quantity;
+        }
+
+        // Add unit if we found one
+        if (unit !== '') {
+          lineItemData.unit = unit;
+        }
+
+        const newLineItem = await LineItem.create(lineItemData);
 
         processedCount++;
         console.log(`✓ Successfully added line item for PO ${poNumber}: ${memo.substring(0, 50)}... (ID: ${newLineItem._id})`);
@@ -2366,6 +2406,7 @@ router.post('/import-netsuite', async (req, res) => {
     const quantityIndex = getColumnIndex('quantity');
     const descriptionIndex = getColumnIndex('description');
     const vendorDescIndex = getColumnIndex('vendor desc');
+    const unitsIndex = getColumnIndex('units');
     const receivedIndex = getColumnIndex('received');
     const billedIndex = getColumnIndex('billed');
     const expectedReceiptIndex = getColumnIndex('expected receipt date');
@@ -2421,6 +2462,7 @@ router.post('/import-netsuite', async (req, res) => {
       const quantity = parseFloat(row[quantityIndex]) || 0;
       const description = row[descriptionIndex] || '';
       const vendorDescription = row[vendorDescIndex] || '';
+      const units = row[unitsIndex] || '';
       const received = parseFloat(row[receivedIndex]) || 0;
       const billed = parseFloat(row[billedIndex]) || 0;
       const expectedReceiptDate = row[expectedReceiptIndex] || '';
@@ -2430,6 +2472,7 @@ router.post('/import-netsuite', async (req, res) => {
       console.log(`📦 Extracted data:`, {
         itemCode,
         quantity,
+        units,
         description: description.substring(0, 30) + '...',
         expectedReceiptDate,
         expectedArrivalDate
@@ -2496,6 +2539,8 @@ router.post('/import-netsuite', async (req, res) => {
         date: expectedReceiptDate || expectedArrivalDate || new Date().toISOString().split('T')[0],
         memo: description, // Use description as memo (required field)
         sku: itemCode,
+        quantityExpected: quantity, // Store the quantity from CSV
+        unit: units, // Store the unit from CSV
         itemStatus: closed === 'T' ? 'Closed' : (received >= quantity ? 'Received' : 'Pending'),
         received: received >= quantity, // Convert to boolean - true if fully received
         receivedDate: received > 0 ? new Date() : null,

@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Receiving Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px 0;
+            border-bottom: 2px solid #007bff;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #007bff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+        }
+
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 6px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .receiving-table {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .receiving-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .receiving-table th {
+            background: #007bff;
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #0056b3;
+        }
+
+        .receiving-table td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+            vertical-align: top;
+        }
+
+        .receiving-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .po-number {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 16px;
+        }
+
+        .vendor-name {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .eta-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .eta-date {
+            font-weight: 500;
+        }
+
+        .eta-status {
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            text-transform: uppercase;
+        }
+
+        .eta-overdue {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .eta-today {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .eta-upcoming {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .eta-future {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .attachments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .attachment-item a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .attachment-item a:hover {
+            text-decoration: underline;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 4px;
+            height: 8px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #28a745;
+            transition: width 0.3s ease;
+        }
+
+        .progress-fill.warning {
+            background: #ffc107;
+        }
+
+        .progress-fill.danger {
+            background: #dc3545;
+        }
+
+        .receiving-stats {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .line-items-summary {
+            margin-top: 8px;
+        }
+
+        .line-items-toggle {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .line-items-toggle:hover {
+            background: #0056b3;
+        }
+
+        .line-items-detail {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 3px solid #007bff;
+        }
+
+        .line-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin-bottom: 4px;
+            background: white;
+            border-radius: 3px;
+            border-left: 3px solid #dee2e6;
+        }
+
+        .line-item.received {
+            border-left-color: #28a745;
+            background: #f8fff9;
+        }
+
+        .line-item-info {
+            flex-grow: 1;
+        }
+
+        .line-item-sku {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .line-item-description {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .line-item-quantity {
+            font-size: 12px;
+            color: #007bff;
+            margin-top: 4px;
+        }
+
+        .receive-checkbox {
+            margin-left: 10px;
+        }
+
+        .bulk-actions {
+            margin-bottom: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .bulk-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .bulk-btn.receive-all {
+            background: #28a745;
+            color: white;
+        }
+
+        .bulk-btn.unreceive-all {
+            background: #dc3545;
+            color: white;
+        }
+
+        .bulk-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .no-pos {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .refresh-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .refresh-btn:hover {
+            background: #138496;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .stats-bar {
+                flex-wrap: wrap;
+            }
+            
+            .receiving-table {
+                overflow-x: auto;
+            }
+            
+            .receiving-table table {
+                min-width: 800px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <i class="fas fa-truck"></i>
+                Receiving Dashboard
+            </h1>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <% if (user) { %>
+                    <span style="color: #6c757d;">Welcome, <%= user.username %></span>
+                <% } %>
+                <button class="refresh-btn" onclick="window.location.reload()">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-number" id="totalPOsCount"><%= purchaseOrders.length %></div>
+                <div class="stat-label">Active POs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingReceiptCount">
+                    <%= purchaseOrders.filter(po => po.receivingStats.pending > 0).length %>
+                </div>
+                <div class="stat-label">Pending Receipt</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="withAttachmentsCount">
+                    <%= purchaseOrders.filter(po => po.attachments && po.attachments.length > 0).length %>
+                </div>
+                <div class="stat-label">With Documents</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="overdueCount">
+                    <%= purchaseOrders.filter(po => po.eta && new Date(po.eta) < new Date()).length %>
+                </div>
+                <div class="stat-label">Overdue</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-group">
+                <label>Search PO or Vendor</label>
+                <input type="text" id="searchFilter" placeholder="Type to search...">
+            </div>
+            
+            <div class="filter-group">
+                <label>Vendor</label>
+                <select id="vendorFilter">
+                    <option value="all">All Vendors</option>
+                    <% uniqueVendors.forEach(vendor => { %>
+                        <option value="<%= vendor %>"><%= vendor %></option>
+                    <% }); %>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Status</label>
+                <select id="statusFilter">
+                    <option value="all">All Statuses</option>
+                    <% uniqueNSStatuses.forEach(status => { %>
+                        <option value="<%= status %>"><%= status %></option>
+                    <% }); %>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Receipt Status</label>
+                <select id="receiptFilter">
+                    <option value="all">All</option>
+                    <option value="pending">Pending Receipt</option>
+                    <option value="partial">Partially Received</option>
+                    <option value="complete">Fully Received</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Documents</label>
+                <select id="attachmentFilter">
+                    <option value="all">All</option>
+                    <option value="with-docs">With Documents</option>
+                    <option value="without-docs">No Documents</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>&nbsp;</label>
+                <button type="button" onclick="clearFilters()" style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 4px;">
+                    Clear Filters
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <% if (purchaseOrders.length === 0) { %>
+            <div class="no-pos">
+                <h3>No Purchase Orders for Receiving</h3>
+                <p>No POs found that are ready for receiving or have shipping documentation.</p>
+                <a href="/purchase-orders" style="color: #007bff;">← Back to Main Dashboard</a>
+            </div>
+        <% } else { %>
+            <div class="receiving-table">
+                <table id="receivingTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 120px;">PO Number</th>
+                            <th style="width: 180px;">Vendor</th>
+                            <th style="width: 120px;">ETA</th>
+                            <th style="width: 200px;">Documents</th>
+                            <th style="width: 150px;">Receiving Progress</th>
+                            <th>Line Items</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% purchaseOrders.forEach((po, index) => { %>
+                            <tr data-po-id="<%= po._id %>" data-vendor="<%= po.vendor %>" data-status="<%= po.nsStatus || '' %>">
+                                <!-- PO Number -->
+                                <td>
+                                    <div class="po-number"><%= po.poNumber %></div>
+                                    <div style="font-size: 12px; color: #6c757d;">
+                                        <%= new Date(po.date).toLocaleDateString() %>
+                                    </div>
+                                </td>
+
+                                <!-- Vendor -->
+                                <td>
+                                    <div class="vendor-name"><%= po.vendor %></div>
+                                    <% if (po.nsStatus) { %>
+                                        <div style="font-size: 12px; color: #6c757d;"><%= po.nsStatus %></div>
+                                    <% } %>
+                                </td>
+
+                                <!-- ETA -->
+                                <td>
+                                    <div class="eta-info">
+                                        <% if (po.eta) { %>
+                                            <div class="eta-date"><%= new Date(po.eta).toLocaleDateString() %></div>
+                                            <% 
+                                                const today = new Date();
+                                                const eta = new Date(po.eta);
+                                                const diffTime = eta.getTime() - today.getTime();
+                                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                                let statusClass = 'eta-future';
+                                                let statusText = `${diffDays} days`;
+                                                
+                                                if (diffDays < 0) {
+                                                    statusClass = 'eta-overdue';
+                                                    statusText = `${Math.abs(diffDays)} days overdue`;
+                                                } else if (diffDays === 0) {
+                                                    statusClass = 'eta-today';
+                                                    statusText = 'Today';
+                                                } else if (diffDays <= 3) {
+                                                    statusClass = 'eta-upcoming';
+                                                }
+                                            %>
+                                            <div class="eta-status <%= statusClass %>"><%= statusText %></div>
+                                        <% } else { %>
+                                            <div style="color: #6c757d; font-style: italic;">No ETA set</div>
+                                        <% } %>
+                                    </div>
+                                </td>
+
+                                <!-- Documents -->
+                                <td>
+                                    <% if (po.attachments && po.attachments.length > 0) { %>
+                                        <div class="attachments-list">
+                                            <% po.attachments.forEach(attachment => { %>
+                                                <div class="attachment-item">
+                                                    <i class="fas fa-file"></i>
+                                                    <a href="/purchase-orders/download-attachment/<%= attachment._id %>" target="_blank">
+                                                        <%= attachment.filename %>
+                                                    </a>
+                                                </div>
+                                            <% }); %>
+                                        </div>
+                                    <% } else { %>
+                                        <div style="color: #6c757d; font-style: italic;">No documents</div>
+                                    <% } %>
+                                </td>
+
+                                <!-- Receiving Progress -->
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: <%= po.receivingStats.percentComplete %>%"></div>
+                                    </div>
+                                    <div class="receiving-stats">
+                                        <%= po.receivingStats.received %>/<%= po.receivingStats.total %> items received
+                                        (<%= po.receivingStats.percentComplete %>%)
+                                    </div>
+                                </td>
+
+                                <!-- Line Items -->
+                                <td>
+                                    <div class="line-items-summary">
+                                        <button class="line-items-toggle" onclick="toggleLineItems(<%= index %>)">
+                                            <i class="fas fa-chevron-down"></i>
+                                            View Items (<%= po.lineItemsData.length %>)
+                                        </button>
+                                        
+                                        <div class="line-items-detail" id="lineItems-<%= index %>">
+                                            <div class="bulk-actions">
+                                                <button class="bulk-btn receive-all" onclick="bulkReceivePO('<%= po._id %>', true)">
+                                                    <i class="fas fa-check-double"></i> Receive All
+                                                </button>
+                                                <button class="bulk-btn unreceive-all" onclick="bulkReceivePO('<%= po._id %>', false)">
+                                                    <i class="fas fa-undo"></i> Unreceive All
+                                                </button>
+                                            </div>
+                                            
+                                            <% if (po.lineItemsData && po.lineItemsData.length > 0) { %>
+                                                <% po.lineItemsData.forEach(item => { %>
+                                                    <div class="line-item <%= item.received ? 'received' : '' %>">
+                                                        <div class="line-item-info">
+                                                            <div class="line-item-sku"><%= item.sku || 'No SKU' %></div>
+                                                            <div class="line-item-description">
+                                                                <%= item.memo || item.vendorDescription || 'No description' %>
+                                                            </div>
+                                                            <div class="line-item-quantity">
+                                                                <strong>Qty: <%= item.quantityExpected || item.quantity || 1 %></strong>
+                                                                <% if (item.unit) { %>
+                                                                    <%= item.unit %>
+                                                                <% } %>
+                                                            </div>
+                                                            <% if (item.received && item.receivedDate) { %>
+                                                                <div style="font-size: 11px; color: #28a745;">
+                                                                    ✓ Received <%= new Date(item.receivedDate).toLocaleDateString() %>
+                                                                    <% if (item.receivedBy) { %>by <%= item.receivedBy %><% } %>
+                                                                </div>
+                                                            <% } %>
+                                                        </div>
+                                                        <label class="receive-checkbox">
+                                                            <input type="checkbox" 
+                                                                   <%= item.received ? 'checked' : '' %>
+                                                                   onchange="toggleItemReceived('<%= item._id %>', this.checked)">
+                                                            Received
+                                                        </label>
+                                                    </div>
+                                                <% }); %>
+                                            <% } else { %>
+                                                <div style="color: #6c757d; text-align: center; padding: 20px;">
+                                                    No line items found for this PO
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </div>
+
+    <script>
+        // Toggle line items display
+        function toggleLineItems(index) {
+            const detail = document.getElementById(`lineItems-${index}`);
+            const button = detail.previousElementSibling;
+            const icon = button.querySelector('i');
+            
+            if (detail.style.display === 'none' || detail.style.display === '') {
+                detail.style.display = 'block';
+                icon.className = 'fas fa-chevron-up';
+            } else {
+                detail.style.display = 'none';
+                icon.className = 'fas fa-chevron-down';
+            }
+        }
+
+        // Toggle individual line item received status
+        async function toggleItemReceived(itemId, received) {
+            try {
+                const response = await fetch(`/receiving/receive-item/${itemId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ received })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update the line item display
+                    const checkbox = event.target;
+                    const lineItem = checkbox.closest('.line-item');
+                    
+                    if (received) {
+                        lineItem.classList.add('received');
+                    } else {
+                        lineItem.classList.remove('received');
+                    }
+                    
+                    // Refresh the page to update progress bars
+                    setTimeout(() => window.location.reload(), 500);
+                } else {
+                    alert(result.error || 'Error updating item status');
+                    // Revert checkbox state
+                    event.target.checked = !received;
+                }
+            } catch (error) {
+                console.error('Error toggling item received:', error);
+                alert('Error updating item status');
+                // Revert checkbox state
+                event.target.checked = !received;
+            }
+        }
+
+        // Bulk receive/unreceive all items for a PO
+        async function bulkReceivePO(poId, received) {
+            const action = received ? 'receive' : 'unreceive';
+            if (!confirm(`Are you sure you want to ${action} all items for this PO?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/receiving/receive-po/${poId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ received })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(result.message);
+                    window.location.reload();
+                } else {
+                    alert(result.error || 'Error updating PO status');
+                }
+            } catch (error) {
+                console.error('Error bulk updating PO:', error);
+                alert('Error updating PO status');
+            }
+        }
+
+        // Filter functionality
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
+            const vendorFilter = document.getElementById('vendorFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const receiptFilter = document.getElementById('receiptFilter').value;
+            const attachmentFilter = document.getElementById('attachmentFilter').value;
+
+            const rows = document.querySelectorAll('#receivingTable tbody tr');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const poNumber = row.querySelector('.po-number').textContent.toLowerCase();
+                const vendor = row.getAttribute('data-vendor').toLowerCase();
+                const status = row.getAttribute('data-status').toLowerCase();
+                
+                // Search filter
+                const matchesSearch = poNumber.includes(searchTerm) || vendor.includes(searchTerm);
+                
+                // Vendor filter
+                const matchesVendor = vendorFilter === 'all' || vendor === vendorFilter.toLowerCase();
+                
+                // Status filter
+                const matchesStatus = statusFilter === 'all' || status.includes(statusFilter.toLowerCase());
+                
+                // Receipt filter
+                let matchesReceipt = true;
+                if (receiptFilter !== 'all') {
+                    const progressText = row.querySelector('.receiving-stats').textContent;
+                    const match = progressText.match(/(\d+)\/(\d+)/);
+                    if (match) {
+                        const received = parseInt(match[1]);
+                        const total = parseInt(match[2]);
+                        
+                        if (receiptFilter === 'pending' && received > 0) matchesReceipt = false;
+                        if (receiptFilter === 'partial' && (received === 0 || received === total)) matchesReceipt = false;
+                        if (receiptFilter === 'complete' && received !== total) matchesReceipt = false;
+                    }
+                }
+                
+                // Attachment filter
+                let matchesAttachment = true;
+                if (attachmentFilter !== 'all') {
+                    const hasAttachments = row.querySelector('.attachments-list') !== null;
+                    if (attachmentFilter === 'with-docs' && !hasAttachments) matchesAttachment = false;
+                    if (attachmentFilter === 'without-docs' && hasAttachments) matchesAttachment = false;
+                }
+
+                const isVisible = matchesSearch && matchesVendor && matchesStatus && matchesReceipt && matchesAttachment;
+                
+                row.style.display = isVisible ? '' : 'none';
+                if (isVisible) visibleCount++;
+            });
+
+            // Update stats
+            document.getElementById('totalPOsCount').textContent = visibleCount;
+        }
+
+        function clearFilters() {
+            document.getElementById('searchFilter').value = '';
+            document.getElementById('vendorFilter').value = 'all';
+            document.getElementById('statusFilter').value = 'all';
+            document.getElementById('receiptFilter').value = 'all';
+            document.getElementById('attachmentFilter').value = 'all';
+            applyFilters();
+        }
+
+        // Add event listeners for filters
+        document.getElementById('searchFilter').addEventListener('input', applyFilters);
+        document.getElementById('vendorFilter').addEventListener('change', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        document.getElementById('receiptFilter').addEventListener('change', applyFilters);
+        document.getElementById('attachmentFilter').addEventListener('change', applyFilters);
+    </script>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

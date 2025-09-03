@@ -12,6 +12,7 @@ const purchaseOrderRoutes = require('./routes/purchaseOrders');
 const organicVendorRoutes = require('./routes/organicVendors');
 const taskRoutes = require('./routes/tasks');
 const authRoutes = require('./routes/auth');
+const receivingRoutes = require('./routes/receiving');
 
 // Import authentication middleware
 const { ensureAuthenticated, ensureApproved, logPageView } = require('./middleware/auth');
@@ -101,6 +102,7 @@ app.use('/auth', authRoutes);
 app.use('/purchase-orders', ensureAuthenticated, ensureApproved, purchaseOrderRoutes);
 app.use('/organic-vendors', ensureAuthenticated, ensureApproved, organicVendorRoutes);
 app.use('/tasks', ensureAuthenticated, ensureApproved, taskRoutes);
+app.use('/receiving', ensureAuthenticated, ensureApproved, receivingRoutes);
 app.use('/dropship', ensureAuthenticated, ensureApproved, dropshipRoutes);
 app.use('/dropship-test', ensureAuthenticated, ensureApproved, dropshipTestRoutes);
 app.use('/api', ensureAuthenticated, ensureApproved, purchaseOrderRoutes); // API routes for AJAX calls
