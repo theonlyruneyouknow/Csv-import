@@ -6345,6 +6345,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         // Attachments Management Functions
         function openAttachmentsModal(poId, poNumber) {
+            console.log('🔧 MODAL: Opening attachments modal for PO:', poNumber, 'ID:', poId);
+            
             document.getElementById('attachmentPOId').value = poId;
             document.getElementById('attachmentsPONumber').textContent = poNumber;
             document.getElementById('attachmentsModal').style.display = 'block';
@@ -6352,7 +6354,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             // Reset form
             document.getElementById('attachmentUploadForm').reset();
             document.getElementById('attachmentPOId').value = poId; // Reset the hidden field
-            document.getElementById('documentType').value = 'Other'; // Reset document type to default
+            document.getElementById('attachmentDocumentType').value = 'Other'; // Reset document type to default
             
             // Load existing attachments
             loadAttachments(poId);
@@ -6363,28 +6365,38 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         }
 
         async function loadAttachments(poId) {
+            console.log('🔧 LOAD ATTACHMENTS: Loading attachments for PO:', poId);
+            
             try {
                 const response = await fetch(`/purchase-orders/attachments/${poId}`);
+                console.log('🔧 LOAD ATTACHMENTS: Response status:', response.status);
+                
                 const result = await response.json();
+                console.log('🔧 LOAD ATTACHMENTS: Response data:', result);
                 
                 if (result.success) {
+                    console.log('🔧 LOAD ATTACHMENTS: Found', result.attachments.length, 'attachments');
                     renderAttachmentsList(result.attachments);
                 } else {
-                    console.error('Error loading attachments:', result.error);
+                    console.error('🔧 LOAD ATTACHMENTS: Error:', result.error);
                     document.getElementById('attachmentsList').innerHTML = 
                         '<div class="no-attachments">Error loading attachments</div>';
                 }
             } catch (error) {
-                console.error('Error loading attachments:', error);
+                console.error('🔧 LOAD ATTACHMENTS: Error loading attachments:', error);
                 document.getElementById('attachmentsList').innerHTML = 
                     '<div class="no-attachments">Error loading attachments</div>';
             }
         }
 
         function renderAttachmentsList(attachments) {
+            console.log('🔧 RENDER ATTACHMENTS: Rendering', attachments.length, 'attachments');
+            console.log('🔧 RENDER ATTACHMENTS: Attachments data:', attachments);
+            
             const container = document.getElementById('attachmentsList');
             
             if (!attachments || attachments.length === 0) {
+                console.log('🔧 RENDER ATTACHMENTS: No attachments to display');
                 container.innerHTML = '<div class="no-attachments">No attachments yet</div>';
                 return;
             }
@@ -6421,11 +6433,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         </div>
                     </div>
                     <div class="attachment-actions">
+                        <button type="button" class="attachment-btn view" 
+                                onclick="viewAttachment('${attachment._id}', '${escapeHtml(attachment.filename)}')" 
+                                title="View Document">
+                            👁️ View
+                        </button>
                         <a href="/purchase-orders/download-attachment/${attachment._id}" 
                            class="attachment-btn download" target="_blank" title="Download">
                             📥 Download
                         </a>
-                        <button class="attachment-btn delete" 
+                        <button type="button" class="attachment-btn delete" 
                                 onclick="deleteAttachment('${attachment._id}')" 
                                 title="Delete">
                             🗑️ Delete
@@ -6462,6 +6479,40 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             } catch (error) {
                 console.error('Error deleting attachment:', error);
                 alert('Error deleting attachment');
+            }
+        }
+
+        function viewAttachment(attachmentId, filename) {
+            console.log('� VIEW ATTACHMENT: Opening viewer for:', attachmentId, filename);
+            
+            const viewer = document.getElementById('documentViewer');
+            const frame = document.getElementById('documentFrame');
+            const title = document.getElementById('viewerTitle');
+            
+            if (!viewer || !frame || !title) {
+                console.error('� Document viewer elements not found!');
+                return;
+            }
+            
+            // Set the title and URL
+            title.textContent = `📄 ${filename}`;
+            frame.src = `/purchase-orders/view-attachment/${attachmentId}`;
+            
+            // Show the viewer
+            viewer.style.display = 'flex';
+            
+            console.log('� Document viewer opened with URL:', frame.src);
+        }
+
+        function closeDocumentViewer() {
+            console.log('� Closing document viewer');
+            
+            const viewer = document.getElementById('documentViewer');
+            const frame = document.getElementById('documentFrame');
+            
+            if (viewer && frame) {
+                viewer.style.display = 'none';
+                frame.src = '';
             }
         }
 
@@ -6502,52 +6553,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function formatDate(dateString) {
             return new Date(dateString).toLocaleDateString();
         }
-
-        // Handle attachment upload form submission
-        document.getElementById('attachmentUploadForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const uploadBtn = document.getElementById('uploadAttachmentBtn');
-            
-            // Show uploading state
-            uploadBtn.disabled = true;
-            uploadBtn.textContent = '⏳ Uploading...';
-            
-            try {
-                const response = await fetch('/purchase-orders/upload-attachment', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    // Reset form
-                    document.getElementById('attachmentFile').value = '';
-                    document.getElementById('attachmentDescription').value = '';
-                    document.getElementById('documentType').value = 'Other';
-                    
-                    // Reload attachments
-                    const poId = document.getElementById('attachmentPOId').value;
-                    loadAttachments(poId);
-                    
-                    // Update attachment count in main dashboard
-                    updateAttachmentCount(poId, 1);
-                    
-                    alert('File uploaded successfully!');
-                } else {
-                    alert(result.error || 'Error uploading file');
-                }
-            } catch (error) {
-                console.error('Error uploading file:', error);
-                alert('Error uploading file');
-            } finally {
-                // Reset button state
-                uploadBtn.disabled = false;
-                uploadBtn.textContent = '📤 Upload File';
-            }
-        });
 
         // Close modal when clicking outside
         window.addEventListener('click', function(event) {
@@ -6789,6 +6794,76 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             
             // Initialize pre-purchase orders visibility
             initializePrePurchaseOrdersVisibility();
+            
+            // Handle attachment upload form submission
+            const attachmentForm = document.getElementById('attachmentUploadForm');
+            if (attachmentForm) {
+                console.log('🔧 INIT: Setting up attachment upload form listener');
+                attachmentForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    alert('🔧 DEBUG: Form submission started!');
+                    console.log('🔧 UPLOAD FORM: Starting upload...');
+                    
+                    const formData = new FormData(this);
+                    const uploadBtn = document.getElementById('uploadAttachmentBtn');
+                    
+                    // Log form data for debugging
+                    console.log('🔧 UPLOAD FORM: Form data contents:');
+                    for (let [key, value] of formData.entries()) {
+                        console.log(`🔧   ${key}:`, value);
+                    }
+                    
+                    // Show uploading state
+                    uploadBtn.disabled = true;
+                    uploadBtn.textContent = '⏳ Uploading...';
+                    
+                    try {
+                        console.log('🔧 UPLOAD FORM: Sending request to /purchase-orders/upload-attachment');
+                        
+                        const response = await fetch('/purchase-orders/upload-attachment', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        console.log('🔧 UPLOAD FORM: Response status:', response.status);
+                        
+                        const result = await response.json();
+                        console.log('🔧 UPLOAD FORM: Response data:', result);
+                        
+                        if (result.success) {
+                            console.log('🔧 UPLOAD FORM: Upload successful!');
+                            
+                            // Reset form
+                            document.getElementById('attachmentFile').value = '';
+                            document.getElementById('attachmentDescription').value = '';
+                            document.getElementById('attachmentDocumentType').value = 'Other';
+                            
+                            // Reload attachments
+                            const poId = document.getElementById('attachmentPOId').value;
+                            console.log('🔧 UPLOAD FORM: Reloading attachments for PO:', poId);
+                            loadAttachments(poId);
+                            
+                            // Update attachment count in main dashboard
+                            updateAttachmentCount(poId, 1);
+                            
+                            alert('File uploaded successfully!');
+                        } else {
+                            console.error('🔧 UPLOAD FORM: Upload failed:', result.error);
+                            alert(result.error || 'Error uploading file');
+                        }
+                    } catch (error) {
+                        console.error('🔧 UPLOAD FORM: Error uploading file:', error);
+                        alert('Error uploading file: ' + error.message);
+                    } finally {
+                        // Reset button state
+                        uploadBtn.disabled = false;
+                        uploadBtn.textContent = '📤 Upload File';
+                    }
+                });
+            } else {
+                console.error('🔧 INIT: Attachment upload form not found!');
+            }
         });
 
         // Pre-Purchase Order Functions
@@ -7185,6 +7260,19 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     <!-- Attachments will be loaded here -->
                 </div>
             </div>
+            
+            <!-- Document Viewer Section -->
+            <div id="documentViewer" class="document-viewer-modal" style="display: none;">
+                <div class="document-viewer-content">
+                    <div class="viewer-header">
+                        <h4 id="viewerTitle">📄 Document Viewer</h4>
+                        <button type="button" class="close-viewer-btn" onclick="closeDocumentViewer()">
+                            <i class="fas fa-times"></i> Close
+                        </button>
+                    </div>
+                    <iframe id="documentFrame" frameborder="0"></iframe>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -7288,9 +7376,72 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         /* Attachments Modal Styles */
         .attachments-modal-content {
-            max-width: 700px;
-            max-height: 80vh;
+            max-width: 900px; /* Increased to accommodate document viewer */
+            max-height: 85vh;
             overflow-y: auto;
+        }
+
+        /* Document Viewer Modal Styles */
+        .document-viewer-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000; /* Higher than attachment modal */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .document-viewer-content {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            width: 90%;
+            height: 90%;
+            max-width: 1200px;
+            max-height: 800px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .viewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .viewer-header h4 {
+            margin: 0;
+            color: #495057;
+            font-size: 18px;
+        }
+
+        .close-viewer-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .close-viewer-btn:hover {
+            background: #c82333;
+        }
+
+        .document-viewer-modal iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            flex: 1;
         }
 
         .attachment-upload-section,
@@ -7437,6 +7588,15 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             transition: all 0.2s;
         }
 
+        .attachment-btn.view {
+            background: #28a745;
+            color: white;
+        }
+
+        .attachment-btn.view:hover {
+            background: #218838;
+        }
+
         .attachment-btn.download {
             background: #007bff;
             color: white;
@@ -7494,6 +7654,25 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 applyFilters();
             } else {
                 console.log('❌ One or more checkboxes not found in final initialization');
+            }
+        });
+
+        // Document viewer event listeners
+        document.addEventListener('click', function(event) {
+            const viewer = document.getElementById('documentViewer');
+            const content = document.querySelector('.document-viewer-content');
+            
+            if (event.target === viewer && viewer.style.display === 'flex') {
+                closeDocumentViewer();
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const viewer = document.getElementById('documentViewer');
+                if (viewer && viewer.style.display === 'flex') {
+                    closeDocumentViewer();
+                }
             }
         });
     </script>

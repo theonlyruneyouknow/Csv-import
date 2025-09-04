@@ -3310,24 +3310,43 @@ const attachmentUpload = multer({
 
 // Upload attachment
 router.post('/upload-attachment', attachmentUpload.single('attachment'), async (req, res) => {
+  console.log('📎 UPLOAD ROUTE HIT - File upload attempt');
+  console.log('📎 Request body:', req.body);
+  console.log('📎 File info:', req.file ? { name: req.file.originalname, size: req.file.size } : 'No file');
+  
   try {
-    const { poId, description } = req.body;
+    const { poId, description, documentType } = req.body;
     const uploadedBy = req.user ? req.user.username : 'Unknown User';
     
+    console.log('📎 Upload params:', { poId, description, documentType, uploadedBy });
+    
     if (!req.file) {
+      console.log('❌ No file uploaded');
       return res.status(400).json({ success: false, error: 'No file uploaded' });
     }
     
     if (!poId) {
+      console.log('❌ No PO ID provided');
       return res.status(400).json({ success: false, error: 'PO ID is required' });
     }
+    
+    console.log('📎 Looking for PO with ID:', poId);
     
     // Find the PO
     const po = await PurchaseOrder.findById(poId);
     if (!po) {
+      console.log('❌ PO not found, cleaning up file');
       // Clean up uploaded file
       fs.unlinkSync(req.file.path);
       return res.status(404).json({ success: false, error: 'Purchase Order not found' });
+    }
+    
+    console.log('✅ Found PO:', po.poNumber, '-', po.vendor);
+    
+    // Ensure attachments array exists
+    if (!po.attachments) {
+      console.log('📎 Initializing attachments array for PO');
+      po.attachments = [];
     }
     
     // Create unique filename with timestamp
@@ -3348,13 +3367,17 @@ router.post('/upload-attachment', attachmentUpload.single('attachment'), async (
       fileType: req.file.mimetype,
       uploadedBy: uploadedBy,
       uploadedAt: new Date(),
-      description: description || ''
+      description: description || '',
+      documentType: documentType || 'Other'
     };
+    
+    console.log('📎 Adding attachment to PO:', attachment);
     
     po.attachments.push(attachment);
     await po.save();
     
-    console.log(`📎 File uploaded: ${req.file.originalname} for PO ${po.poNumber}`);
+    console.log(`✅ File uploaded successfully: ${req.file.originalname} for PO ${po.poNumber}`);
+    console.log(`✅ PO now has ${po.attachments.length} attachments`);
     
     res.json({ 
       success: true, 
@@ -3378,11 +3401,16 @@ router.post('/upload-attachment', attachmentUpload.single('attachment'), async (
 router.get('/attachments/:poId', async (req, res) => {
   try {
     const { poId } = req.params;
+    console.log('📎 GET ATTACHMENTS: Request for PO ID:', poId);
     
     const po = await PurchaseOrder.findById(poId);
     if (!po) {
+      console.log('❌ GET ATTACHMENTS: PO not found');
       return res.status(404).json({ success: false, error: 'Purchase Order not found' });
     }
+    
+    console.log('✅ GET ATTACHMENTS: Found PO:', po.poNumber);
+    console.log('📎 GET ATTACHMENTS: Attachments count:', po.attachments ? po.attachments.length : 'No attachments array');
     
     res.json({ 
       success: true, 
@@ -3431,6 +3459,59 @@ router.get('/download-attachment/:attachmentId', async (req, res) => {
   } catch (error) {
     console.error('Download attachment error:', error);
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// View attachment (for iframe display)
+router.get('/view-attachment/:attachmentId', async (req, res) => {
+  try {
+    const { attachmentId } = req.params;
+    console.log(`📄 View attachment request for ID: ${attachmentId}`);
+    
+    // Find PO with this attachment
+    const po = await PurchaseOrder.findOne({
+      'attachments._id': attachmentId
+    });
+    
+    if (!po) {
+      console.log(`❌ Attachment not found: ${attachmentId}`);
+      return res.status(404).send('Attachment not found');
+    }
+    
+    // Find the specific attachment
+    const attachment = po.attachments.id(attachmentId);
+    if (!attachment) {
+      console.log(`❌ Attachment not found in PO: ${attachmentId}`);
+      return res.status(404).send('Attachment not found');
+    }
+    
+    console.log(`📋 Found attachment: ${attachment.filename} in PO ${po.poNumber}`);
+    
+    // Check if file exists
+    if (!fs.existsSync(attachment.filePath)) {
+      console.log(`❌ File not found on disk: ${attachment.filePath}`);
+      return res.status(404).send('File not found');
+    }
+    
+    console.log(`📤 Serving attachment for viewing: ${attachment.filename}`);
+    
+    // Set headers optimized for iframe viewing
+    res.setHeader('Content-Type', attachment.fileType || 'application/octet-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    
+    // For PDFs and images, use inline display
+    if (attachment.fileType && (attachment.fileType.includes('pdf') || attachment.fileType.includes('image'))) {
+      res.setHeader('Content-Disposition', `inline; filename="${attachment.filename}"`);
+    }
+    
+    // Stream the file
+    const fileStream = fs.createReadStream(attachment.filePath);
+    fileStream.pipe(res);
+    
+  } catch (error) {
+    console.error('View attachment error:', error);
+    res.status(500).send('Error loading attachment');
   }
 });
 

@@ -593,9 +593,18 @@
                                             <% po.attachments.forEach(attachment => { %>
                                                 <div class="attachment-item">
                                                     <i class="fas fa-file"></i>
-                                                    <a href="/purchase-orders/download-attachment/<%= attachment._id %>" target="_blank">
-                                                        <%= attachment.filename %>
-                                                    </a>
+                                                    <span style="flex: 1; margin-right: 8px;"><%= attachment.filename %></span>
+                                                    <div class="attachment-actions">
+                                                        <button type="button" class="view-btn" 
+                                                                onclick="viewAttachment('<%= attachment._id %>', '<%= attachment.filename %>')" 
+                                                                title="View Document">
+                                                            👁️ View
+                                                        </button>
+                                                        <a href="/purchase-orders/download-attachment/<%= attachment._id %>" 
+                                                           class="download-btn" target="_blank" title="Download">
+                                                            📥 Download
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             <% }); %>
                                         </div>
@@ -678,7 +687,182 @@
         <% } %>
     </div>
 
+    <!-- Document Viewer Modal -->
+    <div id="documentViewer" class="document-viewer-modal" style="display: none;">
+        <div class="document-viewer-content">
+            <div class="viewer-header">
+                <h4 id="viewerTitle">📄 Document Viewer</h4>
+                <button type="button" class="close-viewer-btn" onclick="closeDocumentViewer()">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+            <iframe id="documentFrame" frameborder="0"></iframe>
+        </div>
+    </div>
+
+    <style>
+        /* Document Viewer Modal Styles */
+        .document-viewer-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .document-viewer-content {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            width: 90%;
+            height: 90%;
+            max-width: 1200px;
+            max-height: 800px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .viewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .viewer-header h4 {
+            margin: 0;
+            color: #495057;
+            font-size: 18px;
+        }
+
+        .close-viewer-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .close-viewer-btn:hover {
+            background: #c82333;
+        }
+
+        .document-viewer-modal iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            flex: 1;
+        }
+
+        /* Attachment item styles for view buttons */
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .attachment-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .view-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            text-decoration: none;
+        }
+
+        .view-btn:hover {
+            background: #218838;
+            color: white;
+        }
+
+        .download-btn {
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+
+        .download-btn:hover {
+            background: #0056b3;
+            color: white;
+        }
+    </style>
+
     <script>
+        // Document viewer functions
+        function viewAttachment(attachmentId, filename) {
+            console.log('📄 VIEW ATTACHMENT: Opening viewer for:', attachmentId, filename);
+            
+            const viewer = document.getElementById('documentViewer');
+            const frame = document.getElementById('documentFrame');
+            const title = document.getElementById('viewerTitle');
+            
+            if (!viewer || !frame || !title) {
+                console.error('📄 Document viewer elements not found!');
+                return;
+            }
+            
+            // Set the title and URL
+            title.textContent = `📄 ${filename}`;
+            frame.src = `/purchase-orders/view-attachment/${attachmentId}`;
+            
+            // Show the viewer
+            viewer.style.display = 'flex';
+            
+            console.log('📄 Document viewer opened with URL:', frame.src);
+        }
+
+        function closeDocumentViewer() {
+            console.log('📄 Closing document viewer');
+            
+            const viewer = document.getElementById('documentViewer');
+            const frame = document.getElementById('documentFrame');
+            
+            if (viewer && frame) {
+                viewer.style.display = 'none';
+                frame.src = '';
+            }
+        }
+
+        // Close viewer when clicking outside the content
+        document.addEventListener('click', function(event) {
+            const viewer = document.getElementById('documentViewer');
+            const content = document.querySelector('.document-viewer-content');
+            
+            if (event.target === viewer && viewer.style.display === 'flex') {
+                closeDocumentViewer();
+            }
+        });
+
+        // Close viewer with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const viewer = document.getElementById('documentViewer');
+                if (viewer && viewer.style.display === 'flex') {
+                    closeDocumentViewer();
+                }
+            }
+        });
         // Toggle line items display
         function toggleLineItems(index) {
             const detail = document.getElementById(`lineItems-${index}`);
