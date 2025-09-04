@@ -10,6 +10,240 @@
             background-color: #f8f9fa;
         }
 
+        /* Navigation Styles */
+        .container {
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navigation-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .nav-section {
+            position: relative;
+        }
+
+        .nav-accordion-btn, .nav-imports-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .nav-accordion-btn:hover, .nav-imports-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .accordion-icon, .dropdown-icon {
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+
+        .accordion-icon.rotated, .dropdown-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .nav-accordion-content, .nav-dropdown-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 200px;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .nav-accordion-content.show, .nav-dropdown-content.show {
+            max-height: 400px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .nav-accordion-item, .nav-dropdown-item {
+            display: block;
+            padding: 10px 15px;
+            color: #333;
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .nav-accordion-item:hover, .nav-dropdown-item:hover {
+            background: #f8f9fa;
+            color: #007bff;
+        }
+
+        .nav-accordion-divider {
+            height: 1px;
+            background: #eee;
+            margin: 5px 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+
+        .user-status-indicator {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            background: #28a745;
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+
+        .dropdown-user-info {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            background: #f8f9fa;
+        }
+
+        .dropdown-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #007bff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .dropdown-user-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .dropdown-user-role {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .dropdown-user-status {
+            font-size: 11px;
+            color: #28a745;
+            font-weight: 500;
+        }
+
+        .auth-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Responsive Navigation */
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px 15px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+                text-align: center;
+            }
+
+            .navigation-container {
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .nav-accordion-btn, .nav-imports-btn {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+
+            .nav-accordion-content, .nav-dropdown-content {
+                min-width: 180px;
+            }
+
+            .user-info {
+                justify-content: center;
+            }
+        }
+
         .navbar {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             box-shadow: 0 2px 4px rgba(0,0,0,.1);
@@ -231,20 +465,125 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg sticky-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/purchase-orders">
-                📋 Task Management
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link text-white btn btn-outline-light me-2" href="/purchase-orders">
-                    ← Back to Purchase Orders Dashboard
-                </a>
-                <a class="nav-link text-white" href="/organic-vendors">🌱 Organic Vendors</a>
-                <a class="nav-link text-white" href="/dropship">📦 Dropship</a>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-tasks"></i> Task Management Dashboard</h1>
+            
+            <div class="d-flex align-items-center justify-content-between flex-grow-1">
+                <!-- Navigation Container -->
+                <div class="navigation-container">
+                    <!-- Managers Accordion -->
+                    <div class="nav-section">
+                        <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion')">
+                            📊 Managers <span class="accordion-icon">▼</span>
+                        </button>
+                        <div id="managersAccordion" class="nav-accordion-content">
+                            <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
+                            <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items Manager</a>
+                            <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 17Track Dashboard</a>
+                            <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
+                            <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
+                            <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
+                        </div>
+                    </div>
+
+                    <!-- Combined Options Button -->
+                    <div class="nav-section">
+                        <button class="nav-accordion-btn" onclick="toggleAccordion('optionsAccordion')">
+                            ⚙️ Options <span class="accordion-icon">▼</span>
+                        </button>
+                        <div id="optionsAccordion" class="nav-accordion-content">
+                            <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
+                            <a href="/" class="nav-accordion-item">🏠 PO Dashboard</a>
+                            <a href="/receiving" class="nav-accordion-item">🚚 Receiving Dashboard</a>
+                            <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
+                            
+                            <!-- Admin Options (only for admin/manager users) -->
+                            <% if (typeof user !== 'undefined' && user && (user.role === 'admin' || user.role === 'manager')) { %>
+                            <div class="nav-accordion-divider"></div>
+                            <a href="/auth/admin/users" class="nav-accordion-item">👥 User Management</a>
+                            <a href="/auth/admin/audit-logs" class="nav-accordion-item">📊 Audit Logs</a>
+                            <% if (user.role === 'admin' || user.role === 'manager') { %>
+                            <a href="/auth/admin/test-email" class="nav-accordion-item">📧 Test Email</a>
+                            <% } %>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Import Section -->
+                    <div class="nav-section">
+                        <button class="nav-imports-btn" onclick="toggleImportsDropdown()">
+                            📁 Import <span class="dropdown-icon">▼</span>
+                        </button>
+                        <div id="importsDropdown" class="nav-dropdown-content">
+                            <a href="/upload" class="nav-dropdown-item">📄 Purchase Orders CSV</a>
+                            <a href="/upload" class="nav-dropdown-item">📦 Line Items CSV</a>
+                            <button class="nav-dropdown-item" onclick="openNetSuiteImportModal()">🏢 NetSuite PO
+                                Form</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- User Info -->
+                <% if (typeof user !== 'undefined' && user) { %>
+                <div class="user-info" title="<%= user.firstName %> <%= user.lastName %> (<%= user.role %>) - Online">
+                    <div class="user-avatar">
+                        <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                        <div class="user-status-indicator" title="Online"></div>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <!-- User Info Header -->
+                            <li class="dropdown-user-info">
+                                <div class="dropdown-user-avatar">
+                                    <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                                </div>
+                                <div class="dropdown-user-details">
+                                    <div class="dropdown-user-name"><%= user.firstName %> <%= user.lastName %></div>
+                                    <div class="dropdown-user-role"><%= user.role %></div>
+                                    <div class="dropdown-user-status">Online</div>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider" style="margin: 0;"></li>
+                            
+                            <% if (user.permissions && user.permissions.manageUsers) { %>
+                            <li><a class="dropdown-item" href="/auth/admin/users">
+                                <i class="fas fa-users me-2"></i>User Management
+                            </a></li>
+                            <li><a class="dropdown-item" href="/auth/admin/audit-logs">
+                                <i class="fas fa-history me-2"></i>Audit Logs
+                            </a></li>
+                            <% } %>
+                            <% if (user.role === 'admin' || user.role === 'manager') { %>
+                            <li><a class="dropdown-item" href="/auth/admin/test-email">
+                                <i class="fas fa-envelope me-2"></i>Test Email
+                            </a></li>
+                            <% } %>
+                            <% if ((user.permissions && user.permissions.manageUsers) || user.role === 'admin' || user.role === 'manager') { %>
+                            <li><hr class="dropdown-divider"></li>
+                            <% } %>
+                            <li>
+                                <form action="/auth/logout" method="POST" style="margin: 0;">
+                                    <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <% } else { %>
+                <div class="user-info">
+                    <span class="auth-status bg-warning text-dark">Not Authenticated</span>
+                    <a href="/auth/login" class="btn btn-primary btn-sm">Login</a>
+                </div>
+                <% } %>
             </div>
         </div>
-    </nav>
+    </div>
 
     <div class="container-fluid mt-4">
         <!-- Statistics Grid -->
@@ -1077,6 +1416,72 @@
             const backButton = document.querySelector('#taskModal .btn-outline-secondary');
             if (backButton && backButton.innerHTML.includes('Back to Dashboard')) {
                 backButton.remove();
+            }
+        });
+
+        // Navigation Functions
+        function closeAllDropdowns() {
+            // Close all accordion dropdowns
+            const accordions = document.querySelectorAll('.nav-accordion-content');
+            accordions.forEach(accordion => {
+                accordion.classList.remove('show');
+            });
+            
+            // Close imports dropdown
+            const importsDropdown = document.getElementById('importsDropdown');
+            if (importsDropdown) {
+                importsDropdown.classList.remove('show');
+            }
+            
+            // Reset all icons
+            const accordionIcons = document.querySelectorAll('.accordion-icon');
+            accordionIcons.forEach(icon => {
+                icon.classList.remove('rotated');
+            });
+            const importsIcon = document.querySelector('.nav-imports-btn .dropdown-icon');
+            if (importsIcon) {
+                importsIcon.classList.remove('rotated');
+            }
+        }
+
+        function toggleAccordion(accordionId) {
+            // Close all other dropdowns first
+            closeAllDropdowns();
+            
+            const content = document.getElementById(accordionId);
+            const button = document.querySelector(`button[onclick="toggleAccordion('${accordionId}')"]`);
+            const icon = button ? button.querySelector('.accordion-icon') : null;
+
+            if (content) {
+                content.classList.toggle('show');
+            }
+            if (icon) {
+                icon.classList.toggle('rotated');
+            }
+        }
+
+        function toggleImportsDropdown() {
+            // Close all other dropdowns first
+            closeAllDropdowns();
+            
+            const content = document.getElementById('importsDropdown');
+            const icon = document.querySelector('.nav-imports-btn .dropdown-icon');
+
+            content.classList.toggle('show');
+            icon.classList.toggle('rotated');
+        }
+
+        function openNetSuiteImportModal() {
+            alert('NetSuite Import Modal functionality would be implemented here for the Tasks Dashboard');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function (event) {
+            const navigationContainer = document.querySelector('.navigation-container');
+            
+            // If click is outside navigation container, close all dropdowns/accordions
+            if (navigationContainer && !navigationContainer.contains(event.target)) {
+                closeAllDropdowns();
             }
         });
     </script>

@@ -20,24 +20,38 @@
         }
 
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            margin: 0 -20px 20px -20px;
+            border-radius: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
-            background: white;
             z-index: 1000;
-            padding: 15px 0;
-            border-bottom: 1px solid #dee2e6;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         /* Enhanced Navigation Styles */
         .navigation-container {
             display: flex;
             gap: 15px;
-            align-items: flex-start;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
         .nav-section {
@@ -45,11 +59,11 @@
         }
 
         /* Accordion Styles */
-        .nav-accordion-btn {
-            background: #28a745;
+        .nav-accordion-btn, .nav-options-btn, .nav-imports-btn {
+            background: rgba(255, 255, 255, 0.1);
             color: white;
-            border: none;
-            padding: 10px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
@@ -58,14 +72,16 @@
             align-items: center;
             gap: 8px;
             transition: all 0.3s ease;
-            min-width: 120px;
-            justify-content: space-between;
+            white-space: nowrap;
+            text-decoration: none;
         }
 
-        .nav-accordion-btn:hover {
-            background: #218838;
+        .nav-accordion-btn:hover, .nav-options-btn:hover, .nav-imports-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
             transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            color: white;
+            text-decoration: none;
         }
 
         .nav-accordion-content {
@@ -234,6 +250,85 @@
             transform: rotate(180deg);
         }
 
+        /* User Info Styles */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+
+        .user-status-indicator {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            background: #28a745;
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+
+        .dropdown-user-info {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            background: #f8f9fa;
+        }
+
+        .dropdown-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #007bff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .dropdown-user-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .dropdown-user-role {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .dropdown-user-status {
+            font-size: 11px;
+            color: #28a745;
+            font-weight: 500;
+        }
+
+        .auth-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .navigation-container {
@@ -259,6 +354,10 @@
                 min-width: 100%;
                 margin-top: 0;
                 box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .user-info {
+                justify-content: center;
             }
         }
 
@@ -408,61 +507,119 @@
 <body>
     <div class="container-fluid">
         <div class="header">
-            <h1>Organic Vendors Dashboard</h1>
-            <div class="navigation-container">
-                <!-- Managers Accordion -->
-                <div class="nav-section">
-                    <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion')">
-                        📊 Managers <span class="accordion-icon">▼</span>
-                    </button>
-                    <div id="managersAccordion" class="nav-accordion-content">
-                        <a href="/purchase-orders" class="nav-accordion-item">📋 Purchase Orders Dashboard</a>
-                        <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
-                        <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items
-                            Manager</a>
-                        <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 17Track
-                            Dashboard</a>
-                        <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
-                        <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
-                        <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
+            <h1><i class="fas fa-leaf"></i> Organic Vendors Dashboard</h1>
+            
+            <div class="d-flex align-items-center justify-content-between flex-grow-1">
+                <div class="navigation-container">
+                    <!-- Managers Accordion -->
+                    <div class="nav-section">
+                        <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion')">
+                            📊 Managers <span class="accordion-icon">▼</span>
+                        </button>
+                        <div id="managersAccordion" class="nav-accordion-content">
+                            <a href="/purchase-orders" class="nav-accordion-item">📋 Purchase Orders Dashboard</a>
+                            <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
+                            <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items
+                                Manager</a>
+                            <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 17Track
+                                Dashboard</a>
+                            <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
+                            <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
+                        </div>
+                    </div>
+
+                    <!-- Combined Options Button -->
+                    <div class="nav-section">
+                        <button class="nav-options-btn" onclick="toggleOptionsDropdown()">
+                            ⚙️ Options <span class="dropdown-icon">▼</span>
+                        </button>
+                        <div id="optionsDropdown" class="nav-dropdown-content">
+                            <a href="/" class="nav-dropdown-item">🏠 PO Dashboard</a>
+                            <a href="/receiving" class="nav-dropdown-item">🚚 Receiving Dashboard</a>
+                            <a href="/tasks" class="nav-dropdown-item">📋 Tasks Dashboard</a>
+                            <a href="/dropship" class="nav-dropdown-item">🚢 Dropship Dashboard</a>
+                            <div class="nav-divider"></div>
+                            <button class="nav-dropdown-item" onclick="openStatusModal()">
+                                🏷️ Manage PO Status Options
+                            </button>
+                            <button class="nav-dropdown-item" onclick="openLineItemStatusModal()">
+                                📋 Manage Line Item Status Options
+                            </button>
+                            <button class="nav-dropdown-item" onclick="openCarrierModal()">
+                                🚚 Manage Carriers
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Imports Section -->
+                    <div class="nav-section">
+                        <button class="nav-imports-btn" onclick="toggleImportsDropdown()">
+                            📁 Import <span class="dropdown-icon">▼</span>
+                        </button>
+                        <div id="importsDropdown" class="nav-dropdown-content">
+                            <a href="/upload" class="nav-dropdown-item">📄 Purchase Orders CSV</a>
+                            <a href="/upload-line-items" class="nav-dropdown-item">📦 Line Items CSV</a>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Combined Options Button -->
-                <div class="nav-section">
-                    <button class="nav-options-btn" onclick="toggleOptionsDropdown()">
-                        ⚙️ Options <span class="dropdown-icon">▼</span>
-                    </button>
-                    <div id="optionsDropdown" class="nav-dropdown-content">
-                        <button class="nav-dropdown-item" onclick="openStatusModal()">
-                            🏷️ Manage PO Status Options
+                <!-- User Info -->
+                <% if (typeof user !== 'undefined' && user) { %>
+                <div class="user-info" title="<%= user.firstName %> <%= user.lastName %> (<%= user.role %>) - Online">
+                    <div class="user-avatar">
+                        <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                        <div class="user-status-indicator" title="Online"></div>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user"></i>
                         </button>
-                        <button class="nav-dropdown-item" onclick="openLineItemStatusModal()">
-                            📋 Manage Line Item Status Options
-                        </button>
-                        <button class="nav-dropdown-item" onclick="openCarrierModal()">
-                            🚚 Manage Carriers
-                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <!-- User Info Header -->
+                            <li class="dropdown-user-info">
+                                <div class="dropdown-user-avatar">
+                                    <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                                </div>
+                                <div class="dropdown-user-details">
+                                    <div class="dropdown-user-name"><%= user.firstName %> <%= user.lastName %></div>
+                                    <div class="dropdown-user-role"><%= user.role %></div>
+                                    <div class="dropdown-user-status">Online</div>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider" style="margin: 0;"></li>
+                            
+                            <% if (user.permissions && user.permissions.manageUsers) { %>
+                            <li><a class="dropdown-item" href="/auth/admin/users">
+                                <i class="fas fa-users me-2"></i>User Management
+                            </a></li>
+                            <li><a class="dropdown-item" href="/auth/admin/audit-logs">
+                                <i class="fas fa-history me-2"></i>Audit Logs
+                            </a></li>
+                            <% } %>
+                            <% if (user.role === 'admin' || user.role === 'manager') { %>
+                            <li><a class="dropdown-item" href="/auth/admin/test-email">
+                                <i class="fas fa-envelope me-2"></i>Test Email
+                            </a></li>
+                            <% } %>
+                            <% if ((user.permissions && user.permissions.manageUsers) || user.role === 'admin' || user.role === 'manager') { %>
+                            <li><hr class="dropdown-divider"></li>
+                            <% } %>
+                            <li>
+                                <form action="/auth/logout" method="POST" style="margin: 0;">
+                                    <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-
-                <!-- Imports Section -->
-                <div class="nav-section">
-                    <button class="nav-imports-btn" onclick="toggleImportsDropdown()">
-                        📁 Import <span class="dropdown-icon">▼</span>
-                    </button>
-                    <div id="importsDropdown" class="nav-dropdown-content">
-                        <a href="/upload" class="nav-dropdown-item">📄 Purchase Orders CSV</a>
-                        <a href="/upload-line-items" class="nav-dropdown-item">📦 Line Items CSV</a>
-                    </div>
+                <% } else { %>
+                <div class="user-info">
+                    <span class="auth-status bg-warning text-dark">Not Authenticated</span>
+                    <a href="/auth/login" class="btn btn-primary btn-sm">Login</a>
                 </div>
-
-                <!-- Dropship Module -->
-                <div class="nav-section">
-                    <a href="/dropship" class="nav-accordion-btn" style="text-decoration: none;">
-                        🚚 Dropship Processor
-                    </a>
-                </div>
+                <% } %>
             </div>
         </div>
 
