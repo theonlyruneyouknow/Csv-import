@@ -6122,14 +6122,17 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 th.classList.remove('sort-asc', 'sort-desc');
             });
             const headerElement = document.querySelector(`th[data-column="${column}"]`);
-            headerElement.classList.add(direction === 'asc' ? 'sort-asc' : 'sort-desc');
+            if (headerElement) {
+                headerElement.classList.add(direction === 'asc' ? 'sort-asc' : 'sort-desc');
+            }
 
             // Sort main rows with their data
             mainRows.sort((a, b) => {
-                const aData = JSON.parse(a.dataset.po);
-                const bData = JSON.parse(b.dataset.po);
+                try {
+                    const aData = JSON.parse(a.dataset.po);
+                    const bData = JSON.parse(b.dataset.po);
 
-                let aValue, bValue;
+                    let aValue, bValue;
 
                 switch (column) {
                     case 'date':
@@ -6169,14 +6172,40 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         bValue = new Date(bData.updatedAt || 0);
                         break;
                     case 'priority':
-                        aValue = parseInt(aData.priority) || 999; // Default to 999 for no priority (sorts to bottom)
-                        bValue = parseInt(bData.priority) || 999;
+                        // Parse priority values and handle any data type inconsistencies
+                        aValue = aData.priority;
+                        bValue = bData.priority;
+                        
+                        // Convert to number if it's a string representation of a number
+                        if (typeof aValue === 'string') {
+                            aValue = aValue.match(/^\d+$/) ? parseInt(aValue) : 999;
+                        } else if (typeof aValue === 'number') {
+                            aValue = isNaN(aValue) ? 999 : aValue;
+                        } else {
+                            aValue = 999;
+                        }
+                        
+                        if (typeof bValue === 'string') {
+                            bValue = bValue.match(/^\d+$/) ? parseInt(bValue) : 999;
+                        } else if (typeof bValue === 'number') {
+                            bValue = isNaN(bValue) ? 999 : bValue;
+                        } else {
+                            bValue = 999;
+                        }
+                        
+                        // Ensure valid priority range (1-5), default invalid to 999
+                        aValue = (aValue >= 1 && aValue <= 5) ? aValue : 999;
+                        bValue = (bValue >= 1 && bValue <= 5) ? bValue : 999;
                         break;
                 }
 
                 if (aValue < bValue) return direction === 'asc' ? -1 : 1;
                 if (aValue > bValue) return direction === 'asc' ? 1 : -1;
                 return 0;
+                } catch (error) {
+                    console.error('Error parsing PO data for sorting:', error);
+                    return 0;
+                }
             });
 
             // Reappend sorted rows in groups (main row + line items row + notes row)
