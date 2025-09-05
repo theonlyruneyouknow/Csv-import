@@ -638,18 +638,19 @@
             <div class="d-flex align-items-center justify-content-between flex-grow-1">
                 <!-- Navigation Container -->
                 <div class="navigation-container">
-                    <!-- Managers Accordion -->
+                    <!-- Dashboards Accordion -->
                     <div class="nav-section">
                         <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion')">
-                            📊 Managers <span class="accordion-icon">▼</span>
+                            📊 Dashboards <span class="accordion-icon">▼</span>
                         </button>
                         <div id="managersAccordion" class="nav-accordion-content">
-                            <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
+                            <a href="/" class="nav-accordion-item">🏠 PO Dashboard</a>
+                            <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
+                            <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
+                            <div class="nav-accordion-divider"></div>
                             <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items Manager</a>
                             <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 17Track Dashboard</a>
-                            <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
                             <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
-                            <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
                         </div>
                     </div>
 
@@ -660,9 +661,9 @@
                         </button>
                         <div id="optionsAccordion" class="nav-accordion-content">
                             <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
-                            <a href="/" class="nav-accordion-item">🏠 PO Dashboard</a>
-                            <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
-                            <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
+                            <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
+                            <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
+                            <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
                             
                             <!-- Admin Options (only for admin/manager users) -->
                             <% if (typeof user !== 'undefined' && user && (user.role === 'admin' || user.role === 'manager')) { %>
