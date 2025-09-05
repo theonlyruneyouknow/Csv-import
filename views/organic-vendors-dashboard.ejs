@@ -501,6 +501,41 @@
             display: inline-block;
             margin: 2px;
         }
+
+        /* P.O.D. Button Styles */
+        .pod-button {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            white-space: nowrap;
+        }
+
+        .pod-button:hover {
+            background: linear-gradient(135deg, #218838, #1ea583);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            color: white;
+            text-decoration: none;
+        }
+
+        .pod-button .arrow {
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .pod-button:hover .arrow {
+            transform: translateX(-2px);
+        }
     </style>
 </head>
 
@@ -508,6 +543,12 @@
     <div class="container-fluid">
         <div class="header">
             <h1><i class="fas fa-leaf"></i> Organic Vendors Dashboard</h1>
+            
+            <!-- P.O.D. Button -->
+            <a href="/" class="pod-button">
+                <span class="arrow">←</span>
+                <span>P.O.D.</span>
+            </a>
             
             <div class="d-flex align-items-center justify-content-between flex-grow-1">
                 <div class="navigation-container">
