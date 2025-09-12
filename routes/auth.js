@@ -7,8 +7,11 @@ const emailService = require('../services/emailService');
 
 const router = express.Router();
 
+console.log('🔄 Auth routes file loaded');
+
 // Login page
 router.get('/login', ensureNotAuthenticated, (req, res) => {
+    console.log('📨 GET /auth/login accessed');
     res.render('auth/login', { 
         message: req.flash('error'),
         messages: {

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Add to Pantry - Food Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1000;
+            padding: 15px 0;
+            border-bottom: 1px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            flex-shrink: 0;
+            color: #28a745;
+        }
+        
+        .navigation-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .pod-button, .back-button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-button {
+            background: #28a745;
+        }
+
+        .pod-button:hover, .back-button:hover {
+            background: #5a6268;
+            color: white;
+            text-decoration: none;
+            transform: translateX(-2px);
+        }
+
+        .back-button:hover {
+            background: #218838;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f8f9fa;
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid #dee2e6;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #dee2e6;
+            text-align: center;
+        }
+
+        .coming-soon {
+            color: #666;
+            font-size: 1.2em;
+            margin: 40px 0;
+        }
+
+        .btn-primary {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .btn-primary:hover {
+            background: #218838;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-plus"></i> Add to Pantry</h1>
+            <div class="navigation-container">
+                <a href="/food/pantry" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    Pantry
+                </a>
+                
+                <a href="/dashboard" class="pod-button">
+                    <i class="fas fa-arrow-left"></i>
+                    P.O.D.
+                </a>
+                
+                <% if (user) { %>
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span><%= user.username %></span>
+                    <% if (user.role === 'admin') { %>
+                    <span class="badge bg-danger">Admin</span>
+                    <% } else if (user.role === 'manager') { %>
+                    <span class="badge bg-warning">Manager</span>
+                    <% } %>
+                    <a href="/logout" class="btn btn-outline-secondary btn-sm">Logout</a>
+                </div>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <h2><i class="fas fa-construction"></i> Pantry Item Entry</h2>
+            <p class="coming-soon">The pantry item entry form is coming soon! It will include:</p>
+            
+            <div style="text-align: left; max-width: 500px; margin: 0 auto;">
+                <ul style="font-size: 1.1em; line-height: 1.6;">
+                    <li>🏷️ Item name and category selection</li>
+                    <li>📦 Quantity and unit measurements</li>
+                    <li>📅 Expiration date tracking</li>
+                    <li>📍 Storage location (pantry, fridge, freezer)</li>
+                    <li>💰 Purchase price and store information</li>
+                    <li>🌱 Organic certification tracking</li>
+                    <li>📱 Barcode scanning for quick entry</li>
+                    <li>📝 Notes and special instructions</li>
+                    <li>🔄 Automatic low-stock alerts</li>
+                </ul>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <a href="/food/pantry" class="btn-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Pantry
+                </a>
+                <a href="/food-dashboard" class="btn-primary" style="background: #6c757d;">
+                    <i class="fas fa-home"></i> Food Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
