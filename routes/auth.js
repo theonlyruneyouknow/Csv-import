@@ -343,6 +343,25 @@ router.post('/admin/users/:id/reject', ensureAuthenticated, requireRole(['admin'
     }
 });
 
+// Get individual user data for editing
+router.get('/admin/users/:id', ensureAuthenticated, requireRole(['admin']), async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id)
+            .select('-password -passwordResetToken -emailVerificationToken')
+            .populate('createdBy', 'username')
+            .populate('approvedBy', 'username');
+            
+        if (!user) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+        
+        res.json({ success: true, user });
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch user data' });
+    }
+});
+
 // Update user permissions
 router.post('/admin/users/:id/permissions', ensureAuthenticated, requireRole(['admin']), async (req, res) => {
     try {

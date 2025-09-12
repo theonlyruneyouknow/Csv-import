@@ -185,12 +185,13 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Role</label>
-                                    <select class="form-select" id="editUserRole">
+                                    <select class="form-select" id="editUserRole" onchange="updatePermissionsForRole()">
                                         <option value="viewer">Viewer</option>
                                         <option value="user">User</option>
                                         <option value="manager">Manager</option>
                                         <option value="admin">Admin</option>
                                     </select>
+                                    <small class="text-muted">Changing the role will update permissions to match role defaults</small>
                                 </div>
                             </div>
                         </div>
@@ -354,15 +355,98 @@
             }
         }
 
-        function editUserPermissions(userId) {
-            // For now, just show the modal - you would load user data here
-            document.getElementById('editUserId').value = userId;
-            new bootstrap.Modal(document.getElementById('editUserModal')).show();
+        async function editUserPermissions(userId) {
+            try {
+                // Fetch user data
+                const response = await fetch(`/auth/admin/users/${userId}`);
+                const userData = await response.json();
+                
+                if (!userData.success) {
+                    alert('Error loading user data: ' + userData.error);
+                    return;
+                }
+                
+                const user = userData.user;
+                
+                // Set the user ID and role
+                document.getElementById('editUserId').value = userId;
+                document.getElementById('editUserRole').value = user.role;
+                
+                // Set all permission checkboxes based on user's current permissions
+                const permInputs = document.querySelectorAll('[id^="perm_"]');
+                permInputs.forEach(input => {
+                    const permName = input.id.replace('perm_', '');
+                    input.checked = user.permissions && user.permissions[permName] === true;
+                });
+                
+                // Show the modal
+                new bootstrap.Modal(document.getElementById('editUserModal')).show();
+            } catch (error) {
+                alert('Error loading user data: ' + error.message);
+            }
+        }
+
+        function updatePermissionsForRole() {
+            const role = document.getElementById('editUserRole').value;
+            
+            // Define role-based permission sets (matching the migration script)
+            const rolePermissions = {
+                admin: {
+                    viewDashboard: true, editLineItems: true, managePOs: true, manageUsers: true,
+                    viewReports: true, manageDropship: true, manageOrganicVendors: true,
+                    accessReceiving: true, accessTasks: true, accessDropship: true,
+                    accessFoodManagement: true, accessOrganicVendors: true,
+                    accessLineItemsManager: true, accessTrackingDashboard: true,
+                    accessNotesManager: true, accessFileUpload: true,
+                    accessTroubleSeed: true, accessOrphanedItems: true
+                },
+                manager: {
+                    viewDashboard: true, editLineItems: true, managePOs: true, manageUsers: false,
+                    viewReports: true, manageDropship: true, manageOrganicVendors: true,
+                    accessReceiving: true, accessTasks: true, accessDropship: true,
+                    accessFoodManagement: true, accessOrganicVendors: true,
+                    accessLineItemsManager: true, accessTrackingDashboard: true,
+                    accessNotesManager: true, accessFileUpload: true,
+                    accessTroubleSeed: true, accessOrphanedItems: true
+                },
+                user: {
+                    viewDashboard: true, editLineItems: false, managePOs: false, manageUsers: false,
+                    viewReports: true, manageDropship: false, manageOrganicVendors: false,
+                    accessReceiving: true, accessTasks: true, accessDropship: false,
+                    accessFoodManagement: true, accessOrganicVendors: false,
+                    accessLineItemsManager: true, accessTrackingDashboard: true,
+                    accessNotesManager: false, accessFileUpload: false,
+                    accessTroubleSeed: false, accessOrphanedItems: false
+                },
+                viewer: {
+                    viewDashboard: true, editLineItems: false, managePOs: false, manageUsers: false,
+                    viewReports: true, manageDropship: false, manageOrganicVendors: false,
+                    accessReceiving: true, accessTasks: false, accessDropship: false,
+                    accessFoodManagement: false, accessOrganicVendors: false,
+                    accessLineItemsManager: false, accessTrackingDashboard: true,
+                    accessNotesManager: false, accessFileUpload: false,
+                    accessTroubleSeed: false, accessOrphanedItems: false
+                }
+            };
+            
+            // Update all checkboxes based on role
+            const permissions = rolePermissions[role] || {};
+            const permInputs = document.querySelectorAll('[id^="perm_"]');
+            permInputs.forEach(input => {
+                const permName = input.id.replace('perm_', '');
+                input.checked = permissions[permName] === true;
+            });
         }
 
         async function saveUserPermissions() {
             const userId = document.getElementById('editUserId').value;
             const role = document.getElementById('editUserRole').value;
+            const saveButton = document.querySelector('button[onclick="saveUserPermissions()"]');
+            
+            // Show loading state
+            const originalText = saveButton.textContent;
+            saveButton.textContent = 'Saving...';
+            saveButton.disabled = true;
             
             const permissions = {};
             const permInputs = document.querySelectorAll('[id^="perm_"]');
@@ -380,13 +464,27 @@
                 
                 const result = await response.json();
                 if (result.success) {
-                    bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
-                    location.reload();
+                    // Show success message
+                    saveButton.textContent = 'Saved!';
+                    saveButton.classList.remove('btn-primary');
+                    saveButton.classList.add('btn-success');
+                    
+                    // Close modal after brief delay and reload page
+                    setTimeout(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+                        location.reload();
+                    }, 1000);
                 } else {
                     alert('Error: ' + result.error);
+                    // Reset button state
+                    saveButton.textContent = originalText;
+                    saveButton.disabled = false;
                 }
             } catch (error) {
                 alert('Error saving permissions: ' + error.message);
+                // Reset button state
+                saveButton.textContent = originalText;
+                saveButton.disabled = false;
             }
         }
     </script>
