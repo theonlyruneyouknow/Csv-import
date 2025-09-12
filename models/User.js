@@ -52,7 +52,20 @@ const userSchema = new mongoose.Schema({
         manageUsers: { type: Boolean, default: false },
         viewReports: { type: Boolean, default: false },
         manageDropship: { type: Boolean, default: false },
-        manageOrganicVendors: { type: Boolean, default: false }
+        manageOrganicVendors: { type: Boolean, default: false },
+        // Module access permissions
+        accessReceiving: { type: Boolean, default: false },
+        accessTasks: { type: Boolean, default: false },
+        accessDropship: { type: Boolean, default: false },
+        accessFoodManagement: { type: Boolean, default: false },
+        accessOrganicVendors: { type: Boolean, default: false },
+        // Tool access permissions
+        accessLineItemsManager: { type: Boolean, default: false },
+        accessTrackingDashboard: { type: Boolean, default: false },
+        accessNotesManager: { type: Boolean, default: false },
+        accessFileUpload: { type: Boolean, default: false },
+        accessTroubleSeed: { type: Boolean, default: false },
+        accessOrphanedItems: { type: Boolean, default: false }
     },
     lastLogin: {
         type: Date

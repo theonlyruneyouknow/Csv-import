@@ -2871,14 +2871,46 @@
                             📊 Dashboards <span class="accordion-icon">▼</span>
                         </button>
                         <div id="managersAccordion" class="nav-accordion-content">
-                            <a href="/receiving" class="nav-accordion-item">🚚 Receiving Dashboard</a>
-                            <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
-                            <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
-                            <a href="/food-dashboard" class="nav-accordion-item">🍽️ Food Management</a>
-                            <div class="nav-accordion-divider"></div>
-                            <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items Manager</a>
-                            <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 17Track Dashboard</a>
-                            <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
+                            <% if (typeof user !== 'undefined' && user && user.permissions) { %>
+                                <% if (user.permissions.accessReceiving) { %>
+                                    <a href="/receiving" class="nav-accordion-item">🚚 Receiving Dashboard</a>
+                                <% } %>
+                                <% if (user.permissions.accessTasks) { %>
+                                    <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
+                                <% } %>
+                                <% if (user.permissions.accessDropship) { %>
+                                    <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
+                                <% } %>
+                                <% if (user.permissions.accessFoodManagement) { %>
+                                    <a href="/food-dashboard" class="nav-accordion-item">🍽️ Food Management</a>
+                                <% } %>
+                                
+                                <% if (user.permissions.accessLineItemsManager || user.permissions.accessTrackingDashboard || user.permissions.accessNotesManager) { %>
+                                    <div class="nav-accordion-divider"></div>
+                                <% } %>
+                                
+                                <% if (user.permissions.accessLineItemsManager) { %>
+                                    <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items Manager</a>
+                                <% } %>
+                                <% if (user.permissions.accessTrackingDashboard) { %>
+                                    <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 17Track Dashboard</a>
+                                <% } %>
+                                <% if (user.permissions.accessNotesManager) { %>
+                                    <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
+                                <% } %>
+                            <% } else { %>
+                                <!-- Fallback for users without defined permissions (backward compatibility) -->
+                                <% if (user && (user.role === 'admin' || user.role === 'manager')) { %>
+                                    <a href="/receiving" class="nav-accordion-item">🚚 Receiving Dashboard</a>
+                                    <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
+                                    <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
+                                    <a href="/food-dashboard" class="nav-accordion-item">🍽️ Food Management</a>
+                                    <div class="nav-accordion-divider"></div>
+                                    <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items Manager</a>
+                                    <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 17Track Dashboard</a>
+                                    <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
+                                <% } %>
+                            <% } %>
                         </div>
                     </div>
 
@@ -2888,10 +2920,28 @@
                             ⚙️ Options <span class="accordion-icon">▼</span>
                         </button>
                         <div id="optionsAccordion" class="nav-accordion-content">
-                            <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
-                            <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
-                            <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
-                            <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
+                            <% if (typeof user !== 'undefined' && user && user.permissions) { %>
+                                <% if (user.permissions.accessFileUpload) { %>
+                                    <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
+                                <% } %>
+                                <% if (user.permissions.accessOrganicVendors) { %>
+                                    <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
+                                <% } %>
+                                <% if (user.permissions.accessTroubleSeed) { %>
+                                    <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
+                                <% } %>
+                                <% if (user.permissions.accessOrphanedItems) { %>
+                                    <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
+                                <% } %>
+                            <% } else { %>
+                                <!-- Fallback for users without defined permissions -->
+                                <% if (user && (user.role === 'admin' || user.role === 'manager')) { %>
+                                    <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
+                                    <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
+                                    <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
+                                    <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
+                                <% } %>
+                            <% } %>
                             
                             <!-- Admin Options (only for admin/manager users) -->
                             <% if (typeof user !== 'undefined' && user && (user.role === 'admin' || user.role === 'manager')) { %>
