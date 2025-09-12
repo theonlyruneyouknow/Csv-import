@@ -14,6 +14,11 @@ try {
 
 // No need for requireAuth middleware since authentication is handled at app level
 
+// Root Food route - redirect to dashboard
+router.get('/', (req, res) => {
+    res.redirect('/food/dashboard');
+});
+
 // Food Dashboard - Main hub
 router.get('/dashboard', async (req, res) => {
     try {
