@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Medicine Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #28a745;
+            transition: transform 0.2s;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+        
+        .medicine-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .medicine-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transform: translateY(-1px);
+        }
+        
+        .medicine-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-active { background: #d4edda; color: #155724; }
+        .status-paused { background: #fff3cd; color: #856404; }
+        .status-discontinued { background: #f8d7da; color: #721c24; }
+        
+        .refill-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .refill-good { background: #d4edda; color: #155724; }
+        .refill-soon { background: #fff3cd; color: #856404; }
+        .refill-urgent { background: #f8d7da; color: #721c24; }
+        
+        .quick-action-btn {
+            border: 2px solid #28a745;
+            color: #28a745;
+            background: transparent;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .quick-action-btn:hover {
+            background: #28a745;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .upcoming-dose {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .dose-time {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 1.1rem;
+        }
+        
+        .pharmacy-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+            margin-bottom: 1rem;
+        }
+        
+        .pharmacy-hours {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            height: fit-content;
+        }
+        
+        /* Navigation Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1000;
+            padding: 15px 0;
+            border-bottom: 1px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navigation-container {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .nav-section {
+            position: relative;
+        }
+
+        .nav-accordion-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            justify-content: space-between;
+        }
+
+        .nav-accordion-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-accordion-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            min-width: 220px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 5px;
+        }
+
+        .nav-accordion-content.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .nav-accordion-item {
+            display: block;
+            padding: 12px 16px;
+            color: #495057;
+            text-decoration: none;
+            border-bottom: 1px solid #f1f3f4;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .nav-accordion-item:hover {
+            background: #f8f9fa;
+            color: #28a745;
+            text-decoration: none;
+            padding-left: 20px;
+        }
+
+        .nav-accordion-divider {
+            height: 1px;
+            background: #dee2e6;
+            margin: 8px 12px;
+        }
+
+        .nav-options-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 100px;
+            justify-content: space-between;
+        }
+
+        .nav-options-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #28a745;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .user-status-indicator {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            background: #28a745;
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <div class="container">
+        <div class="header">
+            <h1 style="margin: 0; font-size: 1.5rem;">💊 Medicine Management</h1>
+            
+            <div class="d-flex align-items-center justify-content-between flex-grow-1">
+                <!-- Navigation Container -->
+                <div class="navigation-container">
+                    <!-- Dashboards Accordion -->
+                    <div class="nav-section">
+                        <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion')">
+                            📊 Dashboards <span class="accordion-icon">▼</span>
+                        </button>
+                        <div id="managersAccordion" class="nav-accordion-content">
+                            <% if (typeof user !== 'undefined' && user && user.permissions) { %>
+                                <a href="/dashboard" class="nav-accordion-item">🏠 Main Dashboard</a>
+                                <% if (user.permissions.accessReceiving) { %>
+                                    <a href="/receiving" class="nav-accordion-item">🚚 Receiving Dashboard</a>
+                                <% } %>
+                                <% if (user.permissions.accessTasks) { %>
+                                    <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
+                                <% } %>
+                                <% if (user.permissions.accessDropship) { %>
+                                    <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
+                                <% } %>
+                                <% if (user.permissions.accessFoodManagement) { %>
+                                    <a href="/food-dashboard" class="nav-accordion-item">🍽️ Food Management</a>
+                                <% } %>
+                                <% if (user.permissions.accessStoryManagement) { %>
+                                    <a href="/story/dashboard" class="nav-accordion-item">📚 Story Management</a>
+                                <% } %>
+                                <% if (user.permissions.accessMedicineManagement) { %>
+                                    <a href="/medicine/dashboard" class="nav-accordion-item">💊 Medicine Management</a>
+                                <% } %>
+                            <% } else { %>
+                                <!-- Fallback for users without defined permissions -->
+                                <a href="/dashboard" class="nav-accordion-item">🏠 Main Dashboard</a>
+                                <% if (user && (user.role === 'admin' || user.role === 'manager')) { %>
+                                    <a href="/receiving" class="nav-accordion-item">🚚 Receiving Dashboard</a>
+                                    <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
+                                    <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
+                                    <a href="/food-dashboard" class="nav-accordion-item">🍽️ Food Management</a>
+                                    <a href="/story/dashboard" class="nav-accordion-item">📚 Story Management</a>
+                                    <a href="/medicine/dashboard" class="nav-accordion-item">💊 Medicine Management</a>
+                                <% } %>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Options Button -->
+                    <div class="nav-section">
+                        <button class="nav-options-btn" onclick="toggleAccordion('optionsAccordion')">
+                            ⚙️ Options <span class="accordion-icon">▼</span>
+                        </button>
+                        <div id="optionsAccordion" class="nav-accordion-content">
+                            <% if (typeof user !== 'undefined' && user && user.permissions) { %>
+                                <% if (user.permissions.accessFileUpload) { %>
+                                    <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
+                                <% } %>
+                                <% if (user.permissions.accessOrganicVendors) { %>
+                                    <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
+                                <% } %>
+                            <% } else { %>
+                                <!-- Fallback for users without defined permissions -->
+                                <% if (user && (user.role === 'admin' || user.role === 'manager')) { %>
+                                    <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
+                                    <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
+                                <% } %>
+                            <% } %>
+                            
+                            <!-- Admin Options -->
+                            <% if (typeof user !== 'undefined' && user && (user.role === 'admin' || user.role === 'manager')) { %>
+                            <div class="nav-accordion-divider"></div>
+                            <a href="/auth/admin/users" class="nav-accordion-item">👥 User Management</a>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- User Info -->
+                <% if (typeof user !== 'undefined' && user) { %>
+                <div class="user-info" title="<%= user.firstName %> <%= user.lastName %> (<%= user.role %>) - Online">
+                    <div class="user-avatar">
+                        <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                        <div class="user-status-indicator" title="Online"></div>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <form action="/auth/logout" method="POST" style="margin: 0;">
+                                    <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <% } else { %>
+                <div class="user-info">
+                    <a href="/auth/login" class="btn btn-primary btn-sm">Login</a>
+                </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-4 mb-3">
+                        <i class="fas fa-pills me-3"></i>Medicine Management
+                    </h1>
+                    <p class="lead mb-4">Track your medications, manage refills, and stay on top of your health</p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <button class="btn btn-light btn-lg" onclick="addNewMedicine()">
+                            <i class="fas fa-plus me-2"></i>Add Medicine
+                        </button>
+                        <a href="/medicine/medicines" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-list me-2"></i>All Medicines
+                        </a>
+                        <a href="/medicine/pharmacies" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-store me-2"></i>Pharmacies
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="fas fa-heartbeat" style="font-size: 8rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stats-number"><%= stats.activeMedicines %></div>
+                            <div class="text-muted">Active Medicines</div>
+                        </div>
+                        <i class="fas fa-pills text-success" style="font-size: 2rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stats-number text-warning"><%= stats.needingRefill %></div>
+                            <div class="text-muted">Need Refills</div>
+                        </div>
+                        <i class="fas fa-exclamation-triangle text-warning" style="font-size: 2rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stats-number"><%= stats.totalMedicines %></div>
+                            <div class="text-muted">Total Medicines</div>
+                        </div>
+                        <i class="fas fa-capsules text-info" style="font-size: 2rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stats-number">$<%= stats.totalCost || 0 %></div>
+                            <div class="text-muted">Monthly Cost</div>
+                        </div>
+                        <i class="fas fa-dollar-sign text-secondary" style="font-size: 2rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Active Medicines -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3><i class="fas fa-pills me-2 text-success"></i>Active Medicines</h3>
+                        <a href="/medicine/medicines" class="btn btn-outline-primary btn-sm">View All</a>
+                    </div>
+                    
+                    <% if (medicines && medicines.length > 0) { %>
+                        <% medicines.forEach(medicine => { %>
+                            <div class="medicine-card">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <h5 class="mb-1">
+                                            <%= medicine.name %>
+                                            <span class="medicine-status status-<%= medicine.status %>">
+                                                <%= medicine.status.charAt(0).toUpperCase() + medicine.status.slice(1) %>
+                                            </span>
+                                        </h5>
+                                        <p class="text-muted mb-1">
+                                            <strong><%= medicine.strength %></strong> - <%= medicine.form %>
+                                            <% if (medicine.condition) { %>
+                                                <br><small>For: <%= medicine.condition %></small>
+                                            <% } %>
+                                        </p>
+                                        <p class="mb-0">
+                                            <small class="text-muted">
+                                                Take <%= medicine.dosage.amount %> <%= medicine.dosage.frequency.replace('-', ' ') %>
+                                            </small>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="text-center">
+                                            <div class="h4 mb-1"><%= medicine.quantity.remainingPills || 0 %></div>
+                                            <small class="text-muted">pills left</small>
+                                            <% if (medicine.daysUntilRunOut !== null) { %>
+                                                <br><small class="text-muted"><%= medicine.daysUntilRunOut %> days left</small>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="d-grid gap-2">
+                                            <button class="btn btn-success btn-sm" onclick="takeMedicine('<%= medicine._id %>')">
+                                                <i class="fas fa-check me-1"></i>Take Now
+                                            </button>
+                                            <% if (medicine.needsRefill) { %>
+                                                <span class="refill-status refill-urgent">Needs Refill</span>
+                                            <% } else if (medicine.refillStatus === 'refill-soon') { %>
+                                                <span class="refill-status refill-soon">Refill Soon</span>
+                                            <% } else { %>
+                                                <span class="refill-status refill-good">Good Supply</span>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="text-center py-5">
+                            <i class="fas fa-pills text-muted" style="font-size: 4rem;"></i>
+                            <h4 class="text-muted mt-3">No medicines added yet</h4>
+                            <p class="text-muted">Add your first medicine to start tracking</p>
+                            <button class="btn btn-primary" onclick="addNewMedicine()">
+                                <i class="fas fa-plus me-2"></i>Add Your First Medicine
+                            </button>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="mb-4">
+                    <h3><i class="fas fa-history me-2 text-info"></i>Recent Activity</h3>
+                    <% if (recentLogs && recentLogs.length > 0) { %>
+                        <% recentLogs.forEach(log => { %>
+                            <div class="card mb-2">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong><%= log.medicine.name %></strong> - <%= log.doseTaken.amount %>
+                                            <small class="text-muted">
+                                                taken <%= new Date(log.takenAt).toLocaleDateString() %> 
+                                                at <%= new Date(log.takenAt).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'}) %>
+                                            </small>
+                                        </div>
+                                        <% if (log.effectiveness) { %>
+                                            <small class="text-success">Effectiveness: <%= log.effectiveness %>/10</small>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p class="text-muted">No recent activity to show</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Upcoming Doses -->
+                <div class="sidebar mb-3">
+                    <h5 class="mb-3"><i class="fas fa-clock me-2 text-primary"></i>Today's Schedule</h5>
+                    <% if (upcomingDoses && upcomingDoses.length > 0) { %>
+                        <% upcomingDoses.forEach(dose => { %>
+                            <div class="upcoming-dose">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="dose-time"><%= dose.timeDisplay %></div>
+                                        <div class="text-muted"><%= dose.medicine.name %></div>
+                                        <small class="text-muted"><%= dose.medicine.dosage.amount %></small>
+                                    </div>
+                                    <button class="btn btn-success btn-sm" onclick="takeMedicine('<%= dose.medicine._id %>', '<%= dose.time %>')">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p class="text-muted">No scheduled doses for today</p>
+                    <% } %>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="sidebar mb-3">
+                    <h5 class="mb-3"><i class="fas fa-bolt me-2 text-warning"></i>Quick Actions</h5>
+                    <div class="d-grid gap-2">
+                        <button class="quick-action-btn" onclick="addNewMedicine()">
+                            <i class="fas fa-plus me-2"></i>Add Medicine
+                        </button>
+                        <button class="quick-action-btn" onclick="addPharmacy()">
+                            <i class="fas fa-store me-2"></i>Add Pharmacy
+                        </button>
+                        <a href="/medicine/medicines" class="quick-action-btn text-decoration-none text-center">
+                            <i class="fas fa-list me-2"></i>View All
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Pharmacies -->
+                <div class="sidebar">
+                    <h5 class="mb-3"><i class="fas fa-store me-2 text-secondary"></i>My Pharmacies</h5>
+                    <% if (pharmacies && pharmacies.length > 0) { %>
+                        <% pharmacies.forEach(pharmacy => { %>
+                            <div class="pharmacy-card">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <strong><%= pharmacy.name %></strong>
+                                        <% if (pharmacy.isPrimary) { %>
+                                            <span class="badge bg-primary">Primary</span>
+                                        <% } %>
+                                        <br>
+                                        <small class="text-muted"><%= pharmacy.formattedPhone %></small>
+                                        <% if (pharmacy.isOpenNow && pharmacy.isOpenNow()) { %>
+                                            <br><small class="text-success">Open Now</small>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p class="text-muted">No pharmacies added yet</p>
+                        <button class="btn btn-outline-primary btn-sm" onclick="addPharmacy()">
+                            <i class="fas fa-plus me-1"></i>Add Pharmacy
+                        </button>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Navigation functionality
+        function toggleAccordion(accordionId) {
+            const accordionContent = document.getElementById(accordionId);
+            const allAccordions = document.querySelectorAll('.nav-accordion-content');
+            
+            // Close all other accordions
+            allAccordions.forEach(accordion => {
+                if (accordion.id !== accordionId) {
+                    accordion.classList.remove('show');
+                }
+            });
+            
+            // Toggle the current accordion
+            accordionContent.classList.toggle('show');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.nav-section')) {
+                document.querySelectorAll('.nav-accordion-content').forEach(content => {
+                    content.classList.remove('show');
+                });
+            }
+        });
+
+        // Medicine management functions
+        function addNewMedicine() {
+            window.location.href = '/medicine/medicines/new';
+        }
+
+        function addPharmacy() {
+            // TODO: Implement pharmacy modal or redirect to pharmacy form
+            alert('Pharmacy management coming soon!');
+        }
+
+        async function takeMedicine(medicineId, scheduledTime = null) {
+            try {
+                const response = await fetch(`/medicine/medicines/${medicineId}/take`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        scheduledTime: scheduledTime
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Dose recorded successfully!');
+                    location.reload(); // Refresh to update counts
+                } else {
+                    alert('Error: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error recording dose:', error);
+                alert('Error recording dose: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

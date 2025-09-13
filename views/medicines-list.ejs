@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Medicine Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .medicine-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .medicine-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transform: translateY(-1px);
+        }
+        
+        .medicine-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-active { background: #d4edda; color: #155724; }
+        .status-paused { background: #fff3cd; color: #856404; }
+        .status-discontinued { background: #f8d7da; color: #721c24; }
+        
+        .refill-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .refill-good { background: #d4edda; color: #155724; }
+        .refill-soon { background: #fff3cd; color: #856404; }
+        .refill-urgent { background: #f8d7da; color: #721c24; }
+        
+        .btn-action {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin: 0.25rem;
+        }
+        
+        .filters-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .no-medicines {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-2">
+                        <i class="fas fa-pills me-3"></i>All Medicines
+                    </h1>
+                    <p class="mb-0 opacity-75">Manage your complete medication list</p>
+                </div>
+                <div>
+                    <a href="/medicine/dashboard" class="btn btn-light me-2">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                    <a href="/medicine/medicines/new" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Add Medicine
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-card">
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">Filter by Status</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">All Statuses</option>
+                        <option value="active">Active</option>
+                        <option value="paused">Paused</option>
+                        <option value="discontinued">Discontinued</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Filter by Refill Status</label>
+                    <select class="form-select" id="refillFilter">
+                        <option value="">All Refill Statuses</option>
+                        <option value="urgent">Needs Refill</option>
+                        <option value="soon">Refill Soon</option>
+                        <option value="good">Good Supply</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Search Medicines</label>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search by name, condition, or doctor...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                        <i class="fas fa-times me-1"></i>Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Medicines List -->
+        <% if (medicines && medicines.length > 0) { %>
+            <div id="medicinesList">
+                <% medicines.forEach((medicine, index) => { %>
+                    <div class="medicine-card" data-status="<%= medicine.status %>" data-refill="<%= medicine.refillStatus || 'good' %>">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h5 class="mb-1">
+                                    <%= medicine.name %>
+                                    <span class="medicine-status status-<%= medicine.status %>">
+                                        <%= medicine.status.charAt(0).toUpperCase() + medicine.status.slice(1) %>
+                                    </span>
+                                </h5>
+                                <p class="text-muted mb-1">
+                                    <strong><%= medicine.strength %></strong> - <%= medicine.form %>
+                                </p>
+                                <% if (medicine.condition) { %>
+                                    <p class="mb-1">
+                                        <small class="text-muted">For: <%= medicine.condition %></small>
+                                    </p>
+                                <% } %>
+                                <% if (medicine.prescribedBy) { %>
+                                    <p class="mb-1">
+                                        <small class="text-muted">Prescribed by: <%= medicine.prescribedBy %></small>
+                                    </p>
+                                <% } %>
+                                <p class="mb-0">
+                                    <small class="text-muted">
+                                        Take <%= medicine.dosage.amount %> <%= medicine.dosage.frequency.replace('-', ' ') %>
+                                        <% if (medicine.dosage.timing) { %>
+                                            (<%= medicine.dosage.timing %>)
+                                        <% } %>
+                                    </small>
+                                </p>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="h4 mb-1 text-primary"><%= medicine.quantity.remainingPills || 0 %></div>
+                                    <small class="text-muted">of <%= medicine.quantity.totalPills %> pills left</small>
+                                    <% if (medicine.daysUntilRunOut !== null) { %>
+                                        <br><small class="text-muted"><%= medicine.daysUntilRunOut %> days remaining</small>
+                                    <% } %>
+                                    <br>
+                                    <% if (medicine.needsRefill) { %>
+                                        <span class="refill-status refill-urgent">Needs Refill</span>
+                                    <% } else if (medicine.refillStatus === 'refill-soon') { %>
+                                        <span class="refill-status refill-soon">Refill Soon</span>
+                                    <% } else { %>
+                                        <span class="refill-status refill-good">Good Supply</span>
+                                    <% } %>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="d-grid gap-2">
+                                    <% if (medicine.status === 'active') { %>
+                                        <button class="btn btn-success btn-action" onclick="takeMedicine('<%= medicine._id %>')">
+                                            <i class="fas fa-check me-1"></i>Take Now
+                                        </button>
+                                    <% } %>
+                                    <a href="/medicine/medicines/<%= medicine._id %>/edit" class="btn btn-outline-primary btn-action">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </a>
+                                    <button class="btn btn-outline-info btn-action" onclick="viewHistory('<%= medicine._id %>')">
+                                        <i class="fas fa-history me-1"></i>History
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <% if (medicine.notes) { %>
+                            <div class="mt-2 pt-2 border-top">
+                                <small class="text-muted">
+                                    <i class="fas fa-sticky-note me-1"></i>
+                                    <%= medicine.notes %>
+                                </small>
+                            </div>
+                        <% } %>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div class="no-medicines">
+                <i class="fas fa-pills text-muted" style="font-size: 4rem;"></i>
+                <h4 class="text-muted mt-3">No medicines found</h4>
+                <p class="text-muted">Start by adding your first medicine to begin tracking</p>
+                <a href="/medicine/medicines/new" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add Your First Medicine
+                </a>
+            </div>
+        <% } %>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Filter functionality
+        function filterMedicines() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const refillFilter = document.getElementById('refillFilter').value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const medicineCards = document.querySelectorAll('.medicine-card');
+
+            medicineCards.forEach(card => {
+                let showCard = true;
+
+                // Status filter
+                if (statusFilter && card.dataset.status !== statusFilter) {
+                    showCard = false;
+                }
+
+                // Refill filter
+                if (refillFilter && card.dataset.refill !== refillFilter) {
+                    showCard = false;
+                }
+
+                // Search filter
+                if (searchTerm) {
+                    const cardText = card.textContent.toLowerCase();
+                    if (!cardText.includes(searchTerm)) {
+                        showCard = false;
+                    }
+                }
+
+                card.style.display = showCard ? 'block' : 'none';
+            });
+        }
+
+        function clearFilters() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('refillFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            filterMedicines();
+        }
+
+        // Add event listeners
+        document.getElementById('statusFilter').addEventListener('change', filterMedicines);
+        document.getElementById('refillFilter').addEventListener('change', filterMedicines);
+        document.getElementById('searchInput').addEventListener('input', filterMedicines);
+
+        // Medicine actions
+        async function takeMedicine(medicineId) {
+            try {
+                const response = await fetch(`/medicine/medicines/${medicineId}/take`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Dose recorded successfully!');
+                    location.reload(); // Refresh to update counts
+                } else {
+                    alert('Error: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error recording dose:', error);
+                alert('Error recording dose: ' + error.message);
+            }
+        }
+
+        function viewHistory(medicineId) {
+            window.location.href = `/medicine/medicines/${medicineId}/history`;
+        }
+    </script>
+</body>
+</html>
