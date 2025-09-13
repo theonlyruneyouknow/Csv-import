@@ -1,0 +1,557 @@
+const express = require('express');
+const router = express.Router();
+const Project = require('../models/Project');
+const Story = require('../models/Story');
+const Timeline = require('../models/Timeline');
+const Character = require('../models/Character');
+const { ensureAuthenticated } = require('../middleware/auth');
+
+// Middleware to check if user has access to story management
+const ensureStoryAccess = (req, res, next) => {
+    if (!req.user.permissions.accessStoryManagement) {
+        return res.status(403).render('error', { 
+            message: 'Access denied. You do not have permission to access Story Management.' 
+        });
+    }
+    next();
+};
+
+// Story Dashboard
+router.get('/dashboard', ensureAuthenticated, ensureStoryAccess, async (req, res) => {
+    try {
+        const [projects, recentStories, stats] = await Promise.all([
+            Project.find({ author: req.user._id })
+                .sort({ updatedAt: -1 })
+                .limit(10)
+                .populate('author', 'username firstName lastName'),
+            
+            Story.find({ author: req.user._id })
+                .sort({ updatedAt: -1 })
+                .limit(5)
+                .populate('project', 'title type')
+                .populate('author', 'username firstName lastName'),
+            
+            // Get stats
+            Project.aggregate([
+                { $match: { author: req.user._id } },
+                {
+                    $group: {
+                        _id: null,
+                        totalProjects: { $sum: 1 },
+                        totalWordCount: { $sum: '$currentWordCount' },
+                        averageCompletion: { $avg: '$completionPercentage' },
+                        projectsByStatus: {
+                            $push: {
+                                status: '$status',
+                                count: 1
+                            }
+                        }
+                    }
+                }
+            ])
+        ]);
+
+        const projectStats = stats[0] || {
+            totalProjects: 0,
+            totalWordCount: 0,
+            averageCompletion: 0,
+            projectsByStatus: []
+        };
+
+        res.render('story-dashboard', {
+            user: req.user,
+            projects,
+            recentStories,
+            stats: projectStats,
+            title: 'Story Management Dashboard'
+        });
+    } catch (error) {
+        console.error('Error loading story dashboard:', error);
+        res.status(500).render('error', { message: 'Error loading dashboard' });
+    }
+});
+
+// Projects Management
+router.get('/projects', ensureAuthenticated, ensureStoryAccess, async (req, res) => {
+    try {
+        const { status, type, sort = 'updatedAt', order = 'desc' } = req.query;
+        
+        let query = { author: req.user._id };
+        if (status) query.status = status;
+        if (type) query.type = type;
+        
+        const projects = await Project.find(query)
+            .sort({ [sort]: order === 'desc' ? -1 : 1 })
+            .populate('author', 'username firstName lastName')
+            .populate('collaborators.user', 'username firstName lastName');
+            
+        res.render('story-projects', {
+            user: req.user,
+            projects,
+            filters: { status, type, sort, order },
+            title: 'Projects'
+        });
+    } catch (error) {
+        console.error('Error loading projects:', error);
+        res.status(500).render('error', { message: 'Error loading projects' });
+    }
+});
+
+// Create Project
+router.post('/projects', ensureAuthenticated, ensureStoryAccess, async (req, res) => {
+    try {
+        const projectData = {
+            ...req.body,
+            author: req.user._id
+        };
+        
+        const project = new Project(projectData);
+        await project.save();
+        
+        res.json({ success: true, project, message: 'Project created successfully' });
+    } catch (error) {
+        console.error('Error creating project:', error);
+        res.status(500).json({ success: false, error: 'Failed to create project' });
+    }
+});
+
+// Get Project Details
+router.get('/projects/:id', ensureAuthenticated, ensureStoryAccess, async (req, res) => {
+    try {
+        const project = await Project.findOne({ 
+            _id: req.params.id, 
+            $or: [
+                { author: req.user._id },
+                { 'collaborators.user': req.user._id }
+            ]
+        })
+        .populate('author', 'username firstName lastName')
+        .populate('collaborators.user', 'username firstName lastName');
+        
+        if (!project) {
+            return res.status(404).render('error', { message: 'Project not found' });
+        }
+        
+        const [stories, timelines, characters] = await Promise.all([
+            Story.find({ project: project._id })
+                .sort({ order: 1 })
+                .populate('author', 'username firstName lastName')
+                .populate('timeline', 'title'),
+            
+            Timeline.find({ project: project._id, isActive: true })
+                .populate('author', 'username firstName lastName'),
+            
+            Character.find({ project: project._id, isActive: true })
+                .populate('author', 'username firstName lastName')
+        ]);
+        
+        res.render('story-project-detail', {
+            user: req.user,
+            project,
+            stories,
+            timelines,
+            characters,
+            title: project.title
+        });
+    } catch (error) {
+        console.error('Error loading project:', error);
+        res.status(500).render('error', { message: 'Error loading project' });
+    }
+});
+
+// Update Project
+router.put('/projects/:id', ensureAuthenticated, ensureStoryAccess, async (req, res) => {
+    try {
+        const project = await Project.findOne({ 
+            _id: req.params.id, 
+            author: req.user._id 
+        });
+        
+        if (!project) {
+            return res.status(404).json({ success: false, error: 'Project not found' });
+        }
+        
+        Object.assign(project, req.body);
+        await project.save();
+        await project.updateWordCount();
+        
+        res.json({ success: true, project, message: 'Project updated successfully' });
+    } catch (error) {
+        console.error('Error updating project:', error);
+        res.status(500).json({ success: false, error: 'Failed to update project' });
+    }
+});
+
+// Delete Project
+router.delete('/projects/:id', ensureAuthenticated, ensureStoryAccess, async (req, res) => {
+    try {
+        const project = await Project.findOne({ 
+            _id: req.params.id, 
+            author: req.user._id 
+        });
+        
+        if (!project) {
+            return res.status(404).json({ success: false, error: 'Project not found' });
+        }
+        
+        // Delete all related content
+        await Promise.all([
+            Story.deleteMany({ project: project._id }),
+            Timeline.deleteMany({ project: project._id }),
+            Character.deleteMany({ project: project._id })
+        ]);
+        
+        await Project.findByIdAndDelete(project._id);
+        
+        res.json({ success: true, message: 'Project and all related content deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting project:', error);
+        res.status(500).json({ success: false, error: 'Failed to delete project' });
+    }
+});
+
+// Story Writing Interface - New story
+router.get('/write', ensureStoryAccess, async (req, res) => {
+    try {
+        const projects = await Project.find({ author: req.user._id }).sort({ title: 1 });
+        
+        res.render('story-writer', {
+            user: req.user,
+            story: null,
+            project: null,
+            projects,
+            isNewStory: true,
+            pageTitle: 'New Story - Story Management'
+        });
+    } catch (error) {
+        console.error('Error loading story writer:', error);
+        res.status(500).render('error', { message: 'Failed to load story writer' });
+    }
+});
+
+// Story Writing Interface - Edit existing story
+router.get('/write/:storyId', ensureStoryAccess, async (req, res) => {
+    try {
+        const story = await Story.findOne({
+            _id: req.params.storyId,
+            author: req.user._id
+        }).populate('project', 'title type settings');
+        
+        if (!story) {
+            return res.status(404).render('error', { message: 'Story not found' });
+        }
+        
+        // Get user's projects for project selector
+        const projects = await Project.find({ author: req.user._id })
+            .sort({ updatedAt: -1 });
+        
+        res.render('story-writer', {
+            user: req.user,
+            story,
+            project: story.project,
+            projects,
+            isNewStory: false,
+            pageTitle: `Writing: ${story.title} - Story Management`
+        });
+    } catch (error) {
+        console.error('Error loading writer:', error);
+        res.status(500).render('error', { message: 'Error loading writer' });
+    }
+});
+
+// Create or Update Story
+router.post('/stories', ensureAuthenticated, ensureStoryAccess, async (req, res) => {
+    try {
+        const { storyId, projectId, ...storyData } = req.body;
+        
+        if (storyId) {
+            // Update existing story
+            const story = await Story.findOne({ 
+                _id: storyId, 
+                author: req.user._id 
+            });
+            
+            if (!story) {
+                return res.status(404).json({ success: false, error: 'Story not found' });
+            }
+            
+            // Create version if content changed significantly
+            if (story.content !== storyData.content && story.content.length > 0) {
+                await story.createVersion(req.user._id, 'Auto-save update');
+            }
+            
+            Object.assign(story, storyData);
+            story.lastEditedBy = req.user._id;
+            await story.save();
+            
+            // Update project word count
+            const project = await Project.findById(story.project);
+            if (project) {
+                await project.updateWordCount();
+            }
+            
+            res.json({ success: true, story, message: 'Story updated successfully' });
+        } else {
+            // Create new story
+            const story = new Story({
+                ...storyData,
+                project: projectId,
+                author: req.user._id
+            });
+            
+            await story.save();
+            
+            // Update project word count
+            const project = await Project.findById(projectId);
+            if (project) {
+                await project.updateWordCount();
+            }
+            
+            res.json({ success: true, story, message: 'Story created successfully' });
+        }
+    } catch (error) {
+        console.error('Error saving story:', error);
+        res.status(500).json({ success: false, error: 'Failed to save story' });
+    }
+});
+
+// Get Story for editing
+router.get('/stories/:id', ensureAuthenticated, ensureStoryAccess, async (req, res) => {
+    try {
+        const story = await Story.findOne({
+            _id: req.params.id,
+            author: req.user._id
+        })
+        .populate('project', 'title type')
+        .populate('characters', 'name role')
+        .populate('timeline', 'title')
+        .populate('author', 'username firstName lastName')
+        .populate('lastEditedBy', 'username firstName lastName');
+        
+        if (!story) {
+            return res.status(404).json({ success: false, error: 'Story not found' });
+        }
+        
+        res.json({ success: true, story });
+    } catch (error) {
+        console.error('Error loading story:', error);
+        res.status(500).json({ success: false, error: 'Failed to load story' });
+    }
+});
+
+// Delete Story
+router.delete('/stories/:id', ensureAuthenticated, ensureStoryAccess, async (req, res) => {
+    try {
+        const story = await Story.findOne({ 
+            _id: req.params.id, 
+            author: req.user._id 
+        });
+        
+        if (!story) {
+            return res.status(404).json({ success: false, error: 'Story not found' });
+        }
+        
+        const projectId = story.project;
+        await Story.findByIdAndDelete(story._id);
+        
+        // Update project word count
+        const project = await Project.findById(projectId);
+        if (project) {
+            await project.updateWordCount();
+        }
+        
+        res.json({ success: true, message: 'Story deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting story:', error);
+        res.status(500).json({ success: false, error: 'Failed to delete story' });
+    }
+});
+
+// Timeline Management
+router.get('/timelines/:projectId', ensureAuthenticated, ensureStoryAccess, async (req, res) => {
+    try {
+        const project = await Project.findOne({
+            _id: req.params.projectId,
+            $or: [
+                { author: req.user._id },
+                { 'collaborators.user': req.user._id }
+            ]
+        });
+        
+        if (!project) {
+            return res.status(404).json({ success: false, error: 'Project not found' });
+        }
+        
+        const timelines = await Timeline.find({ 
+            project: req.params.projectId, 
+            isActive: true 
+        })
+        .populate('author', 'username firstName lastName')
+        .populate('events.characters', 'name role')
+        .populate('events.relatedStories', 'title type');
+        
+        res.json({ success: true, timelines });
+    } catch (error) {
+        console.error('Error loading timelines:', error);
+        res.status(500).json({ success: false, error: 'Failed to load timelines' });
+    }
+});
+
+// Create Timeline
+router.post('/timelines', ensureAuthenticated, ensureStoryAccess, async (req, res) => {
+    try {
+        const timeline = new Timeline({
+            ...req.body,
+            author: req.user._id
+        });
+        
+        await timeline.save();
+        res.json({ success: true, timeline, message: 'Timeline created successfully' });
+    } catch (error) {
+        console.error('Error creating timeline:', error);
+        res.status(500).json({ success: false, error: 'Failed to create timeline' });
+    }
+});
+
+// Update Timeline
+router.put('/timelines/:id', ensureAuthenticated, ensureStoryAccess, async (req, res) => {
+    try {
+        const timeline = await Timeline.findOne({ 
+            _id: req.params.id, 
+            author: req.user._id 
+        });
+        
+        if (!timeline) {
+            return res.status(404).json({ success: false, error: 'Timeline not found' });
+        }
+        
+        Object.assign(timeline, req.body);
+        await timeline.save();
+        
+        res.json({ success: true, timeline, message: 'Timeline updated successfully' });
+    } catch (error) {
+        console.error('Error updating timeline:', error);
+        res.status(500).json({ success: false, error: 'Failed to update timeline' });
+    }
+});
+
+// Add Timeline Event
+router.post('/timelines/:id/events', ensureAuthenticated, ensureStoryAccess, async (req, res) => {
+    try {
+        const timeline = await Timeline.findOne({ 
+            _id: req.params.id, 
+            author: req.user._id 
+        });
+        
+        if (!timeline) {
+            return res.status(404).json({ success: false, error: 'Timeline not found' });
+        }
+        
+        await timeline.addEvent(req.body);
+        
+        res.json({ success: true, timeline, message: 'Event added successfully' });
+    } catch (error) {
+        console.error('Error adding event:', error);
+        res.status(500).json({ success: false, error: 'Failed to add event' });
+    }
+});
+
+// Character Management
+router.get('/characters/:projectId', ensureAuthenticated, ensureStoryAccess, async (req, res) => {
+    try {
+        const project = await Project.findOne({
+            _id: req.params.projectId,
+            $or: [
+                { author: req.user._id },
+                { 'collaborators.user': req.user._id }
+            ]
+        });
+        
+        if (!project) {
+            return res.status(404).json({ success: false, error: 'Project not found' });
+        }
+        
+        const characters = await Character.find({ 
+            project: req.params.projectId, 
+            isActive: true 
+        })
+        .populate('author', 'username firstName lastName')
+        .populate('relationships.character', 'name role')
+        .populate('appearance.story', 'title type')
+        .populate('arc.keyMoments.chapter', 'title');
+        
+        res.json({ success: true, characters });
+    } catch (error) {
+        console.error('Error loading characters:', error);
+        res.status(500).json({ success: false, error: 'Failed to load characters' });
+    }
+});
+
+// Create Character
+router.post('/characters', ensureAuthenticated, ensureStoryAccess, async (req, res) => {
+    try {
+        const character = new Character({
+            ...req.body,
+            author: req.user._id
+        });
+        
+        await character.save();
+        res.json({ success: true, character, message: 'Character created successfully' });
+    } catch (error) {
+        console.error('Error creating character:', error);
+        res.status(500).json({ success: false, error: 'Failed to create character' });
+    }
+});
+
+// Update Character
+router.put('/characters/:id', ensureAuthenticated, ensureStoryAccess, async (req, res) => {
+    try {
+        const character = await Character.findOne({ 
+            _id: req.params.id, 
+            author: req.user._id 
+        });
+        
+        if (!character) {
+            return res.status(404).json({ success: false, error: 'Character not found' });
+        }
+        
+        Object.assign(character, req.body);
+        await character.save();
+        
+        res.json({ success: true, character, message: 'Character updated successfully' });
+    } catch (error) {
+        console.error('Error updating character:', error);
+        res.status(500).json({ success: false, error: 'Failed to update character' });
+    }
+});
+
+// Get Character Details
+router.get('/characters/detail/:id', ensureAuthenticated, ensureStoryAccess, async (req, res) => {
+    try {
+        const character = await Character.findOne({
+            _id: req.params.id,
+            $or: [
+                { author: req.user._id },
+                { project: { $in: await Project.find({ 
+                    'collaborators.user': req.user._id 
+                }).select('_id') }}
+            ]
+        })
+        .populate('project', 'title type')
+        .populate('relationships.character', 'name role displayName')
+        .populate('appearance.story', 'title type order')
+        .populate('arc.keyMoments.chapter', 'title order')
+        .populate('author', 'username firstName lastName');
+        
+        if (!character) {
+            return res.status(404).json({ success: false, error: 'Character not found' });
+        }
+        
+        res.json({ success: true, character });
+    } catch (error) {
+        console.error('Error loading character:', error);
+        res.status(500).json({ success: false, error: 'Failed to load character' });
+    }
+});
+
+module.exports = router;

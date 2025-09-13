@@ -14,6 +14,7 @@ const taskRoutes = require('./routes/tasks');
 const authRoutes = require('./routes/auth');
 const receivingRoutes = require('./routes/receiving');
 const foodRoutes = require('./routes/food');
+const storyRoutes = require('./routes/story');
 
 // Import authentication middleware
 const { ensureAuthenticated, ensureApproved, logPageView } = require('./middleware/auth');
@@ -396,6 +397,7 @@ app.use('/receiving', ensureAuthenticated, ensureApproved, receivingRoutes);
 app.use('/dropship', ensureAuthenticated, ensureApproved, dropshipRoutes);
 app.use('/dropship-test', ensureAuthenticated, ensureApproved, dropshipTestRoutes);
 app.use('/food', ensureAuthenticated, ensureApproved, foodRoutes);
+app.use('/story', ensureAuthenticated, ensureApproved, storyRoutes);
 // Temporary unprotected food routes for testing
 app.use('/food-test', foodRoutes);
 app.use('/api', ensureAuthenticated, ensureApproved, purchaseOrderRoutes); // API routes for AJAX calls

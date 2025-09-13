@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Story Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Georgia', serif;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .project-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        
+        .project-type-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .type-book { background: #e3f2fd; color: #1565c0; }
+        .type-collection { background: #f3e5f5; color: #7b1fa2; }
+        .type-short-story { background: #e8f5e8; color: #2e7d32; }
+        .type-memoir { background: #fff3e0; color: #ef6c00; }
+        .type-screenplay { background: #fce4ec; color: #c2185b; }
+        .type-poetry { background: #f1f8e9; color: #558b2f; }
+        .type-other { background: #f5f5f5; color: #616161; }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .status-planning { background: #fff3cd; color: #856404; }
+        .status-writing { background: #cce5ff; color: #004085; }
+        .status-editing { background: #d4edda; color: #155724; }
+        .status-reviewing { background: #e2e3e5; color: #383d41; }
+        .status-completed { background: #d1ecf1; color: #0c5460; }
+        .status-published { background: #d4edda; color: #155724; }
+        .status-archived { background: #f8d7da; color: #721c24; }
+        
+        .progress-bar-custom {
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .quick-action-btn {
+            border: 2px solid #667eea;
+            color: #667eea;
+            background: transparent;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .quick-action-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .recent-activity {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .activity-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .word-count-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        /* Navigation Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1000;
+            padding: 15px 0;
+            border-bottom: 1px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navigation-container {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .nav-section {
+            position: relative;
+        }
+
+        .nav-accordion-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            justify-content: space-between;
+        }
+
+        .nav-accordion-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-accordion-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            min-width: 220px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 5px;
+        }
+
+        .nav-accordion-content.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .nav-accordion-item {
+            display: block;
+            padding: 12px 16px;
+            color: #495057;
+            text-decoration: none;
+            border-bottom: 1px solid #f1f3f4;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .nav-accordion-item:hover {
+            background: #f8f9fa;
+            color: #28a745;
+            text-decoration: none;
+            padding-left: 20px;
+        }
+
+        .nav-accordion-divider {
+            height: 1px;
+            background: #dee2e6;
+            margin: 8px 12px;
+        }
+
+        .nav-options-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 100px;
+            justify-content: space-between;
+        }
+
+        .nav-options-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .user-status-indicator {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            background: #28a745;
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <div class="container">
+        <div class="header">
+            <h1 style="margin: 0; font-size: 1.5rem;">📚 Story Management</h1>
+            
+            <div class="d-flex align-items-center justify-content-between flex-grow-1">
+                <!-- Navigation Container -->
+                <div class="navigation-container">
+                    <!-- Dashboards Accordion -->
+                    <div class="nav-section">
+                        <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion')">
+                            📊 Dashboards <span class="accordion-icon">▼</span>
+                        </button>
+                        <div id="managersAccordion" class="nav-accordion-content">
+                            <% if (typeof user !== 'undefined' && user && user.permissions) { %>
+                                <a href="/dashboard" class="nav-accordion-item">🏠 Main Dashboard</a>
+                                <% if (user.permissions.accessReceiving) { %>
+                                    <a href="/receiving" class="nav-accordion-item">🚚 Receiving Dashboard</a>
+                                <% } %>
+                                <% if (user.permissions.accessTasks) { %>
+                                    <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
+                                <% } %>
+                                <% if (user.permissions.accessDropship) { %>
+                                    <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
+                                <% } %>
+                                <% if (user.permissions.accessFoodManagement) { %>
+                                    <a href="/food-dashboard" class="nav-accordion-item">🍽️ Food Management</a>
+                                <% } %>
+                                <% if (user.permissions.accessStoryManagement) { %>
+                                    <a href="/story/dashboard" class="nav-accordion-item">📚 Story Management</a>
+                                <% } %>
+                            <% } else { %>
+                                <!-- Fallback for users without defined permissions -->
+                                <a href="/dashboard" class="nav-accordion-item">🏠 Main Dashboard</a>
+                                <% if (user && (user.role === 'admin' || user.role === 'manager')) { %>
+                                    <a href="/receiving" class="nav-accordion-item">🚚 Receiving Dashboard</a>
+                                    <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
+                                    <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
+                                    <a href="/food-dashboard" class="nav-accordion-item">🍽️ Food Management</a>
+                                    <a href="/story/dashboard" class="nav-accordion-item">📚 Story Management</a>
+                                <% } %>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Options Button -->
+                    <div class="nav-section">
+                        <button class="nav-options-btn" onclick="toggleAccordion('optionsAccordion')">
+                            ⚙️ Options <span class="accordion-icon">▼</span>
+                        </button>
+                        <div id="optionsAccordion" class="nav-accordion-content">
+                            <% if (typeof user !== 'undefined' && user && user.permissions) { %>
+                                <% if (user.permissions.accessFileUpload) { %>
+                                    <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
+                                <% } %>
+                                <% if (user.permissions.accessOrganicVendors) { %>
+                                    <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
+                                <% } %>
+                            <% } else { %>
+                                <!-- Fallback for users without defined permissions -->
+                                <% if (user && (user.role === 'admin' || user.role === 'manager')) { %>
+                                    <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
+                                    <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
+                                <% } %>
+                            <% } %>
+                            
+                            <!-- Admin Options -->
+                            <% if (typeof user !== 'undefined' && user && (user.role === 'admin' || user.role === 'manager')) { %>
+                            <div class="nav-accordion-divider"></div>
+                            <a href="/auth/admin/users" class="nav-accordion-item">👥 User Management</a>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- User Info -->
+                <% if (typeof user !== 'undefined' && user) { %>
+                <div class="user-info" title="<%= user.firstName %> <%= user.lastName %> (<%= user.role %>) - Online">
+                    <div class="user-avatar">
+                        <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                        <div class="user-status-indicator" title="Online"></div>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <form action="/auth/logout" method="POST" style="margin: 0;">
+                                    <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <% } else { %>
+                <div class="user-info">
+                    <a href="/auth/login" class="btn btn-primary btn-sm">Login</a>
+                </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-4 mb-3">
+                        <i class="fas fa-feather-alt me-3"></i>Story Management
+                    </h1>
+                    <p class="lead mb-4">Your creative writing workspace for projects, stories, characters, and timelines</p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <button class="btn btn-light btn-lg" onclick="createNewProject()">
+                            <i class="fas fa-plus me-2"></i>New Project
+                        </button>
+                        <a href="/story/write" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-pen me-2"></i>Start Writing
+                        </a>
+                        <a href="/story/projects" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-folder me-2"></i>All Projects
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="fas fa-book-open" style="font-size: 8rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Statistics Row -->
+        <div class="row mb-5">
+            <div class="col-md-3 mb-3">
+                <div class="stats-card text-center">
+                    <div class="stats-number"><%= stats.totalProjects || 0 %></div>
+                    <div class="text-muted">Projects</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card text-center">
+                    <div class="stats-number word-count-display"><%= (stats.totalWordCount || 0).toLocaleString() %></div>
+                    <div class="text-muted">Total Words</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card text-center">
+                    <div class="stats-number"><%= Math.round(stats.averageCompletion || 0) %>%</div>
+                    <div class="text-muted">Avg. Progress</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card text-center">
+                    <div class="stats-number"><%= recentStories.length %></div>
+                    <div class="text-muted">Recent Stories</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Recent Projects -->
+            <div class="col-lg-8 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3><i class="fas fa-project-diagram me-2 text-primary"></i>Recent Projects</h3>
+                    <a href="/story/projects" class="btn btn-outline-primary btn-sm">View All</a>
+                </div>
+                
+                <% if (projects && projects.length > 0) { %>
+                    <% projects.forEach(project => { %>
+                        <div class="project-card">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h5 class="mb-2">
+                                        <a href="/story/projects/<%= project._id %>" class="text-decoration-none text-dark">
+                                            <%= project.title %>
+                                        </a>
+                                    </h5>
+                                    <div class="mb-2">
+                                        <span class="project-type-badge type-<%= project.type %>">
+                                            <%= project.type.charAt(0).toUpperCase() + project.type.slice(1).replace('-', ' ') %>
+                                        </span>
+                                        <span class="status-badge status-<%= project.status %> ms-2">
+                                            <%= project.status.charAt(0).toUpperCase() + project.status.slice(1) %>
+                                        </span>
+                                    </div>
+                                    <% if (project.description) { %>
+                                        <p class="text-muted small mb-2"><%= project.description.substring(0, 100) %>...</p>
+                                    <% } %>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <div class="word-count-display mb-1"><%= project.currentWordCount.toLocaleString() %></div>
+                                        <small class="text-muted">words</small>
+                                        <% if (project.targetWordCount) { %>
+                                            <div class="progress-bar-custom mt-2">
+                                                <div class="progress-fill" style="width: <%= Math.min(project.completionPercentage || 0, 100) %>%"></div>
+                                            </div>
+                                            <small class="text-muted"><%= Math.round(project.completionPercentage || 0) %>% complete</small>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    <div class="btn-group">
+                                        <a href="/story/write?project=<%= project._id %>" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-pen"></i> Write
+                                        </a>
+                                        <a href="/story/projects/<%= project._id %>" class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            Updated <%= new Date(project.updatedAt).toLocaleDateString() %>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="text-center py-5">
+                        <i class="fas fa-book-open text-muted" style="font-size: 4rem;"></i>
+                        <h4 class="text-muted mt-3">No projects yet</h4>
+                        <p class="text-muted">Create your first writing project to get started</p>
+                        <button class="btn btn-primary" onclick="createNewProject()">
+                            <i class="fas fa-plus me-2"></i>Create Your First Project
+                        </button>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Quick Actions -->
+                <div class="recent-activity mb-4">
+                    <h5 class="mb-3"><i class="fas fa-bolt me-2 text-warning"></i>Quick Actions</h5>
+                    <div class="d-grid gap-2">
+                        <button class="quick-action-btn" onclick="createNewProject()">
+                            <i class="fas fa-plus me-2"></i>New Project
+                        </button>
+                        <a href="/story/write" class="quick-action-btn text-decoration-none text-center">
+                            <i class="fas fa-pen me-2"></i>Quick Write
+                        </a>
+                        <button class="quick-action-btn" onclick="importContent()">
+                            <i class="fas fa-file-import me-2"></i>Import Content
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="recent-activity">
+                    <h5 class="mb-3"><i class="fas fa-clock me-2 text-info"></i>Recent Stories</h5>
+                    <% if (recentStories && recentStories.length > 0) { %>
+                        <% recentStories.forEach(story => { %>
+                            <div class="activity-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <a href="/story/write/<%= story._id %>" class="text-decoration-none">
+                                                <%= story.title %>
+                                            </a>
+                                        </h6>
+                                        <small class="text-muted">
+                                            <%= story.project.title %> • <%= story.wordCount.toLocaleString() %> words
+                                        </small>
+                                    </div>
+                                    <small class="text-muted">
+                                        <%= new Date(story.updatedAt).toLocaleDateString() %>
+                                    </small>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p class="text-muted text-center py-3">No recent stories</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Project Modal -->
+    <div class="modal fade" id="createProjectModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createProjectForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Title *</label>
+                                    <input type="text" class="form-control" name="title" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Type *</label>
+                                    <select class="form-select" name="type" required>
+                                        <option value="">Select type...</option>
+                                        <option value="book">Book</option>
+                                        <option value="collection">Collection</option>
+                                        <option value="short-story">Short Story</option>
+                                        <option value="memoir">Memoir</option>
+                                        <option value="screenplay">Screenplay</option>
+                                        <option value="poetry">Poetry</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Genre</label>
+                                    <input type="text" class="form-control" name="genre" placeholder="e.g., Fiction, Mystery, Romance">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Target Word Count</label>
+                                    <input type="number" class="form-control" name="targetWordCount" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" rows="3" placeholder="Brief description of your project..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Deadline (Optional)</label>
+                            <input type="date" class="form-control" name="deadline">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveProject()">Create Project</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function createNewProject() {
+            new bootstrap.Modal(document.getElementById('createProjectModal')).show();
+        }
+
+        async function saveProject() {
+            const form = document.getElementById('createProjectForm');
+            const formData = new FormData(form);
+            const projectData = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/story/projects', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(projectData)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('createProjectModal')).hide();
+                    window.location.href = `/story/projects/${result.project._id}`;
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error creating project: ' + error.message);
+            }
+        }
+
+        function importContent() {
+            alert('Import functionality coming soon! You can copy and paste content directly into the writing interface for now.');
+        }
+
+        // Navigation functionality
+        function toggleAccordion(accordionId) {
+            const accordionContent = document.getElementById(accordionId);
+            const allAccordions = document.querySelectorAll('.nav-accordion-content');
+            
+            // Close all other accordions
+            allAccordions.forEach(accordion => {
+                if (accordion.id !== accordionId) {
+                    accordion.classList.remove('show');
+                }
+            });
+            
+            // Toggle the current accordion
+            accordionContent.classList.toggle('show');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.nav-section')) {
+                document.querySelectorAll('.nav-accordion-content').forEach(content => {
+                    content.classList.remove('show');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

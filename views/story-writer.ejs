@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle || 'Story Writer' %> - Story Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Georgia', serif;
+        }
+        
+        .writer-header {
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .writing-area {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            min-height: 600px;
+        }
+        
+        .story-title-input {
+            border: none;
+            font-size: 1.8rem;
+            font-weight: bold;
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+            width: 100%;
+        }
+        
+        .story-title-input:focus {
+            outline: none;
+            border-bottom: 2px solid #007bff;
+        }
+        
+        .story-content {
+            border: none;
+            padding: 2rem;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            min-height: 500px;
+            resize: none;
+            width: 100%;
+            font-family: 'Georgia', serif;
+        }
+        
+        .story-content:focus {
+            outline: none;
+        }
+        
+        .word-count-display {
+            font-family: 'Courier New', monospace;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .save-indicator {
+            color: #28a745;
+            font-size: 0.9rem;
+        }
+        
+        .save-indicator.saving {
+            color: #ffc107;
+        }
+        
+        .save-indicator.error {
+            color: #dc3545;
+        }
+        
+        .sidebar {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            height: fit-content;
+        }
+        
+        .project-selector {
+            margin-bottom: 1rem;
+        }
+        
+        .writing-tools {
+            border-top: 1px solid #e9ecef;
+            padding-top: 1rem;
+        }
+        
+        .tool-button {
+            border: 1px solid #dee2e6;
+            background: white;
+            color: #6c757d;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .tool-button:hover {
+            background: #f8f9fa;
+            color: #495057;
+        }
+        
+        .tool-button.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-draft { background: #fff3cd; color: #856404; }
+        .status-writing { background: #cce5ff; color: #004085; }
+        .status-editing { background: #d4edda; color: #155724; }
+        .status-review { background: #e2e3e5; color: #383d41; }
+        .status-completed { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="writer-header">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-3">
+                    <a href="/story/dashboard" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+                <div class="col-md-6 text-center">
+                    <div class="d-flex align-items-center justify-content-center gap-3">
+                        <div class="save-indicator" id="saveIndicator">
+                            <i class="fas fa-check-circle me-1"></i>Saved
+                        </div>
+                        <div class="word-count-display">
+                            <span id="wordCount">0</span> words | <span id="charCount">0</span> chars
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 text-end">
+                    <div class="btn-group">
+                        <button class="btn btn-primary btn-sm" onclick="saveStory()">
+                            <i class="fas fa-save me-1"></i>Save
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="togglePreview()">
+                            <i class="fas fa-eye me-1"></i>Preview
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <!-- Main Writing Area -->
+            <div class="col-lg-9">
+                <div class="writing-area">
+                    <input 
+                        type="text" 
+                        class="story-title-input" 
+                        id="storyTitle"
+                        placeholder="Story Title..."
+                        value="<%= story ? story.title : '' %>"
+                    >
+                    <textarea 
+                        class="story-content" 
+                        id="storyContent"
+                        placeholder="Start writing your story here..."
+                        oninput="updateWordCount(); autoSave()"
+                    ><%= story ? story.content : '' %></textarea>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-3">
+                <!-- Project Selection -->
+                <div class="sidebar mb-3">
+                    <h6><i class="fas fa-folder me-2"></i>Project</h6>
+                    <div class="project-selector">
+                        <select class="form-select" id="projectSelect" onchange="updateProject()">
+                            <option value="">Select project...</option>
+                            <% projects.forEach(proj => { %>
+                                <option value="<%= proj._id %>" <%= (story && story.project._id.toString() === proj._id.toString()) || (project && project._id.toString() === proj._id.toString()) ? 'selected' : '' %>>
+                                    <%= proj.title %>
+                                </option>
+                            <% }); %>
+                        </select>
+                        <button class="btn btn-outline-primary btn-sm w-100 mt-2" onclick="showQuickProjectCreator()">
+                            <i class="fas fa-plus me-1"></i>Create New Project
+                        </button>
+                    </div>
+                    
+                    <!-- Quick Project Creator (hidden by default) -->
+                    <div id="quickProjectCreator" class="mt-3" style="display: none;">
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="mb-2">Create New Project</h6>
+                            <div class="mb-2">
+                                <input type="text" class="form-control form-control-sm" id="quickProjectTitle" placeholder="Project title...">
+                            </div>
+                            <div class="mb-2">
+                                <select class="form-select form-select-sm" id="quickProjectType">
+                                    <option value="novel">Novel</option>
+                                    <option value="short-story">Short Story</option>
+                                    <option value="collection">Collection</option>
+                                    <option value="memoir">Memoir</option>
+                                    <option value="poetry">Poetry</option>
+                                    <option value="screenplay">Screenplay</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary btn-sm flex-fill" onclick="createQuickProject()">
+                                    <i class="fas fa-check me-1"></i>Create
+                                </button>
+                                <button class="btn btn-secondary btn-sm" onclick="hideQuickProjectCreator()">
+                                    <i class="fas fa-times me-1"></i>Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <% if (story && story.project) { %>
+                        <small class="text-muted">
+                            <strong>Type:</strong> <%= story.project.type %><br>
+                            <strong>Status:</strong> 
+                            <span class="status-badge status-<%= story.status || 'draft' %>">
+                                <%= (story.status || 'draft').charAt(0).toUpperCase() + (story.status || 'draft').slice(1) %>
+                            </span>
+                        </small>
+                    <% } %>
+                </div>
+
+                <!-- Story Settings -->
+                <div class="sidebar mb-3">
+                    <h6><i class="fas fa-cog me-2"></i>Story Settings</h6>
+                    <div class="mb-2">
+                        <label class="form-label small">Status</label>
+                        <select class="form-select form-select-sm" id="storyStatus">
+                            <option value="draft" <%= (!story || story.status === 'draft') ? 'selected' : '' %>>Draft</option>
+                            <option value="writing" <%= (story && story.status === 'writing') ? 'selected' : '' %>>Writing</option>
+                            <option value="editing" <%= (story && story.status === 'editing') ? 'selected' : '' %>>Editing</option>
+                            <option value="review" <%= (story && story.status === 'review') ? 'selected' : '' %>>Review</option>
+                            <option value="completed" <%= (story && story.status === 'completed') ? 'selected' : '' %>>Completed</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small">Type</label>
+                        <select class="form-select form-select-sm" id="storyType">
+                            <option value="chapter" <%= (!story || story.type === 'chapter') ? 'selected' : '' %>>Chapter</option>
+                            <option value="scene" <%= (story && story.type === 'scene') ? 'selected' : '' %>>Scene</option>
+                            <option value="short-story" <%= (story && story.type === 'short-story') ? 'selected' : '' %>>Short Story</option>
+                            <option value="poem" <%= (story && story.type === 'poem') ? 'selected' : '' %>>Poem</option>
+                            <option value="note" <%= (story && story.type === 'note') ? 'selected' : '' %>>Note</option>
+                            <option value="outline" <%= (story && story.type === 'outline') ? 'selected' : '' %>>Outline</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Writing Tools -->
+                <div class="sidebar mb-3">
+                    <h6><i class="fas fa-tools me-2"></i>Writing Tools</h6>
+                    <div class="writing-tools">
+                        <button class="tool-button" onclick="formatText('bold')" title="Bold">
+                            <i class="fas fa-bold"></i>
+                        </button>
+                        <button class="tool-button" onclick="formatText('italic')" title="Italic">
+                            <i class="fas fa-italic"></i>
+                        </button>
+                        <button class="tool-button" onclick="formatText('underline')" title="Underline">
+                            <i class="fas fa-underline"></i>
+                        </button>
+                        <button class="tool-button" onclick="insertBreak()" title="Page Break">
+                            <i class="fas fa-file-alt"></i>
+                        </button>
+                        <button class="tool-button" onclick="focusMode()" title="Focus Mode">
+                            <i class="fas fa-eye-slash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="sidebar">
+                    <h6><i class="fas fa-chart-simple me-2"></i>Quick Stats</h6>
+                    <div class="small">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Words:</span>
+                            <span id="sidebarWordCount">0</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Characters:</span>
+                            <span id="sidebarCharCount">0</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Reading time:</span>
+                            <span id="readingTime">0 min</span>
+                        </div>
+                        <% if (story && story.createdAt) { %>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Created:</span>
+                                <span><%= new Date(story.createdAt).toLocaleDateString() %></span>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentStory = null;
+        <% if (story) { %>
+            currentStory = <%- JSON.stringify(story) %>;
+        <% } %>
+        let saveTimeout;
+        let isAutoSaving = false;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateWordCount();
+            setupAutoSave();
+        });
+
+        function updateWordCount() {
+            const content = document.getElementById('storyContent').value;
+            const words = content.trim() === '' ? 0 : content.trim().split(/\s+/).length;
+            const chars = content.length;
+            const readingTime = Math.ceil(words / 200); // 200 words per minute
+
+            document.getElementById('wordCount').textContent = words.toLocaleString();
+            document.getElementById('charCount').textContent = chars.toLocaleString();
+            document.getElementById('sidebarWordCount').textContent = words.toLocaleString();
+            document.getElementById('sidebarCharCount').textContent = chars.toLocaleString();
+            document.getElementById('readingTime').textContent = readingTime + ' min';
+        }
+
+        function setupAutoSave() {
+            const title = document.getElementById('storyTitle');
+            const content = document.getElementById('storyContent');
+            
+            title.addEventListener('input', function() {
+                autoSave();
+            });
+            
+            // Auto-save every 30 seconds when content changes
+            content.addEventListener('input', function() {
+                updateWordCount();
+                autoSave();
+            });
+        }
+
+        function autoSave() {
+            if (isAutoSaving) return;
+            
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveStory(true);
+            }, 2000); // Auto-save after 2 seconds of inactivity
+        }
+
+        // Quick Project Creation Functions
+        function showQuickProjectCreator() {
+            document.getElementById('quickProjectCreator').style.display = 'block';
+            document.getElementById('quickProjectTitle').focus();
+        }
+
+        function hideQuickProjectCreator() {
+            document.getElementById('quickProjectCreator').style.display = 'none';
+            document.getElementById('quickProjectTitle').value = '';
+            document.getElementById('quickProjectType').value = 'novel';
+        }
+
+        async function createQuickProject() {
+            const title = document.getElementById('quickProjectTitle').value.trim();
+            const type = document.getElementById('quickProjectType').value;
+
+            if (!title) {
+                alert('Please enter a project title.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/story/projects', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        type: type,
+                        description: `Created while writing a story`,
+                        wordCountGoal: type === 'novel' ? 80000 : type === 'short-story' ? 5000 : 10000
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Add the new project to the select dropdown
+                    const projectSelect = document.getElementById('projectSelect');
+                    const option = new Option(title, result.project._id, true, true);
+                    projectSelect.add(option);
+                    
+                    // Hide the creator
+                    hideQuickProjectCreator();
+                    
+                    // Show success message
+                    const saveIndicator = document.getElementById('saveIndicator');
+                    saveIndicator.innerHTML = '<i class="fas fa-check me-1"></i>Project created!';
+                    saveIndicator.className = 'save-indicator';
+                    
+                    // Clear the message after 2 seconds
+                    setTimeout(() => {
+                        saveIndicator.innerHTML = '<i class="fas fa-clock me-1"></i>Ready to save';
+                        saveIndicator.className = 'save-indicator';
+                    }, 2000);
+                } else {
+                    alert('Error creating project: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error creating project:', error);
+                alert('Error creating project: ' + error.message);
+            }
+        }
+
+        async function saveStory(isAutoSave = false) {
+            const title = document.getElementById('storyTitle').value.trim();
+            const content = document.getElementById('storyContent').value;
+            const projectId = document.getElementById('projectSelect').value;
+            const status = document.getElementById('storyStatus').value;
+            const type = document.getElementById('storyType').value;
+
+            if (!title && !content) {
+                if (!isAutoSave) {
+                    alert('Please add a title or content before saving.');
+                }
+                return;
+            }
+
+            if (!projectId) {
+                if (!isAutoSave) {
+                    const createProject = confirm('No project selected. Would you like to create a new project now?');
+                    if (createProject) {
+                        showQuickProjectCreator();
+                        return;
+                    } else {
+                        alert('Please select a project before saving.');
+                        return;
+                    }
+                }
+                return;
+            }
+
+            isAutoSaving = isAutoSave;
+            
+            const saveIndicator = document.getElementById('saveIndicator');
+            saveIndicator.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Saving...';
+            saveIndicator.className = 'save-indicator saving';
+
+            try {
+                const data = {
+                    title: title || 'Untitled',
+                    content,
+                    projectId,
+                    status,
+                    type
+                };
+
+                if (currentStory) {
+                    data.storyId = currentStory._id;
+                }
+
+                const response = await fetch('/story/stories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    currentStory = result.story;
+                    saveIndicator.innerHTML = '<i class="fas fa-check-circle me-1"></i>Saved';
+                    saveIndicator.className = 'save-indicator';
+                    
+                    if (!isAutoSave) {
+                        // Update URL if this is a new story
+                        if (window.location.pathname === '/story/write') {
+                            window.history.replaceState({}, '', `/story/write/${currentStory._id}`);
+                        }
+                    }
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                saveIndicator.innerHTML = '<i class="fas fa-exclamation-circle me-1"></i>Error';
+                saveIndicator.className = 'save-indicator error';
+                
+                if (!isAutoSave) {
+                    alert('Error saving story: ' + error.message);
+                }
+            } finally {
+                isAutoSaving = false;
+            }
+        }
+
+        function togglePreview() {
+            // Simple preview toggle - could be enhanced with a proper preview window
+            const content = document.getElementById('storyContent');
+            if (content.style.fontFamily === 'monospace') {
+                content.style.fontFamily = 'Georgia, serif';
+                content.style.fontSize = '1.1rem';
+            } else {
+                content.style.fontFamily = 'monospace';
+                content.style.fontSize = '0.9rem';
+            }
+        }
+
+        function formatText(command) {
+            // Basic text formatting - could be enhanced with more sophisticated editing
+            const content = document.getElementById('storyContent');
+            const start = content.selectionStart;
+            const end = content.selectionEnd;
+            const selectedText = content.value.substring(start, end);
+            
+            if (selectedText) {
+                let formattedText;
+                switch(command) {
+                    case 'bold':
+                        formattedText = `**${selectedText}**`;
+                        break;
+                    case 'italic':
+                        formattedText = `*${selectedText}*`;
+                        break;
+                    case 'underline':
+                        formattedText = `_${selectedText}_`;
+                        break;
+                    default:
+                        formattedText = selectedText;
+                }
+                
+                content.value = content.value.substring(0, start) + formattedText + content.value.substring(end);
+                content.focus();
+                content.setSelectionRange(start, start + formattedText.length);
+                updateWordCount();
+                autoSave();
+            }
+        }
+
+        function insertBreak() {
+            const content = document.getElementById('storyContent');
+            const cursorPos = content.selectionStart;
+            const textBefore = content.value.substring(0, cursorPos);
+            const textAfter = content.value.substring(cursorPos);
+            
+            content.value = textBefore + '\n\n---\n\n' + textAfter;
+            content.focus();
+            content.setSelectionRange(cursorPos + 6, cursorPos + 6);
+            updateWordCount();
+            autoSave();
+        }
+
+        function focusMode() {
+            document.body.classList.toggle('focus-mode');
+            // Could add CSS for focus mode to hide sidebar and other distractions
+        }
+
+        function updateProject() {
+            // This would update the current project context
+            // For now, we just trigger an auto-save
+            autoSave();
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 's':
+                        e.preventDefault();
+                        saveStory();
+                        break;
+                    case 'b':
+                        e.preventDefault();
+                        formatText('bold');
+                        break;
+                    case 'i':
+                        e.preventDefault();
+                        formatText('italic');
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
