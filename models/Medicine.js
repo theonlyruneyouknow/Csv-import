@@ -1,6 +1,20 @@
 const mongoose = require('mongoose');
 
 const medicineSchema = new mongoose.Schema({
+    // User and Family Member Information
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+        index: true
+    },
+    familyMember: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'FamilyMember',
+        required: true,
+        index: true
+    },
+    
     // Basic Information
     name: {
         type: String,

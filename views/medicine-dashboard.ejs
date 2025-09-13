@@ -402,6 +402,9 @@
                         <a href="/medicine/medicines" class="btn btn-outline-light btn-lg">
                             <i class="fas fa-list me-2"></i>All Medicines
                         </a>
+                        <a href="/medicine/family" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-users me-2"></i>Family Members
+                        </a>
                         <a href="/medicine/pharmacies" class="btn btn-outline-light btn-lg">
                             <i class="fas fa-store me-2"></i>Pharmacies
                         </a>
@@ -415,6 +418,33 @@
     </div>
 
     <div class="container">
+        <!-- Family Member Selector -->
+        <% if (familyMembers && familyMembers.length > 1) { %>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h6 class="mb-0"><i class="fas fa-users me-2"></i>Viewing medicines for:</h6>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-select" id="familyMemberSelector" onchange="filterByFamilyMember()">
+                                    <option value="all" <%= selectedMemberId === 'all' ? 'selected' : '' %>>All Family Members</option>
+                                    <% familyMembers.forEach(member => { %>
+                                        <option value="<%= member._id %>" <%= selectedMemberId === member._id.toString() ? 'selected' : '' %>>
+                                            <%= member.getDisplayName() %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% } %>
+
         <!-- Statistics Cards -->
         <div class="row mb-4">
             <div class="col-md-3 col-sm-6 mb-3">
@@ -483,6 +513,11 @@
                                             <span class="medicine-status status-<%= medicine.status %>">
                                                 <%= medicine.status.charAt(0).toUpperCase() + medicine.status.slice(1) %>
                                             </span>
+                                            <% if (familyMembers && familyMembers.length > 1 && selectedMemberId === 'all') { %>
+                                                <small class="text-muted ms-2">
+                                                    (<%= medicine.familyMember ? medicine.familyMember.getDisplayName() : 'Unknown' %>)
+                                                </small>
+                                            <% } %>
                                         </h5>
                                         <p class="text-muted mb-1">
                                             <strong><%= medicine.strength %></strong> - <%= medicine.form %>
@@ -668,8 +703,20 @@
         }
 
         function addPharmacy() {
-            // TODO: Implement pharmacy modal or redirect to pharmacy form
-            alert('Pharmacy management coming soon!');
+            window.location.href = '/medicine/pharmacies/new';
+        }
+
+        function filterByFamilyMember() {
+            const selectedMember = document.getElementById('familyMemberSelector').value;
+            const currentUrl = new URL(window.location);
+            
+            if (selectedMember === 'all') {
+                currentUrl.searchParams.delete('member');
+            } else {
+                currentUrl.searchParams.set('member', selectedMember);
+            }
+            
+            window.location.href = currentUrl.toString();
         }
 
         async function takeMedicine(medicineId, scheduledTime = null) {

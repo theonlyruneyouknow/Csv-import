@@ -140,46 +140,38 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="name" class="form-label">Medicine Name <span class="required">*</span></label>
-                            <input type="text" class="form-control" id="name" name="name" required placeholder="e.g., Lisinopril">
+                            <label for="familyMember" class="form-label">Family Member <span class="required">*</span></label>
+                            <select class="form-select" id="familyMember" name="familyMember" required>
+                                <option value="">Select family member...</option>
+                                <% if (familyMembers) { %>
+                                    <% familyMembers.forEach(member => { %>
+                                        <option value="<%= member._id %>" <%= medicine && medicine.familyMember && medicine.familyMember.toString() === member._id.toString() ? 'selected' : '' %>>
+                                            <%= member.getDisplayName() %>
+                                        </option>
+                                    <% }); %>
+                                <% } %>
+                            </select>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="genericName" class="form-label">Generic Name</label>
-                            <input type="text" class="form-control" id="genericName" name="genericName" placeholder="e.g., ACE Inhibitor">
+                            <label for="name" class="form-label">Medicine Name <span class="required">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" required placeholder="e.g., Lisinopril" value="<%= medicine ? medicine.name : '' %>">
                         </div>
                     </div>
                 </div>
 
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="form-group">
-                            <label for="strength" class="form-label">Strength <span class="required">*</span></label>
-                            <input type="text" class="form-control" id="strength" name="strength" required placeholder="e.g., 10mg">
+                            <label for="genericName" class="form-label">Generic Name</label>
+                            <input type="text" class="form-control" id="genericName" name="genericName" placeholder="e.g., ACE Inhibitor" value="<%= medicine ? medicine.genericName : '' %>">
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="form" class="form-label">Form <span class="required">*</span></label>
-                            <select class="form-select" id="form" name="form" required>
-                                <option value="">Select form...</option>
-                                <option value="tablet">Tablet</option>
-                                <option value="capsule">Capsule</option>
-                                <option value="liquid">Liquid</option>
-                                <option value="injection">Injection</option>
-                                <option value="topical">Topical</option>
-                                <option value="inhaler">Inhaler</option>
-                                <option value="drops">Drops</option>
-                                <option value="patch">Patch</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <label for="condition" class="form-label">Condition/Purpose</label>
-                            <input type="text" class="form-control" id="condition" name="condition" placeholder="e.g., High Blood Pressure">
+                            <input type="text" class="form-control" id="condition" name="condition" placeholder="e.g., High Blood Pressure" value="<%= medicine ? medicine.condition : '' %>">
                         </div>
                     </div>
                 </div>

@@ -3,6 +3,7 @@ const router = express.Router();
 const Medicine = require('../models/Medicine');
 const MedicationLog = require('../models/MedicationLog');
 const Pharmacy = require('../models/Pharmacy');
+const FamilyMember = require('../models/FamilyMember');
 
 // Middleware to check if user has access to medicine management
 const ensureMedicineAccess = (req, res, next) => {
@@ -17,15 +18,41 @@ const ensureMedicineAccess = (req, res, next) => {
 // Medicine Dashboard
 router.get('/dashboard', ensureMedicineAccess, async (req, res) => {
     try {
+        // Get selected family member from query params (default to 'all')
+        const selectedMemberId = req.query.member || 'all';
+        
+        // Get all family members for the user
+        const familyMembers = await FamilyMember.findByUser(req.user._id);
+        
+        // Ensure 'self' member exists
+        await FamilyMember.findOrCreateSelf(req.user._id, {
+            firstName: req.user.firstName,
+            lastName: req.user.lastName
+        });
+        
+        // Build medicine query based on selected family member
+        let medicineQuery = { user: req.user._id, status: 'active' };
+        if (selectedMemberId !== 'all') {
+            medicineQuery.familyMember = selectedMemberId;
+        }
+        
+        // Build log query based on selected family member
+        let logQuery = { 'medicine.user': req.user._id };
+        if (selectedMemberId !== 'all') {
+            logQuery.familyMember = selectedMemberId;
+        }
+        
         const [medicines, recentLogs, pharmacies, stats] = await Promise.all([
             // Active medicines
-            Medicine.find({ user: req.user._id, status: 'active' })
+            Medicine.find(medicineQuery)
+                .populate('familyMember', 'firstName lastName relationship')
                 .sort({ createdAt: -1 })
                 .limit(10),
             
             // Recent medication logs
-            MedicationLog.find({ user: req.user._id })
+            MedicationLog.find(logQuery)
                 .populate('medicine', 'name strength form')
+                .populate('familyMember', 'firstName lastName relationship')
                 .sort({ takenAt: -1 })
                 .limit(5),
             
@@ -84,6 +111,8 @@ router.get('/dashboard', ensureMedicineAccess, async (req, res) => {
             stats: projectStats,
             medicinesNeedingRefill,
             upcomingDoses,
+            familyMembers,
+            selectedMemberId,
             title: 'Medicine Management Dashboard'
         });
     } catch (error) {
@@ -134,12 +163,22 @@ router.get('/medicines', ensureMedicineAccess, async (req, res) => {
 // Add new medicine form
 router.get('/medicines/new', ensureMedicineAccess, async (req, res) => {
     try {
-        const pharmacies = await Pharmacy.find({ user: req.user._id, isActive: true });
+        const [pharmacies, familyMembers] = await Promise.all([
+            Pharmacy.find({ user: req.user._id, isActive: true }),
+            FamilyMember.findByUser(req.user._id)
+        ]);
+        
+        // Ensure 'self' member exists
+        await FamilyMember.findOrCreateSelf(req.user._id, {
+            firstName: req.user.firstName,
+            lastName: req.user.lastName
+        });
         
         res.render('medicine-form', {
             user: req.user,
             medicine: null,
             pharmacies,
+            familyMembers,
             isEdit: false,
             title: 'Add New Medicine'
         });
@@ -156,6 +195,26 @@ router.post('/medicines', ensureMedicineAccess, async (req, res) => {
             ...req.body,
             user: req.user._id
         };
+        
+        // Validate family member exists and belongs to user
+        if (req.body.familyMember) {
+            const familyMember = await FamilyMember.findOne({
+                _id: req.body.familyMember,
+                user: req.user._id
+            });
+            
+            if (!familyMember) {
+                return res.status(400).render('medicine-form', {
+                    error: 'Invalid family member selected',
+                    user: req.user,
+                    medicine: req.body,
+                    familyMembers: await FamilyMember.findByUser(req.user._id),
+                    pharmacies: await Pharmacy.find({ user: req.user._id, isActive: true }),
+                    isEdit: false,
+                    title: 'Add New Medicine'
+                });
+            }
+        }
         
         // Parse dosage times
         if (req.body.timesToTake) {
@@ -391,6 +450,152 @@ router.post('/pharmacies', ensureMedicineAccess, async (req, res) => {
     } catch (error) {
         console.error('Error creating pharmacy:', error);
         res.status(500).json({ error: 'Error creating pharmacy' });
+    }
+});
+
+// Family Member Management Routes
+
+// Get family members list
+router.get('/family', ensureMedicineAccess, async (req, res) => {
+    try {
+        const familyMembers = await FamilyMember.findByUser(req.user._id);
+        
+        res.render('family-members', {
+            user: req.user,
+            familyMembers,
+            title: 'Family Members'
+        });
+    } catch (error) {
+        console.error('Error loading family members:', error);
+        res.status(500).render('error', { message: 'Error loading family members' });
+    }
+});
+
+// Add new family member form
+router.get('/family/new', ensureMedicineAccess, async (req, res) => {
+    try {
+        res.render('family-member-form', {
+            user: req.user,
+            familyMember: null,
+            isEdit: false,
+            title: 'Add Family Member'
+        });
+    } catch (error) {
+        console.error('Error loading family member form:', error);
+        res.status(500).render('error', { message: 'Error loading form' });
+    }
+});
+
+// Create new family member
+router.post('/family', ensureMedicineAccess, async (req, res) => {
+    try {
+        const familyMemberData = {
+            ...req.body,
+            user: req.user._id
+        };
+        
+        const familyMember = new FamilyMember(familyMemberData);
+        await familyMember.save();
+        
+        res.redirect('/medicine/family?success=Family member added successfully');
+    } catch (error) {
+        console.error('Error creating family member:', error);
+        
+        if (error.message.includes('Only one "self" family member')) {
+            return res.render('family-member-form', {
+                error: 'You can only have one "self" family member',
+                user: req.user,
+                familyMember: req.body,
+                isEdit: false,
+                title: 'Add Family Member'
+            });
+        }
+        
+        res.render('family-member-form', {
+            error: 'Error creating family member: ' + error.message,
+            user: req.user,
+            familyMember: req.body,
+            isEdit: false,
+            title: 'Add Family Member'
+        });
+    }
+});
+
+// Edit family member form
+router.get('/family/:id/edit', ensureMedicineAccess, async (req, res) => {
+    try {
+        const familyMember = await FamilyMember.findOne({
+            _id: req.params.id,
+            user: req.user._id
+        });
+        
+        if (!familyMember) {
+            return res.status(404).render('error', { message: 'Family member not found' });
+        }
+        
+        res.render('family-member-form', {
+            user: req.user,
+            familyMember,
+            isEdit: true,
+            title: 'Edit Family Member'
+        });
+    } catch (error) {
+        console.error('Error loading family member:', error);
+        res.status(500).render('error', { message: 'Error loading family member' });
+    }
+});
+
+// Update family member
+router.put('/family/:id', ensureMedicineAccess, async (req, res) => {
+    try {
+        const familyMember = await FamilyMember.findOne({
+            _id: req.params.id,
+            user: req.user._id
+        });
+        
+        if (!familyMember) {
+            return res.status(404).json({ error: 'Family member not found' });
+        }
+        
+        Object.assign(familyMember, req.body);
+        await familyMember.save();
+        
+        res.json({ success: true, message: 'Family member updated successfully' });
+    } catch (error) {
+        console.error('Error updating family member:', error);
+        res.status(500).json({ error: 'Error updating family member' });
+    }
+});
+
+// Delete family member
+router.delete('/family/:id', ensureMedicineAccess, async (req, res) => {
+    try {
+        const familyMember = await FamilyMember.findOne({
+            _id: req.params.id,
+            user: req.user._id
+        });
+        
+        if (!familyMember) {
+            return res.status(404).json({ error: 'Family member not found' });
+        }
+        
+        // Check if family member has medicines
+        const medicineCount = await Medicine.countDocuments({ familyMember: familyMember._id });
+        
+        if (medicineCount > 0) {
+            return res.status(400).json({ 
+                error: 'Cannot delete family member with active medicines. Please remove their medicines first.' 
+            });
+        }
+        
+        // Soft delete
+        familyMember.isActive = false;
+        await familyMember.save();
+        
+        res.json({ success: true, message: 'Family member removed successfully' });
+    } catch (error) {
+        console.error('Error deleting family member:', error);
+        res.status(500).json({ error: 'Error deleting family member' });
     }
 });
 
