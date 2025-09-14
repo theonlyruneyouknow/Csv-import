@@ -16,6 +16,7 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem 1rem;
+            margin-top: 1rem;  /* Add margin for the sticky navbar */
         }
         
         .page-header {
@@ -89,6 +90,58 @@
     </style>
 </head>
 <body>
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/medicine/dashboard">
+                <i class="fas fa-pills me-2"></i>Medicine Management
+            </a>
+            
+            <div class="d-flex align-items-center">
+                <div class="navbar-nav me-3">
+                    <a class="nav-link text-white" href="/medicine/dashboard">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
+                </div>
+                <div class="navbar-nav me-3">
+                    <a class="nav-link text-white" href="/medicine/medicines/new">
+                        <i class="fas fa-plus me-1"></i>Add Medicine
+                    </a>
+                </div>
+                <div class="navbar-nav me-3">
+                    <a class="nav-link text-white" href="/medicine/import">
+                        <i class="fas fa-upload me-1"></i>Import
+                    </a>
+                </div>
+                
+                <!-- User Info -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-1"></i>
+                        <%= user.firstName %> <%= user.lastName %>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header">
+                            <%= user.firstName %> <%= user.lastName %><br>
+                            <small class="text-muted">@<%= user.username %></small>
+                        </h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/"><i class="fas fa-home me-2"></i>Main Dashboard</a></li>
+                        <li><a class="dropdown-item" href="/medicine/dashboard"><i class="fas fa-pills me-2"></i>Medicine Dashboard</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form action="/auth/logout" method="POST" style="margin: 0;">
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
         <!-- Page Header -->
         <div class="page-header">

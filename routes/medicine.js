@@ -240,19 +240,27 @@ router.post('/medicines', ensureMedicineAccess, async (req, res) => {
 // Edit medicine form
 router.get('/medicines/:id/edit', ensureMedicineAccess, async (req, res) => {
     try {
-        const [medicine, pharmacies] = await Promise.all([
+        const [medicine, pharmacies, familyMembers] = await Promise.all([
             Medicine.findOne({ _id: req.params.id, user: req.user._id }),
-            Pharmacy.find({ user: req.user._id, isActive: true })
+            Pharmacy.find({ user: req.user._id, isActive: true }),
+            FamilyMember.findByUser(req.user._id)
         ]);
         
         if (!medicine) {
             return res.status(404).render('error', { message: 'Medicine not found' });
         }
         
+        // Ensure 'self' member exists
+        await FamilyMember.findOrCreateSelf(req.user._id, {
+            firstName: req.user.firstName,
+            lastName: req.user.lastName
+        });
+        
         res.render('medicine-form', {
             user: req.user,
             medicine,
             pharmacies,
+            familyMembers,
             isEdit: true,
             title: `Edit ${medicine.name}`
         });
