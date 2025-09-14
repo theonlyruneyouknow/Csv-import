@@ -8,19 +8,20 @@ const medicationLogSchema = new mongoose.Schema({
         required: true
     },
     
+    // Reference to the user who owns this log
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+        index: true
+    },
+    
     // Reference to the family member who took the medicine
     familyMember: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'FamilyMember',
         required: true,
         index: true
-    },
-    
-    // User who recorded this log (might be different from the family member who took it)
-    recordedBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
     },
     
     // When the dose was taken

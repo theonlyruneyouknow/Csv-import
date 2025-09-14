@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Medicine Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .import-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .file-upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .file-upload-area:hover {
+            border-color: #0d6efd;
+            background-color: #f8f9ff;
+        }
+        .file-upload-area.dragover {
+            border-color: #0d6efd;
+            background-color: #e7f3ff;
+        }
+        .progress-container {
+            display: none;
+            margin-top: 1rem;
+        }
+        .result-container {
+            display: none;
+            margin-top: 2rem;
+        }
+        .pharmacy-format {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .sample-data {
+            background: #f8f9fa;
+            border-radius: 5px;
+            padding: 0.5rem;
+            font-family: monospace;
+            font-size: 0.9em;
+            margin-top: 0.5rem;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .error-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Navigation -->
+            <nav class="col-md-2 d-md-block bg-light sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/medicine">
+                                <i class="fas fa-pills"></i> Medicines
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/medicine/family">
+                                <i class="fas fa-users"></i> Family Members
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/medicine/import">
+                                <i class="fas fa-file-import"></i> Import Records
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2"><i class="fas fa-file-import text-primary"></i> Import Pharmacy Records</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-outline-secondary" onclick="viewHistory()">
+                                <i class="fas fa-history"></i> Import History
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Import Section -->
+                <div class="import-section">
+                    <h3><i class="fas fa-upload text-success"></i> Upload Pharmacy Records</h3>
+                    <p class="text-muted mb-4">
+                        Upload your pharmacy records in CSV or Excel format. We automatically detect and support multiple pharmacy formats.
+                    </p>
+
+                    <!-- File Upload Area -->
+                    <div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById('csvFile').click()">
+                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                        <h5>Click to select a file or drag and drop</h5>
+                        <p class="text-muted">Supported formats: CSV and Excel files up to 10MB</p>
+                        <input type="file" id="csvFile" name="csvFile" accept=".csv,.xlsx,.xls" style="display: none;">
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="progress-container" id="progressContainer">
+                        <div class="progress mb-3">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 0%" id="uploadProgress"></div>
+                        </div>
+                        <div class="text-center">
+                            <span id="progressText">Processing...</span>
+                        </div>
+                    </div>
+
+                    <!-- Upload Button -->
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-primary btn-lg" id="uploadBtn" disabled onclick="uploadFile()">
+                            <i class="fas fa-upload"></i> Import Pharmacy Records
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Supported Formats -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <h4><i class="fas fa-info-circle text-info"></i> Supported Pharmacy Formats</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="pharmacy-format">
+                                    <h6><i class="fas fa-prescription-bottle text-success"></i> Walgreens</h6>
+                                    <p class="text-muted mb-2">Prescription history export with patient and medication details</p>
+                                    <div class="sample-data">
+                                        Patient Name, DOB, Medicine, Strength, Form, Quantity, Date Filled, Price
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="pharmacy-format">
+                                    <h6><i class="fas fa-prescription-bottle text-info"></i> CVS Pharmacy</h6>
+                                    <p class="text-muted mb-2">Medication history with prescription details</p>
+                                    <div class="sample-data">
+                                        Name, Birth Date, Medication, Strength, Qty, Fill Date, Cost
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-lightbulb"></i>
+                            <strong>Auto-Detection:</strong> Our system automatically detects the pharmacy format and maps the data accordingly.
+                            Supports both CSV and Excel formats (.csv, .xlsx, .xls).
+                            Don't see your pharmacy? Upload your file and we'll try to parse it with our generic format detector.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Container -->
+                <div class="result-container" id="resultContainer">
+                    <h4><i class="fas fa-check-circle text-success"></i> Import Results</h4>
+                    <div class="row" id="statsRow">
+                        <!-- Stats will be populated by JavaScript -->
+                    </div>
+                    
+                    <!-- Errors -->
+                    <div class="alert alert-warning" id="errorsAlert" style="display: none;">
+                        <h6><i class="fas fa-exclamation-triangle"></i> Import Warnings</h6>
+                        <div class="error-list" id="errorList">
+                            <!-- Errors will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-success me-2" onclick="location.href='/medicine'">
+                            <i class="fas fa-pills"></i> View Medicines
+                        </button>
+                        <button type="button" class="btn btn-info me-2" onclick="location.href='/medicine/family'">
+                            <i class="fas fa-users"></i> View Family Members
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="resetImport()">
+                            <i class="fas fa-redo"></i> Import Another File
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Family Members Reference -->
+                <% if (familyMembers.length > 0) { %>
+                <div class="mt-4">
+                    <h5><i class="fas fa-users text-primary"></i> Current Family Members</h5>
+                    <div class="row">
+                        <% familyMembers.forEach(member => { %>
+                        <div class="col-md-4 mb-2">
+                            <div class="card">
+                                <div class="card-body py-2">
+                                    <h6 class="card-title mb-1"><%= member.name %></h6>
+                                    <small class="text-muted"><%= member.relationship %></small>
+                                </div>
+                            </div>
+                        </div>
+                        <% }); %>
+                    </div>
+                    <div class="alert alert-info mt-2">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Auto-Matching:</strong> Patient names from your CSV will be automatically matched to existing family members, 
+                        or new family members will be created if no match is found.
+                    </div>
+                </div>
+                <% } %>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedFile = null;
+
+        // File input change handler
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            handleFileSelect(e.target.files[0]);
+        });
+
+        // Drag and drop handlers
+        const uploadArea = document.getElementById('fileUploadArea');
+        
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            if (!file) return;
+            
+            // Validate file type
+            const fileName = file.name.toLowerCase();
+            const isValidFile = fileName.endsWith('.csv') || fileName.endsWith('.xlsx') || fileName.endsWith('.xls');
+            
+            if (!isValidFile) {
+                alert('Please select a CSV or Excel file (.csv, .xlsx, .xls)');
+                return;
+            }
+            
+            // Validate file size (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size must be less than 10MB');
+                return;
+            }
+            
+            selectedFile = file;
+            
+            // Update UI with appropriate icon
+            const selectedFileName = file.name.toLowerCase();
+            let fileIcon = 'fa-file-alt';
+            if (selectedFileName.endsWith('.csv')) {
+                fileIcon = 'fa-file-csv';
+            } else if (selectedFileName.endsWith('.xlsx') || selectedFileName.endsWith('.xls')) {
+                fileIcon = 'fa-file-excel';
+            }
+            
+            const uploadArea = document.getElementById('fileUploadArea');
+            uploadArea.innerHTML = `
+                <i class="fas ${fileIcon} fa-3x text-success mb-3"></i>
+                <h5>${file.name}</h5>
+                <p class="text-muted">Size: ${(file.size / 1024).toFixed(1)} KB</p>
+                <small class="text-success">Ready to import</small>
+            `;
+            
+            document.getElementById('uploadBtn').disabled = false;
+        }
+
+        function uploadFile() {
+            if (!selectedFile) {
+                alert('Please select a file first');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('csvFile', selectedFile);
+
+            // Show progress
+            document.getElementById('progressContainer').style.display = 'block';
+            document.getElementById('uploadBtn').disabled = true;
+            
+            // Start progress animation
+            let progress = 0;
+            const progressBar = document.getElementById('uploadProgress');
+            const progressText = document.getElementById('progressText');
+            
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 90) progress = 90;
+                progressBar.style.width = progress + '%';
+                progressText.textContent = `Processing... ${Math.round(progress)}%`;
+            }, 200);
+
+            // Upload file
+            fetch('/medicine/import', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
+                progressText.textContent = 'Complete!';
+                
+                setTimeout(() => {
+                    document.getElementById('progressContainer').style.display = 'none';
+                    showResults(data);
+                }, 1000);
+            })
+            .catch(error => {
+                clearInterval(progressInterval);
+                console.error('Error:', error);
+                document.getElementById('progressContainer').style.display = 'none';
+                document.getElementById('uploadBtn').disabled = false;
+                alert('Error importing file. Please try again.');
+            });
+        }
+
+        function showResults(data) {
+            if (data.success) {
+                const summary = data.summary;
+                
+                // Create stats cards
+                const statsRow = document.getElementById('statsRow');
+                statsRow.innerHTML = `
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h3>${summary.totalRecords}</h3>
+                            <small>Total Records</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h3>${summary.medicinesCreated}</h3>
+                            <small>Medicines Created</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h3>${summary.logsCreated}</h3>
+                            <small>Medication Logs</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h3>${summary.familyMembersCreated}</h3>
+                            <small>Family Members</small>
+                        </div>
+                    </div>
+                `;
+                
+                // Show errors if any
+                if (summary.errors && summary.errors.length > 0) {
+                    const errorList = document.getElementById('errorList');
+                    errorList.innerHTML = summary.errors.map(error => 
+                        `<div class="mb-1"><i class="fas fa-exclamation-circle"></i> ${error}</div>`
+                    ).join('');
+                    document.getElementById('errorsAlert').style.display = 'block';
+                }
+                
+                document.getElementById('resultContainer').style.display = 'block';
+            } else {
+                alert('Error: ' + (data.error || 'Unknown error occurred'));
+                document.getElementById('uploadBtn').disabled = false;
+            }
+        }
+
+        function resetImport() {
+            selectedFile = null;
+            document.getElementById('uploadBtn').disabled = true;
+            document.getElementById('resultContainer').style.display = 'none';
+            document.getElementById('errorsAlert').style.display = 'none';
+            
+            const uploadArea = document.getElementById('fileUploadArea');
+            uploadArea.innerHTML = `
+                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                <h5>Click to select a file or drag and drop</h5>
+                <p class="text-muted">Supported formats: CSV and Excel files up to 10MB</p>
+            `;
+        }
+
+        function viewHistory() {
+            fetch('/medicine/import/history')
+            .then(response => response.json())
+            .then(data => {
+                // Create a modal or new page to show history
+                alert('Recent imports: ' + data.recentMedicines.length + ' medicines, ' + data.recentLogs.length + ' logs');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error loading import history');
+            });
+        }
+    </script>
+</body>
+</html>

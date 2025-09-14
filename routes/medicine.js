@@ -4,6 +4,10 @@ const Medicine = require('../models/Medicine');
 const MedicationLog = require('../models/MedicationLog');
 const Pharmacy = require('../models/Pharmacy');
 const FamilyMember = require('../models/FamilyMember');
+const PharmacyRecordParser = require('../services/PharmacyRecordParser');
+const multer = require('multer');
+const path = require('path');
+const { ensureAuthenticated } = require('../middleware/auth');
 
 // Middleware to check if user has access to medicine management
 const ensureMedicineAccess = (req, res, next) => {
@@ -596,6 +600,238 @@ router.delete('/family/:id', ensureMedicineAccess, async (req, res) => {
     } catch (error) {
         console.error('Error deleting family member:', error);
         res.status(500).json({ error: 'Error deleting family member' });
+    }
+});
+
+// Multer configuration for CSV file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/');
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    fileFilter: function (req, file, cb) {
+        // Accept CSV and Excel files
+        const fileName = file.originalname.toLowerCase();
+        const isCSV = file.mimetype === 'text/csv' || fileName.endsWith('.csv');
+        const isExcel = file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+                       file.mimetype === 'application/vnd.ms-excel' ||
+                       fileName.endsWith('.xlsx') || fileName.endsWith('.xls');
+        
+        if (isCSV || isExcel) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only CSV and Excel files are allowed'), false);
+        }
+    },
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10MB limit
+    }
+});
+
+// Test import page (no authentication required)
+router.get('/import-test', async (req, res) => {
+    try {
+        // Mock user and family members for testing
+        const mockUser = {
+            _id: 'test-user-id',
+            username: 'testuser',
+            firstName: 'Test',
+            lastName: 'User'
+        };
+        
+        const familyMembers = [];
+
+        res.render('pharmacy-import', {
+            user: mockUser,
+            title: 'Import Pharmacy Records (Test)',
+            familyMembers
+        });
+    } catch (error) {
+        console.error('Error loading test import page:', error);
+        res.status(500).render('error', { message: 'Error loading test import page' });
+    }
+});
+
+// Test import POST route (no authentication required) - FOR TESTING ONLY
+router.post('/import-test', upload.single('csvFile'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        // Create a mock user for testing
+        const mockUser = {
+            _id: '507f1f77bcf86cd799439011', // Valid ObjectId format
+            username: 'testuser',
+            firstName: 'Test',
+            lastName: 'User'
+        };
+
+        const filePath = req.file.path;
+        const parser = new PharmacyRecordParser();
+        
+        // Parse the CSV file
+        const result = await parser.parsePharmacyRecords(filePath, mockUser);
+        
+        // Clean up uploaded file
+        const fs = require('fs');
+        fs.unlinkSync(filePath);
+        
+        res.json({
+            success: true,
+            message: 'Pharmacy records imported successfully (TEST MODE)',
+            summary: {
+                totalRecords: result.summary.totalRecords,
+                medicinesCreated: result.summary.medicinesCreated,
+                logsCreated: result.summary.logsCreated,
+                errorsCount: result.summary.errorsCount
+            },
+            medicines: result.medicines,
+            logs: result.logs,
+            errors: result.errors,
+            warnings: result.warnings
+        });
+    } catch (error) {
+        console.error('Error importing pharmacy records (test):', error);
+        
+        // Clean up uploaded file in case of error
+        if (req.file && req.file.path) {
+            try {
+                const fs = require('fs');
+                fs.unlinkSync(req.file.path);
+            } catch (cleanupError) {
+                console.error('Error cleaning up file:', cleanupError);
+            }
+        }
+        
+        res.status(500).json({ 
+            error: 'Error importing pharmacy records (test)',
+            details: error.message 
+        });
+    }
+});
+
+// Show import page
+router.get('/import', ensureAuthenticated, async (req, res) => {
+    try {
+        const familyMembers = await FamilyMember.find({ 
+            user: req.user._id, 
+            isActive: true 
+        }).sort({ relationship: 1, name: 1 });
+
+        res.render('pharmacy-import', {
+            user: req.user,
+            title: 'Import Pharmacy Records',
+            familyMembers
+        });
+    } catch (error) {
+        console.error('Error loading import page:', error);
+        res.status(500).render('error', { message: 'Error loading import page' });
+    }
+});
+
+// Handle CSV file upload and processing
+router.post('/import', ensureAuthenticated, upload.single('csvFile'), async (req, res) => {
+    try {
+        console.log('📨 POST /medicine/import - File upload received');
+        
+        if (!req.file) {
+            console.log('❌ No file uploaded');
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        console.log(`📂 File received: ${req.file.originalname} (${req.file.size} bytes)`);
+        console.log(`📁 Saved to: ${req.file.path}`);
+        console.log(`👤 User: ${req.user.username}`);
+
+        const filePath = req.file.path;
+        const parser = new PharmacyRecordParser();
+        
+        console.log('🔄 Starting pharmacy record parsing...');
+        
+        // Parse the CSV file
+        const result = await parser.parsePharmacyRecords(filePath, req.user);
+        
+        console.log('✅ Parsing completed');
+        console.log(`📊 Summary: ${result.summary.totalRecords} records, ${result.summary.medicinesCreated} medicines created`);
+        
+        // Only clean up uploaded file if parsing was successful OR if explicitly requested
+        const fs = require('fs');
+        if (result.summary.totalRecords > 0 || req.query.cleanup === 'force') {
+            fs.unlinkSync(filePath);
+            console.log('🗑️ Uploaded file cleaned up');
+        } else {
+            console.log(`🔍 File preserved for debugging at: ${filePath}`);
+            console.log(`🔍 To force cleanup, add ?cleanup=force to the request`);
+        }
+        
+        res.json({
+            success: true,
+            message: 'Pharmacy records imported successfully',
+            summary: {
+                totalRecords: result.summary.totalRecords,
+                medicinesCreated: result.summary.medicinesCreated,
+                logsCreated: result.summary.logsCreated,
+                errorsCount: result.summary.errorsCount
+            },
+            medicines: result.medicines,
+            logs: result.logs,
+            errors: result.errors,
+            warnings: result.warnings
+        });
+    } catch (error) {
+        console.error('Error importing pharmacy records:', error);
+        
+        // Clean up uploaded file in case of error
+        if (req.file && req.file.path) {
+            try {
+                const fs = require('fs');
+                fs.unlinkSync(req.file.path);
+            } catch (cleanupError) {
+                console.error('Error cleaning up file:', cleanupError);
+            }
+        }
+        
+        res.status(500).json({ 
+            error: 'Error importing pharmacy records',
+            details: error.message 
+        });
+    }
+});
+
+// Get import history
+router.get('/import/history', ensureAuthenticated, async (req, res) => {
+    try {
+        // Find recently created medicines as a proxy for import history
+        const recentMedicines = await Medicine.find({ 
+            user: req.user._id 
+        })
+        .populate('familyMember')
+        .sort({ createdAt: -1 })
+        .limit(50);
+        
+        const recentLogs = await MedicationLog.find({ 
+            user: req.user._id 
+        })
+        .populate('medicine')
+        .populate('familyMember')
+        .sort({ createdAt: -1 })
+        .limit(50);
+        
+        res.json({
+            recentMedicines,
+            recentLogs
+        });
+    } catch (error) {
+        console.error('Error fetching import history:', error);
+        res.status(500).json({ error: 'Error fetching import history' });
     }
 });
 

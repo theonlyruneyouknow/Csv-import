@@ -332,6 +332,9 @@
                         </button>
                         <div id="optionsAccordion" class="nav-accordion-content">
                             <% if (typeof user !== 'undefined' && user && user.permissions) { %>
+                                <% if (user.permissions.accessMedicineManagement) { %>
+                                    <a href="/medicine/import" class="nav-accordion-item">📥 Import Pharmacy Records</a>
+                                <% } %>
                                 <% if (user.permissions.accessFileUpload) { %>
                                     <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
                                 <% } %>
@@ -632,6 +635,9 @@
                         <button class="quick-action-btn" onclick="addPharmacy()">
                             <i class="fas fa-store me-2"></i>Add Pharmacy
                         </button>
+                        <a href="/medicine/import" class="quick-action-btn text-decoration-none text-center" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+                            <i class="fas fa-file-import me-2"></i>Import Records
+                        </a>
                         <a href="/medicine/medicines" class="quick-action-btn text-decoration-none text-center">
                             <i class="fas fa-list me-2"></i>View All
                         </a>
