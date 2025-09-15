@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #6f42c1;
+        }
+        
+        .section-header {
+            color: #6f42c1;
+            border-bottom: 2px solid #f8f9fa;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-control:focus {
+            border-color: #6f42c1;
+            box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+        }
+        
+        .btn-primary {
+            background-color: #6f42c1;
+            border-color: #6f42c1;
+        }
+        
+        .btn-primary:hover {
+            background-color: #5a359c;
+            border-color: #5a359c;
+        }
+        
+        .preview-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        .preview-content {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .hymn-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+        }
+        
+        .hymn-number {
+            width: 80px;
+        }
+        
+        .speaker-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: #f8f9fa;
+        }
+        
+        .floating-save {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .required-field {
+            color: #dc3545;
+        }
+        
+        .section-nav {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 1rem;
+            width: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .section-nav h6 {
+            color: #6f42c1;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .section-nav-item {
+            display: block;
+            padding: 0.25rem 0.5rem;
+            color: #666;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+            transition: all 0.2s;
+        }
+        
+        .section-nav-item:hover {
+            background-color: #f8f9fa;
+            color: #6f42c1;
+        }
+        
+        .section-nav-item.active {
+            background-color: #6f42c1;
+            color: white;
+        }
+        
+        @media (max-width: 1200px) {
+            .section-nav {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/bulletin/admin">
+                <i class="fas fa-arrow-left me-2"></i>Back to Admin
+            </a>
+            
+            <div class="d-flex align-items-center">
+                <span class="navbar-text me-3">
+                    <%= bulletin ? 'Editing' : 'Creating' %> Bulletin
+                </span>
+                
+                <div class="dropdown">
+                    <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-1"></i>
+                        <%= user.firstName %> <%= user.lastName %>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/bulletin/admin"><i class="fas fa-cog me-2"></i>Admin Dashboard</a></li>
+                        <li><a class="dropdown-item" href="/bulletin"><i class="fas fa-eye me-2"></i>View Bulletin</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/"><i class="fas fa-home me-2"></i>Main Dashboard</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb Navigation -->
+    <div class="container-fluid py-2 bg-light border-bottom">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="/" class="text-decoration-none">
+                        <i class="fas fa-home me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/bulletin" class="text-decoration-none">
+                        <i class="fas fa-scroll me-1"></i>Bulletin
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/bulletin/admin" class="text-decoration-none">
+                        <i class="fas fa-cog me-1"></i>Admin
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-<%= bulletin ? 'edit' : 'plus' %> me-1"></i>
+                    <%= bulletin ? 'Edit Bulletin' : 'Create Bulletin' %>
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Section Navigation -->
+    <div class="section-nav">
+        <h6><i class="fas fa-list me-1"></i>Quick Navigation</h6>
+        <a href="#ward-info" class="section-nav-item">
+            <i class="fas fa-church me-1"></i>Ward Info
+        </a>
+        <a href="#meeting-info" class="section-nav-item">
+            <i class="fas fa-calendar me-1"></i>Meeting
+        </a>
+        <a href="#leadership" class="section-nav-item">
+            <i class="fas fa-users me-1"></i>Leadership
+        </a>
+        <a href="#hymns" class="section-nav-item">
+            <i class="fas fa-music me-1"></i>Hymns
+        </a>
+        <a href="#speakers" class="section-nav-item">
+            <i class="fas fa-microphone me-1"></i>Speakers
+        </a>
+        <a href="#prayers" class="section-nav-item">
+            <i class="fas fa-praying-hands me-1"></i>Prayers
+        </a>
+        <a href="#come-follow-me" class="section-nav-item">
+            <i class="fas fa-book-open me-1"></i>Come, Follow Me
+        </a>
+        <a href="#announcements" class="section-nav-item">
+            <i class="fas fa-bullhorn me-1"></i>Announcements
+        </a>
+        <a href="#contact-information" class="section-nav-item">
+            <i class="fas fa-address-book me-1"></i>Contact Information
+        </a>
+        <a href="#additional" class="section-nav-item">
+            <i class="fas fa-info-circle me-1"></i>Additional
+        </a>
+    </div>
+
+    <div class="container-fluid py-4">
+        <div class="row">
+            <!-- Form Column -->
+            <div class="col-lg-7">
+                <form id="bulletinForm" action="<%= bulletin ? `/bulletin/${bulletin._id}` : '/bulletin' %>" method="POST">
+                    <% if (bulletin) { %>
+                        <input type="hidden" name="_method" value="PUT">
+                    <% } %>
+                    
+                    <!-- Ward Information -->
+                    <div class="form-section" id="ward-info">
+                        <h3 class="section-header">
+                            <i class="fas fa-church me-2"></i>Ward Information
+                        </h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="wardName" class="form-label">Ward Name <span class="required-field">*</span></label>
+                                <input type="text" class="form-control" id="wardName" name="wardName" 
+                                       value="<%= bulletin ? bulletin.wardName : '' %>" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="wardLocation" class="form-label">Ward Location <span class="required-field">*</span></label>
+                                <input type="text" class="form-control" id="wardLocation" name="wardLocation" 
+                                       value="<%= bulletin ? bulletin.wardLocation : '' %>" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Meeting Information -->
+                    <div class="form-section" id="meeting-info">
+                        <h3 class="section-header">
+                            <i class="fas fa-calendar me-2"></i>Meeting Information
+                        </h3>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="meetingDate" class="form-label">Meeting Date <span class="required-field">*</span></label>
+                                <input type="date" class="form-control" id="meetingDate" name="meetingDate" 
+                                       value="<%= bulletin ? bulletin.meetingDate.toISOString().split('T')[0] : '' %>" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="meetingTime" class="form-label">Meeting Time</label>
+                                <input type="time" class="form-control" id="meetingTime" name="meetingTime" 
+                                       value="<%= bulletin ? bulletin.meetingTime : '' %>">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="meetingType" class="form-label">Meeting Type</label>
+                                <select class="form-control" id="meetingType" name="meetingType">
+                                    <option value="Sacrament Meeting" <%= bulletin && bulletin.meetingType === 'Sacrament Meeting' ? 'selected' : '' %>>Sacrament Meeting</option>
+                                    <option value="Stake Conference" <%= bulletin && bulletin.meetingType === 'Stake Conference' ? 'selected' : '' %>>Stake Conference</option>
+                                    <option value="General Conference" <%= bulletin && bulletin.meetingType === 'General Conference' ? 'selected' : '' %>>General Conference</option>
+                                    <option value="Special Meeting" <%= bulletin && bulletin.meetingType === 'Special Meeting' ? 'selected' : '' %>>Special Meeting</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Leadership Roles -->
+                    <div class="form-section" id="leadership">
+                        <h3 class="section-header">
+                            <i class="fas fa-users me-2"></i>Leadership Roles
+                        </h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="presiding" class="form-label">Presiding <span class="required-field">*</span></label>
+                                <input type="text" class="form-control" id="presiding" name="presiding" 
+                                       value="<%= bulletin ? bulletin.presiding : '' %>" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="conducting" class="form-label">Conducting <span class="required-field">*</span></label>
+                                <input type="text" class="form-control" id="conducting" name="conducting" 
+                                       value="<%= bulletin ? bulletin.conducting : '' %>" required>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="organist" class="form-label">Organist</label>
+                                <input type="text" class="form-control" id="organist" name="organist" 
+                                       value="<%= bulletin ? bulletin.organist : '' %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="chorister" class="form-label">Chorister</label>
+                                <input type="text" class="form-control" id="chorister" name="chorister" 
+                                       value="<%= bulletin ? bulletin.chorister : '' %>">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hymns -->
+                    <div class="form-section" id="hymns">
+                        <h3 class="section-header">
+                            <i class="fas fa-music me-2"></i>Hymns
+                        </h3>
+                        
+                        <!-- Opening Hymn -->
+                        <div class="mb-3">
+                            <label class="form-label">Opening Hymn <span class="required-field">*</span></label>
+                            <div class="hymn-input-group">
+                                <input type="number" class="form-control hymn-number" name="openingHymn[number]" 
+                                       placeholder="#" value="<%= bulletin ? bulletin.openingHymn.number : '' %>" required>
+                                <input type="text" class="form-control" name="openingHymn[title]" 
+                                       placeholder="Hymn Title" value="<%= bulletin ? bulletin.openingHymn.title : '' %>" required>
+                            </div>
+                        </div>
+
+                        <!-- Sacrament Hymn -->
+                        <div class="mb-3">
+                            <label class="form-label">Sacrament Hymn <span class="required-field">*</span></label>
+                            <div class="hymn-input-group">
+                                <input type="number" class="form-control hymn-number" name="sacramentHymn[number]" 
+                                       placeholder="#" value="<%= bulletin ? bulletin.sacramentHymn.number : '' %>" required>
+                                <input type="text" class="form-control" name="sacramentHymn[title]" 
+                                       placeholder="Hymn Title" value="<%= bulletin ? bulletin.sacramentHymn.title : '' %>" required>
+                            </div>
+                        </div>
+
+                        <!-- Closing Hymn -->
+                        <div class="mb-3">
+                            <label class="form-label">Closing Hymn <span class="required-field">*</span></label>
+                            <div class="hymn-input-group">
+                                <input type="number" class="form-control hymn-number" name="closingHymn[number]" 
+                                       placeholder="#" value="<%= bulletin ? bulletin.closingHymn.number : '' %>" required>
+                                <input type="text" class="form-control" name="closingHymn[title]" 
+                                       placeholder="Hymn Title" value="<%= bulletin ? bulletin.closingHymn.title : '' %>" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Speakers -->
+                    <div class="form-section" id="speakers">
+                        <h3 class="section-header">
+                            <i class="fas fa-microphone me-2"></i>Speakers
+                        </h3>
+                        
+                        <!-- First Speaker -->
+                        <div class="speaker-card">
+                            <h5>First Speaker</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="firstSpeakerName" class="form-label">Name <span class="required-field">*</span></label>
+                                    <input type="text" class="form-control" id="firstSpeakerName" name="speakers[first][name]" 
+                                           value="<%= bulletin ? bulletin.speakers.first.name : '' %>" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="firstSpeakerTopic" class="form-label">Topic</label>
+                                    <input type="text" class="form-control" id="firstSpeakerTopic" name="speakers[first][topic]" 
+                                           value="<%= bulletin ? bulletin.speakers.first.topic : '' %>">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Second Speaker -->
+                        <div class="speaker-card">
+                            <h5>Second Speaker</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="secondSpeakerName" class="form-label">Name <span class="required-field">*</span></label>
+                                    <input type="text" class="form-control" id="secondSpeakerName" name="speakers[second][name]" 
+                                           value="<%= bulletin ? bulletin.speakers.second.name : '' %>" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="secondSpeakerTopic" class="form-label">Topic</label>
+                                    <input type="text" class="form-control" id="secondSpeakerTopic" name="speakers[second][topic]" 
+                                           value="<%= bulletin ? bulletin.speakers.second.topic : '' %>">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prayers -->
+                    <div class="form-section" id="prayers">
+                        <h3 class="section-header">
+                            <i class="fas fa-praying-hands me-2"></i>Prayers
+                        </h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="invocation" class="form-label">Invocation <span class="required-field">*</span></label>
+                                <input type="text" class="form-control" id="invocation" name="invocation" 
+                                       value="<%= bulletin ? bulletin.invocation : '' %>" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="benediction" class="form-label">Benediction <span class="required-field">*</span></label>
+                                <input type="text" class="form-control" id="benediction" name="benediction" 
+                                       value="<%= bulletin ? bulletin.benediction : '' %>" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Come, Follow Me Section -->
+                    <div class="form-section" id="come-follow-me">
+                        <h3 class="section-header">
+                            <i class="fas fa-book-open me-2"></i>Come, Follow Me
+                        </h3>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="comeFollowMeCurrentWeekDate" class="form-label">Current Week Date</label>
+                                <input type="text" class="form-control" id="comeFollowMeCurrentWeekDate" name="comeFollowMeCurrentWeekDate" 
+                                       value="<%= bulletin && bulletin.comeFollowMe && bulletin.comeFollowMe.currentWeek ? bulletin.comeFollowMe.currentWeek.date : 'September 14' %>" 
+                                       placeholder="September 14">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="comeFollowMeCurrentWeekScripture" class="form-label">Scripture Reference</label>
+                                <input type="text" class="form-control" id="comeFollowMeCurrentWeekScripture" name="comeFollowMeCurrentWeekScripture" 
+                                       value="<%= bulletin && bulletin.comeFollowMe && bulletin.comeFollowMe.currentWeek ? bulletin.comeFollowMe.currentWeek.scripture : 'D&C 98-101' %>" 
+                                       placeholder="D&C 98-101">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="comeFollowMeCurrentWeekTitle" class="form-label">Title</label>
+                                <input type="text" class="form-control" id="comeFollowMeCurrentWeekTitle" name="comeFollowMeCurrentWeekTitle" 
+                                       value="<%= bulletin && bulletin.comeFollowMe && bulletin.comeFollowMe.currentWeek ? bulletin.comeFollowMe.currentWeek.title : '"Be Still and Know that I Am God"' %>" 
+                                       placeholder='"Be Still and Know that I Am God"'>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="comeFollowMeNextWeekDate" class="form-label">Next Week Date</label>
+                                <input type="text" class="form-control" id="comeFollowMeNextWeekDate" name="comeFollowMeNextWeekDate" 
+                                       value="<%= bulletin && bulletin.comeFollowMe && bulletin.comeFollowMe.nextWeek ? bulletin.comeFollowMe.nextWeek.date : 'September 21' %>" 
+                                       placeholder="September 21">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="comeFollowMeNextWeekScripture" class="form-label">Scripture Reference</label>
+                                <input type="text" class="form-control" id="comeFollowMeNextWeekScripture" name="comeFollowMeNextWeekScripture" 
+                                       value="<%= bulletin && bulletin.comeFollowMe && bulletin.comeFollowMe.nextWeek ? bulletin.comeFollowMe.nextWeek.scripture : 'D&C 102-105' %>" 
+                                       placeholder="D&C 102-105">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="comeFollowMeNextWeekTitle" class="form-label">Title</label>
+                                <input type="text" class="form-control" id="comeFollowMeNextWeekTitle" name="comeFollowMeNextWeekTitle" 
+                                       value="<%= bulletin && bulletin.comeFollowMe && bulletin.comeFollowMe.nextWeek ? bulletin.comeFollowMe.nextWeek.title : '"After Much Tribulation Cometh the Blessing"' %>" 
+                                       placeholder='"After Much Tribulation Cometh the Blessing"'>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="comeFollowMeThirdWeekDate" class="form-label">Third Week Date</label>
+                                <input type="text" class="form-control" id="comeFollowMeThirdWeekDate" name="comeFollowMeThirdWeekDate" 
+                                       value="<%= bulletin && bulletin.comeFollowMe && bulletin.comeFollowMe.thirdWeek ? bulletin.comeFollowMe.thirdWeek.date : 'September 28' %>" 
+                                       placeholder="September 28">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="comeFollowMeThirdWeekScripture" class="form-label">Scripture Reference</label>
+                                <input type="text" class="form-control" id="comeFollowMeThirdWeekScripture" name="comeFollowMeThirdWeekScripture" 
+                                       value="<%= bulletin && bulletin.comeFollowMe && bulletin.comeFollowMe.thirdWeek ? bulletin.comeFollowMe.thirdWeek.scripture : 'D&C 106-108' %>" 
+                                       placeholder="D&C 106-108">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="comeFollowMeThirdWeekTitle" class="form-label">Title</label>
+                                <input type="text" class="form-control" id="comeFollowMeThirdWeekTitle" name="comeFollowMeThirdWeekTitle" 
+                                       value="<%= bulletin && bulletin.comeFollowMe && bulletin.comeFollowMe.thirdWeek ? bulletin.comeFollowMe.thirdWeek.title : '"The Order of the Son of God"' %>" 
+                                       placeholder='"The Order of the Son of God"'>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Announcements Section -->
+                    <div class="form-section" id="announcements">
+                        <h3 class="section-header">
+                            <i class="fas fa-bullhorn me-2"></i>Announcements
+                        </h3>
+                        
+                        <div class="mb-3">
+                            <label for="announcements" class="form-label">Ward Announcements</label>
+                            <textarea class="form-control" id="announcements" name="announcements" rows="15" 
+                                      placeholder="Enter ward announcements..."><%= bulletin ? bulletin.announcements : 'September 14th: Family Heritage Follow-up Training! 7:00 in the Relief Society room.\n\nSeptember 27th: Western Night at Rod and Lisa Petersen\'s Barn.\n\nFaith-based Addiction Recovery Program in person or on Zoom every Wednesday evening at 7:00 p.m. If you have questions, please call or text Sister Hawes (541) 510-4863 or email to: oregonfour@q.com.\n\nPlease follow these missionary pages for daily enlightenment and a way to share the gospel of Jesus Christ with your friends: Facebook-Followers of Christ in Southern Oregon | Instagram-hopeinhim.Southernoregon\n\nPlease help keep our Sister Missionaries fed! Sign up via the new digital calendar at missmeal.onrender.com to secure your spot!\n\nGeneral Conference Tickets! If you are interested in attending the October 2025 General Conference, please contact Ardel Wicks at ardelwicks@gmail.com or (541) 228-4136 to get tickets.\n\nThe Home Storage Center hours have changed! The update hours are on Thursdays from 12:00-5:00 and Saturdays from 10:00-1:00.\n\nGot an announcement? Text Elise Luke at (541) 373-7908\n\nTemple Prep Class: Those planning to attend the temple for the first time, please contact Whaanga (Fonga) Kewene at (541) 914-4104 or rwwkewene@gmail.com.\n\nTo Dine with the Missionaries: Contact Kelly Reynolds at (541) 514-8252 to set up an appointment.' %></textarea>
+                            <div class="form-text">Enter each announcement on a separate line or paragraph for best formatting.</div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information Section -->
+                    <div class="form-section" id="contact-information">
+                        <h3 class="section-header">
+                            <i class="fas fa-address-book me-2"></i>Contact Information
+                        </h3>
+                        
+                        <div class="mb-3">
+                            <label for="contactInformation" class="form-label">Ward Leadership & Contacts</label>
+                            <textarea class="form-control" id="contactInformation" name="contactInformation" rows="18" 
+                                      placeholder="Enter ward contact information..."><%= bulletin ? bulletin.contactInformation : 'Bishop Ivan Walker (541) 579-4436\n1st Counselor Jeff Krebs (541) 817-4150\n2nd Counselor Jason Ryan (541) 373-1891\nExecutive Secretary Jesse Nelson (509) 607-4929\nWard Clerk Lowden Hansen (541) 514-7879\nFinancial Clerk Moroni Luke (541) 232-0324\nElders Quorum President Tony Moe (541) 321-2286\nRelief Society President Marie Aylworth (541) 954-2327\nYoung Women President Kristan Johnston (801) 319-9993\nPrimary President Amy Poeschl (541) 852-3191\nTemple & Family History David Freeman (541) 600-7803\nWard Building Rep Tim Heise (385) 239-9524\nMusic Chairman Patricia Skeen (541) 689-2190\nWard Mission Leader John Lancaster (208) 421-3179\nFull-Time Missionaries Sister Missionaries (541) 232-1081\nElders (541) 285-5017' %></textarea>
+                            <div class="form-text">List each contact on a separate line for best formatting.</div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="form-section" id="additional">
+                        <h3 class="section-header">
+                            <i class="fas fa-info-circle me-2"></i>Additional Information
+                        </h3>
+                        
+                        <div class="mb-3">
+                            <label for="selectedImageUrl" class="form-label">Selected Image URL</label>
+                            <input type="url" class="form-control" id="selectedImageUrl" name="selectedImageUrl" 
+                                   value="<%= bulletin ? bulletin.selectedImageUrl : '' %>" 
+                                   placeholder="https://example.com/image.jpg">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="selectedQuote" class="form-label">Selected Quote</label>
+                            <textarea class="form-control" id="selectedQuote" name="selectedQuote" rows="3" 
+                                      placeholder="Enter an inspirational quote for the bulletin"><%= bulletin ? bulletin.selectedQuote : '' %></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="specialMusic" class="form-label">Special Music</label>
+                            <input type="text" class="form-control" id="specialMusic" name="specialMusic" 
+                                   value="<%= bulletin ? bulletin.specialMusic : '' %>" 
+                                   placeholder="e.g., Primary Choir, John Smith">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="announcements" class="form-label">Announcements</label>
+                            <textarea class="form-control" id="announcements" name="announcements" rows="4" 
+                                      placeholder="Ward business and announcements"><%= bulletin ? bulletin.announcements : '' %></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="form-section">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="/bulletin/admin" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            
+                            <div>
+                                <button type="button" id="previewBtn" class="btn btn-outline-primary me-2">
+                                    <i class="fas fa-eye me-2"></i>Update Preview
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>
+                                    <%= bulletin ? 'Update' : 'Create' %> Bulletin
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Preview Column -->
+            <div class="col-lg-5">
+                <div class="preview-panel">
+                    <h4 class="text-center mb-3">
+                        <i class="fas fa-eye me-2"></i>Preview
+                    </h4>
+                    <div id="bulletinPreview" class="preview-content">
+                        <!-- Preview content will be generated here -->
+                        <div class="text-center text-muted">
+                            <i class="fas fa-file-alt" style="font-size: 3rem;"></i>
+                            <p class="mt-2">Fill out the form to see a preview of your bulletin</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Save Button -->
+    <div class="floating-save">
+        <button type="submit" form="bulletinForm" class="btn btn-primary btn-lg shadow">
+            <i class="fas fa-save"></i>
+        </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Load complete hymn data from external file (341 hymns) -->
+    <script src="/hymn-data.js"></script>
+    <script>
+        // Wait for hymn data to load, then log count
+        if (window.HYMN_DATA) {
+            console.log('Hymn data loaded:', window.HYMN_DATA.length, 'hymns');
+        } else {
+            console.log('Waiting for hymn data to load...');
+            // Check again after a brief delay
+            setTimeout(() => {
+                if (window.HYMN_DATA) {
+                    console.log('Hymn data loaded:', window.HYMN_DATA.length, 'hymns');
+                } else {
+                    console.error('Failed to load hymn data');
+                }
+            }, 100);
+        }
+    </script>
+    <script>
+        // Auto-update preview when form changes
+        function updatePreview() {
+            const formData = new FormData(document.getElementById('bulletinForm'));
+            const data = {};
+            
+            // Convert FormData to object
+            for (let [key, value] of formData.entries()) {
+                if (key.includes('[')) {
+                    // Handle nested objects like hymns and speakers
+                    const match = key.match(/(\w+)\[(\w+)\]\[?(\w+)?\]?/);
+                    if (match) {
+                        const [, parent, child, grandchild] = match;
+                        if (!data[parent]) data[parent] = {};
+                        if (grandchild) {
+                            if (!data[parent][child]) data[parent][child] = {};
+                            data[parent][child][grandchild] = value;
+                        } else {
+                            data[parent][child] = value;
+                        }
+                    }
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            // Generate preview HTML
+            const preview = document.getElementById('bulletinPreview');
+            preview.innerHTML = generatePreviewHTML(data);
+        }
+        
+        function generatePreviewHTML(data) {
+            const date = data.meetingDate ? new Date(data.meetingDate).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            }) : '';
+            
+            return `
+                <div class="text-center mb-4">
+                    <div style="height: 60px; background: #f8f9fa; border: 1px dashed #dee2e6; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                        <small class="text-muted">Church Logo</small>
+                    </div>
+                    <h3 class="mb-1">${data.wardName || 'Ward Name'}</h3>
+                    <p class="text-muted mb-0">${data.wardLocation || 'Ward Location'}</p>
+                </div>
+                
+                ${data.selectedImageUrl ? `
+                    <div class="text-center mb-3">
+                        <img src="${data.selectedImageUrl}" alt="Selected Image" style="max-width: 100%; max-height: 150px;" class="img-fluid">
+                    </div>
+                ` : ''}
+                
+                ${data.selectedQuote ? `
+                    <div class="text-center mb-4" style="font-style: italic; padding: 1rem; background: #f8f9fa; border-left: 3px solid #6f42c1;">
+                        "${data.selectedQuote}"
+                    </div>
+                ` : ''}
+                
+                <div class="text-center mb-4">
+                    <h4>${date}</h4>
+                    <p><strong>${data.meetingType || 'Sacrament Meeting'}</strong></p>
+                    <p>${data.meetingTime || ''}</p>
+                </div>
+                
+                <hr>
+                
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <strong>Presiding:</strong>
+                        <span style="border-bottom: 1px dotted #333; padding-left: 10px; margin-left: 10px;">
+                            ${data.presiding || ''}
+                        </span>
+                    </div>
+                    <div class="col-6">
+                        <strong>Conducting:</strong>
+                        <span style="border-bottom: 1px dotted #333; padding-left: 10px; margin-left: 10px;">
+                            ${data.conducting || ''}
+                        </span>
+                    </div>
+                </div>
+                
+                ${data.organist ? `
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <strong>Organist:</strong>
+                            <span style="border-bottom: 1px dotted #333; padding-left: 10px; margin-left: 10px;">
+                                ${data.organist}
+                            </span>
+                        </div>
+                        ${data.chorister ? `
+                            <div class="col-6">
+                                <strong>Chorister:</strong>
+                                <span style="border-bottom: 1px dotted #333; padding-left: 10px; margin-left: 10px;">
+                                    ${data.chorister}
+                                </span>
+                            </div>
+                        ` : ''}
+                    </div>
+                ` : ''}
+                
+                <hr>
+                
+                <div class="text-center mb-3">
+                    <h5>Welcome to our visitors!</h5>
+                </div>
+                
+                <hr>
+                
+                <div class="mb-3">
+                    <strong>Opening Hymn #${data.openingHymn?.number || ''}:</strong>
+                    <span style="border-bottom: 1px dotted #333; padding-left: 10px; margin-left: 10px;">
+                        ${data.openingHymn?.title || ''}
+                    </span>
+                </div>
+                
+                <div class="mb-3">
+                    <strong>Invocation:</strong>
+                    <span style="border-bottom: 1px dotted #333; padding-left: 10px; margin-left: 10px;">
+                        ${data.invocation || ''}
+                    </span>
+                </div>
+                
+                ${data.announcements ? `
+                    <div class="mb-3">
+                        <strong>Ward Business:</strong>
+                        <div style="margin-left: 20px; margin-top: 10px;">
+                            ${data.announcements.replace(/\n/g, '<br>')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div class="mb-3">
+                    <strong>Sacrament Hymn #${data.sacramentHymn?.number || ''}:</strong>
+                    <span style="border-bottom: 1px dotted #333; padding-left: 10px; margin-left: 10px;">
+                        ${data.sacramentHymn?.title || ''}
+                    </span>
+                </div>
+                
+                <div class="text-center mb-3" style="font-style: italic;">
+                    <em>Administration of the Sacrament</em>
+                </div>
+                
+                <div class="mb-3">
+                    <strong>Speaker:</strong>
+                    <span style="border-bottom: 1px dotted #333; padding-left: 10px; margin-left: 10px;">
+                        ${data.speakers?.first?.name || ''}
+                    </span>
+                    ${data.speakers?.first?.topic ? `<br><em style="margin-left: 20px;">${data.speakers.first.topic}</em>` : ''}
+                </div>
+                
+                ${data.specialMusic ? `
+                    <div class="mb-3">
+                        <strong>Special Music:</strong>
+                        <span style="border-bottom: 1px dotted #333; padding-left: 10px; margin-left: 10px;">
+                            ${data.specialMusic}
+                        </span>
+                    </div>
+                ` : ''}
+                
+                <div class="mb-3">
+                    <strong>Speaker:</strong>
+                    <span style="border-bottom: 1px dotted #333; padding-left: 10px; margin-left: 10px;">
+                        ${data.speakers?.second?.name || ''}
+                    </span>
+                    ${data.speakers?.second?.topic ? `<br><em style="margin-left: 20px;">${data.speakers.second.topic}</em>` : ''}
+                </div>
+                
+                <div class="mb-3">
+                    <strong>Closing Hymn #${data.closingHymn?.number || ''}:</strong>
+                    <span style="border-bottom: 1px dotted #333; padding-left: 10px; margin-left: 10px;">
+                        ${data.closingHymn?.title || ''}
+                    </span>
+                </div>
+                
+                <div class="mb-3">
+                    <strong>Benediction:</strong>
+                    <span style="border-bottom: 1px dotted #333; padding-left: 10px; margin-left: 10px;">
+                        ${data.benediction || ''}
+                    </span>
+                </div>
+                
+                ${data.comeFollowMeCurrentWeekDate || data.comeFollowMeCurrentWeekScripture || data.comeFollowMeCurrentWeekTitle ? `
+                <div class="mb-4">
+                    <h4 style="text-align: center; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;">Come, Follow Me</h4>
+                    
+                    ${data.comeFollowMeCurrentWeekDate ? `
+                    <div class="mb-2">
+                        <strong>${data.comeFollowMeCurrentWeekDate}:</strong>
+                        <span style="margin-left: 10px;">${data.comeFollowMeCurrentWeekScripture || ''} ${data.comeFollowMeCurrentWeekTitle || ''}</span>
+                    </div>
+                    ` : ''}
+                    
+                    ${data.comeFollowMeNextWeekDate ? `
+                    <div class="mb-2">
+                        <strong>${data.comeFollowMeNextWeekDate}:</strong>
+                        <span style="margin-left: 10px;">${data.comeFollowMeNextWeekScripture || ''} ${data.comeFollowMeNextWeekTitle || ''}</span>
+                    </div>
+                    ` : ''}
+                    
+                    ${data.comeFollowMeThirdWeekDate ? `
+                    <div class="mb-2">
+                        <strong>${data.comeFollowMeThirdWeekDate}:</strong>
+                        <span style="margin-left: 10px;">${data.comeFollowMeThirdWeekScripture || ''} ${data.comeFollowMeThirdWeekTitle || ''}</span>
+                    </div>
+                    ` : ''}
+                </div>
+                ` : ''}
+                
+                ${data.announcements ? `
+                <div class="mb-4">
+                    <h4 style="text-align: center; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;">Announcements</h4>
+                    <div style="white-space: pre-line; line-height: 1.6; font-size: 14px;">
+                        ${data.announcements}
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${data.contactInformation ? `
+                <div class="mb-4">
+                    <h4 style="text-align: center; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;">Contact Information</h4>
+                    <div style="white-space: pre-line; line-height: 1.6; font-size: 12px; column-count: 3; column-gap: 20px;">
+                        ${data.contactInformation}
+                    </div>
+                </div>
+                ` : ''}
+            `;
+        }
+        
+        // Event listeners
+        document.getElementById('previewBtn').addEventListener('click', updatePreview);
+        
+        // Auto-update preview on key inputs
+        const formInputs = document.querySelectorAll('#bulletinForm input, #bulletinForm select, #bulletinForm textarea');
+        formInputs.forEach(input => {
+            input.addEventListener('input', debounce(updatePreview, 500));
+        });
+        
+        // Debounce function to limit API calls
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // Initial preview load
+        updatePreview();
+        
+        // Smooth scrolling for section navigation
+        document.querySelectorAll('.section-nav-item').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                
+                if (targetElement) {
+                    // Update active state
+                    document.querySelectorAll('.section-nav-item').forEach(item => 
+                        item.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Smooth scroll to target
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Simple hymn search functionality
+        let searchTimeout;
+        
+        // Add event listeners to all hymn number inputs
+        document.querySelectorAll('.hymn-number').forEach(input => {
+            input.addEventListener('input', function() {
+                console.log('Hymn number input detected:', this.value);
+                const number = this.value.trim();
+                if (number && !isNaN(number)) {
+                    console.log('Calling findHymnByNumber with:', number);
+                    findHymnByNumber(parseInt(number), this);
+                }
+            });
+        });
+        
+        // Add event listeners to all hymn title inputs
+        document.querySelectorAll('input[name*="[title]"]').forEach(input => {
+            input.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim();
+                if (query.length > 2) {
+                    searchTimeout = setTimeout(() => {
+                        findHymnByTitle(query, this);
+                    }, 500);
+                }
+            });
+        });
+        
+        function findHymnByNumber(number, input) {
+            console.log('findHymnByNumber called with:', number);
+            
+            if (!window.HYMN_DATA) {
+                console.log('Hymn data not loaded yet');
+                return;
+            }
+            
+            const hymn = window.HYMN_DATA.find(h => h.number === number);
+            console.log('Found hymn:', hymn);
+            
+            if (hymn) {
+                // Find the corresponding title input
+                const titleInput = input.parentElement.querySelector('input[name*="[title]"]');
+                console.log('Title input found:', titleInput);
+                if (titleInput) {
+                    titleInput.value = hymn.title;
+                    console.log('Set title to:', hymn.title);
+                }
+            } else {
+                console.log('No hymn found for number:', number);
+            }
+        }
+        
+        function findHymnByTitle(query, input) {
+            console.log('findHymnByTitle called with:', query);
+            
+            if (!window.HYMN_DATA || query.length < 3) {
+                return;
+            }
+            
+            const hymn = window.HYMN_DATA.find(h => 
+                h.title.toLowerCase().includes(query.toLowerCase())
+            );
+            console.log('Found hymn by title:', hymn);
+            
+            if (hymn) {
+                // Find the corresponding number input
+                const numberInput = input.parentElement.querySelector('.hymn-number');
+                if (numberInput && !numberInput.value) {
+                    numberInput.value = hymn.number;
+                    console.log('Set number to:', hymn.number);
+                }
+            }
+        }
+        
+        // Update active navigation on scroll
+        window.addEventListener('scroll', function() {
+            const sections = ['ward-info', 'meeting-info', 'leadership', 'hymns', 'speakers', 'prayers', 'additional'];
+            let currentSection = '';
+            
+            sections.forEach(sectionId => {
+                const element = document.getElementById(sectionId);
+                if (element) {
+                    const rect = element.getBoundingClientRect();
+                    if (rect.top <= 100 && rect.bottom >= 100) {
+                        currentSection = sectionId;
+                    }
+                }
+            });
+            
+            if (currentSection) {
+                document.querySelectorAll('.section-nav-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.getAttribute('href') === '#' + currentSection) {
+                        item.classList.add('active');
+                    }
+                });
+            }
+        });
+        
+        // Debug form submission
+        document.getElementById('bulletinForm').addEventListener('submit', function(e) {
+            console.log('Form submit event triggered');
+            console.log('Form action:', this.action);
+            console.log('Form method:', this.method);
+            
+            // Check for required fields
+            const requiredFields = this.querySelectorAll('[required]');
+            let missingFields = [];
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    missingFields.push(field.name || field.id);
+                }
+            });
+            
+            if (missingFields.length > 0) {
+                console.log('Missing required fields:', missingFields);
+                alert('Please fill in all required fields: ' + missingFields.join(', '));
+                e.preventDefault();
+                return false;
+            }
+            
+            console.log('Form validation passed, submitting...');
+        });
+    </script>
+</body>
+</html>

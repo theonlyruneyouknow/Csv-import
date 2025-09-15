@@ -2891,6 +2891,10 @@
                                     <a href="/medicine/dashboard" class="nav-accordion-item">💊 Medicine Management</a>
                                     <a href="/medicine/import" class="nav-accordion-item">📥 Import Pharmacy Records</a>
                                 <% } %>
+                                <% if (user.permissions.accessBulletinManagement || user.role === 'admin' || user.role === 'manager') { %>
+                                    <a href="/bulletin" class="nav-accordion-item">📜 View Bulletin</a>
+                                    <a href="/bulletin/admin" class="nav-accordion-item">⚙️ Bulletin Admin</a>
+                                <% } %>
                                 
                                 <% if (user.permissions.accessLineItemsManager || user.permissions.accessTrackingDashboard || user.permissions.accessNotesManager) { %>
                                     <div class="nav-accordion-divider"></div>
@@ -2914,6 +2918,7 @@
                                     <a href="/food-dashboard" class="nav-accordion-item">🍽️ Food Management</a>
                                     <a href="/story/dashboard" class="nav-accordion-item">📚 Story Management</a>
                                     <a href="/medicine/dashboard" class="nav-accordion-item">💊 Medicine Management</a>
+                                    <a href="/bulletin" class="nav-accordion-item">📜 Church Bulletin</a>
                                     <div class="nav-accordion-divider"></div>
                                     <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items Manager</a>
                                     <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 17Track Dashboard</a>

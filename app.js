@@ -16,6 +16,8 @@ const receivingRoutes = require('./routes/receiving');
 const foodRoutes = require('./routes/food');
 const storyRoutes = require('./routes/story');
 const medicineRoutes = require('./routes/medicine');
+const bulletinRoutes = require('./routes/bulletin');
+const hymnRoutes = require('./routes/hymns');
 
 // Import authentication middleware
 const { ensureAuthenticated, ensureApproved, logPageView } = require('./middleware/auth');
@@ -170,6 +172,54 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
     console.log(`📨 ${req.method} ${req.path}${req.user ? ` (${req.user.username})` : ' (anonymous)'}`);
     next();
+});
+
+// Simple test endpoint
+app.get('/test-api', (req, res) => {
+    console.log('🧪 Test API hit!');
+    res.json({ message: 'Test API working', timestamp: new Date() });
+});
+
+// Serve hymn data as static JavaScript
+app.get('/hymn-data.js', (req, res) => {
+    console.log('📋 Serving hymn data');
+    res.sendFile(__dirname + '/views/hymn-data.js');
+});
+
+// Unprotected hymn search API - must be before authentication middleware
+app.get('/api/hymns/search', async (req, res) => {
+    try {
+        const Hymn = require('./models/Hymn');
+        const { q } = req.query;
+        console.log('🎵 Unprotected hymn search:', q);
+        
+        if (!q) {
+            console.log('🎵 No query provided, returning empty array');
+            return res.json([]);
+        }
+
+        let hymns = [];
+        
+        if (!isNaN(q)) {
+            const number = parseInt(q);
+            console.log('🎵 Searching by number:', number);
+            hymns = await Hymn.find({ number: number }).limit(10);
+        } else {
+            console.log('🎵 Searching by title:', q);
+            hymns = await Hymn.find({
+                title: { $regex: q, $options: 'i' }
+            }).limit(10);
+        }
+        
+        console.log('🎵 Found hymns:', hymns.length);
+        if (hymns.length > 0) {
+            console.log('🎵 First hymn:', hymns[0]);
+        }
+        res.json(hymns);
+    } catch (error) {
+        console.error('❌ Error in unprotected hymn search:', error);
+        res.status(500).json({ error: 'Error searching hymns' });
+    }
 });
 
 // Page view logging middleware
@@ -400,6 +450,8 @@ app.use('/dropship-test', ensureAuthenticated, ensureApproved, dropshipTestRoute
 app.use('/food', ensureAuthenticated, ensureApproved, foodRoutes);
 app.use('/story', ensureAuthenticated, ensureApproved, storyRoutes);
 app.use('/medicine', ensureAuthenticated, ensureApproved, medicineRoutes);
+app.use('/bulletin', ensureAuthenticated, ensureApproved, bulletinRoutes);
+app.use('/hymns', hymnRoutes); // Remove authentication requirement for hymn search
 // Temporary unprotected food routes for testing
 app.use('/food-test', foodRoutes);
 app.use('/api', ensureAuthenticated, ensureApproved, purchaseOrderRoutes); // API routes for AJAX calls
