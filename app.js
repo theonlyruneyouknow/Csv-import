@@ -47,6 +47,44 @@ app.get('/emergency-test', (req, res) => {
     res.send('<h1 style="color: green;">EMERGENCY TEST WORKS!</h1><p>This proves basic routing works</p><a href="/">Back to home</a>');
 });
 
+// Emergency PO11322 status check route
+app.get('/check-po11322', async (req, res) => {
+    console.log('🔍 Emergency PO11322 check route hit!');
+    try {
+        const PurchaseOrder = require('./models/PurchaseOrder');
+        const LineItem = require('./models/LineItem');
+        
+        const po = await PurchaseOrder.findOne({ poNumber: 'PO11322' });
+        if (!po) {
+            console.log('❌ PO11322 not found');
+            return res.json({ found: false, message: 'PO11322 not found' });
+        }
+        
+        console.log(`📋 Found PO11322: isHidden=${po.isHidden}, reason=${po.hiddenReason}`);
+        
+        const lineItems = await LineItem.find({ poNumber: 'PO11322' });
+        const hiddenLineItems = lineItems.filter(item => item.isHidden);
+        
+        const result = {
+            found: true,
+            poNumber: po.poNumber,
+            vendor: po.vendor,
+            isHidden: po.isHidden,
+            hiddenReason: po.hiddenReason,
+            hiddenBy: po.hiddenBy,
+            hiddenDate: po.hiddenDate,
+            lineItemsTotal: lineItems.length,
+            lineItemsHidden: hiddenLineItems.length
+        };
+        
+        console.log('🔍 PO11322 result:', result);
+        res.json(result);
+    } catch (error) {
+        console.error('❌ Emergency PO check error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.get('/emergency-food', (req, res) => {
     console.log('🚨 EMERGENCY FOOD ROUTE HIT!');
     try {

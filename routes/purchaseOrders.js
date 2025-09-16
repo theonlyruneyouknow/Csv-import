@@ -73,17 +73,35 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
 
     const dataRows = parsed.data.slice(dataStartIndex, dataEndIndex);
 
+    // Track which PO numbers were actually processed in this import
+    const processedPONumbers = new Set();
+
     // Process each PO individually to preserve notes and custom status
     for (const row of dataRows) {
       const poNumber = row[2]; // PO number is the unique identifier
       const csvStatus = row[4]; // Status from CSV (this goes to NS Status!)
+
+      // Skip empty rows or invalid PO numbers
+      if (!poNumber || !poNumber.trim()) {
+        continue;
+      }
+
+      // Add to processed list
+      processedPONumbers.add(poNumber.trim());
+
+      // Special logging for PO11322 to help debug
+      if (poNumber.includes('11322')) {
+        console.log(`🎯 FOUND PO11322 in import! Processing...`);
+        console.log(`   Raw PO number from CSV: "${poNumber}"`);
+        console.log(`   Trimmed PO number: "${poNumber.trim()}"`);
+      }
 
       // Find existing PO by PO number
       const existingPO = await PurchaseOrder.findOne({ poNumber: poNumber });
 
       if (existingPO) {
         // Update existing PO - CSV status goes to nsStatus, preserve custom status
-        await PurchaseOrder.findByIdAndUpdate(existingPO._id, {
+        const updateData = {
           reportDate,
           date: row[1],
           poNumber: poNumber,
@@ -94,8 +112,53 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
           updatedAt: new Date(),
           notes: existingPO.notes, // Keep existing notes!
           status: existingPO.status // Keep existing custom Status (not from CSV)!
-        });
-        console.log(`Updated PO ${poNumber} - NS Status: "${csvStatus}", Custom Status: "${existingPO.status}"`);
+        };
+
+        // 🔄 RESURRECTION LOGIC: If this PO was hidden (especially "Not in import"), unhide it
+        if (existingPO.isHidden) {
+          console.log(`🔄 RESURRECTING PO ${poNumber}!`);
+          console.log(`   Previously hidden: ${existingPO.hiddenReason} (by ${existingPO.hiddenBy} on ${existingPO.hiddenDate})`);
+          console.log(`   Now unhiding PO and associated line items...`);
+          
+          // Special extra logging for PO11322
+          if (poNumber.includes('11322')) {
+            console.log(`🎯 PO11322 RESURRECTION DETECTED!`);
+            console.log(`   This is the PO we're specifically testing!`);
+          }
+          
+          // FIRST: Unhide the PO using $unset (separate operation)
+          await PurchaseOrder.findByIdAndUpdate(existingPO._id, {
+            $unset: {
+              isHidden: 1,
+              hiddenDate: 1,
+              hiddenReason: 1,
+              hiddenBy: 1
+            }
+          });
+          console.log(`   ✅ PO ${poNumber} unhidden successfully`);
+
+          // Also unhide any line items that were hidden due to parent PO being hidden
+          try {
+            const lineItemResult = await LineItem.updateMany(
+              { poNumber: poNumber, hiddenReason: 'Parent PO hidden' },
+              {
+                $unset: {
+                  isHidden: 1,
+                  hiddenDate: 1,
+                  hiddenReason: 1,
+                  hiddenBy: 1
+                }
+              }
+            );
+            console.log(`   ✅ Unhidden ${lineItemResult.modifiedCount} line items for PO ${poNumber}`);
+          } catch (lineItemError) {
+            console.error(`   ❌ Error unhiding line items for PO ${poNumber}:`, lineItemError);
+          }
+        }
+
+        // THEN: Update the regular fields (separate operation)
+        await PurchaseOrder.findByIdAndUpdate(existingPO._id, updateData);
+        console.log(`Updated PO ${poNumber} - NS Status: "${csvStatus}", Custom Status: "${existingPO.status}"${existingPO.isHidden ? ' (UNHIDDEN)' : ''}`);
       } else {
         // Create new PO - CSV status goes to nsStatus, custom status starts empty
         await PurchaseOrder.create({
@@ -116,7 +179,10 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
     }
 
     // Hide POs that are no longer in the CSV (soft delete)
-    const currentPONumbers = dataRows.map(row => row[2]);
+    // Use the actually processed PO numbers, not raw CSV data
+    const currentPONumbers = Array.from(processedPONumbers);
+    console.log(`📋 Processed ${currentPONumbers.length} PO numbers in this import:`, currentPONumbers.slice(0, 5), '...');
+    
     const hiddenResult = await PurchaseOrder.updateMany(
       {
         reportDate: reportDate,
@@ -134,7 +200,11 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
     );
 
     if (hiddenResult.modifiedCount > 0) {
-      console.log(`Hidden ${hiddenResult.modifiedCount} POs that are no longer in the report`);
+      console.log(`🫥 Hidden ${hiddenResult.modifiedCount} POs that are no longer in the report`);
+      console.log(`🔍 These POs were NOT in the current import and have been hidden`);
+    } else {
+      console.log(`✅ No POs needed to be hidden - all existing POs are still in the import`);
+    }
       
       // Also hide line items for these hidden POs
       const hiddenPONumbers = await PurchaseOrder.find({
@@ -165,7 +235,6 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
           console.log(`Also hidden ${hiddenLineItemsResult.modifiedCount} line items for hidden POs`);
         }
       }
-    }
 
     // Clean up uploaded file
     fs.unlinkSync(req.file.path);
@@ -3554,6 +3623,45 @@ router.delete('/attachments/:attachmentId', async (req, res) => {
   } catch (error) {
     console.error('Delete attachment error:', error);
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Test route to check specific PO status (for debugging)
+router.get('/test-po/:poNumber', async (req, res) => {
+  try {
+    const { poNumber } = req.params;
+    console.log(`🔍 Testing PO status for: ${poNumber}`);
+    
+    const po = await PurchaseOrder.findOne({ poNumber: poNumber });
+    if (!po) {
+      return res.json({ found: false, message: `PO ${poNumber} not found` });
+    }
+    
+    const lineItems = await LineItem.find({ poNumber: poNumber });
+    const hiddenLineItems = lineItems.filter(item => item.isHidden);
+    
+    res.json({
+      found: true,
+      po: {
+        poNumber: po.poNumber,
+        vendor: po.vendor,
+        amount: po.amount,
+        nsStatus: po.nsStatus,
+        status: po.status,
+        isHidden: po.isHidden,
+        hiddenDate: po.hiddenDate,
+        hiddenReason: po.hiddenReason,
+        hiddenBy: po.hiddenBy
+      },
+      lineItems: {
+        total: lineItems.length,
+        hidden: hiddenLineItems.length,
+        visible: lineItems.length - hiddenLineItems.length
+      }
+    });
+  } catch (error) {
+    console.error('Test PO error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
