@@ -156,8 +156,9 @@ const bulletinSchema = new mongoose.Schema({
     },
     
     announcements: {
-        type: String,
-        default: `September 14th: Family Heritage Follow-up Training! 7:00 in the Relief Society room.
+        text: {
+            type: String,
+            default: `September 14th: Family Heritage Follow-up Training! 7:00 in the Relief Society room.
 
 September 27th: Western Night at Rod and Lisa Petersen's Barn.
 
@@ -176,6 +177,15 @@ Got an announcement? Text Elise Luke at (541) 373-7908
 Temple Prep Class: Those planning to attend the temple for the first time, please contact Whaanga (Fonga) Kewene at (541) 914-4104 or rwwkewene@gmail.com.
 
 To Dine with the Missionaries: Contact Kelly Reynolds at (541) 514-8252 to set up an appointment.`
+        },
+        selectedAnnouncements: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Announcement'
+        }],
+        useManaged: {
+            type: Boolean,
+            default: false
+        }
     },
     
     contactInformation: {
@@ -259,6 +269,30 @@ bulletinSchema.statics.createDefaultBulletin = function(date, userId) {
         meetingDate: date,
         createdBy: userId
     });
+};
+
+// Instance method to get final announcements text
+bulletinSchema.methods.getFinalAnnouncementsText = async function() {
+    if (this.announcements.useManaged && this.announcements.selectedAnnouncements.length > 0) {
+        // Use managed announcements
+        await this.populate('announcements.selectedAnnouncements');
+        
+        const announcementTexts = this.announcements.selectedAnnouncements
+            .filter(ann => ann.isCurrentlyActive) // Only include currently active ones
+            .sort((a, b) => b.priority - a.priority) // Sort by priority
+            .map(ann => {
+                let text = `${ann.title}`;
+                if (ann.content) {
+                    text += `\n${ann.content}`;
+                }
+                return text;
+            });
+        
+        return announcementTexts.join('\n\n');
+    } else {
+        // Use traditional text field
+        return this.announcements.text;
+    }
 };
 
 module.exports = mongoose.model('Bulletin', bulletinSchema);

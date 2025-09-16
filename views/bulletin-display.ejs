@@ -743,7 +743,7 @@
                 <div class="program-section mt-4">
                     <h4 class="section-header text-center mb-3" style="border-bottom: 1px solid #333; padding-bottom: 8px;">Announcements</h4>
                     <div class="announcements-content" style="white-space: pre-line; line-height: 1.6; font-size: 14px; text-align: left; padding: 0 20px;">
-                        <%= bulletin.announcements || `September 14th: Family Heritage Follow-up Training! 7:00 in the Relief Society room.
+                        <%- bulletin.getFinalAnnouncementsText() || `September 14th: Family Heritage Follow-up Training! 7:00 in the Relief Society room.
 
 September 27th: Western Night at Rod and Lisa Petersen's Barn.
 

@@ -61,6 +61,7 @@ const userSchema = new mongoose.Schema({
         accessStoryManagement: { type: Boolean, default: false },
         accessMedicineManagement: { type: Boolean, default: false },
         accessOrganicVendors: { type: Boolean, default: false },
+        accessBulletinManagement: { type: Boolean, default: false },
         // Tool access permissions
         accessLineItemsManager: { type: Boolean, default: false },
         accessTrackingDashboard: { type: Boolean, default: false },

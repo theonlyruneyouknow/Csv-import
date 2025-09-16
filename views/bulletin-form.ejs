@@ -491,13 +491,72 @@
                     <div class="form-section" id="announcements">
                         <h3 class="section-header">
                             <i class="fas fa-bullhorn me-2"></i>Announcements
+                            <div class="float-end">
+                                <a href="/bulletin/announcements" class="btn btn-sm btn-primary" target="_blank">
+                                    <i class="fas fa-cog me-1"></i>Manage Announcements
+                                </a>
+                            </div>
                         </h3>
                         
+                        <!-- Announcement Mode Selection -->
                         <div class="mb-3">
-                            <label for="announcements" class="form-label">Ward Announcements</label>
-                            <textarea class="form-control" id="announcements" name="announcements" rows="15" 
-                                      placeholder="Enter ward announcements..."><%= bulletin ? bulletin.announcements : 'September 14th: Family Heritage Follow-up Training! 7:00 in the Relief Society room.\n\nSeptember 27th: Western Night at Rod and Lisa Petersen\'s Barn.\n\nFaith-based Addiction Recovery Program in person or on Zoom every Wednesday evening at 7:00 p.m. If you have questions, please call or text Sister Hawes (541) 510-4863 or email to: oregonfour@q.com.\n\nPlease follow these missionary pages for daily enlightenment and a way to share the gospel of Jesus Christ with your friends: Facebook-Followers of Christ in Southern Oregon | Instagram-hopeinhim.Southernoregon\n\nPlease help keep our Sister Missionaries fed! Sign up via the new digital calendar at missmeal.onrender.com to secure your spot!\n\nGeneral Conference Tickets! If you are interested in attending the October 2025 General Conference, please contact Ardel Wicks at ardelwicks@gmail.com or (541) 228-4136 to get tickets.\n\nThe Home Storage Center hours have changed! The update hours are on Thursdays from 12:00-5:00 and Saturdays from 10:00-1:00.\n\nGot an announcement? Text Elise Luke at (541) 373-7908\n\nTemple Prep Class: Those planning to attend the temple for the first time, please contact Whaanga (Fonga) Kewene at (541) 914-4104 or rwwkewene@gmail.com.\n\nTo Dine with the Missionaries: Contact Kelly Reynolds at (541) 514-8252 to set up an appointment.' %></textarea>
-                            <div class="form-text">Enter each announcement on a separate line or paragraph for best formatting.</div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="useManaged" name="useManaged" 
+                                       <%= bulletin && bulletin.announcements && bulletin.announcements.useManaged ? 'checked' : '' %>
+                                       onchange="toggleAnnouncementMode()">
+                                <label class="form-check-label" for="useManaged">
+                                    <strong>Use Managed Announcements</strong>
+                                    <small class="text-muted d-block">Use scheduled announcements with automatic expiration</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Traditional Text Mode -->
+                        <div id="textAnnouncementMode">
+                            <div class="mb-3">
+                                <label for="announcements" class="form-label">Ward Announcements</label>
+                                <textarea class="form-control" id="announcements" name="announcements" rows="15" 
+                                          placeholder="Enter ward announcements..."><%= bulletin ? (bulletin.announcements && bulletin.announcements.text ? bulletin.announcements.text : (typeof bulletin.announcements === 'string' ? bulletin.announcements : '')) : 'September 14th: Family Heritage Follow-up Training! 7:00 in the Relief Society room.\n\nSeptember 27th: Western Night at Rod and Lisa Petersen\'s Barn.\n\nFaith-based Addiction Recovery Program in person or on Zoom every Wednesday evening at 7:00 p.m. If you have questions, please call or text Sister Hawes (541) 510-4863 or email to: oregonfour@q.com.\n\nPlease follow these missionary pages for daily enlightenment and a way to share the gospel of Jesus Christ with your friends: Facebook-Followers of Christ in Southern Oregon | Instagram-hopeinhim.Southernoregon\n\nPlease help keep our Sister Missionaries fed! Sign up via the new digital calendar at missmeal.onrender.com to secure your spot!\n\nGeneral Conference Tickets! If you are interested in attending the October 2025 General Conference, please contact Ardel Wicks at ardelwicks@gmail.com or (541) 228-4136 to get tickets.\n\nThe Home Storage Center hours have changed! The update hours are on Thursdays from 12:00-5:00 and Saturdays from 10:00-1:00.\n\nGot an announcement? Text Elise Luke at (541) 373-7908\n\nTemple Prep Class: Those planning to attend the temple for the first time, please contact Whaanga (Fonga) Kewene at (541) 914-4104 or rwwkewene@gmail.com.\n\nTo Dine with the Missionaries: Contact Kelly Reynolds at (541) 514-8252 to set up an appointment.' %></textarea>
+                                <div class="form-text">Enter each announcement on a separate line or paragraph for best formatting.</div>
+                            </div>
+                        </div>
+
+                        <!-- Managed Announcements Mode -->
+                        <div id="managedAnnouncementMode" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>Available Announcements</h5>
+                                    <div id="availableAnnouncements" class="border rounded p-3" style="min-height: 300px; max-height: 400px; overflow-y: auto;">
+                                        <div class="text-center text-muted">
+                                            <i class="fas fa-spinner fa-spin me-2"></i>Loading announcements...
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="refreshAnnouncements()">
+                                            <i class="fas fa-sync me-1"></i>Refresh
+                                        </button>
+                                        <span class="text-muted ms-2" id="announcementCount">0 announcements</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Selected for Bulletin</h5>
+                                    <div id="selectedAnnouncementsList" class="border rounded p-3" style="min-height: 300px; max-height: 400px; overflow-y: auto;">
+                                        <div class="text-center text-muted">
+                                            No announcements selected
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-warning" onclick="clearSelectedAnnouncements()">
+                                            <i class="fas fa-times me-1"></i>Clear All
+                                        </button>
+                                        <span class="text-muted ms-2" id="selectedCount">0 selected</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Hidden input to store selected announcement IDs -->
+                            <input type="hidden" id="selectedAnnouncements" name="selectedAnnouncements" 
+                                   value="<%= bulletin && bulletin.announcements && bulletin.announcements.selectedAnnouncements ? JSON.stringify(bulletin.announcements.selectedAnnouncements) : '[]' %>">
                         </div>
                     </div>
 
@@ -614,6 +673,44 @@
         }
     </script>
     <script>
+        // Get announcements preview text
+        function getAnnouncementsPreview(data) {
+            const useManaged = document.getElementById('useManaged').checked;
+            
+            if (useManaged) {
+                // Get selected announcements preview
+                const selectedIds = selectedAnnouncements;
+                if (selectedIds.length === 0) {
+                    return data.announcementText ? data.announcementText.replace(/\n/g, '<br>') : '';
+                }
+                
+                // Find selected announcements and format them
+                const selectedAnnouncementObjects = availableAnnouncements.filter(a => 
+                    selectedIds.includes(a._id)
+                );
+                
+                let announcementText = data.announcementText || '';
+                if (selectedAnnouncementObjects.length > 0) {
+                    const managedText = selectedAnnouncementObjects
+                        .sort((a, b) => b.priority - a.priority) // Sort by priority
+                        .map(announcement => {
+                            const endDate = new Date(announcement.endDate);
+                            return `${announcement.title}: ${announcement.content}`;
+                        })
+                        .join('\n\n');
+                    
+                    announcementText = announcementText ? 
+                        `${announcementText}\n\n${managedText}` : 
+                        managedText;
+                }
+                
+                return announcementText.replace(/\n/g, '<br>');
+            } else {
+                // Traditional text mode
+                return data.announcementText ? data.announcementText.replace(/\n/g, '<br>') : '';
+            }
+        }
+
         // Auto-update preview when form changes
         function updatePreview() {
             const formData = new FormData(document.getElementById('bulletinForm'));
@@ -737,11 +834,11 @@
                     </span>
                 </div>
                 
-                ${data.announcements ? `
+                ${getAnnouncementsPreview(data) ? `
                     <div class="mb-3">
                         <strong>Ward Business:</strong>
                         <div style="margin-left: 20px; margin-top: 10px;">
-                            ${data.announcements.replace(/\n/g, '<br>')}
+                            ${getAnnouncementsPreview(data)}
                         </div>
                     </div>
                 ` : ''}
@@ -1013,6 +1110,182 @@
             
             console.log('Form validation passed, submitting...');
         });
+
+        // Announcement Management Functions
+        const announcementToggle = document.getElementById('useManaged');
+        const announcementModes = document.querySelectorAll('.announcement-mode');
+        const availableAnnouncementsList = document.getElementById('availableAnnouncementsList');
+        const selectedAnnouncementsList = document.getElementById('selectedAnnouncementsList');
+        const selectedAnnouncementsInput = document.getElementById('selectedAnnouncements');
+        
+        let availableAnnouncements = [];
+        let selectedAnnouncements = [];
+
+        // Toggle between announcement modes
+        function toggleAnnouncementMode() {
+            const useManaged = announcementToggle.checked;
+            announcementModes.forEach(mode => {
+                mode.style.display = mode.dataset.mode === (useManaged ? 'managed' : 'text') ? 'block' : 'none';
+            });
+            
+            if (useManaged && availableAnnouncements.length === 0) {
+                loadAvailableAnnouncements();
+            }
+        }
+
+        // Load available announcements from API
+        async function loadAvailableAnnouncements() {
+            try {
+                console.log('Loading available announcements...');
+                const response = await fetch('/api/announcements?active=true&current=true');
+                if (!response.ok) throw new Error('Failed to load announcements');
+                
+                const data = await response.json();
+                availableAnnouncements = data.announcements || [];
+                console.log('Loaded announcements:', availableAnnouncements);
+                renderAvailableAnnouncements();
+            } catch (error) {
+                console.error('Error loading announcements:', error);
+                availableAnnouncementsList.innerHTML = '<p class="text-danger">Error loading announcements. Please try again.</p>';
+            }
+        }
+
+        // Render available announcements
+        function renderAvailableAnnouncements() {
+            if (availableAnnouncements.length === 0) {
+                availableAnnouncementsList.innerHTML = '<p class="text-muted">No active announcements available.</p>';
+                return;
+            }
+
+            availableAnnouncementsList.innerHTML = availableAnnouncements.map(announcement => {
+                const isSelected = selectedAnnouncements.includes(announcement._id);
+                const endDate = new Date(announcement.endDate);
+                const isExpiring = (endDate - new Date()) < (24 * 60 * 60 * 1000); // Less than 24 hours
+                
+                return `
+                    <div class="announcement-item ${isSelected ? 'd-none' : ''}" data-id="${announcement._id}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">${announcement.title}</h6>
+                                <p class="mb-1 text-truncate">${announcement.content.substring(0, 100)}${announcement.content.length > 100 ? '...' : ''}</p>
+                                <small class="text-muted">
+                                    <span class="badge badge-${getCategoryColor(announcement.category)}">${announcement.category}</span>
+                                    <span class="badge badge-info">Priority: ${announcement.priority}</span>
+                                    ${isExpiring ? '<span class="badge badge-warning">Expiring Soon</span>' : ''}
+                                    <br>
+                                    Expires: ${endDate.toLocaleDateString()}
+                                </small>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-primary ml-2" onclick="selectAnnouncement('${announcement._id}')">
+                                <i class="fas fa-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render selected announcements
+        function renderSelectedAnnouncements() {
+            if (selectedAnnouncements.length === 0) {
+                selectedAnnouncementsList.innerHTML = '<p class="text-muted">No announcements selected.</p>';
+                selectedAnnouncementsInput.value = '';
+                return;
+            }
+
+            const selectedAnnouncementObjects = availableAnnouncements.filter(a => 
+                selectedAnnouncements.includes(a._id)
+            );
+
+            selectedAnnouncementsList.innerHTML = selectedAnnouncementObjects.map(announcement => {
+                const endDate = new Date(announcement.endDate);
+                const isExpiring = (endDate - new Date()) < (24 * 60 * 60 * 1000);
+                
+                return `
+                    <div class="announcement-item selected" data-id="${announcement._id}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">${announcement.title}</h6>
+                                <p class="mb-1">${announcement.content}</p>
+                                <small class="text-muted">
+                                    <span class="badge badge-${getCategoryColor(announcement.category)}">${announcement.category}</span>
+                                    <span class="badge badge-info">Priority: ${announcement.priority}</span>
+                                    ${isExpiring ? '<span class="badge badge-warning">Expiring Soon</span>' : ''}
+                                    <br>
+                                    Expires: ${endDate.toLocaleDateString()}
+                                </small>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-danger ml-2" onclick="deselectAnnouncement('${announcement._id}')">
+                                <i class="fas fa-times"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Update hidden input with selected IDs
+            selectedAnnouncementsInput.value = JSON.stringify(selectedAnnouncements);
+        }
+
+        // Select an announcement
+        function selectAnnouncement(announcementId) {
+            if (!selectedAnnouncements.includes(announcementId)) {
+                selectedAnnouncements.push(announcementId);
+                renderAvailableAnnouncements();
+                renderSelectedAnnouncements();
+            }
+        }
+
+        // Deselect an announcement
+        function deselectAnnouncement(announcementId) {
+            selectedAnnouncements = selectedAnnouncements.filter(id => id !== announcementId);
+            renderAvailableAnnouncements();
+            renderSelectedAnnouncements();
+        }
+
+        // Clear all selected announcements
+        function clearSelectedAnnouncements() {
+            selectedAnnouncements = [];
+            renderAvailableAnnouncements();
+            renderSelectedAnnouncements();
+        }
+
+        // Get category color for badges
+        function getCategoryColor(category) {
+            const colors = {
+                'general': 'secondary',
+                'worship': 'primary',
+                'fellowship': 'success',
+                'service': 'info',
+                'youth': 'warning',
+                'education': 'dark',
+                'special': 'danger'
+            };
+            return colors[category] || 'secondary';
+        }
+
+        // Initialize announcement mode on page load
+        if (announcementToggle) {
+            announcementToggle.addEventListener('change', toggleAnnouncementMode);
+            
+            // Check if we have existing data to load
+            const existingData = selectedAnnouncementsInput.value;
+            if (existingData) {
+                try {
+                    selectedAnnouncements = JSON.parse(existingData);
+                } catch (e) {
+                    console.warn('Could not parse existing announcement data:', e);
+                    selectedAnnouncements = [];
+                }
+            }
+            
+            toggleAnnouncementMode();
+        }
+
+        // Make functions globally available
+        window.selectAnnouncement = selectAnnouncement;
+        window.deselectAnnouncement = deselectAnnouncement;
+        window.clearSelectedAnnouncements = clearSelectedAnnouncements;
     </script>
 </body>
 </html>

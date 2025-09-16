@@ -60,6 +60,51 @@ router.get('/new', ensureAuthenticated, ensureBulletinAccess, async (req, res) =
     }
 });
 
+// TEST ROUTE - Simple test
+router.get('/test', (req, res) => {
+    console.log('🧪 TEST ROUTE HIT!');
+    res.send('<h1>Test Route Works!</h1><p>This proves routing is functional.</p>');
+});
+
+// Announcement management page
+router.get('/announcements', async (req, res) => {
+    console.log('📋 Announcement management route accessed!');
+    
+    try {
+        // Create a mock user for testing
+        const mockUser = {
+            _id: 'test-user',
+            username: 'testuser',
+            firstName: 'Test',
+            lastName: 'User',
+            role: 'admin',
+            permissions: {
+                accessBulletinManagement: true
+            }
+        };
+        
+        console.log('📋 About to render announcement-management template...');
+        
+        res.render('announcement-management', {
+            user: mockUser,
+            title: 'Announcement Management'
+        });
+        
+        console.log('📋 Template rendered successfully!');
+    } catch (error) {
+        console.error('❌ Error in announcement management route:', error);
+        console.error('❌ Error message:', error.message);
+        console.error('❌ Error stack:', error.stack);
+        
+        // Send a simpler error response
+        res.status(500).send(`
+            <h1>Error Loading Announcement Management</h1>
+            <p>Error: ${error.message}</p>
+            <pre>${error.stack}</pre>
+        `);
+    }
+});
+
 // Create bulletin
 router.post('/', ensureAuthenticated, ensureBulletinAccess, async (req, res) => {
     try {
@@ -68,10 +113,42 @@ router.post('/', ensureAuthenticated, ensureBulletinAccess, async (req, res) => 
         // Process the form data to handle special cases
         const bulletinData = { ...req.body };
         
-        // Handle announcements - if it's an array, join it into a string
-        if (Array.isArray(bulletinData.announcements)) {
-            bulletinData.announcements = bulletinData.announcements.join('\n\n');
+        // Handle announcements - support both old string format and new managed format
+        if (bulletinData.useManaged === 'on') {
+            // New managed announcement format
+            bulletinData.announcements = {
+                text: bulletinData.announcementText || '',
+                selectedAnnouncements: bulletinData.selectedAnnouncements ? 
+                    JSON.parse(bulletinData.selectedAnnouncements) : [],
+                useManaged: true
+            };
+        } else {
+            // Traditional text format (backward compatibility)
+            if (Array.isArray(bulletinData.announcements)) {
+                bulletinData.announcements = {
+                    text: bulletinData.announcements.join('\n\n'),
+                    selectedAnnouncements: [],
+                    useManaged: false
+                };
+            } else if (typeof bulletinData.announcements === 'string') {
+                bulletinData.announcements = {
+                    text: bulletinData.announcements,
+                    selectedAnnouncements: [],
+                    useManaged: false
+                };
+            } else {
+                bulletinData.announcements = {
+                    text: bulletinData.announcementText || '',
+                    selectedAnnouncements: [],
+                    useManaged: false
+                };
+            }
         }
+        
+        // Clean up form fields that are now part of announcements object
+        delete bulletinData.useManaged;
+        delete bulletinData.announcementText;
+        delete bulletinData.selectedAnnouncements;
         
         // Handle specialMusic - ensure it's a proper object
         if (typeof bulletinData.specialMusic === 'string') {
@@ -146,10 +223,42 @@ router.post('/:id', ensureAuthenticated, ensureBulletinAccess, async (req, res) 
         // Process the form data to handle special cases
         const updateData = { ...req.body };
         
-        // Handle announcements - if it's an array, join it into a string
-        if (Array.isArray(updateData.announcements)) {
-            updateData.announcements = updateData.announcements.join('\n\n');
+        // Handle announcements - support both old string format and new managed format
+        if (updateData.useManaged === 'on') {
+            // New managed announcement format
+            updateData.announcements = {
+                text: updateData.announcementText || '',
+                selectedAnnouncements: updateData.selectedAnnouncements ? 
+                    JSON.parse(updateData.selectedAnnouncements) : [],
+                useManaged: true
+            };
+        } else {
+            // Traditional text format (backward compatibility)
+            if (Array.isArray(updateData.announcements)) {
+                updateData.announcements = {
+                    text: updateData.announcements.join('\n\n'),
+                    selectedAnnouncements: [],
+                    useManaged: false
+                };
+            } else if (typeof updateData.announcements === 'string') {
+                updateData.announcements = {
+                    text: updateData.announcements,
+                    selectedAnnouncements: [],
+                    useManaged: false
+                };
+            } else {
+                updateData.announcements = {
+                    text: updateData.announcementText || '',
+                    selectedAnnouncements: [],
+                    useManaged: false
+                };
+            }
         }
+        
+        // Clean up form fields that are now part of announcements object
+        delete updateData.useManaged;
+        delete updateData.announcementText;
+        delete updateData.selectedAnnouncements;
         
         // Handle specialMusic - ensure it's a proper object
         if (typeof updateData.specialMusic === 'string') {

@@ -18,6 +18,7 @@ const storyRoutes = require('./routes/story');
 const medicineRoutes = require('./routes/medicine');
 const bulletinRoutes = require('./routes/bulletin');
 const hymnRoutes = require('./routes/hymns');
+const announcementRoutes = require('./routes/announcements');
 
 // Import authentication middleware
 const { ensureAuthenticated, ensureApproved, logPageView } = require('./middleware/auth');
@@ -34,6 +35,12 @@ const app = express();
 
 // URGENT DEBUG: Add test routes IMMEDIATELY after Express app creation
 console.log('🚨 Adding EMERGENCY test routes before ANY middleware...');
+
+// VERY FIRST MIDDLEWARE - Catch ALL requests
+app.use((req, res, next) => {
+    console.log(`🔴 FIRST MIDDLEWARE: ${req.method} ${req.url} from ${req.ip}`);
+    next();
+});
 
 app.get('/emergency-test', (req, res) => {
     console.log('🚨 EMERGENCY TEST ROUTE HIT!');
@@ -116,12 +123,62 @@ console.log('🔄 Connecting to MongoDB...');
 mongoose.connect(mongoURI)
     .then(() => {
         console.log('✅ Connected to MongoDB successfully');
+        
+        // Schedule announcement cleanup
+        setupAnnouncementCleanup();
     })
     .catch((error) => {
         console.error('❌ MongoDB connection error:', error.message);
         console.error('💡 Please check your MONGODB_URI in .env file');
         process.exit(1);
     });
+
+// Setup automatic announcement cleanup
+function setupAnnouncementCleanup() {
+    const Announcement = require('./models/Announcement');
+    
+    // Clean up expired announcements immediately on startup
+    console.log('🧹 Running initial announcement cleanup...');
+    Announcement.cleanupExpired()
+        .then(result => {
+            if (result.deletedCount > 0) {
+                console.log(`✅ Cleaned up ${result.deletedCount} expired announcements`);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Error during initial announcement cleanup:', error);
+        });
+    
+    // Schedule daily cleanup at midnight
+    const scheduleNextCleanup = () => {
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0); // Set to midnight
+        
+        const timeUntilMidnight = tomorrow.getTime() - now.getTime();
+        
+        console.log(`⏰ Next announcement cleanup scheduled for ${tomorrow.toLocaleString()}`);
+        
+        setTimeout(() => {
+            console.log('🧹 Running scheduled announcement cleanup...');
+            Announcement.cleanupExpired()
+                .then(result => {
+                    if (result.deletedCount > 0) {
+                        console.log(`✅ Cleaned up ${result.deletedCount} expired announcements`);
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error during scheduled announcement cleanup:', error);
+                });
+            
+            // Schedule next cleanup for tomorrow
+            scheduleNextCleanup();
+        }, timeUntilMidnight);
+    };
+    
+    scheduleNextCleanup();
+}
 
 // Handle MongoDB connection events
 mongoose.connection.on('error', (error) => {
@@ -450,8 +507,12 @@ app.use('/dropship-test', ensureAuthenticated, ensureApproved, dropshipTestRoute
 app.use('/food', ensureAuthenticated, ensureApproved, foodRoutes);
 app.use('/story', ensureAuthenticated, ensureApproved, storyRoutes);
 app.use('/medicine', ensureAuthenticated, ensureApproved, medicineRoutes);
-app.use('/bulletin', ensureAuthenticated, ensureApproved, bulletinRoutes);
+app.use('/bulletin', bulletinRoutes); // Temporarily remove auth for testing
 app.use('/hymns', hymnRoutes); // Remove authentication requirement for hymn search
+
+// API routes - Order matters! More specific routes must come first
+app.use('/api/announcements', announcementRoutes); // Announcement API routes - MUST be before /api
+
 // Temporary unprotected food routes for testing
 app.use('/food-test', foodRoutes);
 app.use('/api', ensureAuthenticated, ensureApproved, purchaseOrderRoutes); // API routes for AJAX calls
@@ -553,7 +614,7 @@ app.use((req, res) => {
     res.redirect('/splash');
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
