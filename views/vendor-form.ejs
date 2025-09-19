@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= isEdit ? 'Edit' : 'Add New' %> Vendor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .form-section {
+            border-bottom: 1px solid #e9ecef;
+            padding: 25px;
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 30px;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #5a6fd8, #6a4190);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            border: 2px solid #6c757d;
+            border-radius: 8px;
+            padding: 10px 30px;
+            font-weight: 600;
+        }
+
+        .alert {
+            border: none;
+            border-radius: 10px;
+            padding: 15px 20px;
+        }
+
+        .required {
+            color: #dc3545;
+        }
+
+        .form-help {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h1>
+                        <i class="fas fa-<%= isEdit ? 'edit' : 'plus' %>"></i>
+                        <%= isEdit ? 'Edit' : 'Add New' %> Vendor
+                    </h1>
+                    <p class="mb-0">
+                        <%= isEdit ? 'Update vendor information and contact details' : 'Create a new vendor record with contact and business information' %>
+                    </p>
+                </div>
+                <div class="col-auto">
+                    <a href="<%= isEdit ? '/vendors/' + vendor._id : '/vendors' %>" class="btn btn-outline-light">
+                        <i class="fas fa-arrow-left"></i> 
+                        <%= isEdit ? 'Back to Vendor' : 'Back to List' %>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Error Messages -->
+        <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            <%= error %>
+        </div>
+        <% } %>
+
+        <!-- Form -->
+        <form method="POST" action="<%= isEdit ? '/vendors/' + vendor._id + '/edit' : '/vendors/new' %>">
+            <div class="form-container">
+                
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-building"></i>
+                        Basic Information
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Vendor Name <span class="required">*</span>
+                            </label>
+                            <input type="text" class="form-control" name="vendorName" 
+                                   value="<%= vendor ? vendor.vendorName : '' %>" required>
+                            <div class="form-help">Full legal business name</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Vendor Code <span class="required">*</span>
+                            </label>
+                            <input type="text" class="form-control" name="vendorCode" 
+                                   value="<%= vendor ? vendor.vendorCode : '' %>" required style="text-transform: uppercase;">
+                            <div class="form-help">Unique identifier (e.g., JSS, SOU, etc.)</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Vendor Type</label>
+                            <select class="form-select" name="vendorType">
+                                <option value="Seeds" <%= vendor && vendor.vendorType === 'Seeds' ? 'selected' : '' %>>Seeds</option>
+                                <option value="Organic Seeds" <%= vendor && vendor.vendorType === 'Organic Seeds' ? 'selected' : '' %>>Organic Seeds</option>
+                                <option value="Supplies" <%= vendor && vendor.vendorType === 'Supplies' ? 'selected' : '' %>>Supplies</option>
+                                <option value="Equipment" <%= vendor && vendor.vendorType === 'Equipment' ? 'selected' : '' %>>Equipment</option>
+                                <option value="Services" <%= vendor && vendor.vendorType === 'Services' ? 'selected' : '' %>>Services</option>
+                                <option value="Fertilizers" <%= vendor && vendor.vendorType === 'Fertilizers' ? 'selected' : '' %>>Fertilizers</option>
+                                <option value="Tools" <%= vendor && vendor.vendorType === 'Tools' ? 'selected' : '' %>>Tools</option>
+                                <option value="Other" <%= vendor && vendor.vendorType === 'Other' ? 'selected' : '' %>>Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status">
+                                <option value="Active" <%= vendor && vendor.status === 'Active' ? 'selected' : '' %>>Active</option>
+                                <option value="Inactive" <%= vendor && vendor.status === 'Inactive' ? 'selected' : '' %>>Inactive</option>
+                                <option value="Pending Approval" <%= vendor && vendor.status === 'Pending Approval' ? 'selected' : '' %>>Pending Approval</option>
+                                <option value="On Hold" <%= vendor && vendor.status === 'On Hold' ? 'selected' : '' %>>On Hold</option>
+                                <option value="Discontinued" <%= vendor && vendor.status === 'Discontinued' ? 'selected' : '' %>>Discontinued</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-address-book"></i>
+                        Contact Information
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Primary Contact Name</label>
+                            <input type="text" class="form-control" name="primaryContactName" 
+                                   value="<%= vendor && vendor.contactInfo && vendor.contactInfo.primaryContact ? vendor.contactInfo.primaryContact.name : '' %>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Title/Position</label>
+                            <input type="text" class="form-control" name="primaryContactTitle" 
+                                   value="<%= vendor && vendor.contactInfo && vendor.contactInfo.primaryContact ? vendor.contactInfo.primaryContact.title : '' %>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-control" name="primaryContactEmail" 
+                                   value="<%= vendor && vendor.contactInfo && vendor.contactInfo.primaryContact ? vendor.contactInfo.primaryContact.email : '' %>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" name="primaryContactPhone" 
+                                   value="<%= vendor && vendor.contactInfo && vendor.contactInfo.primaryContact ? vendor.contactInfo.primaryContact.phone : '' %>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Mobile Number</label>
+                            <input type="tel" class="form-control" name="primaryContactMobile" 
+                                   value="<%= vendor && vendor.contactInfo && vendor.contactInfo.primaryContact ? vendor.contactInfo.primaryContact.mobile : '' %>">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Business Address -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Business Address
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Street Address</label>
+                            <input type="text" class="form-control" name="street" 
+                                   value="<%= vendor && vendor.address ? vendor.address.street : '' %>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">City</label>
+                            <input type="text" class="form-control" name="city" 
+                                   value="<%= vendor && vendor.address ? vendor.address.city : '' %>">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">State</label>
+                            <input type="text" class="form-control" name="state" 
+                                   value="<%= vendor && vendor.address ? vendor.address.state : '' %>">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">ZIP Code</label>
+                            <input type="text" class="form-control" name="zipCode" 
+                                   value="<%= vendor && vendor.address ? vendor.address.zipCode : '' %>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Country</label>
+                            <input type="text" class="form-control" name="country" 
+                                   value="<%= vendor && vendor.address ? vendor.address.country : 'United States' %>">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Business Information -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-briefcase"></i>
+                        Business Information
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Website</label>
+                            <input type="url" class="form-control" name="website" 
+                                   value="<%= vendor && vendor.businessInfo ? vendor.businessInfo.website : '' %>"
+                                   placeholder="https://example.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tax ID</label>
+                            <input type="text" class="form-control" name="taxId" 
+                                   value="<%= vendor && vendor.businessInfo ? vendor.businessInfo.taxId : '' %>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Business Type</label>
+                            <select class="form-select" name="businessType">
+                                <option value="">Select...</option>
+                                <option value="Corporation" <%= vendor && vendor.businessInfo && vendor.businessInfo.businessType === 'Corporation' ? 'selected' : '' %>>Corporation</option>
+                                <option value="LLC" <%= vendor && vendor.businessInfo && vendor.businessInfo.businessType === 'LLC' ? 'selected' : '' %>>LLC</option>
+                                <option value="Partnership" <%= vendor && vendor.businessInfo && vendor.businessInfo.businessType === 'Partnership' ? 'selected' : '' %>>Partnership</option>
+                                <option value="Sole Proprietorship" <%= vendor && vendor.businessInfo && vendor.businessInfo.businessType === 'Sole Proprietorship' ? 'selected' : '' %>>Sole Proprietorship</option>
+                                <option value="Non-Profit" <%= vendor && vendor.businessInfo && vendor.businessInfo.businessType === 'Non-Profit' ? 'selected' : '' %>>Non-Profit</option>
+                                <option value="Other" <%= vendor && vendor.businessInfo && vendor.businessInfo.businessType === 'Other' ? 'selected' : '' %>>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Terms -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-credit-card"></i>
+                        Payment Terms
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Payment Terms</label>
+                            <select class="form-select" name="paymentTerms">
+                                <option value="Net 30" <%= vendor && vendor.paymentTerms && vendor.paymentTerms.terms === 'Net 30' ? 'selected' : '' %>>Net 30</option>
+                                <option value="Net 15" <%= vendor && vendor.paymentTerms && vendor.paymentTerms.terms === 'Net 15' ? 'selected' : '' %>>Net 15</option>
+                                <option value="Net 45" <%= vendor && vendor.paymentTerms && vendor.paymentTerms.terms === 'Net 45' ? 'selected' : '' %>>Net 45</option>
+                                <option value="Net 60" <%= vendor && vendor.paymentTerms && vendor.paymentTerms.terms === 'Net 60' ? 'selected' : '' %>>Net 60</option>
+                                <option value="COD" <%= vendor && vendor.paymentTerms && vendor.paymentTerms.terms === 'COD' ? 'selected' : '' %>>COD (Cash on Delivery)</option>
+                                <option value="Prepaid" <%= vendor && vendor.paymentTerms && vendor.paymentTerms.terms === 'Prepaid' ? 'selected' : '' %>>Prepaid</option>
+                                <option value="Custom" <%= vendor && vendor.paymentTerms && vendor.paymentTerms.terms === 'Custom' ? 'selected' : '' %>>Custom</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Custom Terms</label>
+                            <input type="text" class="form-control" name="customTerms" 
+                                   value="<%= vendor && vendor.paymentTerms ? vendor.paymentTerms.customTerms : '' %>"
+                                   placeholder="Describe custom payment terms">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-sticky-note"></i>
+                        Notes & Comments
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">General Notes</label>
+                            <textarea class="form-control" name="notes" rows="4" 
+                                      placeholder="Add any additional notes about this vendor..."><%= vendor ? vendor.notes : '' %></textarea>
+                            <div class="form-help">Internal notes, special instructions, or other relevant information</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-section">
+                    <div class="d-flex justify-content-between">
+                        <a href="<%= isEdit ? '/vendors/' + vendor._id : '/vendors' %>" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> 
+                            <%= isEdit ? 'Update' : 'Create' %> Vendor
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-format vendor code to uppercase
+        document.querySelector('input[name="vendorCode"]').addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+        });
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const vendorName = document.querySelector('input[name="vendorName"]').value.trim();
+            const vendorCode = document.querySelector('input[name="vendorCode"]').value.trim();
+
+            if (!vendorName) {
+                e.preventDefault();
+                alert('Vendor name is required');
+                document.querySelector('input[name="vendorName"]').focus();
+                return;
+            }
+
+            if (!vendorCode) {
+                e.preventDefault();
+                alert('Vendor code is required');
+                document.querySelector('input[name="vendorCode"]').focus();
+                return;
+            }
+
+            if (vendorCode.length < 2) {
+                e.preventDefault();
+                alert('Vendor code must be at least 2 characters long');
+                document.querySelector('input[name="vendorCode"]').focus();
+                return;
+            }
+        });
+
+        // Auto-generate vendor code from vendor name
+        document.querySelector('input[name="vendorName"]').addEventListener('blur', function() {
+            const vendorCodeField = document.querySelector('input[name="vendorCode"]');
+            
+            // Only auto-generate if the vendor code field is empty
+            if (!vendorCodeField.value.trim() && this.value.trim()) {
+                // Generate code from first letters of words, max 5 characters
+                const words = this.value.trim().split(/\s+/);
+                let code = '';
+                
+                if (words.length === 1) {
+                    // Single word: take first 3-4 characters
+                    code = words[0].substring(0, 4).toUpperCase();
+                } else {
+                    // Multiple words: take first letter of each word
+                    words.forEach(word => {
+                        if (code.length < 5 && word.length > 0) {
+                            code += word.charAt(0);
+                        }
+                    });
+                    code = code.toUpperCase();
+                }
+                
+                vendorCodeField.value = code;
+            }
+        });
+
+        // Show/hide custom terms field based on payment terms selection
+        document.querySelector('select[name="paymentTerms"]').addEventListener('change', function() {
+            const customTermsField = document.querySelector('input[name="customTerms"]');
+            const customTermsLabel = customTermsField.previousElementSibling;
+            
+            if (this.value === 'Custom') {
+                customTermsField.style.display = 'block';
+                customTermsLabel.style.display = 'block';
+                customTermsField.required = true;
+            } else {
+                customTermsField.style.display = this.value === 'Custom' ? 'block' : 'none';
+                customTermsLabel.style.display = this.value === 'Custom' ? 'block' : 'none';
+                customTermsField.required = this.value === 'Custom';
+            }
+        });
+
+        // Initialize custom terms visibility
+        document.addEventListener('DOMContentLoaded', function() {
+            const paymentTermsSelect = document.querySelector('select[name="paymentTerms"]');
+            if (paymentTermsSelect) {
+                paymentTermsSelect.dispatchEvent(new Event('change'));
+            }
+        });
+    </script>
+</body>
+
+</html>

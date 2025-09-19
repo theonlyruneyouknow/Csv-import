@@ -10,6 +10,7 @@ const flash = require('connect-flash');
 // Import routes
 const purchaseOrderRoutes = require('./routes/purchaseOrders');
 const organicVendorRoutes = require('./routes/organicVendors');
+const vendorRoutes = require('./routes/vendors');
 const taskRoutes = require('./routes/tasks');
 const authRoutes = require('./routes/auth');
 const receivingRoutes = require('./routes/receiving');
@@ -538,6 +539,7 @@ app.get('/food-test-meal-plans-list', (req, res) => {
 // Protected routes - require authentication and approval
 app.use('/purchase-orders', ensureAuthenticated, ensureApproved, purchaseOrderRoutes);
 app.use('/organic-vendors', ensureAuthenticated, ensureApproved, organicVendorRoutes);
+app.use('/vendors', ensureAuthenticated, ensureApproved, vendorRoutes);
 app.use('/tasks', ensureAuthenticated, ensureApproved, taskRoutes);
 app.use('/receiving', ensureAuthenticated, ensureApproved, receivingRoutes);
 app.use('/dropship', ensureAuthenticated, ensureApproved, dropshipRoutes);
