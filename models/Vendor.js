@@ -12,7 +12,6 @@ const vendorSchema = new mongoose.Schema({
     vendorCode: {
         type: String,
         required: true,
-        unique: true,
         trim: true,
         uppercase: true
     },
@@ -26,6 +25,24 @@ const vendorSchema = new mongoose.Schema({
     },
     
     // Contact Information
+    mainPhone: String, // Main vendor phone number
+    mainEmail: String, // Main vendor email
+    
+    contacts: [{
+        name: String,
+        title: String,
+        email: String,
+        phone: String,
+        mobile: String,
+        department: String, // Sales, Customer Service, Accounting, etc.
+        isPrimary: {
+            type: Boolean,
+            default: false
+        },
+        notes: String
+    }],
+    
+    // Legacy contact info (keeping for backward compatibility)
     contactInfo: {
         primaryContact: {
             name: String,
@@ -288,6 +305,50 @@ const vendorSchema = new mongoose.Schema({
 });
 
 // Virtual fields
+// Display vendor with code prefix (e.g., "123 - Johnny's Selected Seeds")
+vendorSchema.virtual('displayName').get(function () {
+    return `${this.vendorCode} - ${this.vendorName}`;
+});
+
+// Shortened display for lists (e.g., "123 - Johnny's...")
+vendorSchema.virtual('shortDisplayName').get(function () {
+    const maxLength = 40;
+    const displayName = `${this.vendorCode} - ${this.vendorName}`;
+    if (displayName.length <= maxLength) {
+        return displayName;
+    }
+    return displayName.substring(0, maxLength - 3) + '...';
+});
+
+// Get primary contact from the contacts array
+vendorSchema.virtual('primaryContact').get(function () {
+    if (this.contacts && this.contacts.length > 0) {
+        const primary = this.contacts.find(contact => contact.isPrimary);
+        return primary || this.contacts[0]; // Return first contact if no primary set
+    }
+    return null;
+});
+
+// Format website URL to include protocol
+vendorSchema.virtual('formattedWebsite').get(function () {
+    if (!this.businessInfo || !this.businessInfo.website) return null;
+    
+    const url = this.businessInfo.website.trim();
+    if (!url) return null;
+    
+    // Check if URL already has protocol
+    if (url.match(/^https?:\/\//i)) {
+        return url;
+    }
+    
+    // Check if it looks like a valid domain (has at least one dot and valid extension)
+    if (url.match(/^[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/)) {
+        return `https://${url}`;
+    }
+    
+    return url; // Return as-is if not a recognizable domain format
+});
+
 vendorSchema.virtual('totalActiveItems').get(function () {
     return this.items ? this.items.filter(item => item.isActive).length : 0;
 });
@@ -325,9 +386,7 @@ vendorSchema.pre('save', function (next) {
 vendorSchema.set('toJSON', { virtuals: true });
 vendorSchema.set('toObject', { virtuals: true });
 
-// Indexes for performance
-vendorSchema.index({ vendorName: 1 });
-vendorSchema.index({ vendorCode: 1 });
+// Indexes for performance (vendorName and vendorCode already indexed via unique constraint)
 vendorSchema.index({ vendorType: 1 });
 vendorSchema.index({ status: 1 });
 vendorSchema.index({ 'performance.lastOrderDate': -1 });

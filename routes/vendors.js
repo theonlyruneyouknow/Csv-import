@@ -95,8 +95,7 @@ router.get('/', async (req, res) => {
         const vendors = await Vendor.find(filter)
             .sort(sortObj)
             .skip(skip)
-            .limit(parseInt(limit))
-            .lean();
+            .limit(parseInt(limit));
 
         const totalVendors = await Vendor.countDocuments(filter);
         const totalPages = Math.ceil(totalVendors / limit);
@@ -190,6 +189,106 @@ router.get('/', async (req, res) => {
 });
 
 // ======================================
+// CREATE NEW VENDOR
+// ======================================
+router.get('/new', (req, res) => {
+    res.render('vendor-form', {
+        vendor: null,
+        isEdit: false,
+        title: 'Add New Vendor'
+    });
+});
+
+router.post('/new', async (req, res) => {
+    try {
+        console.log('🆕 Creating new vendor:', req.body.vendorName);
+
+        // Process contacts array
+        const contacts = [];
+        if (req.body.contacts) {
+            for (let i = 0; req.body.contacts[i]; i++) {
+                const contact = req.body.contacts[i];
+                if (contact.name || contact.email || contact.phone) { // Only add if has some data
+                    contacts.push({
+                        name: contact.name,
+                        title: contact.title,
+                        email: contact.email,
+                        phone: contact.phone,
+                        mobile: contact.mobile,
+                        department: contact.department,
+                        isPrimary: contact.isPrimary === 'on' || contact.isPrimary === true,
+                        notes: contact.notes
+                    });
+                }
+            }
+        }
+
+        const vendorData = {
+            vendorName: req.body.vendorName,
+            vendorCode: req.body.vendorCode,
+            vendorType: req.body.vendorType,
+            mainPhone: req.body.mainPhone,
+            mainEmail: req.body.mainEmail,
+            contacts: contacts,
+            // Keep legacy contactInfo for backward compatibility
+            contactInfo: {
+                primaryContact: {
+                    name: req.body.primaryContactName,
+                    title: req.body.primaryContactTitle,
+                    email: req.body.primaryContactEmail,
+                    phone: req.body.primaryContactPhone,
+                    mobile: req.body.primaryContactMobile
+                }
+            },
+            address: {
+                street: req.body.street,
+                city: req.body.city,
+                state: req.body.state,
+                zipCode: req.body.zipCode,
+                country: req.body.country || 'United States'
+            },
+            businessInfo: {
+                website: req.body.website,
+                taxId: req.body.taxId,
+                businessType: req.body.businessType
+            },
+            paymentTerms: {
+                terms: req.body.paymentTerms,
+                customTerms: req.body.customTerms
+            },
+            status: req.body.status || 'Active',
+            notes: req.body.notes,
+            createdBy: req.user ? req.user.username : 'System'
+        };
+
+        const vendor = new Vendor(vendorData);
+        await vendor.save();
+
+        console.log(`✅ Created vendor: ${vendor.vendorName} (${vendor.vendorCode})`);
+        res.redirect(`/vendors/${vendor._id}?success=created`);
+
+    } catch (error) {
+        console.error('❌ Error creating vendor:', error);
+        if (error.code === 11000) {
+            // Duplicate key error
+            const field = Object.keys(error.keyPattern)[0];
+            const message = `A vendor with this ${field} already exists.`;
+            res.render('vendor-form', {
+                vendor: req.body,
+                isEdit: false,
+                error: message,
+                title: 'Add New Vendor'
+            });
+        } else {
+            res.status(500).render('error', {
+                message: 'Error creating vendor',
+                error: error
+            });
+        }
+    }
+});
+
+// ======================================
 // VENDOR DETAIL PAGE
 // ======================================
 router.get('/:vendorId', async (req, res) => {
@@ -198,7 +297,7 @@ router.get('/:vendorId', async (req, res) => {
         console.log(`🔍 Loading vendor details for: ${vendorId}`);
 
         // Get vendor details
-        const vendor = await Vendor.findById(vendorId).lean();
+        const vendor = await Vendor.findById(vendorId);
         if (!vendor) {
             return res.status(404).render('error', {
                 message: 'Vendor not found'
@@ -290,82 +389,6 @@ router.get('/:vendorId', async (req, res) => {
 });
 
 // ======================================
-// CREATE NEW VENDOR
-// ======================================
-router.get('/new', (req, res) => {
-    res.render('vendor-form', {
-        vendor: null,
-        isEdit: false,
-        title: 'Add New Vendor'
-    });
-});
-
-router.post('/new', async (req, res) => {
-    try {
-        console.log('🆕 Creating new vendor:', req.body.vendorName);
-
-        const vendorData = {
-            vendorName: req.body.vendorName,
-            vendorCode: req.body.vendorCode,
-            vendorType: req.body.vendorType,
-            contactInfo: {
-                primaryContact: {
-                    name: req.body.primaryContactName,
-                    title: req.body.primaryContactTitle,
-                    email: req.body.primaryContactEmail,
-                    phone: req.body.primaryContactPhone,
-                    mobile: req.body.primaryContactMobile
-                }
-            },
-            address: {
-                street: req.body.street,
-                city: req.body.city,
-                state: req.body.state,
-                zipCode: req.body.zipCode,
-                country: req.body.country || 'United States'
-            },
-            businessInfo: {
-                website: req.body.website,
-                taxId: req.body.taxId,
-                businessType: req.body.businessType
-            },
-            paymentTerms: {
-                terms: req.body.paymentTerms,
-                customTerms: req.body.customTerms
-            },
-            status: req.body.status || 'Active',
-            notes: req.body.notes,
-            createdBy: req.user ? req.user.username : 'System'
-        };
-
-        const vendor = new Vendor(vendorData);
-        await vendor.save();
-
-        console.log(`✅ Created vendor: ${vendor.vendorName} (${vendor.vendorCode})`);
-        res.redirect(`/vendors/${vendor._id}?success=created`);
-
-    } catch (error) {
-        console.error('❌ Error creating vendor:', error);
-        if (error.code === 11000) {
-            // Duplicate key error
-            const field = Object.keys(error.keyPattern)[0];
-            const message = `A vendor with this ${field} already exists.`;
-            res.render('vendor-form', {
-                vendor: req.body,
-                isEdit: false,
-                error: message,
-                title: 'Add New Vendor'
-            });
-        } else {
-            res.status(500).render('error', {
-                message: 'Error creating vendor',
-                error: error
-            });
-        }
-    }
-});
-
-// ======================================
 // EDIT VENDOR
 // ======================================
 router.get('/:vendorId/edit', async (req, res) => {
@@ -397,10 +420,34 @@ router.post('/:vendorId/edit', async (req, res) => {
         const { vendorId } = req.params;
         console.log(`✏️ Updating vendor: ${vendorId}`);
 
+        // Process contacts array
+        const contacts = [];
+        if (req.body.contacts) {
+            for (let i = 0; req.body.contacts[i]; i++) {
+                const contact = req.body.contacts[i];
+                if (contact.name || contact.email || contact.phone) { // Only add if has some data
+                    contacts.push({
+                        name: contact.name,
+                        title: contact.title,
+                        email: contact.email,
+                        phone: contact.phone,
+                        mobile: contact.mobile,
+                        department: contact.department,
+                        isPrimary: contact.isPrimary === 'on' || contact.isPrimary === true,
+                        notes: contact.notes
+                    });
+                }
+            }
+        }
+
         const updateData = {
             vendorName: req.body.vendorName,
             vendorCode: req.body.vendorCode,
             vendorType: req.body.vendorType,
+            mainPhone: req.body.mainPhone,
+            mainEmail: req.body.mainEmail,
+            contacts: contacts,
+            // Update legacy contactInfo as well for backward compatibility
             'contactInfo.primaryContact.name': req.body.primaryContactName,
             'contactInfo.primaryContact.title': req.body.primaryContactTitle,
             'contactInfo.primaryContact.email': req.body.primaryContactEmail,

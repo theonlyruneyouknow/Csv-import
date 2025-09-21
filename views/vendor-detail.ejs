@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= vendor.vendorName %> - Vendor Details</title>
+    <title><%= vendor.displayName %> - Vendor Details</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -347,8 +347,8 @@
                             <i class="fas fa-building"></i>
                         </div>
                         <div class="vendor-info">
-                            <h1><%= vendor.vendorName %></h1>
-                            <span class="vendor-code"><%= vendor.vendorCode %></span>
+                            <h1><%= vendor.displayName %></h1>
+                            <span class="vendor-code">Type: <%= vendor.vendorType || 'N/A' %></span>
                             <span class="status-badge status-<%= (vendor.status || 'active').toLowerCase().replace(' ', '-') %> ms-3">
                                 <%= vendor.status || 'Active' %>
                             </span>
@@ -397,22 +397,29 @@
             </div>
             <div class="card-body">
                 <div class="info-grid">
-                    <% if (vendor.contactInfo && vendor.contactInfo.primaryContact) { %>
+                    <% 
+                    // Get primary contact from new structure or fall back to legacy
+                    const primaryContact = vendor.primaryContact || (vendor.contactInfo && vendor.contactInfo.primaryContact);
+                    const mainPhone = vendor.mainPhone || (primaryContact && primaryContact.phone);
+                    const mainEmail = vendor.mainEmail || (primaryContact && primaryContact.email);
+                    %>
+                    
+                    <% if (primaryContact || mainPhone || mainEmail) { %>
                     <div class="info-item">
                         <div class="info-label">Primary Contact</div>
                         <div class="info-value">
-                            <%= vendor.contactInfo.primaryContact.name || 'N/A' %>
-                            <% if (vendor.contactInfo.primaryContact.title) { %>
-                                <br><small class="text-muted"><%= vendor.contactInfo.primaryContact.title %></small>
+                            <%= (primaryContact && primaryContact.name) || 'N/A' %>
+                            <% if (primaryContact && primaryContact.title) { %>
+                                <br><small class="text-muted"><%= primaryContact.title %></small>
                             <% } %>
                         </div>
                     </div>
                     <div class="info-item">
                         <div class="info-label">Email</div>
                         <div class="info-value">
-                            <% if (vendor.contactInfo.primaryContact.email) { %>
-                                <a href="mailto:<%= vendor.contactInfo.primaryContact.email %>">
-                                    <%= vendor.contactInfo.primaryContact.email %>
+                            <% if (mainEmail) { %>
+                                <a href="mailto:<%= mainEmail %>">
+                                    <%= mainEmail %>
                                 </a>
                             <% } else { %>
                                 N/A
@@ -422,14 +429,27 @@
                     <div class="info-item">
                         <div class="info-label">Phone</div>
                         <div class="info-value">
-                            <% if (vendor.contactInfo.primaryContact.phone) { %>
-                                <a href="tel:<%= vendor.contactInfo.primaryContact.phone %>">
-                                    <%= vendor.contactInfo.primaryContact.phone %>
+                            <% if (mainPhone) { %>
+                                <a href="tel:<%= mainPhone %>">
+                                    <%= mainPhone %>
                                 </a>
                             <% } else { %>
                                 N/A
                             <% } %>
                         </div>
+                    </div>
+                    <% } else { %>
+                    <div class="info-item">
+                        <div class="info-label">Primary Contact</div>
+                        <div class="info-value">N/A</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Email</div>
+                        <div class="info-value">N/A</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Phone</div>
+                        <div class="info-value">N/A</div>
                     </div>
                     <% } %>
                     
@@ -448,7 +468,7 @@
                     <div class="info-item">
                         <div class="info-label">Website</div>
                         <div class="info-value">
-                            <a href="<%= vendor.businessInfo.website %>" target="_blank">
+                            <a href="<%= vendor.formattedWebsite || vendor.businessInfo.website %>" target="_blank">
                                 <%= vendor.businessInfo.website %>
                                 <i class="fas fa-external-link-alt ms-1"></i>
                             </a>
@@ -479,6 +499,11 @@
             <button class="tab" onclick="showTab('items')">
                 <i class="fas fa-seedling"></i> Items (<%= vendor.totalActiveItems || 0 %>)
             </button>
+            <% if (vendor.contacts && vendor.contacts.length > 1) { %>
+            <button class="tab" onclick="showTab('contacts')">
+                <i class="fas fa-address-book"></i> All Contacts (<%= vendor.contacts.length %>)
+            </button>
+            <% } %>
             <button class="tab" onclick="showTab('tracking')">
                 <i class="fas fa-truck"></i> Tracking (<%= trackingData.length %>)
             </button>
@@ -604,6 +629,72 @@
             </div>
             <% } %>
         </div>
+
+        <!-- Tab Content: All Contacts -->
+        <% if (vendor.contacts && vendor.contacts.length > 1) { %>
+        <div id="contacts" class="tab-content" style="display: none;">
+            <h4>All Contacts</h4>
+            
+            <div class="row">
+                <% vendor.contacts.forEach((contact, index) => { %>
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h6 class="card-title mb-1">
+                                    <%= contact.name || `Contact ${index + 1}` %>
+                                    <% if (contact.isPrimary) { %>
+                                        <span class="badge bg-primary ms-2">Primary</span>
+                                    <% } %>
+                                </h6>
+                            </div>
+                            
+                            <% if (contact.title || contact.department) { %>
+                            <div class="text-muted mb-2">
+                                <% if (contact.title) { %>
+                                    <%= contact.title %>
+                                    <% if (contact.department) { %> - <%= contact.department %><% } %>
+                                <% } else if (contact.department) { %>
+                                    <%= contact.department %>
+                                <% } %>
+                            </div>
+                            <% } %>
+                            
+                            <div class="contact-details">
+                                <% if (contact.email) { %>
+                                <div class="mb-1">
+                                    <i class="fas fa-envelope text-muted me-2"></i>
+                                    <a href="mailto:<%= contact.email %>"><%= contact.email %></a>
+                                </div>
+                                <% } %>
+                                
+                                <% if (contact.phone) { %>
+                                <div class="mb-1">
+                                    <i class="fas fa-phone text-muted me-2"></i>
+                                    <a href="tel:<%= contact.phone %>"><%= contact.phone %></a>
+                                </div>
+                                <% } %>
+                                
+                                <% if (contact.mobile) { %>
+                                <div class="mb-1">
+                                    <i class="fas fa-mobile-alt text-muted me-2"></i>
+                                    <a href="tel:<%= contact.mobile %>"><%= contact.mobile %></a>
+                                </div>
+                                <% } %>
+                            </div>
+                            
+                            <% if (contact.notes) { %>
+                            <div class="mt-2">
+                                <small class="text-muted"><%= contact.notes %></small>
+                            </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+        </div>
+        <% } %>
 
         <!-- Tab Content: Tracking -->
         <div id="tracking" class="tab-content" style="display: none;">

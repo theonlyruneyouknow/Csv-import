@@ -160,8 +160,11 @@
                                 Vendor Code <span class="required">*</span>
                             </label>
                             <input type="text" class="form-control" name="vendorCode" 
-                                   value="<%= vendor ? vendor.vendorCode : '' %>" required style="text-transform: uppercase;">
-                            <div class="form-help">Unique identifier (e.g., JSS, SOU, etc.)</div>
+                                   value="<%= vendor ? vendor.vendorCode : '' %>" 
+                                   pattern="[0-9]{1,4}" 
+                                   title="Enter a 1-4 digit number"
+                                   required>
+                            <div class="form-help">1-4 digit unique identifier (e.g., 1, 23, 456, 1000). Used as vendor prefix.</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Vendor Type</label>
@@ -195,32 +198,104 @@
                         <i class="fas fa-address-book"></i>
                         Contact Information
                     </div>
-                    <div class="row g-3">
+                    
+                    <!-- Main Vendor Contact Info -->
+                    <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label class="form-label">Primary Contact Name</label>
-                            <input type="text" class="form-control" name="primaryContactName" 
-                                   value="<%= vendor && vendor.contactInfo && vendor.contactInfo.primaryContact ? vendor.contactInfo.primaryContact.name : '' %>">
+                            <label class="form-label">Main Phone Number</label>
+                            <input type="tel" class="form-control" name="mainPhone" 
+                                   value="<%= vendor ? vendor.mainPhone : '' %>"
+                                   placeholder="(555) 123-4567">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Title/Position</label>
-                            <input type="text" class="form-control" name="primaryContactTitle" 
-                                   value="<%= vendor && vendor.contactInfo && vendor.contactInfo.primaryContact ? vendor.contactInfo.primaryContact.title : '' %>">
+                            <label class="form-label">Main Email</label>
+                            <input type="email" class="form-control" name="mainEmail" 
+                                   value="<%= vendor ? vendor.mainEmail : '' %>"
+                                   placeholder="info@vendor.com">
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Email Address</label>
-                            <input type="email" class="form-control" name="primaryContactEmail" 
-                                   value="<%= vendor && vendor.contactInfo && vendor.contactInfo.primaryContact ? vendor.contactInfo.primaryContact.email : '' %>">
+                    </div>
+
+                    <!-- Contact Persons -->
+                    <div class="contacts-section">
+                        <h6 class="mb-3">Contact Persons</h6>
+                        <div id="contacts-container">
+                            <% 
+                            // Handle both new contacts array and legacy contactInfo
+                            let contactsToShow = [];
+                            if (vendor && vendor.contacts && vendor.contacts.length > 0) {
+                                contactsToShow = vendor.contacts;
+                            } else if (vendor && vendor.contactInfo && vendor.contactInfo.primaryContact && vendor.contactInfo.primaryContact.name) {
+                                // Migrate legacy contact to new structure
+                                contactsToShow = [{
+                                    name: vendor.contactInfo.primaryContact.name,
+                                    title: vendor.contactInfo.primaryContact.title,
+                                    email: vendor.contactInfo.primaryContact.email,
+                                    phone: vendor.contactInfo.primaryContact.phone,
+                                    mobile: vendor.contactInfo.primaryContact.mobile,
+                                    department: '',
+                                    isPrimary: true,
+                                    notes: ''
+                                }];
+                            }
+                            
+                            if (contactsToShow.length === 0) {
+                                // Default empty contact
+                                contactsToShow = [{ name: '', title: '', email: '', phone: '', mobile: '', department: '', isPrimary: true, notes: '' }];
+                            }
+                            %>
+                            
+                            <% contactsToShow.forEach((contact, index) => { %>
+                                <div class="contact-entry border rounded p-3 mb-3" data-index="<%= index %>">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-0">Contact <%= index + 1 %></h6>
+                                        <div>
+                                            <label class="form-check-label me-2">
+                                                <input type="checkbox" class="form-check-input me-1" 
+                                                       name="contacts[<%= index %>][isPrimary]" 
+                                                       <%= contact.isPrimary ? 'checked' : '' %>>
+                                                Primary Contact
+                                            </label>
+                                            <button type="button" class="btn btn-sm btn-outline-danger remove-contact">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" name="contacts[<%= index %>][name]" 
+                                                   value="<%= contact.name || '' %>" placeholder="Full Name">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" name="contacts[<%= index %>][title]" 
+                                                   value="<%= contact.title || '' %>" placeholder="Job Title">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" name="contacts[<%= index %>][department]" 
+                                                   value="<%= contact.department || '' %>" placeholder="Department">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="email" class="form-control" name="contacts[<%= index %>][email]" 
+                                                   value="<%= contact.email || '' %>" placeholder="Email">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="tel" class="form-control" name="contacts[<%= index %>][phone]" 
+                                                   value="<%= contact.phone || '' %>" placeholder="Phone">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="tel" class="form-control" name="contacts[<%= index %>][mobile]" 
+                                                   value="<%= contact.mobile || '' %>" placeholder="Mobile">
+                                        </div>
+                                        <div class="col-12">
+                                            <textarea class="form-control" name="contacts[<%= index %>][notes]" 
+                                                      rows="2" placeholder="Notes about this contact"><%= contact.notes || '' %></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }); %>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Phone Number</label>
-                            <input type="tel" class="form-control" name="primaryContactPhone" 
-                                   value="<%= vendor && vendor.contactInfo && vendor.contactInfo.primaryContact ? vendor.contactInfo.primaryContact.phone : '' %>">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Mobile Number</label>
-                            <input type="tel" class="form-control" name="primaryContactMobile" 
-                                   value="<%= vendor && vendor.contactInfo && vendor.contactInfo.primaryContact ? vendor.contactInfo.primaryContact.mobile : '' %>">
-                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="add-contact">
+                            <i class="fas fa-plus"></i> Add Another Contact
+                        </button>
                     </div>
                 </div>
 
@@ -268,9 +343,10 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">Website</label>
-                            <input type="url" class="form-control" name="website" 
+                            <input type="text" class="form-control" name="website" 
                                    value="<%= vendor && vendor.businessInfo ? vendor.businessInfo.website : '' %>"
-                                   placeholder="https://example.com">
+                                   placeholder="www.example.com or https://example.com">
+                            <div class="form-help">Enter website URL (http:// will be added automatically if needed)</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Tax ID</label>
@@ -359,6 +435,28 @@
             this.value = this.value.toUpperCase();
         });
 
+        // Vendor code validation - only allow numbers, max 4 digits
+        document.querySelector('input[name="vendorCode"]').addEventListener('input', function() {
+            // Remove any non-numeric characters
+            this.value = this.value.replace(/[^0-9]/g, '');
+            
+            // Limit to 4 digits
+            if (this.value.length > 4) {
+                this.value = this.value.substring(0, 4);
+            }
+            
+            // Update validation state
+            if (this.value.length === 0) {
+                this.setCustomValidity('Vendor code is required');
+            } else if (this.value.length > 4) {
+                this.setCustomValidity('Vendor code cannot exceed 4 digits');
+            } else if (!/^[0-9]+$/.test(this.value)) {
+                this.setCustomValidity('Vendor code must contain only numbers');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
         // Form validation
         document.querySelector('form').addEventListener('submit', function(e) {
             const vendorName = document.querySelector('input[name="vendorName"]').value.trim();
@@ -378,12 +476,7 @@
                 return;
             }
 
-            if (vendorCode.length < 2) {
-                e.preventDefault();
-                alert('Vendor code must be at least 2 characters long');
-                document.querySelector('input[name="vendorCode"]').focus();
-                return;
-            }
+
         });
 
         // Auto-generate vendor code from vendor name
@@ -392,24 +485,13 @@
             
             // Only auto-generate if the vendor code field is empty
             if (!vendorCodeField.value.trim() && this.value.trim()) {
-                // Generate code from first letters of words, max 5 characters
-                const words = this.value.trim().split(/\s+/);
-                let code = '';
-                
-                if (words.length === 1) {
-                    // Single word: take first 3-4 characters
-                    code = words[0].substring(0, 4).toUpperCase();
-                } else {
-                    // Multiple words: take first letter of each word
-                    words.forEach(word => {
-                        if (code.length < 5 && word.length > 0) {
-                            code += word.charAt(0);
-                        }
-                    });
-                    code = code.toUpperCase();
-                }
-                
-                vendorCodeField.value = code;
+                // Auto-suggest next available numeric code
+                // Note: This is a simple placeholder - in production you'd fetch the highest existing code
+                const vendorName = this.value.trim();
+                const randomSuffix = Math.floor(Math.random() * 900) + 100; // Generate 3-digit number
+                vendorCodeField.value = randomSuffix.toString();
+                vendorCodeField.focus();
+                vendorCodeField.select();
             }
         });
 
@@ -434,6 +516,101 @@
             const paymentTermsSelect = document.querySelector('select[name="paymentTerms"]');
             if (paymentTermsSelect) {
                 paymentTermsSelect.dispatchEvent(new Event('change'));
+            }
+
+            // Contact management
+            let contactIndex = document.querySelectorAll('.contact-entry').length;
+
+            // Add new contact
+            document.getElementById('add-contact').addEventListener('click', function() {
+                const contactsContainer = document.getElementById('contacts-container');
+                const newContactHTML = `
+                    <div class="contact-entry border rounded p-3 mb-3" data-index="${contactIndex}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">Contact ${contactIndex + 1}</h6>
+                            <div>
+                                <label class="form-check-label me-2">
+                                    <input type="checkbox" class="form-check-input me-1" 
+                                           name="contacts[${contactIndex}][isPrimary]">
+                                    Primary Contact
+                                </label>
+                                <button type="button" class="btn btn-sm btn-outline-danger remove-contact">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="contacts[${contactIndex}][name]" 
+                                       placeholder="Full Name">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="contacts[${contactIndex}][title]" 
+                                       placeholder="Job Title">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="contacts[${contactIndex}][department]" 
+                                       placeholder="Department">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="email" class="form-control" name="contacts[${contactIndex}][email]" 
+                                       placeholder="Email">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="tel" class="form-control" name="contacts[${contactIndex}][phone]" 
+                                       placeholder="Phone">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="tel" class="form-control" name="contacts[${contactIndex}][mobile]" 
+                                       placeholder="Mobile">
+                            </div>
+                            <div class="col-12">
+                                <textarea class="form-control" name="contacts[${contactIndex}][notes]" 
+                                          rows="2" placeholder="Notes about this contact"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                const addButton = this;
+                addButton.insertAdjacentHTML('beforebegin', newContactHTML);
+                contactIndex++;
+                
+                // Update contact numbers
+                updateContactNumbers();
+            });
+
+            // Remove contact
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.remove-contact')) {
+                    const contactEntry = e.target.closest('.contact-entry');
+                    if (document.querySelectorAll('.contact-entry').length > 1) {
+                        contactEntry.remove();
+                        updateContactNumbers();
+                    } else {
+                        alert('You must have at least one contact.');
+                    }
+                }
+            });
+
+            // Ensure only one primary contact
+            document.addEventListener('change', function(e) {
+                if (e.target.name && e.target.name.includes('[isPrimary]') && e.target.checked) {
+                    // Uncheck all other primary checkboxes
+                    document.querySelectorAll('input[name*="[isPrimary]"]').forEach(checkbox => {
+                        if (checkbox !== e.target) {
+                            checkbox.checked = false;
+                        }
+                    });
+                }
+            });
+
+            // Update contact numbers in headers
+            function updateContactNumbers() {
+                document.querySelectorAll('.contact-entry').forEach((entry, index) => {
+                    const header = entry.querySelector('h6');
+                    header.textContent = `Contact ${index + 1}`;
+                });
             }
         });
     </script>

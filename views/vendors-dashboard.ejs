@@ -19,6 +19,9 @@
             padding: 20px 0;
             margin-bottom: 30px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .header h1 {
@@ -28,6 +31,125 @@
             display: flex;
             align-items: center;
             gap: 15px;
+        }
+
+        .navigation-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .nav-section {
+            position: relative;
+        }
+
+        .nav-accordion-btn, .nav-imports-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .nav-accordion-btn:hover, .nav-imports-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .accordion-icon, .dropdown-icon {
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+
+        .accordion-icon.rotated, .dropdown-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .nav-accordion-content, .nav-dropdown-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 200px;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .nav-accordion-content.show, .nav-dropdown-content.show {
+            max-height: 400px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .nav-accordion-item, .nav-dropdown-item {
+            display: block;
+            padding: 10px 15px;
+            color: #333;
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .nav-accordion-item:hover, .nav-dropdown-item:hover {
+            background: #f8f9fa;
+            color: #007bff;
+        }
+
+        .nav-accordion-divider {
+            height: 1px;
+            background: #eee;
+            margin: 5px 0;
+        }
+
+        /* Responsive Navigation */
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px 15px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+                text-align: center;
+            }
+
+            .navigation-container {
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .nav-accordion-btn, .nav-imports-btn {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+
+            .nav-accordion-content, .nav-dropdown-content {
+                min-width: 180px;
+            }
         }
 
         .stats-card {
@@ -283,16 +405,47 @@
         <div class="container">
             <div class="row">
                 <div class="col">
-                    <h1>
-                        <i class="fas fa-building"></i>
-                        Vendors Dashboard
-                    </h1>
-                    <p class="mb-0">Manage all your vendors, contacts, and relationships</p>
-                </div>
-                <div class="col-auto">
-                    <a href="/vendors/new" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Add New Vendor
+                    <a href="/" style="text-decoration: none; color: inherit;">
+                        <span>P.O.D.</span>
                     </a>
+                    
+                    <div class="d-flex align-items-center justify-content-between flex-grow-1">
+                        <!-- Navigation Container -->
+                        <div class="navigation-container">
+                            <!-- Dashboards Accordion -->
+                            <div class="nav-section">
+                                <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion')">
+                                    📊 Dashboards <span class="accordion-icon">▼</span>
+                                </button>
+                                <div id="managersAccordion" class="nav-accordion-content">
+                                    <a href="/" class="nav-accordion-item">🏠 PO Dashboard</a>
+                                    <a href="/receiving" class="nav-accordion-item">🚚 Receiving Dashboard</a>
+                                    <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
+                                    <a href="/vendors" class="nav-accordion-item" style="background: #e3f2fd; color: #1976d2; font-weight: 600;">🏢 Vendors Dashboard</a>
+                                    <div class="nav-accordion-divider"></div>
+                                    <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items Manager</a>
+                                    <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 17Track Dashboard</a>
+                                    <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Title Section -->
+                        <div class="flex-grow-1 text-center">
+                            <h1>
+                                <i class="fas fa-building"></i>
+                                Vendors Dashboard
+                            </h1>
+                            <p class="mb-0">Manage all your vendors, contacts, and relationships</p>
+                        </div>
+
+                        <!-- Add Vendor Button -->
+                        <div class="text-end">
+                            <a href="/vendors/new" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add New Vendor
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -410,7 +563,6 @@
                             <thead>
                                 <tr>
                                     <th>Vendor</th>
-                                    <th>Type</th>
                                     <th>Contact</th>
                                     <th>Performance</th>
                                     <th>Status</th>
@@ -425,30 +577,28 @@
                                         <td>
                                             <div>
                                                 <a href="/vendors/<%= vendor._id %>" class="vendor-name">
-                                                    <%= vendor.vendorName %>
+                                                    <%= vendor.displayName %>
                                                 </a>
                                                 <div class="vendor-code mt-1">
-                                                    <%= vendor.vendorCode %>
+                                                    Type: <%= vendor.vendorType || 'N/A' %>
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="vendor-type-badge">
-                                                <%= vendor.vendorType || 'N/A' %>
-                                            </span>
-                                        </td>
-                                        <td>
                                             <div class="contact-info">
-                                                <% if (vendor.contactInfo && vendor.contactInfo.primaryContact) { %>
-                                                    <div><%= vendor.contactInfo.primaryContact.name || 'N/A' %></div>
+                                                <% if (vendor.primaryContact || (vendor.contactInfo && vendor.contactInfo.primaryContact)) { %>
+                                                    <% const primaryContact = vendor.primaryContact || vendor.contactInfo.primaryContact %>
+                                                    <div><%= primaryContact.name || 'N/A' %></div>
                                                     <div class="text-muted">
-                                                        <% if (vendor.contactInfo.primaryContact.email) { %>
-                                                            <i class="fas fa-envelope"></i> <%= vendor.contactInfo.primaryContact.email %>
+                                                        <% if (primaryContact.email) { %>
+                                                            <i class="fas fa-envelope"></i> <%= primaryContact.email %>
                                                         <% } %>
                                                     </div>
                                                     <div class="text-muted">
-                                                        <% if (vendor.contactInfo.primaryContact.phone) { %>
-                                                            <i class="fas fa-phone"></i> <%= vendor.contactInfo.primaryContact.phone %>
+                                                        <% if (vendor.mainPhone) { %>
+                                                            <i class="fas fa-phone"></i> <%= vendor.mainPhone %>
+                                                        <% } else if (primaryContact.phone) { %>
+                                                            <i class="fas fa-phone"></i> <%= primaryContact.phone %>
                                                         <% } %>
                                                     </div>
                                                 <% } else { %>
@@ -647,6 +797,49 @@
             `;
             document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.row'));
         }
+
+        // Navigation Functions
+        function closeAllDropdowns() {
+            const allContents = document.querySelectorAll('.nav-accordion-content, .nav-dropdown-content');
+            allContents.forEach(content => {
+                content.classList.remove('show');
+            });
+            
+            const accordionIcons = document.querySelectorAll('.accordion-icon');
+            accordionIcons.forEach(icon => {
+                icon.classList.remove('rotated');
+            });
+            const importsIcon = document.querySelector('.nav-imports-btn .dropdown-icon');
+            if (importsIcon) {
+                importsIcon.classList.remove('rotated');
+            }
+        }
+
+        function toggleAccordion(accordionId) {
+            // Close all other dropdowns first
+            closeAllDropdowns();
+            
+            const content = document.getElementById(accordionId);
+            const button = document.querySelector(`button[onclick="toggleAccordion('${accordionId}')"]`);
+            const icon = button ? button.querySelector('.accordion-icon') : null;
+
+            if (content) {
+                content.classList.toggle('show');
+            }
+            if (icon) {
+                icon.classList.toggle('rotated');
+            }
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function (event) {
+            const navigationContainer = document.querySelector('.navigation-container');
+            
+            // If click is outside navigation container, close all dropdowns/accordions
+            if (navigationContainer && !navigationContainer.contains(event.target)) {
+                closeAllDropdowns();
+            }
+        });
     </script>
 </body>
 
