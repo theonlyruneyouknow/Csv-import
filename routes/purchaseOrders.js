@@ -754,16 +754,26 @@ router.get('/line-items-manager', async (req, res) => {
 // Trouble Seed Dashboard - This must come before parameterized routes!
 router.get('/trouble-seed', async (req, res) => {
   try {
-    console.log('🚨 Loading Trouble Seed Dashboard...');
+    const today = new Date();
+    const sevenDaysFromNow = new Date(today);
+    sevenDaysFromNow.setDate(today.getDate() + 7);
+    const fourteenDaysFromNow = new Date(today);
+    fourteenDaysFromNow.setDate(today.getDate() + 14);
 
-    // Find POs with "Partially Received" status
-    const partiallyReceivedPOs = await PurchaseOrder.find({
-      nsStatus: 'Partially Received'
-    }).sort({ poNumber: 1 });
+    // Get filter parameters
+    const { category = 'all', vendor = 'all', sortBy = 'poNumber' } = req.query;
 
-    console.log(`Found ${partiallyReceivedPOs.length} partially received POs`);
+    // Base query for items in partially received POs that are not yet received
+    const baseMatch = {
+      received: false,
+      $or: [
+        { itemStatus: { $in: ['Pending', 'Ordered', 'Delivery Delay', 'Back Order'] } },
+        { itemStatus: { $exists: false } },
+        { itemStatus: '' }
+      ]
+    };
 
-    // Get problematic line items for these POs
+    // Enhanced aggregation pipeline
     const troubleItems = await LineItem.aggregate([
       {
         $lookup: {
@@ -777,72 +787,250 @@ router.get('/trouble-seed', async (req, res) => {
         $addFields: {
           vendor: { $arrayElemAt: ['$purchaseOrder.vendor', 0] },
           poNsStatus: { $arrayElemAt: ['$purchaseOrder.nsStatus', 0] },
-          poUrl: { $arrayElemAt: ['$purchaseOrder.poUrl', 0] }
+          poUrl: { $arrayElemAt: ['$purchaseOrder.poUrl', 0] },
+          poDate: { $arrayElemAt: ['$purchaseOrder.date', 0] }
         }
       },
       {
         $match: {
-          poNsStatus: 'Partially Received',
-          $or: [
-            // Delivery delay items with no ETA
-            {
-              itemStatus: 'Delivery Delay',
-              $or: [
-                { eta: { $exists: false } },
-                { eta: null },
-                { eta: '' }
-              ]
-            },
-            // Discontinued items
-            { itemStatus: 'Discontinued' }
-          ]
+          ...baseMatch,
+          poNsStatus: { $in: ['Partially Received', 'Pending Receipt'] }
         }
       },
       {
-        $sort: { poNumber: 1, itemStatus: 1, memo: 1 }
+        $lookup: {
+          from: 'vendors',
+          localField: 'vendor',
+          foreignField: 'name',
+          as: 'vendorInfo'
+        }
+      },
+      {
+        $addFields: {
+          vendorData: { $arrayElemAt: ['$vendorInfo', 0] },
+          etaStatus: {
+            $cond: {
+              if: { $or: [{ $eq: ['$eta', null] }, { $eq: ['$eta', ''] }, { $not: ['$eta'] }] },
+              then: 'no-eta',
+              else: {
+                $cond: {
+                  if: { $lt: ['$eta', today] },
+                  then: 'overdue',
+                  else: {
+                    $cond: {
+                      if: { $lte: ['$eta', sevenDaysFromNow] },
+                      then: 'approaching-soon',
+                      else: {
+                        $cond: {
+                          if: { $lte: ['$eta', fourteenDaysFromNow] },
+                          then: 'approaching',
+                          else: 'future'
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          daysFromToday: {
+            $cond: {
+              if: { $or: [{ $eq: ['$eta', null] }, { $eq: ['$eta', ''] }, { $not: ['$eta'] }] },
+              then: null,
+              else: {
+                $divide: [
+                  { $subtract: ['$eta', today] },
+                  86400000  // milliseconds in a day
+                ]
+              }
+            }
+          }
+        }
+      },
+      {
+        $match: vendor !== 'all' ? { vendor: vendor } : {}
+      },
+      {
+        $sort: sortBy === 'eta' ? { eta: 1, poNumber: 1 } :
+               sortBy === 'vendor' ? { vendor: 1, poNumber: 1 } :
+               { poNumber: 1, memo: 1 }
       }
     ]);
 
-    console.log(`Found ${troubleItems.length} trouble items`);
+    // Categorize items
+    const categories = {
+      noEta: troubleItems.filter(item => item.etaStatus === 'no-eta'),
+      approachingSoon: troubleItems.filter(item => item.etaStatus === 'approaching-soon'), // 0-7 days
+      approaching: troubleItems.filter(item => item.etaStatus === 'approaching'), // 8-14 days
+      overdue: troubleItems.filter(item => item.etaStatus === 'overdue'),
+      needsFollowup: troubleItems.filter(item => 
+        item.etaStatus === 'overdue' || 
+        (item.etaStatus === 'no-eta' && item.itemStatus === 'Delivery Delay') ||
+        (item.etaStatus === 'approaching-soon' && !item.vendorData)
+      )
+    };
+
+    // Filter by category if specified
+    let displayItems = troubleItems;
+    if (category !== 'all') {
+      displayItems = categories[category] || [];
+    }
 
     // Group items by PO for better organization
     const troubleByPO = {};
-    troubleItems.forEach(item => {
+    displayItems.forEach(item => {
       if (!troubleByPO[item.poNumber]) {
         troubleByPO[item.poNumber] = {
           poNumber: item.poNumber,
           vendor: item.vendor,
+          vendorData: item.vendorData,
           poUrl: item.poUrl,
-          delayItems: [],
-          discontinuedItems: []
+          poDate: item.poDate,
+          items: []
         };
       }
-
-      if (item.itemStatus === 'Delivery Delay') {
-        troubleByPO[item.poNumber].delayItems.push(item);
-      } else if (item.itemStatus === 'Discontinued') {
-        troubleByPO[item.poNumber].discontinuedItems.push(item);
-      }
+      troubleByPO[item.poNumber].items.push(item);
     });
 
-    // Calculate statistics
-    const stats = {
-      totalPartiallyReceivedPOs: partiallyReceivedPOs.length,
-      posWithTroubleItems: Object.keys(troubleByPO).length,
-      totalDelayItems: troubleItems.filter(item => item.itemStatus === 'Delivery Delay').length,
-      totalDiscontinuedItems: troubleItems.filter(item => item.itemStatus === 'Discontinued').length
-    };
+    // Get unique vendors for filter dropdown
+    const uniqueVendors = [...new Set(troubleItems.map(item => item.vendor))].sort();
 
-    console.log('Trouble Seed stats:', stats);
+    // Calculate comprehensive statistics
+    const stats = {
+      totalItems: troubleItems.length,
+      totalPOs: Object.keys(troubleByPO).length,
+      noEtaCount: categories.noEta.length,
+      approachingSoonCount: categories.approachingSoon.length,
+      approachingCount: categories.approaching.length,
+      overdueCount: categories.overdue.length,
+      needsFollowupCount: categories.needsFollowup.length,
+      vendorsWithIssues: uniqueVendors.length
+    };
 
     res.render('trouble-seed', {
       troubleByPO: Object.values(troubleByPO),
       stats,
-      partiallyReceivedPOs
+      categories,
+      uniqueVendors,
+      currentFilters: {
+        category,
+        vendor,
+        sortBy
+      },
+      troubleItems: displayItems
     });
 
   } catch (error) {
-    console.error('Trouble Seed dashboard error:', error);
+    console.error('🚨 Enhanced Trouble Seed dashboard error:', error);
+    console.error('🚨 Error stack:', error.stack);
+    res.status(500).render('error', { 
+      error: 'System Error',
+      message: 'Something went wrong!',
+      details: error.message 
+    });
+  }
+});
+
+// API route to update ETA for a line item
+router.put('/line-items/:itemId/eta', async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const { eta } = req.body;
+    
+    console.log(`🗓️ Updating ETA for item ${itemId} to ${eta}`);
+    
+    // Validate ETA format
+    const etaDate = new Date(eta);
+    if (isNaN(etaDate.getTime())) {
+      return res.status(400).json({ error: 'Invalid ETA date format' });
+    }
+    
+    const updatedItem = await LineItem.findByIdAndUpdate(
+      itemId,
+      { 
+        eta: etaDate,
+        notes: `ETA updated to ${etaDate.toLocaleDateString()} on ${new Date().toLocaleDateString()}`
+      },
+      { new: true }
+    );
+    
+    if (!updatedItem) {
+      return res.status(404).json({ error: 'Line item not found' });
+    }
+    
+    console.log(`✅ ETA updated successfully for item: ${updatedItem.memo}`);
+    res.json({ success: true, item: updatedItem });
+    
+  } catch (error) {
+    console.error('Error updating ETA:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API route to mark item as received
+router.put('/line-items/:itemId/receive', async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const { receivedDate = new Date(), receivedBy = 'System' } = req.body;
+    
+    console.log(`📦 Marking item ${itemId} as received`);
+    
+    const updatedItem = await LineItem.findByIdAndUpdate(
+      itemId,
+      { 
+        received: true,
+        receivedDate: new Date(receivedDate),
+        receivedBy: receivedBy,
+        itemStatus: 'Received',
+        receivingNotes: `Marked as received on ${new Date().toLocaleDateString()}`
+      },
+      { new: true }
+    );
+    
+    if (!updatedItem) {
+      return res.status(404).json({ error: 'Line item not found' });
+    }
+    
+    console.log(`✅ Item marked as received: ${updatedItem.memo}`);
+    res.json({ success: true, item: updatedItem });
+    
+  } catch (error) {
+    console.error('Error marking item as received:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API route to add vendor follow-up note
+router.put('/line-items/:itemId/follow-up', async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const { followUpNote, contactMethod = 'Email' } = req.body;
+    
+    console.log(`📞 Adding follow-up note for item ${itemId}`);
+    
+    const currentItem = await LineItem.findById(itemId);
+    if (!currentItem) {
+      return res.status(404).json({ error: 'Line item not found' });
+    }
+    
+    const followUpEntry = `[${new Date().toLocaleDateString()}] ${contactMethod} Follow-up: ${followUpNote}`;
+    const existingNotes = currentItem.notes || '';
+    const updatedNotes = existingNotes ? `${existingNotes}\n${followUpEntry}` : followUpEntry;
+    
+    const updatedItem = await LineItem.findByIdAndUpdate(
+      itemId,
+      { 
+        notes: updatedNotes,
+        itemStatus: 'Vendor Contacted'
+      },
+      { new: true }
+    );
+    
+    console.log(`✅ Follow-up note added: ${updatedItem.memo}`);
+    res.json({ success: true, item: updatedItem });
+    
+  } catch (error) {
+    console.error('Error adding follow-up note:', error);
     res.status(500).json({ error: error.message });
   }
 });
