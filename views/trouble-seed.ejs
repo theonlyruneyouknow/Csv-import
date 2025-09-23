@@ -786,6 +786,304 @@
             background: #f1f3f4;
             margin: 5px 0;
         }
+
+        /* Email Template Management Styles */
+        .template-controls {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .template-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .template-selector label {
+            font-weight: 600;
+            color: #495057;
+            margin: 0;
+        }
+
+        .template-dropdown {
+            flex: 1;
+            min-width: 200px;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+        }
+
+        .template-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-template {
+            padding: 6px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            background: white;
+            color: #495057;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-template:hover {
+            background: #e9ecef;
+            color: #495057;
+            text-decoration: none;
+        }
+
+        .btn-template.primary {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .btn-template.primary:hover {
+            background: #0056b3;
+            border-color: #0056b3;
+            color: white;
+        }
+
+        .btn-template.success {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .btn-template.success:hover {
+            background: #218838;
+            border-color: #218838;
+            color: white;
+        }
+
+        .template-editor {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .editor-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .editor-tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .editor-tab.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+            background: white;
+        }
+
+        .editor-tab:hover:not(.active) {
+            color: #495057;
+            background: #e9ecef;
+        }
+
+        .editor-content {
+            padding: 0;
+        }
+
+        .tab-pane {
+            display: none;
+            padding: 20px;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .template-form {
+            display: grid;
+            gap: 15px;
+        }
+
+        .form-group-template {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group-template label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .form-control-template {
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-control-template:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .template-textarea {
+            min-height: 300px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            resize: vertical;
+        }
+
+        .preview-content {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 20px;
+            min-height: 300px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+        }
+
+        .preview-content h1, .preview-content h2, .preview-content h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .preview-content p {
+            margin: 10px 0;
+        }
+
+        .preview-content ul, .preview-content ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .variables-help {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .variables-help h4 {
+            margin-top: 0;
+            color: #007bff;
+            font-size: 16px;
+        }
+
+        .variable-list {
+            display: grid;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .variable-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .variable-name {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            color: #e83e8c;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .variable-description {
+            color: #6c757d;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .variable-example {
+            background: #f8f9fa;
+            border-radius: 4px;
+            padding: 8px;
+            margin-top: 8px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 12px;
+            color: #495057;
+        }
+
+        .template-status {
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .template-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .template-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .template-metadata {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .template-selector {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .template-actions {
+                justify-content: center;
+            }
+
+            .template-metadata {
+                grid-template-columns: 1fr;
+            }
+
+            .editor-tabs {
+                flex-wrap: wrap;
+            }
+
+            .editor-tab {
+                flex: 1;
+                min-width: 100px;
+            }
+        }
     </style>
 </head>
 
@@ -915,9 +1213,96 @@
             <div class="email-generator-header">
                 <h4>
                     <i class="fas fa-envelope"></i>
-                    Email Content Generator
+                    Enhanced Email Content Generator
                 </h4>
+                <div class="template-controls">
+                    <label for="templateSelect">Email Template:</label>
+                    <select id="templateSelect" onchange="handleTemplateChange()">
+                        <option value="">Loading templates...</option>
+                    </select>
+                    <button class="template-btn" onclick="openTemplateManager()" title="Manage Templates">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <button class="template-btn" onclick="createNewTemplate()" title="Create New Template">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
             </div>
+            
+            <!-- Template Preview/Edit Section -->
+            <div class="template-editor" id="templateEditor" style="display: none;">
+                <div class="editor-tabs">
+                    <button class="tab-btn active" onclick="switchTab('preview')">Preview</button>
+                    <button class="tab-btn" onclick="switchTab('edit')">Edit Template</button>
+                    <button class="tab-btn" onclick="switchTab('variables')">Variables</button>
+                </div>
+                
+                <div class="tab-content">
+                    <div id="previewTab" class="tab-pane active">
+                        <div class="template-preview">
+                            <div class="preview-subject">
+                                <label>Subject:</label>
+                                <div id="subjectPreview"></div>
+                            </div>
+                            <div class="preview-body">
+                                <label>Email Body:</label>
+                                <div id="bodyPreview"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="editTab" class="tab-pane">
+                        <div class="template-form">
+                            <div class="form-group">
+                                <label for="templateName">Template Name:</label>
+                                <input type="text" id="templateName" placeholder="Enter template name">
+                            </div>
+                            <div class="form-group">
+                                <label for="templateSubject">Subject:</label>
+                                <input type="text" id="templateSubject" placeholder="Enter email subject with variables like {{poNumber}}">
+                            </div>
+                            <div class="form-group">
+                                <label for="templateBody">Email Body:</label>
+                                <textarea id="templateBody" rows="10" placeholder="Enter email body with variables and conditional logic"></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button class="template-btn save" onclick="saveTemplate()">
+                                    <i class="fas fa-save"></i> Save Template
+                                </button>
+                                <button class="template-btn cancel" onclick="cancelEdit()">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="variablesTab" class="tab-pane">
+                        <div class="variables-help">
+                            <h5>Available Variables:</h5>
+                            <div class="variable-list">
+                                <div class="variable-item"><code>{{poNumber}}</code> - Purchase Order Number</div>
+                                <div class="variable-item"><code>{{vendor}}</code> - Vendor Name</div>
+                                <div class="variable-item"><code>{{totalItems}}</code> - Total Outstanding Items</div>
+                                <div class="variable-item"><code>{{currentDate}}</code> - Current Date</div>
+                                <div class="variable-item"><code>{{currentTime}}</code> - Current Time</div>
+                                <div class="variable-item"><code>{{senderName}}</code> - Your Name</div>
+                                <div class="variable-item"><code>{{senderTitle}}</code> - Your Title</div>
+                                <div class="variable-item"><code>{{senderContact}}</code> - Your Contact Info</div>
+                            </div>
+                            <h5>Conditional Logic:</h5>
+                            <div class="logic-examples">
+                                <div class="logic-item">
+                                    <code>{{#if noEtaItems}}...{{/if}}</code> - Show only if items without ETA exist
+                                </div>
+                                <div class="logic-item">
+                                    <code>{{#each noEtaItems}}{{memo}}{{/each}}</code> - Loop through items
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="email-content" id="emailContent">
                 Select a PO below to generate email content for vendor communication...
             </div>
@@ -930,6 +1315,9 @@
                 </button>
                 <button class="email-btn btn-generate-all" onclick="generateAllPOsEmail()">
                     <i class="fas fa-envelope-bulk"></i> Generate Summary for All POs
+                </button>
+                <button class="email-btn btn-edit-content" onclick="editGeneratedEmail()" id="editBtn" disabled>
+                    <i class="fas fa-edit"></i> Edit Content
                 </button>
             </div>
         </div>
@@ -1337,7 +1725,642 @@ Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
                     });
                 }
             });
+
+            // Email Template Management Functions
+            let currentTemplates = [];
+            let selectedTemplate = null;
+
+            // Default templates for demo purposes (when MongoDB is not available)
+            const defaultTemplates = [
+                {
+                    _id: 'template-1',
+                    name: 'Standard Follow-up',
+                    category: 'follow-up',
+                    subject: 'UPDATE NEEDED - Purchase Order {{poNumber}} - Outstanding Items',
+                    bodyTemplate: `Dear {{vendor}},
+
+I hope this email finds you well. I am writing to request an update on Purchase Order {{poNumber}}, which currently shows as "Partially Received" in our system.
+
+We have identified several items that require immediate attention:
+
+{{#if noEtaItems}}
+DELIVERY DELAYS (No ETA Provided):
+{{#each noEtaItems}}
+• {{memo}}{{#if sku}} (SKU: {{sku}}){{/if}}
+{{/each}}
+
+We urgently need estimated delivery dates for these items to update our customers and plan accordingly.
+{{/if}}
+
+{{#if overdueItems}}
+OVERDUE ITEMS:
+{{#each overdueItems}}
+• {{memo}}{{#if sku}} (SKU: {{sku}}){{/if}} - Expected: {{eta}}
+{{/each}}
+
+These items are past their expected delivery dates. Please provide immediate updates.
+{{/if}}
+
+{{#if needsFollowupItems}}
+ITEMS REQUIRING FOLLOW-UP:
+{{#each needsFollowupItems}}
+• {{memo}}{{#if sku}} (SKU: {{sku}}){{/if}}
+{{/each}}
+
+These items need your immediate attention and response.
+{{/if}}
+
+Could you please provide:
+1. Updated delivery dates for delayed items
+2. Status updates for overdue items
+3. Alternative products for any discontinued items
+4. Any other issues preventing completion of this order
+
+This information is critical for our operations and customer commitments. Please respond within 24-48 hours.
+
+Thank you for your prompt attention to this matter.
+
+Best regards,
+[Your Name]
+[Your Title]
+[Your Contact Information]
+
+---
+Purchase Order: {{poNumber}}
+Total Outstanding Items: {{totalItems}}
+Generated: {{currentDate}}`,
+                    variables: ['poNumber', 'vendor', 'noEtaItems', 'overdueItems', 'needsFollowupItems', 'totalItems', 'currentDate'],
+                    isDefault: true,
+                    usageCount: 0
+                },
+                {
+                    _id: 'template-2',
+                    name: 'Urgent Escalation',
+                    category: 'escalation',
+                    subject: 'URGENT ESCALATION - Purchase Order {{poNumber}} - Immediate Response Required',
+                    bodyTemplate: `URGENT ATTENTION REQUIRED
+
+Dear {{vendor}},
+
+This is an ESCALATED follow-up regarding Purchase Order {{poNumber}}. We have not received adequate response to our previous communications.
+
+CRITICAL ISSUES:
+{{#if noEtaItems}}
+Items WITHOUT delivery dates: {{noEtaItems.length}}
+{{/if}}
+{{#if overdueItems}}
+OVERDUE items: {{overdueItems.length}}
+{{/if}}
+
+We require IMMEDIATE response within 24 hours or we will need to consider alternative sourcing options.
+
+Contact: [Your Phone] | [Your Email]
+
+{{poNumber}} - {{currentDate}}`,
+                    variables: ['poNumber', 'vendor', 'noEtaItems', 'overdueItems', 'currentDate'],
+                    isDefault: true,
+                    usageCount: 0
+                },
+                {
+                    _id: 'template-3',
+                    name: 'Summary Report',
+                    category: 'summary',
+                    subject: 'Weekly Purchase Order Status Summary',
+                    bodyTemplate: `Weekly Status Summary
+
+Dear {{vendor}},
+
+This is a summary of outstanding items across multiple purchase orders:
+
+Total Outstanding POs: {{totalPOs}}
+Total Outstanding Items: {{totalItems}}
+
+{{#each poSummary}}
+PO {{poNumber}}: {{itemCount}} items pending
+{{/each}}
+
+Please review and provide updates for all outstanding items.
+
+Best regards,
+[Your Name]`,
+                    variables: ['vendor', 'totalPOs', 'totalItems', 'poSummary', 'currentDate'],
+                    isDefault: true,
+                    usageCount: 0
+                }
+            ];
+
+            async function loadTemplates() {
+                try {
+                    const response = await fetch('/api/email-templates');
+                    if (response.ok) {
+                        currentTemplates = await response.json();
+                        populateTemplateSelector();
+                        showTemplateStatus('Templates loaded successfully', 'success');
+                    } else {
+                        console.error('Failed to load templates, using default templates');
+                        currentTemplates = defaultTemplates;
+                        populateTemplateSelector();
+                        showTemplateStatus('Using default templates (MongoDB not connected)', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error loading templates, using default templates:', error);
+                    currentTemplates = defaultTemplates;
+                    populateTemplateSelector();
+                    showTemplateStatus('Using default templates (MongoDB not connected)', 'error');
+                }
+            }
+
+            function populateTemplateSelector() {
+                const selector = document.getElementById('templateSelector');
+                if (!selector) return;
+
+                selector.innerHTML = '<option value="">Select a template...</option>';
+                currentTemplates.forEach(template => {
+                    const option = document.createElement('option');
+                    option.value = template._id;
+                    option.textContent = `${template.name} (${template.category})`;
+                    selector.appendChild(option);
+                });
+            }
+
+            function handleTemplateChange() {
+                const selector = document.getElementById('templateSelector');
+                const templateId = selector.value;
+                
+                if (!templateId) {
+                    selectedTemplate = null;
+                    clearTemplateEditor();
+                    return;
+                }
+
+                selectedTemplate = currentTemplates.find(t => t._id === templateId);
+                if (selectedTemplate) {
+                    loadTemplateIntoEditor(selectedTemplate);
+                    updatePreview();
+                }
+            }
+
+            function loadTemplateIntoEditor(template) {
+                document.getElementById('templateName').value = template.name;
+                document.getElementById('templateCategory').value = template.category;
+                document.getElementById('templateSubject').value = template.subject;
+                document.getElementById('templateBody').value = template.bodyTemplate;
+            }
+
+            function clearTemplateEditor() {
+                document.getElementById('templateName').value = '';
+                document.getElementById('templateCategory').value = '';
+                document.getElementById('templateSubject').value = '';
+                document.getElementById('templateBody').value = '';
+                document.getElementById('templatePreview').innerHTML = '<p>Select a template to see preview...</p>';
+            }
+
+            function updatePreview() {
+                if (!selectedTemplate || !selectedPOForEmail) {
+                    document.getElementById('templatePreview').innerHTML = '<p>Select a template and PO to see preview...</p>';
+                    return;
+                }
+
+                const previewContent = generatePreviewContent(selectedTemplate, selectedPOForEmail);
+                document.getElementById('templatePreview').innerHTML = previewContent;
+            }
+
+            function generatePreviewContent(template, poData) {
+                const noEtaItems = poData.items.filter(item => item.etaStatus === 'no-eta');
+                const overdueItems = poData.items.filter(item => item.etaStatus === 'overdue');
+                const needsFollowupItems = poData.items.filter(item => item.etaStatus === 'needs-followup');
+
+                const variables = {
+                    poNumber: poData.poNumber,
+                    vendor: poData.vendor,
+                    noEtaItems: noEtaItems,
+                    overdueItems: overdueItems,
+                    needsFollowupItems: needsFollowupItems,
+                    totalItems: poData.items.length,
+                    currentDate: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
+                };
+
+                let content = `<h3>Subject: ${substituteVariables(template.subject, variables)}</h3>`;
+                content += `<div style="white-space: pre-line; font-family: inherit;">${substituteVariables(template.bodyTemplate, variables)}</div>`;
+                
+                return content;
+            }
+
+            function substituteVariables(text, variables) {
+                let result = text;
+                
+                // Simple variable substitution
+                Object.keys(variables).forEach(key => {
+                    const regex = new RegExp(`{{${key}}}`, 'g');
+                    result = result.replace(regex, variables[key] || '');
+                });
+
+                // Handle conditional blocks
+                result = result.replace(/{{#if (\w+)}}([\s\S]*?){{\/if}}/g, (match, condition, content) => {
+                    const value = variables[condition];
+                    if (value && (Array.isArray(value) ? value.length > 0 : true)) {
+                        return content;
+                    }
+                    return '';
+                });
+
+                // Handle each loops
+                result = result.replace(/{{#each (\w+)}}([\s\S]*?){{\/each}}/g, (match, arrayName, itemTemplate) => {
+                    const array = variables[arrayName];
+                    if (!Array.isArray(array)) return '';
+                    
+                    return array.map(item => {
+                        let itemContent = itemTemplate;
+                        Object.keys(item).forEach(key => {
+                            const regex = new RegExp(`{{${key}}}`, 'g');
+                            itemContent = itemContent.replace(regex, item[key] || '');
+                        });
+                        return itemContent;
+                    }).join('');
+                });
+
+                return result;
+            }
+
+            function showTemplateStatus(message, type) {
+                const statusEl = document.getElementById('templateStatus');
+                if (!statusEl) return;
+
+                statusEl.textContent = message;
+                statusEl.className = `template-status ${type}`;
+                
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 3000);
+            }
+
+            function switchTab(tabName) {
+                // Hide all tab panes
+                document.querySelectorAll('.tab-pane').forEach(pane => {
+                    pane.classList.remove('active');
+                });
+                
+                // Remove active class from all tabs
+                document.querySelectorAll('.editor-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Show selected tab pane and activate tab
+                document.getElementById(tabName + 'Tab').classList.add('active');
+                document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+                
+                if (tabName === 'preview') {
+                    updatePreview();
+                }
+            }
+
+            function useTemplate() {
+                if (!selectedTemplate || !selectedPOForEmail) {
+                    alert('Please select both a template and a PO first.');
+                    return;
+                }
+
+                const generatedContent = generateEmailContentFromTemplate(selectedTemplate, selectedPOForEmail);
+                document.getElementById('emailContent').textContent = generatedContent;
+                
+                // Enable copy button
+                document.getElementById('copyBtn').disabled = false;
+                
+                showTemplateStatus('Template applied successfully!', 'success');
+            }
+
+            function generateEmailContentFromTemplate(template, poData) {
+                const noEtaItems = poData.items.filter(item => item.etaStatus === 'no-eta');
+                const overdueItems = poData.items.filter(item => item.etaStatus === 'overdue');
+                const needsFollowupItems = poData.items.filter(item => item.etaStatus === 'needs-followup');
+
+                const variables = {
+                    poNumber: poData.poNumber,
+                    vendor: poData.vendor,
+                    noEtaItems: noEtaItems,
+                    overdueItems: overdueItems,
+                    needsFollowupItems: needsFollowupItems,
+                    totalItems: poData.items.length,
+                    currentDate: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
+                };
+
+                const subject = substituteVariables(template.subject, variables);
+                const body = substituteVariables(template.bodyTemplate, variables);
+                
+                return `Subject: ${subject}\n\n${body}`;
+            }
+
+            function initializeTemplateManagement() {
+                loadTemplates();
+                
+                // Set up event listeners
+                const templateSelector = document.getElementById('templateSelector');
+                if (templateSelector) {
+                    templateSelector.addEventListener('change', handleTemplateChange);
+                }
+
+                // Initialize first tab as active
+                switchTab('preview');
+            }
+
+            // Initialize template management
+            initializeTemplateManagement();
         });
+
+        // Email Template Management Functions
+        let currentTemplate = null;
+        let templates = [];
+
+        async function initializeTemplateManagement() {
+            await loadTemplates();
+            setupTemplateEditor();
+        }
+
+        async function loadTemplates() {
+            try {
+                const response = await fetch('/public/email-templates');
+                if (response.ok) {
+                    templates = await response.json();
+                    populateTemplateDropdown();
+                } else {
+                    console.error('Failed to load templates');
+                }
+            } catch (error) {
+                console.error('Error loading templates:', error);
+            }
+        }
+
+        function populateTemplateDropdown() {
+            const dropdown = document.getElementById('templateSelect');
+            dropdown.innerHTML = '<option value="">Select a template...</option>';
+            
+            templates.forEach(template => {
+                const option = document.createElement('option');
+                option.value = template._id;
+                option.textContent = `${template.name} (${template.category})`;
+                dropdown.appendChild(option);
+            });
+        }
+
+        function setupTemplateEditor() {
+            // Tab switching
+            document.querySelectorAll('.editor-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    switchEditorTab(e.target.dataset.tab);
+                });
+            });
+
+            // Template dropdown change
+            document.getElementById('templateSelect').addEventListener('change', handleTemplateChange);
+        }
+
+        function switchEditorTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.editor-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+
+            // Update preview when switching to preview tab
+            if (tabName === 'preview') {
+                updatePreview();
+            }
+        }
+
+        async function handleTemplateChange() {
+            const templateId = document.getElementById('templateSelect').value;
+            
+            if (!templateId) {
+                currentTemplate = null;
+                clearTemplateForm();
+                return;
+            }
+
+            try {
+                const response = await fetch(`/public/email-templates/${templateId}`);
+                if (response.ok) {
+                    currentTemplate = await response.json();
+                    populateTemplateForm(currentTemplate);
+                    updatePreview();
+                } else {
+                    showTemplateStatus('Error loading template', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading template:', error);
+                showTemplateStatus('Error loading template', 'error');
+            }
+        }
+
+        function clearTemplateForm() {
+            document.getElementById('templateName').value = '';
+            document.getElementById('templateCategory').value = '';
+            document.getElementById('templateSubject').value = '';
+            document.getElementById('templateBody').value = '';
+            document.getElementById('previewContent').innerHTML = '<p>Select a template to see preview...</p>';
+        }
+
+        function populateTemplateForm(template) {
+            document.getElementById('templateName').value = template.name;
+            document.getElementById('templateCategory').value = template.category;
+            document.getElementById('templateSubject').value = template.subject;
+            document.getElementById('templateBody').value = template.bodyTemplate;
+        }
+
+        function updatePreview() {
+            if (!currentTemplate) {
+                document.getElementById('previewContent').innerHTML = '<p>Select a template to see preview...</p>';
+                return;
+            }
+
+            const subject = document.getElementById('templateSubject').value;
+            const body = document.getElementById('templateBody').value;
+
+            // Sample data for preview
+            const sampleData = {
+                poNumber: 'PO-12345',
+                vendor: 'Sample Vendor Inc.',
+                items: [
+                    { memo: 'Sample Product 1', sku: 'SKU-001', eta: new Date(), etaStatus: 'no-eta' },
+                    { memo: 'Sample Product 2', sku: 'SKU-002', eta: null, etaStatus: 'overdue' }
+                ]
+            };
+
+            try {
+                const previewSubject = replaceTemplateVariables(subject, sampleData);
+                const previewBody = replaceTemplateVariables(body, sampleData);
+
+                document.getElementById('previewContent').innerHTML = `
+                    <div style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">
+                        <strong>Subject:</strong> ${previewSubject}
+                    </div>
+                    <div style="white-space: pre-wrap;">${previewBody}</div>
+                `;
+            } catch (error) {
+                document.getElementById('previewContent').innerHTML = `<p style="color: #dc3545;">Error generating preview: ${error.message}</p>`;
+            }
+        }
+
+        function replaceTemplateVariables(template, data) {
+            let result = template;
+
+            // Basic variable replacement
+            result = result.replace(/\{\{poNumber\}\}/g, data.poNumber || '');
+            result = result.replace(/\{\{vendor\}\}/g, data.vendor || '');
+            result = result.replace(/\{\{totalItems\}\}/g, data.items ? data.items.length : 0);
+
+            // Handle conditional blocks (simplified)
+            result = result.replace(/\{\{#if hasNoEtaItems\}\}(.*?)\{\{\/if\}\}/gs, 
+                data.items && data.items.some(item => item.etaStatus === 'no-eta') ? '$1' : '');
+            
+            result = result.replace(/\{\{#if hasOverdueItems\}\}(.*?)\{\{\/if\}\}/gs, 
+                data.items && data.items.some(item => item.etaStatus === 'overdue') ? '$1' : '');
+
+            // Handle item loops (simplified)
+            if (data.items) {
+                const noEtaItems = data.items.filter(item => item.etaStatus === 'no-eta');
+                const noEtaList = noEtaItems.map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''}`).join('\n');
+                result = result.replace(/\{\{#each noEtaItems\}\}(.*?)\{\{\/each\}\}/gs, noEtaList);
+
+                const overdueItems = data.items.filter(item => item.etaStatus === 'overdue');
+                const overdueList = overdueItems.map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''} - Expected: ${item.eta ? new Date(item.eta).toLocaleDateString() : 'N/A'}`).join('\n');
+                result = result.replace(/\{\{#each overdueItems\}\}(.*?)\{\{\/each\}\}/gs, overdueList);
+            }
+
+            // Add current date
+            result = result.replace(/\{\{currentDate\}\}/g, new Date().toLocaleDateString());
+            result = result.replace(/\{\{currentTime\}\}/g, new Date().toLocaleTimeString());
+
+            return result;
+        }
+
+        async function saveTemplate() {
+            const templateData = {
+                name: document.getElementById('templateName').value,
+                category: document.getElementById('templateCategory').value,
+                subject: document.getElementById('templateSubject').value,
+                bodyTemplate: document.getElementById('templateBody').value,
+                variables: ['poNumber', 'vendor', 'totalItems', 'noEtaItems', 'overdueItems', 'currentDate', 'currentTime']
+            };
+
+            if (!templateData.name || !templateData.subject || !templateData.bodyTemplate) {
+                showTemplateStatus('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const url = currentTemplate ? `/email-templates/${currentTemplate._id}` : '/email-templates';
+                const method = currentTemplate ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(templateData)
+                });
+
+                if (response.ok) {
+                    const savedTemplate = await response.json();
+                    currentTemplate = savedTemplate;
+                    showTemplateStatus('Template saved successfully!', 'success');
+                    await loadTemplates(); // Refresh template list
+                } else {
+                    showTemplateStatus('Error saving template', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving template:', error);
+                showTemplateStatus('Error saving template', 'error');
+            }
+        }
+
+        function newTemplate() {
+            currentTemplate = null;
+            document.getElementById('templateSelect').value = '';
+            clearTemplateForm();
+            switchEditorTab('edit');
+            showTemplateStatus('Creating new template...', 'success');
+        }
+
+        async function deleteTemplate() {
+            if (!currentTemplate) {
+                showTemplateStatus('No template selected', 'error');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to delete the template "${currentTemplate.name}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/email-templates/${currentTemplate._id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showTemplateStatus('Template deleted successfully!', 'success');
+                    currentTemplate = null;
+                    document.getElementById('templateSelect').value = '';
+                    clearTemplateForm();
+                    await loadTemplates(); // Refresh template list
+                } else {
+                    showTemplateStatus('Error deleting template', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting template:', error);
+                showTemplateStatus('Error deleting template', 'error');
+            }
+        }
+
+        async function useTemplateForEmail() {
+            if (!currentTemplate || !selectedPOForEmail) {
+                showTemplateStatus('Please select both a template and a PO', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/public/email-templates/${currentTemplate._id}/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        poNumber: selectedPOForEmail.poNumber,
+                        vendor: selectedPOForEmail.vendor,
+                        items: selectedPOForEmail.items
+                    })
+                });
+
+                if (response.ok) {
+                    const generatedContent = await response.json();
+                    document.getElementById('emailContent').textContent = `Subject: ${generatedContent.subject}\n\n${generatedContent.body}`;
+                    showTemplateStatus('Email generated from template!', 'success');
+                } else {
+                    showTemplateStatus('Error generating email from template', 'error');
+                }
+            } catch (error) {
+                console.error('Error using template:', error);
+                showTemplateStatus('Error generating email from template', 'error');
+            }
+        }
+
+        function showTemplateStatus(message, type) {
+            const statusDiv = document.getElementById('templateStatus');
+            statusDiv.textContent = message;
+            statusDiv.className = `template-status ${type}`;
+            
+            // Auto-hide success messages after 3 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 3000);
+            }
+        }
     </script>
 </body>
 </html>

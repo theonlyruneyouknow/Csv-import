@@ -14,6 +14,7 @@ const vendorRoutes = require('./routes/vendors');
 const taskRoutes = require('./routes/tasks');
 const authRoutes = require('./routes/auth');
 const receivingRoutes = require('./routes/receiving');
+const emailTemplateRoutes = require('./routes/emailTemplates');
 const foodRoutes = require('./routes/food');
 const storyRoutes = require('./routes/story');
 const medicineRoutes = require('./routes/medicine');
@@ -543,6 +544,7 @@ app.use('/organic-vendors', ensureAuthenticated, ensureApproved, organicVendorRo
 app.use('/vendors', ensureAuthenticated, ensureApproved, vendorRoutes);
 app.use('/tasks', ensureAuthenticated, ensureApproved, taskRoutes);
 app.use('/receiving', ensureAuthenticated, ensureApproved, receivingRoutes);
+app.use('/email-templates', ensureAuthenticated, ensureApproved, emailTemplateRoutes);
 app.use('/dropship', ensureAuthenticated, ensureApproved, dropshipRoutes);
 app.use('/dropship-test', ensureAuthenticated, ensureApproved, dropshipTestRoutes);
 app.use('/food', ensureAuthenticated, ensureApproved, foodRoutes);
@@ -550,6 +552,9 @@ app.use('/story', ensureAuthenticated, ensureApproved, storyRoutes);
 app.use('/medicine', ensureAuthenticated, ensureApproved, medicineRoutes);
 app.use('/bulletin', bulletinRoutes); // Temporarily remove auth for testing
 app.use('/hymns', hymnRoutes); // Remove authentication requirement for hymn search
+
+// Public email template routes for dashboard access (read-only)
+app.use('/public/email-templates', emailTemplateRoutes);
 
 // API routes - Order matters! More specific routes must come first
 app.use('/api/announcements', announcementRoutes); // Announcement API routes - MUST be before /api
