@@ -167,6 +167,7 @@ router.get('/', async (req, res) => {
                 limit: parseInt(limit)
             },
             filters: { sortBy, sortOrder, status, vendorType, search },
+            currentPage: 'vendors',
             stats: stats[0] || {
                 totalVendors: 0,
                 activeVendors: 0,

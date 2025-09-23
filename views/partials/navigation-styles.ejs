@@ -1,0 +1,275 @@
+<style>
+/* Navigation Styles */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1000;
+    padding: 15px 0;
+    border-bottom: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.header h1 {
+    margin: 0;
+    flex-shrink: 0;
+    color: #007bff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.navigation-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.nav-section {
+    position: relative;
+}
+
+.nav-accordion-btn, .nav-imports-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    min-width: 120px;
+    justify-content: space-between;
+}
+
+.nav-accordion-btn:hover, .nav-imports-btn:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-imports-btn {
+    background: #17a2b8;
+}
+
+.nav-imports-btn:hover {
+    background: #138496;
+}
+
+.accordion-icon, .dropdown-icon {
+    transition: transform 0.3s ease;
+    font-size: 12px;
+}
+
+.nav-accordion-content, .nav-dropdown-content {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    min-width: 250px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    z-index: 1001;
+    display: none;
+    margin-top: 5px;
+}
+
+.nav-dropdown-content {
+    min-width: 220px;
+}
+
+.nav-accordion-item, .nav-dropdown-item {
+    display: block;
+    padding: 12px 16px;
+    color: #333;
+    text-decoration: none;
+    border-bottom: 1px solid #f8f9fa;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-size: 14px;
+}
+
+.nav-accordion-item:hover, .nav-dropdown-item:hover {
+    background: #f8f9fa;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.nav-accordion-item.active {
+    background: #e3f2fd;
+    color: #1976d2;
+    font-weight: 600;
+}
+
+.nav-accordion-item:last-child, .nav-dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.nav-accordion-divider {
+    height: 1px;
+    background: #dee2e6;
+    margin: 4px 0;
+}
+
+/* P.O.D. Button Styles */
+.pod-button {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+}
+
+.pod-button:hover {
+    background: linear-gradient(135deg, #218838, #1ea583);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    color: white;
+    text-decoration: none;
+}
+
+.pod-button .arrow {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+}
+
+.pod-button:hover .arrow {
+    transform: translateX(-2px);
+}
+
+/* Refresh Button */
+.refresh-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+    background: #218838;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* User Info */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    position: relative;
+    cursor: pointer;
+}
+
+.user-status-indicator {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 12px;
+    height: 12px;
+    background: #28a745;
+    border: 2px solid white;
+    border-radius: 50%;
+}
+
+/* User Dropdown Styles */
+.dropdown-user-info {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f8f9fa;
+    border-radius: 6px 6px 0 0;
+}
+
+.dropdown-user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.dropdown-user-details {
+    flex: 1;
+}
+
+.dropdown-user-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 2px;
+}
+
+.dropdown-user-role {
+    font-size: 12px;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.dropdown-user-status {
+    font-size: 11px;
+    color: #28a745;
+    font-weight: 500;
+}
+
+/* Navigation JavaScript Functions */
+.nav-accordion-content.show, .nav-dropdown-content.show {
+    display: block;
+}
+</style>

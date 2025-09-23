@@ -115,7 +115,8 @@ router.get('/', async (req, res) => {
       uniqueNSStatuses,
       uniqueStatuses,
       user: req.user,
-      pageTitle: 'Receiving Dashboard'
+      pageTitle: 'Receiving Dashboard',
+      currentPage: 'receiving'
     });
 
   } catch (error) {

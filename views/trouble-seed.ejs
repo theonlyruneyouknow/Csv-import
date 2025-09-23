@@ -9,26 +9,79 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        /* Navigation Styles */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
         .header {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-            color: white;
-            padding: 20px 0;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1000;
+            padding: 15px 0;
+            border-bottom: 1px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .header h1 {
             margin: 0;
-            font-size: 2.2rem;
+            flex-shrink: 0;
+            color: #007bff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* P.O.D. Button Styles */
+        .pod-button {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            white-space: nowrap;
         }
+
+        .pod-button:hover {
+            background: linear-gradient(135deg, #218838, #1ea583);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            color: white;
+            text-decoration: none;
+        }
+
+        .pod-button .arrow {
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .pod-button:hover .arrow {
+            transform: translateX(-2px);
+        }
+
+        /* Dashboard Content Styles */
 
         .stats-grid {
             display: grid;
@@ -453,25 +506,312 @@
             font-style: italic;
             text-align: center;
         }
+
+        /* Navigation Styles from Receiving Dashboard */
+        .header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 15px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-shrink: 0;
+        }
+
+        /* P.O.D. Button Styles */
+        .pod-button {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            white-space: nowrap;
+        }
+
+        .pod-button:hover {
+            background: linear-gradient(135deg, #218838, #1ea583);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            color: white;
+            text-decoration: none;
+        }
+
+        .pod-button .arrow {
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .pod-button:hover .arrow {
+            transform: translateX(-2px);
+        }
+
+        .navigation-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-section {
+            position: relative;
+        }
+
+        .nav-accordion-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            justify-content: space-between;
+        }
+
+        .nav-accordion-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-accordion-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            min-width: 220px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 5px;
+        }
+
+        .nav-accordion-content.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .nav-accordion-item {
+            display: block;
+            padding: 12px 16px;
+            color: #495057;
+            text-decoration: none;
+            border-bottom: 1px solid #f1f3f4;
+            transition: all 0.2s ease;
+        }
+
+        .nav-accordion-item:hover {
+            background: #f8f9fa;
+            color: #007bff;
+            text-decoration: none;
+            padding-left: 20px;
+        }
+
+        .nav-accordion-item:last-child {
+            border-bottom: none;
+        }
+
+        .nav-accordion-item.active {
+            background: #fff3cd;
+            color: #856404;
+            font-weight: 600;
+        }
+
+        .nav-accordion-divider {
+            height: 1px;
+            background: #dee2e6;
+            margin: 4px 0;
+        }
+
+        .nav-imports-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            justify-content: space-between;
+        }
+
+        .nav-imports-btn:hover {
+            background: #138496;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-dropdown-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            min-width: 220px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 5px;
+        }
+
+        .nav-dropdown-content.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .nav-dropdown-item {
+            display: block;
+            padding: 12px 16px;
+            color: #495057;
+            text-decoration: none;
+            border-bottom: 1px solid #f1f3f4;
+            transition: all 0.2s ease;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .nav-dropdown-item:hover {
+            background: #f8f9fa;
+            color: #007bff;
+            text-decoration: none;
+            padding-left: 20px;
+        }
+
+        .refresh-btn {
+            background: #20c997;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: #1ea085;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #007bff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .user-status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #28a745;
+            position: absolute;
+            bottom: -1px;
+            right: -1px;
+            border: 2px solid white;
+        }
+
+        .nav-accordion-divider {
+            height: 1px;
+            background: #f1f3f4;
+            margin: 5px 0;
+        }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <div class="container">
-            <div class="back-nav">
-                <a href="/">
-                    <i class="fas fa-arrow-left"></i>
-                    Back to Dashboard
-                </a>
-            </div>
+    <div class="container">
+        <div class="header">
             <h1>
                 <i class="fas fa-exclamation-triangle"></i>
                 Enhanced Trouble Seed Dashboard
             </h1>
+            
+            <!-- P.O.D. Button -->
+            <a href="/purchase-orders" class="pod-button">
+                <span class="arrow">←</span>
+                <span>P.O.D.</span>
+            </a>
+            
+            <div class="d-flex align-items-center justify-content-between flex-grow-1">
+                <%- include('partials/navigation', { currentPage: 'trouble-seed' }) %>
+            </div>
+        </div>
+        
+        <!-- Dashboard Description -->
+        <div class="mb-4">
             <p class="mb-0">Track and manage problematic seeds with advanced filtering and vendor communication</p>
         </div>
-    </div>
 
     <div class="container-fluid">
         <!-- Statistics Section -->
@@ -755,6 +1095,70 @@
 
         function exportData() {
             alert('Export functionality will be implemented');
+        }
+        
+        // Navigation JavaScript Functions
+        function toggleAccordion(accordionId) {
+            const accordion = document.getElementById(accordionId);
+            const button = accordion.previousElementSibling;
+            const icon = button.querySelector('.accordion-icon');
+            
+            if (accordion.style.display === 'block') {
+                accordion.style.display = 'none';
+                icon.textContent = '▼';
+            } else {
+                // Close all other accordions
+                document.querySelectorAll('.nav-accordion-content').forEach(acc => {
+                    acc.style.display = 'none';
+                    const btn = acc.previousElementSibling;
+                    if (btn) {
+                        const icn = btn.querySelector('.accordion-icon');
+                        if (icn) icn.textContent = '▼';
+                    }
+                });
+                
+                accordion.style.display = 'block';
+                icon.textContent = '▲';
+            }
+        }
+
+        function toggleImportsDropdown() {
+            const dropdown = document.getElementById('importsDropdown');
+            const icon = document.querySelector('.nav-imports-btn .dropdown-icon');
+            
+            if (dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+                icon.textContent = '▼';
+            } else {
+                dropdown.style.display = 'block';
+                icon.textContent = '▲';
+            }
+        }
+
+        function openNetSuiteImportModal() {
+            // Placeholder for NetSuite import functionality
+            alert('NetSuite PO Form import functionality would be implemented here');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.nav-section')) {
+                document.querySelectorAll('.nav-accordion-content, .nav-dropdown-content').forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+                document.querySelectorAll('.accordion-icon, .dropdown-icon').forEach(icon => {
+                    icon.textContent = '▼';
+                });
+            }
+        });
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.nav-accordion-content, .nav-dropdown-content').forEach(dropdown => {
+                dropdown.style.display = 'none';
+            });
+            document.querySelectorAll('.accordion-icon, .dropdown-icon').forEach(icon => {
+                icon.textContent = '▼';
+            });
         }
 
         // Email Generator Functions

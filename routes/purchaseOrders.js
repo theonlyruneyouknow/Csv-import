@@ -917,7 +917,8 @@ router.get('/trouble-seed', async (req, res) => {
         vendor,
         sortBy
       },
-      troubleItems: displayItems
+      troubleItems: displayItems,
+      currentPage: 'trouble-seed'
     });
 
   } catch (error) {

@@ -1,0 +1,76 @@
+<script>
+// Navigation JavaScript Functions
+function toggleAccordion(accordionId) {
+    const accordion = document.getElementById(accordionId);
+    const button = accordion.previousElementSibling;
+    const icon = button.querySelector('.accordion-icon');
+    
+    if (accordion.style.display === 'block') {
+        accordion.style.display = 'none';
+        icon.textContent = '▼';
+    } else {
+        // Close all other accordions
+        document.querySelectorAll('.nav-accordion-content').forEach(acc => {
+            acc.style.display = 'none';
+            const btn = acc.previousElementSibling;
+            if (btn) {
+                const icn = btn.querySelector('.accordion-icon');
+                if (icn) icn.textContent = '▼';
+            }
+        });
+        
+        accordion.style.display = 'block';
+        icon.textContent = '▲';
+    }
+}
+
+function toggleImportsDropdown() {
+    const dropdown = document.getElementById('importsDropdown');
+    const icon = document.querySelector('.nav-imports-btn .dropdown-icon');
+    
+    if (dropdown.style.display === 'block') {
+        dropdown.style.display = 'none';
+        icon.textContent = '▼';
+    } else {
+        dropdown.style.display = 'block';
+        icon.textContent = '▲';
+    }
+}
+
+function openNetSuiteImportModal() {
+    // Placeholder for NetSuite import functionality
+    alert('NetSuite PO Form import functionality would be implemented here');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.nav-section')) {
+        document.querySelectorAll('.nav-accordion-content, .nav-dropdown-content').forEach(dropdown => {
+            dropdown.style.display = 'none';
+        });
+        document.querySelectorAll('.accordion-icon, .dropdown-icon').forEach(icon => {
+            icon.textContent = '▼';
+        });
+    }
+});
+
+// Close dropdowns on window click
+document.addEventListener('DOMContentLoaded', function() {
+    const navigationContainer = document.querySelector('.navigation-container');
+    
+    document.addEventListener('click', function(event) {
+        if (navigationContainer && !navigationContainer.contains(event.target)) {
+            closeAllDropdowns();
+        }
+    });
+});
+
+function closeAllDropdowns() {
+    document.querySelectorAll('.nav-accordion-content, .nav-dropdown-content').forEach(dropdown => {
+        dropdown.style.display = 'none';
+    });
+    document.querySelectorAll('.accordion-icon, .dropdown-icon').forEach(icon => {
+        icon.textContent = '▼';
+    });
+}
+</script>
