@@ -807,8 +807,21 @@ router.get('/trouble-seed', async (req, res) => {
       {
         $lookup: {
           from: 'vendors',
-          localField: 'vendor',
-          foreignField: 'name',
+          let: { poVendor: '$vendor' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $or: [
+                    // Try exact match with vendorName
+                    { $eq: ['$vendorName', '$$poVendor'] },
+                    // Try match with vendor code extracted from start of PO vendor field
+                    { $eq: ['$vendorCode', { $arrayElemAt: [{ $split: ['$$poVendor', ' '] }, 0] }] }
+                  ]
+                }
+              }
+            }
+          ],
           as: 'vendorInfo'
         }
       },

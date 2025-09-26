@@ -443,6 +443,65 @@
             overflow-y: auto;
             word-wrap: break-word;
         }
+        
+        .email-header {
+            margin-bottom: 20px;
+        }
+        
+        .email-to-line {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            color: #1565c0;
+            font-weight: bold;
+        }
+        
+        .email-subject-line {
+            background: #f3e5f5;
+            border: 1px solid #9c27b0;
+            border-radius: 4px;
+            padding: 8px 12px;
+            color: #7b1fa2;
+            font-weight: bold;
+        }
+        
+        .email-body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        
+        .issue-section {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .issue-section h4 {
+            margin: 0 0 10px 0;
+            color: #e65100;
+        }
+        
+        .request-section {
+            background: #e8f5e8;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .request-section h4 {
+            margin: 0 0 10px 0;
+            color: #2e7d32;
+        }
+        
+        .email-footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+        }
 
         .email-actions {
             padding: 20px;
@@ -942,172 +1001,14 @@
             </div>
         </div>
 
-        <!-- Email Generator Section -->
+        <!-- Simplified Email Generator Section -->
         <div class="email-generator">
             <div class="email-generator-header">
                 <h4>
                     <i class="fas fa-envelope"></i>
-                    Enhanced Email Content Generator
+                    Email Content Generator
                 </h4>
-                <div class="template-controls">
-                    <label for="templateSelector">Email Template:</label>
-                    <select id="templateSelector" onchange="handleTemplateChange()">
-                        <option value="">Loading templates...</option>
-                    </select>
-                    <button class="template-btn" onclick="openTemplateManager()" title="Manage Templates">
-                        <i class="fas fa-cog"></i>
-                    </button>
-                    <button class="template-btn" onclick="createNewTemplate()" title="Create New Template">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                </div>
-
-                <!-- COMPREHENSIVE BUTTON TESTING PANEL -->
-                <div class="button-test-panel" style="background: #fff3cd; border: 2px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 8px;">
-                    <h5 style="color: #856404; margin: 0 0 10px 0;">🧪 COMPREHENSIVE BUTTON TESTING PANEL</h5>
-                    <p style="margin: 5px 0; font-size: 12px; color: #856404;">Test each button systematically. Check browser console (F12) for detailed logs.</p>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
-                        <!-- Template Editor Functions -->
-                        <button onclick="testFunction('showTemplateEditor')" style="background: #17a2b8; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                            Test Show Editor
-                        </button>
-                        <button onclick="testFunction('editGeneratedEmail')" style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                            Test Edit Email
-                        </button>
-                        <button onclick="testSwitchTab('preview')" style="background: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                            Test Preview Tab
-                        </button>
-                        <button onclick="testSwitchTab('edit')" style="background: #fd7e14; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                            Test Edit Tab
-                        </button>
-                        <button onclick="testSwitchTab('variables')" style="background: #6f42c1; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                            Test Variables Tab
-                        </button>
-                        <button onclick="testFunction('updatePreview')" style="background: #20c997; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                            Test Update Preview
-                        </button>
-                        <button onclick="testFunction('applyContentChanges')" style="background: #198754; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                            Test Apply Changes
-                        </button>
-                        <button onclick="testFunction('cancelEdit')" style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                            Test Cancel Edit
-                        </button>
-                        <!-- Diagnostic Functions -->
-                        <button onclick="testFunction('runDiagnostics')" style="background: #e83e8c; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                            Test Diagnostics
-                        </button>
-                        <button onclick="testElementExists()" style="background: #495057; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                            Test Elements Exist
-                        </button>
-                        <button onclick="testCSSStyles()" style="background: #6610f2; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                            Test CSS Styles
-                        </button>
-                        <button onclick="forceShowEditor()" style="background: #d63384; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                            Force Show Editor
-                        </button>
-                        <button onclick="clearTestResults()" style="background: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                            Clear Results
-                        </button>
-                    </div>
-                    
-                    <!-- Test Results Display -->
-                    <div id="testResults" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; font-family: monospace; font-size: 11px; max-height: 200px; overflow-y: auto;">
-                        Test results will appear here...
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Template Preview/Edit Section -->
-            <div class="template-editor" id="templateEditor" style="display: none;">
-                <div class="editor-tabs">
-                    <button class="tab-btn active" onclick="switchTab('preview')">Preview</button>
-                    <button class="tab-btn" onclick="switchTab('edit')">Edit Template</button>
-                    <button class="tab-btn" onclick="switchTab('variables')">Variables</button>
-                </div>
-                
-                <div class="tab-content">
-                    <div id="previewTab" class="tab-pane active">
-                        <div class="template-preview">
-                            <div class="preview-subject">
-                                <label>Subject:</label>
-                                <div id="subjectPreview"></div>
-                            </div>
-                            <div class="preview-body">
-                                <label>Email Body:</label>
-                                <div id="bodyPreview"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div id="editTab" class="tab-pane">
-                        <div class="template-form">
-                            <div class="form-group">
-                                <label for="templateName">Template Name:</label>
-                                <input type="text" id="templateName" placeholder="Enter template name">
-                            </div>
-                            <div class="form-group">
-                                <label for="templateCategory">Category:</label>
-                                <select id="templateCategory">
-                                    <option value="follow-up">Follow-up</option>
-                                    <option value="escalation">Escalation</option>
-                                    <option value="summary">Summary</option>
-                                    <option value="custom">Custom</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="templateSubject">Subject:</label>
-                                <input type="text" id="templateSubject" placeholder="Enter email subject with variables like {{poNumber}}">
-                            </div>
-                            <div class="form-group">
-                                <label for="templateBody">Email Body:</label>
-                                <textarea id="templateBody" rows="10" placeholder="Enter email body with variables and conditional logic"></textarea>
-                            </div>
-                            <div class="form-actions">
-                                <button class="template-btn apply" onclick="applyContentChanges()" id="applyChangesBtn" style="background-color: #28a745; color: white;">
-                                    <i class="fas fa-check"></i> Apply Changes
-                                </button>
-                                <button class="template-btn save" onclick="saveTemplate()">
-                                    <i class="fas fa-save"></i> Save Template
-                                </button>
-                                <button class="template-btn save-new" onclick="saveAsNewTemplate()" style="background-color: #17a2b8; color: white;">
-                                    <i class="fas fa-plus"></i> Save as New Template
-                                </button>
-                                <button class="template-btn cancel" onclick="cancelEdit()">
-                                    <i class="fas fa-times"></i> Cancel
-                                </button>
-                                <button class="template-btn delete" onclick="deleteTemplate()" title="Delete Template" style="background-color: #dc3545; color: white;">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div id="variablesTab" class="tab-pane">
-                        <div class="variables-help">
-                            <h5>Available Variables:</h5>
-                            <div class="variable-list">
-                                <div class="variable-item"><code>{{poNumber}}</code> - Purchase Order Number</div>
-                                <div class="variable-item"><code>{{vendor}}</code> - Vendor Name</div>
-                                <div class="variable-item"><code>{{totalItems}}</code> - Total Outstanding Items</div>
-                                <div class="variable-item"><code>{{currentDate}}</code> - Current Date</div>
-                                <div class="variable-item"><code>{{currentTime}}</code> - Current Time</div>
-                                <div class="variable-item"><code>{{senderName}}</code> - Your Name</div>
-                                <div class="variable-item"><code>{{senderTitle}}</code> - Your Title</div>
-                                <div class="variable-item"><code>{{senderContact}}</code> - Your Contact Info</div>
-                            </div>
-                            <h5>Conditional Logic:</h5>
-                            <div class="logic-examples">
-                                <div class="logic-item">
-                                    <code>{{#if noEtaItems}}...{{/if}}</code> - Show only if items without ETA exist
-                                </div>
-                                <div class="logic-item">
-                                    <code>{{#each noEtaItems}}{{memo}}{{/each}}</code> - Loop through items
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <p class="text-muted">Click on any PO section below to generate email content for vendor communication.</p>
             </div>
             
             <div class="email-content" id="emailContent">
@@ -1122,15 +1023,6 @@
                 </button>
                 <button class="email-btn btn-generate-all" onclick="generateAllPOsEmail()">
                     <i class="fas fa-envelope-bulk"></i> Generate Summary for All POs
-                </button>
-                <button class="email-btn btn-show-editor" onclick="showTemplateEditor()" title="Show Template Editor">
-                    <i class="fas fa-tools"></i> Show Template Editor
-                </button>
-                <button class="email-btn btn-debug" onclick="runDiagnostics()" title="Run Diagnostics" style="background-color: #dc3545;">
-                    <i class="fas fa-bug"></i> Debug
-                </button>
-                <button class="email-btn btn-edit-content" onclick="editGeneratedEmail()" id="editBtn" disabled>
-                    <i class="fas fa-edit"></i> Edit Content
                 </button>
             </div>
         </div>
@@ -1240,6 +1132,68 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        console.log('🚀 TROUBLE SEED PAGE LOADING...');
+        console.log('📅 Page loaded at:', new Date().toISOString());
+        
+        // ULTIMATE TEST FUNCTIONS - GLOBAL SCOPE FOR MAXIMUM COMPATIBILITY
+        function ultimateTest() {
+            console.log('🔥 ULTIMATE TEST STARTED');
+            alert('Ultimate test started - check console');
+            
+            fetch('/public/email-templates')
+                .then(response => {
+                    console.log('✅ API Response:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('✅ API Data:', data);
+                    const dropdown = document.getElementById('templateSelector');
+                    console.log('✅ Dropdown found:', !!dropdown);
+                    
+                    if (dropdown && data.templates && data.templates.length > 0) {
+                        // Clear and manually add templates
+                        dropdown.innerHTML = '<option value="">Select a template...</option>';
+                        data.templates.forEach(template => {
+                            const option = document.createElement('option');
+                            option.value = template._id;
+                            option.textContent = template.name;
+                            dropdown.appendChild(option);
+                        });
+                        
+                        alert(`SUCCESS: Added ${data.templates.length} templates to dropdown!`);
+                    } else {
+                        alert('FAILED: No dropdown or no templates');
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ ERROR:', error);
+                    alert('ERROR: ' + error.message);
+                });
+        }
+        
+        function createTestTemplate() {
+            const templateData = {
+                name: 'ULTIMATE TEST ' + Date.now(),
+                category: 'custom',
+                subject: 'Test Subject',
+                bodyTemplate: 'Test Body Content'
+            };
+            
+            fetch('/public/email-templates', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(templateData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                alert('Template created! Running test...');
+                ultimateTest();
+            })
+            .catch(error => {
+                alert('Create ERROR: ' + error.message);
+            });
+        }
+        
         function updateFilter(filterType, value) {
             const params = new URLSearchParams(window.location.search);
             params.set(filterType, value);
@@ -1393,14 +1347,126 @@
         }
 
         function generateEmailContent(po) {
-            // Count different types of items
+            console.log('🎯 generateEmailContent called with PO:', po);
+            console.log('🎯 PO vendor:', po.vendor);
+            console.log('🎯 PO vendorData:', po.vendorData);
+            console.log('🎯 PO items:', po.items);
+            
+            // Count different types of items using same logic as route
             const noEtaItems = po.items.filter(item => item.etaStatus === 'no-eta');
             const overdueItems = po.items.filter(item => item.etaStatus === 'overdue');
-            const needsFollowupItems = po.items.filter(item => item.etaStatus === 'needs-followup');
+            // Items that need follow-up based on route logic
+            const needsFollowupItems = po.items.filter(item => 
+                item.etaStatus === 'overdue' || 
+                (item.etaStatus === 'no-eta' && item.itemStatus === 'Delivery Delay') ||
+                (item.etaStatus === 'approaching-soon' && !item.vendorData)
+            );
+            // Also include approaching-soon and approaching items as they may need attention
+            const approachingItems = po.items.filter(item => 
+                item.etaStatus === 'approaching-soon' || item.etaStatus === 'approaching'
+            );
 
-            const emailContent = `Subject: UPDATE NEEDED - Purchase Order ${po.poNumber} - Outstanding Items
+            console.log('📊 Item counts:');
+            console.log('   - No ETA items:', noEtaItems.length, noEtaItems.map(i => ({memo: i.memo, status: i.etaStatus})));
+            console.log('   - Overdue items:', overdueItems.length, overdueItems.map(i => ({memo: i.memo, status: i.etaStatus})));
+            console.log('   - Needs followup items:', needsFollowupItems.length, needsFollowupItems.map(i => ({memo: i.memo, status: i.etaStatus, itemStatus: i.itemStatus})));
+            console.log('   - Approaching items:', approachingItems.length, approachingItems.map(i => ({memo: i.memo, status: i.etaStatus})));
 
-Dear ${po.vendor},
+            // Get vendor email and contact information
+            const vendorEmail = getVendorEmail(po.vendorData);
+            const contactName = getVendorContactName(po.vendorData);
+            
+            console.log('📧 Final vendor email:', vendorEmail);
+            console.log('👤 Final contact name:', contactName);
+            
+            // Create structured email content with HTML formatting for better display
+            const emailHTML = `
+                <div class="email-header">
+                    <div class="email-to-line"><strong>To:</strong> ${vendorEmail}</div>
+                    <div class="email-subject-line"><strong>Subject:</strong> UPDATE NEEDED - Purchase Order ${po.poNumber} - Outstanding Items</div>
+                </div>
+                <div class="email-body">
+                    <p><strong>Dear ${contactName},</strong></p>
+                    
+                    <p>I hope this email finds you well. I am writing to request an update on Purchase Order ${po.poNumber}, which currently shows as "Partially Received" in our system.</p>
+                    
+                    <p>We have identified several items that require immediate attention:</p>
+                    
+                    ${noEtaItems.length > 0 ? `
+                    <div class="issue-section">
+                        <h4>🚨 DELIVERY DELAYS (No ETA Provided):</h4>
+                        <ul>
+                            ${noEtaItems.map(item => `<li>${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''}</li>`).join('')}
+                        </ul>
+                        <p><em>We urgently need estimated delivery dates for these items to update our customers and plan accordingly.</em></p>
+                    </div>
+                    ` : ''}
+                    
+                    ${overdueItems.length > 0 ? `
+                    <div class="issue-section">
+                        <h4>⏰ OVERDUE ITEMS:</h4>
+                        <ul>
+                            ${overdueItems.map(item => `<li>${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''} - Expected: ${item.effectiveETA ? new Date(item.effectiveETA).toLocaleDateString() : 'N/A'}</li>`).join('')}
+                        </ul>
+                        <p><em>These items are past their expected delivery dates. Please provide immediate updates.</em></p>
+                    </div>
+                    ` : ''}
+                    
+                    ${approachingItems.length > 0 ? `
+                    <div class="issue-section">
+                        <h4>📅 APPROACHING DELIVERY DATES:</h4>
+                        <ul>
+                            ${approachingItems.map(item => `<li>${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''} - Expected: ${item.effectiveETA ? new Date(item.effectiveETA).toLocaleDateString() : 'N/A'}</li>`).join('')}
+                        </ul>
+                        <p><em>These items are expected to arrive soon. Please confirm delivery schedules.</em></p>
+                    </div>
+                    ` : ''}
+                    
+                    ${needsFollowupItems.length > 0 && needsFollowupItems.some(item => !noEtaItems.includes(item) && !overdueItems.includes(item)) ? `
+                    <div class="issue-section">
+                        <h4>📞 ITEMS REQUIRING FOLLOW-UP:</h4>
+                        <ul>
+                            ${needsFollowupItems.filter(item => !noEtaItems.includes(item) && !overdueItems.includes(item)).map(item => `<li>${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''}</li>`).join('')}
+                        </ul>
+                        <p><em>These items need your immediate attention and response.</em></p>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="request-section">
+                        <h4>📋 Could you please provide:</h4>
+                        <ol>
+                            <li>Updated delivery dates for delayed items</li>
+                            <li>Status updates for overdue items</li>
+                            <li>Alternative products for any discontinued items</li>
+                            <li>Any other issues preventing completion of this order</li>
+                        </ol>
+                    </div>
+                    
+                    <p>This information is critical for our operations and customer commitments. Please respond within 24-48 hours.</p>
+                    
+                    <p>Thank you for your prompt attention to this matter.</p>
+                    
+                    <p><strong>Best regards,<br>
+                    [Your Name]<br>
+                    [Your Title]<br>
+                    [Your Contact Information]</strong></p>
+                    
+                    <div class="email-footer">
+                        <hr>
+                        <p><small>
+                            Purchase Order: ${po.poNumber}<br>
+                            Total Outstanding Items: ${po.items.length}<br>
+                            Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
+                        </small></p>
+                    </div>
+                </div>
+            `;
+
+            // Also create plain text version for copying
+            const plainTextContent = `To: ${vendorEmail}
+Subject: UPDATE NEEDED - Purchase Order ${po.poNumber} - Outstanding Items
+
+Dear ${contactName},
 
 I hope this email finds you well. I am writing to request an update on Purchase Order ${po.poNumber}, which currently shows as "Partially Received" in our system.
 
@@ -1416,8 +1482,13 @@ ${overdueItems.map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` :
 
 These items are past their expected delivery dates. Please provide immediate updates.
 
-` : ''}${needsFollowupItems.length > 0 ? `ITEMS REQUIRING FOLLOW-UP:
-${needsFollowupItems.map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''}`).join('\n')}
+` : ''}${approachingItems.length > 0 ? `APPROACHING DELIVERY DATES:
+${approachingItems.map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''} - Expected: ${item.effectiveETA ? new Date(item.effectiveETA).toLocaleDateString() : 'N/A'}`).join('\n')}
+
+These items are expected to arrive soon. Please confirm delivery schedules.
+
+` : ''}${needsFollowupItems.length > 0 && needsFollowupItems.some(item => !noEtaItems.includes(item) && !overdueItems.includes(item)) ? `ITEMS REQUIRING FOLLOW-UP:
+${needsFollowupItems.filter(item => !noEtaItems.includes(item) && !overdueItems.includes(item)).map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''}`).join('\n')}
 
 These items need your immediate attention and response.
 
@@ -1441,7 +1512,121 @@ Purchase Order: ${po.poNumber}
 Total Outstanding Items: ${po.items.length}
 Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
 
-            document.getElementById('emailContent').textContent = emailContent;
+            // Display HTML version for better readability
+            document.getElementById('emailContent').innerHTML = emailHTML;
+            // Store plain text for copying
+            document.getElementById('emailContent').setAttribute('data-plain-text', plainTextContent);
+        }
+
+        // Helper function to get vendor email address
+        function getVendorEmail(vendorData) {
+            console.log('🔍 Debug - getVendorEmail called with:', vendorData);
+            
+            if (!vendorData) {
+                console.log('❌ No vendorData provided');
+                return 'No email available';
+            }
+            
+            // First check for primary contact email in contacts array
+            if (vendorData.contacts && vendorData.contacts.length > 0) {
+                console.log('✅ Found contacts array:', vendorData.contacts);
+                const primaryContact = vendorData.contacts.find(contact => contact.isPrimary && contact.email);
+                if (primaryContact) {
+                    console.log('✅ Found primary contact email:', primaryContact.email);
+                    return primaryContact.email;
+                }
+                
+                // If no primary, get first contact with email
+                const contactWithEmail = vendorData.contacts.find(contact => contact.email);
+                if (contactWithEmail) {
+                    console.log('✅ Found contact with email:', contactWithEmail.email);
+                    return contactWithEmail.email;
+                }
+            }
+            
+            // Check legacy contact info structure
+            if (vendorData.contactInfo) {
+                console.log('✅ Found contactInfo structure:', vendorData.contactInfo);
+                if (vendorData.contactInfo.primaryContact && vendorData.contactInfo.primaryContact.email) {
+                    console.log('✅ Found primary contact email in contactInfo:', vendorData.contactInfo.primaryContact.email);
+                    return vendorData.contactInfo.primaryContact.email;
+                }
+                if (vendorData.contactInfo.secondaryContact && vendorData.contactInfo.secondaryContact.email) {
+                    console.log('✅ Found secondary contact email:', vendorData.contactInfo.secondaryContact.email);
+                    return vendorData.contactInfo.secondaryContact.email;
+                }
+                if (vendorData.contactInfo.customerService && vendorData.contactInfo.customerService.email) {
+                    console.log('✅ Found customer service email:', vendorData.contactInfo.customerService.email);
+                    return vendorData.contactInfo.customerService.email;
+                }
+                if (vendorData.contactInfo.salesRep && vendorData.contactInfo.salesRep.email) {
+                    console.log('✅ Found sales rep email:', vendorData.contactInfo.salesRep.email);
+                    return vendorData.contactInfo.salesRep.email;
+                }
+            }
+            
+            // Fall back to main email
+            if (vendorData.mainEmail) {
+                console.log('✅ Found mainEmail:', vendorData.mainEmail);
+                return vendorData.mainEmail;
+            }
+            
+            console.log('❌ No email found in vendorData. Available keys:', Object.keys(vendorData));
+            return 'No email available';
+        }
+
+        // Helper function to get vendor contact name for addressing
+        function getVendorContactName(vendorData) {
+            console.log('🔍 Debug - getVendorContactName called with:', vendorData);
+            
+            if (!vendorData) {
+                console.log('❌ No vendorData provided, using fallback');
+                return 'Vendor';
+            }
+            
+            // First check for primary contact name in contacts array
+            if (vendorData.contacts && vendorData.contacts.length > 0) {
+                console.log('✅ Found contacts array:', vendorData.contacts);
+                const primaryContact = vendorData.contacts.find(contact => contact.isPrimary && contact.name);
+                if (primaryContact) {
+                    console.log('✅ Found primary contact name:', primaryContact.name);
+                    return primaryContact.name;
+                }
+                
+                // If no primary, get first contact with name
+                const contactWithName = vendorData.contacts.find(contact => contact.name);
+                if (contactWithName) {
+                    console.log('✅ Found contact with name:', contactWithName.name);
+                    return contactWithName.name;
+                }
+            }
+            
+            // Check legacy contact info structure
+            if (vendorData.contactInfo) {
+                console.log('✅ Found contactInfo structure:', vendorData.contactInfo);
+                if (vendorData.contactInfo.primaryContact && vendorData.contactInfo.primaryContact.name) {
+                    console.log('✅ Found primary contact name in contactInfo:', vendorData.contactInfo.primaryContact.name);
+                    return vendorData.contactInfo.primaryContact.name;
+                }
+                if (vendorData.contactInfo.secondaryContact && vendorData.contactInfo.secondaryContact.name) {
+                    console.log('✅ Found secondary contact name:', vendorData.contactInfo.secondaryContact.name);
+                    return vendorData.contactInfo.secondaryContact.name;
+                }
+                if (vendorData.contactInfo.salesRep && vendorData.contactInfo.salesRep.name) {
+                    console.log('✅ Found sales rep name:', vendorData.contactInfo.salesRep.name);
+                    return vendorData.contactInfo.salesRep.name;
+                }
+            }
+            
+            // Fall back to vendor name
+            const vendorName = vendorData.vendorName || vendorData.name;
+            if (vendorName) {
+                console.log('✅ Found vendor name:', vendorName);
+                return vendorName + ' Team';
+            }
+            
+            console.log('❌ No contact name found in vendorData. Available keys:', Object.keys(vendorData));
+            return 'Vendor Team';
         }
 
         function generateAllPOsEmail() {
@@ -1499,7 +1684,10 @@ Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
         }
 
         function copyToClipboard() {
-            const emailContent = document.getElementById('emailContent').textContent;
+            const emailContentElement = document.getElementById('emailContent');
+            // Use the plain text version stored as data attribute, or fallback to text content
+            const emailContent = emailContentElement.getAttribute('data-plain-text') || emailContentElement.textContent;
+            
             navigator.clipboard.writeText(emailContent).then(() => {
                 const btn = document.getElementById('copyBtn');
                 const originalHTML = btn.innerHTML;
@@ -1521,7 +1709,8 @@ Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
                 section.style.border = '';
                 section.style.boxShadow = '';
             });
-            document.getElementById('emailContent').textContent = 'Select a PO below to generate email content for vendor communication...';
+            document.getElementById('emailContent').innerHTML = 'Select a PO below to generate email content for vendor communication...';
+            document.getElementById('emailContent').removeAttribute('data-plain-text');
             document.getElementById('copyBtn').disabled = true;
             document.getElementById('editBtn').disabled = true;
         }
@@ -1849,179 +2038,7 @@ Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
                 }
             });
 
-            // Email Template Management Functions
-            let currentTemplates = [];
-            let selectedTemplate = null;
-
-            // Default templates for demo purposes (when MongoDB is not available)
-            const defaultTemplates = [
-                {
-                    _id: 'template-1',
-                    name: 'Standard Follow-up',
-                    category: 'follow-up',
-                    subject: 'UPDATE NEEDED - Purchase Order {{poNumber}} - Outstanding Items',
-                    bodyTemplate: `Dear {{vendor}},
-
-I hope this email finds you well. I am writing to request an update on Purchase Order {{poNumber}}, which currently shows as "Partially Received" in our system.
-
-We have identified several items that require immediate attention:
-
-{{#if noEtaItems}}
-DELIVERY DELAYS (No ETA Provided):
-{{#each noEtaItems}}
-• {{memo}}{{#if sku}} (SKU: {{sku}}){{/if}}
-{{/each}}
-
-We urgently need estimated delivery dates for these items to update our customers and plan accordingly.
-{{/if}}
-
-{{#if overdueItems}}
-OVERDUE ITEMS:
-{{#each overdueItems}}
-• {{memo}}{{#if sku}} (SKU: {{sku}}){{/if}} - Expected: {{eta}}
-{{/each}}
-
-These items are past their expected delivery dates. Please provide immediate updates.
-{{/if}}
-
-{{#if needsFollowupItems}}
-ITEMS REQUIRING FOLLOW-UP:
-{{#each needsFollowupItems}}
-• {{memo}}{{#if sku}} (SKU: {{sku}}){{/if}}
-{{/each}}
-
-These items need your immediate attention and response.
-{{/if}}
-
-Could you please provide:
-1. Updated delivery dates for delayed items
-2. Status updates for overdue items
-3. Alternative products for any discontinued items
-4. Any other issues preventing completion of this order
-
-This information is critical for our operations and customer commitments. Please respond within 24-48 hours.
-
-Thank you for your prompt attention to this matter.
-
-Best regards,
-[Your Name]
-[Your Title]
-[Your Contact Information]
-
----
-Purchase Order: {{poNumber}}
-Total Outstanding Items: {{totalItems}}
-Generated: {{currentDate}}`,
-                    variables: ['poNumber', 'vendor', 'noEtaItems', 'overdueItems', 'needsFollowupItems', 'totalItems', 'currentDate'],
-                    isDefault: true,
-                    usageCount: 0
-                },
-                {
-                    _id: 'template-2',
-                    name: 'Urgent Escalation',
-                    category: 'escalation',
-                    subject: 'URGENT ESCALATION - Purchase Order {{poNumber}} - Immediate Response Required',
-                    bodyTemplate: `URGENT ATTENTION REQUIRED
-
-Dear {{vendor}},
-
-This is an ESCALATED follow-up regarding Purchase Order {{poNumber}}. We have not received adequate response to our previous communications.
-
-CRITICAL ISSUES:
-{{#if noEtaItems}}
-Items WITHOUT delivery dates: {{noEtaItems.length}}
-{{/if}}
-{{#if overdueItems}}
-OVERDUE items: {{overdueItems.length}}
-{{/if}}
-
-We require IMMEDIATE response within 24 hours or we will need to consider alternative sourcing options.
-
-Contact: [Your Phone] | [Your Email]
-
-{{poNumber}} - {{currentDate}}`,
-                    variables: ['poNumber', 'vendor', 'noEtaItems', 'overdueItems', 'currentDate'],
-                    isDefault: true,
-                    usageCount: 0
-                },
-                {
-                    _id: 'template-3',
-                    name: 'Summary Report',
-                    category: 'summary',
-                    subject: 'Weekly Purchase Order Status Summary',
-                    bodyTemplate: `Weekly Status Summary
-
-Dear {{vendor}},
-
-This is a summary of outstanding items across multiple purchase orders:
-
-Total Outstanding POs: {{totalPOs}}
-Total Outstanding Items: {{totalItems}}
-
-{{#each poSummary}}
-PO {{poNumber}}: {{itemCount}} items pending
-{{/each}}
-
-Please review and provide updates for all outstanding items.
-
-Best regards,
-[Your Name]`,
-                    variables: ['vendor', 'totalPOs', 'totalItems', 'poSummary', 'currentDate'],
-                    isDefault: true,
-                    usageCount: 0
-                }
-            ];
-
-            async function loadTemplates() {
-                try {
-                    const response = await fetch('/api/email-templates');
-                    if (response.ok) {
-                        currentTemplates = await response.json();
-                        populateTemplateSelector();
-                        showTemplateStatus('Templates loaded successfully', 'success');
-                    } else {
-                        console.error('Failed to load templates, using default templates');
-                        currentTemplates = defaultTemplates;
-                        populateTemplateSelector();
-                        showTemplateStatus('Using default templates (MongoDB not connected)', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error loading templates, using default templates:', error);
-                    currentTemplates = defaultTemplates;
-                    populateTemplateSelector();
-                    showTemplateStatus('Using default templates (MongoDB not connected)', 'error');
-                }
-            }
-
-            function populateTemplateSelector() {
-                const selector = document.getElementById('templateSelector');
-                if (!selector) return;
-
-                selector.innerHTML = '<option value="">Select a template...</option>';
-                currentTemplates.forEach(template => {
-                    const option = document.createElement('option');
-                    option.value = template._id;
-                    option.textContent = `${template.name} (${template.category})`;
-                    selector.appendChild(option);
-                });
-            }
-
-            function handleTemplateChange() {
-                const selector = document.getElementById('templateSelector');
-                const templateId = selector.value;
-                
-                if (!templateId) {
-                    selectedTemplate = null;
-                    clearTemplateEditor();
-                    return;
-                }
-
-                selectedTemplate = currentTemplates.find(t => t._id === templateId);
-                if (selectedTemplate) {
-                    loadTemplateIntoEditor(selectedTemplate);
-                    updatePreview();
-                }
-            }
+            // Template management removed for now
 
             function loadTemplateIntoEditor(template) {
                 document.getElementById('templateName').value = template.name;
@@ -2188,29 +2205,57 @@ Best regards,
         }
 
         async function loadTemplates() {
+            console.log('🔄 Loading templates from /public/email-templates...');
             try {
                 const response = await fetch('/public/email-templates');
+                console.log('📡 Response status:', response.status, response.ok);
+                
                 if (response.ok) {
-                    templates = await response.json();
+                    const data = await response.json();
+                    console.log('📦 Raw API data:', data);
+                    
+                    templates = data.templates || data; // Handle both response formats
+                    console.log('📋 Processed templates:', templates);
+                    console.log('📊 Template count:', templates ? templates.length : 0);
+                    
                     populateTemplateDropdown();
                 } else {
-                    console.error('Failed to load templates');
+                    console.error('❌ Failed to load templates, status:', response.status);
                 }
             } catch (error) {
-                console.error('Error loading templates:', error);
+                console.error('💥 Error loading templates:', error);
             }
         }
 
         function populateTemplateDropdown() {
-            const dropdown = document.getElementById('templateSelect');
+            console.log('🔄 populateTemplateDropdown called');
+            const dropdown = document.getElementById('templateSelector');
+            console.log('📦 Dropdown element found:', !!dropdown);
+            
+            if (!dropdown) {
+                console.error('❌ Template selector dropdown not found');
+                return;
+            }
+            
+            console.log('🧹 Clearing dropdown...');
             dropdown.innerHTML = '<option value="">Select a template...</option>';
             
-            templates.forEach(template => {
-                const option = document.createElement('option');
-                option.value = template._id;
-                option.textContent = `${template.name} (${template.category})`;
-                dropdown.appendChild(option);
-            });
+            console.log('📋 Templates to populate:', templates);
+            console.log('📊 Template count:', templates ? templates.length : 0);
+            
+            if (templates && templates.length > 0) {
+                console.log('✅ Adding templates to dropdown...');
+                templates.forEach((template, index) => {
+                    console.log(`➕ Adding template ${index + 1}:`, template.name, template._id);
+                    const option = document.createElement('option');
+                    option.value = template._id;
+                    option.textContent = `${template.name} (${template.category})`;
+                    dropdown.appendChild(option);
+                });
+                console.log('✅ Dropdown populated with', templates.length, 'templates');
+            } else {
+                console.log('❌ No templates to add to dropdown');
+            }
         }
 
         function setupTemplateEditor() {
@@ -2305,7 +2350,7 @@ Best regards,
             }
 
             try {
-                const url = `/email-templates/${selectedTemplate._id}`;
+                const url = `/public/email-templates/${selectedTemplate._id}`;
                 const response = await fetch(url, {
                     method: 'PUT',
                     headers: {
@@ -2315,15 +2360,17 @@ Best regards,
                 });
 
                 if (response.ok) {
-                    const savedTemplate = await response.json();
+                    const result = await response.json();
                     showTemplateStatus('Template updated successfully!', 'success');
                     await loadTemplates(); // Refresh template list
                     
                     // Update the selector to show the saved template
+                    selectedTemplate = result.template;
                     const selector = document.getElementById('templateSelector');
-                    selector.value = savedTemplate._id;
+                    if (selector) selector.value = result.template._id;
                 } else {
-                    showTemplateStatus('Error updating template', 'error');
+                    const errorData = await response.json();
+                    showTemplateStatus('Error updating template: ' + (errorData.error || 'Unknown error'), 'error');
                 }
             } catch (error) {
                 console.error('Error updating template:', error);
@@ -2333,6 +2380,7 @@ Best regards,
         
         // Save as new template (create new)
         async function saveAsNewTemplate() {
+            console.log('saveAsNewTemplate called');
             const templateName = prompt('Enter a name for the new template:');
             if (!templateName) return;
             
@@ -2344,13 +2392,16 @@ Best regards,
                 variables: ['poNumber', 'vendor', 'totalItems', 'noEtaItems', 'overdueItems', 'currentDate', 'currentTime']
             };
 
+            console.log('Template data to save:', templateData);
+
             if (!templateData.subject || !templateData.bodyTemplate) {
                 showTemplateStatus('Please fill in subject and body fields', 'error');
                 return;
             }
 
             try {
-                const response = await fetch('/email-templates', {
+                console.log('Sending POST request to /public/email-templates');
+                const response = await fetch('/public/email-templates', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2358,23 +2409,97 @@ Best regards,
                     body: JSON.stringify(templateData)
                 });
 
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+
                 if (response.ok) {
                     const newTemplate = await response.json();
+                    console.log('New template created:', newTemplate);
                     showTemplateStatus('New template created successfully!', 'success');
                     await loadTemplates(); // Refresh template list
                     
                     // Select the new template
-                    selectedTemplate = newTemplate;
+                    selectedTemplate = newTemplate.template;
                     const selector = document.getElementById('templateSelector');
-                    selector.value = newTemplate._id;
+                    if (selector) selector.value = newTemplate.template._id;
                 } else {
-                    showTemplateStatus('Error creating template', 'error');
+                    const errorData = await response.json();
+                    console.error('Error response:', errorData);
+                    showTemplateStatus('Error creating template: ' + (errorData.error || 'Unknown error'), 'error');
                 }
             } catch (error) {
                 console.error('Error creating template:', error);
                 showTemplateStatus('Error creating template', 'error');
             }
         }
+        
+        // Test function to debug template API - GLOBAL SCOPE
+        function testTemplateAPI() {
+            console.log('🧪 TEST BUTTON CLICKED!');
+            alert('Test button clicked! Check console for details.');
+            
+            // Simple test - just check if we can access the dropdown
+            const dropdown = document.getElementById('templateSelector');
+            console.log('📋 Dropdown found:', !!dropdown);
+            console.log('� Current dropdown options:', dropdown ? dropdown.options.length : 'N/A');
+            
+            // Test direct API call
+            fetch('/public/email-templates')
+                .then(response => {
+                    console.log('📡 API Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('📦 API Data:', data);
+                    console.log('📊 Template count from API:', data.templates ? data.templates.length : 0);
+                    
+                    if (data.templates && data.templates.length > 0) {
+                        console.log('� First template:', data.templates[0]);
+                        alert(`Found ${data.templates.length} templates in database but dropdown has ${dropdown.options.length} options`);
+                    } else {
+                        alert('No templates found in API response');
+                    }
+                })
+                .catch(error => {
+                    console.error('💥 API Error:', error);
+                    alert('API call failed - check console');
+                });
+        }
+
+        // Global function to manually populate dropdown
+        function forcePopulateDropdown() {
+            console.log('🔄 Force populating dropdown...');
+            fetch('/public/email-templates')
+                .then(response => response.json())
+                .then(data => {
+                    const dropdown = document.getElementById('templateSelector');
+                    dropdown.innerHTML = '<option value="">Select a template...</option>';
+                    
+                    if (data.templates) {
+                        data.templates.forEach(template => {
+                            console.log('➕ Adding template to dropdown:', template.name);
+                            const option = document.createElement('option');
+                            option.value = template._id;
+                            option.textContent = `${template.name} (${template.category})`;
+                            dropdown.appendChild(option);
+                        });
+                        console.log('✅ Dropdown force populated with', data.templates.length, 'templates');
+                        alert(`Force populated dropdown with ${data.templates.length} templates`);
+                    }
+                });
+        }
+        
+        // Make functions available for manual console testing
+        window.debugTemplates = {
+            testAPI: testTemplateAPI,
+            forceRefresh: forcePopulateDropdown,
+            checkDropdown: function() {
+                const dropdown = document.getElementById('templateSelector');
+                console.log('📋 Dropdown element:', dropdown);
+                console.log('📋 Option count:', dropdown ? dropdown.options.length : 'N/A');
+                return dropdown;
+            }
+        };
 
         function createNewTemplate() {
             // Clear the template selector
