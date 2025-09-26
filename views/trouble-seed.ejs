@@ -1386,78 +1386,51 @@
                     <div class="email-subject-line"><strong>Subject:</strong> UPDATE NEEDED - Purchase Order ${po.poNumber} - Outstanding Items</div>
                 </div>
                 <div class="email-body">
-                    <p><strong>Dear ${contactName},</strong></p>
-                    
-                    <p>I hope this email finds you well. I am writing to request an update on Purchase Order ${po.poNumber}, which currently shows as "Partially Received" in our system.</p>
-                    
-                    <p>We have identified several items that require immediate attention:</p>
+                    <p><strong>Hi ${contactName},</strong></p>
+                    <p>I need an update on Purchase Order ${po.poNumber}, which shows as "Partially Received" in our system.</p>
                     
                     ${noEtaItems.length > 0 ? `
                     <div class="issue-section">
                         <h4>🚨 DELIVERY DELAYS (No ETA Provided):</h4>
-                        <ul>
-                            ${noEtaItems.map(item => `<li>${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''}</li>`).join('')}
-                        </ul>
-                        <p><em>We urgently need estimated delivery dates for these items to update our customers and plan accordingly.</em></p>
-                    </div>
-                    ` : ''}
+                        <ul>${noEtaItems.map(item => `<li>${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''}</li>`).join('')}</ul>
+                        <p><em>We urgently need estimated delivery dates for these items.</em></p>
+                    </div>` : ''}
                     
                     ${overdueItems.length > 0 ? `
                     <div class="issue-section">
                         <h4>⏰ OVERDUE ITEMS:</h4>
-                        <ul>
-                            ${overdueItems.map(item => `<li>${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''} - Expected: ${item.effectiveETA ? new Date(item.effectiveETA).toLocaleDateString() : 'N/A'}</li>`).join('')}
-                        </ul>
-                        <p><em>These items are past their expected delivery dates. Please provide immediate updates.</em></p>
-                    </div>
-                    ` : ''}
+                        <ul>${overdueItems.map(item => `<li>${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''} - Expected: ${item.effectiveETA ? new Date(item.effectiveETA).toLocaleDateString() : 'N/A'}</li>`).join('')}</ul>
+                        <p><em>These items are past their expected delivery dates.</em></p>
+                    </div>` : ''}
                     
                     ${approachingItems.length > 0 ? `
                     <div class="issue-section">
                         <h4>📅 APPROACHING DELIVERY DATES:</h4>
-                        <ul>
-                            ${approachingItems.map(item => `<li>${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''} - Expected: ${item.effectiveETA ? new Date(item.effectiveETA).toLocaleDateString() : 'N/A'}</li>`).join('')}
-                        </ul>
-                        <p><em>These items are expected to arrive soon. Please confirm delivery schedules.</em></p>
-                    </div>
-                    ` : ''}
+                        <ul>${approachingItems.map(item => `<li>${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''} - Expected: ${item.effectiveETA ? new Date(item.effectiveETA).toLocaleDateString() : 'N/A'}</li>`).join('')}</ul>
+                        <p><em>Please confirm delivery schedules for these items.</em></p>
+                    </div>` : ''}
                     
                     ${needsFollowupItems.length > 0 && needsFollowupItems.some(item => !noEtaItems.includes(item) && !overdueItems.includes(item)) ? `
                     <div class="issue-section">
                         <h4>📞 ITEMS REQUIRING FOLLOW-UP:</h4>
-                        <ul>
-                            ${needsFollowupItems.filter(item => !noEtaItems.includes(item) && !overdueItems.includes(item)).map(item => `<li>${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''}</li>`).join('')}
-                        </ul>
-                        <p><em>These items need your immediate attention and response.</em></p>
-                    </div>
-                    ` : ''}
+                        <ul>${needsFollowupItems.filter(item => !noEtaItems.includes(item) && !overdueItems.includes(item)).map(item => `<li>${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''}</li>`).join('')}</ul>
+                        <p><em>These items need immediate attention.</em></p>
+                    </div>` : ''}
                     
                     <div class="request-section">
-                        <h4>📋 Could you please provide:</h4>
+                        <h4>📋 Please provide:</h4>
                         <ol>
                             <li>Updated delivery dates for delayed items</li>
                             <li>Status updates for overdue items</li>
                             <li>Alternative products for any discontinued items</li>
-                            <li>Any other issues preventing completion of this order</li>
                         </ol>
                     </div>
                     
-                    <p>This information is critical for our operations and customer commitments. Please respond within 24-48 hours.</p>
-                    
-                    <p>Thank you for your prompt attention to this matter.</p>
-                    
-                    <p><strong>Best regards,<br>
-                    [Your Name]<br>
-                    [Your Title]<br>
-                    [Your Contact Information]</strong></p>
+                    <p>Please respond within 24-48 hours. This is critical for our customer commitments.</p>
+                    <p><strong>Thanks,<br>[Your Name]</strong></p>
                     
                     <div class="email-footer">
-                        <hr>
-                        <p><small>
-                            Purchase Order: ${po.poNumber}<br>
-                            Total Outstanding Items: ${po.items.length}<br>
-                            Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
-                        </small></p>
+                        <hr><p><small>PO: ${po.poNumber} | Items: ${po.items.length} | Generated: ${new Date().toLocaleDateString()}</small></p>
                     </div>
                 </div>
             `;
@@ -1466,51 +1439,38 @@
             const plainTextContent = `To: ${vendorEmail}
 Subject: UPDATE NEEDED - Purchase Order ${po.poNumber} - Outstanding Items
 
-Dear ${contactName},
+Hi ${contactName},
 
-I hope this email finds you well. I am writing to request an update on Purchase Order ${po.poNumber}, which currently shows as "Partially Received" in our system.
-
-We have identified several items that require immediate attention:
+I need an update on Purchase Order ${po.poNumber}, which shows as "Partially Received" in our system.
 
 ${noEtaItems.length > 0 ? `DELIVERY DELAYS (No ETA Provided):
 ${noEtaItems.map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''}`).join('\n')}
-
-We urgently need estimated delivery dates for these items to update our customers and plan accordingly.
+We urgently need estimated delivery dates for these items.
 
 ` : ''}${overdueItems.length > 0 ? `OVERDUE ITEMS:
 ${overdueItems.map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''} - Expected: ${item.effectiveETA ? new Date(item.effectiveETA).toLocaleDateString() : 'N/A'}`).join('\n')}
-
-These items are past their expected delivery dates. Please provide immediate updates.
+These items are past their expected delivery dates.
 
 ` : ''}${approachingItems.length > 0 ? `APPROACHING DELIVERY DATES:
 ${approachingItems.map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''} - Expected: ${item.effectiveETA ? new Date(item.effectiveETA).toLocaleDateString() : 'N/A'}`).join('\n')}
-
-These items are expected to arrive soon. Please confirm delivery schedules.
+Please confirm delivery schedules for these items.
 
 ` : ''}${needsFollowupItems.length > 0 && needsFollowupItems.some(item => !noEtaItems.includes(item) && !overdueItems.includes(item)) ? `ITEMS REQUIRING FOLLOW-UP:
 ${needsFollowupItems.filter(item => !noEtaItems.includes(item) && !overdueItems.includes(item)).map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''}`).join('\n')}
+These items need immediate attention.
 
-These items need your immediate attention and response.
-
-` : ''}Could you please provide:
+` : ''}Please provide:
 1. Updated delivery dates for delayed items
 2. Status updates for overdue items
 3. Alternative products for any discontinued items
-4. Any other issues preventing completion of this order
 
-This information is critical for our operations and customer commitments. Please respond within 24-48 hours.
+Please respond within 24-48 hours. This is critical for our customer commitments.
 
-Thank you for your prompt attention to this matter.
-
-Best regards,
+Thanks,
 [Your Name]
-[Your Title]
-[Your Contact Information]
 
 ---
-Purchase Order: ${po.poNumber}
-Total Outstanding Items: ${po.items.length}
-Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
+PO: ${po.poNumber} | Items: ${po.items.length} | Generated: ${new Date().toLocaleDateString()}`;
 
             // Display HTML version for better readability
             document.getElementById('emailContent').innerHTML = emailHTML;
@@ -1590,14 +1550,18 @@ Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
                 const primaryContact = vendorData.contacts.find(contact => contact.isPrimary && contact.name);
                 if (primaryContact) {
                     console.log('✅ Found primary contact name:', primaryContact.name);
-                    return primaryContact.name;
+                    // Extract first name only
+                    const firstName = primaryContact.name.split(' ')[0];
+                    return firstName;
                 }
                 
                 // If no primary, get first contact with name
                 const contactWithName = vendorData.contacts.find(contact => contact.name);
                 if (contactWithName) {
                     console.log('✅ Found contact with name:', contactWithName.name);
-                    return contactWithName.name;
+                    // Extract first name only
+                    const firstName = contactWithName.name.split(' ')[0];
+                    return firstName;
                 }
             }
             
@@ -1606,15 +1570,18 @@ Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
                 console.log('✅ Found contactInfo structure:', vendorData.contactInfo);
                 if (vendorData.contactInfo.primaryContact && vendorData.contactInfo.primaryContact.name) {
                     console.log('✅ Found primary contact name in contactInfo:', vendorData.contactInfo.primaryContact.name);
-                    return vendorData.contactInfo.primaryContact.name;
+                    const firstName = vendorData.contactInfo.primaryContact.name.split(' ')[0];
+                    return firstName;
                 }
                 if (vendorData.contactInfo.secondaryContact && vendorData.contactInfo.secondaryContact.name) {
                     console.log('✅ Found secondary contact name:', vendorData.contactInfo.secondaryContact.name);
-                    return vendorData.contactInfo.secondaryContact.name;
+                    const firstName = vendorData.contactInfo.secondaryContact.name.split(' ')[0];
+                    return firstName;
                 }
                 if (vendorData.contactInfo.salesRep && vendorData.contactInfo.salesRep.name) {
                     console.log('✅ Found sales rep name:', vendorData.contactInfo.salesRep.name);
-                    return vendorData.contactInfo.salesRep.name;
+                    const firstName = vendorData.contactInfo.salesRep.name.split(' ')[0];
+                    return firstName;
                 }
             }
             
