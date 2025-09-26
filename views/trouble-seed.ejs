@@ -7,6 +7,8 @@
     <title>Enhanced Trouble Seed Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <%- include('partials/navigation-styles') %>
+    
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -507,286 +509,6 @@
             text-align: center;
         }
 
-        /* Navigation Styles from Receiving Dashboard */
-        .header {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-            color: white;
-            padding: 15px 0;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 2.2rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-shrink: 0;
-        }
-
-        /* P.O.D. Button Styles */
-        .pod-button {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            white-space: nowrap;
-        }
-
-        .pod-button:hover {
-            background: linear-gradient(135deg, #218838, #1ea583);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-            color: white;
-            text-decoration: none;
-        }
-
-        .pod-button .arrow {
-            font-size: 12px;
-            transition: transform 0.3s ease;
-        }
-
-        .pod-button:hover .arrow {
-            transform: translateX(-2px);
-        }
-
-        .navigation-container {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .nav-section {
-            position: relative;
-        }
-
-        .nav-accordion-btn {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            min-width: 120px;
-            justify-content: space-between;
-        }
-
-        .nav-accordion-btn:hover {
-            background: #218838;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .nav-accordion-content {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: white;
-            min-width: 220px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            border-radius: 6px;
-            border: 1px solid #dee2e6;
-            z-index: 1001;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            margin-top: 5px;
-        }
-
-        .nav-accordion-content.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .nav-accordion-item {
-            display: block;
-            padding: 12px 16px;
-            color: #495057;
-            text-decoration: none;
-            border-bottom: 1px solid #f1f3f4;
-            transition: all 0.2s ease;
-        }
-
-        .nav-accordion-item:hover {
-            background: #f8f9fa;
-            color: #007bff;
-            text-decoration: none;
-            padding-left: 20px;
-        }
-
-        .nav-accordion-item:last-child {
-            border-bottom: none;
-        }
-
-        .nav-accordion-item.active {
-            background: #fff3cd;
-            color: #856404;
-            font-weight: 600;
-        }
-
-        .nav-accordion-divider {
-            height: 1px;
-            background: #dee2e6;
-            margin: 4px 0;
-        }
-
-        .nav-imports-btn {
-            background: #17a2b8;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            min-width: 120px;
-            justify-content: space-between;
-        }
-
-        .nav-imports-btn:hover {
-            background: #138496;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .nav-dropdown-content {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: white;
-            min-width: 220px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            border-radius: 6px;
-            border: 1px solid #dee2e6;
-            z-index: 1001;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            margin-top: 5px;
-        }
-
-        .nav-dropdown-content.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .nav-dropdown-item {
-            display: block;
-            padding: 12px 16px;
-            color: #495057;
-            text-decoration: none;
-            border-bottom: 1px solid #f1f3f4;
-            transition: all 0.2s ease;
-            background: none;
-            border: none;
-            width: 100%;
-            text-align: left;
-            cursor: pointer;
-        }
-
-        .nav-dropdown-item:hover {
-            background: #f8f9fa;
-            color: #007bff;
-            text-decoration: none;
-            padding-left: 20px;
-        }
-
-        .refresh-btn {
-            background: #20c997;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .refresh-btn:hover {
-            background: #1ea085;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #007bff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-            flex-shrink: 0;
-            position: relative;
-        }
-
-        .user-status-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #28a745;
-            position: absolute;
-            bottom: -1px;
-            right: -1px;
-            border: 2px solid white;
-        }
-
-        .nav-accordion-divider {
-            height: 1px;
-            background: #f1f3f4;
-            margin: 5px 0;
-        }
-
         /* Email Template Management Styles */
         .template-controls {
             background: #f8f9fa;
@@ -868,6 +590,18 @@
         .btn-template.success:hover {
             background: #218838;
             border-color: #218838;
+            color: white;
+        }
+
+        .btn-template.danger {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+        .btn-template.danger:hover {
+            background: #c82333;
+            border-color: #c82333;
             color: white;
         }
 
@@ -1216,8 +950,8 @@
                     Enhanced Email Content Generator
                 </h4>
                 <div class="template-controls">
-                    <label for="templateSelect">Email Template:</label>
-                    <select id="templateSelect" onchange="handleTemplateChange()">
+                    <label for="templateSelector">Email Template:</label>
+                    <select id="templateSelector" onchange="handleTemplateChange()">
                         <option value="">Loading templates...</option>
                     </select>
                     <button class="template-btn" onclick="openTemplateManager()" title="Manage Templates">
@@ -1226,6 +960,61 @@
                     <button class="template-btn" onclick="createNewTemplate()" title="Create New Template">
                         <i class="fas fa-plus"></i>
                     </button>
+                </div>
+
+                <!-- COMPREHENSIVE BUTTON TESTING PANEL -->
+                <div class="button-test-panel" style="background: #fff3cd; border: 2px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 8px;">
+                    <h5 style="color: #856404; margin: 0 0 10px 0;">🧪 COMPREHENSIVE BUTTON TESTING PANEL</h5>
+                    <p style="margin: 5px 0; font-size: 12px; color: #856404;">Test each button systematically. Check browser console (F12) for detailed logs.</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
+                        <!-- Template Editor Functions -->
+                        <button onclick="testFunction('showTemplateEditor')" style="background: #17a2b8; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            Test Show Editor
+                        </button>
+                        <button onclick="testFunction('editGeneratedEmail')" style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            Test Edit Email
+                        </button>
+                        <button onclick="testSwitchTab('preview')" style="background: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            Test Preview Tab
+                        </button>
+                        <button onclick="testSwitchTab('edit')" style="background: #fd7e14; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            Test Edit Tab
+                        </button>
+                        <button onclick="testSwitchTab('variables')" style="background: #6f42c1; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            Test Variables Tab
+                        </button>
+                        <button onclick="testFunction('updatePreview')" style="background: #20c997; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            Test Update Preview
+                        </button>
+                        <button onclick="testFunction('applyContentChanges')" style="background: #198754; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            Test Apply Changes
+                        </button>
+                        <button onclick="testFunction('cancelEdit')" style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            Test Cancel Edit
+                        </button>
+                        <!-- Diagnostic Functions -->
+                        <button onclick="testFunction('runDiagnostics')" style="background: #e83e8c; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            Test Diagnostics
+                        </button>
+                        <button onclick="testElementExists()" style="background: #495057; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            Test Elements Exist
+                        </button>
+                        <button onclick="testCSSStyles()" style="background: #6610f2; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            Test CSS Styles
+                        </button>
+                        <button onclick="forceShowEditor()" style="background: #d63384; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            Force Show Editor
+                        </button>
+                        <button onclick="clearTestResults()" style="background: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            Clear Results
+                        </button>
+                    </div>
+                    
+                    <!-- Test Results Display -->
+                    <div id="testResults" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; font-family: monospace; font-size: 11px; max-height: 200px; overflow-y: auto;">
+                        Test results will appear here...
+                    </div>
                 </div>
             </div>
             
@@ -1258,6 +1047,15 @@
                                 <input type="text" id="templateName" placeholder="Enter template name">
                             </div>
                             <div class="form-group">
+                                <label for="templateCategory">Category:</label>
+                                <select id="templateCategory">
+                                    <option value="follow-up">Follow-up</option>
+                                    <option value="escalation">Escalation</option>
+                                    <option value="summary">Summary</option>
+                                    <option value="custom">Custom</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label for="templateSubject">Subject:</label>
                                 <input type="text" id="templateSubject" placeholder="Enter email subject with variables like {{poNumber}}">
                             </div>
@@ -1266,11 +1064,20 @@
                                 <textarea id="templateBody" rows="10" placeholder="Enter email body with variables and conditional logic"></textarea>
                             </div>
                             <div class="form-actions">
+                                <button class="template-btn apply" onclick="applyContentChanges()" id="applyChangesBtn" style="background-color: #28a745; color: white;">
+                                    <i class="fas fa-check"></i> Apply Changes
+                                </button>
                                 <button class="template-btn save" onclick="saveTemplate()">
                                     <i class="fas fa-save"></i> Save Template
                                 </button>
+                                <button class="template-btn save-new" onclick="saveAsNewTemplate()" style="background-color: #17a2b8; color: white;">
+                                    <i class="fas fa-plus"></i> Save as New Template
+                                </button>
                                 <button class="template-btn cancel" onclick="cancelEdit()">
                                     <i class="fas fa-times"></i> Cancel
+                                </button>
+                                <button class="template-btn delete" onclick="deleteTemplate()" title="Delete Template" style="background-color: #dc3545; color: white;">
+                                    <i class="fas fa-trash"></i> Delete
                                 </button>
                             </div>
                         </div>
@@ -1315,6 +1122,12 @@
                 </button>
                 <button class="email-btn btn-generate-all" onclick="generateAllPOsEmail()">
                     <i class="fas fa-envelope-bulk"></i> Generate Summary for All POs
+                </button>
+                <button class="email-btn btn-show-editor" onclick="showTemplateEditor()" title="Show Template Editor">
+                    <i class="fas fa-tools"></i> Show Template Editor
+                </button>
+                <button class="email-btn btn-debug" onclick="runDiagnostics()" title="Run Diagnostics" style="background-color: #dc3545;">
+                    <i class="fas fa-bug"></i> Debug
                 </button>
                 <button class="email-btn btn-edit-content" onclick="editGeneratedEmail()" id="editBtn" disabled>
                     <i class="fas fa-edit"></i> Edit Content
@@ -1377,9 +1190,9 @@
                                 </div>
                                 
                                 <div class="eta-info">
-                                    <% if (item.eta) { %>
+                                    <% if (item.effectiveETA) { %>
                                         <div class="eta-date">
-                                            <%= new Date(item.eta).toLocaleDateString() %>
+                                            <%= new Date(item.effectiveETA).toLocaleDateString() %>
                                             <% if (item.daysFromToday !== null) { %>
                                                 <% const days = Math.round(item.daysFromToday); %>
                                                 <% if (days < 0) { %>
@@ -1574,8 +1387,9 @@
             // Generate email content
             generateEmailContent(selectedPOForEmail);
 
-            // Enable copy button
+            // Enable copy and edit buttons
             document.getElementById('copyBtn').disabled = false;
+            document.getElementById('editBtn').disabled = false;
         }
 
         function generateEmailContent(po) {
@@ -1598,7 +1412,7 @@ ${noEtaItems.map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : '
 We urgently need estimated delivery dates for these items to update our customers and plan accordingly.
 
 ` : ''}${overdueItems.length > 0 ? `OVERDUE ITEMS:
-${overdueItems.map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''} - Expected: ${item.eta ? new Date(item.eta).toLocaleDateString() : 'N/A'}`).join('\n')}
+${overdueItems.map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''} - Expected: ${item.effectiveETA ? new Date(item.effectiveETA).toLocaleDateString() : 'N/A'}`).join('\n')}
 
 These items are past their expected delivery dates. Please provide immediate updates.
 
@@ -1681,6 +1495,7 @@ Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
 
             document.getElementById('emailContent').textContent = emailContent;
             document.getElementById('copyBtn').disabled = false;
+            document.getElementById('editBtn').disabled = false;
         }
 
         function copyToClipboard() {
@@ -1708,7 +1523,315 @@ Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
             });
             document.getElementById('emailContent').textContent = 'Select a PO below to generate email content for vendor communication...';
             document.getElementById('copyBtn').disabled = true;
+            document.getElementById('editBtn').disabled = true;
         }
+
+        function editGeneratedEmail() {
+            console.log('editGeneratedEmail called');
+            const emailContent = document.getElementById('emailContent').textContent;
+            console.log('Email content:', emailContent);
+            
+            if (!emailContent || emailContent === 'Select a PO below to generate email content for vendor communication...') {
+                alert('No email content to edit. Please generate an email first.');
+                return;
+            }
+
+            // Parse the generated email content
+            const lines = emailContent.split('\n');
+            const subjectLine = lines.find(line => line.startsWith('Subject:'));
+            const subject = subjectLine ? subjectLine.replace('Subject: ', '').trim() : '';
+            
+            // Get body content (everything after subject, excluding metadata at the end)
+            const subjectIndex = lines.findIndex(line => line.startsWith('Subject:'));
+            const bodyLines = lines.slice(subjectIndex + 1);
+            
+            // Remove metadata from the end (lines starting with ---)
+            const metadataIndex = bodyLines.findIndex(line => line.startsWith('---'));
+            const body = metadataIndex > -1 ? 
+                bodyLines.slice(0, metadataIndex).join('\n').trim() : 
+                bodyLines.join('\n').trim();
+
+            console.log('Parsed subject:', subject);
+            console.log('Parsed body:', body);
+
+            // Show the template editor
+            document.getElementById('templateEditor').style.display = 'block';
+            
+            // Populate the edit form with current content
+            document.getElementById('templateName').value = `Custom Email - ${new Date().toLocaleDateString()}`;
+            document.getElementById('templateCategory').value = 'custom';
+            document.getElementById('templateSubject').value = subject;
+            document.getElementById('templateBody').value = body;
+            
+            // Switch to edit tab
+            switchTab('edit');
+            
+            // Scroll to the template editor
+            document.getElementById('templateEditor').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+
+        function applyContentChanges() {
+            const subject = document.getElementById('templateSubject').value;
+            const body = document.getElementById('templateBody').value;
+            
+            if (!subject || !body) {
+                alert('Please fill in both subject and body before applying changes.');
+                return;
+            }
+
+            // Create the updated email content
+            const originalEmailContent = document.getElementById('emailContent').textContent;
+            const lines = originalEmailContent.split('\n');
+            
+            // Find metadata from original content (lines starting with ---)
+            const metadataIndex = lines.findIndex(line => line.startsWith('---'));
+            const metadata = metadataIndex > -1 ? '\n\n' + lines.slice(metadataIndex).join('\n') : '';
+            
+            // Construct new email content
+            const updatedContent = `Subject: ${subject}\n\n${body}${metadata}`;
+            
+            // Update the email content display
+            document.getElementById('emailContent').textContent = updatedContent;
+            
+            // Switch back to preview tab
+            switchTab('preview');
+            
+            // Hide the template editor
+            document.getElementById('templateEditor').style.display = 'none';
+            
+            // Scroll back to email content
+            document.getElementById('emailContent').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+            
+            // Show success message
+            alert('Email content updated successfully!');
+        }
+
+        function cancelEdit() {
+            // Hide the template editor without saving changes
+            document.getElementById('templateEditor').style.display = 'none';
+            
+            // Clear the form
+            document.getElementById('templateName').value = '';
+            document.getElementById('templateCategory').value = 'follow-up';
+            document.getElementById('templateSubject').value = '';
+            document.getElementById('templateBody').value = '';
+            
+            // Scroll back to email content
+            document.getElementById('emailContent').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+
+        function showTemplateEditor() {
+            console.log('showTemplateEditor called');
+            
+            // Show the template editor
+            const editor = document.getElementById('templateEditor');
+            editor.style.display = 'block';
+            
+            // Populate with sample content if empty
+            const subjectInput = document.getElementById('templateSubject');
+            const bodyInput = document.getElementById('templateBody');
+            
+            if (!subjectInput.value) {
+                subjectInput.value = 'Sample Subject - {{poNumber}}';
+            }
+            if (!bodyInput.value) {
+                bodyInput.value = 'Sample email body for {{vendor}}.\n\nPlease provide updates for {{totalItems}} items.';
+            }
+            
+            // Switch to edit tab
+            switchTab('edit');
+            
+            // Scroll to editor
+            editor.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+
+        function runDiagnostics() {
+            console.log('🔍 === RUNNING COMPREHENSIVE DIAGNOSTICS ===');
+            
+            // Create a popup to show results
+            let diagnosticResults = '🔍 TEMPLATE EDITOR DIAGNOSTICS\n\n';
+            
+            try {
+                // Check if template editor exists
+                const editor = document.getElementById('templateEditor');
+                diagnosticResults += `Template Editor Element: ${editor ? '✅ EXISTS' : '❌ MISSING'}\n`;
+                
+                if (editor) {
+                    diagnosticResults += `Display Style: ${editor.style.display}\n`;
+                    diagnosticResults += `Computed Display: ${window.getComputedStyle(editor).display}\n`;
+                    diagnosticResults += `Visibility: ${window.getComputedStyle(editor).visibility}\n`;
+                }
+                
+                // Check tab system
+                const tabPanes = document.querySelectorAll('.tab-pane');
+                const tabButtons = document.querySelectorAll('.tab-btn');
+                diagnosticResults += `\nTab Panes Found: ${tabPanes.length}\n`;
+                diagnosticResults += `Tab Buttons Found: ${tabButtons.length}\n`;
+                
+                tabPanes.forEach((pane, index) => {
+                    const isActive = pane.classList.contains('active');
+                    const display = window.getComputedStyle(pane).display;
+                    diagnosticResults += `  Pane ${index} (${pane.id}): ${isActive ? 'ACTIVE' : 'inactive'}, display: ${display}\n`;
+                });
+                
+                tabButtons.forEach((btn, index) => {
+                    const isActive = btn.classList.contains('active');
+                    diagnosticResults += `  Button ${index} (${btn.textContent}): ${isActive ? 'ACTIVE' : 'inactive'}\n`;
+                });
+                
+                // Check form inputs
+                const inputs = ['templateName', 'templateCategory', 'templateSubject', 'templateBody'];
+                diagnosticResults += '\nForm Inputs:\n';
+                inputs.forEach(id => {
+                    const element = document.getElementById(id);
+                    diagnosticResults += `  ${id}: ${element ? '✅ EXISTS' : '❌ MISSING'}\n`;
+                    if (element && element.value) {
+                        diagnosticResults += `    Value: "${element.value.substring(0, 50)}${element.value.length > 50 ? '...' : ''}"\n`;
+                    }
+                });
+                
+                // Check preview elements
+                const previews = ['subjectPreview', 'bodyPreview'];
+                diagnosticResults += '\nPreview Elements:\n';
+                previews.forEach(id => {
+                    const element = document.getElementById(id);
+                    diagnosticResults += `  ${id}: ${element ? '✅ EXISTS' : '❌ MISSING'}\n`;
+                });
+                
+                // Check for JavaScript errors
+                diagnosticResults += `\nJavaScript Functions:\n`;
+                diagnosticResults += `  switchTab: ${typeof switchTab === 'function' ? '✅ EXISTS' : '❌ MISSING'}\n`;
+                diagnosticResults += `  updatePreview: ${typeof updatePreview === 'function' ? '✅ EXISTS' : '❌ MISSING'}\n`;
+                diagnosticResults += `  editGeneratedEmail: ${typeof editGeneratedEmail === 'function' ? '✅ EXISTS' : '❌ MISSING'}\n`;
+                
+                // Test switchTab function
+                diagnosticResults += '\n🧪 TESTING switchTab FUNCTION:\n';
+                try {
+                    switchTab('edit');
+                    diagnosticResults += '  switchTab("edit") - ✅ NO ERRORS\n';
+                    
+                    const editTab = document.getElementById('editTab');
+                    if (editTab) {
+                        const isActive = editTab.classList.contains('active');
+                        const display = window.getComputedStyle(editTab).display;
+                        diagnosticResults += `  editTab active: ${isActive ? 'YES' : 'NO'}, display: ${display}\n`;
+                    }
+                    
+                } catch (error) {
+                    diagnosticResults += `  switchTab ERROR: ${error.message}\n`;
+                }
+                
+            } catch (error) {
+                diagnosticResults += `\n💥 DIAGNOSTIC ERROR: ${error.message}\n`;
+            }
+            
+            diagnosticResults += '\n🔍 === DIAGNOSTICS COMPLETE ===';
+            
+            // Show results in alert and console
+            alert(diagnosticResults);
+            console.log(diagnosticResults);
+            
+            // Also force show the editor for testing
+            const editor = document.getElementById('templateEditor');
+            if (editor) {
+                editor.style.display = 'block';
+                switchTab('edit');
+            }
+        }
+
+        // ===== GLOBAL TEMPLATE EDITOR FUNCTIONS =====
+        
+        function switchTab(tabName) {
+            console.log('switchTab called with:', tabName);
+            
+            // Hide all tab panes
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+                console.log('Hiding pane:', pane.id);
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-btn').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab pane and activate tab
+            const targetPane = document.getElementById(tabName + 'Tab');
+            if (targetPane) {
+                targetPane.classList.add('active');
+                console.log('Showing pane:', targetPane.id);
+            } else {
+                console.error('Could not find pane with ID:', tabName + 'Tab');
+            }
+            
+            const targetBtn = document.querySelector(`[onclick="switchTab('${tabName}')"]`);
+            if (targetBtn) {
+                targetBtn.classList.add('active');
+                console.log('Activated button for tab:', tabName);
+            } else {
+                console.error('Could not find button for tab:', tabName);
+            }
+            
+            if (tabName === 'preview') {
+                updatePreview();
+            }
+            
+            // Make sure template editor is visible
+            const templateEditor = document.getElementById('templateEditor');
+            if (templateEditor && templateEditor.style.display === 'none') {
+                console.log('Template editor was hidden, making it visible');
+                templateEditor.style.display = 'block';
+            }
+        }
+
+        // Move updatePreview to global scope as well
+        function updatePreview() {
+            const subject = document.getElementById('templateSubject').value || 'No Subject';
+            const body = document.getElementById('templateBody').value || 'No Content';
+
+            // Sample data for preview
+            const sampleData = {
+                poNumber: 'PO-12345',
+                vendor: 'Sample Vendor Inc.',
+                items: [
+                    { memo: 'Sample Product 1', sku: 'SKU-001', eta: new Date(), etaStatus: 'no-eta' },
+                    { memo: 'Sample Product 2', sku: 'SKU-002', eta: null, etaStatus: 'overdue' }
+                ]
+            };
+
+            try {
+                const previewSubject = replaceTemplateVariables(subject, sampleData);
+                const previewBody = replaceTemplateVariables(body, sampleData);
+
+                document.getElementById('subjectPreview').innerHTML = previewSubject;
+                document.getElementById('bodyPreview').innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">${previewBody}</pre>`;
+            } catch (error) {
+                document.getElementById('subjectPreview').innerHTML = 'Error in subject template';
+                document.getElementById('bodyPreview').innerHTML = `<p style="color: #dc3545;">Error generating preview: ${error.message}</p>`;
+            }
+        }
+
+        function replaceTemplateVariables(template, data) {
+            let result = template;
+            result = result.replace(/\{\{poNumber\}\}/g, data.poNumber || '');
+            result = result.replace(/\{\{vendor\}\}/g, data.vendor || '');
+            result = result.replace(/\{\{totalItems\}\}/g, data.totalItems || 0);
+            return result;
+        }
+
+        // ===== END GLOBAL FUNCTIONS =====
 
         // Make PO sections clickable for email generation
         document.addEventListener('DOMContentLoaded', () => {
@@ -1912,17 +2035,25 @@ Best regards,
                 document.getElementById('templateCategory').value = '';
                 document.getElementById('templateSubject').value = '';
                 document.getElementById('templateBody').value = '';
-                document.getElementById('templatePreview').innerHTML = '<p>Select a template to see preview...</p>';
+                document.getElementById('subjectPreview').innerHTML = '<em>Select a template to see preview...</em>';
+                document.getElementById('bodyPreview').innerHTML = '<em>Select a template to see preview...</em>';
             }
 
             function updatePreview() {
                 if (!selectedTemplate || !selectedPOForEmail) {
-                    document.getElementById('templatePreview').innerHTML = '<p>Select a template and PO to see preview...</p>';
+                    document.getElementById('subjectPreview').innerHTML = '<em>Select a template and PO to see preview...</em>';
+                    document.getElementById('bodyPreview').innerHTML = '<em>Select a template and PO to see preview...</em>';
                     return;
                 }
 
                 const previewContent = generatePreviewContent(selectedTemplate, selectedPOForEmail);
-                document.getElementById('templatePreview').innerHTML = previewContent;
+                const lines = previewContent.split('\n');
+                const subjectLine = lines.find(line => line.startsWith('Subject:'));
+                const subject = subjectLine ? subjectLine.replace('Subject: ', '') : 'No Subject';
+                const body = lines.slice(1).join('\n').trim();
+                
+                document.getElementById('subjectPreview').innerHTML = subject;
+                document.getElementById('bodyPreview').innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit;">${body}</pre>`;
             }
 
             function generatePreviewContent(template, poData) {
@@ -1992,26 +2123,6 @@ Best regards,
                 setTimeout(() => {
                     statusEl.style.display = 'none';
                 }, 3000);
-            }
-
-            function switchTab(tabName) {
-                // Hide all tab panes
-                document.querySelectorAll('.tab-pane').forEach(pane => {
-                    pane.classList.remove('active');
-                });
-                
-                // Remove active class from all tabs
-                document.querySelectorAll('.editor-tab').forEach(tab => {
-                    tab.classList.remove('active');
-                });
-                
-                // Show selected tab pane and activate tab
-                document.getElementById(tabName + 'Tab').classList.add('active');
-                document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
-                
-                if (tabName === 'preview') {
-                    updatePreview();
-                }
             }
 
             function useTemplate() {
@@ -2162,7 +2273,8 @@ Best regards,
             document.getElementById('templateCategory').value = '';
             document.getElementById('templateSubject').value = '';
             document.getElementById('templateBody').value = '';
-            document.getElementById('previewContent').innerHTML = '<p>Select a template to see preview...</p>';
+            document.getElementById('subjectPreview').innerHTML = '<em>Select a template to see preview...</em>';
+            document.getElementById('bodyPreview').innerHTML = '<em>Select a template to see preview...</em>';
         }
 
         function populateTemplateForm(template) {
@@ -2172,74 +2284,13 @@ Best regards,
             document.getElementById('templateBody').value = template.bodyTemplate;
         }
 
-        function updatePreview() {
-            if (!currentTemplate) {
-                document.getElementById('previewContent').innerHTML = '<p>Select a template to see preview...</p>';
+        // Save template (update existing)
+        async function saveTemplate() {
+            if (!selectedTemplate) {
+                showTemplateStatus('Please select a template to save.', 'error');
                 return;
             }
-
-            const subject = document.getElementById('templateSubject').value;
-            const body = document.getElementById('templateBody').value;
-
-            // Sample data for preview
-            const sampleData = {
-                poNumber: 'PO-12345',
-                vendor: 'Sample Vendor Inc.',
-                items: [
-                    { memo: 'Sample Product 1', sku: 'SKU-001', eta: new Date(), etaStatus: 'no-eta' },
-                    { memo: 'Sample Product 2', sku: 'SKU-002', eta: null, etaStatus: 'overdue' }
-                ]
-            };
-
-            try {
-                const previewSubject = replaceTemplateVariables(subject, sampleData);
-                const previewBody = replaceTemplateVariables(body, sampleData);
-
-                document.getElementById('previewContent').innerHTML = `
-                    <div style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">
-                        <strong>Subject:</strong> ${previewSubject}
-                    </div>
-                    <div style="white-space: pre-wrap;">${previewBody}</div>
-                `;
-            } catch (error) {
-                document.getElementById('previewContent').innerHTML = `<p style="color: #dc3545;">Error generating preview: ${error.message}</p>`;
-            }
-        }
-
-        function replaceTemplateVariables(template, data) {
-            let result = template;
-
-            // Basic variable replacement
-            result = result.replace(/\{\{poNumber\}\}/g, data.poNumber || '');
-            result = result.replace(/\{\{vendor\}\}/g, data.vendor || '');
-            result = result.replace(/\{\{totalItems\}\}/g, data.items ? data.items.length : 0);
-
-            // Handle conditional blocks (simplified)
-            result = result.replace(/\{\{#if hasNoEtaItems\}\}(.*?)\{\{\/if\}\}/gs, 
-                data.items && data.items.some(item => item.etaStatus === 'no-eta') ? '$1' : '');
             
-            result = result.replace(/\{\{#if hasOverdueItems\}\}(.*?)\{\{\/if\}\}/gs, 
-                data.items && data.items.some(item => item.etaStatus === 'overdue') ? '$1' : '');
-
-            // Handle item loops (simplified)
-            if (data.items) {
-                const noEtaItems = data.items.filter(item => item.etaStatus === 'no-eta');
-                const noEtaList = noEtaItems.map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''}`).join('\n');
-                result = result.replace(/\{\{#each noEtaItems\}\}(.*?)\{\{\/each\}\}/gs, noEtaList);
-
-                const overdueItems = data.items.filter(item => item.etaStatus === 'overdue');
-                const overdueList = overdueItems.map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''} - Expected: ${item.eta ? new Date(item.eta).toLocaleDateString() : 'N/A'}`).join('\n');
-                result = result.replace(/\{\{#each overdueItems\}\}(.*?)\{\{\/each\}\}/gs, overdueList);
-            }
-
-            // Add current date
-            result = result.replace(/\{\{currentDate\}\}/g, new Date().toLocaleDateString());
-            result = result.replace(/\{\{currentTime\}\}/g, new Date().toLocaleTimeString());
-
-            return result;
-        }
-
-        async function saveTemplate() {
             const templateData = {
                 name: document.getElementById('templateName').value,
                 category: document.getElementById('templateCategory').value,
@@ -2254,11 +2305,9 @@ Best regards,
             }
 
             try {
-                const url = currentTemplate ? `/email-templates/${currentTemplate._id}` : '/email-templates';
-                const method = currentTemplate ? 'PUT' : 'POST';
-
+                const url = `/email-templates/${selectedTemplate._id}`;
                 const response = await fetch(url, {
-                    method: method,
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -2267,16 +2316,193 @@ Best regards,
 
                 if (response.ok) {
                     const savedTemplate = await response.json();
-                    currentTemplate = savedTemplate;
-                    showTemplateStatus('Template saved successfully!', 'success');
+                    showTemplateStatus('Template updated successfully!', 'success');
                     await loadTemplates(); // Refresh template list
+                    
+                    // Update the selector to show the saved template
+                    const selector = document.getElementById('templateSelector');
+                    selector.value = savedTemplate._id;
                 } else {
-                    showTemplateStatus('Error saving template', 'error');
+                    showTemplateStatus('Error updating template', 'error');
                 }
             } catch (error) {
-                console.error('Error saving template:', error);
-                showTemplateStatus('Error saving template', 'error');
+                console.error('Error updating template:', error);
+                showTemplateStatus('Error updating template', 'error');
             }
+        }
+        
+        // Save as new template (create new)
+        async function saveAsNewTemplate() {
+            const templateName = prompt('Enter a name for the new template:');
+            if (!templateName) return;
+            
+            const templateData = {
+                name: templateName,
+                category: document.getElementById('templateCategory').value,
+                subject: document.getElementById('templateSubject').value,
+                bodyTemplate: document.getElementById('templateBody').value,
+                variables: ['poNumber', 'vendor', 'totalItems', 'noEtaItems', 'overdueItems', 'currentDate', 'currentTime']
+            };
+
+            if (!templateData.subject || !templateData.bodyTemplate) {
+                showTemplateStatus('Please fill in subject and body fields', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/email-templates', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(templateData)
+                });
+
+                if (response.ok) {
+                    const newTemplate = await response.json();
+                    showTemplateStatus('New template created successfully!', 'success');
+                    await loadTemplates(); // Refresh template list
+                    
+                    // Select the new template
+                    selectedTemplate = newTemplate;
+                    const selector = document.getElementById('templateSelector');
+                    selector.value = newTemplate._id;
+                } else {
+                    showTemplateStatus('Error creating template', 'error');
+                }
+            } catch (error) {
+                console.error('Error creating template:', error);
+                showTemplateStatus('Error creating template', 'error');
+            }
+        }
+
+        function createNewTemplate() {
+            // Clear the template selector
+            const selector = document.getElementById('templateSelector');
+            selector.value = '';
+            
+            // Clear selected template
+            selectedTemplate = null;
+            
+            // Clear the editor form
+            clearTemplateEditor();
+            
+            // Set default values for new template
+            document.getElementById('templateName').value = 'New Template';
+            document.getElementById('templateCategory').value = 'follow-up';
+            document.getElementById('templateSubject').value = 'UPDATE NEEDED - Purchase Order {{poNumber}}';
+            document.getElementById('templateBody').value = `Dear {{vendor}},
+
+I hope this email finds you well. I am writing to request an update on Purchase Order {{poNumber}}.
+
+{{#if noEtaItems}}
+ITEMS NEEDING ETA:
+{{#each noEtaItems}}
+• {{memo}}{{#if sku}} (SKU: {{sku}}){{/if}}
+{{/each}}
+{{/if}}
+
+{{#if overdueItems}}
+OVERDUE ITEMS:
+{{#each overdueItems}}
+• {{memo}}{{#if sku}} (SKU: {{sku}}){{/if}} - Expected: {{eta}}
+{{/each}}
+{{/if}}
+
+Please provide updated delivery dates for these items.
+
+Best regards,
+[Your Name]
+[Your Title]
+[Your Contact Information]
+
+---
+Purchase Order: {{poNumber}}
+Generated: {{currentDate}}`;
+            
+            // Show the template editor
+            document.getElementById('templateEditor').style.display = 'block';
+            
+            // Switch to edit tab
+            switchTab('edit');
+            
+            // Focus on template name field
+            document.getElementById('templateName').focus();
+            document.getElementById('templateName').select();
+            
+            showTemplateStatus('Creating new template. Fill in the details and click Save.', 'success');
+        }
+
+        function openTemplateManager() {
+            // Show template editor if hidden
+            const editor = document.getElementById('templateEditor');
+            if (editor.style.display === 'none' || !editor.style.display) {
+                editor.style.display = 'block';
+            } else {
+                editor.style.display = 'none';
+                return;
+            }
+            
+            // If we have a selected template, load it for editing
+            if (selectedTemplate) {
+                loadTemplateIntoEditor(selectedTemplate);
+                switchTab('edit');
+                showTemplateStatus('Editing existing template. Make changes and click Save.', 'success');
+            } else {
+                // Switch to preview tab to show instructions
+                switchTab('preview');
+                showTemplateStatus('Select a template to edit or create a new one.', 'error');
+            }
+        }
+
+        function deleteTemplate() {
+            if (!selectedTemplate || selectedTemplate.isDefault) {
+                showTemplateStatus('Cannot delete default templates', 'error');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to delete the template "${selectedTemplate.name}"?`)) {
+                return;
+            }
+
+            fetch(`/email-templates/${selectedTemplate._id}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    showTemplateStatus('Template deleted successfully', 'success');
+                    selectedTemplate = null;
+                    clearTemplateEditor();
+                    loadTemplates(); // Refresh template list
+                    document.getElementById('templateEditor').style.display = 'none';
+                } else {
+                    showTemplateStatus('Error deleting template', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting template:', error);
+                showTemplateStatus('Error deleting template', 'error');
+            });
+        }
+
+        function cancelEdit() {
+            // Hide the template editor
+            document.getElementById('templateEditor').style.display = 'none';
+            
+            // Clear the form
+            clearTemplateEditor();
+            
+            // Reset selected template
+            if (selectedTemplate) {
+                // Reload the original template if it was being edited
+                loadTemplateIntoEditor(selectedTemplate);
+            }
+            
+            // Reset template selector
+            const selector = document.getElementById('templateSelector');
+            selector.value = selectedTemplate ? selectedTemplate._id : '';
+            
+            showTemplateStatus('Edit cancelled', 'success');
         }
 
         function newTemplate() {
@@ -2349,6 +2575,172 @@ Best regards,
             }
         }
 
+        // ===== COMPREHENSIVE TESTING FUNCTIONS =====
+        
+        function logToTestResults(message, type = 'info') {
+            const testResults = document.getElementById('testResults');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'red' : type === 'success' ? 'green' : type === 'warning' ? 'orange' : 'black';
+            
+            testResults.innerHTML += `<div style="color: ${color};">[${timestamp}] ${message}</div>`;
+            testResults.scrollTop = testResults.scrollHeight;
+            console.log(`[TEST] ${message}`);
+        }
+
+        function testFunction(functionName) {
+            logToTestResults(`🧪 Testing function: ${functionName}`);
+            
+            try {
+                // Check if function exists
+                const func = window[functionName];
+                if (typeof func !== 'function') {
+                    logToTestResults(`❌ Function ${functionName} does not exist or is not a function`, 'error');
+                    return;
+                }
+                
+                logToTestResults(`✅ Function ${functionName} exists`, 'success');
+                
+                // Call the function
+                const result = func();
+                logToTestResults(`✅ Function ${functionName} executed successfully`, 'success');
+                
+                if (result !== undefined) {
+                    logToTestResults(`📤 Function ${functionName} returned: ${result}`, 'info');
+                }
+                
+            } catch (error) {
+                logToTestResults(`💥 Error calling ${functionName}: ${error.message}`, 'error');
+                console.error(`Error testing ${functionName}:`, error);
+            }
+        }
+
+        function testSwitchTab(tabName) {
+            logToTestResults(`🧪 Testing switchTab with: ${tabName}`);
+            
+            try {
+                // First make sure editor is visible
+                const editor = document.getElementById('templateEditor');
+                if (editor) {
+                    editor.style.display = 'block';
+                    logToTestResults(`✅ Made template editor visible`, 'success');
+                }
+                
+                // Test switchTab function
+                if (typeof switchTab === 'function') {
+                    switchTab(tabName);
+                    logToTestResults(`✅ switchTab('${tabName}') called successfully`, 'success');
+                    
+                    // Check if the tab was actually switched
+                    const targetPane = document.getElementById(tabName + 'Tab');
+                    if (targetPane) {
+                        const isActive = targetPane.classList.contains('active');
+                        const display = window.getComputedStyle(targetPane).display;
+                        logToTestResults(`📊 Tab ${tabName}: active=${isActive}, display=${display}`, isActive ? 'success' : 'warning');
+                    } else {
+                        logToTestResults(`❌ Could not find tab pane: ${tabName}Tab`, 'error');
+                    }
+                } else {
+                    logToTestResults(`❌ switchTab function does not exist`, 'error');
+                }
+                
+            } catch (error) {
+                logToTestResults(`💥 Error testing switchTab: ${error.message}`, 'error');
+            }
+        }
+
+        function testElementExists() {
+            logToTestResults(`🧪 Testing element existence`);
+            
+            const requiredElements = [
+                'templateEditor',
+                'templateSubject', 
+                'templateBody',
+                'subjectPreview',
+                'bodyPreview',
+                'previewTab',
+                'editTab',
+                'variablesTab'
+            ];
+            
+            let existingCount = 0;
+            
+            requiredElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    logToTestResults(`✅ Element ${id}: EXISTS`, 'success');
+                    existingCount++;
+                } else {
+                    logToTestResults(`❌ Element ${id}: MISSING`, 'error');
+                }
+            });
+            
+            logToTestResults(`📊 Summary: ${existingCount}/${requiredElements.length} elements exist`, existingCount === requiredElements.length ? 'success' : 'warning');
+        }
+
+        function testCSSStyles() {
+            logToTestResults(`🧪 Testing CSS styles`);
+            
+            const editor = document.getElementById('templateEditor');
+            if (editor) {
+                const styles = window.getComputedStyle(editor);
+                logToTestResults(`📊 Template Editor - display: ${styles.display}, visibility: ${styles.visibility}`, 'info');
+                
+                const tabPanes = document.querySelectorAll('.tab-pane');
+                logToTestResults(`📊 Found ${tabPanes.length} tab panes`, 'info');
+                
+                tabPanes.forEach((pane, index) => {
+                    const paneStyles = window.getComputedStyle(pane);
+                    const isActive = pane.classList.contains('active');
+                    logToTestResults(`📊 Pane ${index} (${pane.id}): active=${isActive}, display=${paneStyles.display}`, 'info');
+                });
+                
+                const tabButtons = document.querySelectorAll('.tab-btn');
+                logToTestResults(`📊 Found ${tabButtons.length} tab buttons`, 'info');
+                
+            } else {
+                logToTestResults(`❌ Template editor not found for CSS testing`, 'error');
+            }
+        }
+
+        function forceShowEditor() {
+            logToTestResults(`🧪 Force showing template editor`);
+            
+            try {
+                const editor = document.getElementById('templateEditor');
+                if (editor) {
+                    // Force show with multiple methods
+                    editor.style.display = 'block';
+                    editor.style.visibility = 'visible';
+                    editor.style.opacity = '1';
+                    
+                    logToTestResults(`✅ Template editor forced visible`, 'success');
+                    
+                    // Try to switch to edit tab
+                    setTimeout(() => {
+                        testSwitchTab('edit');
+                    }, 100);
+                    
+                    // Scroll to it
+                    editor.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                    
+                } else {
+                    logToTestResults(`❌ Template editor element not found`, 'error');
+                }
+            } catch (error) {
+                logToTestResults(`💥 Error forcing editor show: ${error.message}`, 'error');
+            }
+        }
+
+        // Clear test results function
+        function clearTestResults() {
+            document.getElementById('testResults').innerHTML = 'Test results cleared...';
+        }
+
+        // ===== END TESTING FUNCTIONS =====
+
         function showTemplateStatus(message, type) {
             const statusDiv = document.getElementById('templateStatus');
             statusDiv.textContent = message;
@@ -2361,6 +2753,68 @@ Best regards,
                 }, 3000);
             }
         }
+
+        // Initialize template editor with real-time preview updates
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 DOM loaded, initializing template editor...');
+            
+            try {
+                // Check if required elements exist
+                const requiredElements = [
+                    'templateEditor',
+                    'templateSubject', 
+                    'templateBody',
+                    'subjectPreview',
+                    'bodyPreview'
+                ];
+                
+                requiredElements.forEach(id => {
+                    const element = document.getElementById(id);
+                    console.log(`Element ${id}: ${element ? 'EXISTS' : 'MISSING'}`);
+                    if (!element) {
+                        console.error(`❌ Critical element missing: ${id}`);
+                    }
+                });
+                
+                // Add event listeners for real-time preview updates
+                const subjectInput = document.getElementById('templateSubject');
+                const bodyInput = document.getElementById('templateBody');
+                
+                if (subjectInput && bodyInput) {
+                    subjectInput.addEventListener('input', function() {
+                        console.log('📝 Subject input changed');
+                        updatePreview();
+                    });
+                    bodyInput.addEventListener('input', function() {
+                        console.log('📝 Body input changed');
+                        updatePreview();
+                    });
+                    console.log('✅ Event listeners added to template inputs');
+                } else {
+                    console.error('❌ Failed to find template input elements');
+                }
+                
+                // Test tab functionality
+                const tabButtons = document.querySelectorAll('.tab-btn');
+                const tabPanes = document.querySelectorAll('.tab-pane');
+                console.log(`Found ${tabButtons.length} tab buttons and ${tabPanes.length} tab panes`);
+                
+                // Initialize preview
+                updatePreview();
+                console.log('✅ Template editor initialization complete');
+                
+                // Add global error handler
+                window.addEventListener('error', function(e) {
+                    console.error('💥 JavaScript Error:', e.error);
+                    console.error('File:', e.filename, 'Line:', e.lineno);
+                });
+                
+            } catch (error) {
+                console.error('💥 Error during template editor initialization:', error);
+            }
+        });
     </script>
+    
+    <%- include('partials/navigation-scripts') %>
 </body>
 </html>

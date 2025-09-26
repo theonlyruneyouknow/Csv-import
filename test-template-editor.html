@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Editor Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .template-editor {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .editor-tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .tab-btn:hover {
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        .tab-btn.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            min-height: 300px;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .template-form {
+            max-width: 600px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 200px;
+            font-family: monospace;
+        }
+
+        .template-preview {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+        }
+
+        .preview-subject {
+            margin-bottom: 15px;
+        }
+
+        .preview-subject label,
+        .preview-body label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #495057;
+        }
+
+        #subjectPreview,
+        #bodyPreview {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 10px;
+            min-height: 30px;
+        }
+
+        #bodyPreview {
+            min-height: 150px;
+        }
+
+        .test-buttons {
+            margin: 20px 0;
+            padding: 20px;
+            background: #e9ecef;
+            border-radius: 4px;
+        }
+
+        .test-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .test-btn:hover {
+            background: #0056b3;
+        }
+
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Template Editor Test Page</h1>
+    
+    <div class="debug-info" id="debugInfo">
+        Debug info will appear here...
+    </div>
+
+    <div class="test-buttons">
+        <button class="test-btn" onclick="showEditor()">Show Template Editor</button>
+        <button class="test-btn" onclick="hideEditor()">Hide Template Editor</button>
+        <button class="test-btn" onclick="testSwitchTab('preview')">Switch to Preview</button>
+        <button class="test-btn" onclick="testSwitchTab('edit')">Switch to Edit</button>
+        <button class="test-btn" onclick="testSwitchTab('variables')">Switch to Variables</button>
+        <button class="test-btn" onclick="runDiagnostics()">Run Diagnostics</button>
+    </div>
+
+    <!-- Template Preview/Edit Section -->
+    <div class="template-editor" id="templateEditor" style="display: none;">
+        <div class="editor-tabs">
+            <button class="tab-btn active" onclick="switchTab('preview')">Preview</button>
+            <button class="tab-btn" onclick="switchTab('edit')">Edit Template</button>
+            <button class="tab-btn" onclick="switchTab('variables')">Variables</button>
+        </div>
+        
+        <div class="tab-content">
+            <div id="previewTab" class="tab-pane active">
+                <div class="template-preview">
+                    <div class="preview-subject">
+                        <label>Subject:</label>
+                        <div id="subjectPreview">No content yet...</div>
+                    </div>
+                    <div class="preview-body">
+                        <label>Email Body:</label>
+                        <div id="bodyPreview">No content yet...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="editTab" class="tab-pane">
+                <div class="template-form">
+                    <div class="form-group">
+                        <label for="templateName">Template Name:</label>
+                        <input type="text" id="templateName" placeholder="Enter template name" value="Test Template">
+                    </div>
+                    <div class="form-group">
+                        <label for="templateCategory">Category:</label>
+                        <select id="templateCategory">
+                            <option value="follow-up">Follow-up</option>
+                            <option value="escalation">Escalation</option>
+                            <option value="summary">Summary</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="templateSubject">Subject:</label>
+                        <input type="text" id="templateSubject" placeholder="Enter email subject" value="Test Subject - {{poNumber}}">
+                    </div>
+                    <div class="form-group">
+                        <label for="templateBody">Email Body:</label>
+                        <textarea id="templateBody" rows="10" placeholder="Enter email body">Dear {{vendor}},
+
+This is a test email template with {{totalItems}} items.
+
+Best regards,
+Test User</textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="variablesTab" class="tab-pane">
+                <div class="variables-help">
+                    <h5>Available Variables:</h5>
+                    <div class="variable-list">
+                        <div class="variable-item"><code>{{poNumber}}</code> - Purchase Order Number</div>
+                        <div class="variable-item"><code>{{vendor}}</code> - Vendor Name</div>
+                        <div class="variable-item"><code>{{totalItems}}</code> - Total Outstanding Items</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const debugInfo = document.getElementById('debugInfo');
+            const timestamp = new Date().toLocaleTimeString();
+            debugInfo.innerHTML += `[${timestamp}] ${message}<br>`;
+            console.log(message);
+        }
+
+        function showEditor() {
+            log('showEditor called');
+            const editor = document.getElementById('templateEditor');
+            editor.style.display = 'block';
+            log('Template editor display set to: ' + editor.style.display);
+        }
+
+        function hideEditor() {
+            log('hideEditor called');
+            const editor = document.getElementById('templateEditor');
+            editor.style.display = 'none';
+            log('Template editor display set to: ' + editor.style.display);
+        }
+
+        function switchTab(tabName) {
+            log('switchTab called with: ' + tabName);
+            
+            // Hide all tab panes
+            const panes = document.querySelectorAll('.tab-pane');
+            log('Found ' + panes.length + ' tab panes');
+            
+            panes.forEach((pane, index) => {
+                pane.classList.remove('active');
+                log(`Pane ${index} (${pane.id}): removed active class`);
+            });
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab-btn');
+            log('Found ' + tabs.length + ' tab buttons');
+            
+            tabs.forEach((tab, index) => {
+                tab.classList.remove('active');
+                log(`Tab ${index}: removed active class`);
+            });
+            
+            // Show selected tab pane and activate tab
+            const targetPane = document.getElementById(tabName + 'Tab');
+            if (targetPane) {
+                targetPane.classList.add('active');
+                log('Added active class to: ' + targetPane.id);
+            } else {
+                log('ERROR: Could not find pane with ID: ' + tabName + 'Tab');
+            }
+            
+            const targetBtn = document.querySelector(`[onclick="switchTab('${tabName}')"]`);
+            if (targetBtn) {
+                targetBtn.classList.add('active');
+                log('Added active class to button for tab: ' + tabName);
+            } else {
+                log('ERROR: Could not find button for tab: ' + tabName);
+            }
+            
+            if (tabName === 'preview') {
+                updatePreview();
+            }
+        }
+
+        function testSwitchTab(tabName) {
+            log('testSwitchTab called for: ' + tabName);
+            showEditor();
+            setTimeout(() => {
+                switchTab(tabName);
+            }, 100);
+        }
+
+        function updatePreview() {
+            log('updatePreview called');
+            const subject = document.getElementById('templateSubject').value || 'No Subject';
+            const body = document.getElementById('templateBody').value || 'No Content';
+            
+            // Sample data for preview
+            const sampleData = {
+                poNumber: 'PO-12345',
+                vendor: 'Sample Vendor Inc.',
+                totalItems: 5
+            };
+
+            const previewSubject = replaceTemplateVariables(subject, sampleData);
+            const previewBody = replaceTemplateVariables(body, sampleData);
+
+            document.getElementById('subjectPreview').innerHTML = previewSubject;
+            document.getElementById('bodyPreview').innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">${previewBody}</pre>`;
+            
+            log('Preview updated - Subject: ' + previewSubject.substring(0, 50) + '...');
+        }
+
+        function replaceTemplateVariables(template, data) {
+            let result = template;
+            result = result.replace(/\{\{poNumber\}\}/g, data.poNumber || '');
+            result = result.replace(/\{\{vendor\}\}/g, data.vendor || '');
+            result = result.replace(/\{\{totalItems\}\}/g, data.totalItems || 0);
+            return result;
+        }
+
+        function runDiagnostics() {
+            log('=== RUNNING DIAGNOSTICS ===');
+            
+            // Check if elements exist
+            const editor = document.getElementById('templateEditor');
+            log('Template editor exists: ' + (editor ? 'YES' : 'NO'));
+            if (editor) {
+                log('Template editor display: ' + editor.style.display);
+                log('Template editor computed display: ' + window.getComputedStyle(editor).display);
+            }
+            
+            const panes = document.querySelectorAll('.tab-pane');
+            log('Tab panes found: ' + panes.length);
+            panes.forEach((pane, index) => {
+                log(`Pane ${index} (${pane.id}): active=${pane.classList.contains('active')}, display=${window.getComputedStyle(pane).display}`);
+            });
+            
+            const tabs = document.querySelectorAll('.tab-btn');
+            log('Tab buttons found: ' + tabs.length);
+            tabs.forEach((tab, index) => {
+                log(`Tab ${index} (${tab.textContent}): active=${tab.classList.contains('active')}`);
+            });
+            
+            log('=== DIAGNOSTICS COMPLETE ===');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOM loaded, initializing...');
+            
+            // Add event listeners for real-time preview updates
+            const subjectInput = document.getElementById('templateSubject');
+            const bodyInput = document.getElementById('templateBody');
+            
+            if (subjectInput && bodyInput) {
+                subjectInput.addEventListener('input', updatePreview);
+                bodyInput.addEventListener('input', updatePreview);
+                log('Event listeners added to template inputs');
+            }
+            
+            updatePreview();
+            log('Initialization complete');
+        });
+    </script>
+</body>
+</html>

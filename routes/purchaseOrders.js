@@ -20,12 +20,19 @@ const calculateUpcomingETA = (lineItems) => {
   
   const now = new Date();
   const upcomingETAs = lineItems
-    .filter(item => 
-      item.eta && 
-      new Date(item.eta) > now && 
-      !item.billVarianceField // Only consider items without Bill Variance Field values
-    )
-    .map(item => new Date(item.eta))
+    .filter(item => {
+      // Check for any type of ETA (eta, expectedArrivalDate, or trackingEstimatedDelivery)
+      const hasETA = item.eta || item.expectedArrivalDate || item.trackingEstimatedDelivery;
+      if (!hasETA) return false;
+      
+      // Use the best available ETA
+      const etaDate = item.eta || item.expectedArrivalDate || item.trackingEstimatedDelivery;
+      return new Date(etaDate) > now;
+    })
+    .map(item => {
+      const etaDate = item.eta || item.expectedArrivalDate || item.trackingEstimatedDelivery;
+      return new Date(etaDate);
+    })
     .sort((a, b) => a - b); // Sort chronologically
   
   return upcomingETAs.length > 0 ? upcomingETAs[0] : null;
@@ -808,21 +815,45 @@ router.get('/trouble-seed', async (req, res) => {
       {
         $addFields: {
           vendorData: { $arrayElemAt: ['$vendorInfo', 0] },
+          // Use the best available ETA: eta field first, then expectedArrivalDate, then trackingEstimatedDelivery
+          effectiveETA: {
+            $cond: {
+              if: { $and: [{ $ne: ['$eta', null] }, { $ne: ['$eta', ''] }] },
+              then: '$eta',
+              else: {
+                $cond: {
+                  if: { $and: [{ $ne: ['$expectedArrivalDate', null] }, { $ne: ['$expectedArrivalDate', ''] }] },
+                  then: '$expectedArrivalDate',
+                  else: {
+                    $cond: {
+                      if: { $and: [{ $ne: ['$trackingEstimatedDelivery', null] }, { $ne: ['$trackingEstimatedDelivery', ''] }] },
+                      then: '$trackingEstimatedDelivery',
+                      else: null
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $addFields: {
           etaStatus: {
             $cond: {
-              if: { $or: [{ $eq: ['$eta', null] }, { $eq: ['$eta', ''] }, { $not: ['$eta'] }] },
+              if: { $or: [{ $eq: ['$effectiveETA', null] }, { $eq: ['$effectiveETA', ''] }, { $not: ['$effectiveETA'] }] },
               then: 'no-eta',
               else: {
                 $cond: {
-                  if: { $lt: ['$eta', today] },
+                  if: { $lt: ['$effectiveETA', today] },
                   then: 'overdue',
                   else: {
                     $cond: {
-                      if: { $lte: ['$eta', sevenDaysFromNow] },
+                      if: { $lte: ['$effectiveETA', sevenDaysFromNow] },
                       then: 'approaching-soon',
                       else: {
                         $cond: {
-                          if: { $lte: ['$eta', fourteenDaysFromNow] },
+                          if: { $lte: ['$effectiveETA', fourteenDaysFromNow] },
                           then: 'approaching',
                           else: 'future'
                         }
@@ -835,11 +866,11 @@ router.get('/trouble-seed', async (req, res) => {
           },
           daysFromToday: {
             $cond: {
-              if: { $or: [{ $eq: ['$eta', null] }, { $eq: ['$eta', ''] }, { $not: ['$eta'] }] },
+              if: { $or: [{ $eq: ['$effectiveETA', null] }, { $eq: ['$effectiveETA', ''] }, { $not: ['$effectiveETA'] }] },
               then: null,
               else: {
                 $divide: [
-                  { $subtract: ['$eta', today] },
+                  { $subtract: ['$effectiveETA', today] },
                   86400000  // milliseconds in a day
                 ]
               }
