@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .email-header {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .email-content {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 400px;
+            background: white;
+        }
+        .attachment-list {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .attachment-item {
+            display: inline-flex;
+            align-items: center;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin: 5px;
+            text-decoration: none;
+            color: #495057;
+            transition: all 0.2s ease;
+        }
+        .attachment-item:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+        .email-actions {
+            position: sticky;
+            top: 0;
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            z-index: 1000;
+        }
+        .flag-indicator {
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+        .unread-indicator {
+            background: #007bff;
+            color: white;
+        }
+        .important-indicator {
+            background: #ffc107;
+            color: #212529;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- Action Bar -->
+        <div class="email-actions">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <button class="btn btn-outline-secondary" onclick="window.close()">
+                        <i class="fas fa-arrow-left"></i> Close
+                    </button>
+                    <a href="/email-client/inbox?mailbox=<%= encodeURIComponent(mailbox) %>" class="btn btn-outline-primary">
+                        <i class="fas fa-inbox"></i> Back to <%= mailbox %>
+                    </a>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="replyToEmail()">
+                        <i class="fas fa-reply"></i> Reply
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="replyAllToEmail()">
+                        <i class="fas fa-reply-all"></i> Reply All
+                    </button>
+                    <button class="btn btn-outline-info" onclick="forwardEmail()">
+                        <i class="fas fa-share"></i> Forward
+                    </button>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-h"></i> More
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="markAsUnread()"><i class="fas fa-envelope"></i> Mark as Unread</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="deleteEmail()"><i class="fas fa-trash"></i> Delete</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="printEmail()"><i class="fas fa-print"></i> Print</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="viewRawEmail()"><i class="fas fa-code"></i> View Source</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Header -->
+        <div class="email-header">
+            <div class="row">
+                <div class="col-12">
+                    <!-- Flags and Indicators -->
+                    <div class="mb-2">
+                        <% if (!email.flags.includes('\\Seen')) { %>
+                            <span class="flag-indicator unread-indicator">
+                                <i class="fas fa-circle"></i> Unread
+                            </span>
+                        <% } %>
+                        
+                        <% if (email.flags.includes('\\Flagged')) { %>
+                            <span class="flag-indicator important-indicator">
+                                <i class="fas fa-star"></i> Important
+                            </span>
+                        <% } %>
+                    </div>
+                    
+                    <!-- Subject -->
+                    <h2 class="mb-3"><%= email.subject %></h2>
+                    
+                    <!-- Email Details -->
+                    <div class="row">
+                        <div class="col-md-8">
+                            <strong>From:</strong> <%= email.from %><br>
+                            <strong>To:</strong> <%= email.to %><br>
+                            <% if (email.cc) { %>
+                                <strong>CC:</strong> <%= email.cc %><br>
+                            <% } %>
+                            <% if (email.bcc) { %>
+                                <strong>BCC:</strong> <%= email.bcc %><br>
+                            <% } %>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <strong>Date:</strong><br>
+                            <%= new Date(email.date).toLocaleDateString() %><br>
+                            <%= new Date(email.date).toLocaleTimeString() %>
+                            
+                            <br><br>
+                            <small class="text-muted">
+                                Message ID: <%= email.messageId %>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attachments -->
+        <% if (email.attachments && email.attachments.length > 0) { %>
+        <div class="attachment-list">
+            <h6><i class="fas fa-paperclip"></i> Attachments (<%= email.attachments.length %>)</h6>
+            <div class="mt-2">
+                <% email.attachments.forEach(attachment => { %>
+                    <a href="#" class="attachment-item" onclick="downloadAttachment('<%= attachment.filename %>')">
+                        <i class="fas fa-file me-2"></i>
+                        <%= attachment.filename %>
+                        <% if (attachment.size) { %>
+                            <small class="text-muted ms-2">(<%= (attachment.size / 1024).toFixed(1) %>KB)</small>
+                        <% } %>
+                    </a>
+                <% }); %>
+            </div>
+        </div>
+        <% } %>
+
+        <!-- Email Content -->
+        <div class="email-content">
+            <% if (email.html) { %>
+                <!-- HTML Content -->
+                <div id="html-content">
+                    <%- email.html %>
+                </div>
+                
+                <% if (email.text) { %>
+                <div class="mt-3">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="togglePlainText()">
+                        <i class="fas fa-eye"></i> View Plain Text
+                    </button>
+                </div>
+                <div id="plain-content" style="display: none;">
+                    <pre style="white-space: pre-wrap; font-family: inherit;"><%= email.text %></pre>
+                </div>
+                <% } %>
+            <% } else if (email.text) { %>
+                <!-- Plain Text Content -->
+                <pre style="white-space: pre-wrap; font-family: inherit;"><%= email.text %></pre>
+            <% } else { %>
+                <div class="text-center text-muted py-5">
+                    <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                    <h5>No Content Available</h5>
+                    <p>This email appears to have no readable content.</p>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="text-center mt-4 mb-5">
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="replyToEmail()">
+                    <i class="fas fa-reply"></i> Reply
+                </button>
+                <button class="btn btn-outline-primary" onclick="replyAllToEmail()">
+                    <i class="fas fa-reply-all"></i> Reply All
+                </button>
+                <button class="btn btn-outline-info" onclick="forwardEmail()">
+                    <i class="fas fa-share"></i> Forward
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Raw Email Modal -->
+    <div class="modal fade" id="rawEmailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Email Source</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <pre style="font-size: 0.8rem; max-height: 500px; overflow-y: auto;"><%= email.raw %></pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Reply to email
+        function replyToEmail() {
+            const params = new URLSearchParams({
+                replyTo: '<%= email.uid %>',
+                subject: 'Re: <%= email.subject.replace(/'/g, "\\'") %>',
+                to: '<%= email.from.replace(/'/g, "\\'") %>'
+            });
+            
+            window.opener.location.href = `/email-client/compose?${params.toString()}`;
+            window.close();
+        }
+
+        // Reply all to email
+        function replyAllToEmail() {
+            let recipients = '<%= email.from.replace(/'/g, "\\'") %>';
+            <% if (email.to && email.to !== process.env.EMAIL_USER) { %>
+                recipients += ', <%= email.to.replace(/'/g, "\\'") %>';
+            <% } %>
+            
+            const params = new URLSearchParams({
+                replyTo: '<%= email.uid %>',
+                subject: 'Re: <%= email.subject.replace(/'/g, "\\'") %>',
+                to: recipients
+            });
+            
+            window.opener.location.href = `/email-client/compose?${params.toString()}`;
+            window.close();
+        }
+
+        // Forward email
+        function forwardEmail() {
+            const params = new URLSearchParams({
+                forward: '<%= email.uid %>',
+                subject: 'Fwd: <%= email.subject.replace(/'/g, "\\'") %>'
+            });
+            
+            window.opener.location.href = `/email-client/compose?${params.toString()}`;
+            window.close();
+        }
+
+        // Mark as unread
+        function markAsUnread() {
+            fetch(`/email-client/inbox/email/<%= email.uid %>/mark`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'unread',
+                    mailbox: '<%= mailbox %>'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Email marked as unread');
+                    if (window.opener) {
+                        window.opener.location.reload();
+                    }
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error marking as unread');
+            });
+        }
+
+        // Delete email
+        function deleteEmail() {
+            if (confirm('Are you sure you want to delete this email?')) {
+                fetch(`/email-client/inbox/email/<%= email.uid %>`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        mailbox: '<%= mailbox %>'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Email deleted');
+                        if (window.opener) {
+                            window.opener.location.reload();
+                        }
+                        window.close();
+                    } else {
+                        alert('Error deleting email: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting email');
+                });
+            }
+        }
+
+        // Toggle between HTML and plain text view
+        function togglePlainText() {
+            const htmlContent = document.getElementById('html-content');
+            const plainContent = document.getElementById('plain-content');
+            
+            if (plainContent.style.display === 'none') {
+                htmlContent.style.display = 'none';
+                plainContent.style.display = 'block';
+            } else {
+                htmlContent.style.display = 'block';
+                plainContent.style.display = 'none';
+            }
+        }
+
+        // Print email
+        function printEmail() {
+            window.print();
+        }
+
+        // View raw email source
+        function viewRawEmail() {
+            new bootstrap.Modal(document.getElementById('rawEmailModal')).show();
+        }
+
+        // Download attachment (placeholder)
+        function downloadAttachment(filename) {
+            alert(`Download functionality for "${filename}" coming soon!`);
+        }
+    </script>
+</body>
+</html>

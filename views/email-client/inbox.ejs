@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .email-row {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+        .email-row:hover {
+            background-color: #f8f9fa;
+        }
+        .email-row.unread {
+            font-weight: 600;
+            background-color: #f8f9ff;
+            border-left-color: #007bff;
+        }
+        .email-preview {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .mailbox-selector {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .attachment-icon {
+            color: #6c757d;
+            font-size: 0.8rem;
+        }
+        .sidebar {
+            background: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            height: calc(100vh - 56px);
+            overflow-y: auto;
+        }
+        .sidebar-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e9ecef;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .sidebar-item:hover {
+            background-color: #e9ecef;
+        }
+        .sidebar-item.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .unread-count {
+            background: #dc3545;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center;
+        }
+        .email-actions {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .email-row:hover .email-actions {
+            opacity: 1;
+        }
+        .loading-spinner {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg" style="background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/email-client">
+                <i class="fas fa-envelope text-primary"></i> Enhanced Email Client
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/email-client"><i class="fas fa-home"></i> Dashboard</a>
+                <a class="nav-link" href="/email-client/compose"><i class="fas fa-edit"></i> Compose</a>
+                <a class="nav-link active" href="/email-client/inbox"><i class="fas fa-inbox"></i> Gmail Inbox</a>
+                <a class="nav-link" href="/email-client/history"><i class="fas fa-history"></i> History</a>
+                <span class="navbar-text">Welcome, <%= user.username %>!</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 col-md-4 p-0 sidebar">
+                <div class="p-3">
+                    <h6><i class="fas fa-folder text-primary"></i> Gmail Folders</h6>
+                </div>
+                
+                <div class="sidebar-item <%= currentMailbox === 'INBOX' ? 'active' : '' %>" onclick="switchMailbox('INBOX')">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-inbox me-2"></i> Inbox
+                        </div>
+                        <span class="unread-count" id="inbox-count">0</span>
+                    </div>
+                </div>
+                
+                <div class="sidebar-item <%= currentMailbox === '[Gmail]/Sent Mail' ? 'active' : '' %>" onclick="switchMailbox('[Gmail]/Sent Mail')">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-paper-plane me-2"></i> Sent
+                        </div>
+                        <span class="unread-count" id="sent-count">0</span>
+                    </div>
+                </div>
+                
+                <div class="sidebar-item <%= currentMailbox === '[Gmail]/Drafts' ? 'active' : '' %>" onclick="switchMailbox('[Gmail]/Drafts')">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-file-alt me-2"></i> Drafts
+                        </div>
+                        <span class="unread-count" id="drafts-count">0</span>
+                    </div>
+                </div>
+                
+                <div class="sidebar-item <%= currentMailbox === '[Gmail]/Spam' ? 'active' : '' %>" onclick="switchMailbox('[Gmail]/Spam')">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-exclamation-triangle me-2"></i> Spam
+                        </div>
+                        <span class="unread-count" id="spam-count">0</span>
+                    </div>
+                </div>
+                
+                <div class="sidebar-item <%= currentMailbox === '[Gmail]/Trash' ? 'active' : '' %>" onclick="switchMailbox('[Gmail]/Trash')">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-trash me-2"></i> Trash
+                        </div>
+                        <span class="unread-count" id="trash-count">0</span>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="p-3 mt-3">
+                    <h6><i class="fas fa-bolt text-warning"></i> Quick Actions</h6>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary btn-sm" onclick="refreshInbox()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                        <a href="/email-client/compose" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus"></i> New Email
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9 col-md-8">
+                <div class="p-3">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>
+                            <i class="fas fa-inbox text-primary"></i>
+                            <%= currentMailbox %> 
+                            <span class="badge bg-secondary">(<%= stats.total %>)</span>
+                        </h4>
+                        
+                        <div class="d-flex gap-2">
+                            <div class="loading-spinner">
+                                <i class="fas fa-spinner fa-spin"></i> Loading...
+                            </div>
+                            
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" onclick="markAllAsRead()">
+                                    <i class="fas fa-envelope-open"></i> Mark All Read
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="refreshInbox()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search Bar -->
+                    <div class="mailbox-selector">
+                        <form method="GET" action="/email-client/inbox" class="row g-3">
+                            <input type="hidden" name="mailbox" value="<%= currentMailbox %>">
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" name="search" 
+                                       value="<%= query.search || '' %>" 
+                                       placeholder="Search emails...">
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" name="unseen">
+                                    <option value="">All Emails</option>
+                                    <option value="true" <%= query.unseen === 'true' ? 'selected' : '' %>>Unread Only</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Email List -->
+                    <div class="card">
+                        <div class="card-body p-0">
+                            <% if (emails.length > 0) { %>
+                                <% emails.forEach(email => { %>
+                                <div class="email-row p-3 border-bottom <%= email.flags.includes('\\Seen') ? '' : 'unread' %>" 
+                                     onclick="viewEmail(<%= email.uid %>)" data-uid="<%= email.uid %>">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-1">
+                                            <input type="checkbox" class="form-check-input" onclick="event.stopPropagation()" onchange="toggleEmailSelection(<%= email.uid %>)">
+                                        </div>
+                                        
+                                        <div class="col-md-3">
+                                            <div class="d-flex align-items-center">
+                                                <% if (!email.flags.includes('\\Seen')) { %>
+                                                    <i class="fas fa-circle text-primary me-2" style="font-size: 0.5rem;"></i>
+                                                <% } %>
+                                                <strong class="text-truncate"><%= email.from.replace(/<.*?>/g, '') %></strong>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-5">
+                                            <div class="text-truncate">
+                                                <strong><%= email.subject %></strong>
+                                                <% if (email.attachments && email.attachments.length > 0) { %>
+                                                    <i class="fas fa-paperclip attachment-icon ms-2" title="Has attachments"></i>
+                                                <% } %>
+                                            </div>
+                                            <div class="email-preview text-truncate">
+                                                <%= email.preview %>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-2">
+                                            <small class="text-muted">
+                                                <%= new Date(email.date).toLocaleDateString() %>
+                                            </small>
+                                        </div>
+                                        
+                                        <div class="col-md-1">
+                                            <div class="email-actions btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" onclick="markAsRead(<%= email.uid %>, event)" title="Mark as read">
+                                                    <i class="fas fa-envelope-open"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" onclick="deleteEmail(<%= email.uid %>, event)" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }); %>
+                            <% } else { %>
+                                <div class="text-center py-5">
+                                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No emails found</h5>
+                                    <p class="text-muted">
+                                        <% if (query.search) { %>
+                                            No emails match your search criteria.
+                                        <% } else { %>
+                                            This folder is empty.
+                                        <% } %>
+                                    </p>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <% if (pagination.total > 1) { %>
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <% if (pagination.current > 1) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<%= pagination.current - 1 %>&mailbox=<%= encodeURIComponent(currentMailbox) %><%= query.search ? '&search=' + encodeURIComponent(query.search) : '' %>">
+                                    <i class="fas fa-chevron-left"></i> Previous
+                                </a>
+                            </li>
+                            <% } %>
+                            
+                            <% for (let i = Math.max(1, pagination.current - 2); i <= Math.min(pagination.total, pagination.current + 2); i++) { %>
+                            <li class="page-item <%= i === pagination.current ? 'active' : '' %>">
+                                <a class="page-link" href="?page=<%= i %>&mailbox=<%= encodeURIComponent(currentMailbox) %><%= query.search ? '&search=' + encodeURIComponent(query.search) : '' %>">
+                                    <%= i %>
+                                </a>
+                            </li>
+                            <% } %>
+                            
+                            <% if (pagination.current < pagination.total) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<%= pagination.current + 1 %>&mailbox=<%= encodeURIComponent(currentMailbox) %><%= query.search ? '&search=' + encodeURIComponent(query.search) : '' %>">
+                                    Next <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            <% } %>
+                        </ul>
+                    </nav>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedEmails = [];
+
+        // Load mailbox stats on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMailboxStats();
+        });
+
+        // Load mailbox statistics
+        function loadMailboxStats() {
+            fetch('/email-client/stats')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateMailboxCounts(data.stats);
+                    }
+                })
+                .catch(error => console.error('Error loading stats:', error));
+        }
+
+        // Update mailbox unread counts
+        function updateMailboxCounts(stats) {
+            const mappings = {
+                'INBOX': 'inbox',
+                '[Gmail]/Sent Mail': 'sent',
+                '[Gmail]/Drafts': 'drafts',
+                '[Gmail]/Spam': 'spam',
+                '[Gmail]/Trash': 'trash'
+            };
+
+            Object.keys(mappings).forEach(mailbox => {
+                const element = document.getElementById(mappings[mailbox] + '-count');
+                if (element && stats[mailbox]) {
+                    element.textContent = stats[mailbox].unseen || 0;
+                    element.style.display = stats[mailbox].unseen > 0 ? 'inline-block' : 'none';
+                }
+            });
+        }
+
+        // Switch mailbox
+        function switchMailbox(mailbox) {
+            showLoading(true);
+            window.location.href = `/email-client/inbox?mailbox=${encodeURIComponent(mailbox)}`;
+        }
+
+        // View email
+        function viewEmail(uid) {
+            const mailbox = '<%= currentMailbox %>';
+            window.open(`/email-client/inbox/email/${uid}?mailbox=${encodeURIComponent(mailbox)}&markRead=true`, '_blank');
+        }
+
+        // Mark email as read
+        function markAsRead(uid, event) {
+            event.stopPropagation();
+            
+            fetch(`/email-client/inbox/email/${uid}/mark`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'read',
+                    mailbox: '<%= currentMailbox %>'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const row = document.querySelector(`[data-uid="${uid}"]`);
+                    if (row) {
+                        row.classList.remove('unread');
+                        const dot = row.querySelector('.fa-circle');
+                        if (dot) dot.remove();
+                    }
+                    loadMailboxStats(); // Refresh counts
+                }
+            })
+            .catch(error => console.error('Error marking as read:', error));
+        }
+
+        // Delete email
+        function deleteEmail(uid, event) {
+            event.stopPropagation();
+            
+            if (confirm('Are you sure you want to delete this email?')) {
+                fetch(`/email-client/inbox/email/${uid}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        mailbox: '<%= currentMailbox %>'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const row = document.querySelector(`[data-uid="${uid}"]`);
+                        if (row) {
+                            row.style.opacity = '0.5';
+                            setTimeout(() => row.remove(), 300);
+                        }
+                        loadMailboxStats(); // Refresh counts
+                    } else {
+                        alert('Error deleting email: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting email:', error);
+                    alert('Error deleting email');
+                });
+            }
+        }
+
+        // Refresh inbox
+        function refreshInbox() {
+            showLoading(true);
+            window.location.reload();
+        }
+
+        // Mark all as read (placeholder)
+        function markAllAsRead() {
+            alert('Mark all as read functionality coming soon!');
+        }
+
+        // Toggle email selection
+        function toggleEmailSelection(uid) {
+            const index = selectedEmails.indexOf(uid);
+            if (index > -1) {
+                selectedEmails.splice(index, 1);
+            } else {
+                selectedEmails.push(uid);
+            }
+        }
+
+        // Show/hide loading spinner
+        function showLoading(show) {
+            const spinner = document.querySelector('.loading-spinner');
+            if (spinner) {
+                spinner.style.display = show ? 'block' : 'none';
+            }
+        }
+    </script>
+</body>
+</html>

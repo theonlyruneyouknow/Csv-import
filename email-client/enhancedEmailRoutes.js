@@ -8,6 +8,9 @@ const router = express.Router();
 // Import email service (existing)
 const emailService = require('../services/emailService');
 
+// Import Gmail IMAP service for reading server emails
+const gmailImapService = require('../services/gmailImapService');
+
 // Try to import new models, but fall back gracefully if they don't exist
 let EmailHistory, EmailContact, EmailSignature;
 try {
@@ -664,6 +667,180 @@ router.get('/signatures', async (req, res) => {
         });
     } catch (error) {
         console.error('Signatures error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ===== GMAIL INBOX ROUTES =====
+
+// Get Gmail mailboxes (folders)
+router.get('/mailboxes', async (req, res) => {
+    try {
+        const mailboxes = await gmailImapService.getMailboxes();
+        res.json({ success: true, mailboxes });
+    } catch (error) {
+        console.error('Error fetching mailboxes:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get emails from Gmail server
+router.get('/inbox', async (req, res) => {
+    try {
+        const mailbox = req.query.mailbox || 'INBOX';
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const offset = (page - 1) * limit;
+        
+        // Open the specified mailbox
+        const box = await gmailImapService.openMailbox(mailbox);
+        
+        // Fetch emails with pagination
+        const emails = await gmailImapService.fetchEmails({
+            limit,
+            offset,
+            search: req.query.search,
+            unseen: req.query.unseen === 'true'
+        });
+        
+        // Get mailbox stats
+        const stats = await gmailImapService.getMailboxStats(mailbox);
+        
+        if (req.headers.accept && req.headers.accept.includes('application/json')) {
+            res.json({
+                success: true,
+                emails,
+                stats,
+                pagination: {
+                    current: page,
+                    limit,
+                    total: Math.ceil(stats.total / limit)
+                }
+            });
+        } else {
+            res.render('email-client/inbox', {
+                title: `${mailbox} - Gmail Inbox`,
+                user: req.user,
+                emails,
+                stats,
+                currentMailbox: mailbox,
+                pagination: {
+                    current: page,
+                    limit,
+                    total: Math.ceil(stats.total / limit)
+                },
+                query: req.query
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching Gmail inbox:', error);
+        res.status(500).render('error', {
+            title: 'Gmail Connection Error',
+            user: req.user,
+            error: {
+                message: 'Unable to connect to Gmail',
+                details: error.message,
+                suggestion: 'Please check your Gmail App Password and IMAP settings'
+            }
+        });
+    }
+});
+
+// Get specific email by UID
+router.get('/inbox/email/:uid', async (req, res) => {
+    try {
+        const uid = req.params.uid;
+        const mailbox = req.query.mailbox || 'INBOX';
+        
+        // Open mailbox
+        await gmailImapService.openMailbox(mailbox);
+        
+        // Fetch specific email
+        const email = await gmailImapService.getEmailByUID(parseInt(uid));
+        
+        if (!email) {
+            return res.status(404).json({ success: false, error: 'Email not found' });
+        }
+        
+        // Mark as read if requested
+        if (req.query.markRead === 'true') {
+            await gmailImapService.markAsRead(parseInt(uid));
+        }
+        
+        if (req.headers.accept && req.headers.accept.includes('application/json')) {
+            res.json({ success: true, email });
+        } else {
+            res.render('email-client/email-view', {
+                title: email.subject,
+                user: req.user,
+                email,
+                mailbox
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching email:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Mark email as read/unread
+router.post('/inbox/email/:uid/mark', async (req, res) => {
+    try {
+        const uid = parseInt(req.params.uid);
+        const action = req.body.action; // 'read' or 'unread'
+        const mailbox = req.body.mailbox || 'INBOX';
+        
+        await gmailImapService.openMailbox(mailbox, false); // Open with write access
+        
+        if (action === 'read') {
+            await gmailImapService.markAsRead(uid);
+        } else if (action === 'unread') {
+            await gmailImapService.markAsUnread(uid);
+        } else {
+            return res.status(400).json({ success: false, error: 'Invalid action' });
+        }
+        
+        res.json({ success: true, message: `Email marked as ${action}` });
+    } catch (error) {
+        console.error('Error marking email:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Delete email
+router.delete('/inbox/email/:uid', async (req, res) => {
+    try {
+        const uid = parseInt(req.params.uid);
+        const mailbox = req.body.mailbox || 'INBOX';
+        
+        await gmailImapService.openMailbox(mailbox, false); // Open with write access
+        await gmailImapService.deleteEmail(uid);
+        
+        res.json({ success: true, message: 'Email deleted' });
+    } catch (error) {
+        console.error('Error deleting email:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get mailbox statistics
+router.get('/stats', async (req, res) => {
+    try {
+        const mailboxes = ['INBOX', '[Gmail]/Sent Mail', '[Gmail]/Drafts', '[Gmail]/Spam', '[Gmail]/Trash'];
+        const stats = {};
+        
+        for (const mailbox of mailboxes) {
+            try {
+                stats[mailbox] = await gmailImapService.getMailboxStats(mailbox);
+            } catch (error) {
+                console.warn(`Could not get stats for ${mailbox}:`, error.message);
+                stats[mailbox] = { total: 0, new: 0, unseen: 0, name: mailbox, error: true };
+            }
+        }
+        
+        res.json({ success: true, stats });
+    } catch (error) {
+        console.error('Error fetching stats:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
