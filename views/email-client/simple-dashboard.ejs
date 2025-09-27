@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <%- include('../partials/navigation-styles') %>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .email-container {
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+        
+        .compose-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 1.5rem;
+        }
+        
+        .templates-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .template-btn {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            margin: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-block;
+            text-decoration: none;
+            color: #495057;
+        }
+        
+        .template-btn:hover {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+            text-decoration: none;
+        }
+        
+        .priority-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .priority-normal { background: #e9ecef; color: #495057; }
+        .priority-high { background: #fff3cd; color: #856404; }
+        .priority-urgent { background: #f8d7da; color: #721c24; }
+        
+        .success-message {
+            background: #d1edff;
+            border: 1px solid #007bff;
+            color: #004085;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #dc3545;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .template-variables {
+            background: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 0.9em;
+        }
+        
+        .variable-tag {
+            background: #007bff;
+            color: white;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 0.8em;
+        }
+        
+        @media (max-width: 768px) {
+            .email-container {
+                margin: 1rem;
+            }
+            
+            .template-btn {
+                display: block;
+                width: 100%;
+                margin: 0.25rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/navigation', { currentPage: 'email-client' }) %>
+    
+    <div class="container-fluid">
+        <div class="email-container">
+            <div class="compose-card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-envelope me-2"></i>Email Composer
+                    </h4>
+                    <small class="opacity-75">Send emails using the TSC system</small>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Templates Section -->
+                    <div class="templates-section">
+                        <h6 class="mb-3">
+                            <i class="fas fa-file-alt me-2"></i>Quick Templates
+                        </h6>
+                        <div id="templateButtons">
+                            <span class="template-btn" onclick="loadTemplate('vendor_inquiry')">
+                                <i class="fas fa-question-circle me-1"></i>Vendor Inquiry
+                            </span>
+                            <span class="template-btn" onclick="loadTemplate('order_status')">
+                                <i class="fas fa-clock me-1"></i>Order Status
+                            </span>
+                            <span class="template-btn" onclick="loadTemplate('delivery_confirmation')">
+                                <i class="fas fa-truck me-1"></i>Delivery Confirmation
+                            </span>
+                            <span class="template-btn" onclick="clearForm()">
+                                <i class="fas fa-eraser me-1"></i>Clear Form
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Email Form -->
+                    <form id="emailForm">
+                        <div class="row">
+                            <div class="col-md-9">
+                                <div class="mb-3">
+                                    <label for="emailTo" class="form-label">
+                                        <i class="fas fa-user me-1"></i>To
+                                    </label>
+                                    <input type="email" class="form-control" id="emailTo" name="to" required 
+                                           placeholder="recipient@example.com">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="priority" class="form-label">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>Priority
+                                    </label>
+                                    <select class="form-select" id="priority" name="priority">
+                                        <option value="normal">Normal</option>
+                                        <option value="high">High</option>
+                                        <option value="urgent">Urgent</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="emailSubject" class="form-label">
+                                <i class="fas fa-tag me-1"></i>Subject
+                            </label>
+                            <input type="text" class="form-control" id="emailSubject" name="subject" required 
+                                   placeholder="Email subject">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="emailMessage" class="form-label">
+                                <i class="fas fa-edit me-1"></i>Message
+                            </label>
+                            <textarea class="form-control" id="emailMessage" name="message" rows="10" required 
+                                      placeholder="Enter your message here..."></textarea>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Send Email
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Success/Error Messages -->
+                    <div id="successMessage" class="success-message">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span id="successText">Email sent successfully!</span>
+                    </div>
+                    
+                    <div id="errorMessage" class="error-message">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <span id="errorText">Error sending email.</span>
+                    </div>
+                    
+                    <!-- Template Variables Help -->
+                    <div class="template-variables">
+                        <h6><i class="fas fa-info-circle me-2"></i>Template Variables</h6>
+                        <p class="mb-2">You can use these variables in your templates:</p>
+                        <span class="variable-tag">{{vendorName}}</span>
+                        <span class="variable-tag">{{poNumber}}</span>
+                        <span class="variable-tag">{{senderName}}</span>
+                        <span class="variable-tag">{{currentStatus}}</span>
+                        <span class="variable-tag">{{expectedDate}}</span>
+                        <span class="variable-tag">{{deliveryAddress}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <%- include('../partials/navigation-scripts') %>
+    
+    <script>
+        let templates = {};
+        
+        // Load templates on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetch('/email-client/templates');
+                const result = await response.json();
+                if (result.success) {
+                    result.templates.forEach(template => {
+                        templates[template.id] = template;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading templates:', error);
+            }
+        });
+        
+        // Load a template
+        function loadTemplate(templateId) {
+            const template = templates[templateId];
+            if (!template) return;
+            
+            document.getElementById('emailSubject').value = template.subject;
+            document.getElementById('emailMessage').value = template.content;
+            
+            // Auto-replace some common variables
+            const senderName = '<%= user.firstName %> <%= user.lastName %>';
+            
+            const subject = document.getElementById('emailSubject').value
+                .replace('{{senderName}}', senderName);
+            const message = document.getElementById('emailMessage').value
+                .replace('{{senderName}}', senderName);
+                
+            document.getElementById('emailSubject').value = subject;
+            document.getElementById('emailMessage').value = message;
+        }
+        
+        // Clear form
+        function clearForm() {
+            document.getElementById('emailForm').reset();
+            hideMessages();
+        }
+        
+        // Show success message
+        function showSuccess(message) {
+            document.getElementById('successText').textContent = message;
+            document.getElementById('successMessage').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'none';
+            }, 5000);
+        }
+        
+        // Show error message
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+        
+        // Hide messages
+        function hideMessages() {
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+        
+        // Handle form submission
+        document.getElementById('emailForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const emailData = Object.fromEntries(formData);
+            
+            // Show loading state
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+            submitButton.disabled = true;
+            
+            hideMessages();
+            
+            try {
+                const response = await fetch('/email-client/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(emailData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccess(result.message);
+                    this.reset(); // Clear form on success
+                } else {
+                    showError(result.error);
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            } finally {
+                // Restore button state
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

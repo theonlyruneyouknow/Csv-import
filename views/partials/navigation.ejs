@@ -28,6 +28,7 @@
             <a href="/organic-vendors" class="nav-accordion-item <%= currentPage === 'organic-vendors' ? 'active' : '' %>">🌱 Organic Vendors</a>
             <a href="/purchase-orders/trouble-seed" class="nav-accordion-item <%= currentPage === 'trouble-seed' ? 'active' : '' %>">⚠️ Trouble Seed</a>
             <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item <%= currentPage === 'orphaned-items' ? 'active' : '' %>">🧹 Orphaned Items</a>
+            <a href="/email-client" class="nav-accordion-item <%= currentPage === 'email-client' ? 'active' : '' %>">📧 Email Client</a>
             
             <% if (typeof user !== 'undefined' && user && (user.role === 'admin' || user.role === 'manager')) { %>
             <div class="nav-accordion-divider"></div>

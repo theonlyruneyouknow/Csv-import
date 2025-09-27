@@ -21,6 +21,7 @@ const medicineRoutes = require('./routes/medicine');
 const bulletinRoutes = require('./routes/bulletin');
 const hymnRoutes = require('./routes/hymns');
 const announcementRoutes = require('./routes/announcements');
+const emailClientRoutes = require('./email-client/enhancedEmailRoutes');
 
 // Import authentication middleware
 const { ensureAuthenticated, ensureApproved, logPageView } = require('./middleware/auth');
@@ -547,6 +548,7 @@ app.use('/receiving', ensureAuthenticated, ensureApproved, receivingRoutes);
 app.use('/email-templates', ensureAuthenticated, ensureApproved, emailTemplateRoutes);
 app.use('/dropship', ensureAuthenticated, ensureApproved, dropshipRoutes);
 app.use('/dropship-test', ensureAuthenticated, ensureApproved, dropshipTestRoutes);
+app.use('/email-client', ensureAuthenticated, ensureApproved, emailClientRoutes);
 app.use('/food', ensureAuthenticated, ensureApproved, foodRoutes);
 app.use('/story', ensureAuthenticated, ensureApproved, storyRoutes);
 app.use('/medicine', ensureAuthenticated, ensureApproved, medicineRoutes);

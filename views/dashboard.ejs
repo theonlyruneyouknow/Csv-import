@@ -2953,6 +2953,9 @@
                                 <% if (user.permissions.accessOrphanedItems) { %>
                                     <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
                                 <% } %>
+                                <% if (user.permissions.accessEmailClient || user.role === 'admin' || user.role === 'manager') { %>
+                                    <a href="/email-client" class="nav-accordion-item">📧 Email Client</a>
+                                <% } %>
                             <% } else { %>
                                 <!-- Fallback for users without defined permissions -->
                                 <% if (user && (user.role === 'admin' || user.role === 'manager')) { %>
@@ -2960,6 +2963,7 @@
                                     <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
                                     <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
                                     <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
+                                    <a href="/email-client" class="nav-accordion-item">📧 Email Client</a>
                                 <% } %>
                             <% } %>
                             

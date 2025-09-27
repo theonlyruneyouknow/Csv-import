@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Client - TSC</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.        // Provider change handler
+        document.getElementById('provider').addEventListener('change', function() {
+            const provider = this.value;
+            const customSettings = document.getElementById('customSettings');
+            const gmailGuide = document.getElementById('gmailGuide');
+            const outlookGuide = document.getElementById('outlookGuide');
+            const yahooGuide = document.getElementById('yahooGuide');
+            
+            // Hide all guides first
+            gmailGuide.style.display = 'none';
+            outlookGuide.style.display = 'none';
+            yahooGuide.style.display = 'none';
+            
+            if (provider === 'custom') {
+                customSettings.style.display = 'block';
+            } else {
+                customSettings.style.display = 'none';
+                
+                // Show appropriate guide
+                if (provider === 'gmail') {
+                    gmailGuide.style.display = 'block';
+                } else if (provider === 'outlook') {
+                    outlookGuide.style.display = 'block';
+                } else if (provider === 'yahoo') {
+                    yahooGuide.style.display = 'block';
+                }
+            }
+        });"stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .email-sidebar {
+            height: calc(100vh - 120px);
+            overflow-y: auto;
+            border-right: 1px solid #ddd;
+        }
+        .email-content {
+            height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+        .email-list-item {
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .email-list-item:hover {
+            background-color: #f8f9fa;
+        }
+        .email-list-item.unread {
+            background-color: #fff3cd;
+        }
+        .email-list-item.selected {
+            background-color: #d1ecf1;
+        }
+        .compose-modal .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .folder-item {
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 2px 0;
+        }
+        .folder-item:hover {
+            background-color: #e9ecef;
+        }
+        .folder-item.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .setup-card {
+            max-width: 500px;
+            margin: 2rem auto;
+        }
+        .email-actions {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 100;
+            border-bottom: 1px solid #ddd;
+        }
+        .setup-guide {
+            font-size: 0.9em;
+        }
+        .setup-guide ol {
+            padding-left: 1.2em;
+        }
+        .setup-guide li {
+            margin-bottom: 0.3em;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-seedling me-2"></i>TSC Dashboard
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>Home</a>
+                <a class="nav-link" href="/dashboard"><i class="fas fa-tachometer-alt me-1"></i>Dashboard</a>
+                <a class="nav-link active" href="/email-client"><i class="fas fa-envelope me-1"></i>Email</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-3">
+        <!-- Account Setup Card -->
+        <div id="setupCard" class="card setup-card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Email Account Setup</h5>
+            </div>
+            <div class="card-body">
+                <form id="setupForm">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <div class="form-text">
+                            <strong>Important:</strong> 
+                            <ul class="mb-0 mt-1">
+                                <li><strong>Gmail:</strong> Use an <a href="https://support.google.com/accounts/answer/185833" target="_blank">App Password</a>, not your regular password</li>
+                                <li><strong>Outlook:</strong> Use an <a href="https://support.microsoft.com/account-billing/manage-app-passwords-d6f7c83a-61e9-4c33-bbf4-a9d5d0e9e16b" target="_blank">App Password</a> if 2FA is enabled</li>
+                                <li><strong>Yahoo:</strong> Use an <a href="https://help.yahoo.com/kb/generate-third-party-passwords-sln15241.html" target="_blank">App Password</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="provider" class="form-label">Email Provider</label>
+                        <select class="form-select" id="provider" name="provider">
+                            <option value="gmail">Gmail</option>
+                            <option value="outlook">Outlook/Hotmail</option>
+                            <option value="yahoo">Yahoo</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Gmail Setup Guide -->
+                    <div id="gmailGuide" class="alert alert-info">
+                        <h6><i class="fab fa-google me-2"></i>Gmail Setup Instructions:</h6>
+                        <ol class="mb-0">
+                            <li>Go to your <a href="https://myaccount.google.com/" target="_blank">Google Account settings</a></li>
+                            <li>Click on "Security" → "2-Step Verification" (enable if not already)</li>
+                            <li>Click on "App passwords"</li>
+                            <li>Select "Mail" and "Other" → enter "TSC Email Client"</li>
+                            <li>Copy the 16-character app password and use it in the password field above</li>
+                        </ol>
+                    </div>
+                    
+                    <!-- Outlook Setup Guide -->
+                    <div id="outlookGuide" class="alert alert-primary" style="display: none;">
+                        <h6><i class="fab fa-microsoft me-2"></i>Outlook Setup Instructions:</h6>
+                        <ol class="mb-0">
+                            <li>Go to your <a href="https://account.microsoft.com/security" target="_blank">Microsoft Account security</a></li>
+                            <li>Click on "Advanced security options"</li>
+                            <li>Click on "App passwords"</li>
+                            <li>Click "Create a new app password"</li>
+                            <li>Copy the app password and use it in the password field above</li>
+                        </ol>
+                    </div>
+                    
+                    <!-- Yahoo Setup Guide -->
+                    <div id="yahooGuide" class="alert alert-warning" style="display: none;">
+                        <h6><i class="fab fa-yahoo me-2"></i>Yahoo Setup Instructions:</h6>
+                        <ol class="mb-0">
+                            <li>Go to your <a href="https://login.yahoo.com/account/security" target="_blank">Yahoo Account security</a></li>
+                            <li>Click on "Generate app password"</li>
+                            <li>Select "Other app" and enter "TSC Email Client"</li>
+                            <li>Copy the app password and use it in the password field above</li>
+                        </ol>
+                    </div>
+                    <div id="customSettings" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="imapHost" class="form-label">IMAP Host</label>
+                                <input type="text" class="form-control" id="imapHost" name="imapHost">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="imapPort" class="form-label">IMAP Port</label>
+                                <input type="number" class="form-control" id="imapPort" name="imapPort" value="993">
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <label for="smtpHost" class="form-label">SMTP Host</label>
+                                <input type="text" class="form-control" id="smtpHost" name="smtpHost">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="smtpPort" class="form-label">SMTP Port</label>
+                                <input type="number" class="form-control" id="smtpPort" name="smtpPort" value="587">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-link me-1"></i>Connect
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Email Client Interface -->
+        <div id="emailClient" style="display: none;">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-md-3">
+                    <div class="email-sidebar">
+                        <div class="p-3 border-bottom">
+                            <button class="btn btn-primary w-100 mb-3" onclick="showComposeModal()">
+                                <i class="fas fa-edit me-1"></i>Compose
+                            </button>
+                            <div id="accountInfo" class="text-muted small"></div>
+                        </div>
+                        
+                        <div class="p-3">
+                            <h6>Folders</h6>
+                            <div id="foldersList"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email List -->
+                <div class="col-md-4">
+                    <div class="email-content">
+                        <div class="email-actions p-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0" id="currentFolder">Inbox</h6>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="refreshEmails()">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteSelected()">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="emailsList"></div>
+                    </div>
+                </div>
+
+                <!-- Email Viewer -->
+                <div class="col-md-5">
+                    <div class="email-content">
+                        <div id="emailViewer" class="p-4 text-center text-muted">
+                            <i class="fas fa-envelope-open fa-3x mb-3"></i>
+                            <p>Select an email to view</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compose Modal -->
+    <div class="modal fade" id="composeModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Compose Email</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="composeForm">
+                        <div class="mb-3">
+                            <label for="toEmail" class="form-label">To</label>
+                            <input type="email" class="form-control" id="toEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ccEmail" class="form-label">CC</label>
+                            <input type="email" class="form-control" id="ccEmail">
+                        </div>
+                        <div class="mb-3">
+                            <label for="bccEmail" class="form-label">BCC</label>
+                            <input type="email" class="form-control" id="bccEmail">
+                        </div>
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="subject" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control" id="message" rows="10" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="sendEmail()">
+                        <i class="fas fa-paper-plane me-1"></i>Send
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentAccount = null;
+        let currentFolder = 'INBOX';
+        let emails = [];
+        let selectedEmail = null;
+
+        // Provider selection handler
+        document.getElementById('provider').addEventListener('change', function() {
+            const customSettings = document.getElementById('customSettings');
+            if (this.value === 'custom') {
+                customSettings.style.display = 'block';
+            } else {
+                customSettings.style.display = 'none';
+            }
+        });
+
+        // Setup form handler
+        document.getElementById('setupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get form values directly
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const provider = document.getElementById('provider').value;
+            const imapHost = document.getElementById('imapHost').value;
+            const imapPort = document.getElementById('imapPort').value;
+            const smtpHost = document.getElementById('smtpHost').value;
+            const smtpPort = document.getElementById('smtpPort').value;
+            
+            // Validate required fields
+            if (!email || !password) {
+                alert('Email and password are required');
+                return;
+            }
+            
+            if (provider === 'custom' && (!imapHost || !smtpHost)) {
+                alert('For custom configuration, IMAP and SMTP hosts are required');
+                return;
+            }
+            
+            const accountData = {
+                email,
+                password,
+                provider,
+                imapHost,
+                imapPort: parseInt(imapPort) || 993,
+                smtpHost,
+                smtpPort: parseInt(smtpPort) || 587
+            };
+            
+            // Show loading state
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Connecting...';
+            submitButton.disabled = true;
+            
+            try {
+                const response = await fetch('/email-client/setup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(accountData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentAccount = accountData.email;
+                    document.getElementById('setupCard').style.display = 'none';
+                    document.getElementById('emailClient').style.display = 'block';
+                    document.getElementById('accountInfo').textContent = currentAccount;
+                    
+                    await loadFolders();
+                    await loadEmails();
+                } else {
+                    showErrorDialog('Setup Failed', result.error);
+                }
+            } catch (error) {
+                console.error('Setup error:', error);
+                showErrorDialog('Connection Error', error.message);
+            } finally {
+                // Restore button state
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+            }
+        });
+
+        function showErrorDialog(title, message) {
+            // Create or update error modal
+            let errorModal = document.getElementById('errorModal');
+            if (!errorModal) {
+                const modalHtml = `
+                    <div class="modal fade" id="errorModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-danger text-white">
+                                    <h5 class="modal-title" id="errorModalTitle">Error</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div id="errorModalMessage"></div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                errorModal = document.getElementById('errorModal');
+            }
+            
+            // Update content
+            document.getElementById('errorModalTitle').textContent = title;
+            const messageElement = document.getElementById('errorModalMessage');
+            
+            // Format message with line breaks
+            const formattedMessage = message.replace(/\n/g, '<br>').replace(/\d\./g, '<br>$&');
+            messageElement.innerHTML = `<p>${formattedMessage}</p>`;
+            
+            // Show modal
+            const modal = new bootstrap.Modal(errorModal);
+            modal.show();
+        }
+
+        async function loadFolders() {
+            try {
+                const response = await fetch(`/email-client/folders/${encodeURIComponent(currentAccount)}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const foldersList = document.getElementById('foldersList');
+                    foldersList.innerHTML = result.folders.map(folder => 
+                        `<div class="folder-item ${folder === currentFolder ? 'active' : ''}" onclick="selectFolder('${folder}')">
+                            <i class="fas fa-folder me-2"></i>${folder}
+                        </div>`
+                    ).join('');
+                }
+            } catch (error) {
+                console.error('Error loading folders:', error);
+            }
+        }
+
+        async function selectFolder(folder) {
+            currentFolder = folder;
+            document.getElementById('currentFolder').textContent = folder;
+            
+            // Update folder selection
+            document.querySelectorAll('.folder-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            await loadEmails();
+        }
+
+        async function loadEmails() {
+            try {
+                const response = await fetch(`/email-client/emails/${encodeURIComponent(currentAccount)}/${currentFolder}?limit=50`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    emails = result.emails;
+                    renderEmailsList();
+                }
+            } catch (error) {
+                console.error('Error loading emails:', error);
+            }
+        }
+
+        function renderEmailsList() {
+            const emailsList = document.getElementById('emailsList');
+            emailsList.innerHTML = emails.map(email => {
+                const date = new Date(email.date);
+                const isUnread = !email.flags || !email.flags.includes('\\Seen');
+                
+                return `<div class="email-list-item p-3 ${isUnread ? 'unread' : ''}" onclick="selectEmail(${email.uid})">
+                    <div class="d-flex justify-content-between">
+                        <strong class="text-truncate me-2">${email.from[0].name || email.from[0].address}</strong>
+                        <small class="text-muted">${date.toLocaleDateString()}</small>
+                    </div>
+                    <div class="text-truncate mb-1">${email.subject}</div>
+                    <div class="text-muted small text-truncate">${email.text ? email.text.substring(0, 100) + '...' : ''}</div>
+                </div>`;
+            }).join('');
+        }
+
+        function selectEmail(uid) {
+            selectedEmail = emails.find(e => e.uid === uid);
+            
+            // Update selection
+            document.querySelectorAll('.email-list-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            
+            // Mark as read
+            markEmailAsRead(uid);
+            
+            // Display email
+            displayEmail(selectedEmail);
+        }
+
+        function displayEmail(email) {
+            const viewer = document.getElementById('emailViewer');
+            const date = new Date(email.date);
+            
+            viewer.innerHTML = `
+                <div class="text-start">
+                    <h5>${email.subject}</h5>
+                    <div class="mb-3">
+                        <strong>From:</strong> ${email.from[0].name || email.from[0].address} &lt;${email.from[0].address}&gt;<br>
+                        <strong>Date:</strong> ${date.toLocaleString()}
+                        ${email.to ? `<br><strong>To:</strong> ${email.to.map(t => t.address).join(', ')}` : ''}
+                    </div>
+                    <hr>
+                    <div class="email-body">
+                        ${email.html || email.text ? (email.html || email.text.replace(/\n/g, '<br>')) : 'No content'}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function markEmailAsRead(uid) {
+            try {
+                await fetch(`/email-client/mark/${encodeURIComponent(currentAccount)}/${uid}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ flag: '\\Seen', set: true })
+                });
+            } catch (error) {
+                console.error('Error marking email as read:', error);
+            }
+        }
+
+        function showComposeModal() {
+            new bootstrap.Modal(document.getElementById('composeModal')).show();
+        }
+
+        async function sendEmail() {
+            const form = document.getElementById('composeForm');
+            const formData = new FormData(form);
+            const emailData = Object.fromEntries(formData);
+            emailData.from = currentAccount;
+
+            try {
+                const response = await fetch('/email-client/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(emailData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('composeModal')).hide();
+                    form.reset();
+                    alert('Email sent successfully!');
+                } else {
+                    alert('Send failed: ' + result.error);
+                }
+            } catch (error) {
+                alert('Send error: ' + error.message);
+            }
+        }
+
+        async function refreshEmails() {
+            await loadEmails();
+        }
+
+        async function deleteSelected() {
+            if (!selectedEmail) {
+                alert('Please select an email to delete');
+                return;
+            }
+            
+            if (!confirm('Delete this email?')) return;
+            
+            try {
+                const response = await fetch(`/email-client/delete/${encodeURIComponent(currentAccount)}/${selectedEmail.uid}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    await loadEmails();
+                    document.getElementById('emailViewer').innerHTML = `
+                        <div class="text-center text-muted">
+                            <i class="fas fa-envelope-open fa-3x mb-3"></i>
+                            <p>Select an email to view</p>
+                        </div>`;
+                    selectedEmail = null;
+                }
+            } catch (error) {
+                alert('Delete error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

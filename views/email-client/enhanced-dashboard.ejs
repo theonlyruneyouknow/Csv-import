@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .feature-card { 
+            transition: transform 0.2s; 
+            border: none; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            cursor: pointer;
+        }
+        .feature-card:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
+        }
+        .navigation-header { 
+            background: #f8f9fa; 
+            border-bottom: 1px solid #dee2e6; 
+        }
+        .feature-enabled { border-left: 4px solid #28a745; }
+        .feature-disabled { border-left: 4px solid #dc3545; opacity: 0.6; }
+        .feature-coming-soon { border-left: 4px solid #ffc107; }
+    </style>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg navigation-header">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/email-client">
+                <i class="fas fa-envelope text-primary"></i> Enhanced Email Client
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+                <a class="nav-link active" href="/email-client"><i class="fas fa-envelope"></i> Email</a>
+                <a class="nav-link" href="/email-client/compose"><i class="fas fa-edit"></i> Compose</a>
+                <span class="navbar-text">Welcome, <%= user.username %>!</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- Email Stats Overview -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card stat-total h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h6 class="text-muted mb-1">Total Emails</h6>
+                                <h4 class="mb-0"><%= stats.totalEmails || 0 %></h4>
+                            </div>
+                            <div class="text-primary">
+                                <i class="fas fa-envelope fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card stat-sent h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h6 class="text-muted mb-1">Sent Successfully</h6>
+                                <h4 class="mb-0"><%= stats.sentEmails || 0 %></h4>
+                            </div>
+                            <div class="text-success">
+                                <i class="fas fa-paper-plane fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card stat-failed h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h6 class="text-muted mb-1">Failed</h6>
+                                <h4 class="mb-0"><%= stats.failedEmails || 0 %></h4>
+                            </div>
+                            <div class="text-danger">
+                                <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card h-100" style="border-left-color: #ffc107;">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h6 class="text-muted mb-1">Success Rate</h6>
+                                <h4 class="mb-0">
+                                    <% if (stats.totalEmails > 0) { %>
+                                        <%= Math.round((stats.sentEmails / stats.totalEmails) * 100) %>%
+                                    <% } else { %>
+                                        0%
+                                    <% } %>
+                                </h4>
+                            </div>
+                            <div class="text-warning">
+                                <i class="fas fa-chart-line fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Quick Actions -->
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bolt text-warning"></i> Quick Actions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6 col-xl-3">
+                                <a href="/email-client/compose" class="text-decoration-none">
+                                    <div class="feature-card card h-100 text-center">
+                                        <div class="card-body">
+                                            <i class="fas fa-edit fa-3x text-primary mb-3"></i>
+                                            <h6>Compose Email</h6>
+                                            <small class="text-muted">Create new email with rich text editor</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-6 col-xl-3">
+                                <a href="/email-client/compose?template=order_confirmation" class="text-decoration-none">
+                                    <div class="feature-card card h-100 text-center">
+                                        <div class="card-body">
+                                            <i class="fas fa-file-invoice fa-3x text-success mb-3"></i>
+                                            <h6>Order Email</h6>
+                                            <small class="text-muted">Send order confirmation or update</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-6 col-xl-3">
+                                <a href="/email-client/contacts" class="text-decoration-none">
+                                    <div class="feature-card card h-100 text-center">
+                                        <div class="card-body">
+                                            <i class="fas fa-address-book fa-3x text-info mb-3"></i>
+                                            <h6>Contacts</h6>
+                                            <small class="text-muted">Manage email contacts and vendors</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-6 col-xl-3">
+                                <a href="/email-client/signatures" class="text-decoration-none">
+                                    <div class="feature-card card h-100 text-center">
+                                        <div class="card-body">
+                                            <i class="fas fa-signature fa-3x text-warning mb-3"></i>
+                                            <h6>Signatures</h6>
+                                            <small class="text-muted">Manage email signatures</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Email Activity -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clock text-info"></i> Recent Email Activity
+                        </h5>
+                        <a href="/email-client/history" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                    <div class="card-body">
+                        <% if (recentEmails && recentEmails.length > 0) { %>
+                            <% recentEmails.forEach(function(email) { %>
+                                <div class="recent-email">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center mb-1">
+                                                <strong class="me-2"><%= email.subject %></strong>
+                                                <span class="email-status status-<%= email.status %>">
+                                                    <%= email.status.toUpperCase() %>
+                                                </span>
+                                            </div>
+                                            <div class="text-muted small">
+                                                To: <%= email.recipients.map(r => r.email).join(', ') %>
+                                                <% if (email.metadata && email.metadata.relatedVendor) { %>
+                                                    <span class="badge bg-secondary ms-2">
+                                                        <i class="fas fa-store"></i> <%= email.metadata.relatedVendor.name %>
+                                                    </span>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-muted">
+                                                <%= new Date(email.createdAt).toLocaleDateString() %>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <div class="text-center py-4">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No recent email activity</p>
+                                <a href="/email-client/compose" class="btn btn-primary">Send Your First Email</a>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Quick Contacts -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="fas fa-users text-success"></i> Quick Contacts
+                        </h6>
+                        <div>
+                            <button class="btn btn-sm btn-outline-success" onclick="syncVendorContacts()">
+                                <i class="fas fa-sync-alt"></i> Sync
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <% if (contacts && contacts.length > 0) { %>
+                            <% contacts.forEach(function(contact) { %>
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold"><%= contact.name.display %></div>
+                                        <small class="text-muted">
+                                            <%= contact.email %>
+                                            <% if (contact.company.name) { %>
+                                                • <%= contact.company.name %>
+                                            <% } %>
+                                        </small>
+                                    </div>
+                                    <a href="/email-client/compose?to=<%= encodeURIComponent(contact.email) %>" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </a>
+                                </div>
+                            <% }); %>
+                            <div class="text-center mt-3">
+                                <a href="/email-client/contacts" class="btn btn-sm btn-outline-secondary">View All Contacts</a>
+                            </div>
+                        <% } else { %>
+                            <div class="text-center py-3">
+                                <p class="text-muted mb-2">No contacts found</p>
+                                <button class="btn btn-sm btn-success" onclick="syncVendorContacts()">
+                                    <i class="fas fa-sync-alt"></i> Sync Vendor Contacts
+                                </button>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Email Signatures -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-signature text-warning"></i> Email Signatures
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <% if (signatures && signatures.length > 0) { %>
+                            <% signatures.forEach(function(signature) { %>
+                                <div class="mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <strong><%= signature.name %></strong>
+                                            <% if (signature.isDefault) { %>
+                                                <span class="badge bg-primary">Default</span>
+                                            <% } %>
+                                        </div>
+                                        <small class="text-muted">
+                                            Used <%= signature.usage.totalUses %> times
+                                        </small>
+                                    </div>
+                                </div>
+                            <% }); %>
+                            <div class="text-center mt-3">
+                                <a href="/email-client/signatures" class="btn btn-sm btn-outline-warning">Manage Signatures</a>
+                            </div>
+                        <% } else { %>
+                            <div class="text-center py-3">
+                                <p class="text-muted mb-2">No signatures configured</p>
+                                <a href="/email-client/signatures" class="btn btn-sm btn-warning">Create Signature</a>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sync vendor contacts
+        function syncVendorContacts() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+            btn.disabled = true;
+            
+            fetch('/email-client/contacts/sync-vendors', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Vendor contacts synced successfully!');
+                    location.reload();
+                } else {
+                    alert('Error syncing contacts: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Sync error:', error);
+                alert('Error syncing contacts');
+            })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>

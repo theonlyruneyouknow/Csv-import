@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <style>
+        .compose-container { max-width: 1000px; margin: 0 auto; }
+        .recipient-input { min-height: 38px; }
+        .attachment-preview { 
+            background: #f8f9fa; 
+            border: 1px dashed #ccc; 
+            border-radius: 8px; 
+            padding: 15px; 
+            margin-top: 10px; 
+        }
+        .attachment-item {
+            display: inline-flex;
+            align-items: center;
+            background: #e9ecef;
+            border-radius: 20px;
+            padding: 5px 12px;
+            margin: 2px;
+            font-size: 0.85rem;
+        }
+        .template-preview {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            background: #f8f9fa;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg" style="background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/email-client">
+                <i class="fas fa-envelope text-primary"></i> Enhanced Email Client
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/email-client"><i class="fas fa-home"></i> Dashboard</a>
+                <a class="nav-link active" href="/email-client/compose"><i class="fas fa-edit"></i> Compose</a>
+                <span class="navbar-text">Welcome, <%= user.username %>!</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="compose-container">
+            <div class="row">
+                <!-- Main Compose Area -->
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-edit text-primary"></i> Compose Email
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="composeForm" enctype="multipart/form-data">
+                                <!-- Recipients -->
+                                <div class="row mb-3">
+                                    <div class="col-sm-2">
+                                        <label class="col-form-label"><strong>To:</strong></label>
+                                    </div>
+                                    <div class="col-sm-10">
+                                        <input type="email" class="form-control recipient-input" id="toField" name="to" 
+                                               placeholder="Enter email addresses (comma separated)" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-sm-2">
+                                        <label class="col-form-label">CC:</label>
+                                    </div>
+                                    <div class="col-sm-10">
+                                        <input type="email" class="form-control" id="ccField" name="cc" 
+                                               placeholder="Carbon copy (optional)">
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-sm-2">
+                                        <label class="col-form-label">BCC:</label>
+                                    </div>
+                                    <div class="col-sm-10">
+                                        <input type="email" class="form-control" id="bccField" name="bcc" 
+                                               placeholder="Blind carbon copy (optional)">
+                                    </div>
+                                </div>
+
+                                <!-- Subject and Priority -->
+                                <div class="row mb-3">
+                                    <div class="col-sm-2">
+                                        <label class="col-form-label"><strong>Subject:</strong></label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control" id="subjectField" name="subject" 
+                                               placeholder="Email subject" required>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <select class="form-select" name="priority">
+                                            <option value="normal">Normal</option>
+                                            <option value="high">High Priority</option>
+                                            <option value="urgent">Urgent</option>
+                                            <option value="low">Low</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- File Attachments -->
+                                <div class="row mb-3">
+                                    <div class="col-sm-2">
+                                        <label class="col-form-label">Attachments:</label>
+                                    </div>
+                                    <div class="col-sm-10">
+                                        <input type="file" class="form-control" id="attachments" name="attachments" 
+                                               multiple accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar">
+                                        <div class="form-text">Max 25MB per file. Allowed: images, documents, archives</div>
+                                        <div id="attachmentPreview" class="attachment-preview" style="display: none;">
+                                            <div id="attachmentList"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Email Content -->
+                                <div class="mb-3">
+                                    <label class="form-label"><strong>Message:</strong></label>
+                                    <textarea id="emailContent" name="content" style="height: 400px;">
+                                        <p>Hello,</p>
+                                        <p></p>
+                                        <p>Best regards,<br><%= user.username %></p>
+                                    </textarea>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <button type="button" class="btn btn-outline-info" onclick="previewEmail()">
+                                            <i class="fas fa-eye"></i> Preview
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-outline-secondary me-2" onclick="clearForm()">
+                                            Clear
+                                        </button>
+                                        <button type="submit" class="btn btn-primary" id="sendButton">
+                                            <i class="fas fa-paper-plane"></i> Send Email
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+                    <!-- Email Templates -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-file-alt text-info"></i> Email Templates
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <select class="form-select mb-2" id="templateSelect">
+                                <option value="">Select a template...</option>
+                            </select>
+                            <div id="templatePreview" class="template-preview" style="display: none;"></div>
+                            <button class="btn btn-sm btn-info w-100 mt-2" onclick="loadTemplate()" disabled id="loadTemplateBtn">
+                                <i class="fas fa-download"></i> Load Template
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Features Info -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-info-circle text-success"></i> Enhanced Features
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <span>Rich Text Editor</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <span>File Attachments</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <span>Email Templates</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <span>Priority Settings</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <span>Gmail Integration</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Preview Modal -->
+    <div class="modal fade" id="previewModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Email Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="previewContent">
+                    <!-- Preview content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="sendEmailFromPreview()">Send Email</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize TinyMCE rich text editor
+        tinymce.init({
+            selector: '#emailContent',
+            height: 400,
+            plugins: 'advlist autolink lists link image charmap anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount',
+            toolbar: 'undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link image | forecolor backcolor | help',
+            content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px; }',
+            branding: false,
+            menubar: false
+        });
+
+        let templates = {};
+
+        // Load templates on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadEmailTemplates();
+            setupAttachmentPreview();
+            setupFormSubmission();
+            
+            // Pre-fill if coming from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('to')) {
+                document.getElementById('toField').value = urlParams.get('to');
+            }
+            if (urlParams.get('template')) {
+                // Load specific template
+                setTimeout(() => {
+                    const select = document.getElementById('templateSelect');
+                    select.value = urlParams.get('template');
+                    select.dispatchEvent(new Event('change'));
+                    setTimeout(() => loadTemplate(), 500);
+                }, 1000);
+            }
+        });
+
+        // Load email templates
+        function loadEmailTemplates() {
+            fetch('/email-client/templates')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        templates = data.templates;
+                        const select = document.getElementById('templateSelect');
+                        
+                        Object.keys(templates).forEach(category => {
+                            const optgroup = document.createElement('optgroup');
+                            optgroup.label = category.charAt(0).toUpperCase() + category.slice(1);
+                            
+                            templates[category].forEach(template => {
+                                const option = document.createElement('option');
+                                option.value = template.id;
+                                option.textContent = template.name;
+                                option.setAttribute('data-category', category);
+                                optgroup.appendChild(option);
+                            });
+                            
+                            select.appendChild(optgroup);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error loading templates:', error));
+        }
+
+        // Template selection handler
+        document.getElementById('templateSelect').addEventListener('change', function() {
+            const templateId = this.value;
+            const loadBtn = document.getElementById('loadTemplateBtn');
+            const preview = document.getElementById('templatePreview');
+            
+            if (templateId) {
+                // Find template
+                let selectedTemplate = null;
+                Object.keys(templates).forEach(category => {
+                    const found = templates[category].find(t => t.id === templateId);
+                    if (found) selectedTemplate = found;
+                });
+                
+                if (selectedTemplate) {
+                    preview.innerHTML = selectedTemplate.html;
+                    preview.style.display = 'block';
+                    loadBtn.disabled = false;
+                } else {
+                    preview.style.display = 'none';
+                    loadBtn.disabled = true;
+                }
+            } else {
+                preview.style.display = 'none';
+                loadBtn.disabled = true;
+            }
+        });
+
+        // Load template into editor
+        function loadTemplate() {
+            const templateId = document.getElementById('templateSelect').value;
+            if (!templateId) return;
+            
+            let selectedTemplate = null;
+            Object.keys(templates).forEach(category => {
+                const found = templates[category].find(t => t.id === templateId);
+                if (found) selectedTemplate = found;
+            });
+            
+            if (selectedTemplate) {
+                tinymce.get('emailContent').setContent(selectedTemplate.html);
+                
+                // Set subject if it's an order template
+                if (templateId.includes('order') || templateId.includes('status')) {
+                    if (!document.getElementById('subjectField').value) {
+                        document.getElementById('subjectField').value = selectedTemplate.name;
+                    }
+                }
+                
+                alert('Template loaded successfully!');
+            }
+        }
+
+        // Attachment preview
+        function setupAttachmentPreview() {
+            document.getElementById('attachments').addEventListener('change', function() {
+                const preview = document.getElementById('attachmentPreview');
+                const list = document.getElementById('attachmentList');
+                const files = this.files;
+                
+                if (files.length > 0) {
+                    list.innerHTML = '';
+                    Array.from(files).forEach((file, index) => {
+                        const item = document.createElement('span');
+                        item.className = 'attachment-item';
+                        item.innerHTML = `
+                            <i class="fas fa-paperclip me-1"></i>
+                            ${file.name} (${(file.size / 1024).toFixed(1)}KB)
+                        `;
+                        list.appendChild(item);
+                    });
+                    preview.style.display = 'block';
+                } else {
+                    preview.style.display = 'none';
+                }
+            });
+        }
+
+        // Form submission
+        function setupFormSubmission() {
+            document.getElementById('composeForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                sendEmail();
+            });
+        }
+
+        // Send email
+        function sendEmail() {
+            const sendButton = document.getElementById('sendButton');
+            const originalText = sendButton.innerHTML;
+            
+            sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            sendButton.disabled = true;
+            
+            // Get content from TinyMCE
+            const content = tinymce.get('emailContent').getContent();
+            
+            const formData = new FormData(document.getElementById('composeForm'));
+            formData.set('content', content);
+            
+            fetch('/email-client/send', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Email sent successfully!');
+                    // Clear form or redirect
+                    if (confirm('Email sent! Would you like to compose another email?')) {
+                        clearForm();
+                    } else {
+                        window.location.href = '/email-client';
+                    }
+                } else {
+                    alert('Error sending email: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Send error:', error);
+                alert('Error sending email. Please try again.');
+            })
+            .finally(() => {
+                sendButton.innerHTML = originalText;
+                sendButton.disabled = false;
+            });
+        }
+
+        // Preview email
+        function previewEmail() {
+            const content = tinymce.get('emailContent').getContent();
+            const subject = document.getElementById('subjectField').value;
+            const to = document.getElementById('toField').value;
+            
+            const previewContent = `
+                <div class="mb-3">
+                    <strong>To:</strong> ${to}<br>
+                    <strong>Subject:</strong> ${subject}
+                </div>
+                <hr>
+                <div>${content}</div>
+            `;
+            
+            document.getElementById('previewContent').innerHTML = previewContent;
+            new bootstrap.Modal(document.getElementById('previewModal')).show();
+        }
+
+        // Clear form
+        function clearForm() {
+            document.getElementById('composeForm').reset();
+            tinymce.get('emailContent').setContent('<p>Hello,</p><p></p><p>Best regards,<br><%= user.username %></p>');
+            document.getElementById('attachmentPreview').style.display = 'none';
+            document.getElementById('templatePreview').style.display = 'none';
+            document.getElementById('templateSelect').value = '';
+            document.getElementById('loadTemplateBtn').disabled = true;
+        }
+
+        // Send from preview
+        function sendEmailFromPreview() {
+            bootstrap.Modal.getInstance(document.getElementById('previewModal')).hide();
+            sendEmail();
+        }
+    </script>
+</body>
+</html>
