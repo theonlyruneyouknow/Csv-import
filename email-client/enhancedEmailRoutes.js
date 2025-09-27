@@ -477,6 +477,21 @@ router.get('/templates', async (req, res) => {
 // ===== EMAIL HISTORY =====
 router.get('/history', async (req, res) => {
     try {
+        // Check if EmailHistory model exists
+        if (!EmailHistory) {
+            // Fallback: Show placeholder history page
+            return res.render('email-client/history', {
+                title: 'Email History',
+                user: req.user,
+                emails: [],
+                total: 0,
+                currentPage: 1,
+                totalPages: 1,
+                hasEmailHistory: false,
+                message: 'Email history tracking is not yet enabled. Once activated, your sent emails will appear here.'
+            });
+        }
+        
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 20;
         const skip = (page - 1) * limit;
@@ -532,12 +547,10 @@ router.get('/history', async (req, res) => {
                 title: 'Email History',
                 user: req.user,
                 emails,
-                pagination: {
-                    current: page,
-                    total: totalPages,
-                    hasNext: page < totalPages,
-                    hasPrev: page > 1
-                },
+                total,
+                currentPage: page,
+                totalPages,
+                hasEmailHistory: true,
                 query: req.query
             });
         }

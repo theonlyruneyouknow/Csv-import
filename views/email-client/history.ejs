@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .email-item {
+            transition: background-color 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+        .email-item:hover {
+            background-color: #f8f9fa;
+        }
+        .email-sent {
+            border-left-color: #28a745;
+        }
+        .email-failed {
+            border-left-color: #dc3545;
+        }
+        .email-pending {
+            border-left-color: #ffc107;
+        }
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .attachment-indicator {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .search-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .placeholder-content {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        .placeholder-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg" style="background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/email-client">
+                <i class="fas fa-envelope text-primary"></i> Enhanced Email Client
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/email-client"><i class="fas fa-home"></i> Dashboard</a>
+                <a class="nav-link" href="/email-client/compose"><i class="fas fa-edit"></i> Compose</a>
+                <a class="nav-link active" href="/email-client/history"><i class="fas fa-history"></i> History</a>
+                <span class="navbar-text">Welcome, <%= user.username %>!</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-history text-primary"></i> Email History</h2>
+                    <div>
+                        <% if (hasEmailHistory) { %>
+                        <button class="btn btn-outline-primary btn-sm" onclick="exportHistory()">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                        <% } %>
+                        <a href="/email-client/compose" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> New Email
+                        </a>
+                    </div>
+                </div>
+
+                <% if (hasEmailHistory) { %>
+                <!-- Search and Filter Box -->
+                <div class="search-box">
+                    <form method="GET" action="/email-client/history" class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Search</label>
+                            <input type="text" class="form-control" name="search" 
+                                   value="<%= query.search || '' %>" 
+                                   placeholder="Subject or recipient...">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status">
+                                <option value="">All Status</option>
+                                <option value="sent" <%= query.status === 'sent' ? 'selected' : '' %>>Sent</option>
+                                <option value="failed" <%= query.status === 'failed' ? 'selected' : '' %>>Failed</option>
+                                <option value="pending" <%= query.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Date From</label>
+                            <input type="date" class="form-control" name="dateFrom" 
+                                   value="<%= query.dateFrom || '' %>">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Date To</label>
+                            <input type="date" class="form-control" name="dateTo" 
+                                   value="<%= query.dateTo || '' %>">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-search"></i> Filter
+                            </button>
+                            <a href="/email-client/history" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Email List -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-envelope-open-text"></i> 
+                                Sent Emails (<%= total %>)
+                            </h5>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary active" data-view="list">
+                                    <i class="fas fa-list"></i> List
+                                </button>
+                                <button class="btn btn-outline-secondary" data-view="grid">
+                                    <i class="fas fa-th"></i> Grid
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <% if (emails.length > 0) { %>
+                            <% emails.forEach(email => { %>
+                            <div class="email-item email-<%= email.status %> p-3 mb-2 border rounded" 
+                                 onclick="viewEmail('<%= email._id %>')">
+                                <div class="row align-items-center">
+                                    <div class="col-md-1">
+                                        <span class="status-badge badge bg-<%= email.status === 'sent' ? 'success' : email.status === 'failed' ? 'danger' : 'warning' %>">
+                                            <%= email.status.toUpperCase() %>
+                                        </span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong><%= email.subject %></strong>
+                                        <% if (email.attachments && email.attachments.length > 0) { %>
+                                            <i class="fas fa-paperclip attachment-indicator ms-2" 
+                                               title="<%= email.attachments.length %> attachment(s)"></i>
+                                        <% } %>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <% email.recipients.forEach((recipient, index) => { %>
+                                            <span class="badge bg-light text-dark me-1"><%= recipient.email %></span>
+                                        <% }); %>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <small class="text-muted">
+                                            <%= new Date(email.createdAt).toLocaleDateString() %>
+                                            <%= new Date(email.createdAt).toLocaleTimeString() %>
+                                        </small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewEmail('<%= email._id %>', event)">
+                                                <i class="fas fa-eye"></i> View
+                                            </button>
+                                            <button class="btn btn-outline-info" onclick="replyToEmail('<%= email._id %>', event)">
+                                                <i class="fas fa-reply"></i> Reply
+                                            </button>
+                                            <button class="btn btn-outline-secondary" onclick="forwardEmail('<%= email._id %>', event)">
+                                                <i class="fas fa-share"></i> Forward
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                        <% } else { %>
+                            <div class="placeholder-content">
+                                <i class="fas fa-inbox placeholder-icon"></i>
+                                <h4>No emails found</h4>
+                                <p>No emails match your current search criteria.</p>
+                                <a href="/email-client/compose" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Send Your First Email
+                                </a>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <% if (totalPages > 1) { %>
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <% if (currentPage > 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage - 1 %><%= query.search ? '&search=' + encodeURIComponent(query.search) : '' %><%= query.status ? '&status=' + query.status : '' %>">
+                                <i class="fas fa-chevron-left"></i> Previous
+                            </a>
+                        </li>
+                        <% } %>
+                        
+                        <% for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) { %>
+                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %><%= query.search ? '&search=' + encodeURIComponent(query.search) : '' %><%= query.status ? '&status=' + query.status : '' %>">
+                                <%= i %>
+                            </a>
+                        </li>
+                        <% } %>
+                        
+                        <% if (currentPage < totalPages) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage + 1 %><%= query.search ? '&search=' + encodeURIComponent(query.search) : '' %><%= query.status ? '&status=' + query.status : '' %>">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        <% } %>
+                    </ul>
+                </nav>
+                <% } %>
+
+                <% } else { %>
+                <!-- Placeholder for no email history -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="placeholder-content">
+                            <i class="fas fa-clock placeholder-icon"></i>
+                            <h4>Email History Coming Soon</h4>
+                            <p><%= message %></p>
+                            <div class="mt-4">
+                                <a href="/email-client/compose" class="btn btn-primary me-3">
+                                    <i class="fas fa-paper-plane"></i> Send Your First Email
+                                </a>
+                                <button class="btn btn-outline-info" onclick="showUpgradeInfo()">
+                                    <i class="fas fa-info-circle"></i> Learn More
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Detail Modal -->
+    <div class="modal fade" id="emailDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Email Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="emailDetailContent">
+                    <!-- Email details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="replyButton">Reply</button>
+                    <button type="button" class="btn btn-info" id="forwardButton">Forward</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function viewEmail(emailId, event) {
+            if (event) event.stopPropagation();
+            
+            <% if (hasEmailHistory) { %>
+            fetch(`/email-client/emails/${emailId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('emailDetailContent').innerHTML = `
+                            <div class="mb-3">
+                                <strong>From:</strong> ${data.email.from}<br>
+                                <strong>To:</strong> ${data.email.recipients.map(r => r.email).join(', ')}<br>
+                                <strong>Subject:</strong> ${data.email.subject}<br>
+                                <strong>Date:</strong> ${new Date(data.email.createdAt).toLocaleString()}
+                            </div>
+                            <div class="border-top pt-3">
+                                ${data.email.content}
+                            </div>
+                        `;
+                        new bootstrap.Modal(document.getElementById('emailDetailModal')).show();
+                    }
+                })
+                .catch(error => console.error('Error loading email:', error));
+            <% } else { %>
+            alert('Email history tracking is not yet enabled.');
+            <% } %>
+        }
+        
+        function replyToEmail(emailId, event) {
+            if (event) event.stopPropagation();
+            window.location.href = `/email-client/compose?replyTo=${emailId}`;
+        }
+        
+        function forwardEmail(emailId, event) {
+            if (event) event.stopPropagation();
+            window.location.href = `/email-client/compose?forward=${emailId}`;
+        }
+        
+        function exportHistory() {
+            window.location.href = '/email-client/history/export';
+        }
+        
+        function showUpgradeInfo() {
+            alert('Email history tracking will be available once the EmailHistory database model is activated. This feature will automatically track all emails sent through the enhanced email client.');
+        }
+        
+        // View toggle functionality
+        document.querySelectorAll('[data-view]').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('[data-view]').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                // TODO: Implement grid view
+            });
+        });
+    </script>
+</body>
+</html>
