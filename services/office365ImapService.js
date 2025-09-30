@@ -1,57 +1,74 @@
-// services/gmailImapService.js
+// services/office365ImapService.js
 const Imap = require('node-imap');
 const { simpleParser } = require('mailparser');
 const EventEmitter = require('events');
 
-class GmailImapService extends EventEmitter {
+class Office365ImapService extends EventEmitter {
     constructor() {
         super();
         this.imap = null;
         this.isConnected = false;
         this.config = {
-            user: process.env.EMAIL_USER,
-            password: process.env.EMAIL_PASSWORD, // Gmail App Password
-            host: 'imap.gmail.com',
-            port: 993,
-            tls: true,
+            user: process.env.OFFICE365_USER,
+            password: process.env.OFFICE365_PASSWORD, // Microsoft 365 App Password or regular password
+            host: 'imap-mail.outlook.com', // Try the standard Outlook IMAP server
+            port: 993, // Back to secure TLS port
+            tls: true, // Direct TLS
             tlsOptions: {
-                rejectUnauthorized: false
+                rejectUnauthorized: false,
+                servername: 'imap-mail.outlook.com'
             },
             authTimeout: 30000,
-            connTimeout: 30000
+            connTimeout: 30000,
+            debug: console.log, // Enable IMAP protocol debugging
+            // Try to force specific authentication
+            keepalive: {
+                interval: 10000,
+                idleInterval: 300000,
+                forceNoop: true
+            }
         };
         
         // Validate environment variables
-        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-            console.error('❌ Missing Gmail credentials in environment variables');
-            console.error('Required: EMAIL_USER, EMAIL_PASSWORD');
+        console.log(`🔍 Debug - Actual OFFICE365_PASSWORD value: "${process.env.OFFICE365_PASSWORD}"`);
+        console.log(`🔍 Debug - Password length: ${process.env.OFFICE365_PASSWORD ? process.env.OFFICE365_PASSWORD.length : 'undefined'}`);
+        
+        if (!process.env.OFFICE365_USER || !process.env.OFFICE365_PASSWORD) {
+            console.error('❌ Missing Office 365 credentials in environment variables');
+            console.error('Required: OFFICE365_USER, OFFICE365_PASSWORD');
+        } else if (process.env.OFFICE365_PASSWORD === 'your-office365-password-here') {
+            console.error('❌ Office 365 password not configured - still using placeholder');
+            console.error('Please set OFFICE365_PASSWORD to your actual password or app password');
+        } else {
+            console.log(`📧 Office 365 IMAP configured for: ${process.env.OFFICE365_USER}`);
+            console.log(`📧 Using password starting with: ${process.env.OFFICE365_PASSWORD.substring(0, 6)}...`);
         }
     }
 
-    // Connect to Gmail IMAP
+    // Connect to Office 365 IMAP
     async connect() {
         return new Promise((resolve, reject) => {
             if (this.isConnected && this.imap) {
                 return resolve();
             }
 
-            console.log('📧 Connecting to Gmail IMAP...');
+            console.log('📧 Connecting to Office 365 IMAP...');
             this.imap = new Imap(this.config);
 
             this.imap.once('ready', () => {
-                console.log('✅ Gmail IMAP connection ready');
+                console.log('✅ Office 365 IMAP connection ready');
                 this.isConnected = true;
                 resolve();
             });
 
             this.imap.once('error', (err) => {
-                console.error('❌ Gmail IMAP error:', err);
+                console.error('❌ Office 365 IMAP error:', err);
                 this.isConnected = false;
                 reject(err);
             });
 
             this.imap.once('end', () => {
-                console.log('📧 Gmail IMAP connection ended');
+                console.log('📧 Office 365 IMAP connection ended');
                 this.isConnected = false;
             });
 
@@ -63,7 +80,7 @@ class GmailImapService extends EventEmitter {
         });
     }
 
-    // Disconnect from Gmail IMAP
+    // Disconnect from Office 365 IMAP
     disconnect() {
         if (this.imap && this.isConnected) {
             this.imap.end();
@@ -80,10 +97,10 @@ class GmailImapService extends EventEmitter {
         return new Promise((resolve, reject) => {
             this.imap.openBox(mailboxName, readOnly, (err, box) => {
                 if (err) {
-                    console.error(`❌ Error opening mailbox ${mailboxName}:`, err);
+                    console.error(`❌ Error opening Office 365 mailbox ${mailboxName}:`, err);
                     reject(err);
                 } else {
-                    console.log(`📂 Opened mailbox: ${mailboxName} (${box.messages.total} messages)`);
+                    console.log(`📂 Opened Office 365 mailbox: ${mailboxName} (${box.messages.total} messages)`);
                     resolve(box);
                 }
             });
@@ -106,7 +123,7 @@ class GmailImapService extends EventEmitter {
         }
 
         return new Promise((resolve, reject) => {
-            console.log(`🔍 Searching emails with limit: ${limit}, offset: ${offset}`);
+            console.log(`🔍 Searching Office 365 emails with limit: ${limit}, offset: ${offset}`);
             
             // Build search criteria - IMAP expects array format
             let searchCriteria = ['ALL'];
@@ -119,18 +136,18 @@ class GmailImapService extends EventEmitter {
                 searchCriteria = ['OR', ['SUBJECT', search], ['FROM', search]];
             }
 
-            console.log('🔍 Search criteria:', searchCriteria);
+            console.log('🔍 Office 365 Search criteria:', searchCriteria);
 
             this.imap.search(searchCriteria, (err, results) => {
                 if (err) {
-                    console.error('❌ IMAP search error:', err);
+                    console.error('❌ Office 365 IMAP search error:', err);
                     return reject(err);
                 }
 
-                console.log(`✅ Search completed. Found ${results ? results.length : 0} results`);
+                console.log(`✅ Office 365 search completed. Found ${results ? results.length : 0} results`);
 
                 if (!results || results.length === 0) {
-                    console.log('📭 No results found, returning empty array');
+                    console.log('📭 No Office 365 results found, returning empty array');
                     return resolve([]);
                 }
 
@@ -140,14 +157,14 @@ class GmailImapService extends EventEmitter {
                 const end = Math.min(totalResults, totalResults - offset);
                 const paginatedResults = results.slice(start, end).reverse();
 
-                console.log(`📄 Pagination: total=${totalResults}, start=${start}, end=${end}, paginated=${paginatedResults.length}`);
+                console.log(`📄 Office 365 Pagination: total=${totalResults}, start=${start}, end=${end}, paginated=${paginatedResults.length}`);
 
                 if (paginatedResults.length === 0) {
-                    console.log('📭 No results after pagination, returning empty array');
+                    console.log('📭 No Office 365 results after pagination, returning empty array');
                     return resolve([]);
                 }
 
-                console.log(`📨 Fetching ${paginatedResults.length} emails...`);
+                console.log(`📨 Fetching ${paginatedResults.length} Office 365 emails...`);
 
                 const fetch = this.imap.fetch(paginatedResults, {
                     bodies: 'HEADER.FIELDS (FROM TO CC BCC SUBJECT DATE MESSAGE-ID)',
@@ -158,7 +175,7 @@ class GmailImapService extends EventEmitter {
                 let processedCount = 0;
 
                 fetch.on('message', (msg, seqno) => {
-                    console.log(`📧 Processing message ${seqno}`);
+                    console.log(`📧 Processing Office 365 message ${seqno}`);
                     const email = { seqno };
                     
                     msg.on('body', (stream, info) => {
@@ -208,10 +225,10 @@ class GmailImapService extends EventEmitter {
                                 email.preview = `Email from ${email.from} - ${email.subject}`;
                                 
                                 processedCount++;
-                                console.log(`✅ Processed email ${processedCount}: "${email.subject}" from ${email.from}`);
+                                console.log(`✅ Processed Office 365 email ${processedCount}: "${email.subject}" from ${email.from}`);
                                 
                             } catch (parseError) {
-                                console.error('❌ Error parsing email header:', parseError);
+                                console.error('❌ Error parsing Office 365 email header:', parseError);
                                 email.subject = 'Error parsing email';
                                 email.from = 'Unknown';
                                 email.preview = 'Unable to parse email content';
@@ -231,12 +248,12 @@ class GmailImapService extends EventEmitter {
                 });
 
                 fetch.once('error', (err) => {
-                    console.error('❌ Fetch error:', err);
+                    console.error('❌ Office 365 fetch error:', err);
                     reject(err);
                 });
 
                 fetch.once('end', () => {
-                    console.log(`✅ Fetch completed. Processed ${emails.length} emails`);
+                    console.log(`✅ Office 365 fetch completed. Processed ${emails.length} emails`);
                     // Sort emails by date (newest first)
                     emails.sort((a, b) => new Date(b.date) - new Date(a.date));
                     resolve(emails);
@@ -252,7 +269,7 @@ class GmailImapService extends EventEmitter {
         }
 
         return new Promise((resolve, reject) => {
-            console.log(`📧 Fetching email with UID: ${uid}`);
+            console.log(`📧 Fetching Office 365 email with UID: ${uid}`);
             
             const fetch = this.imap.fetch([uid], {
                 bodies: '',
@@ -288,10 +305,10 @@ class GmailImapService extends EventEmitter {
                                 raw: buffer
                             };
                             
-                            console.log(`✅ Parsed email: "${email.subject}"`);
+                            console.log(`✅ Parsed Office 365 email: "${email.subject}"`);
                             
                         } catch (parseError) {
-                            console.error('❌ Error parsing email:', parseError);
+                            console.error('❌ Error parsing Office 365 email:', parseError);
                             email = {
                                 uid,
                                 subject: 'Error parsing email',
@@ -312,12 +329,12 @@ class GmailImapService extends EventEmitter {
             });
 
             fetch.once('error', (err) => {
-                console.error('❌ Error fetching email by UID:', err);
+                console.error('❌ Error fetching Office 365 email by UID:', err);
                 reject(err);
             });
 
             fetch.once('end', () => {
-                console.log(`✅ Completed fetching email with UID: ${uid}`);
+                console.log(`✅ Completed fetching Office 365 email with UID: ${uid}`);
                 resolve(email);
             });
         });
@@ -335,9 +352,51 @@ class GmailImapService extends EventEmitter {
                 name: mailboxName
             };
         } catch (error) {
-            console.error(`❌ Error getting mailbox stats for ${mailboxName}:`, error);
+            console.error(`❌ Error getting Office 365 mailbox stats for ${mailboxName}:`, error);
             throw error;
         }
+    }
+
+    // List available mailboxes
+    async listMailboxes() {
+        if (!this.isConnected) {
+            await this.connect();
+        }
+
+        return new Promise((resolve, reject) => {
+            this.imap.getBoxes((err, boxes) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    const mailboxList = this.parseMailboxes(boxes);
+                    resolve(mailboxList);
+                }
+            });
+        });
+    }
+
+    // Helper function to parse mailbox structure
+    parseMailboxes(boxes, prefix = '') {
+        const result = [];
+        
+        for (const [name, box] of Object.entries(boxes)) {
+            const fullName = prefix ? `${prefix}/${name}` : name;
+            
+            result.push({
+                name: fullName,
+                displayName: name,
+                delimiter: box.delimiter || '/',
+                total: box.total || 0,
+                unseen: box.unseen || 0,
+                hasChildren: box.children !== null
+            });
+            
+            if (box.children) {
+                result.push(...this.parseMailboxes(box.children, fullName));
+            }
+        }
+        
+        return result;
     }
 
     // Mark email as read
@@ -398,4 +457,4 @@ class GmailImapService extends EventEmitter {
     }
 }
 
-module.exports = new GmailImapService();
+module.exports = new Office365ImapService();

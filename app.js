@@ -548,6 +548,235 @@ app.use('/receiving', ensureAuthenticated, ensureApproved, receivingRoutes);
 app.use('/email-templates', ensureAuthenticated, ensureApproved, emailTemplateRoutes);
 app.use('/dropship', ensureAuthenticated, ensureApproved, dropshipRoutes);
 app.use('/dropship-test', ensureAuthenticated, ensureApproved, dropshipTestRoutes);
+// Quick Office 365 test route (unprotected for debugging)
+app.get('/office365-test-direct', async (req, res) => {
+    try {
+        const office365ImapService = require('./services/office365ImapService');
+        
+        const envCheck = {
+            OFFICE365_USER: process.env.OFFICE365_USER || 'NOT SET',
+            OFFICE365_PASSWORD: process.env.OFFICE365_PASSWORD ? '***SET***' : 'NOT SET',
+            OFFICE365_PASSWORD_LENGTH: process.env.OFFICE365_PASSWORD ? process.env.OFFICE365_PASSWORD.length : 0
+        };
+        
+        // Test Office 365 IMAP connection
+        let connectionTest = {
+            status: 'unknown',
+            error: null,
+            stats: null
+        };
+        
+        try {
+            console.log('🔍 Testing Office 365 connection...');
+            await office365ImapService.connect();
+            console.log('✅ Office 365 connected successfully');
+            const stats = await office365ImapService.getMailboxStats();
+            console.log('📊 Office 365 stats:', stats);
+            connectionTest = {
+                status: 'success',
+                error: null,
+                stats: stats
+            };
+            office365ImapService.disconnect();
+            console.log('👋 Office 365 disconnected');
+        } catch (error) {
+            console.error('❌ Office 365 connection failed:', error.message);
+            connectionTest = {
+                status: 'failed',
+                error: error.message,
+                stats: null
+            };
+        }
+
+        res.json({
+            environment: envCheck,
+            connection: connectionTest,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('❌ Test route error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Test dashboard vendor links (unprotected for debugging)
+app.get('/test-dashboard-vendor-links', async (req, res) => {
+    try {
+        const PurchaseOrder = require('./models/PurchaseOrder');
+        const Vendor = require('./models/Vendor');
+        
+        // Get a few sample POs
+        const samplePOs = await PurchaseOrder.find().limit(3).lean();
+        
+        // Get unique vendors
+        const uniqueVendors = [...new Set(samplePOs.map(po => po.vendor).filter(Boolean))];
+        
+        // Get vendor records
+        const vendorRecords = await Vendor.find({
+            $or: [
+                { vendorName: { $in: uniqueVendors } },
+                { vendorCode: { $in: uniqueVendors } }
+            ]
+        }).lean();
+
+        // Create mapping
+        const vendorMap = {};
+        vendorRecords.forEach(vendor => {
+            vendorMap[vendor.vendorName] = vendor._id;
+            if (vendor.vendorCode) {
+                vendorMap[vendor.vendorCode] = vendor._id;
+            }
+        });
+
+        // Generate HTML for testing
+        let html = `
+        <html>
+        <head>
+            <title>Test Vendor Links</title>
+            <style>
+                .vendor-link { color: #007bff; text-decoration: none; }
+                .vendor-link:hover { color: #0056b3; text-decoration: underline; }
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+            </style>
+        </head>
+        <body>
+            <h1>Vendor Links Test</h1>
+            <h2>Vendor Mapping Debug</h2>
+            <p>Total vendors in mapping: ${Object.keys(vendorMap).length}</p>
+            <p>Vendor map keys: ${Object.keys(vendorMap).join(', ')}</p>
+            
+            <h2>Sample Purchase Orders</h2>
+            <table>
+                <tr><th>PO Number</th><th>Vendor</th><th>Has Link?</th><th>Vendor Display</th></tr>`;
+        
+        samplePOs.forEach(po => {
+            const hasLink = vendorMap && vendorMap[po.vendor];
+            const vendorDisplay = hasLink 
+                ? `<a href="/vendors/${vendorMap[po.vendor]}" class="vendor-link" title="View ${po.vendor} profile">${po.vendor}</a>`
+                : po.vendor;
+            
+            html += `<tr>
+                <td>${po.poNumber}</td>
+                <td>${po.vendor}</td>
+                <td>${hasLink ? '✅' : '❌'}</td>
+                <td>${vendorDisplay}</td>
+            </tr>`;
+        });
+        
+        html += `</table></body></html>`;
+        res.send(html);
+        
+    } catch (error) {
+        res.status(500).send(`Error: ${error.message}<br>Stack: ${error.stack}`);
+    }
+});
+
+// Debug vendor mapping endpoint
+app.get('/debug-vendor-links', async (req, res) => {
+    try {
+        const Vendor = require('./models/Vendor');
+        const PurchaseOrder = require('./models/PurchaseOrder');
+        
+        // Get first 10 purchase orders
+        const samplePOs = await PurchaseOrder.find().limit(10).lean();
+        const vendorNamesFromPOs = [...new Set(samplePOs.map(po => po.vendor).filter(Boolean))];
+        
+        // Get all vendor records
+        const allVendors = await Vendor.find().lean();
+        
+        // Get vendor records that match PO vendor names
+        const vendorRecords = await Vendor.find({
+            $or: [
+                { vendorName: { $in: vendorNamesFromPOs } },
+                { vendorCode: { $in: vendorNamesFromPOs } }
+            ]
+        }).lean();
+
+        // Create mapping
+        const vendorMap = {};
+        vendorRecords.forEach(vendor => {
+            vendorMap[vendor.vendorName] = vendor._id;
+            if (vendor.vendorCode) {
+                vendorMap[vendor.vendorCode] = vendor._id;
+            }
+        });
+
+        res.json({
+            poVendorNames: vendorNamesFromPOs,
+            allVendorCount: allVendors.length,
+            matchingVendors: vendorRecords.map(v => ({
+                id: v._id,
+                name: v.vendorName,
+                code: v.vendorCode
+            })),
+            vendorMap,
+            samplePOsWithLinks: samplePOs.map(po => ({
+                poNumber: po.poNumber,
+                vendor: po.vendor,
+                hasVendorRecord: !!vendorMap[po.vendor],
+                vendorId: vendorMap[po.vendor] || null,
+                linkUrl: vendorMap[po.vendor] ? `/vendors/${vendorMap[po.vendor]}` : null
+            })),
+            debug: {
+                vendorMapKeys: Object.keys(vendorMap),
+                vendorMapSize: Object.keys(vendorMap).length
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message, stack: error.stack });
+    }
+});
+
+// Quick vendor mapping test route (unprotected for debugging)
+app.get('/test-vendor-mapping', async (req, res) => {
+    try {
+        const Vendor = require('./models/Vendor');
+        const PurchaseOrder = require('./models/PurchaseOrder');
+        
+        // Get some sample purchase orders
+        const samplePOs = await PurchaseOrder.find().limit(5).lean();
+        const vendorNames = samplePOs.map(po => po.vendor).filter(Boolean);
+        
+        // Get vendor records
+        const vendorRecords = await Vendor.find({
+            $or: [
+                { vendorName: { $in: vendorNames } },
+                { vendorCode: { $in: vendorNames } }
+            ]
+        }).lean();
+
+        // Create mapping
+        const vendorMap = {};
+        vendorRecords.forEach(vendor => {
+            vendorMap[vendor.vendorName] = vendor._id;
+            if (vendor.vendorCode) {
+                vendorMap[vendor.vendorCode] = vendor._id;
+            }
+        });
+
+        res.json({
+            samplePOs: samplePOs.map(po => ({
+                poNumber: po.poNumber,
+                vendor: po.vendor,
+                vendorId: vendorMap[po.vendor] || null,
+                hasLink: !!vendorMap[po.vendor]
+            })),
+            vendorRecords: vendorRecords.map(v => ({
+                id: v._id,
+                name: v.vendorName,
+                code: v.vendorCode
+            })),
+            vendorMap,
+            totalVendors: await Vendor.countDocuments(),
+            totalPOs: await PurchaseOrder.countDocuments()
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.use('/email-client', ensureAuthenticated, ensureApproved, emailClientRoutes);
 app.use('/food', ensureAuthenticated, ensureApproved, foodRoutes);
 app.use('/story', ensureAuthenticated, ensureApproved, storyRoutes);

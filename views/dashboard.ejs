@@ -1980,6 +1980,42 @@
             word-wrap: break-word;
         }
 
+        /* Vendor link styling */
+        .vendor-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: inherit;
+            transition: color 0.2s ease;
+        }
+
+        .vendor-link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        .vendor-link:visited {
+            color: #6f42c1;
+        }
+
+        /* Split vendor display styling */
+        .vendor-number {
+            font-weight: bold;
+            color: #6c757d;
+            margin-right: 0.5em;
+        }
+
+        .vendor-name {
+            color: inherit;
+        }
+
+        .vendor-link .vendor-number {
+            color: #0056b3;
+        }
+
+        .vendor-link:hover .vendor-number {
+            color: #004085;
+        }
+
         .date-cell {
             width: 100px;
         }
@@ -2132,6 +2168,11 @@
             display: table-cell !important;
             background-color: #f8f9fa; /* Light background to indicate it's active */
             border-left: 3px solid #007bff; /* Blue border to indicate active state */
+        }
+
+        /* Hide POs that haven't reached their Next Update date */
+        .hide-not-ready tbody tr[data-not-ready="true"] {
+            display: none !important;
         }
 
         /* On smaller screens, add mobile indicator */
@@ -3157,7 +3198,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             data-receive-date="<%= prePO.receiveDate || '' %>" data-status="<%= prePO.status %>">
                             <div class="pre-po-header">
                                 <div class="pre-po-title">📦 <strong>
-                                        <%= prePO.vendor %>
+                                        <% if (vendorMap && vendorMap[prePO.vendor]) { %>
+                                            <a href="/vendors/<%= vendorMap[prePO.vendor] %>" class="vendor-link" title="View <%= prePO.vendor %> profile">
+                                                <%= prePO.vendor %>
+                                            </a>
+                                        <% } else { %>
+                                            <%= prePO.vendor %>
+                                        <% } %>
                                     </strong></div>
                                 <div class="pre-po-priority <%= prePO.priority.toLowerCase() %>">
                                     <%= prePO.priority %>
@@ -3288,6 +3335,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         id="toggleNsStatusBtn" title="Show/Hide NS Status column">
                         👁️ <span id="nsStatusColumnText">Show NS Status</span>
                     </button>
+                    <button class="btn btn-sm btn-outline-warning ms-2" onclick="toggleNotReadyPOs()"
+                        id="toggleNotReadyBtn" title="Hide POs that haven't reached their Next Update date">
+                        📅 <span id="notReadyText">Hide Not Ready</span>
+                    </button>
                 </div>
             </div>
 
@@ -3354,7 +3405,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             <tbody>
                                 <% purchaseOrders.forEach((po, index)=> { %>
                                     <!-- Main data row -->
-                                    <tr data-po='<%= JSON.stringify(po) %>' data-index="<%= index %>" <% if (po.isHidden) { %>class="hidden-po"<% } %>>
+                                    <tr data-po='<%= JSON.stringify(po) %>' data-index="<%= index %>" 
+                                        <% if (po.isHidden) { %>class="hidden-po"<% } %>
+                                        <% if (po.nextUpdateDate && new Date(po.nextUpdateDate) > new Date()) { %>data-not-ready="true"<% } else { %>data-not-ready="false"<% } %>>
                                         <td class="date-cell">
                                             <%= po.date %>
                                         </td>
@@ -3415,7 +3468,23 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                             </select>
                                         </td>
                                         <td class="vendor" title="<%= po.vendor %>">
-                                            <%= po.vendor %>
+                                            <% if (vendorMap && vendorMap[po.vendor]) { %>
+                                                <a href="/vendors/<%= vendorMap[po.vendor] %>" class="vendor-link" title="View <%= po.vendor %> profile">
+                                                    <% if (po.vendorNumber && po.vendorName) { %>
+                                                        <span class="vendor-number"><%= po.vendorNumber %></span>
+                                                        <span class="vendor-name"><%= po.vendorName %></span>
+                                                    <% } else { %>
+                                                        <%= po.vendor %>
+                                                    <% } %>
+                                                </a>
+                                            <% } else { %>
+                                                <% if (po.vendorNumber && po.vendorName) { %>
+                                                    <span class="vendor-number"><%= po.vendorNumber %></span>
+                                                    <span class="vendor-name"><%= po.vendorName %></span>
+                                                <% } else { %>
+                                                    <%= po.vendor %>
+                                                <% } %>
+                                            <% } %>
                                         </td>
                                         <td class="line-items-count-cell">
                                             <% if (po.lineItems && po.lineItems.length> 0) { %>
@@ -5104,6 +5173,34 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             showTrackingToast(message, 'success');
         }
 
+        function toggleNotReadyPOs() {
+            const table = document.getElementById('purchaseOrdersTable');
+            const isCurrentlyHiding = table.classList.contains('hide-not-ready');
+            const btn = document.getElementById('toggleNotReadyBtn');
+            const btnText = document.getElementById('notReadyText');
+            
+            if (isCurrentlyHiding) {
+                // Show all POs
+                table.classList.remove('hide-not-ready');
+                btn.classList.remove('btn-outline-warning');
+                btn.classList.add('btn-outline-secondary');
+                btnText.textContent = 'Hide Not Ready';
+            } else {
+                // Hide POs that haven't reached their Next Update date
+                table.classList.add('hide-not-ready');
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-outline-warning');
+                btnText.textContent = 'Show All';
+            }
+            
+            // Update the visible count
+            updateVisibleCount();
+            
+            // Show a toast notification
+            const message = isCurrentlyHiding ? '📅 Showing all POs' : '📅 Hiding POs not ready for update';
+            showTrackingToast(message, 'success');
+        }
+
         async function toggleTrackingDetails(poId) {
             // Find the PO data from the page
             const trackingBtn = document.querySelector(`[data-po-id="${poId}"].tracking-toggle-btn`);
@@ -6167,7 +6264,15 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         // Update statistics based on visible rows
         function updateStats() {
-            const visibleRows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]:not(.hidden)');
+            const table = document.getElementById('purchaseOrdersTable');
+            const hideNotReady = table.classList.contains('hide-not-ready');
+            
+            let visibleRowsSelector = '#purchaseOrdersTable tbody tr[data-po]:not(.hidden)';
+            if (hideNotReady) {
+                visibleRowsSelector = '#purchaseOrdersTable tbody tr[data-po]:not(.hidden):not([data-not-ready="true"])';
+            }
+            
+            const visibleRows = document.querySelectorAll(visibleRowsSelector);
             let notesCount = 0;
 
             visibleRows.forEach(row => {
@@ -6179,6 +6284,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             document.getElementById('visibleCount').textContent = visibleRows.length;
             document.getElementById('notesCount').textContent = notesCount;
+        }
+
+        // Helper function to update visible count
+        function updateVisibleCount() {
+            updateStats();
         }
 
         // Sorting functionality

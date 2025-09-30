@@ -9,7 +9,17 @@ const purchaseOrderSchema = new mongoose.Schema({
     unique: true,
     required: true
   },
-  vendor: String,           // Vendor name
+  vendor: String,           // Vendor name (original combined format for backward compatibility)
+  vendorNumber: {           // Extracted vendor number (e.g., "121" from "121 CROOKHAM CO")
+    type: String,
+    default: '',
+    index: true             // Index for efficient lookups
+  },
+  vendorName: {             // Extracted vendor name (e.g., "CROOKHAM CO" from "121 CROOKHAM CO")
+    type: String,
+    default: '',
+    index: true             // Index for efficient lookups
+  },
   nsStatus: String,         // NS Status - from CSV (Pending Receipt, etc.) - display only
   status: {                 // Status - custom editable dropdown (In Progress, On Hold, etc.)
     type: String,

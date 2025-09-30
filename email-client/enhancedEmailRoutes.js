@@ -11,6 +11,9 @@ const emailService = require('../services/emailService');
 // Import Gmail IMAP service for reading server emails
 const gmailImapService = require('../services/gmailImapService');
 
+// Import Office 365 IMAP service for reading server emails
+const office365ImapService = require('../services/office365ImapService');
+
 // Try to import new models, but fall back gracefully if they don't exist
 let EmailHistory, EmailContact, EmailSignature;
 try {
@@ -684,6 +687,104 @@ router.get('/mailboxes', async (req, res) => {
     }
 });
 
+// Test Gmail connection and environment variables
+router.get('/test-gmail', async (req, res) => {
+    try {
+        const envCheck = {
+            EMAIL_SERVICE: process.env.EMAIL_SERVICE || 'NOT SET',
+            EMAIL_USER: process.env.EMAIL_USER || 'NOT SET',
+            EMAIL_PASSWORD: process.env.EMAIL_PASSWORD ? '***SET***' : 'NOT SET',
+            EMAIL_FROM: process.env.EMAIL_FROM || 'NOT SET'
+        };
+        
+        // Test Gmail IMAP connection
+        let connectionTest = {
+            status: 'unknown',
+            error: null,
+            stats: null
+        };
+        
+        try {
+            await gmailImapService.connect();
+            const stats = await gmailImapService.getMailboxStats();
+            connectionTest = {
+                status: 'success',
+                error: null,
+                stats: stats
+            };
+            gmailImapService.disconnect();
+        } catch (error) {
+            connectionTest = {
+                status: 'failed',
+                error: error.message,
+                stats: null
+            };
+        }
+        
+        res.json({
+            provider: 'Gmail',
+            environment: envCheck,
+            imapConnection: connectionTest,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({
+            provider: 'Gmail',
+            error: 'Test failed',
+            details: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+// Test Office 365 connection and environment variables
+router.get('/test-office365', async (req, res) => {
+    try {
+        const envCheck = {
+            OFFICE365_USER: process.env.OFFICE365_USER || 'NOT SET',
+            OFFICE365_PASSWORD: process.env.OFFICE365_PASSWORD ? '***SET***' : 'NOT SET'
+        };
+        
+        // Test Office 365 IMAP connection
+        let connectionTest = {
+            status: 'unknown',
+            error: null,
+            stats: null
+        };
+        
+        try {
+            await office365ImapService.connect();
+            const stats = await office365ImapService.getMailboxStats();
+            connectionTest = {
+                status: 'success',
+                error: null,
+                stats: stats
+            };
+            office365ImapService.disconnect();
+        } catch (error) {
+            connectionTest = {
+                status: 'failed',
+                error: error.message,
+                stats: null
+            };
+        }
+        
+        res.json({
+            provider: 'Office 365',
+            environment: envCheck,
+            imapConnection: connectionTest,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({
+            provider: 'Office 365',
+            error: 'Test failed',
+            details: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
 // Get emails from Gmail server
 router.get('/inbox', async (req, res) => {
     try {
@@ -741,6 +842,140 @@ router.get('/inbox', async (req, res) => {
                 message: 'Unable to connect to Gmail',
                 details: error.message,
                 suggestion: 'Please check your Gmail App Password and IMAP settings'
+            }
+        });
+    }
+});
+
+// Get emails from Office 365 server
+router.get('/office365-inbox', async (req, res) => {
+    try {
+        const mailbox = req.query.mailbox || 'INBOX';
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const offset = (page - 1) * limit;
+        
+        // Open the specified mailbox
+        const box = await office365ImapService.openMailbox(mailbox);
+        
+        // Fetch emails with pagination
+        const emails = await office365ImapService.fetchEmails({
+            limit,
+            offset,
+            search: req.query.search,
+            unseen: req.query.unseen === 'true'
+        });
+        
+        // Get mailbox stats
+        const stats = await office365ImapService.getMailboxStats(mailbox);
+        
+        if (req.headers.accept && req.headers.accept.includes('application/json')) {
+            res.json({
+                success: true,
+                emails,
+                stats,
+                pagination: {
+                    current: page,
+                    limit,
+                    total: Math.ceil(stats.total / limit)
+                }
+            });
+        } else {
+            res.render('email-client/inbox', {
+                title: `${mailbox} - Office 365 Inbox`,
+                user: req.user,
+                emails,
+                stats,
+                currentMailbox: mailbox,
+                emailProvider: 'Office 365',
+                providerClass: 'office365',
+                inboxUrl: '/email-client/office365-inbox',
+                pagination: {
+                    current: page,
+                    limit,
+                    total: Math.ceil(stats.total / limit)
+                },
+                query: req.query
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching Office 365 inbox:', error);
+        res.status(500).render('error', {
+            title: 'Office 365 Connection Error',
+            user: req.user,
+            error: {
+                message: 'Unable to connect to Office 365',
+                details: error.message,
+                suggestion: 'Please check your Office 365 credentials and IMAP settings'
+            }
+        });
+    }
+});
+
+// Get Office 365 mailbox statistics
+router.get('/office365-stats', async (req, res) => {
+    try {
+        const mailboxes = ['INBOX', 'Sent Items', 'Drafts', 'Junk Email', 'Deleted Items'];
+        const stats = {};
+        
+        for (const mailbox of mailboxes) {
+            try {
+                stats[mailbox] = await office365ImapService.getMailboxStats(mailbox);
+            } catch (error) {
+                console.log(`Could not get stats for ${mailbox}:`, error.message);
+                stats[mailbox] = { total: 0, unseen: 0, name: mailbox };
+            }
+        }
+        
+        res.json({ success: true, stats });
+    } catch (error) {
+        console.error('Error fetching Office 365 mailbox stats:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get specific Office 365 email by UID
+router.get('/office365-inbox/email/:uid', async (req, res) => {
+    try {
+        const uid = parseInt(req.params.uid);
+        const mailbox = req.query.mailbox || 'INBOX';
+        
+        // Open mailbox first
+        await office365ImapService.openMailbox(mailbox);
+        
+        // Get the email
+        const email = await office365ImapService.getEmailByUID(uid);
+        
+        if (!email) {
+            return res.status(404).render('error', {
+                title: 'Email Not Found',
+                user: req.user,
+                error: {
+                    message: 'Email not found',
+                    details: `Could not find email with UID ${uid} in ${mailbox}`
+                }
+            });
+        }
+        
+        if (req.headers.accept && req.headers.accept.includes('application/json')) {
+            res.json({ success: true, email });
+        } else {
+            res.render('email-client/email-view', {
+                title: `${email.subject} - Office 365 Email`,
+                user: req.user,
+                email,
+                emailProvider: 'Office 365',
+                backUrl: `/email-client/office365-inbox?mailbox=${encodeURIComponent(mailbox)}`
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching Office 365 email:', error);
+        res.status(500).render('error', {
+            title: 'Error Loading Email',
+            user: req.user,
+            error: {
+                message: 'Unable to load email',
+                details: error.message
             }
         });
     }

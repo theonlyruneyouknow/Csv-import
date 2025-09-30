@@ -100,6 +100,25 @@
             color: #6c757d;
             margin-top: 5px;
         }
+
+        /* Enhanced save button styles */
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Simple unsaved changes indicator */
+        .unsaved-indicator {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            z-index: 10;
+        }
+
+        .btn-group {
+            position: relative;
+        }
     </style>
 </head>
 
@@ -137,8 +156,36 @@
         <% } %>
 
         <!-- Form -->
-        <form method="POST" action="<%= isEdit ? '/vendors/' + vendor._id + '/edit' : '/vendors/new' %>">
+        <form method="POST" action="<%= isEdit ? '/vendors/' + vendor._id + '/edit' : '/vendors/new' %>" id="vendorForm">
             <div class="form-container">
+                
+                <!-- Top Save Button -->
+                <div class="form-section">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">
+                                <i class="fas fa-<%= isEdit ? 'edit' : 'plus' %>"></i>
+                                <%= isEdit ? 'Edit' : 'Add New' %> Vendor
+                            </h3>
+                            <p class="text-muted mb-0">
+                                <%= isEdit ? 'Update vendor information and contact details' : 'Create a new vendor record with contact and business information' %>
+                            </p>
+                        </div>
+                        <div class="btn-group">
+                            <a href="<%= isEdit ? '/vendors/' + vendor._id : '/vendors' %>" class="btn btn-outline-secondary btn-lg" id="topCancelBtn">
+                                <i class="fas fa-arrow-left"></i> Back to <%= isEdit ? 'Vendor' : 'List' %>
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg" id="topSaveBtn">
+                                <i class="fas fa-save"></i> 
+                                <%= isEdit ? 'Update' : 'Create' %> Vendor
+                            </button>
+                            <!-- Small unsaved changes indicator -->
+                            <div id="unsavedIndicator" class="unsaved-indicator" style="display: none;" title="You have unsaved changes">
+                                <i class="fas fa-circle text-warning"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 
                 <!-- Basic Information -->
                 <div class="form-section">
@@ -415,10 +462,10 @@
                 <!-- Form Actions -->
                 <div class="form-section">
                     <div class="d-flex justify-content-between">
-                        <a href="<%= isEdit ? '/vendors/' + vendor._id : '/vendors' %>" class="btn btn-secondary">
-                            <i class="fas fa-times"></i> Cancel
+                        <a href="<%= isEdit ? '/vendors/' + vendor._id : '/vendors' %>" class="btn btn-secondary btn-lg" id="bottomCancelBtn">
+                            <i class="fas fa-arrow-left"></i> Back to <%= isEdit ? 'Vendor' : 'List' %>
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-success btn-lg" id="bottomSaveBtn">
                             <i class="fas fa-save"></i> 
                             <%= isEdit ? 'Update' : 'Create' %> Vendor
                         </button>
@@ -612,6 +659,74 @@
                     header.textContent = `Contact ${index + 1}`;
                 });
             }
+
+            // ======================================
+            // SIMPLE UNSAVED CHANGES DETECTION
+            // ======================================
+            let hasUnsavedChanges = false;
+            let originalFormData = '';
+            let isSubmitting = false;
+
+            // Store original form data when page loads
+            window.addEventListener('load', function() {
+                const form = document.getElementById('vendorForm');
+                originalFormData = new FormData(form);
+                originalFormData = formDataToString(originalFormData);
+            });
+
+            // Helper function to convert FormData to comparable string
+            function formDataToString(formData) {
+                const entries = [];
+                for (let [key, value] of formData.entries()) {
+                    entries.push(`${key}=${value}`);
+                }
+                return entries.sort().join('&');
+            }
+
+            // Check for changes on all form inputs
+            function checkForChanges() {
+                const form = document.getElementById('vendorForm');
+                const currentFormData = new FormData(form);
+                const currentDataString = formDataToString(currentFormData);
+                
+                const hasChanges = originalFormData !== currentDataString;
+                
+                if (hasChanges !== hasUnsavedChanges) {
+                    hasUnsavedChanges = hasChanges;
+                    updateIndicator();
+                }
+            }
+
+            // Show/hide the small indicator
+            function updateIndicator() {
+                const indicator = document.getElementById('unsavedIndicator');
+                if (hasUnsavedChanges) {
+                    indicator.style.display = 'block';
+                } else {
+                    indicator.style.display = 'none';
+                }
+            }
+
+            // Add event listeners to all form inputs
+            const form = document.getElementById('vendorForm');
+            form.addEventListener('input', checkForChanges);
+            form.addEventListener('change', checkForChanges);
+
+            // Handle form submission
+            form.addEventListener('submit', function(e) {
+                isSubmitting = true;
+                hasUnsavedChanges = false;
+                updateIndicator();
+            });
+
+            // Simple warning when leaving page with unsaved changes
+            window.addEventListener('beforeunload', function(e) {
+                if (hasUnsavedChanges && !isSubmitting) {
+                    e.preventDefault();
+                    e.returnValue = 'You have unsaved changes. Leave anyway?';
+                    return e.returnValue;
+                }
+            });
         });
     </script>
 </body>

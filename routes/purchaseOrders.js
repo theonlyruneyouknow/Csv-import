@@ -8,6 +8,7 @@ const StatusOption = require('../models/StatusOption');
 const LineItemStatusOption = require('../models/LineItemStatusOption');
 const Note = require('../models/Note');
 const LineItem = require('../models/LineItem');
+const { splitVendorData } = require('../lib/vendorUtils');
 const Task = require('../models/Task');
 const trackingService = require('../services/17trackService');
 
@@ -107,12 +108,17 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
       const existingPO = await PurchaseOrder.findOne({ poNumber: poNumber });
 
       if (existingPO) {
+        // Split vendor data for better matching
+        const vendorData = splitVendorData(row[3]);
+        
         // Update existing PO - CSV status goes to nsStatus, preserve custom status
         const updateData = {
           reportDate,
           date: row[1],
           poNumber: poNumber,
           vendor: row[3],
+          vendorNumber: vendorData.vendorNumber,
+          vendorName: vendorData.vendorName,
           nsStatus: csvStatus, // CSV status ALWAYS goes to NS Status
           amount: parseFloat((row[5] || '0').replace(/[$,]/g, '')),
           location: row[6],
@@ -167,12 +173,17 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
         await PurchaseOrder.findByIdAndUpdate(existingPO._id, updateData);
         console.log(`Updated PO ${poNumber} - NS Status: "${csvStatus}", Custom Status: "${existingPO.status}"${existingPO.isHidden ? ' (UNHIDDEN)' : ''}`);
       } else {
+        // Split vendor data for better matching
+        const vendorData = splitVendorData(row[3]);
+        
         // Create new PO - CSV status goes to nsStatus, custom status starts empty
         await PurchaseOrder.create({
           reportDate,
           date: row[1],
           poNumber: poNumber,
           vendor: row[3],
+          vendorNumber: vendorData.vendorNumber,
+          vendorName: vendorData.vendorName,
           nsStatus: csvStatus, // CSV status goes to NS Status
           status: '', // Custom status starts EMPTY
           amount: parseFloat((row[5] || '0').replace(/[$,]/g, '')),
@@ -181,7 +192,7 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
           createdAt: new Date(),
           updatedAt: new Date()
         });
-        console.log(`Created new PO ${poNumber} - NS Status: "${csvStatus}", Custom Status: empty`);
+        console.log(`Created new PO ${poNumber} - Vendor: "${vendorData.vendorNumber} ${vendorData.vendorName}" - NS Status: "${csvStatus}", Custom Status: empty`);
       }
     }
 
@@ -1448,12 +1459,109 @@ router.get('/', async (req, res) => {
     // Get unique custom Status values for filters
     const uniqueStatuses = [...new Set(purchaseOrdersWithETA.map(po => po.status).filter(Boolean))];
 
-    // Get unique vendors from both POs and pre-POs
+    // Get unique vendors from both POs and pre-POs with enhanced matching
     const allVendors = [
       ...purchaseOrdersWithETA.map(po => po.vendor),
       ...prePurchaseOrders.map(ppo => ppo.vendor)
     ];
     const uniqueVendors = [...new Set(allVendors.filter(Boolean))].sort();
+    
+    // Also collect vendor numbers and names separately for better matching
+    const vendorNumbers = [...new Set(purchaseOrdersWithETA
+      .map(po => po.vendorNumber)
+      .filter(Boolean))];
+    const vendorNames = [...new Set(purchaseOrdersWithETA
+      .map(po => po.vendorName)
+      .filter(Boolean))];
+
+    // Create vendor mapping for clickable links with enhanced matching
+    const Vendor = require('../models/Vendor');
+    const { createVendorMatchingPatterns, normalizeVendorName } = require('../lib/vendorUtils');
+    
+    // Primary vendor lookup - try exact matches first
+    const vendorRecords = await Vendor.find({
+      $or: [
+        { vendorName: { $in: uniqueVendors } },
+        { vendorCode: { $in: uniqueVendors } },
+        { vendorName: { $in: vendorNames } },
+        { vendorCode: { $in: vendorNumbers } }
+      ]
+    }).lean();
+
+    // Enhanced matching - try case-insensitive and normalized matching
+    const additionalVendorRecords = await Vendor.find({
+      $or: [
+        ...uniqueVendors.map(vendorName => ({
+          $or: [
+            { vendorName: { $regex: new RegExp(`^${vendorName.trim()}$`, 'i') } },
+            { vendorCode: { $regex: new RegExp(`^${vendorName.trim()}$`, 'i') } }
+          ]
+        })),
+        ...vendorNumbers.map(vendorNumber => ({
+          $or: [
+            { vendorCode: { $regex: new RegExp(`^${vendorNumber.trim()}$`, 'i') } },
+            { vendorName: { $regex: new RegExp(`^${vendorNumber.trim()}`, 'i') } }
+          ]
+        })),
+        ...vendorNames.map(vendorName => ({
+          $or: [
+            { vendorName: { $regex: new RegExp(`^${vendorName.trim()}$`, 'i') } },
+            { vendorCode: { $regex: new RegExp(`^${vendorName.trim()}$`, 'i') } }
+          ]
+        }))
+      ]
+    }).lean();
+
+    // Combine and deduplicate vendor records
+    const allVendorRecords = [...vendorRecords, ...additionalVendorRecords];
+    const uniqueVendorRecords = allVendorRecords.filter((vendor, index, self) => 
+      index === self.findIndex(v => v._id.toString() === vendor._id.toString())
+    );
+
+    // Create enhanced mapping from vendor identifiers to vendor ID
+    const vendorMap = {};
+    uniqueVendorRecords.forEach(vendor => {
+      // Map both vendor name and vendor code to the same ID
+      vendorMap[vendor.vendorName] = vendor._id;
+      if (vendor.vendorCode) {
+        vendorMap[vendor.vendorCode] = vendor._id;
+      }
+      
+      // Enhanced mapping for PO vendor strings with split data
+      uniqueVendors.forEach(poVendor => {
+        const trimmedPoVendor = poVendor.trim();
+        const vendorSplit = createVendorMatchingPatterns(poVendor);
+        
+        // Try exact matches first
+        if (vendor.vendorName.toLowerCase() === trimmedPoVendor.toLowerCase() ||
+            (vendor.vendorCode && vendor.vendorCode.toLowerCase() === trimmedPoVendor.toLowerCase())) {
+          vendorMap[poVendor] = vendor._id;
+        }
+        // Try matching with vendor number
+        else if (vendorSplit.vendorNumber && 
+                (vendor.vendorCode === vendorSplit.vendorNumber ||
+                 vendor.vendorName.toLowerCase().includes(vendorSplit.vendorNumber.toLowerCase()))) {
+          vendorMap[poVendor] = vendor._id;
+        }
+        // Try matching with vendor name (normalized)
+        else if (vendorSplit.vendorName && 
+                (vendor.vendorName.toLowerCase() === vendorSplit.vendorName.toLowerCase() ||
+                 normalizeVendorName(vendor.vendorName) === normalizeVendorName(vendorSplit.vendorName))) {
+          vendorMap[poVendor] = vendor._id;
+        }
+      });
+    });
+
+    console.log(`📝 Created enhanced vendor mapping for ${Object.keys(vendorMap).length} vendors`);
+    console.log(`🔍 Vendor map sample:`, Object.keys(vendorMap).slice(0, 5));
+    console.log(`🔍 Sample PO vendors:`, uniqueVendors.slice(0, 5));
+    
+    // Check for exact matches
+    const matchedVendors = uniqueVendors.filter(vendor => vendorMap[vendor]);
+    console.log(`✅ ${matchedVendors.length} vendors have links out of ${uniqueVendors.length} total vendors`);
+    if (matchedVendors.length > 0) {
+      console.log(`🔗 Vendors with links:`, matchedVendors.slice(0, 3));
+    }
 
     // Get status options from database
     let statusOptions = await StatusOption.find().sort({ name: 1 });
@@ -1488,6 +1596,7 @@ router.get('/', async (req, res) => {
       uniqueNSStatuses: uniqueNSStatuses.sort(),
       uniqueStatuses: uniqueStatuses.sort(),
       uniqueVendors,
+      vendorMap, // Add vendor ID mapping for clickable links
       statusOptions: statusOptionNames,
       allStatusOptions: statusOptions, // Send full objects for management
       user: req.user // Pass user information for authentication status
