@@ -8,6 +8,7 @@ const StatusOption = require('../models/StatusOption');
 const LineItemStatusOption = require('../models/LineItemStatusOption');
 const Note = require('../models/Note');
 const LineItem = require('../models/LineItem');
+const OrganicVendor = require('../models/OrganicVendor');
 const { splitVendorData } = require('../lib/vendorUtils');
 const Task = require('../models/Task');
 const trackingService = require('../services/17trackService');
@@ -57,6 +58,56 @@ const formatETA = (eta) => {
     day: 'numeric',
     year: etaDate.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
   });
+};
+
+// Helper function to ensure vendor exists in OrganicVendor database
+const ensureVendorExists = async (vendorData) => {
+  try {
+    const { vendorNumber, vendorName } = vendorData;
+    
+    // Skip if no vendor data
+    if (!vendorNumber && !vendorName) {
+      return null;
+    }
+
+    // Create a unique internal ID from vendor number or name
+    const internalId = vendorNumber || vendorName.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    
+    // Check if vendor already exists by internal ID or vendor number
+    let existingVendor = await OrganicVendor.findOne({
+      $or: [
+        { internalId: internalId },
+        { vendorName: vendorName },
+        ...(vendorNumber ? [{ internalId: vendorNumber }] : [])
+      ]
+    });
+
+    if (existingVendor) {
+      console.log(`✅ Vendor "${vendorName}" (${vendorNumber}) already exists in database`);
+      return existingVendor;
+    }
+
+    // Create new vendor with minimal required fields
+    const newVendor = new OrganicVendor({
+      vendorName: vendorName || `Vendor ${vendorNumber}`,
+      internalId: internalId,
+      lastOrganicCertificationDate: new Date('1900-01-01'), // Default placeholder date
+      status: 'Pending Review', // Valid status for auto-created vendors
+      address: {
+        country: 'United States' // Use default from schema
+      },
+      notes: `Auto-created during CSV import from PO data. Vendor Number: ${vendorNumber || 'N/A'}`
+    });
+
+    await newVendor.save();
+    console.log(`🆕 Created new vendor in database: "${vendorName}" (${vendorNumber}) with ID: ${internalId}`);
+    
+    return newVendor;
+  } catch (error) {
+    console.error(`❌ Error ensuring vendor exists:`, error);
+    // Don't fail the entire import if vendor creation fails
+    return null;
+  }
 };
 
 // Upload and parse CSV
@@ -110,6 +161,9 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
       if (existingPO) {
         // Split vendor data for better matching
         const vendorData = splitVendorData(row[3]);
+        
+        // Ensure vendor exists in vendor database
+        await ensureVendorExists(vendorData);
         
         // Update existing PO - CSV status goes to nsStatus, preserve custom status
         const updateData = {
@@ -175,6 +229,9 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
       } else {
         // Split vendor data for better matching
         const vendorData = splitVendorData(row[3]);
+        
+        // Ensure vendor exists in vendor database
+        await ensureVendorExists(vendorData);
         
         // Create new PO - CSV status goes to nsStatus, custom status starts empty
         await PurchaseOrder.create({

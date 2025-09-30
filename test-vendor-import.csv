@@ -1,0 +1,14 @@
+Purchase Order Summary Report,,,,,,,
+,,,,,,,
+Territory Seed Company,,,,,,,
+PO Report for September 2025,,,,,,,
+Generated: 09/30/2025,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+Date,PO Number,Vendor,Status,Amount,Location
+9/20/2025,PO12345,125 SEED DISTRIBUTORS INC,Open,$1250.00,Warehouse A
+9/21/2025,PO12346,130 ORGANIC FARMS LLC,Pending,$750.50,Warehouse B
+9/22/2025,PO12347,140 HERITAGE SEEDS CO,Processing,$2100.75,Warehouse A
+9/23/2025,PO12348,999 NEW VENDOR COMPANY,Open,$500.00,Warehouse C
+Total ,,,,,$4601.25,
