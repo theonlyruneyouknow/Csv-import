@@ -16,6 +16,12 @@ const trackingService = require('../services/17trackService');
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
+// Test route to verify router is working
+router.get('/test-upload', (req, res) => {
+  console.log('🧪 TEST ROUTE HIT - Upload route is accessible!');
+  res.json({ status: 'Upload route is working', timestamp: new Date() });
+});
+
 // Helper function to calculate the earliest upcoming ETA from line items
 const calculateUpcomingETA = (lineItems) => {
   if (!lineItems || lineItems.length === 0) return null;
@@ -63,29 +69,55 @@ const formatETA = (eta) => {
 // Helper function to ensure vendor exists in OrganicVendor database
 const ensureVendorExists = async (vendorData) => {
   try {
-    const { vendorNumber, vendorName } = vendorData;
+    const { vendorNumber, vendorName, originalVendor } = vendorData;
+    
+    // Enhanced debugging for vendor creation
+    console.log(`🔍 VENDOR DEBUG - Processing vendor:`, {
+      original: originalVendor,
+      vendorNumber: vendorNumber,
+      vendorName: vendorName
+    });
     
     // Skip if no vendor data
     if (!vendorNumber && !vendorName) {
+      console.log(`⚠️ VENDOR DEBUG - Skipping vendor creation: no vendor number or name`);
       return null;
     }
 
     // Create a unique internal ID from vendor number or name
     const internalId = vendorNumber || vendorName.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
     
+    console.log(`🔍 VENDOR DEBUG - Generated internal ID: ${internalId}`);
+    
     // Check if vendor already exists by internal ID or vendor number
-    let existingVendor = await OrganicVendor.findOne({
+    const searchCriteria = {
       $or: [
         { internalId: internalId },
         { vendorName: vendorName },
         ...(vendorNumber ? [{ internalId: vendorNumber }] : [])
       ]
-    });
+    };
+    
+    console.log(`🔍 VENDOR DEBUG - Searching with criteria:`, searchCriteria);
+    
+    let existingVendor = await OrganicVendor.findOne(searchCriteria);
 
     if (existingVendor) {
-      console.log(`✅ Vendor "${vendorName}" (${vendorNumber}) already exists in database`);
+      console.log(`✅ VENDOR DEBUG - Vendor "${vendorName}" (${vendorNumber}) already exists in database with ID: ${existingVendor.internalId}`);
+      console.log(`✅ VENDOR DEBUG - Existing vendor details:`, {
+        id: existingVendor._id,
+        internalId: existingVendor.internalId,
+        vendorName: existingVendor.vendorName,
+        status: existingVendor.status
+      });
       return existingVendor;
     }
+
+    console.log(`🆕 VENDOR DEBUG - Creating new vendor with data:`, {
+      vendorName: vendorName || `Vendor ${vendorNumber}`,
+      internalId: internalId,
+      originalVendor: originalVendor
+    });
 
     // Create new vendor with minimal required fields
     const newVendor = new OrganicVendor({
@@ -96,15 +128,15 @@ const ensureVendorExists = async (vendorData) => {
       address: {
         country: 'United States' // Use default from schema
       },
-      notes: `Auto-created during CSV import from PO data. Vendor Number: ${vendorNumber || 'N/A'}`
+      notes: `Auto-created during CSV import from PO data. Original vendor string: "${originalVendor}". Vendor Number: ${vendorNumber || 'N/A'}`
     });
 
     await newVendor.save();
-    console.log(`🆕 Created new vendor in database: "${vendorName}" (${vendorNumber}) with ID: ${internalId}`);
+    console.log(`� VENDOR DEBUG - Successfully created new vendor: "${vendorName}" (${vendorNumber}) with ID: ${internalId}`);
     
     return newVendor;
   } catch (error) {
-    console.error(`❌ Error ensuring vendor exists:`, error);
+    console.error(`❌ VENDOR DEBUG - Error ensuring vendor exists for "${vendorData.originalVendor}":`, error);
     // Don't fail the entire import if vendor creation fails
     return null;
   }
@@ -112,12 +144,27 @@ const ensureVendorExists = async (vendorData) => {
 
 // Upload and parse CSV
 router.post('/upload', upload.single('csvFile'), async (req, res) => {
+  console.log('🚨 UPLOAD ENDPOINT HIT! File upload detected!');
+  console.log('📁 Request file:', req.file ? req.file.originalname : 'NO FILE');
+  console.log('📁 Request body:', req.body);
+  
   try {
+    if (!req.file) {
+      console.log('❌ No file uploaded!');
+      return res.status(400).send('No file uploaded');
+    }
+
     const fs = require('fs');
     const fileContent = fs.readFileSync(req.file.path, 'utf8');
 
+    console.log('📁 CSV UPLOAD DEBUG - Starting CSV processing...');
+    console.log('📁 File content preview:', fileContent.substring(0, 200) + '...');
+    
     const parsed = Papa.parse(fileContent, { header: false });
     const reportDate = parsed.data[3][0]; // Extract report date
+
+    console.log(`📊 CSV UPLOAD DEBUG - Report date: ${reportDate}`);
+    console.log(`📊 CSV UPLOAD DEBUG - Total parsed rows: ${parsed.data.length}`);
 
     // Extract data rows (skip headers and totals)
     const dataStartIndex = 8;
@@ -131,6 +178,16 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
     }
 
     const dataRows = parsed.data.slice(dataStartIndex, dataEndIndex);
+    
+    console.log(`📊 CSV UPLOAD DEBUG - Processing rows ${dataStartIndex} to ${dataEndIndex} (${dataRows.length} data rows)`);
+    console.log(`📊 CSV UPLOAD DEBUG - Sample data rows:`, dataRows.slice(0, 3).map((row, idx) => ({
+      rowIndex: dataStartIndex + idx,
+      date: row[1],
+      poNumber: row[2], 
+      vendor: row[3],
+      status: row[4],
+      amount: row[5]
+    })));
 
     // Track which PO numbers were actually processed in this import
     const processedPONumbers = new Set();
@@ -139,9 +196,13 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
     for (const row of dataRows) {
       const poNumber = row[2]; // PO number is the unique identifier
       const csvStatus = row[4]; // Status from CSV (this goes to NS Status!)
+      const vendorString = row[3]; // Vendor data
+
+      console.log(`🔄 CSV ROW DEBUG - Processing row: PO=${poNumber}, Vendor="${vendorString}", Status="${csvStatus}"`);
 
       // Skip empty rows or invalid PO numbers
       if (!poNumber || !poNumber.trim()) {
+        console.log(`⚠️ CSV ROW DEBUG - Skipping row: empty PO number`);
         continue;
       }
 
@@ -158,19 +219,24 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
       // Find existing PO by PO number
       const existingPO = await PurchaseOrder.findOne({ poNumber: poNumber });
 
+      // ALWAYS split vendor data and ensure vendor exists FIRST
+      const vendorData = splitVendorData(vendorString);
+      console.log(`🔄 CSV ROW DEBUG - Split vendor data:`, vendorData);
+      
+      // CRITICAL: Always ensure vendor exists in vendor database BEFORE processing PO
+      console.log(`🔍 VENDOR CHECK - Ensuring vendor exists for PO ${poNumber}`);
+      const vendorResult = await ensureVendorExists(vendorData);
+      console.log(`🔍 VENDOR CHECK - Result:`, vendorResult ? 'SUCCESS' : 'FAILED');
+
       if (existingPO) {
-        // Split vendor data for better matching
-        const vendorData = splitVendorData(row[3]);
-        
-        // Ensure vendor exists in vendor database
-        await ensureVendorExists(vendorData);
+        console.log(`🔄 CSV ROW DEBUG - Updating existing PO ${poNumber}`);
         
         // Update existing PO - CSV status goes to nsStatus, preserve custom status
         const updateData = {
           reportDate,
           date: row[1],
           poNumber: poNumber,
-          vendor: row[3],
+          vendor: vendorString,
           vendorNumber: vendorData.vendorNumber,
           vendorName: vendorData.vendorName,
           nsStatus: csvStatus, // CSV status ALWAYS goes to NS Status
@@ -227,18 +293,14 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
         await PurchaseOrder.findByIdAndUpdate(existingPO._id, updateData);
         console.log(`Updated PO ${poNumber} - NS Status: "${csvStatus}", Custom Status: "${existingPO.status}"${existingPO.isHidden ? ' (UNHIDDEN)' : ''}`);
       } else {
-        // Split vendor data for better matching
-        const vendorData = splitVendorData(row[3]);
-        
-        // Ensure vendor exists in vendor database
-        await ensureVendorExists(vendorData);
+        console.log(`🔄 CSV ROW DEBUG - Creating new PO ${poNumber}`);
         
         // Create new PO - CSV status goes to nsStatus, custom status starts empty
         await PurchaseOrder.create({
           reportDate,
           date: row[1],
           poNumber: poNumber,
-          vendor: row[3],
+          vendor: vendorString,
           vendorNumber: vendorData.vendorNumber,
           vendorName: vendorData.vendorName,
           nsStatus: csvStatus, // CSV status goes to NS Status
@@ -1446,7 +1508,9 @@ router.get('/', async (req, res) => {
       query.isHidden = { $ne: true }; // Only show non-hidden POs by default
     }
 
-    const purchaseOrders = await PurchaseOrder.find(query).sort({ date: 1 });
+    const purchaseOrders = await PurchaseOrder.find(query)
+      .populate('linkedVendor')  // Populate the linked vendor from Vendor model
+      .sort({ date: 1 });
 
     // Fetch line items for each PO and calculate ETAs
     const purchaseOrdersWithETA = await Promise.all(
@@ -1516,108 +1580,73 @@ router.get('/', async (req, res) => {
     // Get unique custom Status values for filters
     const uniqueStatuses = [...new Set(purchaseOrdersWithETA.map(po => po.status).filter(Boolean))];
 
-    // Get unique vendors from both POs and pre-POs with enhanced matching
+    // Get unique vendors from both POs and pre-POs
     const allVendors = [
       ...purchaseOrdersWithETA.map(po => po.vendor),
       ...prePurchaseOrders.map(ppo => ppo.vendor)
     ];
     const uniqueVendors = [...new Set(allVendors.filter(Boolean))].sort();
-    
-    // Also collect vendor numbers and names separately for better matching
-    const vendorNumbers = [...new Set(purchaseOrdersWithETA
-      .map(po => po.vendorNumber)
-      .filter(Boolean))];
-    const vendorNames = [...new Set(purchaseOrdersWithETA
-      .map(po => po.vendorName)
-      .filter(Boolean))];
 
-    // Create vendor mapping for clickable links with enhanced matching
+    // Create vendor mapping for clickable links using the Vendor model (main vendor dashboard)
     const Vendor = require('../models/Vendor');
-    const { createVendorMatchingPatterns, normalizeVendorName } = require('../lib/vendorUtils');
+    const { splitVendorData } = require('../lib/vendorUtils');
     
-    // Primary vendor lookup - try exact matches first
-    const vendorRecords = await Vendor.find({
-      $or: [
-        { vendorName: { $in: uniqueVendors } },
-        { vendorCode: { $in: uniqueVendors } },
-        { vendorName: { $in: vendorNames } },
-        { vendorCode: { $in: vendorNumbers } }
-      ]
-    }).lean();
-
-    // Enhanced matching - try case-insensitive and normalized matching
-    const additionalVendorRecords = await Vendor.find({
-      $or: [
-        ...uniqueVendors.map(vendorName => ({
-          $or: [
-            { vendorName: { $regex: new RegExp(`^${vendorName.trim()}$`, 'i') } },
-            { vendorCode: { $regex: new RegExp(`^${vendorName.trim()}$`, 'i') } }
-          ]
-        })),
-        ...vendorNumbers.map(vendorNumber => ({
-          $or: [
-            { vendorCode: { $regex: new RegExp(`^${vendorNumber.trim()}$`, 'i') } },
-            { vendorName: { $regex: new RegExp(`^${vendorNumber.trim()}`, 'i') } }
-          ]
-        })),
-        ...vendorNames.map(vendorName => ({
-          $or: [
-            { vendorName: { $regex: new RegExp(`^${vendorName.trim()}$`, 'i') } },
-            { vendorCode: { $regex: new RegExp(`^${vendorName.trim()}$`, 'i') } }
-          ]
-        }))
-      ]
-    }).lean();
-
-    // Combine and deduplicate vendor records
-    const allVendorRecords = [...vendorRecords, ...additionalVendorRecords];
-    const uniqueVendorRecords = allVendorRecords.filter((vendor, index, self) => 
-      index === self.findIndex(v => v._id.toString() === vendor._id.toString())
-    );
-
-    // Create enhanced mapping from vendor identifiers to vendor ID
+    // First, try to use the linkedVendor field if it exists
     const vendorMap = {};
-    uniqueVendorRecords.forEach(vendor => {
-      // Map both vendor name and vendor code to the same ID
-      vendorMap[vendor.vendorName] = vendor._id;
-      if (vendor.vendorCode) {
-        vendorMap[vendor.vendorCode] = vendor._id;
+    purchaseOrdersWithETA.forEach(po => {
+      if (po.vendor && po.linkedVendor && po.linkedVendor._id) {
+        vendorMap[po.vendor] = po.linkedVendor._id;
       }
-      
-      // Enhanced mapping for PO vendor strings with split data
-      uniqueVendors.forEach(poVendor => {
-        const trimmedPoVendor = poVendor.trim();
-        const vendorSplit = createVendorMatchingPatterns(poVendor);
-        
-        // Try exact matches first
-        if (vendor.vendorName.toLowerCase() === trimmedPoVendor.toLowerCase() ||
-            (vendor.vendorCode && vendor.vendorCode.toLowerCase() === trimmedPoVendor.toLowerCase())) {
-          vendorMap[poVendor] = vendor._id;
-        }
-        // Try matching with vendor number
-        else if (vendorSplit.vendorNumber && 
-                (vendor.vendorCode === vendorSplit.vendorNumber ||
-                 vendor.vendorName.toLowerCase().includes(vendorSplit.vendorNumber.toLowerCase()))) {
-          vendorMap[poVendor] = vendor._id;
-        }
-        // Try matching with vendor name (normalized)
-        else if (vendorSplit.vendorName && 
-                (vendor.vendorName.toLowerCase() === vendorSplit.vendorName.toLowerCase() ||
-                 normalizeVendorName(vendor.vendorName) === normalizeVendorName(vendorSplit.vendorName))) {
-          vendorMap[poVendor] = vendor._id;
-        }
-      });
     });
 
-    console.log(`📝 Created enhanced vendor mapping for ${Object.keys(vendorMap).length} vendors`);
+    // For vendors without links, try pattern matching
+    const unmappedVendors = uniqueVendors.filter(v => !vendorMap[v]);
+    if (unmappedVendors.length > 0) {
+      const allVendorRecords = await Vendor.find();
+      
+      unmappedVendors.forEach(poVendor => {
+        const vendorData = splitVendorData(poVendor);
+        
+        // Try to find matching vendor in the database
+        const matchingVendor = allVendorRecords.find(vendor => {
+          // Match by vendor code (number)
+          if (vendorData.vendorNumber && 
+              (vendor.vendorCode === vendorData.vendorNumber ||
+               vendor.vendorCode === vendorData.vendorNumber.padStart(3, '0'))) {
+            return true;
+          }
+          // Match by vendor name (case-insensitive)
+          if (vendorData.vendorName && 
+              vendor.vendorName.toLowerCase() === vendorData.vendorName.toLowerCase()) {
+            return true;
+          }
+          // Match full vendor string
+          if (vendor.vendorName.toLowerCase() === poVendor.toLowerCase()) {
+            return true;
+          }
+          return false;
+        });
+        
+        if (matchingVendor) {
+          vendorMap[poVendor] = matchingVendor._id;
+        }
+      });
+    }
+
+    console.log(`📝 Created vendor mapping for ${Object.keys(vendorMap).length} vendors (using Vendor model)`);
     console.log(`🔍 Vendor map sample:`, Object.keys(vendorMap).slice(0, 5));
     console.log(`🔍 Sample PO vendors:`, uniqueVendors.slice(0, 5));
     
-    // Check for exact matches
+    // Check for matches
     const matchedVendors = uniqueVendors.filter(vendor => vendorMap[vendor]);
     console.log(`✅ ${matchedVendors.length} vendors have links out of ${uniqueVendors.length} total vendors`);
     if (matchedVendors.length > 0) {
       console.log(`🔗 Vendors with links:`, matchedVendors.slice(0, 3));
+    }
+    // Log unmatched vendors for debugging
+    const unmatchedVendors = uniqueVendors.filter(vendor => !vendorMap[vendor]);
+    if (unmatchedVendors.length > 0) {
+      console.log(`⚠️ Vendors WITHOUT links (need to be added to Vendor model):`, unmatchedVendors.slice(0, 10));
     }
 
     // Get status options from database
@@ -4062,6 +4091,488 @@ router.get('/test-po/:poNumber', async (req, res) => {
     console.error('Test PO error:', error);
     res.status(500).json({ error: error.message });
   }
+});
+
+// POST route to reconcile missing vendors after import
+router.post('/reconcile-vendors', async (req, res) => {
+    try {
+        console.log('🔄 Starting vendor reconciliation...');
+        
+        // Find all POs that have vendor strings but no linked organic vendor
+        const unlinkedPOs = await PurchaseOrder.find({
+            vendor: { $exists: true, $ne: null, $ne: '' },
+            $or: [
+                { organicVendor: { $exists: false } },
+                { organicVendor: null }
+            ]
+        });
+        
+        console.log(`📊 Found ${unlinkedPOs.length} POs with unlinked vendors`);
+        
+        if (unlinkedPOs.length === 0) {
+            return res.json({ 
+                success: true, 
+                message: 'No unlinked vendors found. All POs are properly linked!',
+                created: 0,
+                linked: 0
+            });
+        }
+        
+        // Extract unique vendor strings
+        const uniqueVendors = [...new Set(unlinkedPOs.map(po => po.vendor))];
+        console.log(`📋 Unique vendor strings to process: ${uniqueVendors.length}`);
+        uniqueVendors.forEach(v => console.log(`  - "${v}"`));
+        
+        let vendorsCreated = 0;
+        let posLinked = 0;
+        
+        // Process each unique vendor
+        for (const vendorString of uniqueVendors) {
+            console.log(`\n🔍 Processing vendor: "${vendorString}"`);
+            
+            // Split vendor data using our utility
+            const vendorData = splitVendorData(vendorString);
+            console.log(`📊 Split data:`, vendorData);
+            
+            // Check if vendor already exists by internalId (using vendorNumber from split)
+            let vendor = await OrganicVendor.findOne({ internalId: vendorData.vendorNumber });
+            
+            if (!vendor) {
+                // Create new vendor - use vendorNumber as internalId
+                console.log(`➕ Creating new vendor: ${vendorData.vendorName} (ID: ${vendorData.vendorNumber})`);
+                vendor = new OrganicVendor({
+                    vendorName: vendorData.vendorName,
+                    internalId: vendorData.vendorNumber,
+                    lastOrganicCertificationDate: new Date('2024-01-01'),
+                    status: 'Active'
+                });
+                
+                await vendor.save();
+                vendorsCreated++;
+                console.log(`✅ Created vendor: ${vendor.vendorName} (ID: ${vendor._id})`);
+            } else {
+                console.log(`ℹ️ Vendor already exists: ${vendor.vendorName} (ID: ${vendor._id})`);
+            }
+            
+            // Link this vendor to all matching POs
+            const matchingPOs = unlinkedPOs.filter(po => po.vendor === vendorString);
+            console.log(`🔗 Linking vendor to ${matchingPOs.length} POs...`);
+            
+            for (const po of matchingPOs) {
+                po.organicVendor = vendor._id;
+                await po.save();
+                posLinked++;
+                console.log(`✅ Linked PO ${po.poNumber} to vendor ${vendor.vendorName}`);
+            }
+        }
+        
+        console.log(`\n🎉 Reconciliation complete!`);
+        console.log(`📈 Summary: ${vendorsCreated} vendors created, ${posLinked} POs linked`);
+        
+        res.json({
+            success: true,
+            message: `Reconciliation complete! Created ${vendorsCreated} vendors and linked ${posLinked} POs.`,
+            created: vendorsCreated,
+            linked: posLinked,
+            processedVendors: uniqueVendors
+        });
+        
+    } catch (error) {
+        console.error('❌ Reconciliation failed:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to reconcile vendors',
+            details: error.message
+        });
+    }
+});
+
+// GET route to preview what vendors would be reconciled (for debugging)
+router.get('/preview-vendor-reconciliation', async (req, res) => {
+    try {
+        console.log('🔍 Previewing vendor reconciliation...');
+        
+        // Find all POs that have vendor strings but no linked organic vendor
+        const unlinkedPOs = await PurchaseOrder.find({
+            vendor: { $exists: true, $ne: null, $ne: '' },
+            $or: [
+                { organicVendor: { $exists: false } },
+                { organicVendor: null }
+            ]
+        }).select('poNumber vendor');
+        
+        // Extract unique vendor strings
+        const uniqueVendors = [...new Set(unlinkedPOs.map(po => po.vendor))];
+        
+        const preview = {
+            totalUnlinkedPOs: unlinkedPOs.length,
+            uniqueVendors: uniqueVendors.length,
+            vendors: uniqueVendors.map(vendorString => {
+                const vendorData = splitVendorData(vendorString);
+                const relatedPOs = unlinkedPOs.filter(po => po.vendor === vendorString);
+                return {
+                    originalString: vendorString,
+                    parsedName: vendorData.vendorName,
+                    parsedId: vendorData.vendorNumber,  // Using vendorNumber instead of internalId
+                    affectedPOs: relatedPOs.length,
+                    samplePOs: relatedPOs.slice(0, 3).map(po => po.poNumber)
+                };
+            })
+        };
+        
+        res.json({
+            success: true,
+            preview: preview
+        });
+        
+    } catch (error) {
+        console.error('❌ Preview failed:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to preview reconciliation',
+            details: error.message
+        });
+    }
+});
+
+// GET route for direct reconciliation (for testing - will actually perform the reconciliation)
+router.get('/reconcile-vendors', async (req, res) => {
+    try {
+        console.log('🔄 Starting vendor reconciliation via GET...');
+        
+        // Find all POs that have vendor strings but no linked organic vendor
+        const unlinkedPOs = await PurchaseOrder.find({
+            vendor: { $exists: true, $ne: null, $ne: '' },
+            $or: [
+                { organicVendor: { $exists: false } },
+                { organicVendor: null }
+            ]
+        });
+        
+        console.log(`📊 Found ${unlinkedPOs.length} POs with unlinked vendors`);
+        
+        if (unlinkedPOs.length === 0) {
+            return res.json({ 
+                success: true, 
+                message: 'No unlinked vendors found. All POs are properly linked!',
+                created: 0,
+                linked: 0
+            });
+        }
+        
+        // Extract unique vendor strings
+        const uniqueVendors = [...new Set(unlinkedPOs.map(po => po.vendor))];
+        console.log(`📋 Unique vendor strings to process: ${uniqueVendors.length}`);
+        uniqueVendors.forEach(v => console.log(`  - "${v}"`));
+        
+        let vendorsCreated = 0;
+        let posLinked = 0;
+        
+        // Process each unique vendor
+        for (const vendorString of uniqueVendors) {
+            console.log(`\n🔍 Processing vendor: "${vendorString}"`);
+            
+            // Split vendor data using our utility
+            const vendorData = splitVendorData(vendorString);
+            console.log(`📊 Split data:`, vendorData);
+            
+            // Check if vendor already exists by internalId (using vendorNumber from split)
+            let vendor = await OrganicVendor.findOne({ internalId: vendorData.vendorNumber });
+            
+            if (!vendor) {
+                // Create new vendor - use vendorNumber as internalId
+                console.log(`➕ Creating new vendor: ${vendorData.vendorName} (ID: ${vendorData.vendorNumber})`);
+                vendor = new OrganicVendor({
+                    vendorName: vendorData.vendorName,
+                    internalId: vendorData.vendorNumber,
+                    lastOrganicCertificationDate: new Date('2024-01-01'),
+                    status: 'Active'
+                });
+                
+                await vendor.save();
+                vendorsCreated++;
+                console.log(`✅ Created vendor: ${vendor.vendorName} (ID: ${vendor._id})`);
+            } else {
+                console.log(`ℹ️ Vendor already exists: ${vendor.vendorName} (ID: ${vendor._id})`);
+            }
+            
+            // Link this vendor to all matching POs
+            const matchingPOs = unlinkedPOs.filter(po => po.vendor === vendorString);
+            console.log(`🔗 Linking vendor to ${matchingPOs.length} POs...`);
+            
+            for (const po of matchingPOs) {
+                po.organicVendor = vendor._id;
+                await po.save();
+                posLinked++;
+                console.log(`✅ Linked PO ${po.poNumber} to vendor ${vendor.vendorName}`);
+            }
+        }
+        
+        console.log(`\n🎉 Reconciliation complete!`);
+        console.log(`📈 Summary: ${vendorsCreated} vendors created, ${posLinked} POs linked`);
+        
+        res.json({
+            success: true,
+            message: `Reconciliation complete! Created ${vendorsCreated} vendors and linked ${posLinked} POs.`,
+            created: vendorsCreated,
+            linked: posLinked,
+            processedVendors: uniqueVendors,
+            refreshPage: true
+        });
+        
+    } catch (error) {
+        console.error('❌ Reconciliation failed:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to reconcile vendors',
+            details: error.message
+        });
+    }
+});
+
+// POST route to reconcile missing vendors in the main Vendor model
+router.post('/reconcile-main-vendors', async (req, res) => {
+    try {
+        console.log('🔄 Starting main vendor reconciliation...');
+        
+        const Vendor = require('../models/Vendor');
+        const { splitVendorData } = require('../lib/vendorUtils');
+        
+        // Find all POs that don't have a linkedVendor
+        const unlinkedPOs = await PurchaseOrder.find({
+            vendor: { $exists: true, $ne: null, $ne: '' },
+            $or: [
+                { linkedVendor: { $exists: false } },
+                { linkedVendor: null }
+            ]
+        });
+        
+        console.log(`📊 Found ${unlinkedPOs.length} POs with unlinked vendors`);
+        
+        if (unlinkedPOs.length === 0) {
+            return res.json({ 
+                success: true, 
+                message: 'No unlinked vendors found. All POs are properly linked to the Vendor model!',
+                created: 0,
+                linked: 0
+            });
+        }
+        
+        // Extract unique vendor strings
+        const uniqueVendors = [...new Set(unlinkedPOs.map(po => po.vendor))];
+        console.log(`📋 Unique vendor strings to process: ${uniqueVendors.length}`);
+        uniqueVendors.forEach(v => console.log(`  - "${v}"`));
+        
+        let vendorsCreated = 0;
+        let posLinked = 0;
+        
+        // Process each unique vendor
+        for (const vendorString of uniqueVendors) {
+            console.log(`\n🔍 Processing vendor: "${vendorString}"`);
+            
+            // Split vendor data using our utility
+            const vendorData = splitVendorData(vendorString);
+            console.log(`📊 Split data:`, vendorData);
+            
+            // Check if vendor already exists by vendorCode (using vendorNumber from split)
+            let vendor = await Vendor.findOne({ vendorCode: vendorData.vendorNumber });
+            
+            if (!vendor) {
+                // Create new vendor in the Vendor model
+                console.log(`➕ Creating new vendor: ${vendorData.vendorName} (Code: ${vendorData.vendorNumber})`);
+                vendor = new Vendor({
+                    vendorName: vendorData.vendorName,
+                    vendorCode: vendorData.vendorNumber,
+                    vendorType: 'Seeds', // Default type
+                    status: 'Active'
+                });
+                
+                await vendor.save();
+                vendorsCreated++;
+                console.log(`✅ Created vendor: ${vendor.vendorName} (ID: ${vendor._id})`);
+            } else {
+                console.log(`ℹ️ Vendor already exists: ${vendor.vendorName} (ID: ${vendor._id})`);
+            }
+            
+            // Link this vendor to all matching POs
+            const matchingPOs = unlinkedPOs.filter(po => po.vendor === vendorString);
+            console.log(`🔗 Linking vendor to ${matchingPOs.length} POs...`);
+            
+            for (const po of matchingPOs) {
+                po.linkedVendor = vendor._id;
+                await po.save();
+                posLinked++;
+                console.log(`✅ Linked PO ${po.poNumber} to vendor ${vendor.vendorName}`);
+            }
+        }
+        
+        console.log(`\n🎉 Reconciliation complete!`);
+        console.log(`📈 Summary: ${vendorsCreated} vendors created, ${posLinked} POs linked`);
+        
+        res.json({
+            success: true,
+            message: `Reconciliation complete! Created ${vendorsCreated} vendors and linked ${posLinked} POs to the main Vendor model.`,
+            created: vendorsCreated,
+            linked: posLinked,
+            processedVendors: uniqueVendors
+        });
+        
+    } catch (error) {
+        console.error('❌ Reconciliation failed:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to reconcile vendors',
+            details: error.message
+        });
+    }
+});
+
+// GET route for direct reconciliation (for testing - will actually perform the reconciliation)
+router.get('/reconcile-main-vendors', async (req, res) => {
+    try {
+        console.log('🔄 Starting main vendor reconciliation via GET...');
+        
+        const Vendor = require('../models/Vendor');
+        const { splitVendorData } = require('../lib/vendorUtils');
+        
+        // Find all POs that don't have a linkedVendor
+        const unlinkedPOs = await PurchaseOrder.find({
+            vendor: { $exists: true, $ne: null, $ne: '' },
+            $or: [
+                { linkedVendor: { $exists: false } },
+                { linkedVendor: null }
+            ]
+        });
+        
+        console.log(`📊 Found ${unlinkedPOs.length} POs with unlinked vendors`);
+        
+        if (unlinkedPOs.length === 0) {
+            return res.json({ 
+                success: true, 
+                message: 'No unlinked vendors found. All POs are properly linked to the Vendor model!',
+                created: 0,
+                linked: 0
+            });
+        }
+        
+        // Extract unique vendor strings
+        const uniqueVendors = [...new Set(unlinkedPOs.map(po => po.vendor))];
+        console.log(`📋 Unique vendor strings to process: ${uniqueVendors.length}`);
+        uniqueVendors.forEach(v => console.log(`  - "${v}"`));
+        
+        let vendorsCreated = 0;
+        let posLinked = 0;
+        
+        // Process each unique vendor
+        for (const vendorString of uniqueVendors) {
+            console.log(`\n🔍 Processing vendor: "${vendorString}"`);
+            
+            // Split vendor data using our utility
+            const vendorData = splitVendorData(vendorString);
+            console.log(`📊 Split data:`, vendorData);
+            
+            // Check if vendor already exists by vendorCode (using vendorNumber from split)
+            let vendor = await Vendor.findOne({ vendorCode: vendorData.vendorNumber });
+            
+            if (!vendor) {
+                // Create new vendor in the Vendor model
+                console.log(`➕ Creating new vendor: ${vendorData.vendorName} (Code: ${vendorData.vendorNumber})`);
+                vendor = new Vendor({
+                    vendorName: vendorData.vendorName,
+                    vendorCode: vendorData.vendorNumber,
+                    vendorType: 'Seeds', // Default type
+                    status: 'Active'
+                });
+                
+                await vendor.save();
+                vendorsCreated++;
+                console.log(`✅ Created vendor: ${vendor.vendorName} (ID: ${vendor._id})`);
+            } else {
+                console.log(`ℹ️ Vendor already exists: ${vendor.vendorName} (ID: ${vendor._id})`);
+            }
+            
+            // Link this vendor to all matching POs
+            const matchingPOs = unlinkedPOs.filter(po => po.vendor === vendorString);
+            console.log(`🔗 Linking vendor to ${matchingPOs.length} POs...`);
+            
+            for (const po of matchingPOs) {
+                po.linkedVendor = vendor._id;
+                await po.save();
+                posLinked++;
+                console.log(`✅ Linked PO ${po.poNumber} to vendor ${vendor.vendorName}`);
+            }
+        }
+        
+        console.log(`\n🎉 Reconciliation complete!`);
+        console.log(`📈 Summary: ${vendorsCreated} vendors created, ${posLinked} POs linked`);
+        
+        res.json({
+            success: true,
+            message: `Reconciliation complete! Created ${vendorsCreated} vendors and linked ${posLinked} POs to the main Vendor model.`,
+            created: vendorsCreated,
+            linked: posLinked,
+            processedVendors: uniqueVendors
+        });
+        
+    } catch (error) {
+        console.error('❌ Reconciliation failed:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to reconcile vendors',
+            details: error.message
+        });
+    }
+});
+
+// Test route to check vendor links without authentication
+router.get('/check-vendor-links', async (req, res) => {
+    try {
+        console.log('🔍 Checking vendor links...');
+        
+        const Vendor = require('../models/Vendor');
+        const OrganicVendor = require('../models/OrganicVendor');
+        
+        // Count vendors in both collections
+        const vendorCount = await Vendor.countDocuments();
+        const organicVendorCount = await OrganicVendor.countDocuments();
+        
+        // Get all POs with populated vendors
+        const pos = await PurchaseOrder.find()
+            .populate('linkedVendor')
+            .populate('organicVendor')
+            .select('poNumber vendor linkedVendor organicVendor');
+        
+        const withMainLinks = pos.filter(po => po.linkedVendor);
+        const withOrganicLinks = pos.filter(po => po.organicVendor);
+        const withoutAnyLinks = pos.filter(po => !po.linkedVendor && !po.organicVendor);
+        
+        res.json({
+            vendorCollections: {
+                mainVendors: vendorCount,
+                organicVendors: organicVendorCount
+            },
+            purchaseOrders: {
+                total: pos.length,
+                withMainVendorLinks: withMainLinks.length,
+                withOrganicVendorLinks: withOrganicLinks.length,
+                withoutAnyLinks: withoutAnyLinks.length
+            },
+            sampleLinkedPOs: withMainLinks.slice(0, 5).map(po => ({
+                poNumber: po.poNumber,
+                vendor: po.vendor,
+                linkedToMainVendor: po.linkedVendor ? po.linkedVendor.vendorName : null,
+                linkedToOrganicVendor: po.organicVendor ? po.organicVendor.vendorName : null
+            })),
+            unlinkedPOs: withoutAnyLinks.slice(0, 10).map(po => ({
+                poNumber: po.poNumber,
+                vendor: po.vendor
+            }))
+        });
+        
+    } catch (error) {
+        console.error('❌ Check failed:', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 module.exports = router;

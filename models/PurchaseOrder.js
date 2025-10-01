@@ -20,6 +20,16 @@ const purchaseOrderSchema = new mongoose.Schema({
     default: '',
     index: true             // Index for efficient lookups
   },
+  linkedVendor: {           // Link to main Vendor model - for clickable vendor links to /vendors dashboard
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Vendor',
+    default: null
+  },
+  organicVendor: {          // Link to OrganicVendor model - ONLY for organic certified vendors
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'OrganicVendor',
+    default: null
+  },
   nsStatus: String,         // NS Status - from CSV (Pending Receipt, etc.) - display only
   status: {                 // Status - custom editable dropdown (In Progress, On Hold, etc.)
     type: String,

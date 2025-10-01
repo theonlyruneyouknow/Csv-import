@@ -2994,6 +2994,11 @@
                                 <% if (user.permissions.accessOrphanedItems) { %>
                                     <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
                                 <% } %>
+                                <% if (user.permissions.accessOrganicVendors) { %>
+                                    <button onclick="reconcileVendors()" class="nav-accordion-item" style="background: none; border: none; width: 100%; text-align: left; color: inherit; cursor: pointer;">🔗 Fix Missing Vendors (Both)</button>
+                                    <a href="/test-upload/reconcile-main-vendors" class="nav-accordion-item" style="color: #4a90e2;">🧪 Fix Main Vendors</a>
+                                    <a href="/test-upload/reconcile-vendors" class="nav-accordion-item" style="color: #ff6b6b;">🧪 Fix Organic Vendors</a>
+                                <% } %>
                                 <% if (user.permissions.accessEmailClient || user.role === 'admin' || user.role === 'manager') { %>
                                     <a href="/email-client" class="nav-accordion-item">📧 Email Client</a>
                                 <% } %>
@@ -3910,6 +3915,86 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 closeAllDropdowns();
             }
         });
+
+        // Vendor Reconciliation Function - reconciles BOTH main Vendors and OrganicVendors
+        async function reconcileVendors() {
+            try {
+                // Show confirmation dialog
+                const confirmed = confirm('This will find all POs with missing vendor links and create/link them automatically.\n\nThis will update:\n• Main Vendors (for all vendors)\n• Organic Vendors (for organic certified vendors)\n\nContinue?');
+                if (!confirmed) return;
+
+                // Show loading state
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = '🔄 Processing...';
+                button.disabled = true;
+
+                console.log('🔄 Starting vendor reconciliation...');
+                
+                // Step 1: Reconcile main Vendors first
+                console.log('📋 Step 1: Reconciling main Vendors...');
+                const mainVendorsResponse = await fetch('/test-upload/reconcile-main-vendors', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                });
+
+                const mainVendorsResult = await mainVendorsResponse.json();
+                console.log('📊 Main vendors result:', mainVendorsResult);
+
+                if (!mainVendorsResult.success) {
+                    throw new Error(`Main vendors reconciliation failed: ${mainVendorsResult.error}`);
+                }
+
+                // Step 2: Reconcile OrganicVendors
+                console.log('📋 Step 2: Reconciling OrganicVendors...');
+                const organicVendorsResponse = await fetch('/test-upload/reconcile-vendors', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                });
+
+                const organicVendorsResult = await organicVendorsResponse.json();
+                console.log('📊 Organic vendors result:', organicVendorsResult);
+
+                if (!organicVendorsResult.success) {
+                    throw new Error(`Organic vendors reconciliation failed: ${organicVendorsResult.error}`);
+                }
+
+                // Show combined results
+                const totalCreated = mainVendorsResult.created + organicVendorsResult.created;
+                const totalLinked = mainVendorsResult.linked + organicVendorsResult.linked;
+
+                alert(`✅ Reconciliation complete!\n\n` +
+                      `Main Vendors:\n` +
+                      `• ${mainVendorsResult.created} new vendors created\n` +
+                      `• ${mainVendorsResult.linked} POs linked\n\n` +
+                      `Organic Vendors:\n` +
+                      `• ${organicVendorsResult.created} new vendors created\n` +
+                      `• ${organicVendorsResult.linked} POs linked\n\n` +
+                      `Total: ${totalCreated} created, ${totalLinked} linked\n\n` +
+                      `Refreshing page to show updates...`);
+                
+                // Refresh the page to show the updated links
+                window.location.reload();
+
+            } catch (error) {
+                console.error('❌ Reconciliation request failed:', error);
+                alert(`❌ Failed to reconcile vendors: ${error.message}\n\nPlease check the console for details.`);
+            } finally {
+                // Restore button state
+                if (typeof button !== 'undefined' && button) {
+                    button.textContent = originalText;
+                    button.disabled = false;
+                }
+            }
+        }
 
         // NetSuite Import Functions
         function openNetSuiteImportModal(isUpdate = false, poNumber = '') {
