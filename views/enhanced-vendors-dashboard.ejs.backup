@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Vendors Dashboard - TSC Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-card .label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .stat-card.organic .number {
+            color: #28a745;
+        }
+        
+        .stat-card.active .number {
+            color: #17a2b8;
+        }
+        
+        .stat-card.inactive .number {
+            color: #dc3545;
+        }
+        
+        .controls {
+            padding: 30px;
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .control-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #495057;
+        }
+        
+        .control-group input,
+        .control-group select {
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .control-group input:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #138496;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .vendors-table-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+        
+        .vendors-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .vendors-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .vendors-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .vendors-table th:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .vendors-table tbody tr {
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s;
+        }
+        
+        .vendors-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .vendors-table td {
+            padding: 15px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .badge-organic {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-active {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .badge-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .action-btn {
+            padding: 5px 10px;
+            margin: 0 2px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+        
+        .action-btn-view {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .action-btn-edit {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .action-btn-organic {
+            background: #28a745;
+            color: white;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
+        .pagination button {
+            padding: 10px 15px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            background: #667eea;
+            color: white;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .pagination .page-info {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .modal-header h2 {
+            color: #667eea;
+        }
+        
+        .close-modal {
+            font-size: 2em;
+            cursor: pointer;
+            color: #6c757d;
+            background: none;
+            border: none;
+        }
+        
+        .close-modal:hover {
+            color: #dc3545;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #495057;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .organic-section {
+            background: #e7f5e9;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .organic-section h3 {
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+        
+        /* Navigation Styles */
+        .navigation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .navigation-container {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        
+        .nav-section {
+            position: relative;
+        }
+        
+        .nav-accordion-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            justify-content: space-between;
+        }
+        
+        .nav-accordion-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-accordion-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            min-width: 220px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 5px;
+        }
+        
+        .nav-accordion-content.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .nav-accordion-item {
+            display: block;
+            padding: 12px 16px;
+            color: #495057;
+            text-decoration: none;
+            border-bottom: 1px solid #f1f3f4;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        .nav-accordion-item:last-child {
+            border-bottom: none;
+            border-radius: 0 0 6px 6px;
+        }
+        
+        .nav-accordion-item:first-child {
+            border-radius: 6px 6px 0 0;
+        }
+        
+        .nav-accordion-item:hover {
+            background: #f8f9fa;
+            color: #28a745;
+            text-decoration: none;
+            padding-left: 20px;
+        }
+        
+        .nav-accordion-item.active {
+            background: #e7f5e9;
+            color: #28a745;
+            font-weight: 600;
+            border-left: 3px solid #28a745;
+        }
+        
+        .nav-accordion-divider {
+            height: 1px;
+            background: #dee2e6;
+            margin: 8px 12px;
+        }
+        
+        .accordion-icon {
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+        
+        .accordion-icon.rotated {
+            transform: rotate(180deg);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            position: relative;
+        }
+        
+        .user-status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #28a745;
+            position: absolute;
+            bottom: -1px;
+            right: -1px;
+            border: 2px solid white;
+        }
+        
+        .dropdown-user-info {
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .dropdown-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .dropdown-user-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .dropdown-user-role {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: capitalize;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation Header -->
+        <div class="navigation-header">
+            <h3 style="margin: 0; color: #667eea;">🌟 Enhanced Vendors Dashboard</h3>
+            
+            <div class="d-flex align-items-center gap-3">
+                <div class="navigation-container">
+                    <!-- Dashboards Accordion -->
+                    <div class="nav-section">
+                        <button class="nav-accordion-btn" onclick="toggleAccordion('dashboardsAccordion')">
+                            📊 Dashboards <span class="accordion-icon">▼</span>
+                        </button>
+                        <div id="dashboardsAccordion" class="nav-accordion-content">
+                            <a href="/purchase-orders" class="nav-accordion-item">� Purchase Orders</a>
+                            <a href="/vendors" class="nav-accordion-item">🏢 Vendors Dashboard</a>
+                            <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
+                            <a href="/enhanced-vendors" class="nav-accordion-item active">🌟 Enhanced Vendors</a>
+                            <div class="nav-accordion-divider"></div>
+                            <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
+                            <a href="/receiving" class="nav-accordion-item">🚚 Receiving</a>
+                            <a href="/dropship" class="nav-accordion-item">🚢 Dropship</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- User Info -->
+                <% if (typeof user !== 'undefined' && user) { %>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                        <div class="user-status-indicator"></div>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li class="dropdown-user-info">
+                                <div class="dropdown-user-avatar">
+                                    <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                                </div>
+                                <div>
+                                    <div class="dropdown-user-name"><%= user.firstName %> <%= user.lastName %></div>
+                                    <div class="dropdown-user-role"><%= user.role %></div>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <% } %>
+            </div>
+        </div>
+        
+        <div class="header">
+            <h1>🌟 Enhanced Vendors Dashboard</h1>
+            <p class="subtitle">Unified vendor management with organic certification tracking</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="number"><%= stats.total %></div>
+                <div class="label">Total Vendors</div>
+            </div>
+            <div class="stat-card organic">
+                <div class="number"><%= stats.organic %></div>
+                <div class="label">🌱 Organic Certified</div>
+            </div>
+            <div class="stat-card active">
+                <div class="number"><%= stats.active %></div>
+                <div class="label">Active Vendors</div>
+            </div>
+            <div class="stat-card inactive">
+                <div class="number"><%= stats.inactive %></div>
+                <div class="label">Inactive Vendors</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label for="searchInput">🔍 Search</label>
+                    <input type="text" id="searchInput" placeholder="Search by name, code, or email..." value="<%= filters.search %>">
+                </div>
+                
+                <div class="control-group">
+                    <label for="statusFilter">Status</label>
+                    <select id="statusFilter">
+                        <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Statuses</option>
+                        <option value="Active" <%= filters.status === 'Active' ? 'selected' : '' %>>Active</option>
+                        <option value="Inactive" <%= filters.status === 'Inactive' ? 'selected' : '' %>>Inactive</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="organicFilter">Organic Certification</label>
+                    <select id="organicFilter">
+                        <option value="all" <%= filters.organic === 'all' ? 'selected' : '' %>>All Vendors</option>
+                        <option value="organic-only" <%= filters.organic === 'organic-only' ? 'selected' : '' %>>🌱 Organic Only</option>
+                        <option value="non-organic" <%= filters.organic === 'non-organic' ? 'selected' : '' %>>Non-Organic Only</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="sortBy">Sort By</label>
+                    <select id="sortBy">
+                        <option value="vendorName" <%= filters.sortBy === 'vendorName' ? 'selected' : '' %>>Vendor Name</option>
+                        <option value="vendorCode" <%= filters.sortBy === 'vendorCode' ? 'selected' : '' %>>Vendor Code</option>
+                        <option value="status" <%= filters.sortBy === 'status' ? 'selected' : '' %>>Status</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="applyFilters()">🔍 Apply Filters</button>
+                <button class="btn btn-secondary" onclick="resetFilters()">🔄 Reset</button>
+                <button class="btn btn-info" onclick="exportToCSV()">📥 Export CSV</button>
+            </div>
+        </div>
+        
+        <div class="vendors-table-container">
+            <table class="vendors-table">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('vendorCode')">Code 🔽</th>
+                        <th onclick="sortTable('vendorName')">Vendor Name 🔽</th>
+                        <th>Status</th>
+                        <th>Type</th>
+                        <th>🌱 Organic</th>
+                        <th>Certification Expiry</th>
+                        <th>Contact</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% vendors.forEach(vendor => { %>
+                        <tr data-vendor-id="<%= vendor._id %>">
+                            <td><strong><%= vendor.vendorCode || 'N/A' %></strong></td>
+                            <td><%= vendor.vendorName %></td>
+                            <td>
+                                <% if (vendor.status === 'Active') { %>
+                                    <span class="badge badge-active">Active</span>
+                                <% } else { %>
+                                    <span class="badge badge-inactive">Inactive</span>
+                                <% } %>
+                            </td>
+                            <td><%= vendor.vendorType || 'Standard' %></td>
+                            <td>
+                                <% if (vendor.hasOrganicCertification) { %>
+                                    <span class="badge badge-organic">✓ Certified</span>
+                                <% } else { %>
+                                    <span style="color: #6c757d;">—</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (vendor.certificationExpiryDate) { %>
+                                    <%= new Date(vendor.certificationExpiryDate).toLocaleDateString() %>
+                                <% } else { %>
+                                    <span style="color: #6c757d;">—</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (vendor.mainEmail) { %>
+                                    <a href="mailto:<%= vendor.mainEmail %>"><%= vendor.mainEmail %></a>
+                                <% } else { %>
+                                    <span style="color: #6c757d;">No email</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <button class="action-btn action-btn-view" onclick="viewVendor('<%= vendor._id %>')">👁️ View</button>
+                                <button class="action-btn action-btn-edit" onclick="editVendor('<%= vendor._id %>')">✏️ Edit</button>
+                                <% if (!vendor.hasOrganicCertification) { %>
+                                    <button class="action-btn action-btn-organic" onclick="addOrganicCert('<%= vendor._id %>')">🌱 Add Cert</button>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination">
+            <button onclick="changePage(<%= pagination.currentPage - 1 %>)" <%= !pagination.hasPrevPage ? 'disabled' : '' %>>
+                ← Previous
+            </button>
+            <span class="page-info">
+                Page <%= pagination.currentPage %> of <%= pagination.totalPages %> 
+                (<%= pagination.totalVendors %> total vendors)
+            </span>
+            <button onclick="changePage(<%= pagination.currentPage + 1 %>)" <%= !pagination.hasNextPage ? 'disabled' : '' %>>
+                Next →
+            </button>
+        </div>
+    </div>
+    
+    <!-- View/Edit Vendor Modal -->
+    <div id="vendorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Vendor Details</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody">
+                <!-- Content loaded dynamically -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function applyFilters() {
+            const search = document.getElementById('searchInput').value;
+            const status = document.getElementById('statusFilter').value;
+            const organic = document.getElementById('organicFilter').value;
+            const sortBy = document.getElementById('sortBy').value;
+            
+            const params = new URLSearchParams({
+                search,
+                status,
+                organic,
+                sortBy,
+                sortOrder: '<%= filters.sortOrder %>'
+            });
+            
+            window.location.href = `/enhanced-vendors?${params.toString()}`;
+        }
+        
+        function resetFilters() {
+            window.location.href = '/enhanced-vendors';
+        }
+        
+        function changePage(page) {
+            const currentParams = new URLSearchParams(window.location.search);
+            currentParams.set('page', page);
+            window.location.href = `/enhanced-vendors?${currentParams.toString()}`;
+        }
+        
+        function sortTable(field) {
+            const currentParams = new URLSearchParams(window.location.search);
+            const currentSort = currentParams.get('sortBy');
+            const currentOrder = currentParams.get('sortOrder') || 'asc';
+            
+            let newOrder = 'asc';
+            if (currentSort === field && currentOrder === 'asc') {
+                newOrder = 'desc';
+            }
+            
+            currentParams.set('sortBy', field);
+            currentParams.set('sortOrder', newOrder);
+            window.location.href = `/enhanced-vendors?${currentParams.toString()}`;
+        }
+        
+        async function viewVendor(vendorId) {
+            try {
+                const response = await fetch(`/enhanced-vendors/${vendorId}`);
+                const vendor = await response.json();
+                
+                document.getElementById('modalTitle').textContent = 'Vendor Details';
+                document.getElementById('modalBody').innerHTML = `
+                    <div class="form-group">
+                        <label>Vendor Code:</label>
+                        <input type="text" value="${vendor.vendorCode || 'N/A'}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Vendor Name:</label>
+                        <input type="text" value="${vendor.vendorName}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Status:</label>
+                        <input type="text" value="${vendor.status}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="text" value="${vendor.mainEmail || 'N/A'}" readonly>
+                    </div>
+                    ${vendor.hasOrganicCertification ? `
+                        <div class="organic-section">
+                            <h3>🌱 Organic Certification</h3>
+                            <div class="form-group">
+                                <label>Certification Agency:</label>
+                                <input type="text" value="${vendor.organicVendor?.organicCertificationAgency || 'N/A'}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Last Certification Date:</label>
+                                <input type="text" value="${vendor.organicVendor?.lastOrganicCertificationDate ? new Date(vendor.organicVendor.lastOrganicCertificationDate).toLocaleDateString() : 'N/A'}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Expiry Date:</label>
+                                <input type="text" value="${vendor.organicVendor?.organicCertificationExpiryDate ? new Date(vendor.organicVendor.organicCertificationExpiryDate).toLocaleDateString() : 'N/A'}" readonly>
+                            </div>
+                        </div>
+                    ` : ''}
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="editVendor('${vendorId}')">✏️ Edit</button>
+                        <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+                    </div>
+                `;
+                
+                document.getElementById('vendorModal').classList.add('active');
+            } catch (error) {
+                console.error('Error loading vendor:', error);
+                alert('Error loading vendor details');
+            }
+        }
+        
+        function editVendor(vendorId) {
+            // TODO: Implement edit functionality
+            alert('Edit functionality coming soon!');
+        }
+        
+        function addOrganicCert(vendorId) {
+            // TODO: Implement add organic certification
+            alert('Add organic certification functionality coming soon!');
+        }
+        
+        function closeModal() {
+            document.getElementById('vendorModal').classList.remove('active');
+        }
+        
+        function exportToCSV() {
+            // TODO: Implement CSV export
+            alert('CSV export functionality coming soon!');
+        }
+        
+        // Allow Enter key to trigger search
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                applyFilters();
+            }
+        });
+        
+        // Navigation Functions
+        function toggleAccordion(accordionId) {
+            const accordion = document.getElementById(accordionId);
+            const allAccordions = document.querySelectorAll('.nav-accordion-content');
+            const button = accordion.previousElementSibling;
+            const icon = button.querySelector('.accordion-icon');
+            
+            // Close all other accordions
+            allAccordions.forEach(acc => {
+                if (acc.id !== accordionId) {
+                    acc.classList.remove('show');
+                    const otherIcon = acc.previousElementSibling.querySelector('.accordion-icon');
+                    if (otherIcon) otherIcon.classList.remove('rotated');
+                }
+            });
+            
+            // Toggle current accordion
+            accordion.classList.toggle('show');
+            if (icon) icon.classList.toggle('rotated');
+        }
+        
+        // Close accordions when clicking outside
+        document.addEventListener('click', function(event) {
+            const navigationContainer = document.querySelector('.navigation-container');
+            if (navigationContainer && !navigationContainer.contains(event.target)) {
+                const allAccordions = document.querySelectorAll('.nav-accordion-content');
+                allAccordions.forEach(acc => {
+                    acc.classList.remove('show');
+                    const icon = acc.previousElementSibling.querySelector('.accordion-icon');
+                    if (icon) icon.classList.remove('rotated');
+                });
+            }
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

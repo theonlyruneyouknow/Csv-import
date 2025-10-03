@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Vendors Dashboard - Complete Vendor Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+
+        .container-fluid {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            margin: 0 -20px 20px -20px;
+            border-radius: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Navigation Styles */
+        .navigation-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-section {
+            position: relative;
+        }
+
+        .nav-accordion-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-accordion-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .nav-accordion-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            min-width: 220px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 5px;
+        }
+
+        .nav-accordion-content.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .nav-accordion-item {
+            display: block;
+            padding: 12px 16px;
+            color: #495057;
+            text-decoration: none;
+            border-bottom: 1px solid #f1f3f4;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .nav-accordion-item:hover {
+            background: #f8f9fa;
+            color: #667eea;
+            text-decoration: none;
+            padding-left: 20px;
+        }
+
+        .nav-accordion-item.active {
+            background: #e7f0ff;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* Stats Grid */
+        .stats-container {
+            margin-bottom: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card.organic {
+            border-left-color: #28a745;
+        }
+
+        .stat-card.active {
+            border-left-color: #17a2b8;
+        }
+
+        .stat-card.inactive {
+            border-left-color: #dc3545;
+        }
+
+        .stat-card .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 0;
+        }
+
+        .stat-card.organic .number {
+            color: #28a745;
+        }
+
+        .stat-card.active .number {
+            color: #17a2b8;
+        }
+
+        .stat-card.inactive .number {
+            color: #dc3545;
+        }
+
+        .stat-card .label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        /* Filters */
+        .filters-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #495057;
+            font-size: 0.9em;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            font-size: 0.9em;
+            transition: border-color 0.3s;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Vendor Cards */
+        .vendor-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            overflow: hidden;
+            border-left: 4px solid transparent;
+        }
+
+        .vendor-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .vendor-card.has-organic {
+            border-left-color: #28a745;
+        }
+
+        .vendor-card-header {
+            padding: 20px;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .vendor-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0 0 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .vendor-name a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .vendor-name a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .vendor-code {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        .vendor-badges {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-organic {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-active {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .badge-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-standard {
+            background: #e7e7e7;
+            color: #495057;
+        }
+
+        /* Vendor Card Body */
+        .vendor-card-body {
+            padding: 20px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .info-section {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .info-section h6 {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-item {
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .info-item i {
+            width: 20px;
+            color: #667eea;
+        }
+
+        .info-item a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .info-item a:hover {
+            text-decoration: underline;
+        }
+
+        /* Organic Section (Collapsible) */
+        .organic-section {
+            margin-top: 20px;
+            border-top: 2px solid #28a745;
+            background: #e7f5e9;
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+        }
+
+        .organic-header {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .organic-header:hover {
+            background: linear-gradient(135deg, #218838 0%, #1aa179 100%);
+        }
+
+        .organic-header h5 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .organic-content {
+            padding: 20px;
+            display: none;
+        }
+
+        .organic-content.show {
+            display: block;
+        }
+
+        .cert-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .cert-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #28a745;
+        }
+
+        .cert-item strong {
+            display: block;
+            color: #495057;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+
+        .cert-item span {
+            color: #2c3e50;
+            font-size: 0.95em;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+        }
+
+        .btn-outline-success {
+            background: white;
+            color: #28a745;
+            border: 2px solid #28a745;
+        }
+
+        .btn-outline-success:hover {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-outline-primary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-outline-primary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .pagination-btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .pagination-btn:disabled {
+            background: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 10px;
+            margin: 40px 0;
+        }
+
+        .empty-state i {
+            font-size: 4em;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #adb5bd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header with Navigation -->
+        <div class="header">
+            <h1><i class="fas fa-building"></i> Enhanced Vendors Dashboard</h1>
+            
+            <div class="navigation-container">
+                <div class="nav-section">
+                    <button class="nav-accordion-btn" onclick="toggleAccordion('dashboardsAccordion')">
+                        📊 Dashboards <span class="accordion-icon">▼</span>
+                    </button>
+                    <div id="dashboardsAccordion" class="nav-accordion-content">
+                        <a href="/purchase-orders" class="nav-accordion-item">📦 Purchase Orders</a>
+                        <a href="/vendors" class="nav-accordion-item">🏢 Vendors Dashboard</a>
+                        <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
+                        <a href="/enhanced-vendors" class="nav-accordion-item active">🌟 Enhanced Vendors</a>
+                        <a href="/tasks" class="nav-accordion-item">📋 Tasks</a>
+                        <a href="/receiving" class="nav-accordion-item">🚚 Receiving</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Grid -->
+        <div class="stats-container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="number"><%= stats.total %></div>
+                    <div class="label">Total Vendors</div>
+                </div>
+                <div class="stat-card organic">
+                    <div class="number"><%= stats.organic %></div>
+                    <div class="label">🌱 Organic Certified</div>
+                </div>
+                <div class="stat-card active">
+                    <div class="number"><%= stats.active %></div>
+                    <div class="label">Active Vendors</div>
+                </div>
+                <div class="stat-card inactive">
+                    <div class="number"><%= stats.inactive %></div>
+                    <div class="label">Inactive Vendors</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number"><%= stats.withContact %></div>
+                    <div class="label">With Contact Info</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters-section">
+            <h5 style="margin-bottom: 15px;"><i class="fas fa-filter"></i> Filters & Search</h5>
+            <form id="filtersForm" method="GET" action="/enhanced-vendors">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="search"><i class="fas fa-search"></i> Search</label>
+                        <input type="text" id="search" name="search" placeholder="Vendor name, code, email..." value="<%= filters.search %>">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="status">Status</label>
+                        <select id="status" name="status">
+                            <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Statuses</option>
+                            <option value="Active" <%= filters.status === 'Active' ? 'selected' : '' %>>Active</option>
+                            <option value="Inactive" <%= filters.status === 'Inactive' ? 'selected' : '' %>>Inactive</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="vendorType">Vendor Type</label>
+                        <select id="vendorType" name="vendorType">
+                            <option value="all" <%= filters.vendorType === 'all' ? 'selected' : '' %>>All Types</option>
+                            <option value="Standard" <%= filters.vendorType === 'Standard' ? 'selected' : '' %>>Standard</option>
+                            <option value="Preferred" <%= filters.vendorType === 'Preferred' ? 'selected' : '' %>>Preferred</option>
+                            <option value="Wholesale" <%= filters.vendorType === 'Wholesale' ? 'selected' : '' %>>Wholesale</option>
+                            <option value="Retail" <%= filters.vendorType === 'Retail' ? 'selected' : '' %>>Retail</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="organic">Organic Certification</label>
+                        <select id="organic" name="organic">
+                            <option value="all" <%= filters.organic === 'all' ? 'selected' : '' %>>All Vendors</option>
+                            <option value="organic-only" <%= filters.organic === 'organic-only' ? 'selected' : '' %>>🌱 Organic Only</option>
+                            <option value="non-organic" <%= filters.organic === 'non-organic' ? 'selected' : '' %>>Non-Organic Only</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="sortBy">Sort By</label>
+                        <select id="sortBy" name="sortBy">
+                            <option value="vendorName" <%= filters.sortBy === 'vendorName' ? 'selected' : '' %>>Vendor Name</option>
+                            <option value="vendorCode" <%= filters.sortBy === 'vendorCode' ? 'selected' : '' %>>Vendor Code</option>
+                            <option value="status" <%= filters.sortBy === 'status' ? 'selected' : '' %>>Status</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Apply Filters
+                    </button>
+                    <a href="/enhanced-vendors" class="btn btn-outline-primary">
+                        <i class="fas fa-redo"></i> Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Vendors List -->
+        <div id="vendorsList">
+            <% if (vendors.length === 0) { %>
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h3>No Vendors Found</h3>
+                    <p>Try adjusting your filters or search criteria</p>
+                </div>
+            <% } else { %>
+                <% vendors.forEach(vendor => { %>
+                    <div class="vendor-card <%= vendor.hasOrganicCertification ? 'has-organic' : '' %>">
+                        <!-- Card Header -->
+                        <div class="vendor-card-header">
+                            <div class="vendor-name">
+                                <a href="/enhanced-vendors/vendor/<%= vendor._id %>">
+                                    <%= vendor.vendorName %>
+                                </a>
+                            </div>
+                            <div class="vendor-code">Code: <%= vendor.vendorCode || 'N/A' %></div>
+                            
+                            <div class="vendor-badges">
+                                <% if (vendor.hasOrganicCertification) { %>
+                                    <span class="badge badge-organic">
+                                        <i class="fas fa-leaf"></i> Organic Certified
+                                    </span>
+                                <% } %>
+                                <% if (vendor.status === 'Active') { %>
+                                    <span class="badge badge-active">Active</span>
+                                <% } else { %>
+                                    <span class="badge badge-inactive">Inactive</span>
+                                <% } %>
+                                <span class="badge badge-standard">
+                                    <%= vendor.vendorType || 'Standard' %>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="vendor-card-body">
+                            <div class="info-grid">
+                                <!-- Contact Information -->
+                                <div class="info-section">
+                                    <h6><i class="fas fa-address-card"></i> Contact Information</h6>
+                                    <% if (vendor.contactInfo && vendor.contactInfo.primaryContact) { %>
+                                        <div class="info-item">
+                                            <i class="fas fa-user"></i>
+                                            <strong><%= vendor.contactInfo.primaryContact.name || 'N/A' %></strong>
+                                        </div>
+                                        <div class="info-item">
+                                            <i class="fas fa-envelope"></i>
+                                            <% if (vendor.contactInfo.primaryContact.email) { %>
+                                                <a href="mailto:<%= vendor.contactInfo.primaryContact.email %>">
+                                                    <%= vendor.contactInfo.primaryContact.email %>
+                                                </a>
+                                            <% } else { %>
+                                                N/A
+                                            <% } %>
+                                        </div>
+                                        <div class="info-item">
+                                            <i class="fas fa-phone"></i>
+                                            <%= vendor.contactInfo.primaryContact.phone || vendor.phone || 'N/A' %>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="info-item">
+                                            <i class="fas fa-envelope"></i>
+                                            <% if (vendor.mainEmail) { %>
+                                                <a href="mailto:<%= vendor.mainEmail %>"><%= vendor.mainEmail %></a>
+                                            <% } else { %>
+                                                No email
+                                            <% } %>
+                                        </div>
+                                        <div class="info-item">
+                                            <i class="fas fa-phone"></i>
+                                            <%= vendor.phone || 'N/A' %>
+                                        </div>
+                                    <% } %>
+                                    <% if (vendor.website) { %>
+                                        <div class="info-item">
+                                            <i class="fas fa-globe"></i>
+                                            <a href="<%= vendor.website %>" target="_blank">Website</a>
+                                        </div>
+                                    <% } %>
+                                </div>
+
+                                <!-- Address Information -->
+                                <div class="info-section">
+                                    <h6><i class="fas fa-map-marker-alt"></i> Address</h6>
+                                    <% if (vendor.address) { %>
+                                        <div class="info-item">
+                                            <%= typeof vendor.address === 'string' ? vendor.address : 
+                                                [vendor.address.street, vendor.address.city, vendor.address.state, vendor.address.zip].filter(Boolean).join(', ') %>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="info-item text-muted">No address on file</div>
+                                    <% } %>
+                                </div>
+
+                                <!-- Statistics -->
+                                <div class="info-section">
+                                    <h6><i class="fas fa-chart-line"></i> Statistics</h6>
+                                    <div class="info-item">
+                                        <i class="fas fa-shopping-cart"></i>
+                                        Purchase Orders: <%= vendor.poCount || 0 %>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-calendar"></i>
+                                        Added: <%= vendor.createdAt ? new Date(vendor.createdAt).toLocaleDateString() : 'N/A' %>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="action-buttons">
+                                <a href="/enhanced-vendors/vendor/<%= vendor._id %>" class="btn btn-primary">
+                                    <i class="fas fa-eye"></i> View Full Details
+                                </a>
+                                <button class="btn btn-info" onclick="editVendor('<%= vendor._id %>')">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <% if (vendor.hasOrganicCertification) { %>
+                                    <button class="btn btn-outline-success" onclick="toggleOrganic('<%= vendor._id %>')">
+                                        <i class="fas fa-leaf"></i> <span id="organic-toggle-<%= vendor._id %>">Show</span> Organic Info
+                                    </button>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <!-- Organic Section (Collapsible) -->
+                        <% if (vendor.hasOrganicCertification && vendor.organicVendor) { %>
+                            <div class="organic-section" id="organic-section-<%= vendor._id %>">
+                                <div class="organic-header" onclick="toggleOrganic('<%= vendor._id %>')">
+                                    <h5>
+                                        <i class="fas fa-leaf"></i> Organic Certification Details
+                                    </h5>
+                                    <i class="fas fa-chevron-down" id="organic-icon-<%= vendor._id %>"></i>
+                                </div>
+                                <div class="organic-content" id="organic-content-<%= vendor._id %>">
+                                    <div class="cert-info-grid">
+                                        <div class="cert-item">
+                                            <strong>Status</strong>
+                                            <span><%= vendor.organicVendor.status || 'N/A' %></span>
+                                        </div>
+                                        <div class="cert-item">
+                                            <strong>Certification Agency</strong>
+                                            <span><%= vendor.organicVendor.organicCertificationAgency || 'N/A' %></span>
+                                        </div>
+                                        <div class="cert-item">
+                                            <strong>Last Certified</strong>
+                                            <span>
+                                                <%= vendor.organicVendor.lastOrganicCertificationDate ? 
+                                                    new Date(vendor.organicVendor.lastOrganicCertificationDate).toLocaleDateString() : 'N/A' %>
+                                            </span>
+                                        </div>
+                                        <div class="cert-item">
+                                            <strong>Expiry Date</strong>
+                                            <span>
+                                                <%= vendor.organicVendor.organicCertificationExpiryDate ? 
+                                                    new Date(vendor.organicVendor.organicCertificationExpiryDate).toLocaleDateString() : 'N/A' %>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="action-buttons">
+                                        <% if (vendor.organicVendor.certificate) { %>
+                                            <button class="btn btn-outline-primary" onclick="viewDocument('<%= vendor._id %>', 'certificate')">
+                                                <i class="fas fa-file-pdf"></i> View Certificate
+                                            </button>
+                                        <% } %>
+                                        
+                                        <% if (vendor.organicDatabaseUrl) { %>
+                                            <a href="<%= vendor.organicDatabaseUrl %>" target="_blank" class="btn btn-outline-success">
+                                                <i class="fas fa-external-link-alt"></i> USDA Database
+                                            </a>
+                                        <% } %>
+                                        
+                                        <% if (vendor.organicSeeds && vendor.organicSeeds.length > 0) { %>
+                                            <button class="btn btn-outline-success" onclick="viewOrganicSeeds('<%= vendor._id %>')">
+                                                <i class="fas fa-seedling"></i> View Organic Seeds (<%= vendor.organicSeeds.length %>)
+                                            </button>
+                                        <% } else if (vendor.organicSeedsRawData) { %>
+                                            <button class="btn btn-outline-success" onclick="viewOrganicSeeds('<%= vendor._id %>')">
+                                                <i class="fas fa-seedling"></i> View Seeds Data
+                                            </button>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                <% }); %>
+            <% } %>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pagination.totalPages > 1) { %>
+            <div class="pagination-container">
+                <button class="pagination-btn" onclick="changePage(<%= pagination.currentPage - 1 %>)" <%= !pagination.hasPrevPage ? 'disabled' : '' %>>
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                
+                <span class="pagination-info">
+                    Page <%= pagination.currentPage %> of <%= pagination.totalPages %>
+                    (<%= pagination.totalVendors %> vendors)
+                </span>
+                
+                <button class="pagination-btn" onclick="changePage(<%= pagination.currentPage + 1 %>)" <%= !pagination.hasNextPage ? 'disabled' : '' %>>
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        <% } %>
+    </div>
+
+    <script>
+        // Navigation accordion toggle
+        function toggleAccordion(accordionId) {
+            const accordion = document.getElementById(accordionId);
+            const allAccordions = document.querySelectorAll('.nav-accordion-content');
+            
+            allAccordions.forEach(acc => {
+                if (acc.id !== accordionId) {
+                    acc.classList.remove('show');
+                }
+            });
+            
+            accordion.classList.toggle('show');
+        }
+
+        // Close accordions when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.nav-section')) {
+                document.querySelectorAll('.nav-accordion-content').forEach(acc => {
+                    acc.classList.remove('show');
+                });
+            }
+        });
+
+        // Toggle organic section
+        function toggleOrganic(vendorId) {
+            const content = document.getElementById('organic-content-' + vendorId);
+            const icon = document.getElementById('organic-icon-' + vendorId);
+            const toggleText = document.getElementById('organic-toggle-' + vendorId);
+            
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+                if (icon) icon.className = 'fas fa-chevron-down';
+                if (toggleText) toggleText.textContent = 'Show';
+            } else {
+                content.classList.add('show');
+                if (icon) icon.className = 'fas fa-chevron-up';
+                if (toggleText) toggleText.textContent = 'Hide';
+            }
+        }
+
+        // Pagination
+        function changePage(page) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', page);
+            window.location.href = url.toString();
+        }
+
+        // Edit vendor (placeholder - will implement properly)
+        function editVendor(vendorId) {
+            window.location.href = `/enhanced-vendors/vendor/${vendorId}?edit=true`;
+        }
+
+        // View document (placeholder)
+        function viewDocument(vendorId, docType) {
+            alert('Document viewer coming soon for vendor ' + vendorId);
+        }
+
+        // View organic seeds (placeholder)
+        function viewOrganicSeeds(vendorId) {
+            alert('Organic seeds viewer coming soon for vendor ' + vendorId);
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
