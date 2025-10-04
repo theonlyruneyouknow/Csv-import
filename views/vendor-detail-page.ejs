@@ -642,7 +642,43 @@
                     <!-- Primary Contact -->
                     <div class="info-card">
                         <h3><i class="fas fa-user-circle"></i> Primary Contact</h3>
-                        <% if (vendor.contactInfo && vendor.contactInfo.primaryContact) { %>
+                        <% if (vendor.primaryContact) { %>
+                            <div class="info-item">
+                                <i class="fas fa-user"></i>
+                                <span class="value"><%= vendor.primaryContact.name || 'N/A' %></span>
+                            </div>
+                            <% if (vendor.primaryContact.title) { %>
+                                <div class="info-item">
+                                    <i class="fas fa-briefcase"></i>
+                                    <span class="value"><%= vendor.primaryContact.title %></span>
+                                </div>
+                            <% } %>
+                            <div class="info-item">
+                                <i class="fas fa-envelope"></i>
+                                <% if (vendor.primaryContact.email) { %>
+                                    <a href="mailto:<%= vendor.primaryContact.email %>"><%= vendor.primaryContact.email %></a>
+                                <% } else { %>
+                                    <span class="value">No email</span>
+                                <% } %>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-phone"></i>
+                                <span class="value"><%= vendor.primaryContact.phone || 'N/A' %></span>
+                            </div>
+                            <% if (vendor.primaryContact.mobile) { %>
+                                <div class="info-item">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    <span class="value"><%= vendor.primaryContact.mobile %></span>
+                                </div>
+                            <% } %>
+                            <% if (vendor.primaryContact.department) { %>
+                                <div class="info-item">
+                                    <i class="fas fa-building"></i>
+                                    <span class="value"><%= vendor.primaryContact.department %></span>
+                                </div>
+                            <% } %>
+                        <% } else if (vendor.contactInfo && vendor.contactInfo.primaryContact) { %>
+                            <!-- Fallback to legacy contactInfo structure -->
                             <div class="info-item">
                                 <i class="fas fa-user"></i>
                                 <span class="value"><%= vendor.contactInfo.primaryContact.name || 'N/A' %></span>
@@ -659,10 +695,6 @@
                                 <i class="fas fa-phone"></i>
                                 <span class="value"><%= vendor.contactInfo.primaryContact.phone || 'N/A' %></span>
                             </div>
-                            <div class="info-item">
-                                <i class="fas fa-briefcase"></i>
-                                <span class="value"><%= vendor.contactInfo.primaryContact.role || 'N/A' %></span>
-                            </div>
                         <% } else { %>
                             <div class="empty-state" style="padding: 20px;">
                                 <p>No primary contact information</p>
@@ -673,7 +705,37 @@
                     <!-- Billing Contact -->
                     <div class="info-card">
                         <h3><i class="fas fa-file-invoice-dollar"></i> Billing Contact</h3>
-                        <% if (vendor.contactInfo && vendor.contactInfo.billingContact) { %>
+                        <% if (vendor.billingContact) { %>
+                            <div class="info-item">
+                                <i class="fas fa-user"></i>
+                                <span class="value"><%= vendor.billingContact.name || 'N/A' %></span>
+                            </div>
+                            <% if (vendor.billingContact.title) { %>
+                                <div class="info-item">
+                                    <i class="fas fa-briefcase"></i>
+                                    <span class="value"><%= vendor.billingContact.title %></span>
+                                </div>
+                            <% } %>
+                            <div class="info-item">
+                                <i class="fas fa-envelope"></i>
+                                <% if (vendor.billingContact.email) { %>
+                                    <a href="mailto:<%= vendor.billingContact.email %>"><%= vendor.billingContact.email %></a>
+                                <% } else { %>
+                                    <span class="value">No email</span>
+                                <% } %>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-phone"></i>
+                                <span class="value"><%= vendor.billingContact.phone || 'N/A' %></span>
+                            </div>
+                            <% if (vendor.billingContact.mobile) { %>
+                                <div class="info-item">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    <span class="value"><%= vendor.billingContact.mobile %></span>
+                                </div>
+                            <% } %>
+                        <% } else if (vendor.contactInfo && vendor.contactInfo.billingContact) { %>
+                            <!-- Fallback to legacy contactInfo structure -->
                             <div class="info-item">
                                 <i class="fas fa-user"></i>
                                 <span class="value"><%= vendor.contactInfo.billingContact.name || 'N/A' %></span>
@@ -700,7 +762,37 @@
                     <!-- Shipping Contact -->
                     <div class="info-card">
                         <h3><i class="fas fa-truck"></i> Shipping Contact</h3>
-                        <% if (vendor.contactInfo && vendor.contactInfo.shippingContact) { %>
+                        <% if (vendor.shippingContact) { %>
+                            <div class="info-item">
+                                <i class="fas fa-user"></i>
+                                <span class="value"><%= vendor.shippingContact.name || 'N/A' %></span>
+                            </div>
+                            <% if (vendor.shippingContact.title) { %>
+                                <div class="info-item">
+                                    <i class="fas fa-briefcase"></i>
+                                    <span class="value"><%= vendor.shippingContact.title %></span>
+                                </div>
+                            <% } %>
+                            <div class="info-item">
+                                <i class="fas fa-envelope"></i>
+                                <% if (vendor.shippingContact.email) { %>
+                                    <a href="mailto:<%= vendor.shippingContact.email %>"><%= vendor.shippingContact.email %></a>
+                                <% } else { %>
+                                    <span class="value">No email</span>
+                                <% } %>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-phone"></i>
+                                <span class="value"><%= vendor.shippingContact.phone || 'N/A' %></span>
+                            </div>
+                            <% if (vendor.shippingContact.mobile) { %>
+                                <div class="info-item">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    <span class="value"><%= vendor.shippingContact.mobile %></span>
+                                </div>
+                            <% } %>
+                        <% } else if (vendor.contactInfo && vendor.contactInfo.shippingContact) { %>
+                            <!-- Fallback to legacy contactInfo structure -->
                             <div class="info-item">
                                 <i class="fas fa-user"></i>
                                 <span class="value"><%= vendor.contactInfo.shippingContact.name || 'N/A' %></span>

@@ -1081,44 +1081,138 @@
                             <div class="info-grid">
                                 <!-- Contact Information -->
                                 <div class="info-section">
-                                    <h6><i class="fas fa-address-card"></i> Contact Information</h6>
-                                    <% if (vendor.contactInfo && vendor.contactInfo.primaryContact) { %>
-                                        <div class="info-item">
-                                            <i class="fas fa-user"></i>
-                                            <strong><%= vendor.contactInfo.primaryContact.name || 'N/A' %></strong>
-                                        </div>
-                                        <div class="info-item">
-                                            <i class="fas fa-envelope"></i>
-                                            <% if (vendor.contactInfo.primaryContact.email) { %>
-                                                <a href="mailto:<%= vendor.contactInfo.primaryContact.email %>">
-                                                    <%= vendor.contactInfo.primaryContact.email %>
-                                                </a>
-                                            <% } else { %>
-                                                N/A
+                                    <h6><i class="fas fa-address-card"></i> Contacts</h6>
+                                    
+                                    <% if (vendor.contacts && vendor.contacts.length > 0) { %>
+                                        <% vendor.contacts.forEach((contact, index) => { %>
+                                            <% if (contact.name || contact.email || contact.phone) { %>
+                                                <div class="contact-card" style="background: #f8f9fa; padding: 12px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid #667eea;">
+                                                    <!-- Role Badges -->
+                                                    <div style="margin-bottom: 6px;">
+                                                        <% if (contact.isPrimary) { %>
+                                                            <span style="display: inline-block; background: #667eea; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.75em; margin-right: 4px;">
+                                                                <i class="fas fa-user-circle"></i> Primary
+                                                            </span>
+                                                        <% } %>
+                                                        <% if (contact.isBilling) { %>
+                                                            <span style="display: inline-block; background: #10b981; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.75em; margin-right: 4px;">
+                                                                <i class="fas fa-file-invoice-dollar"></i> Billing
+                                                            </span>
+                                                        <% } %>
+                                                        <% if (contact.isShipping) { %>
+                                                            <span style="display: inline-block; background: #3b82f6; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.75em; margin-right: 4px;">
+                                                                <i class="fas fa-truck"></i> Shipping
+                                                            </span>
+                                                        <% } %>
+                                                    </div>
+                                                    
+                                                    <!-- Contact Info -->
+                                                    <% if (contact.name) { %>
+                                                        <div style="margin-bottom: 4px;">
+                                                            <strong style="color: #2c3e50;"><%= contact.name %></strong>
+                                                            <% if (contact.title) { %>
+                                                                <span style="font-size: 0.85em; color: #6c757d; margin-left: 4px;">- <%= contact.title %></span>
+                                                            <% } %>
+                                                        </div>
+                                                    <% } %>
+                                                    <% if (contact.email) { %>
+                                                        <div style="font-size: 0.9em; color: #495057; margin-bottom: 2px;">
+                                                            <i class="fas fa-envelope" style="width: 16px;"></i>
+                                                            <a href="mailto:<%= contact.email %>" style="color: #667eea;"><%= contact.email %></a>
+                                                        </div>
+                                                    <% } %>
+                                                    <% if (contact.phone) { %>
+                                                        <div style="font-size: 0.9em; color: #495057; margin-bottom: 2px;">
+                                                            <i class="fas fa-phone" style="width: 16px;"></i>
+                                                            <a href="tel:<%= contact.phone %>" style="color: #667eea;"><%= contact.phone %></a>
+                                                        </div>
+                                                    <% } %>
+                                                    <% if (contact.mobile) { %>
+                                                        <div style="font-size: 0.9em; color: #495057; margin-bottom: 2px;">
+                                                            <i class="fas fa-mobile-alt" style="width: 16px;"></i>
+                                                            <a href="tel:<%= contact.mobile %>" style="color: #667eea;"><%= contact.mobile %></a>
+                                                        </div>
+                                                    <% } %>
+                                                    <% if (contact.department) { %>
+                                                        <div style="font-size: 0.85em; color: #6c757d; margin-top: 4px;">
+                                                            <i class="fas fa-building" style="width: 16px;"></i> <%= contact.department %>
+                                                        </div>
+                                                    <% } %>
+                                                </div>
                                             <% } %>
-                                        </div>
-                                        <div class="info-item">
-                                            <i class="fas fa-phone"></i>
-                                            <%= vendor.contactInfo.primaryContact.phone || vendor.phone || 'N/A' %>
-                                        </div>
+                                        <% }); %>
+                                    <% } else if (vendor.primaryContact || (vendor.contactInfo && vendor.contactInfo.primaryContact)) { %>
+                                        <!-- Fallback to old contact display for legacy data -->
+                                        <% const primaryContact = vendor.primaryContact || vendor.contactInfo.primaryContact %>
+                                        <% if (primaryContact.name) { %>
+                                            <div class="info-item" style="margin-bottom: 8px;">
+                                                <i class="fas fa-user"></i>
+                                                <div style="display: flex; flex-direction: column;">
+                                                    <strong style="color: #2c3e50;"><%= primaryContact.name %></strong>
+                                                    <% if (primaryContact.title) { %>
+                                                        <span style="font-size: 0.85em; color: #6c757d;"><%= primaryContact.title %></span>
+                                                    <% } %>
+                                                </div>
+                                            </div>
+                                        <% } %>
+                                        <% if (primaryContact.email) { %>
+                                            <div class="info-item">
+                                                <i class="fas fa-envelope"></i>
+                                                <a href="mailto:<%= primaryContact.email %>">
+                                                    <%= primaryContact.email %>
+                                                </a>
+                                            </div>
+                                        <% } else if (vendor.mainEmail) { %>
+                                            <div class="info-item">
+                                                <i class="fas fa-envelope"></i>
+                                                <a href="mailto:<%= vendor.mainEmail %>"><%= vendor.mainEmail %></a>
+                                            </div>
+                                        <% } %>
+                                        <% if (vendor.mainPhone) { %>
+                                            <div class="info-item">
+                                                <i class="fas fa-phone"></i>
+                                                <a href="tel:<%= vendor.mainPhone %>">
+                                                    <%= vendor.mainPhone %>
+                                                </a>
+                                            </div>
+                                        <% } else if (primaryContact.phone) { %>
+                                            <div class="info-item">
+                                                <i class="fas fa-phone"></i>
+                                                <a href="tel:<%= primaryContact.phone %>">
+                                                    <%= primaryContact.phone %>
+                                                </a>
+                                            </div>
+                                        <% } %>
+                                        <% if (primaryContact.mobile) { %>
+                                            <div class="info-item">
+                                                <i class="fas fa-mobile-alt"></i>
+                                                <a href="tel:<%= primaryContact.mobile %>">
+                                                    Mobile: <%= primaryContact.mobile %>
+                                                </a>
+                                            </div>
+                                        <% } %>
                                     <% } else { %>
                                         <div class="info-item">
                                             <i class="fas fa-envelope"></i>
                                             <% if (vendor.mainEmail) { %>
                                                 <a href="mailto:<%= vendor.mainEmail %>"><%= vendor.mainEmail %></a>
                                             <% } else { %>
-                                                No email
+                                                <span style="color: #adb5bd;">No email</span>
                                             <% } %>
                                         </div>
                                         <div class="info-item">
                                             <i class="fas fa-phone"></i>
-                                            <%= vendor.phone || 'N/A' %>
+                                            <% if (vendor.mainPhone) { %>
+                                                <a href="tel:<%= vendor.mainPhone %>"><%= vendor.mainPhone %></a>
+                                            <% } else { %>
+                                                <span style="color: #adb5bd;">No phone</span>
+                                            <% } %>
                                         </div>
                                     <% } %>
-                                    <% if (vendor.website) { %>
+                                    <% if (vendor.businessInfo && vendor.businessInfo.website) { %>
                                         <div class="info-item">
                                             <i class="fas fa-globe"></i>
-                                            <a href="<%= vendor.website %>" target="_blank">Website</a>
+                                            <a href="<%= vendor.businessInfo.website %>" target="_blank">Website</a>
                                         </div>
                                     <% } %>
                                 </div>
@@ -1126,13 +1220,25 @@
                                 <!-- Address Information -->
                                 <div class="info-section">
                                     <h6><i class="fas fa-map-marker-alt"></i> Address</h6>
-                                    <% if (vendor.address) { %>
-                                        <div class="info-item">
-                                            <%= typeof vendor.address === 'string' ? vendor.address : 
-                                                [vendor.address.street, vendor.address.city, vendor.address.state, vendor.address.zip].filter(Boolean).join(', ') %>
+                                    <% if (vendor.address && (vendor.address.street || vendor.address.city)) { %>
+                                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                                            <% if (vendor.address.street) { %>
+                                                <div style="color: #2c3e50;"><%= vendor.address.street %></div>
+                                            <% } %>
+                                            <% if (vendor.address.street2) { %>
+                                                <div style="color: #2c3e50;"><%= vendor.address.street2 %></div>
+                                            <% } %>
+                                            <div style="color: #2c3e50;">
+                                                <%= [vendor.address.city, vendor.address.state, vendor.address.zipCode].filter(Boolean).join(', ') %>
+                                            </div>
+                                            <% if (vendor.address.country && vendor.address.country !== 'United States') { %>
+                                                <div style="color: #6c757d; font-size: 0.9em;"><%= vendor.address.country %></div>
+                                            <% } %>
                                         </div>
+                                    <% } else if (typeof vendor.address === 'string' && vendor.address) { %>
+                                        <div style="color: #2c3e50;"><%= vendor.address %></div>
                                     <% } else { %>
-                                        <div class="info-item text-muted">No address on file</div>
+                                        <div style="color: #adb5bd; font-style: italic;">No address on file</div>
                                     <% } %>
                                 </div>
 
@@ -1155,8 +1261,8 @@
                                 <a href="/enhanced-vendors/vendor/<%= vendor._id %>" class="btn btn-primary">
                                     <i class="fas fa-eye"></i> View Full Details
                                 </a>
-                                <button class="btn btn-info" onclick="editVendor('<%= vendor._id %>')">
-                                    <i class="fas fa-edit"></i> Edit
+                                <button class="btn btn-info" onclick="openEditContactModal('<%= vendor._id %>')">
+                                    <i class="fas fa-edit"></i> Edit Contact
                                 </button>
                                 <% if (vendor.hasOrganicCertification) { %>
                                     <button class="btn btn-outline-success" onclick="toggleOrganic('<%= vendor._id %>')">
@@ -1354,7 +1460,176 @@
         function viewOrganicSeeds(vendorId) {
             alert('Organic seeds viewer coming soon for vendor ' + vendorId);
         }
+
+        // Open Edit Contact Modal
+        async function openEditContactModal(vendorId) {
+            try {
+                // Fetch vendor data
+                const response = await fetch(`/enhanced-vendors/${vendorId}`);
+                const vendor = await response.json();
+                
+                // Populate modal with vendor data
+                document.getElementById('editVendorId').value = vendorId;
+                document.getElementById('editVendorName').textContent = vendor.vendorName;
+                
+                // Primary Contact
+                document.getElementById('primaryContactName').value = vendor.contactInfo?.primaryContact?.name || '';
+                document.getElementById('primaryContactTitle').value = vendor.contactInfo?.primaryContact?.title || '';
+                document.getElementById('primaryContactEmail').value = vendor.contactInfo?.primaryContact?.email || '';
+                document.getElementById('primaryContactPhone').value = vendor.contactInfo?.primaryContact?.phone || '';
+                document.getElementById('primaryContactMobile').value = vendor.contactInfo?.primaryContact?.mobile || '';
+                
+                // Main Contact Info
+                document.getElementById('mainEmail').value = vendor.mainEmail || '';
+                document.getElementById('mainPhone').value = vendor.mainPhone || '';
+                
+                // Website
+                document.getElementById('website').value = vendor.businessInfo?.website || '';
+                
+                // Show modal
+                const modal = new bootstrap.Modal(document.getElementById('editContactModal'));
+                modal.show();
+            } catch (error) {
+                console.error('Error loading vendor data:', error);
+                alert('Error loading vendor information. Please try again.');
+            }
+        }
+
+        // Save Contact Information
+        async function saveContactInfo() {
+            const vendorId = document.getElementById('editVendorId').value;
+            const saveBtn = document.getElementById('saveContactBtn');
+            const originalText = saveBtn.innerHTML;
+            
+            try {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                
+                const contactData = {
+                    contactInfo: {
+                        primaryContact: {
+                            name: document.getElementById('primaryContactName').value,
+                            title: document.getElementById('primaryContactTitle').value,
+                            email: document.getElementById('primaryContactEmail').value,
+                            phone: document.getElementById('primaryContactPhone').value,
+                            mobile: document.getElementById('primaryContactMobile').value
+                        }
+                    },
+                    mainEmail: document.getElementById('mainEmail').value,
+                    mainPhone: document.getElementById('mainPhone').value,
+                    businessInfo: {
+                        website: document.getElementById('website').value
+                    }
+                };
+                
+                const response = await fetch(`/enhanced-vendors/${vendorId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(contactData)
+                });
+                
+                if (response.ok) {
+                    // Close modal
+                    bootstrap.Modal.getInstance(document.getElementById('editContactModal')).hide();
+                    
+                    // Show success message
+                    alert('Contact information updated successfully!');
+                    
+                    // Reload page to show updated data
+                    window.location.reload();
+                } else {
+                    throw new Error('Failed to save contact information');
+                }
+            } catch (error) {
+                console.error('Error saving contact info:', error);
+                alert('Error saving contact information. Please try again.');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalText;
+            }
+        }
     </script>
+
+    <!-- Edit Contact Modal -->
+    <div class="modal fade" id="editContactModal" tabindex="-1" aria-labelledby="editContactModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h5 class="modal-title" id="editContactModalLabel">
+                        <i class="fas fa-edit"></i> Edit Contact Information - <span id="editVendorName"></span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editVendorId">
+                    
+                    <h6 class="mb-3" style="color: #667eea; border-bottom: 2px solid #e9ecef; padding-bottom: 8px;">
+                        <i class="fas fa-user-circle"></i> Primary Contact
+                    </h6>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="primaryContactName" class="form-label">Contact Name</label>
+                            <input type="text" class="form-control" id="primaryContactName" placeholder="John Doe">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="primaryContactTitle" class="form-label">Title/Role</label>
+                            <input type="text" class="form-control" id="primaryContactTitle" placeholder="Quality Assurance & Sales">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="primaryContactEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="primaryContactEmail" placeholder="contact@vendor.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="primaryContactPhone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="primaryContactPhone" placeholder="800.352.5247">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="primaryContactMobile" class="form-label">Mobile (Optional)</label>
+                            <input type="tel" class="form-control" id="primaryContactMobile" placeholder="555-123-4567">
+                        </div>
+                    </div>
+                    
+                    <h6 class="mb-3" style="color: #667eea; border-bottom: 2px solid #e9ecef; padding-bottom: 8px;">
+                        <i class="fas fa-building"></i> Company Contact Information
+                    </h6>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="mainEmail" class="form-label">Main Email</label>
+                            <input type="email" class="form-control" id="mainEmail" placeholder="info@vendor.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="mainPhone" class="form-label">Main Phone</label>
+                            <input type="tel" class="form-control" id="mainPhone" placeholder="800-123-4567">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="website" class="form-label">Website</label>
+                            <input type="url" class="form-control" id="website" placeholder="https://www.vendor.com">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" id="saveContactBtn" onclick="saveContactInfo()">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

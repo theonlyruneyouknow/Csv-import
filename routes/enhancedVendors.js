@@ -46,18 +46,17 @@ router.get('/', async (req, res) => {
             vendorQuery.vendorType = vendorTypeFilter;
         }
         
-        // Get ALL vendors with complete data
+        // Get ALL vendors with complete data (NOT using .lean() to preserve virtuals like primaryContact)
         const vendors = await Vendor.find(vendorQuery)
             .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
             .skip(skip)
-            .limit(limit)
-            .lean(); // Use lean() for better performance
+            .limit(limit);
         
         const totalVendors = await Vendor.countDocuments(vendorQuery);
         const totalPages = Math.ceil(totalVendors / limit);
         
         // Get ALL organic vendors for cross-referencing
-        const organicVendors = await OrganicVendor.find().lean();
+        const organicVendors = await OrganicVendor.find();
         const organicVendorMap = new Map();
         organicVendors.forEach(ov => {
             // Match by internalId OR vendorName
@@ -79,8 +78,11 @@ router.get('/', async (req, res) => {
                 ]
             });
             
+            // Convert to plain object but preserve virtuals
+            const vendorObj = vendor.toObject({ virtuals: true });
+            
             return {
-                ...vendor,
+                ...vendorObj,
                 hasOrganicCertification: !!organicVendor,
                 organicVendor: organicVendor || null,
                 // Organic fields for easy access
@@ -106,13 +108,13 @@ router.get('/', async (req, res) => {
         }
         
         // Get comprehensive statistics
-        const allVendorsForStats = await Vendor.find().lean();
+        const allVendorsForStats = await Vendor.find();
         const stats = {
             total: totalVendors,
             organic: enhancedVendors.filter(v => v.hasOrganicCertification).length,
             active: allVendorsForStats.filter(v => v.status === 'Active').length,
             inactive: allVendorsForStats.filter(v => v.status === 'Inactive').length,
-            withContact: allVendorsForStats.filter(v => v.contactInfo?.primaryContact?.email).length,
+            withContact: allVendorsForStats.filter(v => v.primaryContact || (v.contactInfo?.primaryContact?.email)).length,
             byType: {}
         };
         
@@ -159,24 +161,28 @@ router.get('/vendor/:id', async (req, res) => {
     try {
         console.log(`📄 Loading detail page for vendor: ${req.params.id}`);
         
-        const vendor = await Vendor.findById(req.params.id).lean();
+        // Don't use .lean() to preserve virtual fields (primaryContact, billingContact, shippingContact)
+        const vendor = await Vendor.findById(req.params.id);
         if (!vendor) {
             return res.status(404).send('Vendor not found');
         }
         
+        // Convert to object with virtuals preserved
+        const vendorObj = vendor.toObject({ virtuals: true });
+        
         // Get organic certification data
         const organicVendor = await OrganicVendor.findOne({ 
             $or: [
-                { internalId: vendor.vendorCode },
-                { vendorName: vendor.vendorName }
+                { internalId: vendorObj.vendorCode },
+                { vendorName: vendorObj.vendorName }
             ]
         }).lean();
         
         // Get purchase orders for this vendor
         const purchaseOrders = await PurchaseOrder.find({
             $or: [
-                { vendor: vendor.vendorName },
-                { vendor: new RegExp(vendor.vendorCode, 'i') }
+                { vendor: vendorObj.vendorName },
+                { vendor: new RegExp(vendorObj.vendorCode, 'i') }
             ]
         })
         .sort({ poDate: -1 })
@@ -186,8 +192,8 @@ router.get('/vendor/:id', async (req, res) => {
         // Get line items for this vendor
         const lineItems = await LineItem.find({
             $or: [
-                { vendor: vendor.vendorName },
-                { vendor: new RegExp(vendor.vendorCode, 'i') }
+                { vendor: vendorObj.vendorName },
+                { vendor: new RegExp(vendorObj.vendorCode, 'i') }
             ]
         })
         .sort({ createdAt: -1 })
@@ -201,10 +207,10 @@ router.get('/vendor/:id', async (req, res) => {
             totalSpend: purchaseOrders.reduce((sum, po) => sum + (parseFloat(po.total) || 0), 0)
         };
         
-        console.log(`✅ Loaded vendor: ${vendor.vendorName} with ${purchaseOrders.length} POs`);
+        console.log(`✅ Loaded vendor: ${vendorObj.vendorName} with ${purchaseOrders.length} POs`);
         
         res.render('vendor-detail-page', {
-            vendor: vendor,
+            vendor: vendorObj,
             hasOrganicCertification: !!organicVendor,
             organicVendor: organicVendor || null,
             purchaseOrders: purchaseOrders,

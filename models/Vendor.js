@@ -39,6 +39,14 @@ const vendorSchema = new mongoose.Schema({
             type: Boolean,
             default: false
         },
+        isBilling: {
+            type: Boolean,
+            default: false
+        },
+        isShipping: {
+            type: Boolean,
+            default: false
+        },
         notes: String
     }],
     
@@ -325,6 +333,24 @@ vendorSchema.virtual('primaryContact').get(function () {
     if (this.contacts && this.contacts.length > 0) {
         const primary = this.contacts.find(contact => contact.isPrimary);
         return primary || this.contacts[0]; // Return first contact if no primary set
+    }
+    return null;
+});
+
+// Get billing contact from the contacts array
+vendorSchema.virtual('billingContact').get(function () {
+    if (this.contacts && this.contacts.length > 0) {
+        const billing = this.contacts.find(contact => contact.isBilling);
+        return billing || null;
+    }
+    return null;
+});
+
+// Get shipping contact from the contacts array
+vendorSchema.virtual('shippingContact').get(function () {
+    if (this.contacts && this.contacts.length > 0) {
+        const shipping = this.contacts.find(contact => contact.isShipping);
+        return shipping || null;
     }
     return null;
 });
