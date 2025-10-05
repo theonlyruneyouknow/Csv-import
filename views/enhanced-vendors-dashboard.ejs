@@ -1081,12 +1081,26 @@
                             <div class="info-grid">
                                 <!-- Contact Information -->
                                 <div class="info-section">
-                                    <h6><i class="fas fa-address-card"></i> Contacts</h6>
-                                    
-                                    <% if (vendor.contacts && vendor.contacts.length > 0) { %>
+                                <h6>
+                                    <i class="fas fa-address-card"></i> Contacts
+                                    <% if (vendor.contacts && vendor.contacts.length > 1) { %>
+                                        <button onclick="toggleVendorContacts('<%= vendor._id %>')" 
+                                                class="btn btn-sm btn-link" 
+                                                style="font-size: 0.75rem; padding: 0 5px; text-decoration: none;"
+                                                id="toggle-btn-<%= vendor._id %>">
+                                            <i class="fas fa-chevron-down" id="toggle-icon-<%= vendor._id %>"></i>
+                                            <span id="toggle-text-<%= vendor._id %>">Show More</span>
+                                        </button>
+                                    <% } %>
+                                </h6>                                    <% if (vendor.contacts && vendor.contacts.length > 0) { %>
                                         <% vendor.contacts.forEach((contact, index) => { %>
                                             <% if (contact.name || contact.email || contact.phone) { %>
-                                                <div class="contact-card" style="background: #f8f9fa; padding: 12px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid #667eea;">
+                                                <%
+                                                    // Hide additional contacts by default
+                                                    const displayStyle = index > 0 ? 'display: none;' : '';
+                                                %>
+                                                <div class="contact-card vendor-contact-<%= vendor._id %>" 
+                                                     style="background: #f8f9fa; padding: 12px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid #667eea; <%= displayStyle %>">
                                                     <!-- Role Badges -->
                                                     <div style="margin-bottom: 6px;">
                                                         <% if (contact.isPrimary) { %>
@@ -1136,6 +1150,12 @@
                                                     <% if (contact.department) { %>
                                                         <div style="font-size: 0.85em; color: #6c757d; margin-top: 4px;">
                                                             <i class="fas fa-building" style="width: 16px;"></i> <%= contact.department %>
+                                                        </div>
+                                                    <% } %>
+                                                    <% if (contact.notes) { %>
+                                                        <div style="font-size: 0.85em; color: #495057; margin-top: 8px; padding: 6px; background: #fff; border-radius: 4px; border-left: 2px solid #667eea;">
+                                                            <i class="fas fa-sticky-note" style="width: 16px; color: #667eea;"></i>
+                                                            <span style="font-style: italic;"><%= contact.notes %></span>
                                                         </div>
                                                     <% } %>
                                                 </div>
@@ -1209,10 +1229,19 @@
                                             <% } %>
                                         </div>
                                     <% } %>
+                                    
+                                    <!-- Website Link - Always visible -->
                                     <% if (vendor.businessInfo && vendor.businessInfo.website) { %>
-                                        <div class="info-item">
+                                        <div class="info-item" style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #e9ecef;">
                                             <i class="fas fa-globe"></i>
-                                            <a href="<%= vendor.businessInfo.website %>" target="_blank">Website</a>
+                                            <%
+                                                let websiteUrl = vendor.businessInfo.website;
+                                                // Ensure URL has protocol
+                                                if (websiteUrl && !websiteUrl.match(/^https?:\/\//i)) {
+                                                    websiteUrl = 'https://' + websiteUrl;
+                                                }
+                                            %>
+                                            <a href="<%= websiteUrl %>" target="_blank" rel="noopener noreferrer">Website</a>
                                         </div>
                                     <% } %>
                                 </div>
@@ -1436,6 +1465,42 @@
                 content.classList.add('show');
                 if (icon) icon.className = 'fas fa-chevron-up';
                 if (toggleText) toggleText.textContent = 'Hide';
+            }
+        }
+
+        // Toggle vendor contacts (show/hide additional contacts)
+        function toggleVendorContacts(vendorId) {
+            const contacts = document.querySelectorAll('.vendor-contact-' + vendorId);
+            const icon = document.getElementById('toggle-icon-' + vendorId);
+            const text = document.getElementById('toggle-text-' + vendorId);
+            
+            let isCurrentlyHidden = true;
+            
+            // Check the current state (if second contact is hidden, we're in collapsed mode)
+            if (contacts.length > 1) {
+                isCurrentlyHidden = contacts[1].style.display === 'none';
+            }
+            
+            // Toggle all contacts except the first one
+            contacts.forEach((contact, index) => {
+                if (index > 0) { // Skip first contact (always visible)
+                    if (isCurrentlyHidden) {
+                        contact.style.display = 'block';
+                    } else {
+                        contact.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Update button text and icon
+            if (isCurrentlyHidden) {
+                // We just showed them, so now button should say "Show Less"
+                if (icon) icon.className = 'fas fa-chevron-up';
+                if (text) text.textContent = 'Show Less';
+            } else {
+                // We just hid them, so now button should say "Show More"
+                if (icon) icon.className = 'fas fa-chevron-down';
+                if (text) text.textContent = 'Show More';
             }
         }
 

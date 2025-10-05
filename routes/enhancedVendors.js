@@ -178,16 +178,77 @@ router.get('/vendor/:id', async (req, res) => {
             ]
         }).lean();
         
-        // Get purchase orders for this vendor
+        // Get ALL purchase orders for this vendor (including hidden and billed)
         const purchaseOrders = await PurchaseOrder.find({
             $or: [
                 { vendor: vendorObj.vendorName },
                 { vendor: new RegExp(vendorObj.vendorCode, 'i') }
             ]
+            // NO filter on isHidden or status - include ALL POs for this vendor
         })
         .sort({ poDate: -1 })
         .limit(50)
         .lean();
+        
+        // Collect all documents from POs
+        const poDocuments = [];
+        purchaseOrders.forEach(po => {
+            if (po.attachments && po.attachments.length > 0) {
+                po.attachments.forEach(attachment => {
+                    poDocuments.push({
+                        ...attachment,
+                        // Convert ObjectId to string for URL compatibility
+                        attachmentId: attachment._id ? attachment._id.toString() : null,
+                        poNumber: po.poNumber,
+                        poId: po._id ? po._id.toString() : null,
+                        source: 'Purchase Order'
+                    });
+                });
+            }
+        });
+        
+        // Collect organic documents
+        const organicDocuments = [];
+        if (organicVendor) {
+            if (organicVendor.certificate) {
+                organicDocuments.push({
+                    type: 'certificate',
+                    name: 'Organic Certificate',
+                    filename: organicVendor.certificate.filename || 'certificate.pdf',
+                    mimeType: organicVendor.certificate.mimeType || 'application/pdf',
+                    uploadedAt: organicVendor.certificate.uploadedAt || organicVendor.updatedAt,
+                    source: 'Organic Certification',
+                    organicVendorId: organicVendor._id ? organicVendor._id.toString() : null
+                });
+            }
+            if (organicVendor.operationsProfile) {
+                organicDocuments.push({
+                    type: 'operationsProfile',
+                    name: 'Operations Profile',
+                    filename: organicVendor.operationsProfile.filename || 'operations-profile.pdf',
+                    mimeType: organicVendor.operationsProfile.mimeType || 'application/pdf',
+                    uploadedAt: organicVendor.operationsProfile.uploadedAt || organicVendor.updatedAt,
+                    source: 'Organic Certification',
+                    organicVendorId: organicVendor._id ? organicVendor._id.toString() : null
+                });
+            }
+        }
+        
+        // Combine all documents
+        const allDocuments = [...organicDocuments, ...poDocuments].sort((a, b) => {
+            return new Date(b.uploadedAt) - new Date(a.uploadedAt);
+        });
+        
+        console.log(`📄 Document summary for ${vendorObj.vendorName}:`, {
+            organicDocs: organicDocuments.length,
+            poDocs: poDocuments.length,
+            total: allDocuments.length,
+            poDocSample: poDocuments.length > 0 ? {
+                filename: poDocuments[0].filename,
+                attachmentId: poDocuments[0].attachmentId,
+                poNumber: poDocuments[0].poNumber
+            } : 'none'
+        });
         
         // Get line items for this vendor
         const lineItems = await LineItem.find({
@@ -207,7 +268,7 @@ router.get('/vendor/:id', async (req, res) => {
             totalSpend: purchaseOrders.reduce((sum, po) => sum + (parseFloat(po.total) || 0), 0)
         };
         
-        console.log(`✅ Loaded vendor: ${vendorObj.vendorName} with ${purchaseOrders.length} POs`);
+        console.log(`✅ Loaded vendor: ${vendorObj.vendorName} with ${purchaseOrders.length} POs and ${allDocuments.length} documents`);
         
         res.render('vendor-detail-page', {
             vendor: vendorObj,
@@ -216,6 +277,7 @@ router.get('/vendor/:id', async (req, res) => {
             purchaseOrders: purchaseOrders,
             lineItems: lineItems,
             stats: stats,
+            allDocuments: allDocuments,
             user: req.user
         });
         

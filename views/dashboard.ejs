@@ -6283,15 +6283,17 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const isNotMyConcern = status === 'Not my concern';
                 const shouldShowNotMyConcern = !isNotMyConcern || showNotMyConcern;
 
-                // "Pending Bill" NS Status filter - hide by default unless checkbox is checked
-                const isPendingBill = nsStatus === 'Pending Bill';
-                const shouldShowPendingBill = !isPendingBill || showPendingBill;
+                // "Pending Bill" and "Billed" NS Status filter - hide by default unless checkbox is checked
+                // BUT: Always show if vendor filter is active (to see ALL POs from a vendor)
+                const vendorFilterActive = new URLSearchParams(window.location.search).get('vendor');
+                const isPendingBill = nsStatus === 'Pending Bill' || nsStatus === 'Billed';
+                const shouldShowPendingBill = vendorFilterActive || !isPendingBill || showPendingBill;
 
                 if (isNotMyConcern && !showNotMyConcern) {
                     hiddenNotMyConcernCount++;
                 }
 
-                if (isPendingBill && !showPendingBill) {
+                if (isPendingBill && !showPendingBill && !vendorFilterActive) {
                     hiddenPendingBillCount++;
                 }
 
@@ -6529,6 +6531,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             window.location.href = url.toString();
         }
 
+        // Clear vendor filter and reload without it
+        function clearVendorFilter() {
+            const url = new URL(window.location);
+            url.searchParams.delete('vendor');
+            window.location.href = url.toString();
+        }
+
         // Event listeners for filters
         document.getElementById('searchFilter').addEventListener('input', applyFilters);
         document.getElementById('nsStatusFilter').addEventListener('change', applyFilters);
@@ -6538,6 +6547,54 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         document.getElementById('showNotMyConcern').addEventListener('change', applyFilters);
         document.getElementById('showPendingBill').addEventListener('change', applyFilters);
         document.getElementById('showHiddenPOs').addEventListener('change', toggleHiddenPOs);
+
+        // Check for query parameters and auto-fill search
+        const urlParams = new URLSearchParams(window.location.search);
+        const poNumber = urlParams.get('poNumber');
+        const vendorFilter = urlParams.get('vendor');
+        
+        // Handle PO Number search
+        if (poNumber) {
+            document.getElementById('searchFilter').value = poNumber;
+            applyFilters(); // Trigger the filter to show the PO
+            
+            // Optional: Scroll to the PO after a short delay to let filters apply
+            setTimeout(() => {
+                const poElement = document.querySelector(`[data-po-number="${poNumber}"]`);
+                if (poElement) {
+                    poElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Highlight the PO temporarily
+                    poElement.style.backgroundColor = '#fff3cd';
+                    setTimeout(() => {
+                        poElement.style.backgroundColor = '';
+                    }, 3000);
+                }
+            }, 300);
+        }
+        
+        // Handle Vendor filter
+        if (vendorFilter) {
+            document.getElementById('searchFilter').value = vendorFilter;
+            applyFilters(); // Trigger the filter
+            
+            // Show a notification banner about the active vendor filter
+            const banner = document.createElement('div');
+            banner.id = 'vendor-filter-banner';
+            banner.style.cssText = 'position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 9999; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 12px; animation: slideDown 0.3s ease-out;';
+            banner.innerHTML = `
+                <i class="fas fa-filter"></i>
+                <span style="font-weight: 500;">Filtered by vendor: <strong>${vendorFilter}</strong></span>
+                <button onclick="clearVendorFilter()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 12px; border-radius: 4px; cursor: pointer; margin-left: 8px; font-weight: 500;">
+                    <i class="fas fa-times"></i> Clear Filter
+                </button>
+            `;
+            document.body.appendChild(banner);
+            
+            // Add animation
+            const style = document.createElement('style');
+            style.textContent = '@keyframes slideDown { from { top: 0; opacity: 0; } to { top: 70px; opacity: 1; } }';
+            document.head.appendChild(style);
+        }
 
         // Event listeners for sorting
         document.querySelectorAll('th.sortable').forEach(header => {

@@ -1503,9 +1503,17 @@ router.get('/', async (req, res) => {
     // Check if we should include hidden POs
     const includeHidden = req.query.includeHidden === 'true';
     
+    // Check for vendor filter
+    const vendorFilter = req.query.vendor;
+    
     let query = {};
     if (!includeHidden) {
       query.isHidden = { $ne: true }; // Only show non-hidden POs by default
+    }
+    
+    // Add vendor filter if provided
+    if (vendorFilter) {
+      query.vendor = { $regex: new RegExp(vendorFilter, 'i') }; // Case-insensitive match
     }
 
     const purchaseOrders = await PurchaseOrder.find(query)

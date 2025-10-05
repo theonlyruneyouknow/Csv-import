@@ -455,6 +455,186 @@
                 align-items: flex-start;
             }
         }
+
+        /* Button Group & Dropdown Styles */
+        .btn-group {
+            display: inline-flex;
+            vertical-align: middle;
+            position: relative; /* Important for dropdown positioning */
+        }
+
+        .btn-group .btn {
+            position: relative;
+            flex: 1 1 auto;
+        }
+
+        .btn-group .btn:not(:last-child) {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .btn-group .btn:not(:first-child) {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            margin-left: -2px;
+        }
+
+        .dropdown-toggle-split {
+            padding-right: 8px;
+            padding-left: 8px;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            z-index: 1000;
+            display: none;
+            min-width: 200px;
+            padding: 8px 0;
+            margin: 2px 0 0;
+            font-size: 0.9rem;
+            color: #212529;
+            text-align: left;
+            list-style: none;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid rgba(0,0,0,.15);
+            border-radius: 4px;
+            box-shadow: 0 6px 12px rgba(0,0,0,.175);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        /* Position dropdown upward if too close to bottom of screen */
+        .dropdown-menu.dropup {
+            top: auto;
+            bottom: 100%;
+            margin-top: 0;
+            margin-bottom: 2px;
+        }
+
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 8px 16px;
+            clear: both;
+            font-weight: 400;
+            color: #212529;
+            text-align: inherit;
+            text-decoration: none;
+            white-space: nowrap;
+            background-color: transparent;
+            border: 0;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover,
+        .dropdown-item:focus {
+            color: #16181b;
+            background-color: #f8f9fa;
+        }
+
+        .dropdown-item.disabled {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: transparent;
+        }
+
+        .dropdown-item i {
+            margin-right: 8px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .dropdown-menu-right {
+            right: 0;
+            left: auto;
+        }
+
+        /* PO Details Row Styles */
+        .po-details-row {
+            background: #f8f9fa !important;
+        }
+
+        .po-details-row td {
+            padding: 0 !important;
+        }
+
+        .po-details-row .table {
+            margin-bottom: 0;
+        }
+
+        .po-details-row .table th {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #495057;
+            padding: 10px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .po-details-row .table td {
+            padding: 10px !important;
+            font-size: 0.9em;
+        }
+
+        .po-details-row .badge {
+            font-size: 0.75em;
+            padding: 4px 8px;
+        }
+
+        /* Button Secondary Style */
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: none;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        /* Badge Styles for Documents Table */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            border-radius: 12px;
+            white-space: nowrap;
+        }
+
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .badge-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .badge-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .badge-danger {
+            background: #dc3545;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -874,6 +1054,42 @@
                         </div>
                     </div>
 
+                    <!-- Action Buttons - Moved to top -->
+                    <div class="action-buttons" style="margin-top: 25px; margin-bottom: 25px;">
+                        <% if (organicVendor.certificate) { %>
+                            <button class="btn btn-success" onclick="toggleCertificate()">
+                                <i class="fas fa-file-pdf"></i> View Certificate
+                            </button>
+                        <% } %>
+                        <% if (organicVendor.operationsProfile) { %>
+                            <button class="btn btn-outline-success" onclick="toggleOperationsProfile()">
+                                <i class="fas fa-file-alt"></i> View Operations Profile
+                            </button>
+                        <% } %>
+                        <% if (organicVendor.organicDatabaseUrl) { %>
+                            <a href="<%= organicVendor.organicDatabaseUrl %>" target="_blank" class="btn btn-outline-primary">
+                                <i class="fas fa-external-link-alt"></i> View USDA Database
+                            </a>
+                        <% } %>
+                    </div>
+
+                    <!-- Certificate Viewer (hidden by default) -->
+                    <% if (organicVendor.certificate) { %>
+                        <div id="certificateViewer" style="display: none; margin-bottom: 25px;">
+                            <h4><i class="fas fa-certificate"></i> Certificate Document</h4>
+                            <iframe id="certificateFrame" style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 5px;"></iframe>
+                        </div>
+                    <% } %>
+
+                    <!-- Operations Profile Viewer (hidden by default) -->
+                    <% if (organicVendor.operationsProfile) { %>
+                        <div id="operationsProfileViewer" style="display: none; margin-bottom: 25px;">
+                            <h4><i class="fas fa-file-alt"></i> Operations Profile Document</h4>
+                            <iframe id="operationsProfileFrame" style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 5px;"></iframe>
+                        </div>
+                    <% } %>
+
+                    <!-- Organic Seeds Data -->
                     <% if (organicVendor.organicSeeds && organicVendor.organicSeeds.length > 0) { %>
                         <div class="info-card" style="margin-top: 25px;">
                             <h3><i class="fas fa-seedling"></i> Organic Seeds (<%= organicVendor.organicSeeds.length %>)</h3>
@@ -895,24 +1111,6 @@
                             </div>
                         </div>
                     <% } %>
-
-                    <div class="action-buttons">
-                        <% if (organicVendor.certificate) { %>
-                            <button class="btn btn-success" onclick="viewDocument('certificate')">
-                                <i class="fas fa-file-pdf"></i> View Certificate
-                            </button>
-                        <% } %>
-                        <% if (organicVendor.operationsProfile) { %>
-                            <button class="btn btn-outline-success" onclick="viewDocument('operationsProfile')">
-                                <i class="fas fa-file-alt"></i> View Operations Profile
-                            </button>
-                        <% } %>
-                        <% if (organicVendor.organicDatabaseUrl) { %>
-                            <a href="<%= organicVendor.organicDatabaseUrl %>" target="_blank" class="btn btn-outline-primary">
-                                <i class="fas fa-external-link-alt"></i> View USDA Database
-                            </a>
-                        <% } %>
-                    </div>
                 </div>
             <% } %>
 
@@ -925,6 +1123,16 @@
                         <p>No purchase orders found for this vendor</p>
                     </div>
                 <% } else { %>
+                    <!-- Bulk Action Buttons -->
+                    <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+                        <button onclick="viewAllInline()" class="btn btn-sm btn-secondary" style="padding: 8px 16px;">
+                            <i class="fas fa-list"></i> View All Inline
+                        </button>
+                        <a href="/purchase-orders?vendor=<%= encodeURIComponent(vendor.vendorName) %>&includeHidden=true" class="btn btn-sm btn-primary" style="padding: 8px 16px;">
+                            <i class="fas fa-external-link-alt"></i> View All in PO Dashboard
+                        </a>
+                    </div>
+                    
                     <div class="orders-table">
                         <table>
                             <thead>
@@ -939,7 +1147,7 @@
                             </thead>
                             <tbody>
                                 <% purchaseOrders.forEach(po => { %>
-                                    <tr>
+                                    <tr data-po-id="<%= po._id %>" data-po-number="<%= po.poNumber %>">
                                         <td><strong><%= po.poNumber %></strong></td>
                                         <td><%= po.date ? new Date(po.date).toLocaleDateString() : 'N/A' %></td>
                                         <td>
@@ -950,9 +1158,45 @@
                                         <td>$<%= parseFloat(po.total || 0).toLocaleString('en-US', {minimumFractionDigits: 2}) %></td>
                                         <td><%= po.lineItems ? po.lineItems.length : 0 %></td>
                                         <td>
-                                            <a href="/purchase-orders/<%= po._id %>" class="btn btn-sm btn-outline-primary" style="padding: 5px 12px; font-size: 0.85em;">
-                                                <i class="fas fa-eye"></i> View
-                                            </a>
+                                            <div class="btn-group" role="group">
+                                                <button onclick="viewPOInline('<%= po._id %>', '<%= po.poNumber %>')" class="btn btn-sm btn-outline-primary" style="padding: 5px 12px; font-size: 0.85em;" title="View Inline">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 5px 8px; font-size: 0.85em;">
+                                                    <span class="sr-only">Toggle Dropdown</span>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right" style="font-size: 0.9em;">
+                                                    <a class="dropdown-item" href="#" onclick="event.preventDefault(); viewPOInline('<%= po._id %>', '<%= po.poNumber %>')">
+                                                        <i class="fas fa-list"></i> View Inline
+                                                    </a>
+                                                    <a class="dropdown-item" href="/purchase-orders?poNumber=<%= po.poNumber %>&includeHidden=true">
+                                                        <i class="fas fa-external-link-alt"></i> View in PO Dashboard
+                                                    </a>
+                                                    <% 
+                                                    // Check if poUrl contains NetSuite link
+                                                    let hasNetSuiteUrl = po.poUrl && po.poUrl.includes('netsuite.com');
+                                                    %>
+                                                    <% if (hasNetSuiteUrl) { %>
+                                                        <a class="dropdown-item" href="<%= po.poUrl %>" target="_blank">
+                                                            <i class="fas fa-cloud"></i> View in NetSuite
+                                                        </a>
+                                                    <% } else { %>
+                                                        <a class="dropdown-item disabled" href="#" style="opacity: 0.5; cursor: not-allowed;">
+                                                            <i class="fas fa-cloud"></i> View in NetSuite (No URL)
+                                                        </a>
+                                                    <% } %>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <!-- Inline PO Details Row (hidden by default) -->
+                                    <tr id="po-details-<%= po._id %>" class="po-details-row" style="display: none;">
+                                        <td colspan="6" style="padding: 0; background: #f8f9fa;">
+                                            <div style="padding: 20px;">
+                                                <div class="spinner-border text-primary" role="status" style="display: block; margin: 20px auto;">
+                                                    <span class="sr-only">Loading...</span>
+                                                </div>
+                                            </div>
                                         </td>
                                     </tr>
                                 <% }); %>
@@ -970,42 +1214,201 @@
 
             <!-- Documents Tab -->
             <div id="documents-tab" class="tab-content">
-                <div class="documents-grid">
-                    <% if (hasOrganicCertification && organicVendor.certificate) { %>
-                        <div class="doc-card" onclick="viewDocument('certificate')">
-                            <i class="fas fa-file-pdf"></i>
-                            <h4>Organic Certificate</h4>
-                            <p style="color: #6c757d; font-size: 0.9em;">PDF Document</p>
-                            <button class="btn btn-outline-primary" style="margin-top: 10px;">
-                                <i class="fas fa-eye"></i> View
-                            </button>
+                <% if (allDocuments && allDocuments.length > 0) { %>
+                    <!-- Document Statistics -->
+                    <div class="info-card" style="margin-bottom: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <div style="display: flex; justify-content: space-around; text-align: center;">
+                            <div>
+                                <h2 style="margin: 0; color: white;"><%= allDocuments.length %></h2>
+                                <p style="margin: 5px 0 0 0; opacity: 0.9;">Total Documents</p>
+                            </div>
+                            <div>
+                                <h2 style="margin: 0; color: white;"><%= allDocuments.filter(d => d.source === 'Organic Certification').length %></h2>
+                                <p style="margin: 5px 0 0 0; opacity: 0.9;">Organic Docs</p>
+                            </div>
+                            <div>
+                                <h2 style="margin: 0; color: white;"><%= allDocuments.filter(d => d.source === 'Purchase Order').length %></h2>
+                                <p style="margin: 5px 0 0 0; opacity: 0.9;">PO Attachments</p>
+                            </div>
                         </div>
-                    <% } %>
+                    </div>
 
-                    <% if (hasOrganicCertification && organicVendor.operationsProfile) { %>
-                        <div class="doc-card" onclick="viewDocument('operationsProfile')">
-                            <i class="fas fa-file-alt"></i>
-                            <h4>Operations Profile</h4>
-                            <p style="color: #6c757d; font-size: 0.9em;">PDF Document</p>
-                            <button class="btn btn-outline-primary" style="margin-top: 10px;">
-                                <i class="fas fa-eye"></i> View
-                            </button>
+                    <!-- Documents Table -->
+                    <div class="info-card">
+                        <h3><i class="fas fa-folder-open"></i> All Documents</h3>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                                <thead>
+                                    <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                                        <th style="padding: 12px; text-align: left; font-weight: 600;">Document Name</th>
+                                        <th style="padding: 12px; text-align: left; font-weight: 600;">Type/Category</th>
+                                        <th style="padding: 12px; text-align: left; font-weight: 600;">Source</th>
+                                        <th style="padding: 12px; text-align: left; font-weight: 600;">Uploaded</th>
+                                        <th style="padding: 12px; text-align: left; font-weight: 600;">Size</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% allDocuments.forEach((doc, index) => { %>
+                                        <tr style="border-bottom: 1px solid #dee2e6; <%= index % 2 === 0 ? 'background: #fff' : 'background: #f8f9fa' %>;">
+                                            <td style="padding: 12px;">
+                                                <i class="fas <%= doc.mimeType && doc.mimeType.includes('pdf') ? 'fa-file-pdf' : doc.mimeType && doc.mimeType.includes('image') ? 'fa-file-image' : 'fa-file-alt' %>" 
+                                                   style="color: <%= doc.mimeType && doc.mimeType.includes('pdf') ? '#dc3545' : doc.mimeType && doc.mimeType.includes('image') ? '#28a745' : '#6c757d' %>; margin-right: 8px;"></i>
+                                                <strong><%= doc.filename || doc.name %></strong>
+                                                <% if (doc.description) { %>
+                                                    <br><small style="color: #6c757d;"><%= doc.description %></small>
+                                                <% } %>
+                                            </td>
+                                            <td style="padding: 12px;">
+                                                <% if (doc.documentType) { %>
+                                                    <span class="badge badge-info"><%= doc.documentType %></span>
+                                                <% } else if (doc.type === 'certificate') { %>
+                                                    <span class="badge badge-success">Certificate</span>
+                                                <% } else if (doc.type === 'operationsProfile') { %>
+                                                    <span class="badge badge-primary">Operations</span>
+                                                <% } else { %>
+                                                    <span class="badge badge-secondary">Other</span>
+                                                <% } %>
+                                            </td>
+                                            <td style="padding: 12px;">
+                                                <% if (doc.source === 'Purchase Order') { %>
+                                                    <a href="/purchase-orders?poNumber=<%= doc.poNumber %>&includeHidden=true" 
+                                                       style="color: #007bff; text-decoration: none;">
+                                                        <i class="fas fa-shopping-cart"></i> PO <%= doc.poNumber %>
+                                                    </a>
+                                                <% } else { %>
+                                                    <i class="fas fa-leaf" style="color: #28a745;"></i> <%= doc.source %>
+                                                <% } %>
+                                            </td>
+                                            <td style="padding: 12px;">
+                                                <%= doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString() : 'N/A' %>
+                                                <% if (doc.uploadedBy) { %>
+                                                    <br><small style="color: #6c757d;">by <%= doc.uploadedBy %></small>
+                                                <% } %>
+                                            </td>
+                                            <td style="padding: 12px;">
+                                                <% if (doc.fileSize) { %>
+                                                    <%= (doc.fileSize / 1024).toFixed(1) %> KB
+                                                <% } else { %>
+                                                    -
+                                                <% } %>
+                                            </td>
+                                            <td style="padding: 12px; text-align: center;">
+                                                <% if (doc.source === 'Organic Certification') { %>
+                                                    <% if (doc.type === 'certificate') { %>
+                                                        <button onclick="viewOrganicDocument('certificate', '<%= doc.organicVendorId %>')" 
+                                                                class="btn btn-sm btn-outline-primary" title="View Certificate">
+                                                            <i class="fas fa-eye"></i> View
+                                                        </button>
+                                                    <% } else if (doc.type === 'operationsProfile') { %>
+                                                        <button onclick="viewOrganicDocument('operations-profile', '<%= doc.organicVendorId %>')" 
+                                                                class="btn btn-sm btn-outline-primary" title="View Operations Profile">
+                                                            <i class="fas fa-eye"></i> View
+                                                        </button>
+                                                    <% } %>
+                                                <% } else if (doc.attachmentId) { %>
+                                                    <div class="btn-group" role="group" style="display: flex; gap: 5px;">
+                                                        <a href="/purchase-orders/view-attachment/<%= doc.attachmentId %>" 
+                                                           target="_blank" class="btn btn-sm btn-outline-primary" title="View <%= doc.filename %>">
+                                                            <i class="fas fa-eye"></i> View
+                                                        </a>
+                                                        <a href="/purchase-orders/download-attachment/<%= doc.attachmentId %>" 
+                                                           class="btn btn-sm btn-outline-secondary" title="Download <%= doc.filename %>">
+                                                            <i class="fas fa-download"></i>
+                                                        </a>
+                                                    </div>
+                                                <% } else { %>
+                                                    <span class="text-muted" style="font-size: 0.85em;">
+                                                        <i class="fas fa-exclamation-triangle"></i> Error loading
+                                                    </span>
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
                         </div>
-                    <% } %>
-
-                    <% if (!hasOrganicCertification || (!organicVendor.certificate && !organicVendor.operationsProfile)) { %>
-                        <div class="empty-state" style="grid-column: 1 / -1;">
-                            <i class="fas fa-folder-open"></i>
-                            <h3>No Documents</h3>
-                            <p>No documents available for this vendor</p>
-                        </div>
-                    <% } %>
-                </div>
+                    </div>
+                <% } else { %>
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <h3>No Documents</h3>
+                        <p>No documents have been uploaded for this vendor yet</p>
+                    </div>
+                <% } %>
             </div>
         </div>
     </div>
 
     <script>
+        // Initialize dropdowns
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing dropdowns...');
+            
+            // Handle dropdown toggles
+            document.querySelectorAll('.dropdown-toggle').forEach(function(toggle) {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    console.log('Dropdown clicked');
+                    
+                    const btnGroup = this.closest('.btn-group');
+                    const menu = btnGroup.querySelector('.dropdown-menu');
+                    
+                    if (!menu) {
+                        console.error('Dropdown menu not found');
+                        return;
+                    }
+                    
+                    const isOpen = menu.classList.contains('show');
+                    
+                    // Close all dropdowns
+                    document.querySelectorAll('.dropdown-menu').forEach(m => {
+                        m.classList.remove('show');
+                        m.classList.remove('dropup');
+                    });
+                    
+                    // Toggle this dropdown
+                    if (!isOpen) {
+                        // Check if dropdown will go off-screen
+                        const buttonRect = btnGroup.getBoundingClientRect();
+                        const spaceBelow = window.innerHeight - buttonRect.bottom;
+                        const menuHeight = 150; // Approximate dropdown height
+                        
+                        // If not enough space below, open upward
+                        if (spaceBelow < menuHeight && buttonRect.top > menuHeight) {
+                            menu.classList.add('dropup');
+                            console.log('Opening dropdown upward');
+                        }
+                        
+                        menu.classList.add('show');
+                        console.log('Dropdown opened');
+                    }
+                });
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.btn-group')) {
+                    document.querySelectorAll('.dropdown-menu').forEach(m => {
+                        m.classList.remove('show');
+                    });
+                }
+            });
+            
+            // Prevent dropdown from closing when clicking inside menu
+            document.querySelectorAll('.dropdown-menu').forEach(function(menu) {
+                menu.addEventListener('click', function(e) {
+                    // Only stop propagation for disabled items
+                    if (e.target.classList.contains('disabled')) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+        
         function switchTab(tabName) {
             // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
@@ -1024,9 +1427,145 @@
             event.target.classList.add('active');
         }
 
-        function viewDocument(docType) {
-            // This will be implemented to show document viewer
-            alert('Document viewer coming soon for: ' + docType);
+        // Toggle Certificate Viewer
+        function toggleCertificate() {
+            const viewer = document.getElementById('certificateViewer');
+            const frame = document.getElementById('certificateFrame');
+            
+            if (viewer.style.display === 'none' || !viewer.style.display) {
+                // Get the organic vendor ID from the page data
+                <% if (organicVendor && organicVendor._id) { %>
+                    frame.src = '/organic-vendors/<%= organicVendor._id %>/certificate';
+                <% } %>
+                viewer.style.display = 'block';
+            } else {
+                viewer.style.display = 'none';
+                frame.src = '';
+            }
+        }
+
+        // Toggle Operations Profile Viewer
+        function toggleOperationsProfile() {
+            const viewer = document.getElementById('operationsProfileViewer');
+            const frame = document.getElementById('operationsProfileFrame');
+            
+            if (viewer.style.display === 'none' || !viewer.style.display) {
+                // Get the organic vendor ID from the page data
+                <% if (organicVendor && organicVendor._id) { %>
+                    frame.src = '/organic-vendors/<%= organicVendor._id %>/operations-profile';
+                <% } %>
+                viewer.style.display = 'block';
+            } else {
+                viewer.style.display = 'none';
+                frame.src = '';
+            }
+        }
+
+        // View organic document from Documents tab (opens in new window)
+        function viewOrganicDocument(docType, organicVendorId) {
+            const url = `/organic-vendors/${organicVendorId}/${docType}`;
+            window.open(url, '_blank');
+        }
+
+        // View PO inline (expand row to show details)
+        async function viewPOInline(poId, poNumber) {
+            const detailsRow = document.getElementById('po-details-' + poId);
+            
+            // Toggle if already open
+            if (detailsRow.style.display === 'table-row') {
+                detailsRow.style.display = 'none';
+                return;
+            }
+            
+            // Show the row with spinner
+            detailsRow.style.display = 'table-row';
+            
+            try {
+                // Fetch line items for this PO
+                const response = await fetch(`/purchase-orders/${poId}/line-items`);
+                const lineItems = await response.json();
+                
+                // Build the inline view HTML
+                let html = `
+                    <div style="padding: 20px; background: white; border-left: 4px solid #667eea;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h4 style="margin: 0; color: #2c3e50;">
+                                <i class="fas fa-box-open"></i> ${poNumber} - Line Items
+                            </h4>
+                            <button onclick="document.getElementById('po-details-${poId}').style.display='none'" 
+                                    class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-times"></i> Close
+                            </button>
+                        </div>
+                        
+                        ${lineItems.length === 0 ? 
+                            '<p style="color: #6c757d; text-align: center; padding: 20px;">No line items found</p>' :
+                            `<div style="overflow-x: auto;">
+                                <table class="table table-sm table-hover" style="margin: 0;">
+                                    <thead style="background: #f8f9fa;">
+                                        <tr>
+                                            <th>Item</th>
+                                            <th>Description</th>
+                                            <th>Quantity</th>
+                                            <th>Unit Price</th>
+                                            <th>Total</th>
+                                            <th>Status</th>
+                                            <th>ETA</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${lineItems.map(item => `
+                                            <tr>
+                                                <td><strong>${item.itemName || 'N/A'}</strong></td>
+                                                <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">${item.description || '-'}</td>
+                                                <td>${item.quantity || 0}</td>
+                                                <td>$${parseFloat(item.unitPrice || 0).toFixed(2)}</td>
+                                                <td>$${parseFloat(item.total || 0).toFixed(2)}</td>
+                                                <td><span class="badge badge-info">${item.status || 'Pending'}</span></td>
+                                                <td>${item.eta ? new Date(item.eta).toLocaleDateString() : '-'}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>`
+                        }
+                    </div>
+                `;
+                
+                detailsRow.querySelector('td').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error fetching PO details:', error);
+                detailsRow.querySelector('td').innerHTML = `
+                    <div style="padding: 20px; text-align: center; color: #dc3545;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error loading PO details. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // View all POs inline
+        function viewAllInline() {
+            const poRows = document.querySelectorAll('[data-po-id]');
+            poRows.forEach(row => {
+                const poId = row.getAttribute('data-po-id');
+                const poNumber = row.getAttribute('data-po-number');
+                viewPOInline(poId, poNumber);
+            });
+        }
+
+        // View in NetSuite
+        function viewInNetSuite(netsuiteId) {
+            // Open NetSuite in new window
+            // You'll need to configure your NetSuite account URL
+            const netsuiteUrl = `https://YOUR_ACCOUNT.app.netsuite.com/app/accounting/transactions/purchord.nl?id=${netsuiteId}`;
+            
+            // For now, show alert - replace with actual NetSuite URL when configured
+            alert(`NetSuite Integration:\n\nPO ID: ${netsuiteId}\n\nConfigure your NetSuite account URL in the code to enable direct linking.`);
+            
+            // Uncomment when NetSuite URL is configured:
+            // window.open(netsuiteUrl, '_blank');
         }
     </script>
 
