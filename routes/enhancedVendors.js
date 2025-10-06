@@ -195,14 +195,18 @@ router.get('/vendor/:id', async (req, res) => {
         purchaseOrders.forEach(po => {
             if (po.attachments && po.attachments.length > 0) {
                 po.attachments.forEach(attachment => {
+                    const attachmentId = attachment._id ? attachment._id.toString() : null;
                     poDocuments.push({
                         ...attachment,
                         // Convert ObjectId to string for URL compatibility
-                        attachmentId: attachment._id ? attachment._id.toString() : null,
+                        attachmentId: attachmentId,
                         poNumber: po.poNumber,
                         poId: po._id ? po._id.toString() : null,
                         source: 'Purchase Order'
                     });
+                    
+                    // Log each document found
+                    console.log(`  📎 Found: ${attachment.filename} (ID: ${attachmentId}) from ${po.poNumber}`);
                 });
             }
         });
@@ -246,9 +250,30 @@ router.get('/vendor/:id', async (req, res) => {
             poDocSample: poDocuments.length > 0 ? {
                 filename: poDocuments[0].filename,
                 attachmentId: poDocuments[0].attachmentId,
-                poNumber: poDocuments[0].poNumber
+                poNumber: poDocuments[0].poNumber,
+                filePath: poDocuments[0].filePath
             } : 'none'
         });
+        
+        console.log('═══════════════════════════════════════════════════════════');
+        console.log(`📊 VENDOR DOCUMENTS LOADED: ${vendorObj.vendorName}`);
+        console.log('═══════════════════════════════════════════════════════════');
+        if (poDocuments.length > 0) {
+            console.log(`📄 Found ${poDocuments.length} PO attachment(s):`);
+            poDocuments.forEach((doc, idx) => {
+                console.log(`  ${idx + 1}. ${doc.filename}`);
+                console.log(`     PO: ${doc.poNumber}`);
+                console.log(`     ID: ${doc.attachmentId}`);
+                console.log(`     Path: ${doc.filePath}`);
+                console.log(`     View: http://localhost:3002/purchase-orders/view-attachment/${doc.attachmentId}`);
+            });
+        } else {
+            console.log('📄 No PO attachments found');
+        }
+        if (organicDocuments.length > 0) {
+            console.log(`🌱 Found ${organicDocuments.length} organic document(s)`);
+        }
+        console.log('═══════════════════════════════════════════════════════════');
         
         // Get line items for this vendor
         const lineItems = await LineItem.find({

@@ -1308,10 +1308,10 @@
                                                     <% } %>
                                                 <% } else if (doc.attachmentId) { %>
                                                     <div class="btn-group" role="group" style="display: flex; gap: 5px;">
-                                                        <a href="/purchase-orders/view-attachment/<%= doc.attachmentId %>" 
-                                                           target="_blank" class="btn btn-sm btn-outline-primary" title="View <%= doc.filename %>">
+                                                        <button onclick="viewDocumentInline('/purchase-orders/view-attachment/<%= doc.attachmentId %>', '<%= doc.filename %>', '/purchase-orders/download-attachment/<%= doc.attachmentId %>')" 
+                                                                class="btn btn-sm btn-outline-primary" title="View <%= doc.filename %>">
                                                             <i class="fas fa-eye"></i> View
-                                                        </a>
+                                                        </button>
                                                         <a href="/purchase-orders/download-attachment/<%= doc.attachmentId %>" 
                                                            class="btn btn-sm btn-outline-secondary" title="Download <%= doc.filename %>">
                                                             <i class="fas fa-download"></i>
@@ -1461,10 +1461,31 @@
             }
         }
 
-        // View organic document from Documents tab (opens in new window)
+        // View organic document from Documents tab (opens inline in modal)
         function viewOrganicDocument(docType, organicVendorId) {
             const url = `/organic-vendors/${organicVendorId}/${docType}`;
-            window.open(url, '_blank');
+            const filename = docType === 'certificate' ? 'Organic Certificate' : 'Operations Profile';
+            
+            // Use inline viewer
+            viewDocumentInline(url, filename, url);
+        }
+
+        // View document inline in modal
+        function viewDocumentInline(viewUrl, filename, downloadUrl) {
+            // Set modal title
+            document.getElementById('documentTitle').textContent = filename;
+            
+            // Set iframe source
+            document.getElementById('documentViewerIframe').src = viewUrl;
+            
+            // Set download button
+            const downloadBtn = document.getElementById('documentDownloadBtn');
+            downloadBtn.href = downloadUrl;
+            downloadBtn.download = filename;
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('documentViewerModal'));
+            modal.show();
         }
 
         // View PO inline (expand row to show details)
@@ -1568,6 +1589,32 @@
             // window.open(netsuiteUrl, '_blank');
         }
     </script>
+
+    <!-- Document Viewer Modal -->
+    <div class="modal fade" id="documentViewerModal" tabindex="-1" aria-labelledby="documentViewerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" style="max-width: 90vw;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="documentViewerModalLabel">
+                        <i class="fas fa-file-pdf"></i> <span id="documentTitle">Document Viewer</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding: 0; height: 80vh;">
+                    <iframe id="documentViewerIframe" 
+                            style="width: 100%; height: 100%; border: none;"
+                            src="">
+                    </iframe>
+                </div>
+                <div class="modal-footer">
+                    <a id="documentDownloadBtn" href="" class="btn btn-primary" download>
+                        <i class="fas fa-download"></i> Download
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

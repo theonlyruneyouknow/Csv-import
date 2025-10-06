@@ -3881,13 +3881,41 @@ router.post('/upload-attachment', attachmentUpload.single('attachment'), async (
     po.attachments.push(attachment);
     await po.save();
     
-    console.log(`✅ File uploaded successfully: ${req.file.originalname} for PO ${po.poNumber}`);
-    console.log(`✅ PO now has ${po.attachments.length} attachments`);
+    // Get the attachment ID that was just created
+    const newAttachment = po.attachments[po.attachments.length - 1];
+    const attachmentId = newAttachment._id.toString();
+    
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('✅ FILE UPLOADED SUCCESSFULLY');
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log(`📄 Filename: ${req.file.originalname}`);
+    console.log(`📋 PO Number: ${po.poNumber}`);
+    console.log(`🏢 Vendor: ${po.vendor}`);
+    console.log(`🆔 PO ID: ${po._id.toString()}`);
+    console.log(`🔑 Attachment ID: ${attachmentId}`);
+    console.log(`📁 File Path: ${finalPath}`);
+    console.log(`📊 File Size: ${req.file.size} bytes`);
+    console.log(`📎 File Type: ${req.file.mimetype}`);
+    console.log(`📝 Document Type: ${documentType || 'Other'}`);
+    console.log(`👤 Uploaded By: ${uploadedBy}`);
+    console.log(`📅 Upload Time: ${new Date().toISOString()}`);
+    console.log(`📊 Total Attachments for this PO: ${po.attachments.length}`);
+    console.log('');
+    console.log('🔗 VIEW URL:');
+    console.log(`   http://localhost:3002/purchase-orders/view-attachment/${attachmentId}`);
+    console.log('🔗 DOWNLOAD URL:');
+    console.log(`   http://localhost:3002/purchase-orders/download-attachment/${attachmentId}`);
+    console.log('═══════════════════════════════════════════════════════════');
     
     res.json({ 
       success: true, 
       message: 'File uploaded successfully',
-      attachment: attachment
+      attachment: {
+        ...attachment,
+        attachmentId: attachmentId,
+        viewUrl: `/purchase-orders/view-attachment/${attachmentId}`,
+        downloadUrl: `/purchase-orders/download-attachment/${attachmentId}`
+      }
     });
     
   } catch (error) {
