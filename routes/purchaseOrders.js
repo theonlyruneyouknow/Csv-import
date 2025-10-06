@@ -3233,203 +3233,134 @@ router.post('/import-netsuite', async (req, res) => {
 // =============================================================================
 
 // Register tracking numbers with 17track
+// ============================================
+// DEPRECATED 17TRACK ROUTES - NO LONGER USED
+// These routes relied on the 17Track API which is no longer in use
+// Use the new tracking routes in routes/tracking.js instead
+// ============================================
+
+/*
+// DEPRECATED: Old 17Track register route
 router.post('/tracking/register', async (req, res) => {
-  try {
-    const { trackingNumbers } = req.body;
-
-    if (!trackingNumbers || !Array.isArray(trackingNumbers)) {
-      return res.status(400).json({ error: 'trackingNumbers array is required' });
-    }
-
-    console.log('📦 Registering tracking numbers:', trackingNumbers.length);
-
-    // Format tracking numbers for API
-    const formattedNumbers = trackingNumbers.map(item =>
-      trackingService.formatTrackingNumber(item.number, item.carrier)
-    );
-
-    const result = await trackingService.registerTrackingNumbers(formattedNumbers);
-
-    res.json({
-      success: true,
-      message: `Registered ${trackingNumbers.length} tracking numbers`,
-      data: result
-    });
-  } catch (error) {
-    console.error('Tracking registration error:', error);
-    res.status(500).json({ error: error.message });
-  }
+  res.status(410).json({ 
+    error: 'This endpoint is deprecated. 17Track integration has been removed. Use PUT /purchase-orders/line-items/:lineItemId/tracking instead.' 
+  });
 });
 
-// Get tracking status for line items
+// DEPRECATED: Old 17Track status route
 router.post('/tracking/status', async (req, res) => {
-  try {
-    const { trackingNumbers } = req.body;
-
-    if (!trackingNumbers || !Array.isArray(trackingNumbers)) {
-      return res.status(400).json({ error: 'trackingNumbers array is required' });
-    }
-
-    console.log('🔍 Getting tracking status for:', trackingNumbers.length, 'numbers');
-
-    const result = await trackingService.getBatchStatus(trackingNumbers);
-
-    res.json({
-      success: true,
-      data: result
-    });
-  } catch (error) {
-    console.error('Tracking status error:', error);
-    res.status(500).json({ error: error.message });
-  }
+  res.status(410).json({ 
+    error: 'This endpoint is deprecated. 17Track integration has been removed. Use GET /purchase-orders/tracking/:trackingNumber instead.' 
+  });
 });
 
-// Update all line items with tracking information
+// DEPRECATED: Old 17Track bulk update route
 router.post('/tracking/update-all', async (req, res) => {
-  try {
-    console.log('🚀 Starting bulk tracking update...');
-
-    // Find all line items with tracking numbers
-    const lineItemsWithTracking = await LineItem.find({
-      trackingNumber: { $exists: true, $ne: '', $ne: null }
-    });
-
-    if (lineItemsWithTracking.length === 0) {
-      return res.json({
-        success: true,
-        message: 'No line items with tracking numbers found',
-        updated: 0
-      });
-    }
-
-    console.log(`Found ${lineItemsWithTracking.length} line items with tracking numbers`);
-
-    // Get unique tracking numbers
-    const trackingNumbers = [...new Set(lineItemsWithTracking.map(item => item.trackingNumber))];
-
-    console.log(`Checking ${trackingNumbers.length} unique tracking numbers`);
-
-    // Get tracking status from 17track
-    const trackingData = await trackingService.getBatchStatus(
-      trackingNumbers.map(num => ({ number: num }))
-    );
-
-    // Update line items with tracking information
-    const updateResults = await trackingService.updateLineItemsWithTracking(
-      lineItemsWithTracking,
-      trackingData.data?.accepted || []
-    );
-
-    console.log(`✅ Updated ${updateResults.length} line items with tracking data`);
-
-    res.json({
-      success: true,
-      message: `Updated ${updateResults.length} line items with tracking information`,
-      totalTracked: trackingNumbers.length,
-      updated: updateResults.length
-    });
-  } catch (error) {
-    console.error('Bulk tracking update error:', error);
-    res.status(500).json({ error: error.message });
-  }
+  res.status(410).json({ 
+    error: 'This endpoint is deprecated. 17Track integration has been removed. Use POST /purchase-orders/tracking/bulk-update instead.' 
+  });
 });
 
-// Update tracking for a specific PO
+// DEPRECATED: Old 17Track PO-specific update route
 router.post('/:id/tracking/update', async (req, res) => {
-  try {
-    const purchaseOrder = await PurchaseOrder.findById(req.params.id);
-    if (!purchaseOrder) {
-      return res.status(404).json({ error: 'Purchase order not found' });
-    }
-
-    // Find line items for this PO with tracking numbers
-    const lineItems = await LineItem.find({
-      poId: req.params.id,
-      trackingNumber: { $exists: true, $ne: '', $ne: null }
-    });
-
-    if (lineItems.length === 0) {
-      return res.json({
-        success: true,
-        message: 'No line items with tracking numbers found for this PO',
-        updated: 0
-      });
-    }
-
-    console.log(`Updating tracking for ${lineItems.length} line items in PO ${purchaseOrder.poNumber}`);
-
-    // Get unique tracking numbers
-    const trackingNumbers = [...new Set(lineItems.map(item => item.trackingNumber))];
-
-    // Get tracking status from 17track
-    const trackingData = await trackingService.getBatchStatus(
-      trackingNumbers.map(num => ({ number: num }))
-    );
-
-    // Update line items with tracking information
-    const updateResults = await trackingService.updateLineItemsWithTracking(
-      lineItems,
-      trackingData.data?.accepted || []
-    );
-
-    console.log(`✅ Updated ${updateResults.length} line items with tracking data for PO ${purchaseOrder.poNumber}`);
-
-    res.json({
-      success: true,
-      message: `Updated tracking for ${updateResults.length} line items`,
-      poNumber: purchaseOrder.poNumber,
-      updated: updateResults.length
-    });
-  } catch (error) {
-    console.error('PO tracking update error:', error);
-    res.status(500).json({ error: error.message });
-  }
+  res.status(410).json({ 
+    error: 'This endpoint is deprecated. 17Track integration has been removed. Use manual tracking updates instead.' 
+  });
 });
+*/
+
+// ============================================
+// ACTIVE TRACKING ROUTES (Self-Managed)
+// ============================================
 
 // Add tracking number to line item
 router.put('/line-items/:lineItemId/tracking', async (req, res) => {
   try {
-    const { trackingNumber, carrier } = req.body;
+    const { trackingNumber, carrier, status, location, description, estimatedDelivery } = req.body;
+    const username = req.user ? req.user.username : 'System';
 
-    const lineItem = await LineItem.findByIdAndUpdate(
-      req.params.lineItemId,
-      {
-        trackingNumber: trackingNumber?.trim() || '',
-        trackingCarrier: carrier?.trim() || '',
-        updatedAt: new Date()
-      },
-      { new: true }
-    );
+    console.log(`📦 Updating tracking for line item ${req.params.lineItemId}`);
 
+    const lineItem = await LineItem.findById(req.params.lineItemId);
     if (!lineItem) {
       return res.status(404).json({ error: 'Line item not found' });
     }
 
-    // If tracking number was added, optionally register it with 17track
-    if (trackingNumber && trackingNumber.trim()) {
-      try {
-        await trackingService.registerTrackingNumbers([
-          trackingService.formatTrackingNumber(trackingNumber.trim(), carrier)
-        ]);
-        console.log(`Registered tracking number ${trackingNumber} with 17track`);
-      } catch (registerError) {
-        console.error('Failed to register tracking number:', registerError);
-        // Don't fail the request if registration fails
-      }
+    // Load tracking service for auto-detection and URL generation
+    const trackingService = require('../services/trackingService');
+
+    // Auto-detect carrier if tracking number provided but carrier isn't
+    let finalCarrier = carrier;
+    if (trackingNumber && trackingNumber.trim() && !carrier) {
+      finalCarrier = trackingService.detectCarrier(trackingNumber.trim());
+      console.log(`🔍 Auto-detected carrier: ${finalCarrier}`);
     }
 
-    console.log(`Updated tracking for line item ${lineItem._id} (PO ${lineItem.poNumber}): ${trackingNumber || 'cleared'}`);
-    res.json({ success: true, lineItem });
+    // Generate tracking URL
+    const trackingURL = trackingService.getTrackingURL(
+      trackingNumber?.trim() || '', 
+      finalCarrier || lineItem.trackingCarrier
+    );
+
+    // Update tracking fields
+    lineItem.trackingNumber = trackingNumber?.trim() || '';
+    lineItem.trackingCarrier = finalCarrier?.trim() || '';
+    lineItem.trackingURL = trackingURL || '';
+    
+    if (status) {
+      lineItem.trackingStatus = status;
+      lineItem.trackingLastUpdate = new Date();
+    }
+    
+    if (location) {
+      lineItem.trackingLocation = location;
+    }
+    
+    if (description) {
+      lineItem.trackingStatusDescription = description;
+    }
+    
+    if (estimatedDelivery) {
+      lineItem.trackingEstimatedDelivery = new Date(estimatedDelivery);
+    }
+
+    // Add to tracking history if status was updated
+    if (status) {
+      if (!lineItem.trackingHistory) {
+        lineItem.trackingHistory = [];
+      }
+      
+      lineItem.trackingHistory.push({
+        timestamp: new Date(),
+        status: status,
+        location: location || '',
+        description: description || '',
+        updatedBy: username
+      });
+    }
+
+    lineItem.updatedAt = new Date();
+    await lineItem.save();
+
+    console.log(`✅ Updated tracking for line item ${lineItem._id} (PO ${lineItem.poNumber}): ${trackingNumber || 'cleared'}`);
+    
+    res.json({ 
+      success: true, 
+      lineItem,
+      trackingURL
+    });
   } catch (error) {
-    console.error('Line item tracking update error:', error);
+    console.error('❌ Line item tracking update error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Update tracking status for a single line item
+// Update tracking status for a single line item (manual update)
 router.put('/line-items/:lineItemId/tracking/update', async (req, res) => {
   try {
     const { lineItemId } = req.params;
+    const { status, location, description } = req.body;
+    const username = req.user ? req.user.username : 'System';
 
     // Find the line item
     const lineItem = await LineItem.findById(lineItemId);
@@ -3441,133 +3372,121 @@ router.put('/line-items/:lineItemId/tracking/update', async (req, res) => {
       return res.status(400).json({ error: 'No tracking number assigned to this line item' });
     }
 
-    console.log(`🔄 Updating tracking for line item ${lineItemId} with tracking number: ${lineItem.trackingNumber}`);
+    console.log(`🔄 Manually updating tracking for line item ${lineItemId}: ${status || 'No status change'}`);
 
-    // Get updated tracking information from 17track
-    const trackingData = await trackingService.getTrackingInfo([
-      { number: lineItem.trackingNumber }
-    ]);
-
-    if (trackingData.data && trackingData.data.accepted && trackingData.data.accepted.length > 0) {
-      const parsedStatus = trackingService.parseTrackingStatus(trackingData.data.accepted[0]);
-
-      // Update the line item with new tracking information
-      const updatedLineItem = await LineItem.findByIdAndUpdate(
-        lineItemId,
-        {
-          trackingStatus: parsedStatus.status,
-          trackingStatusDescription: parsedStatus.statusDescription,
-          trackingLastUpdate: new Date(),
-          trackingLocation: parsedStatus.lastLocation,
-          trackingEstimatedDelivery: parsedStatus.estimatedDelivery,
-          updatedAt: new Date()
-        },
-        { new: true }
-      );
-
-      console.log(`✅ Updated tracking for line item ${lineItemId}: ${parsedStatus.status}`);
-
-      res.json({
-        success: true,
-        lineItem: updatedLineItem,
-        trackingInfo: parsedStatus
-      });
-    } else {
-      res.json({
-        success: false,
-        message: 'No tracking information found',
-        lineItem: lineItem
+    // Update tracking status
+    if (status) {
+      lineItem.trackingStatus = status;
+      lineItem.trackingLastUpdate = new Date();
+      
+      // Add to history
+      if (!lineItem.trackingHistory) {
+        lineItem.trackingHistory = [];
+      }
+      lineItem.trackingHistory.push({
+        timestamp: new Date(),
+        status: status,
+        location: location || lineItem.trackingLocation || '',
+        description: description || '',
+        updatedBy: username
       });
     }
+
+    if (location) {
+      lineItem.trackingLocation = location;
+    }
+
+    if (description) {
+      lineItem.trackingStatusDescription = description;
+    }
+
+    lineItem.updatedAt = new Date();
+    await lineItem.save();
+
+    console.log(`✅ Updated tracking for line item ${lineItemId}: ${status || 'info updated'}`);
+
+    res.json({
+      success: true,
+      lineItem: lineItem
+    });
   } catch (error) {
-    console.error('Line item tracking update error:', error);
+    console.error('❌ Line item tracking update error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Debug route for testing specific tracking number
-router.get('/tracking/debug/:trackingNumber/:carrier', async (req, res) => {
+// Debug/validation route for testing tracking numbers
+router.get('/tracking/debug/:trackingNumber/:carrier?', async (req, res) => {
   try {
     const { trackingNumber, carrier } = req.params;
+    const trackingService = require('../services/trackingService');
 
-    console.log('🐞 DEBUG: Testing tracking number:', trackingNumber, 'with carrier:', carrier || 'auto-detect');
+    console.log('🐞 DEBUG: Validating tracking number:', trackingNumber, 'carrier:', carrier || 'auto-detect');
 
-    // Test 1: Try registering the tracking number first
-    const trackingObj = trackingService.formatTrackingNumber(trackingNumber, carrier);
-    console.log('📦 Formatted tracking object:', trackingObj);
+    // Auto-detect carrier if not provided
+    const detectedCarrier = carrier || trackingService.detectCarrier(trackingNumber);
+    
+    // Validate tracking number
+    const isValid = trackingService.validateTrackingNumber(trackingNumber, detectedCarrier);
+    
+    // Generate tracking URL
+    const trackingURL = trackingService.getTrackingURL(trackingNumber, detectedCarrier);
 
-    try {
-      console.log('🔄 Step 1: Attempting to register tracking number...');
-      const registerResult = await trackingService.registerTrackingNumbers([trackingObj]);
-      console.log('✅ Registration result:', registerResult);
-    } catch (registerError) {
-      console.log('⚠️ Registration failed (may be already registered):', registerError.response?.data || registerError.message);
-    }
+    // Get available carriers and statuses
+    const carriers = trackingService.getCarriers();
+    const statuses = trackingService.getStatuses();
 
-    // Test 2: Try to get tracking info
-    console.log('🔄 Step 2: Attempting to get tracking info...');
-    const trackingData = await trackingService.getTrackingInfo([{ number: trackingNumber }]);
-    console.log('📊 Raw tracking data:', JSON.stringify(trackingData, null, 2));
-
-    if (trackingData.data && trackingData.data.accepted && trackingData.data.accepted.length > 0) {
-      const parsedStatus = trackingService.parseTrackingStatus(trackingData.data.accepted[0]);
-      console.log('✅ Parsed status:', parsedStatus);
-
-      res.json({
-        success: true,
-        trackingNumber,
-        carrier,
-        rawData: trackingData.data.accepted[0],
-        parsedStatus: parsedStatus,
-        registrationAttempt: 'completed'
-      });
-    } else {
-      console.log('❌ No tracking data found');
-      res.json({
-        success: false,
-        message: 'No tracking data found',
-        trackingNumber,
-        carrier,
-        rawResponse: trackingData
-      });
-    }
-  } catch (error) {
-    console.error('💥 Debug tracking error:', error);
-    res.status(500).json({
-      error: error.message,
-      trackingNumber: req.params.trackingNumber,
-      carrier: req.params.carrier,
-      details: error.response?.data || error.stack
+    res.json({
+      success: true,
+      trackingNumber,
+      providedCarrier: carrier || null,
+      detectedCarrier,
+      isValid,
+      trackingURL,
+      availableCarriers: carriers,
+      availableStatuses: statuses
     });
+  } catch (error) {
+    console.error('❌ Tracking debug error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Get tracking details for a specific tracking number
+// Get tracking details for a line item (just returns info from database)
 router.get('/tracking/:trackingNumber', async (req, res) => {
   try {
     const { trackingNumber } = req.params;
+    const trackingService = require('../services/trackingService');
 
-    console.log('🔍 Getting detailed tracking info for:', trackingNumber);
+    console.log('🔍 Getting tracking info for:', trackingNumber);
 
-    const trackingData = await trackingService.getTrackingInfo([
-      { number: trackingNumber }
-    ]);
+    // Find line item(s) with this tracking number
+    const lineItems = await LineItem.find({ trackingNumber })
+      .populate('poId', 'poNumber vendor')
+      .lean();
 
-    if (trackingData.data && trackingData.data.accepted && trackingData.data.accepted.length > 0) {
-      const parsedStatus = trackingService.parseTrackingStatus(trackingData.data.accepted[0]);
-      res.json({
-        success: true,
-        trackingInfo: parsedStatus,
-        rawData: trackingData.data.accepted[0]
-      });
-    } else {
-      res.json({
+    if (lineItems.length === 0) {
+      return res.json({
         success: false,
-        message: 'No tracking information found'
+        message: 'No line items found with this tracking number'
       });
     }
+
+    // Get tracking info from the first match
+    const lineItem = lineItems[0];
+    const trackingData = trackingService.formatTrackingData(lineItem);
+
+    res.json({
+      success: true,
+      trackingNumber,
+      lineItems: lineItems.length,
+      trackingInfo: trackingData,
+      history: lineItem.trackingHistory || [],
+      poNumber: lineItem.poId?.poNumber,
+      vendor: lineItem.poId?.vendor
+    });
   } catch (error) {
-    console.error('Tracking details error:', error);
+    console.error('❌ Tracking details error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -3575,41 +3494,93 @@ router.get('/tracking/:trackingNumber', async (req, res) => {
 // Tracking dashboard page
 router.get('/tracking-dashboard', async (req, res) => {
   try {
-    console.log('📊 Loading tracking dashboard...');
+    console.log('📊 Loading tracking dashboard (Self-Managed System)...');
+
+    // Get filter parameters
+    const statusFilter = req.query.status || 'all';
+    const carrierFilter = req.query.carrier || 'all';
+    const dateRange = req.query.dateRange || '30'; // days
 
     // Get statistics
     const totalLineItems = await LineItem.countDocuments();
     const itemsWithTracking = await LineItem.countDocuments({
       trackingNumber: { $exists: true, $ne: '', $ne: null }
     });
+    
+    // Count by status using text statuses (not 17track codes)
     const deliveredItems = await LineItem.countDocuments({
-      trackingStatus: '40' // 40 = Delivered in 17track
+      trackingStatus: { $regex: /delivered/i }
     });
     const inTransitItems = await LineItem.countDocuments({
-      trackingStatus: '10' // 10 = In Transit in 17track
+      trackingStatus: { $regex: /transit|picked/i }
+    });
+    const exceptionItems = await LineItem.countDocuments({
+      trackingStatus: { $regex: /exception|delayed|lost/i }
     });
 
-    // Get recent tracking updates
-    const recentlyUpdated = await LineItem.find({
-      trackingLastUpdate: { $exists: true, $ne: null }
-    })
-      .sort({ trackingLastUpdate: -1 })
-      .limit(10)
-      .populate('poId', 'poNumber vendor');
+    // Build query for filtered line items
+    let query = { trackingNumber: { $exists: true, $ne: '', $ne: null } };
 
-    // Get items needing attention (tracking issues)
+    if (statusFilter !== 'all') {
+      query.trackingStatus = statusFilter;
+    }
+
+    if (carrierFilter !== 'all') {
+      query.trackingCarrier = carrierFilter;
+    }
+
+    // Date range filter
+    if (dateRange !== 'all') {
+      const daysAgo = new Date();
+      daysAgo.setDate(daysAgo.getDate() - parseInt(dateRange));
+      query.trackingLastUpdate = { $gte: daysAgo };
+    }
+
+    // Get recent tracking updates
+    const recentlyUpdated = await LineItem.find(query)
+      .sort({ trackingLastUpdate: -1 })
+      .limit(50)
+      .populate('poId', 'poNumber vendor')
+      .lean();
+
+    // Get items needing attention (exceptions, delays, etc.)
     const trackingIssues = await LineItem.find({
+      trackingNumber: { $exists: true, $ne: '' },
       $or: [
-        { trackingStatus: '20' }, // Expired
-        { trackingStatus: '35' }, // Undelivered
-        { trackingStatus: '50' }  // Alert
+        { trackingStatus: { $regex: /exception/i } },
+        { trackingStatus: { $regex: /delayed/i } },
+        { trackingStatus: { $regex: /lost/i } },
+        { trackingStatus: { $regex: /damaged/i } },
+        { trackingStatus: { $regex: /returned/i } }
       ]
     })
       .populate('poId', 'poNumber vendor')
-      .limit(20);
+      .limit(20)
+      .lean();
 
-    // Get unique carriers for filtering
-    const uniqueCarriers = await LineItem.distinct('trackingCarrier');
+    // Get unique carriers and statuses for filtering
+    const uniqueCarriers = await LineItem.distinct('trackingCarrier', {
+      trackingCarrier: { $exists: true, $ne: '' }
+    });
+    const uniqueStatuses = await LineItem.distinct('trackingStatus', {
+      trackingStatus: { $exists: true, $ne: '' }
+    });
+
+    // Generate tracking URLs for display
+    const trackingService = require('../services/trackingService');
+    recentlyUpdated.forEach(item => {
+      if (item.trackingNumber && item.trackingCarrier) {
+        item.trackingURL = trackingService.getTrackingURL(item.trackingNumber, item.trackingCarrier);
+      }
+    });
+
+    trackingIssues.forEach(item => {
+      if (item.trackingNumber && item.trackingCarrier) {
+        item.trackingURL = trackingService.getTrackingURL(item.trackingNumber, item.trackingCarrier);
+      }
+    });
+
+    console.log(`✅ Tracking dashboard loaded: ${recentlyUpdated.length} items, ${trackingIssues.length} issues`);
 
     res.render('tracking-dashboard', {
       stats: {
@@ -3617,15 +3588,24 @@ router.get('/tracking-dashboard', async (req, res) => {
         itemsWithTracking,
         deliveredItems,
         inTransitItems,
+        exceptionItems,
+        noTracking: totalLineItems - itemsWithTracking,
         trackingCoverage: totalLineItems > 0 ? Math.round((itemsWithTracking / totalLineItems) * 100) : 0
       },
       recentlyUpdated,
       trackingIssues,
-      uniqueCarriers: uniqueCarriers.filter(Boolean).sort()
+      uniqueCarriers: uniqueCarriers.filter(Boolean).sort(),
+      uniqueStatuses: uniqueStatuses.filter(Boolean).sort(),
+      filters: {
+        status: statusFilter,
+        carrier: carrierFilter,
+        dateRange: dateRange
+      },
+      user: req.user
     });
   } catch (error) {
-    console.error('Tracking dashboard error:', error);
-    res.status(500).json({ error: error.message });
+    console.error('❌ Tracking dashboard error:', error);
+    res.status(500).send('Error loading tracking dashboard: ' + error.message);
   }
 });
 

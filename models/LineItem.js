@@ -115,6 +115,20 @@ const lineItemSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
+    trackingHistory: [{
+        timestamp: {
+            type: Date,
+            default: Date.now
+        },
+        status: String,
+        location: String,
+        description: String,
+        updatedBy: String
+    }],
+    trackingURL: {              // Direct link to carrier tracking page
+        type: String,
+        default: ''
+    },
     // Soft delete/hide functionality
     isHidden: {
         type: Boolean,

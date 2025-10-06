@@ -3597,22 +3597,18 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                 </div>
                                                 <% if (po.shippingTracking) { %>
                                                     <div class="tracking-actions">
-                                                        <button class="btn btn-sm btn-outline-primary tracking-info-btn"
-                                                            data-tracking="<%= po.shippingTracking %>"
-                                                            data-carrier="<%= po.shippingCarrier || 'FedEx' %>"
-                                                            data-po-id="<%= po._id %>" title="Get tracking info">
-                                                            🔍
-                                                        </button>
-                                                        <button
-                                                            class="btn btn-sm btn-outline-success tracking-update-btn"
-                                                            data-po-id="<%= po._id %>"
-                                                            title="Update tracking from 17track">
-                                                            🔄
-                                                        </button>
+                                                        <a href="#" 
+                                                           onclick="event.preventDefault(); openTrackingUrl('<%= po.shippingTracking %>', '<%= po.shippingCarrier || 'FedEx' %>');"
+                                                           class="btn btn-sm btn-outline-primary"
+                                                           title="Track on <%= po.shippingCarrier || 'FedEx' %> website">
+                                                            🌐 Track Package
+                                                        </a>
                                                     </div>
+                                                    <% if (po.shippingTrackingStatus) { %>
                                                     <div class="tracking-status" data-po-id="<%= po._id %>">
-                                                        <small class="text-muted">Click 🔍 to check status</small>
+                                                        <small class="text-muted"><%= po.shippingTrackingStatus %></small>
                                                     </div>
+                                                    <% } %>
                                                     <% } %>
                                             </div>
                                         </td>
@@ -5317,22 +5313,22 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 content.innerHTML = `
                     <div class="tracking-info-section">
                         <div class="tracking-info-header">
-                            <div class="tracking-number">${trackingNumber}</div>
-                            <div class="carrier-info">${carrier}</div>
+                            <div class="tracking-number" style="font-size: 1.2rem; font-weight: bold; color: #007bff;">${trackingNumber}</div>
+                            <div class="carrier-info" style="padding: 4px 12px; background: #e9ecef; border-radius: 4px; display: inline-block; margin-top: 8px;">
+                                <strong>Carrier:</strong> ${carrier}
+                            </div>
                         </div>
-                        <div class="tracking-status-display" style="background: #ffc107; color: #212529;">
-                            Click "Check Status" to get latest tracking information
+                        <div class="tracking-status-display" style="background: #17a2b8; color: white; padding: 15px; margin: 20px 0; border-radius: 4px; text-align: center;">
+                            Click the button below to track your package on the carrier's website
                         </div>
-                        <div class="tracking-actions-section">
-                            <button class="tracking-action-btn primary" onclick="checkTrackingStatus('${poId}', '${trackingNumber}', '${carrier}')">
-                                🔍 Check Status
-                            </button>
-                            <button class="tracking-action-btn secondary" onclick="updateTrackingInfo('${poId}')">
-                                🔄 Update from 17track
-                            </button>
-                            <button class="tracking-action-btn secondary" onclick="openTrackingUrl('${trackingNumber}', '${carrier}')">
+                        <div class="tracking-actions-section" style="text-align: center;">
+                            <button class="tracking-action-btn primary" onclick="openTrackingUrl('${trackingNumber}', '${carrier}')" 
+                                    style="padding: 12px 24px; font-size: 1rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
                                 🌐 View on ${carrier} Website
                             </button>
+                        </div>
+                        <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; font-size: 0.9rem;">
+                            <strong>📌 Note:</strong> For the most up-to-date tracking information, please visit the carrier's website directly.
                         </div>
                     </div>
                 `;
@@ -5345,60 +5341,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById('trackingDetailsModal').style.display = 'none';
         }
 
-        async function checkTrackingStatus(poId, trackingNumber, carrier) {
-            const statusDiv = document.querySelector('.tracking-status-display');
-            statusDiv.innerHTML = '🔄 Checking status...';
-            statusDiv.style.background = '#007bff';
-            statusDiv.style.color = 'white';
-            
-            try {
-                // This would call your existing tracking API
-                const response = await fetch('/purchase-orders/tracking-info', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ trackingNumber, carrier })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success && result.trackingInfo) {
-                    statusDiv.innerHTML = `📦 ${result.trackingInfo.status || 'In Transit'}`;
-                    statusDiv.style.background = '#28a745';
-                    
-                    if (result.trackingInfo.description) {
-                        statusDiv.innerHTML += `<br><small>${result.trackingInfo.description}</small>`;
-                    }
-                } else {
-                    statusDiv.innerHTML = '❌ Unable to get tracking status';
-                    statusDiv.style.background = '#dc3545';
-                }
-            } catch (error) {
-                console.error('Error checking tracking:', error);
-                statusDiv.innerHTML = '❌ Error checking status';
-                statusDiv.style.background = '#dc3545';
-            }
-        }
-
-        async function updateTrackingInfo(poId) {
-            try {
-                const response = await fetch(`/purchase-orders/${poId}/update-tracking`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showTrackingToast('📦 Tracking information updated', 'success');
-                    // Refresh the modal content or page as needed
-                } else {
-                    showTrackingToast('❌ Failed to update tracking', 'error');
-                }
-            } catch (error) {
-                console.error('Error updating tracking:', error);
-                showTrackingToast('❌ Error updating tracking', 'error');
-            }
-        }
+        // REMOVED: Old 17track integration functions - no longer needed
+        // checkTrackingStatus() and updateTrackingInfo() removed
 
         function openTrackingUrl(trackingNumber, carrier) {
             let url = '';
