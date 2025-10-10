@@ -151,6 +151,56 @@ class TrackingService {
     }
 
     /**
+     * Fetch live tracking data from carrier APIs (when available)
+     * @param {string} trackingNumber - Tracking number
+     * @param {string} carrier - Carrier name
+     * @returns {Promise<Object>} Live tracking data or null if API not available
+     */
+    async fetchLiveTracking(trackingNumber, carrier) {
+        if (!trackingNumber || !carrier) {
+            return { success: false, error: 'Missing tracking number or carrier' };
+        }
+
+        try {
+            // Check if we have API integration for this carrier
+            if (carrier.toLowerCase() === 'fedex') {
+                const fedexService = require('./fedexService');
+                
+                // Check if FedEx API is configured
+                if (!fedexService.isConfigured()) {
+                    console.log('⚠️ FedEx API not configured, using fallback');
+                    return { 
+                        success: false, 
+                        error: 'FedEx API credentials not configured',
+                        useIframe: true 
+                    };
+                }
+
+                // Fetch from FedEx API
+                console.log('🚀 Fetching live tracking from FedEx API...');
+                const trackingData = await fedexService.trackPackage(trackingNumber);
+                return trackingData;
+            }
+
+            // Add more carrier APIs here in the future (UPS, USPS, etc.)
+            // For now, other carriers use iframe fallback
+            return { 
+                success: false, 
+                error: 'No API integration for this carrier',
+                useIframe: true 
+            };
+
+        } catch (error) {
+            console.error('❌ Error fetching live tracking:', error);
+            return { 
+                success: false, 
+                error: error.message,
+                useIframe: true 
+            };
+        }
+    }
+
+    /**
      * Create tracking history entry
      * @param {string} status - Status update
      * @param {string} location - Current location

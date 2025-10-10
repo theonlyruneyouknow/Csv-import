@@ -177,6 +177,9 @@
             left: 0;
             background: white;
             min-width: 220px;
+            max-height: 70vh; /* Limit height to 70% of viewport */
+            overflow-y: auto; /* Enable vertical scrolling */
+            overflow-x: hidden; /* Hide horizontal overflow */
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border-radius: 6px;
             border: 1px solid #dee2e6;
@@ -186,6 +189,25 @@
             transform: translateY(-10px);
             transition: all 0.3s ease;
             margin-top: 5px;
+        }
+
+        /* Custom scrollbar for navigation dropdowns */
+        .nav-accordion-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .nav-accordion-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .nav-accordion-content::-webkit-scrollbar-thumb {
+            background: #28a745;
+            border-radius: 4px;
+        }
+
+        .nav-accordion-content::-webkit-scrollbar-thumb:hover {
+            background: #218838;
         }
 
         .nav-accordion-content.show {
@@ -282,6 +304,9 @@
             left: 0;
             background: white;
             min-width: 200px;
+            max-height: 70vh; /* Limit height to 70% of viewport */
+            overflow-y: auto; /* Enable vertical scrolling */
+            overflow-x: hidden; /* Hide horizontal overflow */
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border-radius: 6px;
             border: 1px solid #dee2e6;
@@ -291,6 +316,25 @@
             transform: translateY(-10px);
             transition: all 0.3s ease;
             margin-top: 5px;
+        }
+
+        /* Custom scrollbar for dropdown */
+        .nav-dropdown-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .nav-dropdown-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .nav-dropdown-content::-webkit-scrollbar-thumb {
+            background: #007bff;
+            border-radius: 4px;
+        }
+
+        .nav-dropdown-content::-webkit-scrollbar-thumb:hover {
+            background: #0056b3;
         }
 
         .nav-dropdown-content.show {
@@ -369,6 +413,15 @@
                 min-width: 100%;
                 margin-top: 0;
                 box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+                max-height: 50vh; /* Smaller max height on mobile */
+            }
+        }
+
+        /* Additional small screen optimization */
+        @media (max-height: 600px) {
+            .nav-accordion-content,
+            .nav-dropdown-content {
+                max-height: 40vh; /* Even smaller for short screens */
             }
         }
 
@@ -2896,6 +2949,132 @@
             margin-top: 2px;
         }
     </style>
+    
+    <script>
+        // Navigation Functions - Defined early so they're available for onclick handlers
+        function closeAllDropdowns() {
+            console.log('🔄 closeAllDropdowns called');
+            // Close accordions
+            const accordionsToClose = document.querySelectorAll('.nav-accordion-content.show');
+            console.log('🔍 Found', accordionsToClose.length, 'open accordions');
+            accordionsToClose.forEach(content => {
+                content.classList.remove('show');
+            });
+            
+            const iconsToRotate = document.querySelectorAll('.accordion-icon.rotated');
+            console.log('🔍 Found', iconsToRotate.length, 'rotated icons');
+            iconsToRotate.forEach(icon => {
+                icon.classList.remove('rotated');
+            });
+            
+            // Close import dropdown
+            const importsDropdown = document.getElementById('importsDropdown');
+            if (importsDropdown) {
+                importsDropdown.classList.remove('show');
+            }
+            const importsIcon = document.querySelector('.nav-imports-btn .dropdown-icon');
+            if (importsIcon) {
+                importsIcon.classList.remove('rotated');
+            }
+            console.log('✅ closeAllDropdowns complete');
+        }
+
+        function toggleAccordion(accordionId, event) {
+            console.log('🔍 toggleAccordion called:', accordionId);
+            console.log('🔍 Event received:', event);
+            
+            // Stop the event from propagating to the document click handler
+            if (event) {
+                event.stopPropagation();
+                console.log('✅ Event propagation stopped');
+            }
+            
+            const content = document.getElementById(accordionId);
+            const button = document.querySelector(`button[onclick*="toggleAccordion('${accordionId}'"]`);
+            const icon = button ? button.querySelector('.accordion-icon') : null;
+
+            console.log('🔍 Content element found:', !!content);
+            console.log('🔍 Button element found:', !!button);
+            console.log('🔍 Icon element found:', !!icon);
+
+            // Check if this accordion is currently open
+            const isOpen = content && content.classList.contains('show');
+            console.log('🔍 Is currently open:', isOpen);
+            
+            // Close all dropdowns first
+            console.log('🔄 Closing all dropdowns...');
+            closeAllDropdowns();
+            
+            // If it was closed, open it (toggle behavior)
+            if (!isOpen) {
+                console.log('✅ Opening accordion...');
+                if (content) {
+                    content.classList.add('show');
+                    console.log('✅ Added "show" class to content');
+                }
+                if (icon) {
+                    icon.classList.add('rotated');
+                    console.log('✅ Added "rotated" class to icon');
+                }
+            } else {
+                console.log('ℹ️ Accordion was open, now closed');
+            }
+        }
+
+        function toggleImportsDropdown(event) {
+            console.log('🔍 toggleImportsDropdown called');
+            console.log('🔍 Event received:', event);
+            
+            // Stop the event from propagating to the document click handler
+            if (event) {
+                event.stopPropagation();
+                console.log('✅ Event propagation stopped');
+            }
+            
+            const content = document.getElementById('importsDropdown');
+            const icon = document.querySelector('.nav-imports-btn .dropdown-icon');
+            
+            console.log('🔍 Content element found:', !!content);
+            console.log('🔍 Icon element found:', !!icon);
+            
+            // Check if dropdown is currently open
+            const isOpen = content && content.classList.contains('show');
+            console.log('🔍 Is currently open:', isOpen);
+
+            // Close all other dropdowns first
+            console.log('🔄 Closing all dropdowns...');
+            closeAllDropdowns();
+
+            // If it was closed, open it (toggle behavior)
+            if (!isOpen) {
+                console.log('✅ Opening imports dropdown...');
+                content.classList.add('show');
+                icon.classList.add('rotated');
+                console.log('✅ Added "show" and "rotated" classes');
+            } else {
+                console.log('ℹ️ Dropdown was open, now closed');
+            }
+        }
+        
+        // Wait for DOM to be ready before adding event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ DOM Ready - Setting up navigation event listeners');
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function (event) {
+                console.log('📍 Document click detected');
+                const navigationContainer = document.querySelector('.navigation-container');
+                
+                // If click is outside navigation container, close all dropdowns/accordions
+                if (navigationContainer && !navigationContainer.contains(event.target)) {
+                    console.log('🚪 Click outside navigation - closing all dropdowns');
+                    closeAllDropdowns();
+                } else {
+                    console.log('📍 Click inside navigation - ignoring');
+                }
+            });
+        });
+    </script>
 </head>
 
 <body>
@@ -2908,11 +3087,13 @@
                 <div class="navigation-container">
                     <!-- Dashboards Accordion -->
                     <div class="nav-section">
-                        <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion')">
+                        <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion', event)">
                             📊 Dashboards <span class="accordion-icon">▼</span>
                         </button>
                         <div id="managersAccordion" class="nav-accordion-content">
                             <% if (typeof user !== 'undefined' && user && user.permissions) { %>
+                                <!-- Main Purchase Orders Dashboard Link -->
+                                <a href="/purchase-orders" class="nav-accordion-item">📦 Purchase Orders</a>
                                 <% if (user.permissions.accessReceiving) { %>
                                     <a href="/receiving" class="nav-accordion-item">🚚 Receiving Dashboard</a>
                                 <% } %>
@@ -2962,6 +3143,7 @@
                             <% } else { %>
                                 <!-- Fallback for users without defined permissions (backward compatibility) -->
                                 <% if (user && (user.role === 'admin' || user.role === 'manager')) { %>
+                                    <a href="/purchase-orders" class="nav-accordion-item">📦 Purchase Orders</a>
                                     <a href="/receiving" class="nav-accordion-item">🚚 Receiving Dashboard</a>
                                     <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
                                     <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
@@ -2980,7 +3162,7 @@
 
                     <!-- Combined Options Button -->
                     <div class="nav-section">
-                        <button class="nav-accordion-btn" onclick="toggleAccordion('optionsAccordion')">
+                        <button class="nav-accordion-btn" onclick="toggleAccordion('optionsAccordion', event)">
                             ⚙️ Options <span class="accordion-icon">▼</span>
                         </button>
                         <div id="optionsAccordion" class="nav-accordion-content">
@@ -3030,7 +3212,7 @@
 
                     <!-- Import Section -->
                     <div class="nav-section">
-                        <button class="nav-imports-btn" onclick="toggleImportsDropdown()">
+                        <button class="nav-imports-btn" onclick="toggleImportsDropdown(event)">
                             📁 Import <span class="dropdown-icon">▼</span>
                         </button>
                         <div id="importsDropdown" class="nav-dropdown-content">
@@ -3857,64 +4039,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
     </div>
 
     <script>
-        // Navigation Functions
-        function closeAllDropdowns() {
-            // Close accordions
-            document.querySelectorAll('.nav-accordion-content.show').forEach(content => {
-                content.classList.remove('show');
-            });
-            document.querySelectorAll('.accordion-icon.rotated').forEach(icon => {
-                icon.classList.remove('rotated');
-            });
-            
-            // Close import dropdown
-            const importsDropdown = document.getElementById('importsDropdown');
-            if (importsDropdown) {
-                importsDropdown.classList.remove('show');
-            }
-            const importsIcon = document.querySelector('.nav-imports-btn .dropdown-icon');
-            if (importsIcon) {
-                importsIcon.classList.remove('rotated');
-            }
-        }
-
-        function toggleAccordion(accordionId) {
-            // Close all other dropdowns first
-            closeAllDropdowns();
-            
-            const content = document.getElementById(accordionId);
-            const button = document.querySelector(`button[onclick="toggleAccordion('${accordionId}')"]`);
-            const icon = button ? button.querySelector('.accordion-icon') : null;
-
-            if (content) {
-                content.classList.toggle('show');
-            }
-            if (icon) {
-                icon.classList.toggle('rotated');
-            }
-        }
-
-        function toggleImportsDropdown() {
-            // Close all other dropdowns first
-            closeAllDropdowns();
-            
-            const content = document.getElementById('importsDropdown');
-            const icon = document.querySelector('.nav-imports-btn .dropdown-icon');
-
-            content.classList.toggle('show');
-            icon.classList.toggle('rotated');
-        }
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', function (event) {
-            const navigationContainer = document.querySelector('.navigation-container');
-            
-            // If click is outside navigation container, close all dropdowns/accordions
-            if (navigationContainer && !navigationContainer.contains(event.target)) {
-                closeAllDropdowns();
-            }
-        });
-
         // Vendor Reconciliation Function - reconciles BOTH main Vendors and OrganicVendors
         async function reconcileVendors() {
             try {
@@ -5309,32 +5433,345 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             
             if (message) {
                 content.innerHTML = `<div style="text-align: center; padding: 20px; color: #6c757d;">${message}</div>`;
-            } else {
-                content.innerHTML = `
-                    <div class="tracking-info-section">
-                        <div class="tracking-info-header">
-                            <div class="tracking-number" style="font-size: 1.2rem; font-weight: bold; color: #007bff;">${trackingNumber}</div>
-                            <div class="carrier-info" style="padding: 4px 12px; background: #e9ecef; border-radius: 4px; display: inline-block; margin-top: 8px;">
-                                <strong>Carrier:</strong> ${carrier}
-                            </div>
-                        </div>
-                        <div class="tracking-status-display" style="background: #17a2b8; color: white; padding: 15px; margin: 20px 0; border-radius: 4px; text-align: center;">
-                            Click the button below to track your package on the carrier's website
-                        </div>
-                        <div class="tracking-actions-section" style="text-align: center;">
-                            <button class="tracking-action-btn primary" onclick="openTrackingUrl('${trackingNumber}', '${carrier}')" 
-                                    style="padding: 12px 24px; font-size: 1rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                🌐 View on ${carrier} Website
-                            </button>
-                        </div>
-                        <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; font-size: 0.9rem;">
-                            <strong>📌 Note:</strong> For the most up-to-date tracking information, please visit the carrier's website directly.
+                modal.style.display = 'block';
+                return;
+            }
+
+            // Show loading state
+            content.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p style="margin-top: 15px; color: #6c757d;">Loading tracking information...</p>
+                </div>
+            `;
+            modal.style.display = 'block';
+
+            // Fetch tracking information from database
+            fetch(`/purchase-orders/tracking/${trackingNumber}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.trackingInfo) {
+                        displayTrackingInfo(trackingNumber, carrier, data.trackingInfo);
+                        // Try to fetch live data in background if carrier supports API
+                        if (carrier.toLowerCase() === 'fedex') {
+                            refreshLiveTracking(trackingNumber, carrier);
+                        }
+                    } else {
+                        // No tracking info in database, show basic view
+                        displayBasicTracking(trackingNumber, carrier);
+                        // Try to fetch live data
+                        if (carrier.toLowerCase() === 'fedex') {
+                            refreshLiveTracking(trackingNumber, carrier);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching tracking info:', error);
+                    displayBasicTracking(trackingNumber, carrier);
+                });
+        }
+
+        function displayTrackingInfo(trackingNumber, carrier, trackingInfo) {
+            const content = document.getElementById('trackingDetailsContent');
+            
+            // Status badge color based on status
+            let statusColor = '#6c757d';
+            let statusIcon = '📦';
+            const status = (trackingInfo.status || '').toLowerCase();
+            
+            if (status.includes('delivered')) {
+                statusColor = '#28a745';
+                statusIcon = '✅';
+            } else if (status.includes('transit') || status.includes('picked')) {
+                statusColor = '#17a2b8';
+                statusIcon = '🚚';
+            } else if (status.includes('exception') || status.includes('delayed')) {
+                statusColor = '#ffc107';
+                statusIcon = '⚠️';
+            } else if (status.includes('label')) {
+                statusColor = '#6c757d';
+                statusIcon = '🏷️';
+            }
+
+            let historyHtml = '';
+            if (trackingInfo.history && trackingInfo.history.length > 0) {
+                historyHtml = `
+                    <div class="tracking-history" style="margin-top: 25px;">
+                        <h5 style="color: #495057; margin-bottom: 15px; border-bottom: 2px solid #dee2e6; padding-bottom: 8px;">
+                            📋 Tracking History
+                        </h5>
+                        <div class="timeline">
+                            ${trackingInfo.history.map((event, index) => `
+                                <div class="timeline-item" style="padding: 12px; margin-bottom: 10px; background: ${index === 0 ? '#f8f9fa' : 'white'}; border-left: 3px solid ${index === 0 ? '#007bff' : '#dee2e6'}; border-radius: 4px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <strong style="color: #007bff;">${event.status || 'Update'}</strong>
+                                        <span style="color: #6c757d; font-size: 0.85rem;">
+                                            ${event.timestamp ? new Date(event.timestamp).toLocaleString() : ''}
+                                        </span>
+                                    </div>
+                                    ${event.location ? `<div style="color: #6c757d; font-size: 0.9rem;">📍 ${event.location}</div>` : ''}
+                                    ${event.description ? `<div style="color: #495057; margin-top: 5px;">${event.description}</div>` : ''}
+                                    ${event.updatedBy ? `<div style="color: #6c757d; font-size: 0.85rem; margin-top: 5px;"><em>Updated by: ${event.updatedBy}</em></div>` : ''}
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
                 `;
             }
+
+            content.innerHTML = `
+                <div class="tracking-info-section">
+                    <div class="tracking-info-header" style="text-align: center; margin-bottom: 20px;">
+                        <div class="tracking-number" style="font-size: 1.3rem; font-weight: bold; color: #007bff; margin-bottom: 10px;">
+                            ${trackingNumber}
+                        </div>
+                        <div class="carrier-info" style="padding: 6px 15px; background: #e9ecef; border-radius: 20px; display: inline-block;">
+                            <strong>Carrier:</strong> ${carrier}
+                        </div>
+                    </div>
+                    
+                    <div class="current-status" style="background: ${statusColor}; color: white; padding: 20px; margin: 20px 0; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 8px;">${statusIcon}</div>
+                        <div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 5px;">
+                            ${trackingInfo.statusDescription || trackingInfo.status || 'Status Unknown'}
+                        </div>
+                        ${trackingInfo.lastUpdate ? `
+                            <div style="font-size: 0.9rem; opacity: 0.9;">
+                                Last Updated: ${new Date(trackingInfo.lastUpdate).toLocaleString()}
+                            </div>
+                        ` : ''}
+                        ${trackingInfo.lastLocation ? `
+                            <div style="font-size: 0.95rem; margin-top: 8px;">
+                                📍 ${trackingInfo.lastLocation}
+                            </div>
+                        ` : ''}
+                        ${trackingInfo.estimatedDelivery ? `
+                            <div style="font-size: 0.95rem; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.3);">
+                                🕒 Estimated Delivery: ${new Date(trackingInfo.estimatedDelivery).toLocaleDateString()}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    ${historyHtml}
+                    
+                    <div class="tracking-actions-section" style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 2px solid #dee2e6;">
+                        ${carrier.toLowerCase() === 'fedex' ? `
+                            <button class="tracking-action-btn" onclick="refreshLiveTracking('${trackingNumber}', '${carrier}')" 
+                                    id="refreshBtn-${trackingNumber}"
+                                    style="padding: 12px 24px; margin: 5px; font-size: 1rem; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                🔄 Refresh from FedEx API
+                            </button>
+                        ` : ''}
+                        <button class="tracking-action-btn" onclick="viewTrackingInIframe('${trackingNumber}', '${carrier}')" 
+                                style="padding: 12px 24px; margin: 5px; font-size: 1rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            🖼️ View Carrier Page (In-App)
+                        </button>
+                        <button class="tracking-action-btn" onclick="openTrackingUrl('${trackingNumber}', '${carrier}')" 
+                                style="padding: 12px 24px; margin: 5px; font-size: 1rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            🌐 Open on ${carrier} Website
+                        </button>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 4px; font-size: 0.85rem; text-align: center; color: #6c757d;">
+                        ${carrier.toLowerCase() === 'fedex' ? `
+                            <strong>✨ Live API Tracking:</strong> This information is fetched directly from FedEx servers for real-time accuracy.
+                        ` : `
+                            💡 <strong>Tip:</strong> Information shown here is from our database. For real-time updates, view the carrier page.
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayBasicTracking(trackingNumber, carrier) {
+            const content = document.getElementById('trackingDetailsContent');
             
-            modal.style.display = 'block';
+            content.innerHTML = `
+                <div class="tracking-info-section">
+                    <div class="tracking-info-header" style="text-align: center; margin-bottom: 20px;">
+                        <div class="tracking-number" style="font-size: 1.3rem; font-weight: bold; color: #007bff; margin-bottom: 10px;">
+                            ${trackingNumber}
+                        </div>
+                        <div class="carrier-info" style="padding: 6px 15px; background: #e9ecef; border-radius: 20px; display: inline-block;">
+                            <strong>Carrier:</strong> ${carrier}
+                        </div>
+                    </div>
+                    
+                    <div class="current-status" style="background: #6c757d; color: white; padding: 20px; margin: 20px 0; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 8px;">📦</div>
+                        <div style="font-size: 1.1rem; font-weight: bold;">
+                            No tracking information available yet
+                        </div>
+                        <div style="font-size: 0.9rem; opacity: 0.9; margin-top: 8px;">
+                            Click below to check the carrier's website for updates
+                        </div>
+                    </div>
+                    
+                    <div class="tracking-actions-section" style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 2px solid #dee2e6;">
+                        ${carrier.toLowerCase() === 'fedex' ? `
+                            <button class="tracking-action-btn" onclick="refreshLiveTracking('${trackingNumber}', '${carrier}')" 
+                                    id="refreshBtn-${trackingNumber}"
+                                    style="padding: 12px 24px; margin: 5px; font-size: 1rem; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                🔄 Get Live Status from FedEx
+                            </button>
+                        ` : ''}
+                        <button class="tracking-action-btn" onclick="viewTrackingInIframe('${trackingNumber}', '${carrier}')" 
+                                style="padding: 12px 24px; margin: 5px; font-size: 1rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            🖼️ View Carrier Page (In-App)
+                        </button>
+                        <button class="tracking-action-btn" onclick="openTrackingUrl('${trackingNumber}', '${carrier}')" 
+                                style="padding: 12px 24px; margin: 5px; font-size: 1rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            🌐 Open on ${carrier} Website
+                        </button>
+                    </div>
+                </div>
+            `;
+                        </button>
+                        <button class="tracking-action-btn" onclick="openTrackingUrl('${trackingNumber}', '${carrier}')" 
+                                style="padding: 12px 24px; margin: 5px; font-size: 1rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            🌐 Open on ${carrier} Website
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function refreshLiveTracking(trackingNumber, carrier) {
+            console.log(`🔄 Refreshing live tracking for ${trackingNumber} from ${carrier} API...`);
+            
+            const refreshBtn = document.getElementById(`refreshBtn-${trackingNumber}`);
+            if (refreshBtn) {
+                refreshBtn.disabled = true;
+                refreshBtn.innerHTML = '⏳ Fetching...';
+            }
+
+            try {
+                const response = await fetch(`/purchase-orders/tracking/${trackingNumber}/live?carrier=${carrier}`);
+                const data = await response.json();
+
+                if (data.success && data.trackingInfo) {
+                    // Update the modal with fresh data
+                    displayTrackingInfo(trackingNumber, carrier, data.trackingInfo);
+                    
+                    // Show success toast
+                    showToast('✅ Tracking updated from ' + carrier + ' API', 'success');
+                } else if (data.useIframe) {
+                    // API not configured or unavailable, show message
+                    showToast('⚠️ ' + (data.error || 'API not available'), 'warning');
+                } else {
+                    showToast('❌ ' + (data.error || 'Failed to fetch tracking'), 'error');
+                }
+            } catch (error) {
+                console.error('Error refreshing tracking:', error);
+                showToast('❌ Error refreshing tracking', 'error');
+            } finally {
+                if (refreshBtn) {
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerHTML = '🔄 Refresh from FedEx API';
+                }
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            // Create toast notification
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 4px;
+                color: white;
+                z-index: 10000;
+                font-size: 14px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+                animation: slideIn 0.3s ease-out;
+                ${type === 'success' ? 'background: #28a745;' : ''}
+                ${type === 'error' ? 'background: #dc3545;' : ''}
+                ${type === 'warning' ? 'background: #ffc107; color: #000;' : ''}
+                ${type === 'info' ? 'background: #17a2b8;' : ''}
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            // Auto-remove after 4 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function viewTrackingInIframe(trackingNumber, carrier) {
+            const url = getCarrierTrackingUrl(trackingNumber, carrier);
+            
+            // Create or update iframe modal
+            let iframeModal = document.getElementById('trackingIframeModal');
+            if (!iframeModal) {
+                iframeModal = document.createElement('div');
+                iframeModal.id = 'trackingIframeModal';
+                iframeModal.style.cssText = `
+                    display: none;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.8);
+                    z-index: 10001;
+                    padding: 20px;
+                `;
+                iframeModal.innerHTML = `
+                    <div style="background: white; width: 100%; height: 100%; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
+                        <div style="padding: 15px 20px; background: #f8f9fa; border-bottom: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center;">
+                            <h4 style="margin: 0; color: #495057;">📦 Carrier Tracking: ${trackingNumber}</h4>
+                            <button onclick="closeTrackingIframe()" style="background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">
+                                ✖ Close
+                            </button>
+                        </div>
+                        <iframe id="trackingIframe" style="flex: 1; border: none; width: 100%;"></iframe>
+                    </div>
+                `;
+                document.body.appendChild(iframeModal);
+            }
+            
+            document.getElementById('trackingIframe').src = url;
+            iframeModal.style.display = 'block';
+        }
+
+        function closeTrackingIframe() {
+            const modal = document.getElementById('trackingIframeModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.getElementById('trackingIframe').src = '';
+            }
+        }
+
+        function getCarrierTrackingUrl(trackingNumber, carrier) {
+            let url = '';
+            
+            switch (carrier.toLowerCase()) {
+                case 'fedex':
+                    url = `https://www.fedex.com/fedextrack/?trknbr=${trackingNumber}`;
+                    break;
+                case 'ups':
+                    url = `https://www.ups.com/track?tracknum=${trackingNumber}`;
+                    break;
+                case 'usps':
+                    url = `https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}`;
+                    break;
+                case 'dhl':
+                    url = `https://www.dhl.com/en/express/tracking.html?AWB=${trackingNumber}`;
+                    break;
+                case 'ontrac':
+                    url = `https://www.ontrac.com/tracking/?number=${trackingNumber}`;
+                    break;
+                default:
+                    url = `https://www.google.com/search?q=track+${trackingNumber}`;
+            }
+            
+            return url;
         }
 
         function closeTrackingDetailsModal() {
@@ -5345,26 +5782,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         // checkTrackingStatus() and updateTrackingInfo() removed
 
         function openTrackingUrl(trackingNumber, carrier) {
-            let url = '';
-            
-            switch (carrier.toLowerCase()) {
-                case 'fedex':
-                    url = `https://www.fedex.com/apps/fedextrack/?tracknumbers=${trackingNumber}`;
-                    break;
-                case 'ups':
-                    url = `https://www.ups.com/track?tracknum=${trackingNumber}`;
-                    break;
-                case 'usps':
-                    url = `https://tools.usps.com/go/TrackConfirmAction?qtc_tLabels1=${trackingNumber}`;
-                    break;
-                case 'dhl':
-                    url = `https://www.dhl.com/us-en/home/tracking.html?tracking-id=${trackingNumber}`;
-                    break;
-                default:
-                    alert('Tracking URL not available for this carrier');
-                    return;
-            }
-            
+            const url = getCarrierTrackingUrl(trackingNumber, carrier);
             window.open(url, '_blank');
         }
 

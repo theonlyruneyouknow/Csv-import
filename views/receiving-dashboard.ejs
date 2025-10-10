@@ -404,6 +404,55 @@
             transform: translateY(-1px);
         }
 
+        /* View Toggle Buttons */
+        .view-toggle-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .view-toggle-btn {
+            padding: 10px 20px;
+            border: 2px solid #007bff;
+            background: white;
+            color: #007bff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .view-toggle-btn:hover {
+            background: #e7f3ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+        }
+
+        .view-toggle-btn.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .view-toggle-btn.active:hover {
+            background: #0056b3;
+        }
+
+        .view-toggle-btn .badge {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .view-toggle-btn.active .badge {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
         .no-pos {
             text-align: center;
             padding: 40px;
@@ -576,6 +625,25 @@
                     Clear Filters
                 </button>
             </div>
+        </div>
+
+        <!-- View Toggle Buttons -->
+        <div class="view-toggle-buttons">
+            <button class="view-toggle-btn active" id="btnShowToReceive" onclick="showToReceive()">
+                <i class="fas fa-clock"></i>
+                To Be Received
+                <span class="badge" id="toReceiveCount">0</span>
+            </button>
+            <button class="view-toggle-btn" id="btnShowReceived" onclick="showReceived()">
+                <i class="fas fa-check-circle"></i>
+                Received Items
+                <span class="badge" id="receivedCount">0</span>
+            </button>
+            <button class="view-toggle-btn" id="btnShowAll" onclick="showAll()">
+                <i class="fas fa-list"></i>
+                Show All
+                <span class="badge" id="allCount">0</span>
+            </button>
         </div>
 
         <!-- Main Content -->
@@ -1096,6 +1164,133 @@
         document.getElementById('statusFilter').addEventListener('change', applyFilters);
         document.getElementById('receiptFilter').addEventListener('change', applyFilters);
         document.getElementById('attachmentFilter').addEventListener('change', applyFilters);
+
+        // View toggle functions
+        let currentView = 'toReceive'; // default view
+
+        function updateViewCounts() {
+            let toReceiveCount = 0;
+            let receivedCount = 0;
+            let allCount = 0;
+
+            // Count line items in all POs
+            document.querySelectorAll('.line-items-detail').forEach(detail => {
+                const allItems = detail.querySelectorAll('.line-item');
+                allItems.forEach(item => {
+                    allCount++;
+                    if (item.classList.contains('received')) {
+                        receivedCount++;
+                    } else {
+                        toReceiveCount++;
+                    }
+                });
+            });
+
+            // Update badge counts
+            document.getElementById('toReceiveCount').textContent = toReceiveCount;
+            document.getElementById('receivedCount').textContent = receivedCount;
+            document.getElementById('allCount').textContent = allCount;
+        }
+
+        function showToReceive() {
+            currentView = 'toReceive';
+            updateViewButtons();
+            
+            // Show all PO rows
+            document.querySelectorAll('#receivingTable tbody tr').forEach(row => {
+                row.style.display = '';
+            });
+
+            // Filter line items - show only those not received
+            document.querySelectorAll('.line-items-detail').forEach(detail => {
+                const items = detail.querySelectorAll('.line-item');
+                let hasUnreceived = false;
+                
+                items.forEach(item => {
+                    if (item.classList.contains('received')) {
+                        item.style.display = 'none';
+                    } else {
+                        item.style.display = '';
+                        hasUnreceived = true;
+                    }
+                });
+
+                // Optionally hide PO rows that have all items received
+                const poRow = detail.closest('tr');
+                if (!hasUnreceived && poRow) {
+                    poRow.style.display = 'none';
+                }
+            });
+        }
+
+        function showReceived() {
+            currentView = 'received';
+            updateViewButtons();
+            
+            // Show all PO rows
+            document.querySelectorAll('#receivingTable tbody tr').forEach(row => {
+                row.style.display = '';
+            });
+
+            // Filter line items - show only those received
+            document.querySelectorAll('.line-items-detail').forEach(detail => {
+                const items = detail.querySelectorAll('.line-item');
+                let hasReceived = false;
+                
+                items.forEach(item => {
+                    if (item.classList.contains('received')) {
+                        item.style.display = '';
+                        hasReceived = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                // Optionally hide PO rows that have no received items
+                const poRow = detail.closest('tr');
+                if (!hasReceived && poRow) {
+                    poRow.style.display = 'none';
+                }
+            });
+        }
+
+        function showAll() {
+            currentView = 'all';
+            updateViewButtons();
+            
+            // Show all PO rows
+            document.querySelectorAll('#receivingTable tbody tr').forEach(row => {
+                row.style.display = '';
+            });
+
+            // Show all line items
+            document.querySelectorAll('.line-item').forEach(item => {
+                item.style.display = '';
+            });
+        }
+
+        function updateViewButtons() {
+            // Remove active class from all buttons
+            document.getElementById('btnShowToReceive').classList.remove('active');
+            document.getElementById('btnShowReceived').classList.remove('active');
+            document.getElementById('btnShowAll').classList.remove('active');
+
+            // Add active class to current view button
+            if (currentView === 'toReceive') {
+                document.getElementById('btnShowToReceive').classList.add('active');
+            } else if (currentView === 'received') {
+                document.getElementById('btnShowReceived').classList.add('active');
+            } else {
+                document.getElementById('btnShowAll').classList.add('active');
+            }
+        }
+
+        // Initialize counts on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateViewCounts();
+            // Start with "To Be Received" view
+            showToReceive();
+        });
 
         function openNetSuiteImportModal() {
             alert('NetSuite Import Modal functionality would be implemented here for the Receiving Dashboard');

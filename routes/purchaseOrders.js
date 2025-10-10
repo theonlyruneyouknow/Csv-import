@@ -3415,8 +3415,8 @@ router.put('/line-items/:lineItemId/tracking/update', async (req, res) => {
   }
 });
 
-// Debug/validation route for testing tracking numbers
-router.get('/tracking/debug/:trackingNumber/:carrier?', async (req, res) => {
+// Debug/validation route for testing tracking numbers (with optional carrier)
+router.get('/tracking/debug/:trackingNumber/:carrier', async (req, res) => {
   try {
     const { trackingNumber, carrier } = req.params;
     const trackingService = require('../services/trackingService');
@@ -3440,6 +3440,43 @@ router.get('/tracking/debug/:trackingNumber/:carrier?', async (req, res) => {
       success: true,
       trackingNumber,
       providedCarrier: carrier || null,
+      detectedCarrier,
+      isValid,
+      trackingURL,
+      availableCarriers: carriers,
+      availableStatuses: statuses
+    });
+  } catch (error) {
+    console.error('❌ Tracking debug error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Debug/validation route for testing tracking numbers (without carrier - auto-detect)
+router.get('/tracking/debug/:trackingNumber', async (req, res) => {
+  try {
+    const { trackingNumber } = req.params;
+    const trackingService = require('../services/trackingService');
+
+    console.log('🐞 DEBUG: Validating tracking number:', trackingNumber, 'carrier: auto-detect');
+
+    // Auto-detect carrier
+    const detectedCarrier = trackingService.detectCarrier(trackingNumber);
+    
+    // Validate tracking number
+    const isValid = trackingService.validateTrackingNumber(trackingNumber, detectedCarrier);
+    
+    // Generate tracking URL
+    const trackingURL = trackingService.getTrackingURL(trackingNumber, detectedCarrier);
+
+    // Get available carriers and statuses
+    const carriers = trackingService.getCarriers();
+    const statuses = trackingService.getStatuses();
+
+    res.json({
+      success: true,
+      trackingNumber,
+      providedCarrier: null,
       detectedCarrier,
       isValid,
       trackingURL,
@@ -3480,14 +3517,115 @@ router.get('/tracking/:trackingNumber', async (req, res) => {
       success: true,
       trackingNumber,
       lineItems: lineItems.length,
-      trackingInfo: trackingData,
-      history: lineItem.trackingHistory || [],
+      trackingInfo: {
+        ...trackingData,
+        lastLocation: lineItem.trackingLocation,
+        history: lineItem.trackingHistory || []
+      },
       poNumber: lineItem.poId?.poNumber,
       vendor: lineItem.poId?.vendor
     });
   } catch (error) {
     console.error('❌ Tracking details error:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Fetch live tracking data from carrier API
+router.get('/tracking/:trackingNumber/live', async (req, res) => {
+  try {
+    const { trackingNumber } = req.params;
+    const { carrier } = req.query; // Optional carrier parameter
+    const trackingService = require('../services/trackingService');
+
+    console.log(`🔄 Fetching live tracking for: ${trackingNumber} (${carrier || 'auto-detect'})`);
+
+    // Auto-detect carrier if not provided
+    let finalCarrier = carrier;
+    if (!finalCarrier) {
+      // Try to find in database first
+      const lineItem = await LineItem.findOne({ trackingNumber }).lean();
+      finalCarrier = lineItem?.trackingCarrier || trackingService.detectCarrier(trackingNumber);
+    }
+
+    if (!finalCarrier || finalCarrier === 'Unknown') {
+      return res.json({
+        success: false,
+        error: 'Could not determine carrier for tracking number',
+        trackingNumber
+      });
+    }
+
+    // Fetch live tracking data
+    const liveData = await trackingService.fetchLiveTracking(trackingNumber, finalCarrier);
+
+    // If API fetch failed, return error but client can fallback to iframe
+    if (!liveData.success) {
+      return res.json({
+        success: false,
+        error: liveData.error,
+        useIframe: liveData.useIframe || false,
+        trackingNumber,
+        carrier: finalCarrier
+      });
+    }
+
+    // Update database with latest tracking info
+    const updateData = {
+      trackingStatus: liveData.status,
+      trackingStatusDescription: liveData.statusDescription,
+      trackingLastUpdate: liveData.lastUpdate || new Date(),
+      trackingLocation: liveData.lastLocation,
+      trackingEstimatedDelivery: liveData.estimatedDelivery
+    };
+
+    // Add to tracking history if we have new information
+    if (liveData.history && liveData.history.length > 0) {
+      // Only add the most recent event if it's new
+      const latestEvent = liveData.history[0];
+      const existingLineItem = await LineItem.findOne({ trackingNumber });
+      
+      if (existingLineItem) {
+        const hasEvent = existingLineItem.trackingHistory?.some(
+          h => h.timestamp?.getTime() === latestEvent.timestamp?.getTime()
+        );
+        
+        if (!hasEvent) {
+          updateData.$push = {
+            trackingHistory: {
+              timestamp: latestEvent.timestamp || new Date(),
+              status: latestEvent.status,
+              location: latestEvent.location,
+              description: latestEvent.description,
+              updatedBy: 'API Update'
+            }
+          };
+        }
+      }
+    }
+
+    // Update all line items with this tracking number
+    await LineItem.updateMany(
+      { trackingNumber },
+      updateData
+    );
+
+    console.log(`✅ Updated tracking info for ${trackingNumber} from live API`);
+
+    res.json({
+      success: true,
+      trackingNumber,
+      carrier: finalCarrier,
+      trackingInfo: liveData,
+      updated: true
+    });
+
+  } catch (error) {
+    console.error('❌ Live tracking error:', error);
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
   }
 });
 
