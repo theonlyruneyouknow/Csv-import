@@ -1431,6 +1431,34 @@ router.get('/line-items-api', async (req, res) => {
   }
 });
 
+// Get line items WITH tracking numbers (dedicated endpoint for tracking dashboard)
+router.get('/line-items-with-tracking', async (req, res) => {
+  try {
+    console.log('📦 Fetching line items with tracking numbers...');
+    
+    const limit = parseInt(req.query.limit) || 1000;
+    
+    // Query for items with tracking numbers
+    const lineItems = await LineItem.find({
+      trackingNumber: { $exists: true, $ne: '', $ne: null }
+    })
+    .populate('poId', 'poNumber vendor')
+    .sort({ trackingLastUpdate: -1 })
+    .limit(limit)
+    .lean();
+
+    console.log(`✅ Found ${lineItems.length} line items with tracking numbers`);
+
+    res.json({
+      lineItems,
+      totalCount: lineItems.length
+    });
+  } catch (error) {
+    console.error('❌ Line items with tracking error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get line item status options - This must also come before parameterized routes!
 router.get('/line-items/status-options', async (req, res) => {
   try {
@@ -3415,6 +3443,115 @@ router.put('/line-items/:lineItemId/tracking/update', async (req, res) => {
   }
 });
 
+// Bulk update all tracking numbers using carrier APIs (replaces old 17Track bulk update)
+router.post('/tracking/bulk-update', async (req, res) => {
+  try {
+    console.log('🔄 Starting bulk tracking update using carrier APIs...');
+    
+    const trackingService = require('../services/trackingService');
+    const fedexService = require('../services/fedexService');
+    
+    // Find all line items with tracking numbers
+    const lineItems = await LineItem.find({
+      trackingNumber: { $exists: true, $ne: '', $ne: null }
+    }).limit(100); // Limit to prevent API overuse
+    
+    console.log(`📦 Found ${lineItems.length} line items with tracking numbers`);
+    
+    let updated = 0;
+    let failed = 0;
+    let skipped = 0;
+    
+    for (const lineItem of lineItems) {
+      try {
+        const carrier = lineItem.trackingCarrier || trackingService.detectCarrier(lineItem.trackingNumber);
+        
+        // Currently only FedEx is supported, skip others
+        if (carrier.toLowerCase() !== 'fedex') {
+          console.log(`⏭️  Skipping ${lineItem.trackingNumber} - ${carrier} API not yet implemented`);
+          skipped++;
+          continue;
+        }
+        
+        // Fetch live tracking data from FedEx
+        const trackingData = await fedexService.trackPackage(lineItem.trackingNumber);
+        
+        if (trackingData.success && trackingData.status) {
+          // Update line item with live data
+          lineItem.trackingStatus = trackingData.status;
+          lineItem.trackingStatusDescription = trackingData.statusDescription || '';
+          lineItem.trackingLastUpdate = new Date();
+          lineItem.trackingLocation = trackingData.lastLocation || '';
+          lineItem.trackingCarrier = 'FedEx';
+          
+          if (trackingData.estimatedDelivery) {
+            lineItem.trackingEstimatedDelivery = trackingData.estimatedDelivery;
+          }
+          
+          if (trackingData.actualDelivery) {
+            lineItem.trackingActualDelivery = trackingData.actualDelivery;
+          }
+          
+          // Add to tracking history if we have new events
+          if (trackingData.history && trackingData.history.length > 0) {
+            if (!lineItem.trackingHistory) {
+              lineItem.trackingHistory = [];
+            }
+            
+            // Add the most recent event
+            const latestEvent = trackingData.history[0];
+            lineItem.trackingHistory.push({
+              timestamp: latestEvent.timestamp || new Date(),
+              status: latestEvent.status || trackingData.status,
+              location: latestEvent.location || '',
+              description: latestEvent.description || '',
+              updatedBy: 'FedEx API'
+            });
+          }
+          
+          await lineItem.save();
+          updated++;
+          console.log(`✅ Updated ${lineItem.trackingNumber}: ${trackingData.status}`);
+        } else {
+          failed++;
+          console.log(`❌ Failed to get tracking for ${lineItem.trackingNumber}: ${trackingData.error || 'Unknown error'}`);
+        }
+        
+        // Add small delay to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+      } catch (error) {
+        console.error(`❌ Error updating ${lineItem.trackingNumber}:`, error.message);
+        failed++;
+      }
+    }
+    
+    console.log(`✅ Bulk update complete: ${updated} updated, ${failed} failed, ${skipped} skipped`);
+    
+    res.json({
+      success: true,
+      message: `Updated ${updated} of ${lineItems.length} tracking numbers`,
+      totalTracked: lineItems.length,
+      updated,
+      failed,
+      skipped,
+      details: {
+        fedexSupported: true,
+        upsSupported: false,
+        uspsSupported: false,
+        dhlSupported: false
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Bulk tracking update error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Debug/validation route for testing tracking numbers (with optional carrier)
 router.get('/tracking/debug/:trackingNumber/:carrier', async (req, res) => {
   try {
@@ -3645,15 +3782,28 @@ router.get('/tracking-dashboard', async (req, res) => {
       trackingNumber: { $exists: true, $ne: '', $ne: null }
     });
     
-    // Count by status using text statuses (not 17track codes)
+    // Count by status using standardized status values from carrier APIs
     const deliveredItems = await LineItem.countDocuments({
-      trackingStatus: { $regex: /delivered/i }
+      trackingStatus: { $in: ['Delivered', 'delivered'] }
     });
     const inTransitItems = await LineItem.countDocuments({
-      trackingStatus: { $regex: /transit|picked/i }
+      trackingStatus: { 
+        $in: [
+          'In Transit', 'in transit',
+          'Out for Delivery', 'out for delivery',
+          'Picked Up', 'picked up',
+          'Label Created', 'label created'
+        ] 
+      }
     });
     const exceptionItems = await LineItem.countDocuments({
-      trackingStatus: { $regex: /exception|delayed|lost/i }
+      trackingStatus: { 
+        $in: [
+          'Exception', 'exception',
+          'Delayed', 'delayed',
+          'Returned to Sender', 'returned'
+        ]
+      }
     });
 
     // Build query for filtered line items
@@ -3684,13 +3834,15 @@ router.get('/tracking-dashboard', async (req, res) => {
     // Get items needing attention (exceptions, delays, etc.)
     const trackingIssues = await LineItem.find({
       trackingNumber: { $exists: true, $ne: '' },
-      $or: [
-        { trackingStatus: { $regex: /exception/i } },
-        { trackingStatus: { $regex: /delayed/i } },
-        { trackingStatus: { $regex: /lost/i } },
-        { trackingStatus: { $regex: /damaged/i } },
-        { trackingStatus: { $regex: /returned/i } }
-      ]
+      trackingStatus: { 
+        $in: [
+          'Exception', 'exception',
+          'Delayed', 'delayed',
+          'Lost', 'lost',
+          'Damaged', 'damaged',
+          'Returned to Sender', 'returned'
+        ]
+      }
     })
       .populate('poId', 'poNumber vendor')
       .limit(20)
