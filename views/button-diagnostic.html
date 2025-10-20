@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Button Diagnostic</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .section { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        h2 { color: #666; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        .test-btn { padding: 10px 20px; margin: 10px; font-size: 14px; cursor: pointer; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        pre { background: #f8f8f8; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .accordion-test { background: #28a745; color: white; border: none; border-radius: 6px; }
+        .dropdown-test { background: #007bff; color: white; border: none; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Dashboard Button Diagnostic Tool</h1>
+
+    <div class="section">
+        <h2>1. Function Availability Test</h2>
+        <div id="functionTest"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. Event Handler Test</h2>
+        <button class="test-btn accordion-test" onclick="testToggleAccordion('test1', event)">
+            Test toggleAccordion()
+        </button>
+        <button class="test-btn dropdown-test" onclick="testToggleDropdown(event)">
+            Test toggleImportsDropdown()
+        </button>
+        <div id="eventTest"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. DOM Element Test</h2>
+        <div id="domTest"></div>
+    </div>
+
+    <div class="section">
+        <h2>4. Console Errors</h2>
+        <div id="consoleTest"></div>
+        <pre id="errorLog"></pre>
+    </div>
+
+    <div class="section">
+        <h2>5. Recommendations</h2>
+        <div id="recommendations"></div>
+    </div>
+
+    <script>
+        const results = {
+            functions: [],
+            events: [],
+            dom: [],
+            errors: []
+        };
+
+        // Test 1: Check if functions exist
+        function checkFunctions() {
+            const output = document.getElementById('functionTest');
+            const functionsToCheck = [
+                'toggleAccordion',
+                'toggleImportsDropdown',
+                'closeAllDropdowns'
+            ];
+
+            functionsToCheck.forEach(funcName => {
+                const exists = typeof window[funcName] === 'function';
+                results.functions.push({ name: funcName, exists });
+                
+                const status = exists ? 
+                    `<span class="success">✅ ${funcName} is defined</span>` :
+                    `<span class="error">❌ ${funcName} is NOT defined</span>`;
+                
+                output.innerHTML += `<div>${status}</div>`;
+            });
+        }
+
+        // Test 2: Test event handlers
+        function testToggleAccordion(id, event) {
+            const output = document.getElementById('eventTest');
+            try {
+                if (typeof toggleAccordion === 'function') {
+                    output.innerHTML += `<div class="success">✅ toggleAccordion() called successfully</div>`;
+                    output.innerHTML += `<div class="info">   Event object: ${event ? 'Present' : 'Missing'}</div>`;
+                } else {
+                    output.innerHTML += `<div class="error">❌ toggleAccordion() is not a function</div>`;
+                }
+            } catch (error) {
+                output.innerHTML += `<div class="error">❌ Error calling toggleAccordion(): ${error.message}</div>`;
+                results.errors.push(error.message);
+            }
+        }
+
+        function testToggleDropdown(event) {
+            const output = document.getElementById('eventTest');
+            try {
+                if (typeof toggleImportsDropdown === 'function') {
+                    output.innerHTML += `<div class="success">✅ toggleImportsDropdown() called successfully</div>`;
+                    output.innerHTML += `<div class="info">   Event object: ${event ? 'Present' : 'Missing'}</div>`;
+                } else {
+                    output.innerHTML += `<div class="error">❌ toggleImportsDropdown() is not a function</div>`;
+                }
+            } catch (error) {
+                output.innerHTML += `<div class="error">❌ Error calling toggleImportsDropdown(): ${error.message}</div>`;
+                results.errors.push(error.message);
+            }
+        }
+
+        // Test 3: Check DOM elements
+        function checkDOM() {
+            const output = document.getElementById('domTest');
+            const elementsToCheck = [
+                'managersAccordion',
+                'optionsAccordion',
+                'importsDropdown'
+            ];
+
+            elementsToCheck.forEach(id => {
+                const element = document.getElementById(id);
+                const exists = element !== null;
+                results.dom.push({ id, exists });
+                
+                const status = exists ?
+                    `<div class="success">✅ #${id} found in DOM</div>` :
+                    `<div class="info">ℹ️  #${id} not found (might be on main dashboard only)</div>`;
+                
+                output.innerHTML += status;
+            });
+        }
+
+        // Test 4: Check for console errors
+        function checkConsoleErrors() {
+            const output = document.getElementById('consoleTest');
+            if (results.errors.length === 0) {
+                output.innerHTML = '<div class="success">✅ No JavaScript errors detected during tests</div>';
+            } else {
+                output.innerHTML = `<div class="error">❌ ${results.errors.length} error(s) detected</div>`;
+                document.getElementById('errorLog').textContent = results.errors.join('\n');
+            }
+        }
+
+        // Test 5: Generate recommendations
+        function generateRecommendations() {
+            const output = document.getElementById('recommendations');
+            let recommendations = '';
+
+            // Check if critical functions are missing
+            const missingFunctions = results.functions.filter(f => !f.exists);
+            if (missingFunctions.length > 0) {
+                recommendations += `
+                    <div class="error">
+                        <strong>❌ CRITICAL: Missing Functions</strong>
+                        <p>The following functions are not defined:</p>
+                        <ul>${missingFunctions.map(f => `<li>${f.name}</li>`).join('')}</ul>
+                        <p><strong>Solution:</strong> Ensure the navigation functions are loaded in the &lt;head&gt; section of dashboard.ejs</p>
+                    </div>
+                `;
+            }
+
+            // Check if all functions exist
+            if (missingFunctions.length === 0) {
+                recommendations += `
+                    <div class="success">
+                        <strong>✅ All Functions Present</strong>
+                        <p>If buttons still don't work, the issue is likely:</p>
+                        <ul>
+                            <li><strong>Browser Cache:</strong> Try hard refresh (Ctrl+Shift+R)</li>
+                            <li><strong>Event Parameter:</strong> Check if onclick handlers pass 'event'</li>
+                            <li><strong>DOM Timing:</strong> Functions might be called before DOM is ready</li>
+                            <li><strong>CSS Z-Index:</strong> Another element might be covering the buttons</li>
+                        </ul>
+                    </div>
+                `;
+            }
+
+            // If there are errors
+            if (results.errors.length > 0) {
+                recommendations += `
+                    <div class="error">
+                        <strong>❌ JavaScript Errors Detected</strong>
+                        <p>Check the browser console (F12 → Console) for detailed error messages</p>
+                    </div>
+                `;
+            }
+
+            output.innerHTML = recommendations;
+        }
+
+        // Run all tests
+        window.addEventListener('DOMContentLoaded', () => {
+            checkFunctions();
+            checkDOM();
+            checkConsoleErrors();
+            generateRecommendations();
+        });
+
+        // Capture console errors
+        window.addEventListener('error', (e) => {
+            results.errors.push(e.message);
+            document.getElementById('errorLog').textContent += e.message + '\n';
+        });
+    </script>
+</body>
+</html>

@@ -3,8 +3,6 @@
 
 <head>
     <title>Purchase Orders Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -22,118 +20,6 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            position: sticky;
-            top: 0;
-            background: white;
-            z-index: 1000;
-            padding: 15px 0;
-            border-bottom: 1px solid #dee2e6;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .header h1 {
-            margin: 0;
-            flex-shrink: 0;
-        }
-        
-        .navigation-container {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #007bff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-            flex-shrink: 0;
-            position: relative;
-        }
-        
-        .user-status-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #28a745;
-            position: absolute;
-            bottom: -1px;
-            right: -1px;
-            border: 2px solid white;
-        }
-
-        .dropdown-user-info {
-            padding: 12px 16px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-            margin-bottom: 0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .dropdown-user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #007bff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-
-        .dropdown-user-details {
-            flex: 1;
-        }
-
-        .dropdown-user-name {
-            font-weight: bold;
-            font-size: 14px;
-            color: #212529;
-            margin: 0;
-        }
-
-        .dropdown-user-role {
-            font-size: 12px;
-            color: #6c757d;
-            margin: 0;
-            text-transform: capitalize;
-        }
-
-        .dropdown-user-status {
-            font-size: 11px;
-            color: #28a745;
-            margin: 2px 0 0 0;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .dropdown-user-status::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #28a745;
         }
 
         /* Enhanced Navigation Styles */
@@ -177,37 +63,15 @@
             left: 0;
             background: white;
             min-width: 220px;
-            max-height: 70vh; /* Limit height to 70% of viewport */
-            overflow-y: auto; /* Enable vertical scrolling */
-            overflow-x: hidden; /* Hide horizontal overflow */
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border-radius: 6px;
             border: 1px solid #dee2e6;
-            z-index: 1001;
+            z-index: 1000;
             opacity: 0;
             visibility: hidden;
             transform: translateY(-10px);
             transition: all 0.3s ease;
             margin-top: 5px;
-        }
-
-        /* Custom scrollbar for navigation dropdowns */
-        .nav-accordion-content::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .nav-accordion-content::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 0 6px 6px 0;
-        }
-
-        .nav-accordion-content::-webkit-scrollbar-thumb {
-            background: #28a745;
-            border-radius: 4px;
-        }
-
-        .nav-accordion-content::-webkit-scrollbar-thumb:hover {
-            background: #218838;
         }
 
         .nav-accordion-content.show {
@@ -240,13 +104,6 @@
             color: #28a745;
             text-decoration: none;
             padding-left: 20px;
-        }
-
-        /* Divider for admin section */
-        .nav-accordion-divider {
-            height: 1px;
-            background: #dee2e6;
-            margin: 8px 12px;
         }
 
         /* Options Button Styles */
@@ -304,37 +161,15 @@
             left: 0;
             background: white;
             min-width: 200px;
-            max-height: 70vh; /* Limit height to 70% of viewport */
-            overflow-y: auto; /* Enable vertical scrolling */
-            overflow-x: hidden; /* Hide horizontal overflow */
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border-radius: 6px;
             border: 1px solid #dee2e6;
-            z-index: 10001;
+            z-index: 1000;
             opacity: 0;
             visibility: hidden;
             transform: translateY(-10px);
             transition: all 0.3s ease;
             margin-top: 5px;
-        }
-
-        /* Custom scrollbar for dropdown */
-        .nav-dropdown-content::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .nav-dropdown-content::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 0 6px 6px 0;
-        }
-
-        .nav-dropdown-content::-webkit-scrollbar-thumb {
-            background: #007bff;
-            border-radius: 4px;
-        }
-
-        .nav-dropdown-content::-webkit-scrollbar-thumb:hover {
-            background: #0056b3;
         }
 
         .nav-dropdown-content.show {
@@ -413,15 +248,6 @@
                 min-width: 100%;
                 margin-top: 0;
                 box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-                max-height: 50vh; /* Smaller max height on mobile */
-            }
-        }
-
-        /* Additional small screen optimization */
-        @media (max-height: 600px) {
-            .nav-accordion-content,
-            .nav-dropdown-content {
-                max-height: 40vh; /* Even smaller for short screens */
             }
         }
 
@@ -745,41 +571,6 @@
             background: #e0a800;
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-        }
-
-        /* P.O.D. Button Styles */
-        .pod-button {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            white-space: nowrap;
-        }
-
-        .pod-button:hover {
-            background: linear-gradient(135deg, #218838, #1ea583);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-            color: white;
-            text-decoration: none;
-        }
-
-        .pod-button .arrow {
-            font-size: 12px;
-            transition: transform 0.3s ease;
-        }
-
-        .pod-button:hover .arrow {
-            transform: translateX(-2px);
         }
 
         /* Responsive design for Line Items column */
@@ -1246,99 +1037,10 @@
             margin-bottom: 20px;
         }
 
-        .pre-purchase-title-area {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
         .pre-purchase-header h2 {
             margin: 0;
             color: #495057;
             font-size: 1.3em;
-        }
-
-        .toggle-pre-purchase-btn {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85em;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .toggle-pre-purchase-btn:hover {
-            background: #5a6268;
-            transform: translateY(-1px);
-        }
-
-        .toggle-pre-purchase-btn.active {
-            background: #007bff;
-        }
-
-        .toggle-pre-purchase-btn.active:hover {
-            background: #0056b3;
-        }
-
-        .pre-purchase-badge {
-            background: #dc3545;
-            color: white;
-            border-radius: 50%;
-            padding: 2px 6px;
-            font-size: 0.75em;
-            font-weight: bold;
-            margin-left: 3px;
-            min-width: 18px;
-            text-align: center;
-            display: inline-block;
-        }
-
-        .toggle-pre-purchase-btn.active .pre-purchase-badge {
-            display: none;
-        }
-
-        .pre-purchase-content {
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-
-        .pre-purchase-content.slide-up {
-            animation: slideUp 0.3s ease-out;
-        }
-
-        .pre-purchase-content.slide-down {
-            animation: slideDown 0.3s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                max-height: 0;
-                margin-bottom: 0;
-            }
-            to {
-                opacity: 1;
-                max-height: 1000px;
-                margin-bottom: 20px;
-            }
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 1;
-                max-height: 1000px;
-                margin-bottom: 20px;
-            }
-            to {
-                opacity: 0;
-                max-height: 0;
-                margin-bottom: 0;
-            }
         }
 
         .add-pre-po-btn {
@@ -1595,8 +1297,8 @@
         .notes-toggle-cell {
             text-align: center;
             vertical-align: middle;
-            width: 70px;
-            /* Increased for two buttons */
+            width: 110px;
+            /* Width for 3 buttons (notes, tracking, task) */
         }
 
         .notes-toggle {
@@ -1801,43 +1503,6 @@
             background: #28a745;
         }
 
-        .attachments-btn {
-            background: #6f42c1;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            width: 24px;
-            height: 20px;
-            cursor: pointer;
-            font-size: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0.7;
-            transition: all 0.2s ease;
-            margin-left: 2px;
-            position: relative;
-        }
-
-        .attachments-btn:hover {
-            opacity: 1;
-            background: #5a32a3;
-        }
-
-        .attachment-count {
-            font-size: 8px;
-            font-weight: bold;
-            margin-left: 1px;
-        }
-
-        .attachments-btn.has-attachments {
-            background: #17a2b8;
-        }
-
-        .attachments-btn.has-attachments:hover {
-            background: #138496;
-        }
-
         /* Priority System */
         .priority-cell {
             width: 80px;
@@ -2033,42 +1698,6 @@
             word-wrap: break-word;
         }
 
-        /* Vendor link styling */
-        .vendor-link {
-            color: #007bff;
-            text-decoration: none;
-            font-weight: inherit;
-            transition: color 0.2s ease;
-        }
-
-        .vendor-link:hover {
-            color: #0056b3;
-            text-decoration: underline;
-        }
-
-        .vendor-link:visited {
-            color: #6f42c1;
-        }
-
-        /* Split vendor display styling */
-        .vendor-number {
-            font-weight: bold;
-            color: #6c757d;
-            margin-right: 0.5em;
-        }
-
-        .vendor-name {
-            color: inherit;
-        }
-
-        .vendor-link .vendor-number {
-            color: #0056b3;
-        }
-
-        .vendor-link:hover .vendor-number {
-            color: #004085;
-        }
-
         .date-cell {
             width: 100px;
         }
@@ -2082,13 +1711,8 @@
             width: 140px;
         }
 
-        .eta-cell {
-            width: 140px;
-        }
-
         /* Date input styling */
-        .date-input,
-        .eta-date-input {
+        .date-input {
             width: 100%;
             border: 1px solid transparent;
             background: transparent;
@@ -2098,68 +1722,27 @@
             color: #495057;
         }
 
-        .date-input:focus,
-        .eta-date-input:focus {
+        .date-input:focus {
             background: white;
             border: 1px solid #007bff;
             outline: none;
             box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
         }
 
-        .date-input.has-date,
-        .eta-date-input.has-date {
+        .date-input.has-date {
             background: #e7f3ff;
             border-color: #b3d9ff;
         }
 
-        .date-input.saving,
-        .eta-date-input.saving {
+        .date-input.saving {
             background: #d1ecf1;
             border-color: #bee5eb;
         }
 
-        .date-input.overdue,
-        .eta-date-input.overdue {
+        .date-input.overdue {
             background: #f8d7da;
             border-color: #f5c6cb;
             color: #721c24;
-        }
-
-        /* Calculated ETA from line items */
-        .calculated-eta {
-            display: inline-block;
-            background: #e3f2fd;
-            color: #1565c0;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-            margin-bottom: 4px;
-            border: 1px solid #bbdefb;
-        }
-
-        .calculated-eta.overdue {
-            background: #ffebee;
-            color: #c62828;
-            border-color: #ffcdd2;
-        }
-
-        .calculated-eta.today {
-            background: #fff3e0;
-            color: #ef6c00;
-            border-color: #ffcc02;
-        }
-
-        .calculated-eta.tomorrow {
-            background: #f3e5f5;
-            color: #7b1fa2;
-            border-color: #ce93d8;
-        }
-
-        .eta-cell {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
         }
 
         /* Shipping tracking display */
@@ -2204,28 +1787,11 @@
             display: none;
         }
 
-        /* Default behavior: ns status column hidden until explicitly shown */
-        .ns-status-cell {
-            display: none;
-        }
-
         /* Show tracking column when tracking is explicitly enabled */
         .show-tracking .shipping-tracking-cell {
             display: table-cell !important;
             background-color: #f8f9fa; /* Light background to indicate it's active */
             border-left: 3px solid #28a745; /* Green border to indicate active state */
-        }
-
-        /* Show NS status column when explicitly enabled */
-        .show-ns-status .ns-status-cell {
-            display: table-cell !important;
-            background-color: #f8f9fa; /* Light background to indicate it's active */
-            border-left: 3px solid #007bff; /* Blue border to indicate active state */
-        }
-
-        /* Hide POs that haven't reached their Next Update date */
-        .hide-not-ready tbody tr[data-not-ready="true"] {
-            display: none !important;
         }
 
         /* On smaller screens, add mobile indicator */
@@ -2285,9 +1851,9 @@
             opacity: 0.9;
         }
 
-        /* Task management button styles */
-        .task-toggle-btn {
-            background: #28a745; /* Green for task management */
+        /* Manage Attachments Button */
+        .manage-attachments-btn {
+            background: #6c757d; /* Gray for no attachments */
             color: white;
             border: none;
             border-radius: 4px;
@@ -2299,52 +1865,37 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
-            margin-left: 4px;
-            position: relative;
         }
 
-        .task-toggle-btn.has-tasks {
-            background: #17a2b8; /* Teal when tasks exist */
+        .manage-attachments-btn.has-attachments {
+            background: #28a745; /* Green when there are attachments */
+            color: white;
         }
 
-        .task-toggle-btn:hover {
+        .manage-attachments-btn:hover {
             transform: scale(1.05);
             opacity: 0.9;
         }
 
-        .task-count {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #dc3545;
+        /* Create Task Button */
+        .create-task-btn {
+            background: #17a2b8; /* Teal/Cyan */
             color: white;
-            border-radius: 50%;
-            font-size: 10px;
-            min-width: 16px;
-            height: 16px;
-            display: flex;
+            border: none;
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 12px;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            line-height: 1;
+            transition: all 0.2s ease;
         }
 
-        .task-management-container {
-            position: relative;
-            display: inline-block;
-        }
-
-        .task-management-container .dropdown-menu {
-            font-size: 14px;
-            min-width: 200px;
-        }
-
-        .task-management-container .dropdown-item {
-            padding: 8px 16px;
-            white-space: nowrap;
-        }
-
-        .task-management-container .dropdown-item:hover {
-            background-color: #f8f9fa;
+        .create-task-btn:hover {
+            transform: scale(1.05);
+            background: #138496;
         }
 
         /* Toggle tracking visibility button */
@@ -2361,23 +1912,6 @@
         }
 
         .toggle-tracking-column-btn:hover {
-            background: #5a6268;
-        }
-
-        /* Toggle NS Status visibility button */
-        .toggle-ns-status-column-btn {
-            background: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
-            cursor: pointer;
-            font-size: 11px;
-            margin-left: 10px;
-            transition: all 0.2s ease;
-        }
-
-        .toggle-ns-status-column-btn:hover {
             background: #5a6268;
         }
 
@@ -2798,42 +2332,224 @@
             overflow-y: auto;
         }
 
-        .po-details-line-items-table {
-            max-height: 500px;
-            overflow-y: auto;
-        }
-
         .po-details-notes-history {
             max-height: 500px;
             overflow-y: auto;
         }
 
-        /* PO Modal Table Styles */
-        .po-modal-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 0;
+        /* Attachments Section Styles */
+        .attachments-section {
+            padding: 20px;
         }
 
-        .po-modal-table th,
-        .po-modal-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
+        .attachments-header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 15px;
+        }
+
+        .attachments-header h4 {
+            margin: 0 0 8px 0;
+            color: #343a40;
+            font-size: 18px;
+        }
+
+        .attachments-description {
+            margin: 0;
+            color: #6c757d;
             font-size: 14px;
         }
 
-        .po-modal-table th {
+        .attachment-upload-form {
             background: #f8f9fa;
-            font-weight: bold;
-            color: #495057;
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
         }
 
-        .po-modal-table tr:hover {
-            background: #f8f9fa;
+        .upload-form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .upload-form-row .form-group {
+            flex: 1;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .form-group input[type="file"],
+        .form-group input[type="text"],
+        .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .file-hint {
+            display: block;
+            margin-top: 5px;
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .upload-attachment-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .upload-attachment-btn:hover {
+            background: #0056b3;
+        }
+
+        .upload-attachment-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .attachments-list h5 {
+            margin: 0 0 15px 0;
+            color: #343a40;
+            font-size: 16px;
+        }
+
+        .attachments-container {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .attachment-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: box-shadow 0.2s;
+        }
+
+        .attachment-item:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .attachment-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .attachment-filename {
+            font-weight: 500;
+            color: #343a40;
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+
+        .attachment-meta {
+            font-size: 12px;
+            color: #6c757d;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .attachment-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: 15px;
+            flex-shrink: 0;
+        }
+
+        .attachment-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .download-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .download-btn:hover {
+            background: #1e7e34;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        .no-attachments {
+            text-align: center;
+            color: #6c757d;
+            padding: 30px;
+            font-style: italic;
+        }
+
+        .attachment-type-badge {
+            background: #e9ecef;
+            color: #495057;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .upload-status {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .upload-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .upload-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
         .line-items-summary {
@@ -2921,366 +2637,75 @@
             font-style: italic;
             padding: 40px;
         }
-
-        /* Hidden PO Styles */
-        .hidden-po {
-            background-color: #f8f9fa !important;
-            opacity: 0.7;
-            border-left: 4px solid #dc3545;
-        }
-
-        .hidden-po-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: #dc3545;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 10px;
-            font-weight: bold;
-            margin-left: 8px;
-        }
-
-        .hidden-po-reason {
-            font-size: 11px;
-            color: #6c757d;
-            font-style: italic;
-            margin-top: 2px;
-        }
     </style>
-    
-    <script>
-        // Navigation Functions - Defined early so they're available for onclick handlers
-        function closeAllDropdowns() {
-            console.log('🔄 closeAllDropdowns called');
-            // Close accordions
-            const accordionsToClose = document.querySelectorAll('.nav-accordion-content.show');
-            console.log('🔍 Found', accordionsToClose.length, 'open accordions');
-            accordionsToClose.forEach(content => {
-                content.classList.remove('show');
-            });
-            
-            const iconsToRotate = document.querySelectorAll('.accordion-icon.rotated');
-            console.log('🔍 Found', iconsToRotate.length, 'rotated icons');
-            iconsToRotate.forEach(icon => {
-                icon.classList.remove('rotated');
-            });
-            
-            // Close import dropdown
-            const importsDropdown = document.getElementById('importsDropdown');
-            if (importsDropdown) {
-                importsDropdown.classList.remove('show');
-            }
-            const importsIcon = document.querySelector('.nav-imports-btn .dropdown-icon');
-            if (importsIcon) {
-                importsIcon.classList.remove('rotated');
-            }
-            console.log('✅ closeAllDropdowns complete');
-        }
-
-        function toggleAccordion(accordionId, event) {
-            console.log('🔍 toggleAccordion called:', accordionId);
-            console.log('🔍 Event received:', event);
-            
-            // Stop the event from propagating to the document click handler
-            if (event) {
-                event.stopPropagation();
-                console.log('✅ Event propagation stopped');
-            }
-            
-            const content = document.getElementById(accordionId);
-            const button = document.querySelector(`button[onclick*="toggleAccordion('${accordionId}'"]`);
-            const icon = button ? button.querySelector('.accordion-icon') : null;
-
-            console.log('🔍 Content element found:', !!content);
-            console.log('🔍 Button element found:', !!button);
-            console.log('🔍 Icon element found:', !!icon);
-
-            // Check if this accordion is currently open
-            const isOpen = content && content.classList.contains('show');
-            console.log('🔍 Is currently open:', isOpen);
-            
-            // Close all dropdowns first
-            console.log('🔄 Closing all dropdowns...');
-            closeAllDropdowns();
-            
-            // If it was closed, open it (toggle behavior)
-            if (!isOpen) {
-                console.log('✅ Opening accordion...');
-                if (content) {
-                    content.classList.add('show');
-                    console.log('✅ Added "show" class to content');
-                }
-                if (icon) {
-                    icon.classList.add('rotated');
-                    console.log('✅ Added "rotated" class to icon');
-                }
-            } else {
-                console.log('ℹ️ Accordion was open, now closed');
-            }
-        }
-
-        function toggleImportsDropdown(event) {
-            console.log('🔍 toggleImportsDropdown called');
-            console.log('🔍 Event received:', event);
-            
-            // Stop the event from propagating to the document click handler
-            if (event) {
-                event.stopPropagation();
-                console.log('✅ Event propagation stopped');
-            }
-            
-            const content = document.getElementById('importsDropdown');
-            const icon = document.querySelector('.nav-imports-btn .dropdown-icon');
-            
-            console.log('🔍 Content element found:', !!content);
-            console.log('🔍 Icon element found:', !!icon);
-            
-            // Check if dropdown is currently open
-            const isOpen = content && content.classList.contains('show');
-            console.log('🔍 Is currently open:', isOpen);
-
-            // Close all other dropdowns first
-            console.log('🔄 Closing all dropdowns...');
-            closeAllDropdowns();
-
-            // If it was closed, open it (toggle behavior)
-            if (!isOpen) {
-                console.log('✅ Opening imports dropdown...');
-                content.classList.add('show');
-                icon.classList.add('rotated');
-                console.log('✅ Added "show" and "rotated" classes');
-            } else {
-                console.log('ℹ️ Dropdown was open, now closed');
-            }
-        }
-        
-        // Wait for DOM to be ready before adding event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('✅ DOM Ready - Setting up navigation event listeners');
-            
-            // Close dropdowns when clicking outside
-            document.addEventListener('click', function (event) {
-                console.log('📍 Document click detected');
-                const navigationContainer = document.querySelector('.navigation-container');
-                
-                // If click is outside navigation container, close all dropdowns/accordions
-                if (navigationContainer && !navigationContainer.contains(event.target)) {
-                    console.log('🚪 Click outside navigation - closing all dropdowns');
-                    closeAllDropdowns();
-                } else {
-                    console.log('📍 Click inside navigation - ignoring');
-                }
-            });
-        });
-    </script>
 </head>
 
 <body>
     <div class="container">
         <div class="header">
             <h1>Purchase Orders Dashboard</h1>
-            
-            <div class="d-flex align-items-center justify-content-between flex-grow-1">
-                <!-- Navigation Container -->
-                <div class="navigation-container">
-                    <!-- Dashboards Accordion -->
-                    <div class="nav-section">
-                        <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion', event)">
-                            📊 Dashboards <span class="accordion-icon">▼</span>
-                        </button>
-                        <div id="managersAccordion" class="nav-accordion-content">
-                            <% if (typeof user !== 'undefined' && user && user.permissions) { %>
-                                <!-- Main Purchase Orders Dashboard Link -->
-                                <a href="/purchase-orders" class="nav-accordion-item">📦 Purchase Orders</a>
-                                <% if (user.permissions.accessReceiving) { %>
-                                    <a href="/receiving" class="nav-accordion-item">🚚 Receiving Dashboard</a>
-                                <% } %>
-                                <% if (user.permissions.accessTasks) { %>
-                                    <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
-                                <% } %>
-                                <% if (user.permissions.accessOrganicVendors) { %>
-                                    <a href="/vendors" class="nav-accordion-item">🏢 Vendors Dashboard</a>
-                                <% } %>
-                                <% if (user.permissions.accessOrganicVendors) { %>
-                                    <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
-                                <% } %>
-                                <% if (user.permissions.accessOrganicVendors) { %>
-                                    <a href="/enhanced-vendors" class="nav-accordion-item">🌟 Enhanced Vendors</a>
-                                <% } %>
-                                <% if (user.permissions.accessDropship) { %>
-                                    <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
-                                <% } %>
-                                <% if (user.permissions.accessFoodManagement) { %>
-                                    <a href="/food-dashboard" class="nav-accordion-item">🍽️ Food Management</a>
-                                <% } %>
-                                <% if (user.permissions.accessStoryManagement) { %>
-                                    <a href="/story/dashboard" class="nav-accordion-item">📚 Story Management</a>
-                                <% } %>
-                                <% if (user.permissions.accessMedicineManagement) { %>
-                                    <a href="/medicine/dashboard" class="nav-accordion-item">💊 Medicine Management</a>
-                                    <a href="/medicine/import" class="nav-accordion-item">📥 Import Pharmacy Records</a>
-                                <% } %>
-                                <% if (user.permissions.accessBulletinManagement || user.role === 'admin' || user.role === 'manager') { %>
-                                    <a href="/bulletin" class="nav-accordion-item">📜 View Bulletin</a>
-                                    <a href="/bulletin/admin" class="nav-accordion-item">⚙️ Bulletin Admin</a>
-                                <% } %>
-                                
-                                <% if (user.permissions.accessLineItemsManager || user.permissions.accessTrackingDashboard || user.permissions.accessNotesManager) { %>
-                                    <div class="nav-accordion-divider"></div>
-                                <% } %>
-                                
-                                <% if (user.permissions.accessLineItemsManager) { %>
-                                    <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items Manager</a>
-                                <% } %>
-                                <% if (user.permissions.accessTrackingDashboard) { %>
-                                    <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 Tracking Dashboard</a>
-                                <% } %>
-                                <% if (user.permissions.accessNotesManager) { %>
-                                    <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
-                                <% } %>
-                            <% } else { %>
-                                <!-- Fallback for users without defined permissions (backward compatibility) -->
-                                <% if (user && (user.role === 'admin' || user.role === 'manager')) { %>
-                                    <a href="/purchase-orders" class="nav-accordion-item">📦 Purchase Orders</a>
-                                    <a href="/receiving" class="nav-accordion-item">🚚 Receiving Dashboard</a>
-                                    <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
-                                    <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
-                                    <a href="/food-dashboard" class="nav-accordion-item">🍽️ Food Management</a>
-                                    <a href="/story/dashboard" class="nav-accordion-item">📚 Story Management</a>
-                                    <a href="/medicine/dashboard" class="nav-accordion-item">💊 Medicine Management</a>
-                                    <a href="/bulletin" class="nav-accordion-item">📜 Church Bulletin</a>
-                                    <div class="nav-accordion-divider"></div>
-                                    <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items Manager</a>
-                                    <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 Tracking Dashboard</a>
-                                    <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
-                                <% } %>
-                            <% } %>
-                        </div>
+            <div class="navigation-container">
+                <!-- Managers Accordion -->
+                <div class="nav-section">
+                    <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion')">
+                        📊 Managers <span class="accordion-icon">▼</span>
+                    </button>
+                    <div id="managersAccordion" class="nav-accordion-content">
+                        <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
+                        <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items
+                            Manager</a>
+                        <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 17Track
+                            Dashboard</a>
+                        <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
+                        <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
+                        <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
                     </div>
+                </div>
 
-                    <!-- Combined Options Button -->
-                    <div class="nav-section">
-                        <button class="nav-accordion-btn" onclick="toggleAccordion('optionsAccordion', event)">
-                            ⚙️ Options <span class="accordion-icon">▼</span>
+                <!-- Combined Options Button -->
+                <div class="nav-section">
+                    <button class="nav-options-btn" onclick="toggleOptionsDropdown()">
+                        ⚙️ Options <span class="dropdown-icon">▼</span>
+                    </button>
+                    <div id="optionsDropdown" class="nav-dropdown-content">
+                        <button class="nav-dropdown-item" onclick="openStatusModal()">
+                            🏷️ Manage PO Status Options
                         </button>
-                        <div id="optionsAccordion" class="nav-accordion-content">
-                            <% if (typeof user !== 'undefined' && user && user.permissions) { %>
-                                <% if (user.permissions.accessFileUpload) { %>
-                                    <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
-                                <% } %>
-                                <% if (user.permissions.accessOrganicVendors) { %>
-                                    <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
-                                <% } %>
-                                <% if (user.permissions.accessTroubleSeed) { %>
-                                    <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
-                                <% } %>
-                                <% if (user.permissions.accessOrphanedItems) { %>
-                                    <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
-                                <% } %>
-                                <% if (user.permissions.accessOrganicVendors) { %>
-                                    <button onclick="reconcileVendors()" class="nav-accordion-item" style="background: none; border: none; width: 100%; text-align: left; color: inherit; cursor: pointer;">🔗 Fix Missing Vendors (Both)</button>
-                                    <a href="/test-upload/reconcile-main-vendors" class="nav-accordion-item" style="color: #4a90e2;">🧪 Fix Main Vendors</a>
-                                    <a href="/test-upload/reconcile-vendors" class="nav-accordion-item" style="color: #ff6b6b;">🧪 Fix Organic Vendors</a>
-                                <% } %>
-                                <% if (user.permissions.accessEmailClient || user.role === 'admin' || user.role === 'manager') { %>
-                                    <a href="/email-client" class="nav-accordion-item">📧 Email Client</a>
-                                <% } %>
-                            <% } else { %>
-                                <!-- Fallback for users without defined permissions -->
-                                <% if (user && (user.role === 'admin' || user.role === 'manager')) { %>
-                                    <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
-                                    <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
-                                    <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
-                                    <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
-                                    <a href="/email-client" class="nav-accordion-item">📧 Email Client</a>
-                                <% } %>
-                            <% } %>
-                            
-                            <!-- Admin Options (only for admin/manager users) -->
-                            <% if (typeof user !== 'undefined' && user && (user.role === 'admin' || user.role === 'manager')) { %>
-                            <div class="nav-accordion-divider"></div>
-                            <a href="/auth/admin/users" class="nav-accordion-item">👥 User Management</a>
-                            <a href="/auth/admin/audit-logs" class="nav-accordion-item">📊 Audit Logs</a>
-                            <% if (user.role === 'admin' || user.role === 'manager') { %>
-                            <a href="/auth/admin/test-email" class="nav-accordion-item">📧 Test Email</a>
-                            <% } %>
-                            <% } %>
-                        </div>
+                        <button class="nav-dropdown-item" onclick="openLineItemStatusModal()">
+                            📋 Manage Line Item Status Options
+                        </button>
+                        <button class="nav-dropdown-item" onclick="openCarrierModal()">
+                            🚚 Manage Carriers
+                        </button>
                     </div>
+                </div>
 
-                    <!-- Import Section -->
-                    <div class="nav-section">
-                        <button class="nav-imports-btn" onclick="toggleImportsDropdown(event)">
-                            📁 Import <span class="dropdown-icon">▼</span>
-                        </button>
-                        <div id="importsDropdown" class="nav-dropdown-content">
-                            <a href="/upload" class="nav-dropdown-item">📄 Purchase Orders CSV</a>
-                            <a href="/upload" class="nav-dropdown-item">📦 Line Items CSV</a>
-                            <button class="nav-dropdown-item" onclick="openNetSuiteImportModal()">🏢 NetSuite PO
-                                Form</button>
-                        </div>
+                <!-- Imports Section -->
+                <div class="nav-section">
+                    <button class="nav-imports-btn" onclick="toggleImportsDropdown()">
+                        📁 Import <span class="dropdown-icon">▼</span>
+                    </button>
+                    <div id="importsDropdown" class="nav-dropdown-content">
+                        <a href="/upload" class="nav-dropdown-item">📄 Purchase Orders CSV</a>
+                        <a href="/upload-line-items" class="nav-dropdown-item">📦 Line Items CSV</a>
+                        <button class="nav-dropdown-item" onclick="openNetSuiteImportModal()">🏢 NetSuite PO
+                            Form</button>
                     </div>
                 </div>
-                
-                <!-- User Info -->
-                <% if (typeof user !== 'undefined' && user) { %>
-                <div class="user-info" title="<%= user.firstName %> <%= user.lastName %> (<%= user.role %>) - Online">
-                    <div class="user-avatar">
-                        <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
-                        <div class="user-status-indicator" title="Online"></div>
-                    </div>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <!-- User Info Header -->
-                            <li class="dropdown-user-info">
-                                <div class="dropdown-user-avatar">
-                                    <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
-                                </div>
-                                <div class="dropdown-user-details">
-                                    <div class="dropdown-user-name"><%= user.firstName %> <%= user.lastName %></div>
-                                    <div class="dropdown-user-role"><%= user.role %></div>
-                                    <div class="dropdown-user-status">Online</div>
-                                </div>
-                            </li>
-                            <li><hr class="dropdown-divider" style="margin: 0;"></li>
-                            
-                            <% if (user.permissions && user.permissions.manageUsers) { %>
-                            <li><a class="dropdown-item" href="/auth/admin/users">
-                                <i class="fas fa-users me-2"></i>User Management
-                            </a></li>
-                            <li><a class="dropdown-item" href="/auth/admin/audit-logs">
-                                <i class="fas fa-history me-2"></i>Audit Logs
-                            </a></li>
-                            <% } %>
-                            <% if (user.role === 'admin' || user.role === 'manager') { %>
-                            <li><a class="dropdown-item" href="/auth/admin/test-email">
-                                <i class="fas fa-envelope me-2"></i>Test Email
-                            </a></li>
-                            <% } %>
-                            <% if ((user.permissions && user.permissions.manageUsers) || user.role === 'admin' || user.role === 'manager') { %>
-                            <li><hr class="dropdown-divider"></li>
-                            <% } %>
-                            <li>
-                                <form action="/auth/logout" method="POST" style="margin: 0;">
-                                    <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
-                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
+
+                <!-- Dropship Module -->
+                <div class="nav-section">
+                    <a href="/dropship" class="nav-accordion-btn" style="text-decoration: none;">
+                        🚚 Dropship Processor
+                    </a>
                 </div>
-                <% } else { %>
-                <div class="user-info">
-                    <span class="auth-status bg-warning text-dark">Not Authenticated</span>
-                    <a href="/auth/login" class="btn btn-primary btn-sm">Login</a>
+
+                <!-- Task Management -->
+                <div class="nav-section">
+                    <a href="/tasks" class="nav-accordion-btn" style="text-decoration: none;">
+                        ✅ Task Management
+                    </a>
                 </div>
-                <% } %>
             </div>
         </div>
 
@@ -3364,37 +2789,21 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         <!-- Pre-Purchase Orders Section -->
         <div class="pre-purchase-section">
             <div class="pre-purchase-header">
-                <div class="pre-purchase-title-area">
-                    <h2>📋 Pre-Purchase Orders<% if (prePurchaseOrders && prePurchaseOrders.length> 0) { %> (<%=
-                                prePurchaseOrders.length %>)<% } %>
-                    </h2>
-                    <button class="toggle-pre-purchase-btn" onclick="togglePrePurchaseOrders()" title="Show/Hide Pre-Purchase Orders">
-                        <i class="fas fa-eye-slash" id="pre-purchase-toggle-icon"></i>
-                        <span id="pre-purchase-toggle-text">Show</span>
-                        <% if (prePurchaseOrders && prePurchaseOrders.length > 0) { %>
-                            <span class="pre-purchase-badge" id="pre-purchase-badge"><%= prePurchaseOrders.length %></span>
-                        <% } %>
-                    </button>
-                </div>
+                <h2>📋 Pre-Purchase Orders<% if (prePurchaseOrders && prePurchaseOrders.length> 0) { %> (<%=
+                            prePurchaseOrders.length %>)<% } %>
+                </h2>
                 <button class="add-pre-po-btn" onclick="addPrePurchaseOrder()">➕ Add Pre-PO</button>
             </div>
 
-            <div class="pre-purchase-content" id="pre-purchase-content" style="display: none;">
-                <% if (prePurchaseOrders && prePurchaseOrders.length> 0) { %>
-                    <div class="pre-purchase-orders">
+            <% if (prePurchaseOrders && prePurchaseOrders.length> 0) { %>
+                <div class="pre-purchase-orders">
                     <% prePurchaseOrders.forEach((prePO, index)=> { %>
                         <div class="pre-po-card priority-<%= prePO.priority.toLowerCase() %>" data-id="<%= prePO._id %>"
                             data-priority="<%= prePO.priority.toLowerCase() %>"
                             data-receive-date="<%= prePO.receiveDate || '' %>" data-status="<%= prePO.status %>">
                             <div class="pre-po-header">
                                 <div class="pre-po-title">📦 <strong>
-                                        <% if (vendorMap && vendorMap[prePO.vendor]) { %>
-                                            <a href="/vendors/<%= vendorMap[prePO.vendor] %>" class="vendor-link" title="View <%= prePO.vendor %> profile">
-                                                <%= prePO.vendor %>
-                                            </a>
-                                        <% } else { %>
-                                            <%= prePO.vendor %>
-                                        <% } %>
+                                        <%= prePO.vendor %>
                                     </strong></div>
                                 <div class="pre-po-priority <%= prePO.priority.toLowerCase() %>">
                                     <%= prePO.priority %>
@@ -3431,7 +2840,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         <p>No pre-purchase orders yet. Start planning your purchases!</p>
                     </div>
                     <% } %>
-            </div> <!-- End pre-purchase-content -->
         </div>
 
         <% if (purchaseOrders.length> 0) { %>
@@ -3488,14 +2896,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 </div>
 
                 <div class="filter-group">
-                    <label style="margin-bottom: 5px;">Show Hidden POs</label>
-                    <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
-                        <input type="checkbox" id="showHiddenPOs" style="margin: 0;">
-                        <span style="font-size: 12px;">Include soft deleted POs</span>
-                    </label>
-                </div>
-
-                <div class="filter-group">
                     <label style="margin-bottom: 5px;">Show "Not my concern"</label>
                     <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
                         <input type="checkbox" id="showNotMyConcern" style="margin: 0;">
@@ -3520,14 +2920,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     <button class="btn btn-sm btn-outline-secondary ms-2" onclick="toggleTrackingColumn()"
                         id="toggleTrackingBtn" title="Show/Hide tracking column">
                         👁️ <span id="trackingColumnText">Show Tracking</span>
-                    </button>
-                    <button class="btn btn-sm btn-outline-secondary ms-2" onclick="toggleNsStatusColumn()"
-                        id="toggleNsStatusBtn" title="Show/Hide NS Status column">
-                        👁️ <span id="nsStatusColumnText">Show NS Status</span>
-                    </button>
-                    <button class="btn btn-sm btn-outline-warning ms-2" onclick="toggleNotReadyPOs()"
-                        id="toggleNotReadyBtn" title="Hide POs that haven't reached their Next Update date">
-                        📅 <span id="notReadyText">Hide Not Ready</span>
                     </button>
                 </div>
             </div>
@@ -3575,12 +2967,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     <th class="sortable vendor" data-column="vendor">Vendor</th>
                                     <th class="sortable line-items-count-cell" data-column="lineItemsCount">Line Items
                                     </th>
-                                    <th class="sortable eta-cell" data-column="eta">ETA</th>
-                                    <th class="sortable ns-status-cell" data-column="nsStatus">NS Status
-                                        <button class="toggle-ns-status-column-btn" onclick="toggleNsStatusColumn()" title="Show/Hide NS Status column">
-                                            👁️
-                                        </button>
-                                    </th>
+                                    <th class="sortable ns-status-cell" data-column="nsStatus">NS Status</th>
                                     <th class="sortable status-cell" data-column="status">Status</th>
                                     <th class="sortable shipping-tracking-cell" data-column="shippingTracking">Tracking
                                         <br><small style="font-weight: normal;">(Carrier & #)</small>
@@ -3589,15 +2976,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                         </button>
                                     </th>
                                     <th class="sortable next-update-cell" data-column="nextUpdateDate">Next Update</th>
-                                    <th class="notes-toggle-cell">Notes +</th>
+                                    <th class="notes-toggle-cell">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <% purchaseOrders.forEach((po, index)=> { %>
                                     <!-- Main data row -->
-                                    <tr data-po='<%= JSON.stringify(po) %>' data-index="<%= index %>" 
-                                        <% if (po.isHidden) { %>class="hidden-po"<% } %>
-                                        <% if (po.nextUpdateDate && new Date(po.nextUpdateDate) > new Date()) { %>data-not-ready="true"<% } else { %>data-not-ready="false"<% } %>>
+                                    <tr data-po='<%= JSON.stringify(po) %>' data-index="<%= index %>">
                                         <td class="date-cell">
                                             <%= po.date %>
                                         </td>
@@ -3626,26 +3011,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                                 title="Copy PO Number">
                                                                 📋
                                                             </button>
-                                                            <button
-                                                                class="attachments-btn <%= (po.attachments && po.attachments.length > 0) ? 'has-attachments' : '' %>"
-                                                                data-id="<%- po._id %>"
-                                                                data-po="<%- po.poNumber %>"
-                                                                onclick="openAttachmentsModal('<%- po._id %>', '<%- po.poNumber %>')"
-                                                                title="Manage Attachments">
-                                                                📎 <span class="attachment-count"><%= po.attachments ? po.attachments.length : 0 %></span>
+                                                            <button class="manage-attachments-btn <%= po.attachments && po.attachments.length > 0 ? 'has-attachments' : '' %>"
+                                                                type="button"
+                                                                data-po-id="<%= po._id %>"
+                                                                data-po-number="<%= po.poNumber %>"
+                                                                title="<%= po.attachments && po.attachments.length > 0 ? `Manage ${po.attachments.length} attachment(s)` : 'Manage attachments' %>">
+                                                                📎
                                                             </button>
                                             </div>
-                                            <% if (po.isHidden) { %>
-                                                <span class="hidden-po-indicator">
-                                                    🚫 HIDDEN
-                                                </span>
-                                                <div class="hidden-po-reason">
-                                                    Reason: <%= po.hiddenReason || 'Not specified' %>
-                                                    <% if (po.hiddenDate) { %>
-                                                        <br>Hidden: <%= new Date(po.hiddenDate).toLocaleDateString() %>
-                                                    <% } %>
-                                                </div>
-                                            <% } %>
                                         </td>
                                         <td class="priority-cell">
                                             <select class="priority-select" data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
@@ -3658,23 +3031,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                             </select>
                                         </td>
                                         <td class="vendor" title="<%= po.vendor %>">
-                                            <% if (vendorMap && vendorMap[po.vendor]) { %>
-                                                <a href="/vendors/<%= vendorMap[po.vendor] %>" class="vendor-link" title="View <%= po.vendor %> profile">
-                                                    <% if (po.vendorNumber && po.vendorName) { %>
-                                                        <span class="vendor-number"><%= po.vendorNumber %></span>
-                                                        <span class="vendor-name"><%= po.vendorName %></span>
-                                                    <% } else { %>
-                                                        <%= po.vendor %>
-                                                    <% } %>
-                                                </a>
-                                            <% } else { %>
-                                                <% if (po.vendorNumber && po.vendorName) { %>
-                                                    <span class="vendor-number"><%= po.vendorNumber %></span>
-                                                    <span class="vendor-name"><%= po.vendorName %></span>
-                                                <% } else { %>
-                                                    <%= po.vendor %>
-                                                <% } %>
-                                            <% } %>
+                                            <%= po.vendor %>
                                         </td>
                                         <td class="line-items-count-cell">
                                             <% if (po.lineItems && po.lineItems.length> 0) { %>
@@ -3710,23 +3067,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                         </button>
                                                     </div>
                                                     <% } %>
-                                        </td>
-                                        <td class="eta-cell">
-                                            <% if (po.formattedETA && po.formattedETA !== 'No ETA') { %>
-                                                <span class="calculated-eta 
-                                                    <%= po.formattedETA === 'Past Due' ? 'overdue' : '' %>
-                                                    <%= po.formattedETA === 'Today' ? 'today' : '' %>
-                                                    <%= po.formattedETA === 'Tomorrow' ? 'tomorrow' : '' %>"
-                                                    title="Calculated from line items with Expected Arrival Dates (no Bill Variance Field)">
-                                                    🕒 <%= po.formattedETA %>
-                                                </span>
-                                            <% } %>
-                                            <input type="date"
-                                                class="eta-date-input <%= po.eta ? 'has-date' : '' %> <%= po.eta && new Date(po.eta) < new Date() ? 'overdue' : '' %>"
-                                                value="<%= po.eta ? new Date(po.eta).toISOString().split('T')[0] : '' %>"
-                                                data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
-                                                title="Manual ETA override for PO <%= po.poNumber %>"
-                                                placeholder="Manual ETA">
                                         </td>
                                         <td class="ns-status-cell">
                                             <span class="ns-status-display">
@@ -3779,18 +3119,22 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                 </div>
                                                 <% if (po.shippingTracking) { %>
                                                     <div class="tracking-actions">
-                                                        <a href="#" 
-                                                           onclick="event.preventDefault(); openTrackingUrl('<%= po.shippingTracking %>', '<%= po.shippingCarrier || 'FedEx' %>');"
-                                                           class="btn btn-sm btn-outline-primary"
-                                                           title="Track on <%= po.shippingCarrier || 'FedEx' %> website">
-                                                            🌐 Track Package
-                                                        </a>
+                                                        <button class="btn btn-sm btn-outline-primary tracking-info-btn"
+                                                            data-tracking="<%= po.shippingTracking %>"
+                                                            data-carrier="<%= po.shippingCarrier || 'FedEx' %>"
+                                                            data-po-id="<%= po._id %>" title="Get tracking info">
+                                                            🔍
+                                                        </button>
+                                                        <button
+                                                            class="btn btn-sm btn-outline-success tracking-update-btn"
+                                                            data-po-id="<%= po._id %>"
+                                                            title="Update tracking from 17track">
+                                                            🔄
+                                                        </button>
                                                     </div>
-                                                    <% if (po.shippingTrackingStatus) { %>
                                                     <div class="tracking-status" data-po-id="<%= po._id %>">
-                                                        <small class="text-muted"><%= po.shippingTrackingStatus %></small>
+                                                        <small class="text-muted">Click 🔍 to check status</small>
                                                     </div>
-                                                    <% } %>
                                                     <% } %>
                                             </div>
                                         </td>
@@ -3802,52 +3146,28 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                 title="Set next update date for PO <%= po.poNumber %>">
                                         </td>
                                         <td class="notes-toggle-cell">
-                                            <div style="display: flex; gap: 4px;">
+                                            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                                                 <button
                                                     class="notes-toggle <%= po.notes && po.notes.trim() ? 'has-notes' : '' %>"
                                                     type="button" data-index="<%= index %>"
                                                     title="<%= po.notes && po.notes.trim() ? 'View/Edit notes' : 'Add notes' %>">
                                                     <%= po.notes && po.notes.trim() ? '📝' : '➕' %>
                                                 </button>
-                                                <div class="task-management-container">
-                                                    <% if (po.relatedTasks && po.relatedTasks.length > 0) { %>
-                                                        <div class="dropdown">
-                                                            <button class="task-toggle-btn has-tasks dropdown-toggle" 
-                                                                    type="button" 
-                                                                    data-bs-toggle="dropdown" 
-                                                                    aria-expanded="false"
-                                                                    data-po-id="<%= po._id %>"
-                                                                    title="<%= po.relatedTasks.length %> task(s) for this PO">
-                                                                📋<span class="task-count"><%= po.relatedTasks.length %></span>
-                                                            </button>
-                                                            <ul class="dropdown-menu">
-                                                                <% po.relatedTasks.forEach(function(task) { %>
-                                                                    <li><a class="dropdown-item" href="/tasks?editTask=<%= task._id %>&returnUrl=<%= encodeURIComponent('/purchase-orders') %>">
-                                                                        ✏️ Edit: <%= task.title %>
-                                                                    </a></li>
-                                                                <% }); %>
-                                                                <li><hr class="dropdown-divider"></li>
-                                                                <li><a class="dropdown-item" href="/tasks?createTaskForPO=<%= po._id %>&poNumber=<%= po.poNumber %>&returnUrl=<%= encodeURIComponent('/purchase-orders') %>">
-                                                                    ➕ Create New Task
-                                                                </a></li>
-                                                            </ul>
-                                                        </div>
-                                                    <% } else { %>
-                                                        <a href="/tasks?createTaskForPO=<%= po._id %>&poNumber=<%= po.poNumber %>&returnUrl=<%= encodeURIComponent('/purchase-orders') %>" 
-                                                           class="task-toggle-btn" 
-                                                           title="Create task for this PO">
-                                                            ➕
-                                                        </a>
-                                                    <% } %>
-                                                </div>
                                                 <button class="tracking-toggle-btn <%= po.shippingTracking ? 'has-status' : '' %>"
                                                     type="button" 
                                                     data-po-id="<%= po._id %>"
                                                     data-tracking="<%= po.shippingTracking || '' %>"
                                                     data-carrier="<%= po.shippingCarrier || 'FedEx' %>"
-                                                    onclick="toggleTrackingDetails('<%= po._id %>')"
                                                     title="<%= po.shippingTracking ? `Tracking: ${po.shippingTracking} (${po.shippingCarrier || 'FedEx'})` : 'No tracking information' %>">
                                                     🚚
+                                                </button>
+                                                <button class="create-task-btn"
+                                                    type="button"
+                                                    data-po-id="<%= po._id %>"
+                                                    data-po-number="<%= po.poNumber %>"
+                                                    data-vendor="<%= po.vendor %>"
+                                                    title="Create task for PO <%= po.poNumber %> and vendor <%= po.vendor %>">
+                                                    ✅
                                                 </button>
                                             </div>
                                         </td>
@@ -3863,7 +3183,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                 </div>
                                                 <div class="line-items-actions">
                                                     <button class="show-received-toggle" id="show-received-<%= index %>"
-                                                        onclick="toggleReceivedItems(<%= index %>)"
                                                         style="display: none;">
                                                         👁️ Show Received
                                                     </button>
@@ -3999,26 +3318,78 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             </div>
 
             <div class="po-details-tabs">
-                <button class="tab-button active" onclick="showTab('lineItemsTable')">📦 Line Items - Table View</button>
-                <button class="tab-button" onclick="showTab('lineItems')">📦 Line Items - Card View</button>
+                <button class="tab-button active" onclick="showTab('lineItems')">📦 Line Items</button>
                 <button class="tab-button" onclick="showTab('notesHistory')">📋 Notes History</button>
+                <button class="tab-button" onclick="showTab('attachments')">📎 Documents</button>
             </div>
 
-            <div id="lineItemsTableTab" class="tab-content active">
-                <div id="poDetailsLineItemsTable" class="po-details-line-items-table">
-                    <!-- Table view will be loaded here -->
-                </div>
-            </div>
-
-            <div id="lineItemsTab" class="tab-content">
+            <div id="lineItemsTab" class="tab-content active">
                 <div id="poDetailsLineItems" class="po-details-line-items">
-                    <!-- Card view will be loaded here -->
+                    <!-- Line items will be loaded here -->
                 </div>
             </div>
 
             <div id="notesHistoryTab" class="tab-content">
                 <div id="poDetailsNotesHistory" class="po-details-notes-history">
                     <!-- Notes history will be loaded here -->
+                </div>
+            </div>
+
+            <div id="attachmentsTab" class="tab-content">
+                <div class="attachments-section">
+                    <div class="attachments-header">
+                        <h4>Document Attachments</h4>
+                        <p class="attachments-description">Upload purchase orders, invoices, packing slips, and other documents related to this PO.</p>
+                    </div>
+                    
+                    <div class="attachment-upload-form">
+                        <form id="attachmentUploadForm" enctype="multipart/form-data">
+                            <input type="hidden" id="attachmentPOId" name="poId">
+                            
+                            <div class="upload-form-row">
+                                <div class="form-group">
+                                    <label for="attachmentFile">Select File:</label>
+                                    <input type="file" id="attachmentFile" name="attachment" 
+                                           accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.txt"
+                                           required>
+                                    <small class="file-hint">Supported: PDF, Images, Word, Excel, Text files (Max: 10MB)</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="documentType">Document Type:</label>
+                                    <select id="documentType" name="documentType">
+                                        <option value="Purchase Order">Purchase Order</option>
+                                        <option value="Invoice">Invoice</option>
+                                        <option value="Packing Slip">Packing Slip</option>
+                                        <option value="Bill of Lading (BOL)">Bill of Lading (BOL)</option>
+                                        <option value="Shipping Confirmation">Shipping Confirmation</option>
+                                        <option value="Receipt">Receipt</option>
+                                        <option value="Quote">Quote</option>
+                                        <option value="Contract">Contract</option>
+                                        <option value="Specification Sheet">Specification Sheet</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="attachmentDescription">Description (Optional):</label>
+                                <input type="text" id="attachmentDescription" name="description" 
+                                       placeholder="Brief description of this document...">
+                            </div>
+                            
+                            <button type="submit" class="upload-attachment-btn">
+                                📎 Upload Document
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div class="attachments-list">
+                        <h5>Uploaded Documents:</h5>
+                        <div id="attachmentsList" class="attachments-container">
+                            <!-- Attachments will be loaded here -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -4038,86 +3409,123 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         </div>
     </div>
 
+    <!-- Create Task Modal -->
+    <div id="createTaskModal" class="status-modal">
+        <div class="status-modal-content" style="max-width: 500px;">
+            <div class="status-modal-header">
+                <div class="status-modal-title">Create Task</div>
+                <button class="status-close" onclick="closeCreateTaskModal()">&times;</button>
+            </div>
+
+            <div class="status-modal-body" style="padding: 20px;">
+                <form id="createTaskForm">
+                    <input type="hidden" id="taskPOId" name="poId">
+                    
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label for="taskTitle" style="display: block; margin-bottom: 5px; font-weight: 500;">Task Title:</label>
+                        <input type="text" id="taskTitle" name="title" required 
+                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label for="taskDescription" style="display: block; margin-bottom: 5px; font-weight: 500;">Description:</label>
+                        <textarea id="taskDescription" name="description" rows="4" 
+                                  style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;"></textarea>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label for="taskDueDate" style="display: block; margin-bottom: 5px; font-weight: 500;">Due Date:</label>
+                        <input type="date" id="taskDueDate" name="dueDate" 
+                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label for="taskPriority" style="display: block; margin-bottom: 5px; font-weight: 500;">Priority:</label>
+                        <select id="taskPriority" name="priority" 
+                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Related To:</label>
+                        <div id="taskRelatedInfo" style="padding: 10px; background: #f8f9fa; border-radius: 4px; font-size: 14px;">
+                            <!-- PO and vendor info will be displayed here -->
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="button" onclick="closeCreateTaskModal()" 
+                                style="padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                style="padding: 8px 16px; border: none; background: #007bff; color: white; border-radius: 4px; cursor: pointer;">
+                            Create Task
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Vendor Reconciliation Function - reconciles BOTH main Vendors and OrganicVendors
-        async function reconcileVendors() {
-            try {
-                // Show confirmation dialog
-                const confirmed = confirm('This will find all POs with missing vendor links and create/link them automatically.\n\nThis will update:\n• Main Vendors (for all vendors)\n• Organic Vendors (for organic certified vendors)\n\nContinue?');
-                if (!confirmed) return;
+        // Navigation Functions
+        function toggleAccordion() {
+            const content = document.getElementById('managersAccordion');
+            const icon = document.querySelector('.accordion-icon');
 
-                // Show loading state
-                const button = event.target;
-                const originalText = button.textContent;
-                button.textContent = '🔄 Processing...';
-                button.disabled = true;
-
-                console.log('🔄 Starting vendor reconciliation...');
-                
-                // Step 1: Reconcile main Vendors first
-                console.log('📋 Step 1: Reconciling main Vendors...');
-                const mainVendorsResponse = await fetch('/test-upload/reconcile-main-vendors', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    credentials: 'same-origin'
-                });
-
-                const mainVendorsResult = await mainVendorsResponse.json();
-                console.log('📊 Main vendors result:', mainVendorsResult);
-
-                if (!mainVendorsResult.success) {
-                    throw new Error(`Main vendors reconciliation failed: ${mainVendorsResult.error}`);
-                }
-
-                // Step 2: Reconcile OrganicVendors
-                console.log('📋 Step 2: Reconciling OrganicVendors...');
-                const organicVendorsResponse = await fetch('/test-upload/reconcile-vendors', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    credentials: 'same-origin'
-                });
-
-                const organicVendorsResult = await organicVendorsResponse.json();
-                console.log('📊 Organic vendors result:', organicVendorsResult);
-
-                if (!organicVendorsResult.success) {
-                    throw new Error(`Organic vendors reconciliation failed: ${organicVendorsResult.error}`);
-                }
-
-                // Show combined results
-                const totalCreated = mainVendorsResult.created + organicVendorsResult.created;
-                const totalLinked = mainVendorsResult.linked + organicVendorsResult.linked;
-
-                alert(`✅ Reconciliation complete!\n\n` +
-                      `Main Vendors:\n` +
-                      `• ${mainVendorsResult.created} new vendors created\n` +
-                      `• ${mainVendorsResult.linked} POs linked\n\n` +
-                      `Organic Vendors:\n` +
-                      `• ${organicVendorsResult.created} new vendors created\n` +
-                      `• ${organicVendorsResult.linked} POs linked\n\n` +
-                      `Total: ${totalCreated} created, ${totalLinked} linked\n\n` +
-                      `Refreshing page to show updates...`);
-                
-                // Refresh the page to show the updated links
-                window.location.reload();
-
-            } catch (error) {
-                console.error('❌ Reconciliation request failed:', error);
-                alert(`❌ Failed to reconcile vendors: ${error.message}\n\nPlease check the console for details.`);
-            } finally {
-                // Restore button state
-                if (typeof button !== 'undefined' && button) {
-                    button.textContent = originalText;
-                    button.disabled = false;
-                }
-            }
+            content.classList.toggle('show');
+            icon.classList.toggle('rotated');
         }
+
+        function toggleOptionsDropdown() {
+            const content = document.getElementById('optionsDropdown');
+            const icon = document.querySelector('.nav-options-btn .dropdown-icon');
+
+            content.classList.toggle('show');
+            icon.classList.toggle('rotated');
+
+            // Close other dropdowns
+            document.getElementById('importsDropdown').classList.remove('show');
+            document.querySelector('.nav-imports-btn .dropdown-icon').classList.remove('rotated');
+        }
+
+        function toggleImportsDropdown() {
+            const content = document.getElementById('importsDropdown');
+            const icon = document.querySelector('.nav-imports-btn .dropdown-icon');
+
+            content.classList.toggle('show');
+            icon.classList.toggle('rotated');
+
+            // Close other dropdowns
+            document.getElementById('optionsDropdown').classList.remove('show');
+            document.querySelector('.nav-options-btn .dropdown-icon').classList.remove('rotated');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function (event) {
+            const managersSection = document.querySelector('.nav-section:first-child');
+            const optionsSection = document.querySelector('.nav-section:nth-child(2)');
+            const importsSection = document.querySelector('.nav-section:nth-child(3)');
+
+            if (!managersSection.contains(event.target)) {
+                document.getElementById('managersAccordion').classList.remove('show');
+                document.querySelector('.accordion-icon').classList.remove('rotated');
+            }
+
+            if (!optionsSection.contains(event.target)) {
+                document.getElementById('optionsDropdown').classList.remove('show');
+                document.querySelector('.nav-options-btn .dropdown-icon').classList.remove('rotated');
+            }
+
+            if (!importsSection.contains(event.target)) {
+                document.getElementById('importsDropdown').classList.remove('show');
+                document.querySelector('.nav-imports-btn .dropdown-icon').classList.remove('rotated');
+            }
+        });
 
         // NetSuite Import Functions
         function openNetSuiteImportModal(isUpdate = false, poNumber = '') {
@@ -4287,59 +3695,136 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     fallbackCopyTextToClipboard(poNumber);
                 }
             }
+
+            // Handle PO Details button clicks using event delegation
+            if (event.target.closest('.po-details-btn')) {
+                const btn = event.target.closest('.po-details-btn');
+                const poId = btn.getAttribute('data-id');
+                const poNumber = btn.getAttribute('data-po');
+                
+                console.log('📦 PO Details button clicked:', { poId, poNumber });
+                
+                if (poId && poNumber) {
+                    openPoDetailsModal(poId, poNumber);
+                } else {
+                    console.error('❌ Missing PO ID or number:', { poId, poNumber });
+                }
+            }
+
+            // Handle notes toggle buttons using event delegation
+            if (event.target.closest('.notes-toggle')) {
+                const btn = event.target.closest('.notes-toggle');
+                const index = btn.getAttribute('data-index');
+                const notesRow = document.getElementById(`notes-row-${index}`);
+                
+                if (notesRow) {
+                    const isExpanded = notesRow.classList.contains('expanded');
+                    
+                    if (isExpanded) {
+                        notesRow.classList.remove('expanded');
+                    } else {
+                        notesRow.classList.add('expanded');
+                        const textarea = notesRow.querySelector('.notes-input');
+                        if (textarea) {
+                            setTimeout(() => textarea.focus(), 100);
+                        }
+                    }
+                }
+            }
+
+            // Handle tracking details toggle using event delegation
+            if (event.target.closest('.tracking-toggle-btn')) {
+                event.preventDefault(); // Prevent any onclick from firing
+                const btn = event.target.closest('.tracking-toggle-btn');
+                const poId = btn.getAttribute('data-po-id');
+                
+                if (poId) {
+                    console.log('📍 Tracking details button clicked:', poId);
+                    toggleTrackingDetails(poId);
+                } else {
+                    console.error('❌ Missing PO ID for tracking button');
+                }
+            }
+
+            // Handle "Show Received" toggle button using event delegation
+            if (event.target.closest('.show-received-toggle')) {
+                event.preventDefault(); // Prevent any onclick from firing
+                const btn = event.target.closest('.show-received-toggle');
+                const btnId = btn.getAttribute('id');
+                const index = btnId ? btnId.replace('show-received-', '') : null;
+                
+                if (index !== null) {
+                    console.log('👁️ Show Received button clicked for index:', index);
+                    toggleReceivedItems(index);
+                } else {
+                    console.error('❌ Could not determine index for show-received button');
+                }
+            }
+
+            // Handle line items close buttons using event delegation
+            if (event.target.closest('.line-items-close')) {
+                const btn = event.target.closest('.line-items-close');
+                const index = btn.getAttribute('data-index');
+                const lineItemsRow = document.getElementById(`line-items-row-${index}`);
+                
+                if (lineItemsRow) {
+                    lineItemsRow.classList.remove('expanded');
+                }
+            }
+
+            // Handle notes close buttons using event delegation
+            if (event.target.closest('.notes-close')) {
+                const btn = event.target.closest('.notes-close');
+                const index = btn.getAttribute('data-index');
+                const notesRow = document.getElementById(`notes-row-${index}`);
+                
+                if (notesRow) {
+                    notesRow.classList.remove('expanded');
+                }
+            }
+
+            // Handle manage attachments button using event delegation
+            if (event.target.closest('.manage-attachments-btn')) {
+                const btn = event.target.closest('.manage-attachments-btn');
+                const poId = btn.getAttribute('data-po-id');
+                const poNumber = btn.getAttribute('data-po-number');
+                
+                if (poId && poNumber) {
+                    console.log('📎 Manage Attachments button clicked:', { poId, poNumber });
+                    // Open PO Details modal and switch to attachments tab
+                    openPoDetailsModal(poId, poNumber).then(() => {
+                        // Switch to attachments tab after modal opens
+                        const attachmentsTabBtn = document.querySelector('.tab-button[onclick*="attachments"]');
+                        if (attachmentsTabBtn) {
+                            attachmentsTabBtn.click();
+                        }
+                    });
+                } else {
+                    console.error('❌ Missing PO ID or number for attachments button');
+                }
+            }
+
+            // Handle create task button using event delegation
+            if (event.target.closest('.create-task-btn')) {
+                const btn = event.target.closest('.create-task-btn');
+                const poId = btn.getAttribute('data-po-id');
+                const poNumber = btn.getAttribute('data-po-number');
+                const vendor = btn.getAttribute('data-vendor');
+                
+                if (poId && poNumber && vendor) {
+                    console.log('✅ Create Task button clicked:', { poId, poNumber, vendor });
+                    openCreateTaskModal(poId, poNumber, vendor);
+                } else {
+                    console.error('❌ Missing data for create task button:', { poId, poNumber, vendor });
+                }
+            }
         });
 
         let currentSort = { column: null, direction: null };
 
         // Enhanced Notes functionality - notes appear below each row
-
-        // Handle notes toggle buttons
-        document.querySelectorAll('.notes-toggle').forEach(toggleBtn => {
-            toggleBtn.addEventListener('click', function () {
-                const index = this.dataset.index;
-                const notesRow = document.getElementById(`notes-row-${index}`);
-                const isExpanded = notesRow.classList.contains('expanded');
-
-                if (isExpanded) {
-                    // Collapse
-                    notesRow.classList.remove('expanded');
-                } else {
-                    // Expand
-                    notesRow.classList.add('expanded');
-                    // Focus on the textarea
-                    const textarea = notesRow.querySelector('.notes-input');
-                    setTimeout(() => textarea.focus(), 100);
-                }
-            });
-        });
-
-        // Handle PO details buttons
-        document.querySelectorAll('.po-details-btn').forEach(detailsBtn => {
-            detailsBtn.addEventListener('click', async function () {
-                const index = this.dataset.index;
-                const poId = this.dataset.id;
-                const poNumber = this.dataset.po;
-                openPoDetailsModal(poId, poNumber);
-            });
-        });
-
-        // Handle line items close buttons
-        document.querySelectorAll('.line-items-close').forEach(closeBtn => {
-            closeBtn.addEventListener('click', function () {
-                const index = this.dataset.index;
-                const lineItemsRow = document.getElementById(`line-items-row-${index}`);
-                lineItemsRow.classList.remove('expanded');
-            });
-        });
-
-        // Handle close buttons
-        document.querySelectorAll('.notes-close').forEach(closeBtn => {
-            closeBtn.addEventListener('click', function () {
-                const index = this.dataset.index;
-                const notesRow = document.getElementById(`notes-row-${index}`);
-                notesRow.classList.remove('expanded');
-            });
-        });
+        // NOTE: All button event listeners are now handled via event delegation above
+        // This ensures buttons work even after dynamic table updates (filtering, sorting, etc.)
 
         // Handle notes input with auto-save
         document.querySelectorAll('.notes-input').forEach(input => {
@@ -4521,52 +4006,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     .catch(error => {
                         this.classList.remove('saving');
                         console.error('Error saving next update date:', error);
-                    });
-            });
-        });
-
-        // Auto-save ETA when changed
-        document.querySelectorAll('.eta-date-input').forEach(etaInput => {
-            etaInput.addEventListener('change', function () {
-                const id = this.dataset.id;
-                const poNumber = this.dataset.po;
-                const eta = this.value;
-
-                // Show saving state
-                this.classList.add('saving');
-
-                fetch(`/purchase-orders/${id}/eta`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ eta })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        // Remove saving state and update appearance
-                        this.classList.remove('saving');
-
-                        if (eta) {
-                            this.classList.add('has-date');
-
-                            // Check if date is overdue
-                            const etaDate = new Date(eta);
-                            const today = new Date();
-                            today.setHours(0, 0, 0, 0); // Reset time for date comparison
-
-                            if (etaDate < today) {
-                                this.classList.add('overdue');
-                            } else {
-                                this.classList.remove('overdue');
-                            }
-                        } else {
-                            this.classList.remove('has-date', 'overdue');
-                        }
-
-                        console.log(`ETA saved for PO ${poNumber}: ${eta || 'cleared'}`);
-                    })
-                    .catch(error => {
-                        this.classList.remove('saving');
-                        console.error('Error saving ETA:', error);
                     });
             });
         });
@@ -5226,6 +4665,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const urlModal = document.getElementById('urlModal');
             const poDetailsModal = document.getElementById('poDetailsModal');
             const trackingDetailsModal = document.getElementById('trackingDetailsModal');
+            const createTaskModal = document.getElementById('createTaskModal');
             
             if (event.target === urlModal) {
                 closeUrlModal();
@@ -5235,6 +4675,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             }
             if (event.target === trackingDetailsModal) {
                 closeTrackingDetailsModal();
+            }
+            if (event.target === createTaskModal) {
+                closeCreateTaskModal();
             }
         });
 
@@ -5247,10 +4690,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             modal.dataset.poId = poId; // Store poId for later use
             modal.style.display = 'block';
             
-            // Reset to line items table tab (new default)
+            // Set PO ID in attachment form
+            const attachmentPOIdInput = document.getElementById('attachmentPOId');
+            if (attachmentPOIdInput) {
+                attachmentPOIdInput.value = poId;
+            }
+            
+            // Reset to line items tab
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('lineItemsTableTab').classList.add('active');
+            document.getElementById('lineItemsTab').classList.add('active');
             document.querySelector('.tab-button').classList.add('active');
             
             // Load line items by default
@@ -5259,85 +4708,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         function closePoDetailsModal() {
             document.getElementById('poDetailsModal').style.display = 'none';
-        }
-
-        // Render PO modal table view
-        function renderPoModalTableView(lineItems) {
-            const tableContainer = document.getElementById('poDetailsLineItemsTable');
-            
-            if (!lineItems || lineItems.length === 0) {
-                tableContainer.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
-                return;
-            }
-
-            const tableHtml = `
-                <table class="po-modal-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Memo</th>
-                            <th>Quantity</th>
-                            <th>SKU</th>
-                            <th>Status</th>
-                            <th>Notes</th>
-                            <th>Received</th>
-                            <th>Tracking</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${lineItems.map(item => `
-                            <tr class="line-item-row ${item.received ? 'received' : ''}" data-item-id="${item._id}">
-                                <td>${item.date ? new Date(item.date).toLocaleDateString() : 'No date'}</td>
-                                <td class="item-memo" title="${escapeHtml(item.memo)}">${escapeHtml(item.memo)}</td>
-                                <td>${item.quantityExpected || item.quantity || 'N/A'}${item.unit ? ' ' + item.unit : ''}</td>
-                                <td>
-                                    <input type="text" 
-                                           class="sku-input" 
-                                           placeholder="SKU" 
-                                           value="${escapeHtml(item.sku || '')}"
-                                           onchange="updateLineItemField('${item._id}', 'sku', this.value)">
-                                </td>
-                                <td>
-                                    <select class="status-select" 
-                                            onchange="updateLineItemField('${item._id}', 'status', this.value)">
-                                        <option value="">Select Status</option>
-                                        ${globalLineItemStatusOptions.map(status => 
-                                            `<option value="${escapeHtml(status)}" ${item.status === status ? 'selected' : ''}>${escapeHtml(status)}</option>`
-                                        ).join('')}
-                                    </select>
-                                </td>
-                                <td>
-                                    <input type="text" 
-                                           class="notes-input" 
-                                           placeholder="Notes" 
-                                           value="${escapeHtml(item.notes || '')}"
-                                           onchange="updateLineItemField('${item._id}', 'notes', this.value)">
-                                </td>
-                                <td>
-                                    <button class="received-toggle ${item.received ? 'received' : ''}" 
-                                            onclick="toggleReceivedInModal('${item._id}', ${!item.received}, '${getPoIdFromModal()}')">
-                                        ${item.received ? '✅ Received' : '📦 Mark Received'}
-                                    </button>
-                                </td>
-                                <td class="line-item-tracking ${!item.trackingNumber ? 'no-tracking' : ''}">
-                                    ${item.trackingNumber ? 
-                                        `<a href="#" onclick="openTrackingDetails('${item.trackingNumber}', '${item.carrier || 'Unknown'}')" class="tracking-link">${item.trackingNumber}</a>` :
-                                        `<button class="tracking-add-btn" onclick="addTrackingInModal('${item._id}')">Add Tracking</button>`
-                                    }
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-
-            tableContainer.innerHTML = tableHtml;
-        }
-
-        // Helper function to get PO ID from modal
-        function getPoIdFromModal() {
-            const modal = document.getElementById('poDetailsModal');
-            return modal.dataset.poId;
         }
 
         // Tracking Functions
@@ -5358,54 +4728,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             
             // Show a toast notification
             const message = isCurrentlyVisible ? '👁️ Tracking column hidden' : '👁️ Tracking column shown';
-            showTrackingToast(message, 'success');
-        }
-
-        function toggleNsStatusColumn() {
-            const table = document.getElementById('purchaseOrdersTable');
-            const isCurrentlyVisible = table.classList.contains('show-ns-status');
-            
-            if (isCurrentlyVisible) {
-                // Hide NS status column
-                table.classList.remove('show-ns-status');
-            } else {
-                // Show NS status column
-                table.classList.add('show-ns-status');
-            }
-            
-            // Update button state
-            updateNsStatusButtonState(!isCurrentlyVisible);
-            
-            // Show a toast notification
-            const message = isCurrentlyVisible ? '👁️ NS Status column hidden' : '👁️ NS Status column shown';
-            showTrackingToast(message, 'success');
-        }
-
-        function toggleNotReadyPOs() {
-            const table = document.getElementById('purchaseOrdersTable');
-            const isCurrentlyHiding = table.classList.contains('hide-not-ready');
-            const btn = document.getElementById('toggleNotReadyBtn');
-            const btnText = document.getElementById('notReadyText');
-            
-            if (isCurrentlyHiding) {
-                // Show all POs
-                table.classList.remove('hide-not-ready');
-                btn.classList.remove('btn-outline-warning');
-                btn.classList.add('btn-outline-secondary');
-                btnText.textContent = 'Hide Not Ready';
-            } else {
-                // Hide POs that haven't reached their Next Update date
-                table.classList.add('hide-not-ready');
-                btn.classList.remove('btn-outline-secondary');
-                btn.classList.add('btn-outline-warning');
-                btnText.textContent = 'Show All';
-            }
-            
-            // Update the visible count
-            updateVisibleCount();
-            
-            // Show a toast notification
-            const message = isCurrentlyHiding ? '📅 Showing all POs' : '📅 Hiding POs not ready for update';
             showTrackingToast(message, 'success');
         }
 
@@ -5433,356 +4755,178 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             
             if (message) {
                 content.innerHTML = `<div style="text-align: center; padding: 20px; color: #6c757d;">${message}</div>`;
-                modal.style.display = 'block';
-                return;
-            }
-
-            // Show loading state
-            content.innerHTML = `
-                <div style="text-align: center; padding: 40px;">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+            } else {
+                content.innerHTML = `
+                    <div class="tracking-info-section">
+                        <div class="tracking-info-header">
+                            <div class="tracking-number">${trackingNumber}</div>
+                            <div class="carrier-info">${carrier}</div>
+                        </div>
+                        <div class="tracking-status-display" style="background: #ffc107; color: #212529;">
+                            Click "Check Status" to get latest tracking information
+                        </div>
+                        <div class="tracking-actions-section">
+                            <button class="tracking-action-btn primary" onclick="checkTrackingStatus('${poId}', '${trackingNumber}', '${carrier}')">
+                                🔍 Check Status
+                            </button>
+                            <button class="tracking-action-btn secondary" onclick="updateTrackingInfo('${poId}')">
+                                🔄 Update from 17track
+                            </button>
+                            <button class="tracking-action-btn secondary" onclick="openTrackingUrl('${trackingNumber}', '${carrier}')">
+                                🌐 View on ${carrier} Website
+                            </button>
+                        </div>
                     </div>
-                    <p style="margin-top: 15px; color: #6c757d;">Loading tracking information...</p>
-                </div>
-            `;
+                `;
+            }
+            
             modal.style.display = 'block';
-
-            // Fetch tracking information from database
-            fetch(`/purchase-orders/tracking/${trackingNumber}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.trackingInfo) {
-                        displayTrackingInfo(trackingNumber, carrier, data.trackingInfo);
-                        // Try to fetch live data in background if carrier supports API
-                        if (carrier.toLowerCase() === 'fedex') {
-                            refreshLiveTracking(trackingNumber, carrier);
-                        }
-                    } else {
-                        // No tracking info in database, show basic view
-                        displayBasicTracking(trackingNumber, carrier);
-                        // Try to fetch live data
-                        if (carrier.toLowerCase() === 'fedex') {
-                            refreshLiveTracking(trackingNumber, carrier);
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching tracking info:', error);
-                    displayBasicTracking(trackingNumber, carrier);
-                });
-        }
-
-        function displayTrackingInfo(trackingNumber, carrier, trackingInfo) {
-            const content = document.getElementById('trackingDetailsContent');
-            
-            // Status badge color based on status
-            let statusColor = '#6c757d';
-            let statusIcon = '📦';
-            const status = (trackingInfo.status || '').toLowerCase();
-            
-            if (status.includes('delivered')) {
-                statusColor = '#28a745';
-                statusIcon = '✅';
-            } else if (status.includes('transit') || status.includes('picked')) {
-                statusColor = '#17a2b8';
-                statusIcon = '🚚';
-            } else if (status.includes('exception') || status.includes('delayed')) {
-                statusColor = '#ffc107';
-                statusIcon = '⚠️';
-            } else if (status.includes('label')) {
-                statusColor = '#6c757d';
-                statusIcon = '🏷️';
-            }
-
-            let historyHtml = '';
-            if (trackingInfo.history && trackingInfo.history.length > 0) {
-                historyHtml = `
-                    <div class="tracking-history" style="margin-top: 25px;">
-                        <h5 style="color: #495057; margin-bottom: 15px; border-bottom: 2px solid #dee2e6; padding-bottom: 8px;">
-                            📋 Tracking History
-                        </h5>
-                        <div class="timeline">
-                            ${trackingInfo.history.map((event, index) => `
-                                <div class="timeline-item" style="padding: 12px; margin-bottom: 10px; background: ${index === 0 ? '#f8f9fa' : 'white'}; border-left: 3px solid ${index === 0 ? '#007bff' : '#dee2e6'}; border-radius: 4px;">
-                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                        <strong style="color: #007bff;">${event.status || 'Update'}</strong>
-                                        <span style="color: #6c757d; font-size: 0.85rem;">
-                                            ${event.timestamp ? new Date(event.timestamp).toLocaleString() : ''}
-                                        </span>
-                                    </div>
-                                    ${event.location ? `<div style="color: #6c757d; font-size: 0.9rem;">📍 ${event.location}</div>` : ''}
-                                    ${event.description ? `<div style="color: #495057; margin-top: 5px;">${event.description}</div>` : ''}
-                                    ${event.updatedBy ? `<div style="color: #6c757d; font-size: 0.85rem; margin-top: 5px;"><em>Updated by: ${event.updatedBy}</em></div>` : ''}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            content.innerHTML = `
-                <div class="tracking-info-section">
-                    <div class="tracking-info-header" style="text-align: center; margin-bottom: 20px;">
-                        <div class="tracking-number" style="font-size: 1.3rem; font-weight: bold; color: #007bff; margin-bottom: 10px;">
-                            ${trackingNumber}
-                        </div>
-                        <div class="carrier-info" style="padding: 6px 15px; background: #e9ecef; border-radius: 20px; display: inline-block;">
-                            <strong>Carrier:</strong> ${carrier}
-                        </div>
-                    </div>
-                    
-                    <div class="current-status" style="background: ${statusColor}; color: white; padding: 20px; margin: 20px 0; border-radius: 8px; text-align: center;">
-                        <div style="font-size: 2rem; margin-bottom: 8px;">${statusIcon}</div>
-                        <div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 5px;">
-                            ${trackingInfo.statusDescription || trackingInfo.status || 'Status Unknown'}
-                        </div>
-                        ${trackingInfo.lastUpdate ? `
-                            <div style="font-size: 0.9rem; opacity: 0.9;">
-                                Last Updated: ${new Date(trackingInfo.lastUpdate).toLocaleString()}
-                            </div>
-                        ` : ''}
-                        ${trackingInfo.lastLocation ? `
-                            <div style="font-size: 0.95rem; margin-top: 8px;">
-                                📍 ${trackingInfo.lastLocation}
-                            </div>
-                        ` : ''}
-                        ${trackingInfo.estimatedDelivery ? `
-                            <div style="font-size: 0.95rem; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.3);">
-                                🕒 Estimated Delivery: ${new Date(trackingInfo.estimatedDelivery).toLocaleDateString()}
-                            </div>
-                        ` : ''}
-                    </div>
-
-                    ${historyHtml}
-                    
-                    <div class="tracking-actions-section" style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 2px solid #dee2e6;">
-                        ${carrier.toLowerCase() === 'fedex' ? `
-                            <button class="tracking-action-btn" onclick="refreshLiveTracking('${trackingNumber}', '${carrier}')" 
-                                    id="refreshBtn-${trackingNumber}"
-                                    style="padding: 12px 24px; margin: 5px; font-size: 1rem; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                🔄 Refresh from FedEx API
-                            </button>
-                        ` : ''}
-                        <button class="tracking-action-btn" onclick="viewTrackingInIframe('${trackingNumber}', '${carrier}')" 
-                                style="padding: 12px 24px; margin: 5px; font-size: 1rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            🖼️ View Carrier Page (In-App)
-                        </button>
-                        <button class="tracking-action-btn" onclick="openTrackingUrl('${trackingNumber}', '${carrier}')" 
-                                style="padding: 12px 24px; margin: 5px; font-size: 1rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            🌐 Open on ${carrier} Website
-                        </button>
-                    </div>
-                    
-                    <div style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 4px; font-size: 0.85rem; text-align: center; color: #6c757d;">
-                        ${carrier.toLowerCase() === 'fedex' ? `
-                            <strong>✨ Live API Tracking:</strong> This information is fetched directly from FedEx servers for real-time accuracy.
-                        ` : `
-                            💡 <strong>Tip:</strong> Information shown here is from our database. For real-time updates, view the carrier page.
-                        `}
-                    </div>
-                </div>
-            `;
-        }
-
-        function displayBasicTracking(trackingNumber, carrier) {
-            const content = document.getElementById('trackingDetailsContent');
-            
-            content.innerHTML = `
-                <div class="tracking-info-section">
-                    <div class="tracking-info-header" style="text-align: center; margin-bottom: 20px;">
-                        <div class="tracking-number" style="font-size: 1.3rem; font-weight: bold; color: #007bff; margin-bottom: 10px;">
-                            ${trackingNumber}
-                        </div>
-                        <div class="carrier-info" style="padding: 6px 15px; background: #e9ecef; border-radius: 20px; display: inline-block;">
-                            <strong>Carrier:</strong> ${carrier}
-                        </div>
-                    </div>
-                    
-                    <div class="current-status" style="background: #6c757d; color: white; padding: 20px; margin: 20px 0; border-radius: 8px; text-align: center;">
-                        <div style="font-size: 2rem; margin-bottom: 8px;">📦</div>
-                        <div style="font-size: 1.1rem; font-weight: bold;">
-                            No tracking information available yet
-                        </div>
-                        <div style="font-size: 0.9rem; opacity: 0.9; margin-top: 8px;">
-                            Click below to check the carrier's website for updates
-                        </div>
-                    </div>
-                    
-                    <div class="tracking-actions-section" style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 2px solid #dee2e6;">
-                        ${carrier.toLowerCase() === 'fedex' ? `
-                            <button class="tracking-action-btn" onclick="refreshLiveTracking('${trackingNumber}', '${carrier}')" 
-                                    id="refreshBtn-${trackingNumber}"
-                                    style="padding: 12px 24px; margin: 5px; font-size: 1rem; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                🔄 Get Live Status from FedEx
-                            </button>
-                        ` : ''}
-                        <button class="tracking-action-btn" onclick="viewTrackingInIframe('${trackingNumber}', '${carrier}')" 
-                                style="padding: 12px 24px; margin: 5px; font-size: 1rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            🖼️ View Carrier Page (In-App)
-                        </button>
-                        <button class="tracking-action-btn" onclick="openTrackingUrl('${trackingNumber}', '${carrier}')" 
-                                style="padding: 12px 24px; margin: 5px; font-size: 1rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            🌐 Open on ${carrier} Website
-                        </button>
-                    </div>
-                </div>
-            `;
-                        </button>
-                        <button class="tracking-action-btn" onclick="openTrackingUrl('${trackingNumber}', '${carrier}')" 
-                                style="padding: 12px 24px; margin: 5px; font-size: 1rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            🌐 Open on ${carrier} Website
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        async function refreshLiveTracking(trackingNumber, carrier) {
-            console.log(`🔄 Refreshing live tracking for ${trackingNumber} from ${carrier} API...`);
-            
-            const refreshBtn = document.getElementById(`refreshBtn-${trackingNumber}`);
-            if (refreshBtn) {
-                refreshBtn.disabled = true;
-                refreshBtn.innerHTML = '⏳ Fetching...';
-            }
-
-            try {
-                const response = await fetch(`/purchase-orders/tracking/${trackingNumber}/live?carrier=${carrier}`);
-                const data = await response.json();
-
-                if (data.success && data.trackingInfo) {
-                    // Update the modal with fresh data
-                    displayTrackingInfo(trackingNumber, carrier, data.trackingInfo);
-                    
-                    // Show success toast
-                    showToast('✅ Tracking updated from ' + carrier + ' API', 'success');
-                } else if (data.useIframe) {
-                    // API not configured or unavailable, show message
-                    showToast('⚠️ ' + (data.error || 'API not available'), 'warning');
-                } else {
-                    showToast('❌ ' + (data.error || 'Failed to fetch tracking'), 'error');
-                }
-            } catch (error) {
-                console.error('Error refreshing tracking:', error);
-                showToast('❌ Error refreshing tracking', 'error');
-            } finally {
-                if (refreshBtn) {
-                    refreshBtn.disabled = false;
-                    refreshBtn.innerHTML = '🔄 Refresh from FedEx API';
-                }
-            }
-        }
-
-        function showToast(message, type = 'info') {
-            // Create toast notification
-            const toast = document.createElement('div');
-            toast.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 15px 20px;
-                border-radius: 4px;
-                color: white;
-                z-index: 10000;
-                font-size: 14px;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-                animation: slideIn 0.3s ease-out;
-                ${type === 'success' ? 'background: #28a745;' : ''}
-                ${type === 'error' ? 'background: #dc3545;' : ''}
-                ${type === 'warning' ? 'background: #ffc107; color: #000;' : ''}
-                ${type === 'info' ? 'background: #17a2b8;' : ''}
-            `;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-
-            // Auto-remove after 4 seconds
-            setTimeout(() => {
-                toast.style.animation = 'slideOut 0.3s ease-out';
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
-
-        function viewTrackingInIframe(trackingNumber, carrier) {
-            const url = getCarrierTrackingUrl(trackingNumber, carrier);
-            
-            // Create or update iframe modal
-            let iframeModal = document.getElementById('trackingIframeModal');
-            if (!iframeModal) {
-                iframeModal = document.createElement('div');
-                iframeModal.id = 'trackingIframeModal';
-                iframeModal.style.cssText = `
-                    display: none;
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: rgba(0, 0, 0, 0.8);
-                    z-index: 10001;
-                    padding: 20px;
-                `;
-                iframeModal.innerHTML = `
-                    <div style="background: white; width: 100%; height: 100%; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
-                        <div style="padding: 15px 20px; background: #f8f9fa; border-bottom: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center;">
-                            <h4 style="margin: 0; color: #495057;">📦 Carrier Tracking: ${trackingNumber}</h4>
-                            <button onclick="closeTrackingIframe()" style="background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">
-                                ✖ Close
-                            </button>
-                        </div>
-                        <iframe id="trackingIframe" style="flex: 1; border: none; width: 100%;"></iframe>
-                    </div>
-                `;
-                document.body.appendChild(iframeModal);
-            }
-            
-            document.getElementById('trackingIframe').src = url;
-            iframeModal.style.display = 'block';
-        }
-
-        function closeTrackingIframe() {
-            const modal = document.getElementById('trackingIframeModal');
-            if (modal) {
-                modal.style.display = 'none';
-                document.getElementById('trackingIframe').src = '';
-            }
-        }
-
-        function getCarrierTrackingUrl(trackingNumber, carrier) {
-            let url = '';
-            
-            switch (carrier.toLowerCase()) {
-                case 'fedex':
-                    url = `https://www.fedex.com/fedextrack/?trknbr=${trackingNumber}`;
-                    break;
-                case 'ups':
-                    url = `https://www.ups.com/track?tracknum=${trackingNumber}`;
-                    break;
-                case 'usps':
-                    url = `https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}`;
-                    break;
-                case 'dhl':
-                    url = `https://www.dhl.com/en/express/tracking.html?AWB=${trackingNumber}`;
-                    break;
-                case 'ontrac':
-                    url = `https://www.ontrac.com/tracking/?number=${trackingNumber}`;
-                    break;
-                default:
-                    url = `https://www.google.com/search?q=track+${trackingNumber}`;
-            }
-            
-            return url;
         }
 
         function closeTrackingDetailsModal() {
             document.getElementById('trackingDetailsModal').style.display = 'none';
         }
 
-        // REMOVED: Old 17track integration functions - no longer needed
-        // checkTrackingStatus() and updateTrackingInfo() removed
+        // Task Creation Modal Functions
+        function openCreateTaskModal(poId, poNumber, vendor) {
+            const modal = document.getElementById('createTaskModal');
+            const poIdInput = document.getElementById('taskPOId');
+            const relatedInfo = document.getElementById('taskRelatedInfo');
+            const titleInput = document.getElementById('taskTitle');
+            
+            // Set hidden PO ID
+            poIdInput.value = poId;
+            
+            // Display related PO and vendor info
+            relatedInfo.innerHTML = `
+                <div><strong>PO Number:</strong> ${poNumber}</div>
+                <div><strong>Vendor:</strong> ${vendor}</div>
+            `;
+            
+            // Pre-fill title with PO reference
+            titleInput.value = `Follow up on PO ${poNumber} - ${vendor}`;
+            
+            modal.style.display = 'block';
+        }
+
+        function closeCreateTaskModal() {
+            const modal = document.getElementById('createTaskModal');
+            modal.style.display = 'none';
+            document.getElementById('createTaskForm').reset();
+        }
+
+        // Handle task form submission
+        document.getElementById('createTaskForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                title: document.getElementById('taskTitle').value,
+                description: document.getElementById('taskDescription').value,
+                dueDate: document.getElementById('taskDueDate').value,
+                priority: document.getElementById('taskPriority').value,
+                relatedPOs: [document.getElementById('taskPOId').value],
+                status: 'pending'
+            };
+            
+            try {
+                const response = await fetch('/tasks/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showTrackingToast('Task created successfully!', 'success');
+                    closeCreateTaskModal();
+                } else {
+                    showTrackingToast('Failed to create task: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error creating task:', error);
+                showTrackingToast('Error creating task', 'error');
+            }
+        });
+
+        async function checkTrackingStatus(poId, trackingNumber, carrier) {
+            const statusDiv = document.querySelector('.tracking-status-display');
+            statusDiv.innerHTML = '🔄 Checking status...';
+            statusDiv.style.background = '#007bff';
+            statusDiv.style.color = 'white';
+            
+            try {
+                // This would call your existing tracking API
+                const response = await fetch('/purchase-orders/tracking-info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ trackingNumber, carrier })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.trackingInfo) {
+                    statusDiv.innerHTML = `📦 ${result.trackingInfo.status || 'In Transit'}`;
+                    statusDiv.style.background = '#28a745';
+                    
+                    if (result.trackingInfo.description) {
+                        statusDiv.innerHTML += `<br><small>${result.trackingInfo.description}</small>`;
+                    }
+                } else {
+                    statusDiv.innerHTML = '❌ Unable to get tracking status';
+                    statusDiv.style.background = '#dc3545';
+                }
+            } catch (error) {
+                console.error('Error checking tracking:', error);
+                statusDiv.innerHTML = '❌ Error checking status';
+                statusDiv.style.background = '#dc3545';
+            }
+        }
+
+        async function updateTrackingInfo(poId) {
+            try {
+                const response = await fetch(`/purchase-orders/${poId}/update-tracking`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showTrackingToast('📦 Tracking information updated', 'success');
+                    // Refresh the modal content or page as needed
+                } else {
+                    showTrackingToast('❌ Failed to update tracking', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating tracking:', error);
+                showTrackingToast('❌ Error updating tracking', 'error');
+            }
+        }
 
         function openTrackingUrl(trackingNumber, carrier) {
-            const url = getCarrierTrackingUrl(trackingNumber, carrier);
+            let url = '';
+            
+            switch (carrier.toLowerCase()) {
+                case 'fedex':
+                    url = `https://www.fedex.com/apps/fedextrack/?tracknumbers=${trackingNumber}`;
+                    break;
+                case 'ups':
+                    url = `https://www.ups.com/track?tracknum=${trackingNumber}`;
+                    break;
+                case 'usps':
+                    url = `https://tools.usps.com/go/TrackConfirmAction?qtc_tLabels1=${trackingNumber}`;
+                    break;
+                case 'dhl':
+                    url = `https://www.dhl.com/us-en/home/tracking.html?tracking-id=${trackingNumber}`;
+                    break;
+                default:
+                    alert('Tracking URL not available for this carrier');
+                    return;
+            }
+            
             window.open(url, '_blank');
         }
 
@@ -5831,10 +4975,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     event.preventDefault();
                     toggleTrackingColumn();
                 }
-                if (event.ctrlKey && event.key === 'n') {
-                    event.preventDefault();
-                    toggleNsStatusColumn();
-                }
             });
             
             // Handle window resize
@@ -5848,16 +4988,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     updateTrackingButtonState(true);
                 }
             });
-        }
-
-        // Initialize NS Status column state
-        function initializeNsStatusColumn() {
-            // Set initial state - hidden by default for all screen sizes
-            const table = document.getElementById('purchaseOrdersTable');
-            
-            // NS Status column is hidden by default
-            table.classList.remove('show-ns-status');
-            updateNsStatusButtonState(false);
         }
 
         function updateTrackingButtonState(isVisible) {
@@ -5879,24 +5009,213 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             }
         }
 
-        function updateNsStatusButtonState(isVisible) {
-            const toggleBtn = document.getElementById('toggleNsStatusBtn');
-            const buttonText = document.getElementById('nsStatusColumnText');
+        // Attachment Management Functions
+        async function loadAttachments(poId) {
+            const container = document.getElementById('attachmentsList');
             
-            if (!toggleBtn || !buttonText) return; // Elements might not exist yet
-            
-            if (isVisible) {
-                toggleBtn.classList.remove('btn-outline-secondary');
-                toggleBtn.classList.add('btn-outline-success');
-                buttonText.textContent = 'Hide NS Status';
-                toggleBtn.title = 'Hide NS Status column (Ctrl+N)';
-            } else {
-                toggleBtn.classList.remove('btn-outline-success');
-                toggleBtn.classList.add('btn-outline-secondary');
-                buttonText.textContent = 'Show NS Status';
-                toggleBtn.title = 'Show NS Status column (Ctrl+N)';
+            try {
+                container.innerHTML = '<div style="text-align: center; padding: 20px; color: #6c757d;">Loading attachments...</div>';
+                
+                const response = await fetch(`/purchase-orders/attachments/${poId}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    renderAttachmentsList(result.attachments);
+                } else {
+                    console.error('Error loading attachments:', result.error);
+                    container.innerHTML = '<div class="no-attachments">Error loading attachments.</div>';
+                }
+            } catch (error) {
+                console.error('Error loading attachments:', error);
+                container.innerHTML = '<div class="no-attachments">Error loading attachments.</div>';
             }
         }
+
+        function renderAttachmentsList(attachments) {
+            const container = document.getElementById('attachmentsList');
+            
+            if (!attachments || attachments.length === 0) {
+                container.innerHTML = '<div class="no-attachments">No documents uploaded yet.</div>';
+                return;
+            }
+            
+            const attachmentsHtml = attachments.map(attachment => {
+                const uploadDate = new Date(attachment.uploadedAt).toLocaleDateString();
+                const fileSize = formatFileSize(attachment.fileSize);
+                
+                return `
+                    <div class="attachment-item" data-attachment-id="${attachment._id}">
+                        <div class="attachment-info">
+                            <div class="attachment-filename">${escapeHtml(attachment.filename)}</div>
+                            <div class="attachment-meta">
+                                <span class="attachment-type-badge">${escapeHtml(attachment.documentType)}</span>
+                                <span>Size: ${fileSize}</span>
+                                <span>Uploaded: ${uploadDate}</span>
+                                <span>By: ${escapeHtml(attachment.uploadedBy)}</span>
+                                ${attachment.description ? `<span>Description: ${escapeHtml(attachment.description)}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="attachment-actions">
+                            <a href="/purchase-orders/download-attachment/${attachment._id}" 
+                               class="attachment-btn download-btn" 
+                               title="Download ${attachment.filename}">
+                                📥 Download
+                            </a>
+                            <button class="attachment-btn delete-btn" 
+                                    onclick="deleteAttachment('${attachment._id}')"
+                                    title="Delete ${attachment.filename}">
+                                🗑️ Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = attachmentsHtml;
+        }
+
+        async function deleteAttachment(attachmentId) {
+            if (!confirm('Are you sure you want to delete this attachment? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/purchase-orders/attachments/${attachmentId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Remove the attachment from the UI
+                    const attachmentElement = document.querySelector(`[data-attachment-id="${attachmentId}"]`);
+                    if (attachmentElement) {
+                        attachmentElement.remove();
+                    }
+                    
+                    // Check if any attachments are left
+                    const container = document.getElementById('attachmentsList');
+                    if (container.children.length === 0) {
+                        container.innerHTML = '<div class="no-attachments">No documents uploaded yet.</div>';
+                    }
+                    
+                    showAttachmentToast('Document deleted successfully', 'success');
+                } else {
+                    showAttachmentToast('Error deleting document: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting attachment:', error);
+                showAttachmentToast('Error deleting document', 'error');
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showAttachmentToast(message, type) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 4px;
+                color: white;
+                z-index: 10000;
+                font-size: 14px;
+                background: ${type === 'success' ? '#28a745' : '#dc3545'};
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            `;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                if (document.body.contains(toast)) {
+                    document.body.removeChild(toast);
+                }
+            }, 3000);
+        }
+
+        // Initialize attachment upload form when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const attachmentForm = document.getElementById('attachmentUploadForm');
+            if (attachmentForm) {
+                attachmentForm.addEventListener('submit', async function(event) {
+                    event.preventDefault();
+                    
+                    const poId = document.getElementById('attachmentPOId').value;
+                    const fileInput = document.getElementById('attachmentFile');
+                    const documentType = document.getElementById('documentType').value;
+                    const description = document.getElementById('attachmentDescription').value;
+                    
+                    if (!poId) {
+                        showAttachmentToast('PO ID is required', 'error');
+                        return;
+                    }
+                    
+                    if (!fileInput.files || fileInput.files.length === 0) {
+                        showAttachmentToast('Please select a file to upload', 'error');
+                        return;
+                    }
+                    
+                    const file = fileInput.files[0];
+                    
+                    // Check file size (10MB limit)
+                    if (file.size > 10 * 1024 * 1024) {
+                        showAttachmentToast('File size must be less than 10MB', 'error');
+                        return;
+                    }
+                    
+                    // Show upload progress
+                    const submitBtn = attachmentForm.querySelector('.upload-attachment-btn');
+                    const originalText = submitBtn.textContent;
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = '📤 Uploading...';
+                    
+                    try {
+                        const formData = new FormData();
+                        formData.append('attachment', file);
+                        formData.append('poId', poId);
+                        formData.append('documentType', documentType);
+                        formData.append('description', description);
+                        
+                        const response = await fetch('/purchase-orders/upload-attachment', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            showAttachmentToast('Document uploaded successfully', 'success');
+                            
+                            // Reset form
+                            attachmentForm.reset();
+                            document.getElementById('attachmentPOId').value = poId; // Restore PO ID
+                            document.getElementById('documentType').value = 'Other'; // Reset to default
+                            
+                            // Reload attachments list
+                            await loadAttachments(poId);
+                        } else {
+                            showAttachmentToast('Upload failed: ' + result.error, 'error');
+                        }
+                    } catch (error) {
+                        console.error('Upload error:', error);
+                        showAttachmentToast('Upload failed due to network error', 'error');
+                    } finally {
+                        // Restore button
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                    }
+                });
+            }
+        });
 
         // Enhanced tab function that loads content when switching
         async function showTab(tabName) {
@@ -5927,35 +5246,32 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 if (poId && poNumber) {
                     await loadPoDetailsNotesHistory(poId, poNumber);
                 }
+            } else if (tabName === 'attachments') {
+                const modal = document.getElementById('poDetailsModal');
+                const poId = modal.dataset.poId;
+                
+                if (poId) {
+                    await loadAttachments(poId);
+                }
             }
         }
 
         async function loadPoDetailsLineItems(poId) {
-            const cardContainer = document.getElementById('poDetailsLineItems');
-            const tableContainer = document.getElementById('poDetailsLineItemsTable');
+            const container = document.getElementById('poDetailsLineItems');
             
             try {
-                // Show loading in both containers
-                cardContainer.innerHTML = '<div class="loading-line-items">Loading line items...</div>';
-                tableContainer.innerHTML = '<div class="loading-line-items">Loading line items...</div>';
+                container.innerHTML = '<div class="loading-line-items">Loading line items...</div>';
                 
                 const response = await fetch(`/purchase-orders/${poId}/line-items`);
                 const lineItems = await response.json();
                 
                 if (lineItems.length === 0) {
-                    cardContainer.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
-                    tableContainer.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
+                    container.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
                 } else {
-                    // Store line items globally for the modal
-                    window.currentPoLineItems = lineItems;
-                    
                     const receivedCount = lineItems.filter(item => item.received).length;
                     const totalCount = lineItems.length;
                     
-                    // Render table view
-                    renderPoModalTableView(lineItems);
-                    
-                    // Generate the HTML for card view (existing format)
+                    // Generate the HTML for line items
                     const lineItemsHtml = lineItems.map(item => `
                         <div class="line-item ${item.received ? 'received' : ''}" data-item-id="${item._id}">
                             <div class="line-item-header">
@@ -6007,8 +5323,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         </div>
                     `).join('');
                     
-                    // Populate card view
-                    cardContainer.innerHTML = `
+                    container.innerHTML = `
                         <div class="line-items-summary">
                             <strong>Summary:</strong> ${receivedCount}/${totalCount} items received
                             ${receivedCount === totalCount ? ' ✅' : ''}
@@ -6018,8 +5333,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
             } catch (error) {
                 console.error('Error loading line items:', error);
-                cardContainer.innerHTML = '<div class="no-line-items">Error loading line items</div>';
-                tableContainer.innerHTML = '<div class="no-line-items">Error loading line items</div>';
+                container.innerHTML = '<div class="no-line-items">Error loading line items</div>';
             }
         }
 
@@ -6645,17 +5959,15 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const isNotMyConcern = status === 'Not my concern';
                 const shouldShowNotMyConcern = !isNotMyConcern || showNotMyConcern;
 
-                // "Pending Bill" and "Billed" NS Status filter - hide by default unless checkbox is checked
-                // BUT: Always show if vendor filter is active (to see ALL POs from a vendor)
-                const vendorFilterActive = new URLSearchParams(window.location.search).get('vendor');
-                const isPendingBill = nsStatus === 'Pending Bill' || nsStatus === 'Billed';
-                const shouldShowPendingBill = vendorFilterActive || !isPendingBill || showPendingBill;
+                // "Pending Bill" NS Status filter - hide by default unless checkbox is checked
+                const isPendingBill = nsStatus === 'Pending Bill';
+                const shouldShowPendingBill = !isPendingBill || showPendingBill;
 
                 if (isNotMyConcern && !showNotMyConcern) {
                     hiddenNotMyConcernCount++;
                 }
 
-                if (isPendingBill && !showPendingBill && !vendorFilterActive) {
+                if (isPendingBill && !showPendingBill) {
                     hiddenPendingBillCount++;
                 }
 
@@ -6716,15 +6028,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         // Update statistics based on visible rows
         function updateStats() {
-            const table = document.getElementById('purchaseOrdersTable');
-            const hideNotReady = table.classList.contains('hide-not-ready');
-            
-            let visibleRowsSelector = '#purchaseOrdersTable tbody tr[data-po]:not(.hidden)';
-            if (hideNotReady) {
-                visibleRowsSelector = '#purchaseOrdersTable tbody tr[data-po]:not(.hidden):not([data-not-ready="true"])';
-            }
-            
-            const visibleRows = document.querySelectorAll(visibleRowsSelector);
+            const visibleRows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]:not(.hidden)');
             let notesCount = 0;
 
             visibleRows.forEach(row => {
@@ -6736,11 +6040,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             document.getElementById('visibleCount').textContent = visibleRows.length;
             document.getElementById('notesCount').textContent = notesCount;
-        }
-
-        // Helper function to update visible count
-        function updateVisibleCount() {
-            updateStats();
         }
 
         // Sorting functionality
@@ -6759,17 +6058,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 th.classList.remove('sort-asc', 'sort-desc');
             });
             const headerElement = document.querySelector(`th[data-column="${column}"]`);
-            if (headerElement) {
-                headerElement.classList.add(direction === 'asc' ? 'sort-asc' : 'sort-desc');
-            }
+            headerElement.classList.add(direction === 'asc' ? 'sort-asc' : 'sort-desc');
 
             // Sort main rows with their data
             mainRows.sort((a, b) => {
-                try {
-                    const aData = JSON.parse(a.dataset.po);
-                    const bData = JSON.parse(b.dataset.po);
+                const aData = JSON.parse(a.dataset.po);
+                const bData = JSON.parse(b.dataset.po);
 
-                    let aValue, bValue;
+                let aValue, bValue;
 
                 switch (column) {
                     case 'date':
@@ -6809,40 +6105,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         bValue = new Date(bData.updatedAt || 0);
                         break;
                     case 'priority':
-                        // Parse priority values and handle any data type inconsistencies
-                        aValue = aData.priority;
-                        bValue = bData.priority;
-                        
-                        // Convert to number if it's a string representation of a number
-                        if (typeof aValue === 'string') {
-                            aValue = aValue.match(/^\d+$/) ? parseInt(aValue) : 999;
-                        } else if (typeof aValue === 'number') {
-                            aValue = isNaN(aValue) ? 999 : aValue;
-                        } else {
-                            aValue = 999;
-                        }
-                        
-                        if (typeof bValue === 'string') {
-                            bValue = bValue.match(/^\d+$/) ? parseInt(bValue) : 999;
-                        } else if (typeof bValue === 'number') {
-                            bValue = isNaN(bValue) ? 999 : bValue;
-                        } else {
-                            bValue = 999;
-                        }
-                        
-                        // Ensure valid priority range (1-5), default invalid to 999
-                        aValue = (aValue >= 1 && aValue <= 5) ? aValue : 999;
-                        bValue = (bValue >= 1 && bValue <= 5) ? bValue : 999;
+                        aValue = parseInt(aData.priority) || 999; // Default to 999 for no priority (sorts to bottom)
+                        bValue = parseInt(bData.priority) || 999;
                         break;
                 }
 
                 if (aValue < bValue) return direction === 'asc' ? -1 : 1;
                 if (aValue > bValue) return direction === 'asc' ? 1 : -1;
                 return 0;
-                } catch (error) {
-                    console.error('Error parsing PO data for sorting:', error);
-                    return 0;
-                }
             });
 
             // Reappend sorted rows in groups (main row + line items row + notes row)
@@ -6878,28 +6148,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             applyFilters();
         }
 
-        // Toggle hidden POs functionality
-        function toggleHiddenPOs() {
-            const checkbox = document.getElementById('showHiddenPOs');
-            const includeHidden = checkbox.checked;
-            
-            // Reload page with hidden parameter
-            const url = new URL(window.location);
-            if (includeHidden) {
-                url.searchParams.set('includeHidden', 'true');
-            } else {
-                url.searchParams.delete('includeHidden');
-            }
-            window.location.href = url.toString();
-        }
-
-        // Clear vendor filter and reload without it
-        function clearVendorFilter() {
-            const url = new URL(window.location);
-            url.searchParams.delete('vendor');
-            window.location.href = url.toString();
-        }
-
         // Event listeners for filters
         document.getElementById('searchFilter').addEventListener('input', applyFilters);
         document.getElementById('nsStatusFilter').addEventListener('change', applyFilters);
@@ -6908,55 +6156,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         document.getElementById('priorityFilter').addEventListener('change', applyFilters);
         document.getElementById('showNotMyConcern').addEventListener('change', applyFilters);
         document.getElementById('showPendingBill').addEventListener('change', applyFilters);
-        document.getElementById('showHiddenPOs').addEventListener('change', toggleHiddenPOs);
-
-        // Check for query parameters and auto-fill search
-        const urlParams = new URLSearchParams(window.location.search);
-        const poNumber = urlParams.get('poNumber');
-        const vendorFilter = urlParams.get('vendor');
-        
-        // Handle PO Number search
-        if (poNumber) {
-            document.getElementById('searchFilter').value = poNumber;
-            applyFilters(); // Trigger the filter to show the PO
-            
-            // Optional: Scroll to the PO after a short delay to let filters apply
-            setTimeout(() => {
-                const poElement = document.querySelector(`[data-po-number="${poNumber}"]`);
-                if (poElement) {
-                    poElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    // Highlight the PO temporarily
-                    poElement.style.backgroundColor = '#fff3cd';
-                    setTimeout(() => {
-                        poElement.style.backgroundColor = '';
-                    }, 3000);
-                }
-            }, 300);
-        }
-        
-        // Handle Vendor filter
-        if (vendorFilter) {
-            document.getElementById('searchFilter').value = vendorFilter;
-            applyFilters(); // Trigger the filter
-            
-            // Show a notification banner about the active vendor filter
-            const banner = document.createElement('div');
-            banner.id = 'vendor-filter-banner';
-            banner.style.cssText = 'position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 9999; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 12px; animation: slideDown 0.3s ease-out;';
-            banner.innerHTML = `
-                <i class="fas fa-filter"></i>
-                <span style="font-weight: 500;">Filtered by vendor: <strong>${vendorFilter}</strong></span>
-                <button onclick="clearVendorFilter()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 12px; border-radius: 4px; cursor: pointer; margin-left: 8px; font-weight: 500;">
-                    <i class="fas fa-times"></i> Clear Filter
-                </button>
-            `;
-            document.body.appendChild(banner);
-            
-            // Add animation
-            const style = document.createElement('style');
-            style.textContent = '@keyframes slideDown { from { top: 0; opacity: 0; } to { top: 70px; opacity: 1; } }';
-            document.head.appendChild(style);
-        }
 
         // Event listeners for sorting
         document.querySelectorAll('th.sortable').forEach(header => {
@@ -7097,225 +6296,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         document.getElementById('statusInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 addStatusOption();
-            }
-        });
-
-        // Attachments Management Functions
-        function openAttachmentsModal(poId, poNumber) {
-            console.log('🔧 MODAL: Opening attachments modal for PO:', poNumber, 'ID:', poId);
-            
-            document.getElementById('attachmentPOId').value = poId;
-            document.getElementById('attachmentsPONumber').textContent = poNumber;
-            document.getElementById('attachmentsModal').style.display = 'block';
-            
-            // Reset form
-            document.getElementById('attachmentUploadForm').reset();
-            document.getElementById('attachmentPOId').value = poId; // Reset the hidden field
-            document.getElementById('attachmentDocumentType').value = 'Other'; // Reset document type to default
-            
-            // Load existing attachments
-            loadAttachments(poId);
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        async function loadAttachments(poId) {
-            console.log('🔧 LOAD ATTACHMENTS: Loading attachments for PO:', poId);
-            
-            try {
-                const response = await fetch(`/purchase-orders/attachments/${poId}`);
-                console.log('🔧 LOAD ATTACHMENTS: Response status:', response.status);
-                
-                const result = await response.json();
-                console.log('🔧 LOAD ATTACHMENTS: Response data:', result);
-                
-                if (result.success) {
-                    console.log('🔧 LOAD ATTACHMENTS: Found', result.attachments.length, 'attachments');
-                    renderAttachmentsList(result.attachments);
-                } else {
-                    console.error('🔧 LOAD ATTACHMENTS: Error:', result.error);
-                    document.getElementById('attachmentsList').innerHTML = 
-                        '<div class="no-attachments">Error loading attachments</div>';
-                }
-            } catch (error) {
-                console.error('🔧 LOAD ATTACHMENTS: Error loading attachments:', error);
-                document.getElementById('attachmentsList').innerHTML = 
-                    '<div class="no-attachments">Error loading attachments</div>';
-            }
-        }
-
-        function renderAttachmentsList(attachments) {
-            console.log('🔧 RENDER ATTACHMENTS: Rendering', attachments.length, 'attachments');
-            console.log('🔧 RENDER ATTACHMENTS: Attachments data:', attachments);
-            
-            const container = document.getElementById('attachmentsList');
-            
-            if (!attachments || attachments.length === 0) {
-                console.log('🔧 RENDER ATTACHMENTS: No attachments to display');
-                container.innerHTML = '<div class="no-attachments">No attachments yet</div>';
-                return;
-            }
-            
-            // Document type badges with icons
-            function getDocumentTypeBadge(documentType) {
-                const badges = {
-                    'Purchase Order': '<span class="doc-type-badge po">📄 PO</span>',
-                    'Invoice': '<span class="doc-type-badge invoice">🧾 Invoice</span>',
-                    'Packing Slip': '<span class="doc-type-badge packing-slip">📦 Packing Slip</span>',
-                    'Bill of Lading (BOL)': '<span class="doc-type-badge bol">🚛 BOL</span>',
-                    'Shipping Confirmation': '<span class="doc-type-badge shipping">🚚 Shipping</span>',
-                    'Receipt': '<span class="doc-type-badge receipt">🧾 Receipt</span>',
-                    'Quote': '<span class="doc-type-badge quote">💰 Quote</span>',
-                    'Contract': '<span class="doc-type-badge contract">📋 Contract</span>',
-                    'Specification Sheet': '<span class="doc-type-badge spec">📊 Spec Sheet</span>',
-                    'Other': '<span class="doc-type-badge other">📄 Other</span>'
-                };
-                return badges[documentType] || badges['Other'];
-            }
-            
-            const attachmentsHtml = attachments.map(attachment => `
-                <div class="attachment-item">
-                    <div class="attachment-info">
-                        <div class="attachment-name">
-                            ${escapeHtml(attachment.filename)}
-                            ${getDocumentTypeBadge(attachment.documentType)}
-                        </div>
-                        <div class="attachment-meta">
-                            ${formatFileSize(attachment.fileSize)} • 
-                            ${formatDate(attachment.uploadedAt)} • 
-                            ${escapeHtml(attachment.uploadedBy)}
-                            ${attachment.description ? `<br><em>${escapeHtml(attachment.description)}</em>` : ''}
-                        </div>
-                    </div>
-                    <div class="attachment-actions">
-                        <button type="button" class="attachment-btn view" 
-                                onclick="viewAttachment('${attachment._id}', '${escapeHtml(attachment.filename)}')" 
-                                title="View Document">
-                            👁️ View
-                        </button>
-                        <a href="/purchase-orders/download-attachment/${attachment._id}" 
-                           class="attachment-btn download" target="_blank" title="Download">
-                            📥 Download
-                        </a>
-                        <button type="button" class="attachment-btn delete" 
-                                onclick="deleteAttachment('${attachment._id}')" 
-                                title="Delete">
-                            🗑️ Delete
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-            
-            container.innerHTML = attachmentsHtml;
-        }
-
-        async function deleteAttachment(attachmentId) {
-            if (!confirm('Are you sure you want to delete this attachment?')) {
-                return;
-            }
-            
-            try {
-                const response = await fetch(`/purchase-orders/attachments/${attachmentId}`, {
-                    method: 'DELETE'
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    // Reload attachments for current PO
-                    const poId = document.getElementById('attachmentPOId').value;
-                    loadAttachments(poId);
-                    
-                    // Update attachment count in main dashboard
-                    updateAttachmentCount(poId, -1);
-                } else {
-                    alert(result.error || 'Error deleting attachment');
-                }
-            } catch (error) {
-                console.error('Error deleting attachment:', error);
-                alert('Error deleting attachment');
-            }
-        }
-
-        function viewAttachment(attachmentId, filename) {
-            console.log('� VIEW ATTACHMENT: Opening viewer for:', attachmentId, filename);
-            
-            const viewer = document.getElementById('documentViewer');
-            const frame = document.getElementById('documentFrame');
-            const title = document.getElementById('viewerTitle');
-            
-            if (!viewer || !frame || !title) {
-                console.error('� Document viewer elements not found!');
-                return;
-            }
-            
-            // Set the title and URL
-            title.textContent = `📄 ${filename}`;
-            frame.src = `/purchase-orders/view-attachment/${attachmentId}`;
-            
-            // Show the viewer
-            viewer.style.display = 'flex';
-            
-            console.log('� Document viewer opened with URL:', frame.src);
-        }
-
-        function closeDocumentViewer() {
-            console.log('� Closing document viewer');
-            
-            const viewer = document.getElementById('documentViewer');
-            const frame = document.getElementById('documentFrame');
-            
-            if (viewer && frame) {
-                viewer.style.display = 'none';
-                frame.src = '';
-            }
-        }
-
-        function updateAttachmentCount(poId, change) {
-            const button = document.querySelector(`button[data-id="${poId}"].attachments-btn`);
-            if (button) {
-                const countSpan = button.querySelector('.attachment-count');
-                if (countSpan) {
-                    const currentCount = parseInt(countSpan.textContent) || 0;
-                    const newCount = Math.max(0, currentCount + change);
-                    countSpan.textContent = newCount;
-                    
-                    // Update button appearance based on count
-                    if (newCount > 0) {
-                        button.classList.add('has-attachments');
-                    } else {
-                        button.classList.remove('has-attachments');
-                    }
-                }
-            }
-        }
-
-        // Helper functions
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        function formatDate(dateString) {
-            return new Date(dateString).toLocaleDateString();
-        }
-
-        // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
-            const attachmentsModal = document.getElementById('attachmentsModal');
-            if (event.target === attachmentsModal) {
-                closeModal('attachmentsModal');
             }
         });
 
@@ -7548,146 +6528,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     }
                 });
             }
-            
-            // Initialize pre-purchase orders visibility
-            initializePrePurchaseOrdersVisibility();
-            
-            // Handle attachment upload form submission
-            const attachmentForm = document.getElementById('attachmentUploadForm');
-            if (attachmentForm) {
-                console.log('🔧 INIT: Setting up attachment upload form listener');
-                attachmentForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    
-                    alert('🔧 DEBUG: Form submission started!');
-                    console.log('🔧 UPLOAD FORM: Starting upload...');
-                    
-                    const formData = new FormData(this);
-                    const uploadBtn = document.getElementById('uploadAttachmentBtn');
-                    
-                    // Log form data for debugging
-                    console.log('🔧 UPLOAD FORM: Form data contents:');
-                    for (let [key, value] of formData.entries()) {
-                        console.log(`🔧   ${key}:`, value);
-                    }
-                    
-                    // Show uploading state
-                    uploadBtn.disabled = true;
-                    uploadBtn.textContent = '⏳ Uploading...';
-                    
-                    try {
-                        console.log('🔧 UPLOAD FORM: Sending request to /purchase-orders/upload-attachment');
-                        
-                        const response = await fetch('/purchase-orders/upload-attachment', {
-                            method: 'POST',
-                            body: formData
-                        });
-                        
-                        console.log('🔧 UPLOAD FORM: Response status:', response.status);
-                        
-                        const result = await response.json();
-                        console.log('🔧 UPLOAD FORM: Response data:', result);
-                        
-                        if (result.success) {
-                            console.log('🔧 UPLOAD FORM: Upload successful!');
-                            
-                            // Reset form
-                            document.getElementById('attachmentFile').value = '';
-                            document.getElementById('attachmentDescription').value = '';
-                            document.getElementById('attachmentDocumentType').value = 'Other';
-                            
-                            // Reload attachments
-                            const poId = document.getElementById('attachmentPOId').value;
-                            console.log('🔧 UPLOAD FORM: Reloading attachments for PO:', poId);
-                            loadAttachments(poId);
-                            
-                            // Update attachment count in main dashboard
-                            updateAttachmentCount(poId, 1);
-                            
-                            alert('File uploaded successfully!');
-                        } else {
-                            console.error('🔧 UPLOAD FORM: Upload failed:', result.error);
-                            alert(result.error || 'Error uploading file');
-                        }
-                    } catch (error) {
-                        console.error('🔧 UPLOAD FORM: Error uploading file:', error);
-                        alert('Error uploading file: ' + error.message);
-                    } finally {
-                        // Reset button state
-                        uploadBtn.disabled = false;
-                        uploadBtn.textContent = '📤 Upload File';
-                    }
-                });
-            } else {
-                console.error('🔧 INIT: Attachment upload form not found!');
-            }
         });
 
         // Pre-Purchase Order Functions
-        function togglePrePurchaseOrders() {
-            const content = document.getElementById('pre-purchase-content');
-            const icon = document.getElementById('pre-purchase-toggle-icon');
-            const text = document.getElementById('pre-purchase-toggle-text');
-            const button = document.querySelector('.toggle-pre-purchase-btn');
-            const badge = document.getElementById('pre-purchase-badge');
-            
-            if (content.style.display === 'none') {
-                // Show the section with animation
-                content.style.display = 'block';
-                content.classList.remove('slide-down');
-                content.classList.add('slide-up');
-                
-                icon.className = 'fas fa-eye';
-                text.textContent = 'Hide';
-                button.classList.add('active');
-                if (badge) badge.style.display = 'none';
-                
-                // Store the preference
-                localStorage.setItem('prePurchaseOrdersVisible', 'true');
-            } else {
-                // Hide the section with animation
-                content.classList.remove('slide-up');
-                content.classList.add('slide-down');
-                
-                setTimeout(() => {
-                    content.style.display = 'none';
-                }, 300); // Match animation duration
-                
-                icon.className = 'fas fa-eye-slash';
-                text.textContent = 'Show';
-                button.classList.remove('active');
-                if (badge) badge.style.display = 'inline-block';
-                
-                // Store the preference
-                localStorage.setItem('prePurchaseOrdersVisible', 'false');
-            }
-        }
-
-        // Initialize pre-purchase orders visibility on page load
-        function initializePrePurchaseOrdersVisibility() {
-            const isVisible = localStorage.getItem('prePurchaseOrdersVisible');
-            const content = document.getElementById('pre-purchase-content');
-            const icon = document.getElementById('pre-purchase-toggle-icon');
-            const text = document.getElementById('pre-purchase-toggle-text');
-            const button = document.querySelector('.toggle-pre-purchase-btn');
-            const badge = document.getElementById('pre-purchase-badge');
-            
-            // Default to hidden if no preference is stored
-            if (isVisible === 'true') {
-                content.style.display = 'block';
-                icon.className = 'fas fa-eye';
-                text.textContent = 'Hide';
-                button.classList.add('active');
-                if (badge) badge.style.display = 'none';
-            } else {
-                content.style.display = 'none';
-                icon.className = 'fas fa-eye-slash';
-                text.textContent = 'Show';
-                button.classList.remove('active');
-                if (badge) badge.style.display = 'inline-block';
-            }
-        }
-
         function addPrePurchaseOrder() {
             document.getElementById('prePurchaseOrderModalTitle').textContent = 'Add Pre-Purchase Order';
             document.getElementById('prePOId').value = '';
@@ -7856,9 +6699,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 
                 // Initialize tracking column state
                 initializeTrackingColumn();
-                
-                // Initialize NS Status column state
-                initializeNsStatusColumn();
             });
         } else {
             console.log('DOM already loaded, initializing immediately');
@@ -7961,78 +6801,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         </div>
     </div>
 
-    <!-- Attachments Modal -->
-    <div id="attachmentsModal" class="modal" style="display: none;">
-        <div class="modal-content attachments-modal-content">
-            <span class="close" onclick="closeModal('attachmentsModal')">&times;</span>
-            <h3 id="attachmentsModalTitle">Manage Attachments - PO #<span id="attachmentsPONumber"></span></h3>
-            
-            <!-- Upload Section -->
-            <div class="attachment-upload-section">
-                <h4>📁 Upload New Attachment</h4>
-                <form id="attachmentUploadForm" enctype="multipart/form-data">
-                    <input type="hidden" id="attachmentPOId" name="poId">
-                    
-                    <div class="form-group">
-                        <label for="attachmentFile">Choose File:</label>
-                        <input type="file" id="attachmentFile" name="attachment" 
-                               accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.txt" required>
-                        <small class="file-info">Accepted: PDF, Images, Word, Excel, Text files (Max 10MB)</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="attachmentDescription">Description (Optional):</label>
-                        <input type="text" id="attachmentDescription" name="description" 
-                               placeholder="e.g., Purchase Order Document, Invoice, Receipt...">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="attachmentDocumentType">Document Type:</label>
-                        <select id="attachmentDocumentType" name="documentType" required>
-                            <option value="Purchase Order">Purchase Order</option>
-                            <option value="Invoice">Invoice</option>
-                            <option value="Packing Slip">Packing Slip</option>
-                            <option value="Bill of Lading (BOL)">Bill of Lading (BOL)</option>
-                            <option value="Shipping Confirmation">Shipping Confirmation</option>
-                            <option value="Receipt">Receipt</option>
-                            <option value="Quote">Quote</option>
-                            <option value="Contract">Contract</option>
-                            <option value="Specification Sheet">Specification Sheet</option>
-                            <option value="Other" selected>Other</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="submit" id="uploadAttachmentBtn">
-                            📤 Upload File
-                        </button>
-                    </div>
-                </form>
-            </div>
-            
-            <!-- Existing Attachments Section -->
-            <div class="existing-attachments-section">
-                <h4>📎 Existing Attachments</h4>
-                <div id="attachmentsList">
-                    <!-- Attachments will be loaded here -->
-                </div>
-            </div>
-            
-            <!-- Document Viewer Section -->
-            <div id="documentViewer" class="document-viewer-modal" style="display: none;">
-                <div class="document-viewer-content">
-                    <div class="viewer-header">
-                        <h4 id="viewerTitle">📄 Document Viewer</h4>
-                        <button type="button" class="close-viewer-btn" onclick="closeDocumentViewer()">
-                            <i class="fas fa-times"></i> Close
-                        </button>
-                    </div>
-                    <iframe id="documentFrame" frameborder="0"></iframe>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <style>
         .modal {
             position: fixed;
@@ -8130,263 +6898,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         .form-actions button:hover {
             opacity: 0.9;
         }
-
-        /* Attachments Modal Styles */
-        .attachments-modal-content {
-            max-width: 900px; /* Increased to accommodate document viewer */
-            max-height: 85vh;
-            overflow-y: auto;
-        }
-
-        /* Document Viewer Modal Styles */
-        .document-viewer-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 10000; /* Higher than attachment modal */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .document-viewer-content {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            width: 90%;
-            height: 90%;
-            max-width: 1200px;
-            max-height: 800px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .viewer-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .viewer-header h4 {
-            margin: 0;
-            color: #495057;
-            font-size: 18px;
-        }
-
-        .close-viewer-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.2s;
-        }
-
-        .close-viewer-btn:hover {
-            background: #c82333;
-        }
-
-        .document-viewer-modal iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            flex: 1;
-        }
-
-        .attachment-upload-section,
-        .existing-attachments-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #e9ecef;
-            border-radius: 6px;
-            background: #f8f9fa;
-        }
-
-        .attachment-upload-section h4,
-        .existing-attachments-section h4 {
-            margin: 0 0 15px 0;
-            color: #495057;
-            font-size: 16px;
-        }
-
-        .file-info {
-            display: block;
-            color: #6c757d;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-
-        .attachment-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px;
-            margin-bottom: 8px;
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-        }
-
-        .attachment-item:hover {
-            background: #f1f3f4;
-        }
-
-        .attachment-info {
-            flex-grow: 1;
-            margin-right: 10px;
-        }
-
-        .attachment-name {
-            font-weight: 500;
-            color: #212529;
-            margin-bottom: 2px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .doc-type-badge {
-            font-size: 10px;
-            font-weight: 600;
-            padding: 2px 6px;
-            border-radius: 8px;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-
-        .doc-type-badge.po {
-            background: #e3f2fd;
-            color: #1565c0;
-            border: 1px solid #bbdefb;
-        }
-
-        .doc-type-badge.invoice {
-            background: #f3e5f5;
-            color: #6a1b9a;
-            border: 1px solid #ce93d8;
-        }
-
-        .doc-type-badge.packing-slip {
-            background: #e8f5e8;
-            color: #2e7d2e;
-            border: 1px solid #a5d6a7;
-        }
-
-        .doc-type-badge.bol {
-            background: #fff3e0;
-            color: #ef6c00;
-            border: 1px solid #ffcc02;
-        }
-
-        .doc-type-badge.shipping {
-            background: #e0f2f1;
-            color: #00695c;
-            border: 1px solid #80cbc4;
-        }
-
-        .doc-type-badge.receipt {
-            background: #fce4ec;
-            color: #c2185b;
-            border: 1px solid #f8bbd9;
-        }
-
-        .doc-type-badge.quote {
-            background: #f1f8e9;
-            color: #558b2f;
-            border: 1px solid #c5e1a5;
-        }
-
-        .doc-type-badge.contract {
-            background: #fff8e1;
-            color: #f57f17;
-            border: 1px solid #fff176;
-        }
-
-        .doc-type-badge.spec {
-            background: #e8eaf6;
-            color: #3f51b5;
-            border: 1px solid #c5cae9;
-        }
-
-        .doc-type-badge.other {
-            background: #f5f5f5;
-            color: #616161;
-            border: 1px solid #e0e0e0;
-        }
-
-        .attachment-meta {
-            font-size: 12px;
-            color: #6c757d;
-        }
-
-        .attachment-actions {
-            display: flex;
-            gap: 5px;
-        }
-
-        .attachment-btn {
-            padding: 4px 8px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 12px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            transition: all 0.2s;
-        }
-
-        .attachment-btn.view {
-            background: #28a745;
-            color: white;
-        }
-
-        .attachment-btn.view:hover {
-            background: #218838;
-        }
-
-        .attachment-btn.download {
-            background: #007bff;
-            color: white;
-        }
-
-        .attachment-btn.download:hover {
-            background: #0056b3;
-        }
-
-        .attachment-btn.delete {
-            background: #dc3545;
-            color: white;
-        }
-
-        .attachment-btn.delete:hover {
-            background: #c82333;
-        }
-
-        .no-attachments {
-            text-align: center;
-            color: #6c757d;
-            font-style: italic;
-            padding: 20px;
-        }
-
-        #uploadAttachmentBtn {
-            background: #28a745;
-            color: white;
-        }
-
-        #uploadAttachmentBtn:hover {
-            background: #218838;
-        }
     </style>
 
     <!-- Final initialization script to ensure DOM is ready -->
@@ -8397,48 +6908,17 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             const notMyConcernCheckbox = document.getElementById('showNotMyConcern');
             const pendingBillCheckbox = document.getElementById('showPendingBill');
-            const hiddenPOsCheckbox = document.getElementById('showHiddenPOs');
 
-            if (notMyConcernCheckbox && pendingBillCheckbox && hiddenPOsCheckbox) {
+            if (notMyConcernCheckbox && pendingBillCheckbox) {
                 notMyConcernCheckbox.checked = false; // Ensure unchecked
                 pendingBillCheckbox.checked = false; // Ensure unchecked
-                
-                // Set hidden POs checkbox based on URL parameter
-                const urlParams = new URLSearchParams(window.location.search);
-                hiddenPOsCheckbox.checked = urlParams.get('includeHidden') === 'true';
-                
                 console.log('✅ Final filter initialization complete, applying filters...');
                 applyFilters();
             } else {
                 console.log('❌ One or more checkboxes not found in final initialization');
             }
         });
-
-        // Document viewer event listeners
-        document.addEventListener('click', function(event) {
-            const viewer = document.getElementById('documentViewer');
-            const content = document.querySelector('.document-viewer-content');
-            
-            if (event.target === viewer && viewer.style.display === 'flex') {
-                closeDocumentViewer();
-            }
-        });
-
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                const viewer = document.getElementById('documentViewer');
-                if (viewer && viewer.style.display === 'flex') {
-                    closeDocumentViewer();
-                }
-            }
-        });
     </script>
-
-    <!-- Bootstrap JavaScript for dropdown functionality -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
-^
-^
-^
