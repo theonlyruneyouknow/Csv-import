@@ -29,6 +29,147 @@
             align-items: flex-start;
         }
 
+        /* User Profile Styles */
+        .user-profile-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-left: auto;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #dee2e6;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+        }
+
+        .user-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 280px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            z-index: 1001;
+            border: 1px solid #dee2e6;
+            margin-top: 10px;
+        }
+
+        .user-dropdown-content.show {
+            display: block;
+        }
+
+        .user-dropdown-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            background: white;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar-large {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .user-info strong {
+            font-size: 18px;
+            color: #212529;
+            font-weight: 600;
+            display: block;
+        }
+
+        .user-info .user-role {
+            color: #6c757d;
+            font-size: 14px;
+            display: block;
+        }
+
+        .user-info .user-status {
+            color: #28a745;
+            font-size: 13px;
+            display: block;
+            font-weight: 500;
+        }
+
+        .user-dropdown-item {
+            padding: 14px 20px;
+            color: #495057;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+            font-size: 15px;
+            border: none;
+            background: white;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .user-dropdown-item:hover {
+            background: #f8f9fa;
+        }
+
+        .user-dropdown-item:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+
+        .user-dropdown-item.logout {
+            color: #dc3545;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .dropdown-icon {
+            font-size: 18px;
+            width: 20px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .user-dropdown-item.logout:hover {
+            background: #fff5f5;
+        }
+
         .nav-section {
             position: relative;
         }
@@ -2743,7 +2884,7 @@
                         <button class="nav-dropdown-item" onclick="fixMainVendors()">🔧 Fix Main Vendors</button>
                         <button class="nav-dropdown-item" onclick="fixOrganicVendors()">🌱 Fix Organic Vendors</button>
                         <button class="nav-dropdown-item" onclick="openEmailClient()">📧 Email Client</button>
-                        <a href="/user-management" class="nav-dropdown-item">👥 User Management</a>
+                        <a href="/auth/admin/users" class="nav-dropdown-item">👥 User Management</a>
                     </div>
                 </div>
 
@@ -2760,6 +2901,43 @@
                         ✅ Task Management
                     </a>
                 </div>
+
+                <!-- User Profile -->
+                <% if (user) { %>
+                <div class="user-profile-section">
+                    <div class="user-dropdown">
+                        <div class="user-avatar" onclick="toggleUserDropdown()">
+                            <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : '' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                        </div>
+                        <div id="userDropdown" class="user-dropdown-content">
+                            <div class="user-dropdown-header">
+                                <div class="user-avatar-large">
+                                    <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : '' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                                </div>
+                                <div class="user-info">
+                                    <strong><%= user.firstName %> <%= user.lastName %></strong>
+                                    <small class="user-role">Admin</small>
+                                    <small class="user-status">● Online</small>
+                                </div>
+                            </div>
+                            <a href="/auth/admin/users" class="user-dropdown-item">
+                                <span class="dropdown-icon">�</span> User Management
+                            </a>
+                            <a href="/auth/admin/audit-logs" class="user-dropdown-item">
+                                <span class="dropdown-icon">🔄</span> Audit Logs
+                            </a>
+                            <a href="/auth/admin/test-email" class="user-dropdown-item">
+                                <span class="dropdown-icon">✉️</span> Test Email
+                            </a>
+                            <form action="/auth/logout" method="POST" style="margin: 0;">
+                                <button type="submit" class="user-dropdown-item logout">
+                                    <span class="dropdown-icon">🚪</span> Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <% } %>
             </div>
         </div>
 
@@ -3589,6 +3767,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const managersSection = document.querySelector('.nav-section:first-child');
             const optionsSection = document.querySelector('.nav-section:nth-child(2)');
             const importsSection = document.querySelector('.nav-section:nth-child(3)');
+            const userSection = document.querySelector('.user-dropdown');
 
             if (!managersSection.contains(event.target)) {
                 document.getElementById('managersAccordion').classList.remove('show');
@@ -3603,6 +3782,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             if (!importsSection.contains(event.target)) {
                 document.getElementById('importsDropdown').classList.remove('show');
                 document.querySelector('.nav-imports-btn .dropdown-icon').classList.remove('rotated');
+            }
+
+            if (userSection && !userSection.contains(event.target)) {
+                document.getElementById('userDropdown').classList.remove('show');
             }
         });
 
@@ -4970,6 +5153,15 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             // Show a toast notification
             const message = isCurrentlyVisible ? '📦 NS Status column hidden' : '📦 NS Status column shown';
             showTrackingToast(message, 'success');
+        }
+
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+
+            // Close other dropdowns
+            document.getElementById('optionsDropdown').classList.remove('show');
+            document.getElementById('importsDropdown').classList.remove('show');
         }
 
         async function toggleTrackingDetails(poId) {
@@ -7167,3 +7359,4 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 </body>
 
 </html>
+
