@@ -1448,6 +1448,18 @@
             color: #495057;
         }
 
+        .vendor-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .vendor-link:hover {
+            text-decoration: underline;
+            color: #0056b3;
+        }
+
         .url-btn {
             background: #6c757d;
             color: white;
@@ -1794,6 +1806,16 @@
             border-left: 3px solid #28a745; /* Green border to indicate active state */
         }
 
+        /* Default behavior: NS Status column hidden until explicitly shown */
+        .ns-status-cell {
+            display: none;
+        }
+
+        /* Show NS Status column when explicitly enabled */
+        .show-ns-status .ns-status-cell {
+            display: table-cell !important;
+        }
+
         /* On smaller screens, add mobile indicator */
         @media (max-width: 1400px) {
             /* Show a hint that tracking column can be toggled */
@@ -2008,6 +2030,33 @@
 
         .status-cell {
             min-width: 150px;
+        }
+
+        .eta-cell {
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .eta-input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: inherit;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .eta-input:hover {
+            border-color: #007bff;
+        }
+
+        .eta-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
         }
 
         .ns-status-cell {
@@ -2686,10 +2735,15 @@
                         📁 Import <span class="dropdown-icon">▼</span>
                     </button>
                     <div id="importsDropdown" class="nav-dropdown-content">
-                        <a href="/upload" class="nav-dropdown-item">📄 Purchase Orders CSV</a>
-                        <a href="/upload-line-items" class="nav-dropdown-item">📦 Line Items CSV</a>
-                        <button class="nav-dropdown-item" onclick="openNetSuiteImportModal()">🏢 NetSuite PO
-                            Form</button>
+                        <a href="/upload" class="nav-dropdown-item">📄 Upload CSV</a>
+                        <a href="/organic-vendors" class="nav-dropdown-item">🌱 Organic Vendors</a>
+                        <a href="/trouble-seed" class="nav-dropdown-item">⚠️ Trouble Seed</a>
+                        <a href="/orphaned-line-items" class="nav-dropdown-item">� Orphaned Items</a>
+                        <button class="nav-dropdown-item" onclick="fixMissingVendorsBoth()">🔗 Fix Missing Vendors (Both)</button>
+                        <button class="nav-dropdown-item" onclick="fixMainVendors()">🔧 Fix Main Vendors</button>
+                        <button class="nav-dropdown-item" onclick="fixOrganicVendors()">🌱 Fix Organic Vendors</button>
+                        <button class="nav-dropdown-item" onclick="openEmailClient()">📧 Email Client</button>
+                        <a href="/user-management" class="nav-dropdown-item">👥 User Management</a>
                     </div>
                 </div>
 
@@ -2921,6 +2975,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         id="toggleTrackingBtn" title="Show/Hide tracking column">
                         👁️ <span id="trackingColumnText">Show Tracking</span>
                     </button>
+                    <button class="btn btn-sm btn-outline-secondary ms-2" onclick="toggleNSStatusColumn()"
+                        id="toggleNSStatusBtn" title="Show/Hide NS Status column">
+                        📦 <span id="nsStatusColumnText">Show NS Status</span>
+                    </button>
                 </div>
             </div>
 
@@ -2967,6 +3025,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     <th class="sortable vendor" data-column="vendor">Vendor</th>
                                     <th class="sortable line-items-count-cell" data-column="lineItemsCount">Line Items
                                     </th>
+                                    <th class="sortable eta-cell" data-column="eta">ETA</th>
                                     <th class="sortable ns-status-cell" data-column="nsStatus">NS Status</th>
                                     <th class="sortable status-cell" data-column="status">Status</th>
                                     <th class="sortable shipping-tracking-cell" data-column="shippingTracking">Tracking
@@ -3031,7 +3090,21 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                             </select>
                                         </td>
                                         <td class="vendor" title="<%= po.vendor %>">
-                                            <%= po.vendor %>
+                                            <% if (po.linkedVendor && po.linkedVendor._id) { %>
+                                                <a href="/vendors/<%= po.linkedVendor._id %>" 
+                                                   class="vendor-link"
+                                                   title="View vendor details for <%= po.vendor %>">
+                                                    <%= po.vendor %>
+                                                </a>
+                                            <% } else if (po.linkedVendor) { %>
+                                                <a href="/vendors/<%= po.linkedVendor %>" 
+                                                   class="vendor-link"
+                                                   title="View vendor details for <%= po.vendor %>">
+                                                    <%= po.vendor %>
+                                                </a>
+                                            <% } else { %>
+                                                <%= po.vendor %>
+                                            <% } %>
                                         </td>
                                         <td class="line-items-count-cell">
                                             <% if (po.lineItems && po.lineItems.length> 0) { %>
@@ -3067,6 +3140,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                         </button>
                                                     </div>
                                                     <% } %>
+                                        </td>
+                                        <td class="eta-cell">
+                                            <input type="date" class="eta-input" data-id="<%= po._id %>"
+                                                data-po="<%= po.poNumber %>"
+                                                value="<%= po.eta ? new Date(po.eta).toISOString().split('T')[0] : '' %>"
+                                                title="ETA for PO <%= po.poNumber %>">
                                         </td>
                                         <td class="ns-status-cell">
                                             <span class="ns-status-display">
@@ -3568,6 +3647,108 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById('addToExisting').checked = false;
         }
 
+        // Vendor Reconciliation Functions
+        async function fixMainVendors() {
+            if (!confirm('This will create Vendor entries for all POs that don\'t have a linkedVendor and link them. Continue?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/purchase-orders/reconcile-main-vendors', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(result.message);
+                    location.reload(); // Refresh to show updated data
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Error fixing main vendors:', error);
+                alert('Failed to fix main vendors: Network error');
+            }
+        }
+
+        async function fixOrganicVendors() {
+            if (!confirm('This will create OrganicVendor entries for all POs that don\'t have an organicVendor and link them. Continue?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/purchase-orders/reconcile-vendors', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(result.message);
+                    location.reload(); // Refresh to show updated data
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Error fixing organic vendors:', error);
+                alert('Failed to fix organic vendors: Network error');
+            }
+        }
+
+        async function fixMissingVendorsBoth() {
+            if (!confirm('This will fix both Main Vendors and Organic Vendors. Continue?')) {
+                return;
+            }
+
+            try {
+                // First fix main vendors
+                const mainResponse = await fetch('/purchase-orders/reconcile-main-vendors', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const mainResult = await mainResponse.json();
+
+                if (!mainResponse.ok) {
+                    alert(`Error fixing main vendors: ${mainResult.error}`);
+                    return;
+                }
+
+                // Then fix organic vendors
+                const organicResponse = await fetch('/purchase-orders/reconcile-vendors', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const organicResult = await organicResponse.json();
+
+                if (organicResponse.ok) {
+                    alert(`Successfully fixed both!\n\nMain Vendors: ${mainResult.message}\nOrganic Vendors: ${organicResult.message}`);
+                    location.reload(); // Refresh to show updated data
+                } else {
+                    alert(`Main vendors fixed, but organic vendors failed: ${organicResult.error}`);
+                }
+            } catch (error) {
+                console.error('Error fixing vendors:', error);
+                alert('Failed to fix vendors: Network error');
+            }
+        }
+
+        function openEmailClient() {
+            alert('Email Client feature coming soon!');
+        }
+
         async function processNetSuiteImport() {
             const netsuiteData = document.getElementById('netsuiteData').value.trim();
             const targetPOId = document.getElementById('targetPO').value;
@@ -4006,6 +4187,43 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     .catch(error => {
                         this.classList.remove('saving');
                         console.error('Error saving next update date:', error);
+                    });
+            });
+        });
+
+        // Auto-save ETA when changed
+        document.querySelectorAll('.eta-input').forEach(etaInput => {
+            etaInput.addEventListener('change', function () {
+                const id = this.dataset.id;
+                const poNumber = this.dataset.po;
+                const eta = this.value;
+
+                // Show saving state
+                this.style.borderColor = '#ffc107';
+
+                fetch(`/purchase-orders/${id}/eta`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ eta })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Reset border color to show success
+                        this.style.borderColor = '#28a745';
+                        setTimeout(() => {
+                            this.style.borderColor = '';
+                        }, 1000);
+
+                        console.log(`ETA saved for PO ${poNumber}: ${eta || 'cleared'}`);
+                    })
+                    .catch(error => {
+                        // Show error state
+                        this.style.borderColor = '#dc3545';
+                        setTimeout(() => {
+                            this.style.borderColor = '';
+                        }, 2000);
+                        console.error('Error saving ETA:', error);
+                        alert('Failed to save ETA. Please try again.');
                     });
             });
         });
@@ -4728,6 +4946,29 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             
             // Show a toast notification
             const message = isCurrentlyVisible ? '👁️ Tracking column hidden' : '👁️ Tracking column shown';
+            showTrackingToast(message, 'success');
+        }
+
+        function toggleNSStatusColumn() {
+            const table = document.getElementById('purchaseOrdersTable');
+            const isCurrentlyVisible = table.classList.contains('show-ns-status');
+            
+            if (isCurrentlyVisible) {
+                // Hide NS Status column
+                table.classList.remove('show-ns-status');
+            } else {
+                // Show NS Status column
+                table.classList.add('show-ns-status');
+            }
+            
+            // Update button text
+            const btnText = document.getElementById('nsStatusColumnText');
+            if (btnText) {
+                btnText.textContent = isCurrentlyVisible ? 'Show NS Status' : 'Hide NS Status';
+            }
+            
+            // Show a toast notification
+            const message = isCurrentlyVisible ? '📦 NS Status column hidden' : '📦 NS Status column shown';
             showTrackingToast(message, 'success');
         }
 
@@ -6087,6 +6328,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     case 'nsStatus':
                         aValue = (aData.nsStatus || '').toLowerCase();
                         bValue = (bData.nsStatus || '').toLowerCase();
+                        break;
+                    case 'eta':
+                        aValue = aData.eta ? new Date(aData.eta) : new Date(0);
+                        bValue = bData.eta ? new Date(bData.eta) : new Date(0);
                         break;
                     case 'status':
                         aValue = (aData.status || '').toLowerCase();

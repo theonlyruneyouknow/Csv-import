@@ -1546,6 +1546,7 @@ router.get('/', async (req, res) => {
 
     const purchaseOrders = await PurchaseOrder.find(query)
       .populate('linkedVendor')  // Populate the linked vendor from Vendor model
+      .populate('organicVendor') // Populate the organic vendor from OrganicVendor model
       .sort({ date: 1 });
 
     // Fetch line items for each PO and calculate ETAs
@@ -4680,15 +4681,38 @@ router.post('/reconcile-main-vendors', async (req, res) => {
             const vendorData = splitVendorData(vendorString);
             console.log(`📊 Split data:`, vendorData);
             
-            // Check if vendor already exists by vendorCode (using vendorNumber from split)
-            let vendor = await Vendor.findOne({ vendorCode: vendorData.vendorNumber });
+            // Generate a vendor code if vendorNumber is empty
+            let vendorCode = vendorData.vendorNumber || '';
+            if (!vendorCode || vendorCode.trim() === '') {
+                // Generate vendor code from vendor name
+                const words = vendorData.vendorName.trim().split(/\s+/);
+                if (words.length === 1) {
+                    // Single word: take first 3-4 characters
+                    vendorCode = words[0].substring(0, 4).toUpperCase();
+                } else {
+                    // Multiple words: take first letter of each word, max 5 characters
+                    vendorCode = words.slice(0, 5).map(word => word.charAt(0)).join('').toUpperCase();
+                }
+                console.log(`📝 Generated vendor code: ${vendorCode} for vendor: ${vendorData.vendorName}`);
+            }
+            
+            // Check if vendor already exists by vendorCode
+            let vendor = await Vendor.findOne({ vendorCode: vendorCode });
             
             if (!vendor) {
+                // Ensure vendor code is unique
+                let finalVendorCode = vendorCode;
+                let counter = 1;
+                while (await Vendor.findOne({ vendorCode: finalVendorCode })) {
+                    finalVendorCode = vendorCode + counter;
+                    counter++;
+                }
+                
                 // Create new vendor in the Vendor model
-                console.log(`➕ Creating new vendor: ${vendorData.vendorName} (Code: ${vendorData.vendorNumber})`);
+                console.log(`➕ Creating new vendor: ${vendorData.vendorName} (Code: ${finalVendorCode})`);
                 vendor = new Vendor({
                     vendorName: vendorData.vendorName,
-                    vendorCode: vendorData.vendorNumber,
+                    vendorCode: finalVendorCode,
                     vendorType: 'Seeds', // Default type
                     status: 'Active'
                 });
