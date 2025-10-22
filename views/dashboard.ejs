@@ -1164,11 +1164,16 @@
 
         /* Pre-Purchase Orders Styles */
         .pre-purchase-section {
+            display: none; /* Hidden by default */
             margin-bottom: 30px;
             padding: 20px;
             background: #f8f9fa;
             border-radius: 8px;
             border: 1px solid #dee2e6;
+        }
+
+        .pre-purchase-section.show {
+            display: block; /* Show when toggled */
         }
 
         .pre-purchase-header {
@@ -2859,6 +2864,9 @@
                         ⚙️ Options <span class="dropdown-icon">▼</span>
                     </button>
                     <div id="optionsDropdown" class="nav-dropdown-content">
+                        <button class="nav-dropdown-item" onclick="togglePrePurchaseSection()">
+                            📋 Pre-Purchase Orders
+                        </button>
                         <button class="nav-dropdown-item" onclick="openStatusModal()">
                             🏷️ Manage PO Status Options
                         </button>
@@ -3761,6 +3769,21 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             icon.classList.toggle('rotated');
 
             // Close other dropdowns
+            document.getElementById('optionsDropdown').classList.remove('show');
+            document.querySelector('.nav-options-btn .dropdown-icon').classList.remove('rotated');
+        }
+
+        // Toggle Pre-Purchase Orders section visibility
+        function togglePrePurchaseSection() {
+            const section = document.querySelector('.pre-purchase-section');
+            section.classList.toggle('show');
+            
+            // Scroll to the section if it's being shown
+            if (section.classList.contains('show')) {
+                section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            // Close the options dropdown
             document.getElementById('optionsDropdown').classList.remove('show');
             document.querySelector('.nav-options-btn .dropdown-icon').classList.remove('rotated');
         }
