@@ -333,6 +333,22 @@
             background: #f8d7da;
             color: #721c24;
         }
+
+        .po-link {
+            color: #007bff;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .po-link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
     </style>
 </head>
 
@@ -496,6 +512,9 @@
             <button class="tab active" onclick="showTab('purchase-orders')">
                 <i class="fas fa-file-invoice"></i> Purchase Orders (<%= poStats.totalPOs %>)
             </button>
+            <button class="tab" onclick="showTab('unreceived')">
+                <i class="fas fa-clock"></i> Unreceived Items (<span id="unreceivedCount">0</span>)
+            </button>
             <button class="tab" onclick="showTab('items')">
                 <i class="fas fa-seedling"></i> Items (<%= vendor.totalActiveItems || 0 %>)
             </button>
@@ -574,6 +593,48 @@
                 <div>No purchase orders found for this vendor</div>
             </div>
             <% } %>
+        </div>
+
+        <!-- Tab Content: Unreceived Items -->
+        <div id="unreceived" class="tab-content" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>Unreceived Items</h4>
+                <button class="btn btn-sm btn-outline-primary" onclick="loadUnreceivedItems()">
+                    <i class="fas fa-sync"></i> Refresh
+                </button>
+            </div>
+
+            <div id="unreceivedLoading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Loading unreceived items...</p>
+            </div>
+
+            <div id="unreceivedContent" style="display: none;">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>PO Number</th>
+                                <th>PO Date</th>
+                                <th>ETA</th>
+                                <th>SKU</th>
+                                <th>Description</th>
+                                <th>Item Status</th>
+                                <th>PO Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="unreceivedItemsBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="unreceivedEmpty" class="text-center py-5 text-muted" style="display: none;">
+                <i class="fas fa-check-circle fa-3x mb-3 text-success"></i>
+                <div>All items from this vendor have been received!</div>
+            </div>
         </div>
 
         <!-- Tab Content: Items -->
@@ -897,6 +958,95 @@
             
             // Add active class to clicked tab
             event.target.classList.add('active');
+
+            // Load unreceived items when that tab is shown
+            if (tabId === 'unreceived') {
+                loadUnreceivedItems();
+            }
+        }
+
+        // Load unreceived items for this vendor
+        let unreceivedItemsLoaded = false;
+        async function loadUnreceivedItems() {
+            // Only load once unless explicitly refreshed
+            if (unreceivedItemsLoaded && event && event.type !== 'click') {
+                return;
+            }
+
+            const loading = document.getElementById('unreceivedLoading');
+            const content = document.getElementById('unreceivedContent');
+            const empty = document.getElementById('unreceivedEmpty');
+            const tbody = document.getElementById('unreceivedItemsBody');
+
+            loading.style.display = 'block';
+            content.style.display = 'none';
+            empty.style.display = 'none';
+
+            try {
+                const response = await fetch('/purchase-orders/unreceived-items');
+                const data = await response.json();
+
+                if (data.success) {
+                    console.log('Total unreceived items:', data.items.length);
+                    console.log('Looking for vendor ID:', '<%= vendor._id %>');
+                    console.log('Looking for vendor name:', '<%= vendor.vendorName %>');
+
+                    // Filter items for this vendor by vendorId (more reliable than name matching)
+                    const vendorId = '<%= vendor._id %>';
+                    const vendorItems = data.items.filter(item => {
+                        // Match by vendorId if available
+                        if (item.vendorId) {
+                            return item.vendorId === vendorId;
+                        }
+                        // Fallback: match by vendor name (may include number prefix)
+                        return item.vendor && item.vendor.includes('<%= vendor.vendorName %>');
+                    });
+
+                    console.log('Filtered items for this vendor:', vendorItems.length);
+
+                    // Update count
+                    document.getElementById('unreceivedCount').textContent = vendorItems.length;
+
+                    if (vendorItems.length === 0) {
+                        loading.style.display = 'none';
+                        empty.style.display = 'block';
+                    } else {
+                        tbody.innerHTML = vendorItems.map(item => {
+                            const poLink = item.poUrl || '#';
+                            return `
+                                <tr>
+                                    <td>
+                                        ${item.poUrl 
+                                            ? `<a href="${poLink}" target="_blank" class="po-link">${item.poNumber}</a>`
+                                            : item.poNumber
+                                        }
+                                    </td>
+                                    <td>${item.poDate || 'N/A'}</td>
+                                    <td>${item.eta ? new Date(item.eta).toLocaleDateString() : 'N/A'}</td>
+                                    <td><strong>${item.sku || 'N/A'}</strong></td>
+                                    <td style="max-width: 400px;" title="${item.memo || ''}">${item.memo || 'N/A'}</td>
+                                    <td>${item.itemStatus ? `<span class="badge bg-info">${item.itemStatus}</span>` : 'N/A'}</td>
+                                    <td>${item.poStatus ? `<span class="badge bg-warning">${item.poStatus}</span>` : 'N/A'}</td>
+                                </tr>
+                            `;
+                        }).join('');
+
+                        loading.style.display = 'none';
+                        content.style.display = 'block';
+                    }
+
+                    unreceivedItemsLoaded = true;
+                } else {
+                    throw new Error(data.error || 'Failed to load unreceived items');
+                }
+            } catch (error) {
+                console.error('Error loading unreceived items:', error);
+                loading.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> Error loading unreceived items: ${error.message}
+                    </div>
+                `;
+            }
         }
 
         // Show add item modal
@@ -1016,6 +1166,31 @@
             `;
             document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.stats-grid'));
         }
+
+        // Load unreceived items count on page load
+        async function loadUnreceivedCount() {
+            try {
+                const response = await fetch('/purchase-orders/unreceived-items');
+                const data = await response.json();
+
+                if (data.success) {
+                    const vendorId = '<%= vendor._id %>';
+                    const vendorItems = data.items.filter(item => {
+                        if (item.vendorId) {
+                            return item.vendorId === vendorId;
+                        }
+                        return item.vendor && item.vendor.includes('<%= vendor.vendorName %>');
+                    });
+
+                    document.getElementById('unreceivedCount').textContent = vendorItems.length;
+                }
+            } catch (error) {
+                console.error('Error loading unreceived count:', error);
+            }
+        }
+
+        // Load the count when page loads
+        loadUnreceivedCount();
     </script>
 </body>
 
