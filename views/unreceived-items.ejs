@@ -328,6 +328,17 @@
             color: #0c5460;
         }
 
+        .po-link, .vendor-link {
+            color: #007bff;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .po-link:hover, .vendor-link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
         .toast {
             position: fixed;
             top: 20px;
@@ -761,14 +772,29 @@
                 return;
             }
             
-            tbody.innerHTML = filteredItems.map(item => `
+            tbody.innerHTML = filteredItems.map(item => {
+                // Use poUrl directly if available
+                const poLink = item.poUrl || '#';
+                
+                // Build vendor link
+                const vendorLink = item.vendorId 
+                    ? `/vendors/${item.vendorId}`
+                    : '#';
+                
+                return `
                 <tr>
                     <td>
-                        <a href="/purchase-orders?search=${encodeURIComponent(item.poNumber)}" class="po-link">
-                            ${item.poNumber}
-                        </a>
+                        ${item.poUrl 
+                            ? `<a href="${poLink}" target="_blank" class="po-link">${item.poNumber}</a>`
+                            : item.poNumber
+                        }
                     </td>
-                    <td>${item.vendor || 'N/A'}</td>
+                    <td>
+                        ${item.vendorId 
+                            ? `<a href="${vendorLink}" class="vendor-link">${item.vendor}</a>`
+                            : item.vendor || 'N/A'
+                        }
+                    </td>
                     <td>${item.poDate || 'N/A'}</td>
                     <td>${item.eta ? new Date(item.eta).toLocaleDateString() : 'N/A'}</td>
                     <td><strong>${item.sku || 'N/A'}</strong></td>
@@ -776,7 +802,8 @@
                     <td>${item.itemStatus ? `<span class="badge badge-info">${item.itemStatus}</span>` : 'N/A'}</td>
                     <td>${item.poStatus ? `<span class="badge badge-warning">${item.poStatus}</span>` : 'N/A'}</td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function exportToCSV() {

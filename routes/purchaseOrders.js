@@ -4936,7 +4936,9 @@ router.get('/unreceived-items', async (req, res) => {
             .filter(item => item.poId) // Only include items with valid PO references
             .map(item => ({
                 poNumber: item.poNumber,
+                poUrl: item.poId.poUrl || null,
                 vendor: item.poId.vendor || 'N/A',
+                vendorId: item.poId.linkedVendor || null,
                 poDate: item.poId.date || item.date || 'N/A',
                 eta: item.poId.eta || null,
                 sku: item.sku || 'N/A',
