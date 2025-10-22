@@ -535,9 +535,15 @@
         <div id="purchase-orders" class="tab-content active">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4>Recent Purchase Orders</h4>
+                <% if (purchaseOrders && purchaseOrders.length > 0) { %>
                 <button class="btn btn-primary btn-sm" onclick="window.open('/purchase-orders?vendor=<%= encodeURIComponent(vendor.vendorName) %>', '_blank')">
                     <i class="fas fa-external-link-alt"></i> View All POs
                 </button>
+                <% } else { %>
+                <button class="btn btn-primary btn-sm" onclick="window.open('/purchase-orders', '_blank')">
+                    <i class="fas fa-external-link-alt"></i> View PO Dashboard
+                </button>
+                <% } %>
             </div>
 
             <% if (purchaseOrders && purchaseOrders.length > 0) { %>
