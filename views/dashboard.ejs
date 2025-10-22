@@ -1162,6 +1162,105 @@
             font-weight: 500;
         }
 
+        /* Line Items Table Styles */
+        .line-items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 12px;
+            background: white;
+        }
+
+        .line-items-table thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .line-items-table th {
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            font-size: 11px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .line-items-table td {
+            padding: 8px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+
+        .line-items-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .line-items-table .line-item-row.received {
+            background: #f0f9f0;
+        }
+
+        .line-items-table .line-item-row.received:hover {
+            background: #e6f5e6;
+        }
+
+        .line-items-table .description-cell {
+            max-width: 300px;
+            white-space: normal;
+            line-height: 1.4;
+        }
+
+        .line-items-table .received-cell {
+            text-align: center;
+            width: 80px;
+        }
+
+        .received-toggle-inline {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .received-toggle-inline:hover {
+            background: #5a6268;
+            transform: scale(1.1);
+        }
+
+        .received-toggle-inline.received {
+            background: #28a745;
+        }
+
+        .received-toggle-inline.received:hover {
+            background: #218838;
+        }
+
+        .line-items-table .status-badge {
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .line-items-table .status-no-variances {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .line-items-summary {
+            padding: 10px;
+            background: #e7f5ff;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: #004085;
+        }
+
         /* Pre-Purchase Orders Styles */
         .pre-purchase-section {
             display: none; /* Hidden by default */
@@ -4089,15 +4188,34 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             // Handle PO Details button clicks using event delegation
             if (event.target.closest('.po-details-btn')) {
                 const btn = event.target.closest('.po-details-btn');
+                const index = btn.getAttribute('data-index');
                 const poId = btn.getAttribute('data-id');
                 const poNumber = btn.getAttribute('data-po');
                 
-                console.log('📦 PO Details button clicked:', { poId, poNumber });
+                console.log('📦 PO Details button clicked:', { index, poId, poNumber });
                 
-                if (poId && poNumber) {
-                    openPoDetailsModal(poId, poNumber);
+                if (index !== null) {
+                    const lineItemsRow = document.getElementById(`line-items-row-${index}`);
+                    
+                    if (lineItemsRow) {
+                        const isExpanded = lineItemsRow.classList.contains('expanded');
+                        
+                        if (isExpanded) {
+                            // Close the line items row
+                            lineItemsRow.classList.remove('expanded');
+                        } else {
+                            // Open the line items row and load data
+                            lineItemsRow.classList.add('expanded');
+                            
+                            // Load line items data if not already loaded
+                            const container = document.getElementById(`line-items-container-${index}`);
+                            if (container && container.querySelector('.loading-line-items')) {
+                                loadLineItemsInline(poId, index);
+                            }
+                        }
+                    }
                 } else {
-                    console.error('❌ Missing PO ID or number:', { poId, poNumber });
+                    console.error('❌ Missing index for PO details button');
                 }
             }
 
@@ -5135,6 +5253,150 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         function closePoDetailsModal() {
             document.getElementById('poDetailsModal').style.display = 'none';
+        }
+
+        // Load line items inline (in expandable row)
+        async function loadLineItemsInline(poId, index) {
+            const container = document.getElementById(`line-items-container-${index}`);
+            const statusSpan = document.getElementById(`line-items-status-${index}`);
+            const showReceivedBtn = document.getElementById(`show-received-${index}`);
+            
+            try {
+                container.innerHTML = '<div class="loading-line-items">Loading line items...</div>';
+                
+                const response = await fetch(`/purchase-orders/${poId}/line-items`);
+                const lineItems = await response.json();
+                
+                if (lineItems.length === 0) {
+                    container.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
+                    if (statusSpan) statusSpan.textContent = '';
+                } else {
+                    const receivedCount = lineItems.filter(item => item.received).length;
+                    const totalCount = lineItems.length;
+                    const unreceivedCount = totalCount - receivedCount;
+                    
+                    // Update status
+                    if (statusSpan) {
+                        statusSpan.textContent = `(${receivedCount}/${totalCount} received)`;
+                    }
+                    
+                    // Show the "Show Received" button if there are received items
+                    if (showReceivedBtn && receivedCount > 0) {
+                        showReceivedBtn.style.display = 'inline-block';
+                        // Store the initial state
+                        showReceivedBtn.dataset.showingReceived = 'false';
+                    }
+                    
+                    // Generate the HTML for line items table
+                    const lineItemsHtml = lineItems.map(item => `
+                        <tr class="line-item-row ${item.received ? 'received' : ''}" data-item-id="${item._id}">
+                            <td>${item.sku || 'N/A'}</td>
+                            <td>${item.quantityExpected || '-'}</td>
+                            <td class="description-cell">${escapeHtml(item.memo || 'No description')}</td>
+                            <td class="received-cell">
+                                <button class="received-toggle-inline ${item.received ? 'received' : ''}" 
+                                        onclick="toggleReceivedInline('${item._id}', ${!item.received}, '${poId}', '${index}')">
+                                    ${item.received ? '✅' : '📦'}
+                                </button>
+                            </td>
+                            <td>${item.quantityReceived !== undefined ? item.quantityReceived : '-'}</td>
+                            <td>${item.date ? item.date : '-'}</td>
+                            <td>
+                                <span class="status-badge ${item.billVarianceStatus ? 'status-' + item.billVarianceStatus.toLowerCase().replace(/\s+/g, '-') : ''}">
+                                    ${item.billVarianceStatus || '-'}
+                                </span>
+                            </td>
+                            <td>${item.expectedArrivalDate ? new Date(item.expectedArrivalDate).toLocaleDateString() : '-'}</td>
+                        </tr>
+                    `).join('');
+                    
+                    container.innerHTML = `
+                        <div class="line-items-summary">
+                            <strong>Summary:</strong> ${receivedCount}/${totalCount} items received
+                            ${receivedCount === totalCount ? ' ✅' : ''}
+                        </div>
+                        <table class="line-items-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Qty Expected</th>
+                                    <th>Description</th>
+                                    <th>Received</th>
+                                    <th>Qty Received</th>
+                                    <th>Expected Receipt Date</th>
+                                    <th>Bill Variance Status</th>
+                                    <th>Expected Arrival Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${lineItemsHtml}
+                            </tbody>
+                        </table>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading line items:', error);
+                container.innerHTML = '<div class="no-line-items">Error loading line items</div>';
+            }
+        }
+
+        // Helper functions for inline line items
+        async function toggleReceivedInline(itemId, received, poId, index) {
+            try {
+                const response = await fetch(`/purchase-orders/line-items/${itemId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ received })
+                });
+
+                if (response.ok) {
+                    // Reload line items to reflect changes
+                    await loadLineItemsInline(poId, index);
+                    // Also reload the page to update the count in the main table
+                    location.reload();
+                } else {
+                    console.error('Failed to update received status');
+                }
+            } catch (error) {
+                console.error('Error updating received status:', error);
+            }
+        }
+
+        async function updateLineItemTrackingInline(itemId, poId, index) {
+            try {
+                const response = await fetch(`/purchase-orders/line-items/${itemId}/update-tracking`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    // Reload line items to reflect changes
+                    await loadLineItemsInline(poId, index);
+                } else {
+                    console.error('Failed to update tracking');
+                }
+            } catch (error) {
+                console.error('Error updating tracking:', error);
+            }
+        }
+
+        async function updateTrackingNumberInline(itemId, trackingNumber, poId, index) {
+            try {
+                const response = await fetch(`/purchase-orders/line-items/${itemId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ trackingNumber })
+                });
+
+                if (response.ok) {
+                    // Reload line items to reflect changes
+                    await loadLineItemsInline(poId, index);
+                } else {
+                    console.error('Failed to update tracking number');
+                }
+            } catch (error) {
+                console.error('Error updating tracking number:', error);
+            }
         }
 
         // Tracking Functions
