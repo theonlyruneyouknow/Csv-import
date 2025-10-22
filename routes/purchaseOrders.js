@@ -1523,6 +1523,19 @@ router.get('/debug/line-items/:poNumber', async (req, res) => {
   }
 });
 
+// Unreceived Items Report Page - MUST be before '/' route
+router.get('/unreceived-items-report', async (req, res) => {
+  try {
+    console.log('📋 Loading unreceived items report page...');
+    res.render('unreceived-items', {
+      user: req.user
+    });
+  } catch (error) {
+    console.error('❌ Error loading unreceived items report page:', error);
+    res.status(500).send('Error loading report page: ' + error.message);
+  }
+});
+
 // Get all purchase orders with unique status values
 router.get('/', async (req, res) => {
   try {
@@ -4902,6 +4915,57 @@ router.get('/check-vendor-links', async (req, res) => {
     } catch (error) {
         console.error('❌ Check failed:', error);
         res.status(500).json({ error: error.message });
+    }
+});
+
+// Get all unreceived items report
+router.get('/unreceived-items', async (req, res) => {
+    try {
+        console.log('📋 Fetching unreceived items report...');
+        
+        // Find all line items where received = false
+        const unreceivedItems = await LineItem.find({ received: false })
+            .populate('poId')
+            .sort({ poNumber: 1, sku: 1 })
+            .lean();
+        
+        console.log(`Found ${unreceivedItems.length} unreceived items`);
+        
+        // Format the data for the report
+        const formattedItems = unreceivedItems
+            .filter(item => item.poId) // Only include items with valid PO references
+            .map(item => ({
+                poNumber: item.poNumber,
+                vendor: item.poId.vendor || 'N/A',
+                poDate: item.poId.date || item.date || 'N/A',
+                eta: item.poId.eta || null,
+                sku: item.sku || 'N/A',
+                memo: item.memo || 'N/A',
+                itemStatus: item.itemStatus || 'N/A',
+                poStatus: item.poId.status || 'N/A'
+            }));
+        
+        // Get stats
+        const uniquePOs = new Set(formattedItems.map(item => item.poNumber));
+        const stats = {
+            totalItems: formattedItems.length,
+            totalPOs: uniquePOs.size
+        };
+        
+        console.log(`📊 Stats: ${stats.totalItems} items across ${stats.totalPOs} POs`);
+        
+        res.json({
+            success: true,
+            items: formattedItems,
+            stats: stats
+        });
+        
+    } catch (error) {
+        console.error('❌ Error fetching unreceived items:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
     }
 });
 

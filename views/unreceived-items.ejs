@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unreceived Items Report - Purchase Orders</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-primary:hover {
+            background: #f0f0f0;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .stats-bar {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #212529;
+        }
+
+        .filters-bar {
+            padding: 20px 30px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .filter-input {
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: calc(100vh - 400px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead {
+            background: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            background: #e9ecef;
+        }
+
+        th.sortable::after {
+            content: ' ⇅';
+            color: #adb5bd;
+        }
+
+        th.sort-asc::after {
+            content: ' ▲';
+            color: #667eea;
+        }
+
+        th.sort-desc::after {
+            content: ' ▼';
+            color: #667eea;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+            color: #212529;
+        }
+
+        tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .po-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .po-link:hover {
+            text-decoration: underline;
+        }
+
+        .empty-state {
+            padding: 60px 30px;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h2 {
+            font-size: 24px;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+        }
+
+        .loading {
+            padding: 60px 30px;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .stats-bar {
+                gap: 20px;
+            }
+
+            .table-container {
+                max-height: calc(100vh - 500px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Unreceived Items Report</h1>
+            <div class="header-actions">
+                <a href="/purchase-orders" class="btn btn-primary">
+                    ← Back to Dashboard
+                </a>
+                <button onclick="exportToCSV()" class="btn btn-success">
+                    📥 Export to CSV
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-label">Total Unreceived Items</span>
+                <span class="stat-value" id="totalItems">-</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Purchase Orders</span>
+                <span class="stat-value" id="totalPOs">-</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Unique Vendors</span>
+                <span class="stat-value" id="totalVendors">-</span>
+            </div>
+        </div>
+
+        <div class="filters-bar">
+            <div class="filter-group">
+                <label>Search</label>
+                <input type="text" id="searchFilter" class="filter-input" placeholder="Search by PO, vendor, SKU, or description...">
+            </div>
+            <div class="filter-group">
+                <label>Vendor</label>
+                <select id="vendorFilter" class="filter-input">
+                    <option value="">All Vendors</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Status</label>
+                <select id="statusFilter" class="filter-input">
+                    <option value="">All Statuses</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="itemsTable">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-sort="poNumber">PO Number</th>
+                        <th class="sortable" data-sort="vendor">Vendor</th>
+                        <th class="sortable" data-sort="poDate">PO Date</th>
+                        <th class="sortable" data-sort="eta">ETA</th>
+                        <th class="sortable" data-sort="sku">SKU</th>
+                        <th data-sort="memo">Description</th>
+                        <th class="sortable" data-sort="itemStatus">Item Status</th>
+                        <th class="sortable" data-sort="poStatus">PO Status</th>
+                    </tr>
+                </thead>
+                <tbody id="itemsBody">
+                    <tr>
+                        <td colspan="8" class="loading">
+                            <div class="loading-spinner"></div>
+                            <p>Loading unreceived items...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        let allItems = [];
+        let filteredItems = [];
+        let currentSort = { column: 'poNumber', direction: 'asc' };
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Search filter
+            document.getElementById('searchFilter').addEventListener('input', applyFilters);
+            
+            // Dropdown filters
+            document.getElementById('vendorFilter').addEventListener('change', applyFilters);
+            document.getElementById('statusFilter').addEventListener('change', applyFilters);
+            
+            // Sort headers
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.addEventListener('click', () => {
+                    const sortBy = th.dataset.sort;
+                    handleSort(sortBy);
+                });
+            });
+        }
+
+        async function loadData() {
+            try {
+                const response = await fetch('/purchase-orders/unreceived-items');
+                const data = await response.json();
+                
+                if (data.success) {
+                    allItems = data.items;
+                    filteredItems = [...allItems];
+                    updateStats(data.stats);
+                    populateFilters();
+                    renderTable();
+                } else {
+                    showError('Failed to load data: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showError('Error loading unreceived items');
+            }
+        }
+
+        function updateStats(stats) {
+            document.getElementById('totalItems').textContent = stats.totalItems.toLocaleString();
+            document.getElementById('totalPOs').textContent = stats.totalPOs.toLocaleString();
+            
+            // Calculate unique vendors
+            const uniqueVendors = new Set(allItems.map(item => item.vendor));
+            document.getElementById('totalVendors').textContent = uniqueVendors.size.toLocaleString();
+        }
+
+        function populateFilters() {
+            // Populate vendor filter
+            const vendors = [...new Set(allItems.map(item => item.vendor))].sort();
+            const vendorSelect = document.getElementById('vendorFilter');
+            vendors.forEach(vendor => {
+                const option = document.createElement('option');
+                option.value = vendor;
+                option.textContent = vendor;
+                vendorSelect.appendChild(option);
+            });
+            
+            // Populate status filter
+            const statuses = [...new Set(allItems.map(item => item.poStatus).filter(s => s))].sort();
+            const statusSelect = document.getElementById('statusFilter');
+            statuses.forEach(status => {
+                const option = document.createElement('option');
+                option.value = status;
+                option.textContent = status;
+                statusSelect.appendChild(option);
+            });
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
+            const vendorFilter = document.getElementById('vendorFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            filteredItems = allItems.filter(item => {
+                // Search filter
+                const matchesSearch = !searchTerm || 
+                    item.poNumber.toLowerCase().includes(searchTerm) ||
+                    item.vendor.toLowerCase().includes(searchTerm) ||
+                    (item.sku && item.sku.toLowerCase().includes(searchTerm)) ||
+                    (item.memo && item.memo.toLowerCase().includes(searchTerm));
+                
+                // Vendor filter
+                const matchesVendor = !vendorFilter || item.vendor === vendorFilter;
+                
+                // Status filter
+                const matchesStatus = !statusFilter || item.poStatus === statusFilter;
+                
+                return matchesSearch && matchesVendor && matchesStatus;
+            });
+            
+            renderTable();
+        }
+
+        function handleSort(column) {
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = 'asc';
+            }
+            
+            // Update header classes
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+                if (th.dataset.sort === column) {
+                    th.classList.add(currentSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+                }
+            });
+            
+            sortItems();
+            renderTable();
+        }
+
+        function sortItems() {
+            filteredItems.sort((a, b) => {
+                let aVal = a[currentSort.column];
+                let bVal = b[currentSort.column];
+                
+                // Handle null/undefined
+                if (!aVal) aVal = '';
+                if (!bVal) bVal = '';
+                
+                // Handle dates
+                if (currentSort.column === 'eta' || currentSort.column === 'poDate') {
+                    aVal = aVal ? new Date(aVal) : new Date(0);
+                    bVal = bVal ? new Date(bVal) : new Date(0);
+                }
+                
+                // Compare
+                if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+                if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('itemsBody');
+            
+            if (filteredItems.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">✅</div>
+                                <h2>All Items Received!</h2>
+                                <p>There are no unreceived items to display.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = filteredItems.map(item => `
+                <tr>
+                    <td>
+                        <a href="/purchase-orders?search=${encodeURIComponent(item.poNumber)}" class="po-link">
+                            ${item.poNumber}
+                        </a>
+                    </td>
+                    <td>${item.vendor || 'N/A'}</td>
+                    <td>${item.poDate || 'N/A'}</td>
+                    <td>${item.eta ? new Date(item.eta).toLocaleDateString() : 'N/A'}</td>
+                    <td><strong>${item.sku || 'N/A'}</strong></td>
+                    <td style="max-width: 400px; white-space: normal;" title="${item.memo || ''}">${item.memo || 'N/A'}</td>
+                    <td>${item.itemStatus ? `<span class="badge badge-info">${item.itemStatus}</span>` : 'N/A'}</td>
+                    <td>${item.poStatus ? `<span class="badge badge-warning">${item.poStatus}</span>` : 'N/A'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function exportToCSV() {
+            const headers = ['PO Number', 'Vendor', 'PO Date', 'ETA', 'SKU', 'Description', 'Item Status', 'PO Status'];
+            const csvRows = [headers.join(',')];
+            
+            filteredItems.forEach(item => {
+                const row = [
+                    item.poNumber,
+                    item.vendor || '',
+                    item.poDate || '',
+                    item.eta ? new Date(item.eta).toLocaleDateString() : '',
+                    item.sku || '',
+                    `"${(item.memo || '').replace(/"/g, '""')}"`,
+                    item.itemStatus || '',
+                    item.poStatus || ''
+                ];
+                csvRows.push(row.join(','));
+            });
+            
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `unreceived_items_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast('CSV exported successfully!');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function showError(message) {
+            const tbody = document.getElementById('itemsBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">⚠️</div>
+                            <h2>Error Loading Data</h2>
+                            <p>${message}</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+    </script>
+</body>
+</html>
