@@ -24,23 +24,37 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 40px);
         }
 
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 30px;
+            padding: 20px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
+            transition: padding 0.3s ease;
+        }
+
+        .header.compact {
+            padding: 12px 20px;
         }
 
         .header h1 {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 10px;
+            transition: font-size 0.3s ease;
+        }
+
+        .header.compact h1 {
+            font-size: 18px;
         }
 
         .header-actions {
@@ -80,13 +94,33 @@
             background: #218838;
         }
 
-        .stats-bar {
+        /* Combined Stats and Filters Bar */
+        .stats-and-filters-bar {
             background: #f8f9fa;
-            padding: 20px 30px;
+            padding: 15px 30px;
             border-bottom: 1px solid #dee2e6;
             display: flex;
-            gap: 40px;
+            justify-content: space-between;
+            align-items: center;
+            gap: 30px;
             flex-wrap: wrap;
+            flex-shrink: 0;
+            transition: padding 0.3s ease;
+        }
+
+        .stats-and-filters-bar.compact {
+            padding: 10px 20px;
+            gap: 20px;
+        }
+
+        .stats-section {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stats-and-filters-bar.compact .stats-section {
+            gap: 20px;
         }
 
         .stat-item {
@@ -95,44 +129,64 @@
         }
 
         .stat-label {
-            font-size: 13px;
+            font-size: 11px;
             color: #6c757d;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
+            transition: font-size 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .stats-and-filters-bar.compact .stat-label {
+            font-size: 10px;
         }
 
         .stat-value {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 600;
             color: #212529;
+            transition: font-size 0.3s ease;
         }
 
-        .filters-bar {
-            padding: 20px 30px;
-            border-bottom: 1px solid #dee2e6;
+        .stats-and-filters-bar.compact .stat-value {
+            font-size: 16px;
+        }
+
+        .filters-section {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             flex-wrap: wrap;
-            align-items: center;
+            align-items: flex-end;
+        }
+
+        .stats-and-filters-bar.compact .filters-section {
+            gap: 8px;
         }
 
         .filter-group {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 4px;
         }
 
         .filter-group label {
-            font-size: 12px;
+            font-size: 11px;
             color: #6c757d;
             font-weight: 500;
+            white-space: nowrap;
         }
 
         .filter-input {
-            padding: 8px 12px;
+            padding: 6px 10px;
             border: 1px solid #dee2e6;
             border-radius: 4px;
-            font-size: 14px;
-            min-width: 200px;
+            font-size: 13px;
+            min-width: 160px;
+        }
+
+        .stats-and-filters-bar.compact .filter-input {
+            padding: 5px 8px;
+            font-size: 12px;
+            min-width: 140px;
         }
 
         .filter-input:focus {
@@ -142,7 +196,9 @@
 
         .table-container {
             overflow-x: auto;
-            max-height: calc(100vh - 400px);
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
         }
 
         table {
@@ -301,19 +357,132 @@
             display: block;
         }
 
+        /* Compact mode for better space usage */
+        .compact-mode-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .compact-mode-toggle:hover {
+            background: #5568d3;
+            transform: scale(1.1);
+        }
+
         @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
+            body {
+                padding: 10px;
             }
 
-            .stats-bar {
+            .container {
+                height: calc(100vh - 20px);
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+                padding: 15px 20px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .header.compact {
+                padding: 10px 15px;
+            }
+
+            .header.compact h1 {
+                font-size: 16px;
+            }
+
+            .header-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+
+            .stats-and-filters-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 12px 20px;
+                gap: 15px;
+            }
+
+            .stats-and-filters-bar.compact {
+                padding: 8px 15px;
+                gap: 10px;
+            }
+
+            .stats-section {
                 gap: 20px;
             }
 
-            .table-container {
-                max-height: calc(100vh - 500px);
+            .stats-and-filters-bar.compact .stats-section {
+                gap: 15px;
+            }
+
+            .stat-label {
+                font-size: 10px;
+            }
+
+            .stat-value {
+                font-size: 16px;
+            }
+
+            .stats-and-filters-bar.compact .stat-value {
+                font-size: 14px;
+            }
+
+            .filters-section {
+                width: 100%;
+                gap: 8px;
+            }
+
+            .filter-group {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .filter-input {
+                min-width: 100%;
+                font-size: 12px;
+                padding: 5px 8px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px 6px;
+            }
+
+            .compact-mode-toggle {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
             }
         }
     </style>
@@ -332,37 +501,38 @@
             </div>
         </div>
 
-        <div class="stats-bar">
-            <div class="stat-item">
-                <span class="stat-label">Total Unreceived Items</span>
-                <span class="stat-value" id="totalItems">-</span>
+        <div class="stats-and-filters-bar">
+            <div class="stats-section">
+                <div class="stat-item">
+                    <span class="stat-label">Total Unreceived Items</span>
+                    <span class="stat-value" id="totalItems">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Purchase Orders</span>
+                    <span class="stat-value" id="totalPOs">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Unique Vendors</span>
+                    <span class="stat-value" id="totalVendors">-</span>
+                </div>
             </div>
-            <div class="stat-item">
-                <span class="stat-label">Purchase Orders</span>
-                <span class="stat-value" id="totalPOs">-</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Unique Vendors</span>
-                <span class="stat-value" id="totalVendors">-</span>
-            </div>
-        </div>
-
-        <div class="filters-bar">
-            <div class="filter-group">
-                <label>Search</label>
-                <input type="text" id="searchFilter" class="filter-input" placeholder="Search by PO, vendor, SKU, or description...">
-            </div>
-            <div class="filter-group">
-                <label>Vendor</label>
-                <select id="vendorFilter" class="filter-input">
-                    <option value="">All Vendors</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Status</label>
-                <select id="statusFilter" class="filter-input">
-                    <option value="">All Statuses</option>
-                </select>
+            <div class="filters-section">
+                <div class="filter-group">
+                    <label>Search</label>
+                    <input type="text" id="searchFilter" class="filter-input" placeholder="Search by PO, vendor, SKU...">
+                </div>
+                <div class="filter-group">
+                    <label>Vendor</label>
+                    <select id="vendorFilter" class="filter-input">
+                        <option value="">All Vendors</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select id="statusFilter" class="filter-input">
+                        <option value="">All Statuses</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -393,17 +563,50 @@
     </div>
 
     <div id="toast" class="toast"></div>
+    
+    <!-- Compact Mode Toggle Button -->
+    <button class="compact-mode-toggle" onclick="toggleCompactMode()" title="Toggle Compact Mode">
+        ⬍
+    </button>
 
     <script>
         let allItems = [];
         let filteredItems = [];
         let currentSort = { column: 'poNumber', direction: 'asc' };
+        let isCompactMode = false;
 
         // Load data on page load
         document.addEventListener('DOMContentLoaded', () => {
             loadData();
             setupEventListeners();
+            // Check for saved compact mode preference
+            const savedCompactMode = localStorage.getItem('unreceivedItemsCompactMode');
+            if (savedCompactMode === 'true') {
+                toggleCompactMode();
+            }
         });
+
+        function toggleCompactMode() {
+            isCompactMode = !isCompactMode;
+            const header = document.querySelector('.header');
+            const statsAndFiltersBar = document.querySelector('.stats-and-filters-bar');
+            const toggleBtn = document.querySelector('.compact-mode-toggle');
+            
+            if (isCompactMode) {
+                header.classList.add('compact');
+                statsAndFiltersBar.classList.add('compact');
+                toggleBtn.textContent = '⬍';
+                toggleBtn.title = 'Expand View';
+            } else {
+                header.classList.remove('compact');
+                statsAndFiltersBar.classList.remove('compact');
+                toggleBtn.textContent = '⬍';
+                toggleBtn.title = 'Compact View';
+            }
+            
+            // Save preference
+            localStorage.setItem('unreceivedItemsCompactMode', isCompactMode);
+        }
 
         function setupEventListeners() {
             // Search filter
