@@ -4931,9 +4931,15 @@ router.get('/unreceived-items', async (req, res) => {
         
         console.log(`Found ${unreceivedItems.length} unreceived items`);
         
-        // Format the data for the report
+        // Format the data for the report - filter out items from hidden POs
         const formattedItems = unreceivedItems
-            .filter(item => item.poId) // Only include items with valid PO references
+            .filter(item => {
+                // Only include items with valid PO references
+                if (!item.poId) return false;
+                // Exclude items from hidden POs (matching dashboard behavior)
+                if (item.poId.isHidden === true) return false;
+                return true;
+            })
             .map(item => ({
                 poNumber: item.poNumber,
                 poUrl: item.poId.poUrl || null,
@@ -4954,7 +4960,8 @@ router.get('/unreceived-items', async (req, res) => {
             totalPOs: uniquePOs.size
         };
         
-        console.log(`📊 Stats: ${stats.totalItems} items across ${stats.totalPOs} POs`);
+        const hiddenCount = unreceivedItems.length - formattedItems.length;
+        console.log(`📊 Stats: ${stats.totalItems} items across ${stats.totalPOs} POs (${hiddenCount} items excluded from hidden POs)`);
         
         res.json({
             success: true,
