@@ -627,6 +627,18 @@
             display: table-row;
         }
 
+        /* Enhanced Tracking Styles - Tracking appears below the row */
+        .tracking-row {
+            display: none;
+            /* Hidden by default */
+            background: #f0f8ff;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .tracking-row.expanded {
+            display: table-row;
+        }
+
         /* Line Items Count Column Styles */
         .line-items-count-cell {
             width: 80px;
@@ -1626,6 +1638,124 @@
         }
 
         .notes-close:hover {
+            background: #5a6268;
+        }
+
+        /* Tracking header with actions */
+        .tracking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #bee5eb;
+        }
+
+        .tracking-title {
+            font-weight: bold;
+            color: #0c5460;
+            font-size: 16px;
+        }
+
+        .tracking-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tracking-close {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .tracking-close:hover {
+            background: #138496;
+        }
+
+        .tracking-cell-expanded {
+            padding: 15px;
+        }
+
+        .tracking-container {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #bee5eb;
+        }
+
+        .tracking-info-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tracking-info-item {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .tracking-info-label {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 5px;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .tracking-info-value {
+            color: #212529;
+            font-size: 14px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            word-break: break-word;
+        }
+
+        .tracking-link {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .tracking-link:hover {
+            text-decoration: underline;
+        }
+
+        .tracking-button-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tracking-action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .tracking-action-btn.primary {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .tracking-action-btn.primary:hover {
+            background: #138496;
+        }
+
+        .tracking-action-btn.secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .tracking-action-btn.secondary:hover {
             background: #5a6268;
         }
 
@@ -3186,7 +3316,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             <!-- Filters Section -->
             <div class="filters">
                 <div class="filter-group">
-                    <label>Search Vendor or PO Number</label>
+                    <label>Search Vendor, PO#, or Tracking#</label>
                     <input type="text" id="searchFilter" placeholder="Type to search...">
                 </div>
 
@@ -3520,10 +3650,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                 </button>
                                                 <button class="tracking-toggle-btn <%= po.shippingTracking ? 'has-status' : '' %>"
                                                     type="button" 
+                                                    data-index="<%= index %>"
                                                     data-po-id="<%= po._id %>"
                                                     data-tracking="<%= po.shippingTracking || '' %>"
                                                     data-carrier="<%= po.shippingCarrier || 'FedEx' %>"
-                                                    title="<%= po.shippingTracking ? `Tracking: ${po.shippingTracking} (${po.shippingCarrier || 'FedEx'})` : 'No tracking information' %>">
+                                                    title="<%= po.shippingTracking ? `Tracking: ${po.shippingTracking} (${po.shippingCarrier || 'FedEx'})` : 'View tracking information' %>">
                                                     🚚
                                                 </button>
                                                 <button class="create-task-btn"
@@ -3577,6 +3708,63 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                     data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
                                                     data-index="<%= index %>"
                                                     placeholder="Add detailed notes for <%= po.poNumber %>... (These notes persist across CSV uploads)"><%= po.notes %></textarea>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Expandable tracking row -->
+                                    <tr class="tracking-row" id="tracking-row-<%= index %>">
+                                        <td colspan="9" class="tracking-cell-expanded">
+                                            <div class="tracking-header">
+                                                <div class="tracking-title">🚚 Tracking Information for PO <%= po.poNumber %>
+                                                </div>
+                                                <div class="tracking-actions">
+                                                    <button class="tracking-close" data-index="<%= index %>">Close</button>
+                                                </div>
+                                            </div>
+                                            <div class="tracking-container">
+                                                <% if (po.shippingTracking) { %>
+                                                <div class="tracking-info-row">
+                                                    <div class="tracking-info-item">
+                                                        <div class="tracking-info-label">Tracking Number</div>
+                                                        <div class="tracking-info-value">
+                                                            <a href="#" class="tracking-link" onclick="openTrackingUrl('<%= po.shippingTracking %>', '<%= po.shippingCarrier || 'FedEx' %>'); return false;">
+                                                                <%= po.shippingTracking %>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tracking-info-item">
+                                                        <div class="tracking-info-label">Carrier</div>
+                                                        <div class="tracking-info-value">
+                                                            <%= po.shippingCarrier || 'FedEx' %>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tracking-info-item">
+                                                        <div class="tracking-info-label">Vendor</div>
+                                                        <div class="tracking-info-value">
+                                                            <%= po.vendor %>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="tracking-button-group">
+                                                    <button class="tracking-action-btn primary" onclick="openTrackingUrl('<%= po.shippingTracking %>', '<%= po.shippingCarrier || 'FedEx' %>')">
+                                                        🌐 View on <%= po.shippingCarrier || 'FedEx' %> Website
+                                                    </button>
+                                                    <button class="tracking-action-btn secondary" onclick="checkTrackingStatus('<%= po._id %>', '<%= po.shippingTracking %>', '<%= po.shippingCarrier || 'FedEx' %>')">
+                                                        🔍 Check Status
+                                                    </button>
+                                                    <button class="tracking-action-btn secondary" onclick="updateTrackingInfo('<%= po._id %>')">
+                                                        ✏️ Update Tracking
+                                                    </button>
+                                                </div>
+                                                <% } else { %>
+                                                <div style="text-align: center; padding: 20px; color: #6c757d;">
+                                                    <p>No tracking information available for this PO.</p>
+                                                    <button class="tracking-action-btn primary" onclick="updateTrackingInfo('<%= po._id %>')">
+                                                        ➕ Add Tracking Information
+                                                    </button>
+                                                </div>
+                                                <% } %>
                                             </div>
                                         </td>
                                     </tr>
@@ -4242,15 +4430,18 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             // Handle tracking details toggle using event delegation
             if (event.target.closest('.tracking-toggle-btn')) {
-                event.preventDefault(); // Prevent any onclick from firing
                 const btn = event.target.closest('.tracking-toggle-btn');
-                const poId = btn.getAttribute('data-po-id');
+                const index = btn.getAttribute('data-index');
+                const trackingRow = document.getElementById(`tracking-row-${index}`);
                 
-                if (poId) {
-                    console.log('📍 Tracking details button clicked:', poId);
-                    toggleTrackingDetails(poId);
-                } else {
-                    console.error('❌ Missing PO ID for tracking button');
+                if (trackingRow) {
+                    const isExpanded = trackingRow.classList.contains('expanded');
+                    
+                    if (isExpanded) {
+                        trackingRow.classList.remove('expanded');
+                    } else {
+                        trackingRow.classList.add('expanded');
+                    }
                 }
             }
 
@@ -4288,6 +4479,17 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 
                 if (notesRow) {
                     notesRow.classList.remove('expanded');
+                }
+            }
+
+            // Handle tracking close buttons using event delegation
+            if (event.target.closest('.tracking-close')) {
+                const btn = event.target.closest('.tracking-close');
+                const index = btn.getAttribute('data-index');
+                const trackingRow = document.getElementById(`tracking-row-${index}`);
+                
+                if (trackingRow) {
+                    trackingRow.classList.remove('expanded');
                 }
             }
 
@@ -6636,13 +6838,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const poData = JSON.parse(row.dataset.po);
                 const vendor = poData.vendor.toLowerCase();
                 const poNumber = poData.poNumber.toLowerCase();
+                const trackingNumber = (poData.shippingTracking || '').toLowerCase();
                 const nsStatus = poData.nsStatus || '';
                 const status = poData.status || '';
                 const notes = poData.notes || '';
                 const index = row.dataset.index;
 
-                // Search filter
-                const matchesSearch = vendor.includes(searchTerm) || poNumber.includes(searchTerm);
+                // Search filter - search vendor, PO number, or tracking number
+                const matchesSearch = vendor.includes(searchTerm) || poNumber.includes(searchTerm) || trackingNumber.includes(searchTerm);
 
                 // NS Status filter
                 const matchesNSStatus = nsStatusFilter === 'all' || nsStatus === nsStatusFilter;
