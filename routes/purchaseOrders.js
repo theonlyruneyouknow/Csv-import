@@ -11,7 +11,6 @@ const LineItem = require('../models/LineItem');
 const OrganicVendor = require('../models/OrganicVendor');
 const { splitVendorData } = require('../lib/vendorUtils');
 const Task = require('../models/Task');
-const trackingService = require('../services/17trackService');
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
@@ -2592,18 +2591,7 @@ router.put('/:id/shipping-tracking', async (req, res) => {
       );
       console.log(`Updated ${updateResult.modifiedCount} line items with tracking: ${shippingTracking} (${shippingCarrier || 'FedEx'})`);
 
-      // Auto-register with 17track if we have line items
-      if (updateResult.modifiedCount > 0) {
-        try {
-          await trackingService.registerTrackingNumbers([
-            trackingService.formatTrackingNumber(shippingTracking.trim(), shippingCarrier || 'FedEx')
-          ]);
-          console.log(`Registered ${shippingTracking} with 17track using carrier: ${shippingCarrier || 'FedEx'}`);
-        } catch (registerError) {
-          console.error('Failed to register tracking number with 17track:', registerError);
-          // Don't fail the request if registration fails
-        }
-      }
+      // Tracking number saved - can be updated via tracking dashboard
     } else if (!shippingTracking || !shippingTracking.trim()) {
       // Clear tracking from line items if PO tracking is cleared
       const clearResult = await LineItem.updateMany(
@@ -3270,50 +3258,10 @@ router.post('/import-netsuite', async (req, res) => {
   }
 });
 
-// =============================================================================
-// 17TRACK API INTEGRATION ROUTES
-// =============================================================================
-
-// Register tracking numbers with 17track
 // ============================================
-// DEPRECATED 17TRACK ROUTES - NO LONGER USED
-// These routes relied on the 17Track API which is no longer in use
-// Use the new tracking routes in routes/tracking.js instead
+// TRACKING ROUTES
 // ============================================
-
-/*
-// DEPRECATED: Old 17Track register route
-router.post('/tracking/register', async (req, res) => {
-  res.status(410).json({ 
-    error: 'This endpoint is deprecated. 17Track integration has been removed. Use PUT /purchase-orders/line-items/:lineItemId/tracking instead.' 
-  });
-});
-
-// DEPRECATED: Old 17Track status route
-router.post('/tracking/status', async (req, res) => {
-  res.status(410).json({ 
-    error: 'This endpoint is deprecated. 17Track integration has been removed. Use GET /purchase-orders/tracking/:trackingNumber instead.' 
-  });
-});
-
-// DEPRECATED: Old 17Track bulk update route
-router.post('/tracking/update-all', async (req, res) => {
-  res.status(410).json({ 
-    error: 'This endpoint is deprecated. 17Track integration has been removed. Use POST /purchase-orders/tracking/bulk-update instead.' 
-  });
-});
-
-// DEPRECATED: Old 17Track PO-specific update route
-router.post('/:id/tracking/update', async (req, res) => {
-  res.status(410).json({ 
-    error: 'This endpoint is deprecated. 17Track integration has been removed. Use manual tracking updates instead.' 
-  });
-});
-*/
-
-// ============================================
-// ACTIVE TRACKING ROUTES (Self-Managed)
-// ============================================
+// Note: Main tracking routes are in routes/tracking.js
 
 // Add tracking number to line item
 router.put('/line-items/:lineItemId/tracking', async (req, res) => {
@@ -3457,7 +3405,7 @@ router.put('/line-items/:lineItemId/tracking/update', async (req, res) => {
   }
 });
 
-// Bulk update all tracking numbers using carrier APIs (replaces old 17Track bulk update)
+// Bulk update all tracking numbers using carrier APIs
 router.post('/tracking/bulk-update', async (req, res) => {
   try {
     console.log('🔄 Starting bulk tracking update using carrier APIs...');

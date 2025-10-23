@@ -2948,8 +2948,8 @@
                         <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
                         <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items
                             Manager</a>
-                        <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 17Track
-                            Dashboard</a>
+                        <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 Tracking Dashboard</a>
+                        <a href="/shipments/dashboard" class="nav-accordion-item">📦 Shipment Management</a>
                         <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
                         <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
                         <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
@@ -3254,7 +3254,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 <div class="filter-group">
                     <button class="clear-filters" onclick="clearAllFilters()">Clear Filters</button>
                     <button class="btn btn-sm btn-outline-primary ms-2" onclick="updateAllTracking()"
-                        id="bulkTrackingBtn" title="Update all shipping tracking with 17track">
+                        id="bulkTrackingBtn" title="Update all shipping tracking">
                         🚚 Update Tracking
                     </button>
                     <button class="btn btn-sm btn-outline-secondary ms-2" onclick="toggleTrackingColumn()"
@@ -3493,7 +3493,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                         <button
                                                             class="btn btn-sm btn-outline-success tracking-update-btn"
                                                             data-po-id="<%= po._id %>"
-                                                            title="Update tracking from 17track">
+                                                            title="Update tracking">
                                                             🔄
                                                         </button>
                                                     </div>
@@ -4555,7 +4555,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             });
         });
 
-        // Auto-save Shipping Tracking when changed with 17track integration
+        // Auto-save Shipping Tracking when changed
         document.querySelectorAll('.shipping-tracking-input').forEach(trackingInput => {
             trackingInput.addEventListener('blur', function () {
                 const id = this.dataset.poId;
@@ -4588,7 +4588,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             console.log(`🔧 Setting up tracking UI for PO ${id} with tracking: ${shippingTracking} (${shippingCarrier})`);
                             updateTrackingUI(id, shippingTracking, shippingCarrier);
 
-                            // Auto-register with 17track if it's a new tracking number
+                            // Tracking number saved successfully
                             if (shippingTracking !== oldValue && shippingTracking) {
                                 registerTrackingNumber(shippingTracking, shippingCarrier);
                             }
@@ -4723,7 +4723,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     </button>
                     <button class="btn btn-sm btn-outline-success tracking-update-btn" 
                             data-po-id="${poId}"
-                            title="Update tracking from 17track">
+                            title="Update tracking">
                         🔄
                     </button>
                 `;
@@ -4771,32 +4771,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             if (actions) actions.remove();
             if (status) status.remove();
-        }
-
-        // Function to register tracking number with 17track
-        async function registerTrackingNumber(trackingNumber, carrier = 'FedEx') {
-            try {
-                console.log('🚀 Registering tracking number with 17track:', trackingNumber, `(${carrier})`);
-
-                const response = await fetch('/purchase-orders/tracking/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        trackingNumbers: [{ number: trackingNumber, carrier: carrier }]
-                    })
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    console.log('✅ Tracking number registered with 17track');
-                    showTrackingToast(`📦 ${trackingNumber} (${carrier}) registered with 17track`, 'success');
-                } else {
-                    console.warn('⚠️ Failed to register tracking number:', result.error);
-                    showTrackingToast('Failed to register tracking number', 'warning');
-                }
-            } catch (error) {
-                console.error('❌ Error registering tracking number:', error);
-            }
         }
 
         // Function to get tracking info
@@ -5491,7 +5465,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                 🔍 Check Status
                             </button>
                             <button class="tracking-action-btn secondary" onclick="updateTrackingInfo('${poId}')">
-                                🔄 Update from 17track
+                                🔄 Update Tracking
                             </button>
                             <button class="tracking-action-btn secondary" onclick="openTrackingUrl('${trackingNumber}', '${carrier}')">
                                 🌐 View on ${carrier} Website

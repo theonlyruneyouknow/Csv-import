@@ -85,7 +85,7 @@ const lineItemSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
-    // 17track integration fields
+    // Tracking integration fields
     trackingNumber: {
         type: String,
         default: '',

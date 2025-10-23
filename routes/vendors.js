@@ -342,7 +342,7 @@ router.get('/:vendorId', async (req, res) => {
         };
         poStats.avgValue = poStats.totalPOs > 0 ? poStats.totalValue / poStats.totalPOs : 0;
 
-        // Get tracking information (from 17Track service if available)
+        // Get tracking information
         let trackingData = [];
         try {
             // Get tracking numbers from purchase orders

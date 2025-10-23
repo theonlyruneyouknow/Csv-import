@@ -17,6 +17,7 @@ const authRoutes = require('./routes/auth');
 const receivingRoutes = require('./routes/receiving');
 const emailTemplateRoutes = require('./routes/emailTemplates');
 const trackingRoutes = require('./routes/tracking'); // NEW: Self-managed tracking
+const shipmentRoutes = require('./routes/shipments'); // NEW: Shipment management
 const foodRoutes = require('./routes/food');
 const storyRoutes = require('./routes/story');
 const medicineRoutes = require('./routes/medicine');
@@ -547,6 +548,7 @@ app.use('/test-upload', purchaseOrderRoutes);
 
 app.use('/purchase-orders', ensureAuthenticated, ensureApproved, purchaseOrderRoutes);
 app.use('/purchase-orders', ensureAuthenticated, ensureApproved, trackingRoutes); // NEW: Tracking routes
+app.use('/shipments', ensureAuthenticated, ensureApproved, shipmentRoutes); // NEW: Shipment management
 app.use('/organic-vendors', ensureAuthenticated, ensureApproved, organicVendorRoutes);
 app.use('/vendors', ensureAuthenticated, ensureApproved, vendorRoutes);
 app.use('/enhanced-vendors', ensureAuthenticated, ensureApproved, enhancedVendorRoutes);

@@ -1,5 +1,5 @@
 // routes/tracking.js
-// Self-managed tracking routes (replaces 17track integration)
+// Self-managed tracking routes
 
 const express = require('express');
 const router = express.Router();
