@@ -2165,8 +2165,8 @@
         }
 
         .vendor {
-            width: 280px;
-            /* Increased from ~180px */
+            width: 380px;
+            /* Increased for better vendor name display */
             word-wrap: break-word;
         }
 
@@ -2175,17 +2175,19 @@
         }
 
         .update-date-cell {
-            width: 130px;
+            width: 140px;
             font-size: 14px;
         }
 
         .next-update-cell {
-            width: 130px;
+            width: 140px;
         }
 
         /* Date input styling */
         .date-input {
             width: 100%;
+            min-width: 130px;
+            max-width: 100%;
             border: 1px solid #ddd;
             background: white;
             padding: 6px 8px;
@@ -2194,6 +2196,7 @@
             color: #495057;
             cursor: pointer;
             transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
         }
 
         .date-input:focus {
@@ -2495,12 +2498,14 @@
         }
 
         .eta-cell {
-            width: 130px;
+            width: 140px;
             text-align: center;
         }
 
         .eta-input {
             width: 100%;
+            min-width: 130px;
+            max-width: 100%;
             padding: 6px 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
@@ -2509,6 +2514,7 @@
             background: white;
             cursor: pointer;
             transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
         }
 
         .eta-input:hover {
