@@ -855,7 +855,6 @@
             border: none;
             border-top: 1px solid #dee2e6;
             background: white;
-            position: relative;
         }
 
         .line-items-header {
@@ -864,10 +863,9 @@
             align-items: center;
             margin-bottom: 15px;
             border-bottom: 2px solid #dee2e6;
+            padding: 15px;
             padding-bottom: 10px;
             background: white;
-            position: relative;
-            z-index: 1;
         }
 
         .line-items-title {
@@ -927,8 +925,7 @@
         }
 
         .line-items-container {
-            max-height: 300px;
-            overflow-y: auto;
+            padding: 0;
         }
 
         .line-item {
@@ -3781,7 +3778,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
                                     <!-- Expandable line items row -->
                                     <tr class="line-items-row" id="line-items-row-<%= index %>">
-                                        <td colspan="9" class="line-items-cell-expanded">
+                                        <td colspan="11" class="line-items-cell-expanded">
                                             <div class="line-items-header">
                                                 <div class="line-items-title">Line Items for PO <%= po.poNumber %>
                                                         <span class="line-items-status"
@@ -3804,7 +3801,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
                                     <!-- Expandable notes row -->
                                     <tr class="notes-row" id="notes-row-<%= index %>">
-                                        <td colspan="9" class="notes-cell-expanded">
+                                        <td colspan="11" class="notes-cell-expanded">
                                             <div class="notes-header">
                                                 <div class="notes-title">Notes for PO <%= po.poNumber %>
                                                 </div>
@@ -3824,7 +3821,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
                                     <!-- Expandable tracking row -->
                                     <tr class="tracking-row" id="tracking-row-<%= index %>">
-                                        <td colspan="9" class="tracking-cell-expanded">
+                                        <td colspan="11" class="tracking-cell-expanded">
                                             <div class="tracking-header">
                                                 <div class="tracking-title">🚚 Tracking Information for PO <%= po.poNumber %>
                                                 </div>
