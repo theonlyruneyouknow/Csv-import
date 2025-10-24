@@ -542,7 +542,7 @@
             border-radius: 6px;
             margin-bottom: 15px;
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             gap: 10px;
             position: sticky;
             top: 80px; /* Below the header */
@@ -3474,6 +3474,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     </select>
                 </div>
 
+                <!-- Clear Filters button next to Notes Filter -->
+                <div class="filter-group filter-actions">
+                    <button class="clear-filters" onclick="clearAllFilters()">Clear Filters</button>
+                </div>
+
+                <!-- Second Row: Checkboxes and Action Buttons -->
                 <div class="filter-group">
                     <label style="margin-bottom: 5px;">Show "Not my concern"</label>
                     <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
@@ -3488,11 +3494,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         <input type="checkbox" id="showPendingBill" style="margin: 0;">
                         <span style="font-size: 12px;">Show billed POs</span>
                     </label>
-                </div>
-
-                <!-- Action Buttons in Filter Grid -->
-                <div class="filter-group filter-actions">
-                    <button class="clear-filters" onclick="clearAllFilters()">Clear Filters</button>
                 </div>
 
                 <div class="filter-group filter-actions">
@@ -3515,6 +3516,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         📦 <span id="nsStatusColumnText">Show NS Status</span>
                     </button>
                 </div>
+
+                <!-- Empty cell for alignment -->
+                <div class="filter-group"></div>
             </div>
             <% } %>
 
