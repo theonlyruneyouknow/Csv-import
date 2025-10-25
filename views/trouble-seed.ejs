@@ -2538,7 +2538,7 @@
                     </div>
                     
                     <p>Please respond within 24-48 hours. This is critical for our customer commitments.</p>
-                    <p><strong>Thanks,<br>[Your Name]</strong></p>
+                    <p><strong>Thanks,<br><%= user ? user.username : 'Purchase Team' %></strong></p>
                     
                     <div class="email-footer">
                         <hr><p><small>PO: ${po.poNumber} | Items: ${po.items.length} | Generated: ${new Date().toLocaleDateString()}</small></p>
@@ -2578,7 +2578,7 @@ These items need immediate attention.
 Please respond within 24-48 hours. This is critical for our customer commitments.
 
 Thanks,
-[Your Name]
+<%= user ? user.username : 'Purchase Team' %>
 
 ---
 PO: ${po.poNumber} | Items: ${po.items.length} | Generated: ${new Date().toLocaleDateString()}`;
@@ -3685,9 +3685,7 @@ OVERDUE ITEMS:
 Please provide updated delivery dates for these items.
 
 Best regards,
-[Your Name]
-[Your Title]
-[Your Contact Information]
+<%= user ? user.username : 'Purchase Team' %>
 
 ---
 Purchase Order: {{poNumber}}

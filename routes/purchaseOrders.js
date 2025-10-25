@@ -1121,7 +1121,8 @@ router.get('/trouble-seed', async (req, res) => {
         emailStatus
       },
       troubleItems: displayItems,
-      currentPage: 'trouble-seed'
+      currentPage: 'trouble-seed',
+      user: req.user || null // Pass user information for email signature
     });
 
   } catch (error) {
