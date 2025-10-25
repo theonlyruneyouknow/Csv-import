@@ -584,9 +584,15 @@
                                 <% } %>
                             </td>
                             <td>
-                                <a href="/purchase-orders/<%= po._id %>" class="btn btn-outline-primary btn-sm">
-                                    <i class="fas fa-eye"></i>
-                                </a>
+                                <% if (po.poUrl) { %>
+                                    <a href="<%= po.poUrl %>" target="_blank" class="btn btn-outline-primary btn-sm" title="View in NetSuite">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                <% } else { %>
+                                    <button class="btn btn-outline-secondary btn-sm" disabled title="No NetSuite link available">
+                                        <i class="fas fa-eye-slash"></i>
+                                    </button>
+                                <% } %>
                             </td>
                         </tr>
                         <% }); %>
