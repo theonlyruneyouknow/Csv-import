@@ -1912,6 +1912,9 @@
                     <button class="email-btn btn-copy" onclick="copyToClipboard()" id="copyBtn" disabled>
                         <i class="fas fa-copy"></i> Copy to Clipboard
                     </button>
+                    <button class="email-btn btn-edit" onclick="editGeneratedEmail()" id="editBtn" disabled style="background: #ffc107; border-color: #ffc107; color: #000;">
+                        <i class="fas fa-edit"></i> Edit Email
+                    </button>
                     <button class="email-btn btn-mark-sent" onclick="markEmailSent()" id="markSentBtn" disabled style="background: #28a745;">
                         <i class="fas fa-check-circle"></i> Mark Email Sent
                     </button>
@@ -1920,6 +1923,36 @@
                     </button>
                     <button class="email-btn btn-generate-all" onclick="generateAllPOsEmail()">
                         <i class="fas fa-envelope-bulk"></i> Generate Summary for All POs
+                    </button>
+                </div>
+            </div>
+
+            <!-- Email Editor Modal -->
+            <div id="templateEditor" style="display: none; background: white; border: 2px solid #007bff; border-radius: 8px; padding: 20px; margin: 20px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <h5 style="color: #007bff; margin-bottom: 20px;">
+                    <i class="fas fa-edit"></i> Edit Email Content
+                </h5>
+                
+                <div class="form-group">
+                    <label for="templateSubject"><strong>Subject:</strong></label>
+                    <input type="text" id="templateSubject" class="form-control" placeholder="Enter email subject">
+                </div>
+                
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="templateBody"><strong>Email Body:</strong></label>
+                    <textarea id="templateBody" class="form-control" rows="15" placeholder="Enter email body" style="font-family: monospace; font-size: 13px;"></textarea>
+                </div>
+                
+                <!-- Hidden fields for template name and category (not shown but required by existing functions) -->
+                <input type="hidden" id="templateName" value="">
+                <input type="hidden" id="templateCategory" value="custom">
+                
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button class="btn btn-primary" onclick="applyContentChanges()">
+                        <i class="fas fa-check"></i> Apply Changes
+                    </button>
+                    <button class="btn btn-secondary" onclick="cancelEdit()">
+                        <i class="fas fa-times"></i> Cancel
                     </button>
                 </div>
             </div>
@@ -1943,6 +1976,9 @@
                 <div class="email-actions">
                     <button class="email-btn btn-copy" onclick="copyToClipboard()" id="copyBtn" disabled>
                         <i class="fas fa-copy"></i> Copy to Clipboard
+                    </button>
+                    <button class="email-btn btn-edit" onclick="editGeneratedEmail()" id="editBtn" disabled style="background: #ffc107; border-color: #ffc107; color: #000;">
+                        <i class="fas fa-edit"></i> Edit Email
                     </button>
                     <button class="email-btn btn-mark-sent" onclick="markEmailSent()" id="markSentBtn" disabled style="background: #28a745;">
                         <i class="fas fa-check-circle"></i> Mark Email Sent
@@ -2869,9 +2905,6 @@ Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
             document.getElementById('templateSubject').value = subject;
             document.getElementById('templateBody').value = body;
             
-            // Switch to edit tab
-            switchTab('edit');
-            
             // Scroll to the template editor
             document.getElementById('templateEditor').scrollIntoView({ 
                 behavior: 'smooth', 
@@ -2899,11 +2932,9 @@ Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
             // Construct new email content
             const updatedContent = `Subject: ${subject}\n\n${body}${metadata}`;
             
-            // Update the email content display
+            // Update the email content display (plain text for copying)
             document.getElementById('emailContent').textContent = updatedContent;
-            
-            // Switch back to preview tab
-            switchTab('preview');
+            document.getElementById('emailContent').setAttribute('data-plain-text', updatedContent);
             
             // Hide the template editor
             document.getElementById('templateEditor').style.display = 'none';
