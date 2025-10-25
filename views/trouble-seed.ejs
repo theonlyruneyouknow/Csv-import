@@ -428,46 +428,93 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 15px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
             margin-bottom: 20px;
         }
 
         .stat-card {
             background: white;
             border-radius: 8px;
-            padding: 12px 15px;
+            padding: 10px 12px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-            border-left: 4px solid #dc3545;
-            transition: transform 0.2s ease;
+            justify-content: flex-start;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #dee2e6;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            min-height: 70px;
         }
 
         .stat-card:hover {
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            text-decoration: none;
+        }
+
+        .stat-card.active {
+            border-left-color: #dc3545;
+            background: #fff5f5;
         }
 
         .stat-card.no-eta {
             border-left-color: #6c757d;
         }
 
+        .stat-card.no-eta.active {
+            background: #f8f9fa;
+        }
+
         .stat-card.approaching-soon {
             border-left-color: #ff6b35;
+        }
+
+        .stat-card.approaching-soon.active {
+            background: #fff3e0;
         }
 
         .stat-card.approaching {
             border-left-color: #ffc107;
         }
 
+        .stat-card.approaching.active {
+            background: #fffbf0;
+        }
+
         .stat-card.overdue {
             border-left-color: #dc3545;
         }
 
+        .stat-card.overdue.active {
+            background: #fff5f5;
+        }
+
         .stat-card.needs-followup {
             border-left-color: #9c27b0;
+        }
+
+        .stat-card.needs-followup.active {
+            background: #f3e5f5;
+        }
+
+        .stat-card.contacted {
+            border-left-color: #28a745;
+        }
+
+        .stat-card.contacted.active {
+            background: #f0f8f4;
+        }
+
+        .stat-card.not-contacted {
+            border-left-color: #ffc107;
+        }
+
+        .stat-card.not-contacted.active {
+            background: #fffbf0;
         }
 
         .stat-number {
@@ -923,6 +970,10 @@
         }
 
         @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
             .category-tabs {
                 flex-direction: column;
             }
@@ -949,6 +1000,12 @@
             .item-actions {
                 margin-left: 0;
                 justify-content: flex-start;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
             }
         }
 
@@ -1532,86 +1589,69 @@
         </div>
 
     <div class="container-fluid">
-        <!-- Statistics Section -->
-        <div class="stats-grid">
-            <div class="stat-card no-eta">
-                <div class="stat-number"><%= stats.noEtaCount %></div>
-                <div class="stat-label">No ETA<br>Provided</div>
-            </div>
-            <div class="stat-card approaching-soon">
-                <div class="stat-number"><%= stats.approachingSoonCount %></div>
-                <div class="stat-label">ETA Within<br>7 Days</div>
-            </div>
-            <div class="stat-card approaching">
-                <div class="stat-number"><%= stats.approachingCount %></div>
-                <div class="stat-label">ETA 8-14<br>Days</div>
-            </div>
-            <div class="stat-card overdue">
-                <div class="stat-number"><%= stats.overdueCount %></div>
-                <div class="stat-label">Overdue<br>Items</div>
-            </div>
-            <div class="stat-card needs-followup">
-                <div class="stat-number"><%= stats.needsFollowupCount %></div>
-                <div class="stat-label">Need Vendor<br>Follow-up</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number"><%= stats.totalPOs %></div>
-                <div class="stat-label">Affected<br>POs</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number"><%= stats.uniqueVendors || 0 %></div>
-                <div class="stat-label">Unique<br>Vendors</div>
-            </div>
-            <div class="stat-card" style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 4px solid #28a745;">
-                <div class="stat-number" style="color: #155724;"><%= stats.contactedPOs || 0 %></div>
-                <div class="stat-label">📧 Contacted<br>POs</div>
-            </div>
-            <div class="stat-card" style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); border-left: 4px solid #ffc107;">
-                <div class="stat-number" style="color: #856404;"><%= stats.notContactedPOs || 0 %></div>
-                <div class="stat-label">⚠️ Not Contacted<br>POs</div>
-            </div>
-        </div>
-
-        <!-- Filters Section -->
+        <!-- Filter Options Header -->
         <div class="filters-section">
             <h4><i class="fas fa-filter"></i> Filter Options</h4>
             
-            <!-- Category Tabs -->
-            <div class="category-tabs">
-                <a href="?category=all&vendor=<%= currentFilters.vendor %>&sortBy=<%= currentFilters.sortBy %>" 
-                   class="category-tab <%= currentFilters.category === 'all' ? 'active' : '' %>">
-                    All Items
-                    <span class="tab-badge <%= currentFilters.category === 'all' ? 'active' : '' %>"><%= stats.totalItems %></span>
+            <!-- Filter Buttons Grid (2 rows x 5 columns) -->
+            <div class="stats-grid">
+                <!-- Row 1 -->
+                <a href="?category=all&vendor=<%= currentFilters.vendor %>&sortBy=<%= currentFilters.sortBy %>&emailStatus=<%= currentFilters.emailStatus %>" 
+                   class="stat-card <%= currentFilters.category === 'all' ? 'active' : '' %>">
+                    <div class="stat-number"><%= stats.totalItems %></div>
+                    <div class="stat-label">All Items</div>
                 </a>
-                <a href="?category=noEta&vendor=<%= currentFilters.vendor %>&sortBy=<%= currentFilters.sortBy %>" 
-                   class="category-tab <%= currentFilters.category === 'noEta' ? 'active' : '' %>">
-                    No ETA
-                    <span class="tab-badge <%= currentFilters.category === 'noEta' ? 'active' : '' %>"><%= stats.noEtaCount %></span>
+                <a href="?category=noEta&vendor=<%= currentFilters.vendor %>&sortBy=<%= currentFilters.sortBy %>&emailStatus=<%= currentFilters.emailStatus %>" 
+                   class="stat-card no-eta <%= currentFilters.category === 'noEta' ? 'active' : '' %>">
+                    <div class="stat-number"><%= stats.noEtaCount %></div>
+                    <div class="stat-label">No ETA<br>Provided</div>
                 </a>
-                <a href="?category=approachingSoon&vendor=<%= currentFilters.vendor %>&sortBy=<%= currentFilters.sortBy %>" 
-                   class="category-tab <%= currentFilters.category === 'approachingSoon' ? 'active' : '' %>">
-                    Approaching Soon
-                    <span class="tab-badge <%= currentFilters.category === 'approachingSoon' ? 'active' : '' %>"><%= stats.approachingSoonCount %></span>
+                <a href="?category=approachingSoon&vendor=<%= currentFilters.vendor %>&sortBy=<%= currentFilters.sortBy %>&emailStatus=<%= currentFilters.emailStatus %>" 
+                   class="stat-card approaching-soon <%= currentFilters.category === 'approachingSoon' ? 'active' : '' %>">
+                    <div class="stat-number"><%= stats.approachingSoonCount %></div>
+                    <div class="stat-label">ETA Within<br>7 Days</div>
                 </a>
-                <a href="?category=approaching&vendor=<%= currentFilters.vendor %>&sortBy=<%= currentFilters.sortBy %>" 
-                   class="category-tab <%= currentFilters.category === 'approaching' ? 'active' : '' %>">
-                    Approaching
-                    <span class="tab-badge <%= currentFilters.category === 'approaching' ? 'active' : '' %>"><%= stats.approachingCount %></span>
+                <a href="?category=approaching&vendor=<%= currentFilters.vendor %>&sortBy=<%= currentFilters.sortBy %>&emailStatus=<%= currentFilters.emailStatus %>" 
+                   class="stat-card approaching <%= currentFilters.category === 'approaching' ? 'active' : '' %>">
+                    <div class="stat-number"><%= stats.approachingCount %></div>
+                    <div class="stat-label">ETA 8-14<br>Days</div>
                 </a>
-                <a href="?category=overdue&vendor=<%= currentFilters.vendor %>&sortBy=<%= currentFilters.sortBy %>" 
-                   class="category-tab <%= currentFilters.category === 'overdue' ? 'active' : '' %>">
-                    Overdue
-                    <span class="tab-badge <%= currentFilters.category === 'overdue' ? 'active' : '' %>"><%= stats.overdueCount %></span>
+                <a href="?category=overdue&vendor=<%= currentFilters.vendor %>&sortBy=<%= currentFilters.sortBy %>&emailStatus=<%= currentFilters.emailStatus %>" 
+                   class="stat-card overdue <%= currentFilters.category === 'overdue' ? 'active' : '' %>">
+                    <div class="stat-number"><%= stats.overdueCount %></div>
+                    <div class="stat-label">Overdue<br>Items</div>
                 </a>
-                <a href="?category=needsFollowup&vendor=<%= currentFilters.vendor %>&sortBy=<%= currentFilters.sortBy %>" 
-                   class="category-tab <%= currentFilters.category === 'needsFollowup' ? 'active' : '' %>">
-                    Needs Follow-up
-                    <span class="tab-badge <%= currentFilters.category === 'needsFollowup' ? 'active' : '' %>"><%= stats.needsFollowupCount %></span>
+                
+                <!-- Row 2 -->
+                <a href="?category=needsFollowup&vendor=<%= currentFilters.vendor %>&sortBy=<%= currentFilters.sortBy %>&emailStatus=<%= currentFilters.emailStatus %>" 
+                   class="stat-card needs-followup <%= currentFilters.category === 'needsFollowup' ? 'active' : '' %>">
+                    <div class="stat-number"><%= stats.needsFollowupCount %></div>
+                    <div class="stat-label">Need Vendor<br>Follow-up</div>
+                </a>
+                <a href="?category=<%= currentFilters.category %>&vendor=<%= currentFilters.vendor %>&sortBy=<%= currentFilters.sortBy %>&emailStatus=all" 
+                   class="stat-card <%= currentFilters.emailStatus === 'all' && currentFilters.category === 'all' ? 'active' : '' %>">
+                    <div class="stat-number"><%= stats.totalPOs %></div>
+                    <div class="stat-label">Affected<br>POs</div>
+                </a>
+                <a href="?category=<%= currentFilters.category %>&vendor=all&sortBy=<%= currentFilters.sortBy %>&emailStatus=<%= currentFilters.emailStatus %>" 
+                   class="stat-card <%= currentFilters.vendor === 'all' ? 'active' : '' %>">
+                    <div class="stat-number"><%= stats.uniqueVendors || 0 %></div>
+                    <div class="stat-label">Unique<br>Vendors</div>
+                </a>
+                <a href="?category=<%= currentFilters.category %>&vendor=<%= currentFilters.vendor %>&sortBy=<%= currentFilters.sortBy %>&emailStatus=contacted" 
+                   class="stat-card contacted <%= currentFilters.emailStatus === 'contacted' ? 'active' : '' %>">
+                    <div class="stat-number"><%= stats.contactedPOs || 0 %></div>
+                    <div class="stat-label">📧 Contacted<br>POs</div>
+                </a>
+                <a href="?category=<%= currentFilters.category %>&vendor=<%= currentFilters.vendor %>&sortBy=<%= currentFilters.sortBy %>&emailStatus=not-contacted" 
+                   class="stat-card not-contacted <%= currentFilters.emailStatus === 'not-contacted' ? 'active' : '' %>">
+                    <div class="stat-number"><%= stats.notContactedPOs || 0 %></div>
+                    <div class="stat-label">⚠️ Not Contacted<br>POs</div>
                 </a>
             </div>
 
-            <!-- Additional Filters -->
-            <div class="row">
+            <!-- Additional Filters Row -->
+            <div class="row" style="margin-top: 20px;">
                 <div class="col-md-4">
                     <label class="form-label">Filter by Vendor:</label>
                     <div class="custom-vendor-select" id="vendorSelectContainer">
@@ -1666,18 +1706,34 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Email Status:</label>
-                    <select class="form-select" onchange="updateFilter('emailStatus', this.value)">
-                        <option value="all" <%= currentFilters.emailStatus === 'all' ? 'selected' : '' %>>All POs</option>
-                        <option value="contacted" <%= currentFilters.emailStatus === 'contacted' ? 'selected' : '' %>>📧 Contacted</option>
-                        <option value="not-contacted" <%= currentFilters.emailStatus === 'not-contacted' ? 'selected' : '' %>>⚠️ Not Contacted</option>
+                    <label class="form-label">Contacted POs:</label>
+                    <select class="form-select" onchange="if(this.value) window.location.href='/vendors/' + this.value;">
+                        <option value="">View Contacted Vendors...</option>
+                        <% 
+                        const contactedPOs = troubleByPO.filter(po => po.lastEmailSent);
+                        const vendorGroups = {};
+                        contactedPOs.forEach(po => {
+                            if (po.vendorData && po.vendorData._id) {
+                                if (!vendorGroups[po.vendorData._id]) {
+                                    vendorGroups[po.vendorData._id] = {
+                                        name: po.vendor,
+                                        id: po.vendorData._id,
+                                        count: 0
+                                    };
+                                }
+                                vendorGroups[po.vendorData._id].count++;
+                            }
+                        });
+                        Object.values(vendorGroups).forEach(vendor => { %>
+                            <option value="<%= vendor.id %>"><%= vendor.name %> (<%= vendor.count %> POs)</option>
+                        <% }); %>
                     </select>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">&nbsp;</label>
                     <div>
-                        <button class="btn btn-success" onclick="exportData()">
-                            <i class="fas fa-download"></i> Export Data
+                        <button class="btn btn-primary w-100" onclick="window.location.reload()">
+                            <i class="fas fa-sync-alt"></i> Refresh
                         </button>
                     </div>
                 </div>
