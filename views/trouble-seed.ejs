@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Trouble Seed Dashboard</title>
+    <title>Trouble Seed Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <%- include('partials/navigation-styles') %>
@@ -32,10 +32,9 @@
             top: 0;
             background: white;
             z-index: 1000;
-            padding: 15px 0;
+            padding: 15px 20px;
             border-bottom: 1px solid #dee2e6;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            flex-wrap: wrap;
             gap: 15px;
         }
 
@@ -46,6 +45,20 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 1.8rem;
+        }
+
+        /* Navigation Container */
+        .navigation-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+
+        .nav-section {
+            position: relative;
+            flex-shrink: 0;
         }
 
         /* P.O.D. Button Styles */
@@ -53,7 +66,7 @@
             background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
             border: none;
-            padding: 8px 15px;
+            padding: 10px 16px;
             border-radius: 6px;
             text-decoration: none;
             font-size: 14px;
@@ -81,6 +94,334 @@
 
         .pod-button:hover .arrow {
             transform: translateX(-2px);
+        }
+
+        /* Navigation Accordion Styles */
+        .nav-accordion-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            justify-content: space-between;
+        }
+
+        .nav-accordion-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-accordion-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            min-width: 220px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .nav-accordion-content.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            display: block;
+        }
+
+        .nav-accordion-item {
+            display: block;
+            padding: 12px 16px;
+            color: #495057;
+            text-decoration: none;
+            border-bottom: 1px solid #f1f3f4;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .nav-accordion-item:last-child {
+            border-bottom: none;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .nav-accordion-item:first-child {
+            border-radius: 6px 6px 0 0;
+        }
+
+        .nav-accordion-item:hover {
+            background: #f8f9fa;
+            color: #28a745;
+            text-decoration: none;
+            padding-left: 20px;
+        }
+
+        /* Options Button Styles */
+        .nav-options-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 100px;
+            justify-content: space-between;
+        }
+
+        .nav-options-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Imports Button Styles */
+        .nav-imports-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 100px;
+            justify-content: space-between;
+        }
+
+        .nav-imports-btn:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dropdown Styles */
+        .nav-dropdown-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .nav-dropdown-content.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            display: block;
+        }
+
+        .nav-dropdown-item {
+            display: block;
+            padding: 12px 16px;
+            color: #495057;
+            text-decoration: none;
+            border-bottom: 1px solid #f1f3f4;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            background: none;
+            border-left: none;
+            border-right: none;
+            border-top: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .nav-dropdown-item:last-child {
+            border-bottom: none;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .nav-dropdown-item:first-child {
+            border-radius: 6px 6px 0 0;
+        }
+
+        .nav-dropdown-item:hover {
+            background: #f8f9fa;
+            color: #007bff;
+            text-decoration: none;
+            padding-left: 20px;
+        }
+
+        /* Icon animations */
+        .accordion-icon,
+        .dropdown-icon {
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+
+        .accordion-icon.rotated,
+        .dropdown-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        /* User Profile Styles */
+        .user-profile-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-left: auto;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #dee2e6;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+        }
+
+        .user-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 280px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            z-index: 1001;
+            border: 1px solid #dee2e6;
+            margin-top: 10px;
+        }
+
+        .user-dropdown-content.show {
+            display: block;
+        }
+
+        .user-dropdown-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            background: white;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar-large {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .user-info strong {
+            font-size: 18px;
+            color: #212529;
+            font-weight: 600;
+            display: block;
+        }
+
+        .user-info .user-role {
+            color: #6c757d;
+            font-size: 14px;
+            display: block;
+        }
+
+        .user-info .user-status {
+            color: #28a745;
+            font-size: 13px;
+            display: block;
+            font-weight: 500;
+        }
+
+        .user-dropdown-item {
+            padding: 14px 20px;
+            color: #495057;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+            font-size: 15px;
+            border: none;
+            background: white;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .user-dropdown-item:hover {
+            background: #f8f9fa;
+        }
+
+        .user-dropdown-item:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+
+        .user-dropdown-item.logout {
+            color: #dc3545;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .user-dropdown-item.logout:hover {
+            background: #fff5f5;
         }
 
         /* Dashboard Content Styles */
@@ -890,17 +1231,95 @@
         <div class="header">
             <h1>
                 <i class="fas fa-exclamation-triangle"></i>
-                Enhanced Trouble Seed Dashboard
+                Trouble Seed Dashboard
             </h1>
-            
-            <!-- P.O.D. Button -->
-            <a href="/purchase-orders" class="pod-button">
-                <span class="arrow">←</span>
-                <span>P.O.D.</span>
-            </a>
-            
-            <div class="d-flex align-items-center justify-content-between flex-grow-1">
-                <%- include('partials/navigation', { currentPage: 'trouble-seed' }) %>
+            <div class="navigation-container">
+                <!-- P.O.D. Button -->
+                <a href="/purchase-orders" class="pod-button">
+                    <span class="arrow">←</span>
+                    <span>P.O.D.</span>
+                </a>
+
+                <!-- Managers Accordion -->
+                <div class="nav-section">
+                    <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion')">
+                        📊 Managers <span class="accordion-icon">▼</span>
+                    </button>
+                    <div id="managersAccordion" class="nav-accordion-content">
+                        <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items Manager</a>
+                        <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 Tracking Dashboard</a>
+                        <a href="/shipments/dashboard" class="nav-accordion-item">📦 Shipment Management</a>
+                        <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
+                        <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
+                        <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
+                        <a href="/purchase-orders/unreceived-items-report" class="nav-accordion-item">📋 Unreceived Items Report</a>
+                    </div>
+                </div>
+
+                <!-- Options Button -->
+                <div class="nav-section">
+                    <button class="nav-options-btn" onclick="toggleOptionsDropdown()">
+                        ⚙️ Options <span class="dropdown-icon">▼</span>
+                    </button>
+                    <div id="optionsDropdown" class="nav-dropdown-content">
+                        <button class="nav-dropdown-item" onclick="openStatusModal()">
+                            🏷️ Manage PO Status Options
+                        </button>
+                        <button class="nav-dropdown-item" onclick="openLineItemStatusModal()">
+                            📋 Manage Line Item Status Options
+                        </button>
+                        <button class="nav-dropdown-item" onclick="openCarrierModal()">
+                            🚚 Manage Carriers
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Import Button -->
+                <div class="nav-section">
+                    <button class="nav-imports-btn" onclick="toggleImportsDropdown()">
+                        📥 Import <span class="dropdown-icon">▼</span>
+                    </button>
+                    <div id="importsDropdown" class="nav-dropdown-content">
+                        <a href="/purchase-orders/upload" class="nav-dropdown-item">📤 Upload CSV</a>
+                        <button class="nav-dropdown-item" onclick="openNetSuiteImportModal()">
+                            📋 Import from NetSuite
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Profile Section -->
+            <div class="user-profile-section">
+                <button class="nav-imports-btn" onclick="location.reload()">
+                    🔄 Refresh
+                </button>
+                <div class="user-dropdown">
+                    <div class="user-avatar" onclick="toggleUserDropdown()">
+                        RL
+                    </div>
+                    <div id="userDropdown" class="user-dropdown-content">
+                        <div class="user-dropdown-header">
+                            <div class="user-avatar-large">RL</div>
+                            <div class="user-info">
+                                <strong>Rune User</strong>
+                                <span class="user-role">Administrator</span>
+                                <span class="user-status">● Online</span>
+                            </div>
+                        </div>
+                        <a href="/profile" class="user-dropdown-item">
+                            <span class="dropdown-icon">👤</span>
+                            Profile Settings
+                        </a>
+                        <a href="/preferences" class="user-dropdown-item">
+                            <span class="dropdown-icon">⚙️</span>
+                            Preferences
+                        </a>
+                        <button class="user-dropdown-item logout" onclick="logout()">
+                            <span class="dropdown-icon">🚪</span>
+                            Logout
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -2912,6 +3331,101 @@ Generated: {{currentDate}}`;
         });
     </script>
     
-    <%- include('partials/navigation-scripts') %>
+    <!-- Navigation Functions -->
+    <script>
+        // Toggle accordion dropdowns
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const allAccordions = document.querySelectorAll('.nav-accordion-content');
+            const allDropdowns = document.querySelectorAll('.nav-dropdown-content');
+            
+            // Close other accordions and dropdowns
+            allAccordions.forEach(acc => {
+                if (acc.id !== id) acc.classList.remove('show');
+            });
+            allDropdowns.forEach(drop => drop.classList.remove('show'));
+            
+            // Toggle current
+            content.classList.toggle('show');
+            
+            // Rotate icon
+            const button = content.previousElementSibling;
+            const icon = button.querySelector('.accordion-icon');
+            if (icon) icon.classList.toggle('rotated');
+        }
+
+        // Toggle options dropdown
+        function toggleOptionsDropdown() {
+            const dropdown = document.getElementById('optionsDropdown');
+            const allAccordions = document.querySelectorAll('.nav-accordion-content');
+            const allDropdowns = document.querySelectorAll('.nav-dropdown-content');
+            
+            // Close other menus
+            allAccordions.forEach(acc => acc.classList.remove('show'));
+            allDropdowns.forEach(drop => {
+                if (drop.id !== 'optionsDropdown') drop.classList.remove('show');
+            });
+            
+            // Toggle current
+            dropdown.classList.toggle('show');
+        }
+
+        // Toggle imports dropdown
+        function toggleImportsDropdown() {
+            const dropdown = document.getElementById('importsDropdown');
+            const allAccordions = document.querySelectorAll('.nav-accordion-content');
+            const allDropdowns = document.querySelectorAll('.nav-dropdown-content');
+            
+            // Close other menus
+            allAccordions.forEach(acc => acc.classList.remove('show'));
+            allDropdowns.forEach(drop => {
+                if (drop.id !== 'importsDropdown') drop.classList.remove('show');
+            });
+            
+            // Toggle current
+            dropdown.classList.toggle('show');
+        }
+
+        // Toggle user dropdown
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.nav-section') && !event.target.closest('.user-dropdown')) {
+                document.querySelectorAll('.nav-accordion-content, .nav-dropdown-content, .user-dropdown-content').forEach(content => {
+                    content.classList.remove('show');
+                });
+                document.querySelectorAll('.accordion-icon, .dropdown-icon').forEach(icon => {
+                    icon.classList.remove('rotated');
+                });
+            }
+        });
+
+        // Placeholder functions for options (can be implemented later)
+        function openStatusModal() {
+            alert('Status management modal - to be implemented');
+        }
+
+        function openLineItemStatusModal() {
+            alert('Line Item Status management modal - to be implemented');
+        }
+
+        function openCarrierModal() {
+            alert('Carrier management modal - to be implemented');
+        }
+
+        function openNetSuiteImportModal() {
+            alert('NetSuite import modal - to be implemented');
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/logout';
+            }
+        }
+    </script>
 </body>
 </html>
