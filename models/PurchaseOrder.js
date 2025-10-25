@@ -149,6 +149,45 @@ const purchaseOrderSchema = new mongoose.Schema({
       ]
     }
   }],
+  // Email communication tracking
+  lastEmailSent: {            // When was the last email sent to vendor about this PO
+    type: Date,
+    default: null
+  },
+  lastEmailRecipient: {       // Email address the last communication was sent to
+    type: String,
+    default: ''
+  },
+  lastEmailSubject: {         // Subject of the last email sent
+    type: String,
+    default: ''
+  },
+  lastEmailSentBy: {          // Who sent the email (user identifier)
+    type: String,
+    default: ''
+  },
+  emailCommunicationHistory: [{  // Full history of email communications
+    sentAt: {
+      type: Date,
+      required: true
+    },
+    recipient: {
+      type: String,
+      required: true
+    },
+    subject: {
+      type: String,
+      default: ''
+    },
+    sentBy: {
+      type: String,
+      default: ''
+    },
+    notes: {                  // Any notes about this communication
+      type: String,
+      default: ''
+    }
+  }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

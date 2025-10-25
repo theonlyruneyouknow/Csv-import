@@ -493,6 +493,124 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
         }
 
+        /* Custom Vendor Select Dropdown */
+        .custom-vendor-select {
+            position: relative;
+            width: 100%;
+        }
+
+        .vendor-select-display {
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 8px 35px 8px 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.15s ease-in-out;
+        }
+
+        .vendor-select-display:hover {
+            border-color: #86b7fe;
+        }
+
+        .vendor-select-display i {
+            position: absolute;
+            right: 12px;
+            color: #6c757d;
+            transition: transform 0.2s ease;
+        }
+
+        .vendor-select-display.open i {
+            transform: rotate(180deg);
+        }
+
+        .vendor-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            margin-top: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .vendor-option {
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .vendor-option:last-child {
+            border-bottom: none;
+        }
+
+        .vendor-option:hover {
+            background-color: #f8f9fa;
+        }
+
+        .vendor-option.selected {
+            background-color: #e7f3ff;
+            border-left: 3px solid #007bff;
+        }
+
+        .vendor-option-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .vendor-name {
+            font-weight: 500;
+            color: #333;
+            flex: 1;
+        }
+
+        .vendor-badges {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .vendor-mini-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .vendor-mini-badge.badge-total {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .vendor-mini-badge.badge-overdue {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .vendor-mini-badge.badge-no-eta {
+            background: #f5f5f5;
+            color: #616161;
+        }
+
+        .vendor-mini-badge.badge-approaching-soon {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
         .category-tabs {
             display: flex;
             flex-wrap: wrap;
@@ -579,6 +697,91 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
+        }
+
+        /* PO Summary Section */
+        .po-summary {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-top: 1px solid #dee2e6;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .summary-badges {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .summary-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .summary-badge i {
+            font-size: 0.9rem;
+        }
+
+        .badge-total {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge-overdue {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .badge-no-eta {
+            background: #f5f5f5;
+            color: #616161;
+        }
+
+        .badge-approaching-soon {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .badge-approaching {
+            background: #fffde7;
+            color: #f57f17;
+        }
+
+        .most-urgent {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: white;
+            border-left: 3px solid #dc3545;
+            border-radius: 5px;
+            font-size: 0.85rem;
+        }
+
+        .most-urgent i {
+            color: #dc3545;
+            font-size: 1rem;
+        }
+
+        .most-urgent-text {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .most-urgent-date {
+            color: #dc3545;
+            font-weight: 700;
         }
 
         .items-list {
@@ -1359,6 +1562,14 @@
                 <div class="stat-number"><%= stats.uniqueVendors || 0 %></div>
                 <div class="stat-label">Unique<br>Vendors</div>
             </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 4px solid #28a745;">
+                <div class="stat-number" style="color: #155724;"><%= stats.contactedPOs || 0 %></div>
+                <div class="stat-label">📧 Contacted<br>POs</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); border-left: 4px solid #ffc107;">
+                <div class="stat-number" style="color: #856404;"><%= stats.notContactedPOs || 0 %></div>
+                <div class="stat-label">⚠️ Not Contacted<br>POs</div>
+            </div>
         </div>
 
         <!-- Filters Section -->
@@ -1403,14 +1614,50 @@
             <div class="row">
                 <div class="col-md-4">
                     <label class="form-label">Filter by Vendor:</label>
-                    <select class="form-select" onchange="updateFilter('vendor', this.value)">
-                        <option value="all" <%= currentFilters.vendor === 'all' ? 'selected' : '' %>>All Vendors</option>
-                        <% uniqueVendors.forEach(vendor => { %>
-                            <option value="<%= vendor %>" <%= currentFilters.vendor === vendor ? 'selected' : '' %>><%= vendor %></option>
-                        <% }); %>
-                    </select>
+                    <div class="custom-vendor-select" id="vendorSelectContainer">
+                        <div class="vendor-select-display" onclick="toggleVendorDropdown()">
+                            <span id="selectedVendorText">
+                                <%= currentFilters.vendor === 'all' ? 'All Vendors' : currentFilters.vendor %>
+                            </span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="vendor-dropdown" id="vendorDropdown" style="display: none;">
+                            <div class="vendor-option <%= currentFilters.vendor === 'all' ? 'selected' : '' %>" 
+                                 onclick="selectVendor('all', 'All Vendors')">
+                                <span class="vendor-name">All Vendors</span>
+                            </div>
+                            <% uniqueVendors.forEach(vendor => { %>
+                                <div class="vendor-option <%= currentFilters.vendor === vendor ? 'selected' : '' %>" 
+                                     onclick="selectVendor('<%= vendor %>', '<%= vendor %>')">
+                                    <div class="vendor-option-content">
+                                        <span class="vendor-name"><%= vendor %></span>
+                                        <div class="vendor-badges">
+                                            <span class="vendor-mini-badge badge-total" title="<%= vendorStats[vendor].total %> total items">
+                                                <%= vendorStats[vendor].total %>
+                                            </span>
+                                            <% if (vendorStats[vendor].overdue > 0) { %>
+                                                <span class="vendor-mini-badge badge-overdue" title="<%= vendorStats[vendor].overdue %> overdue">
+                                                    <%= vendorStats[vendor].overdue %>⚠
+                                                </span>
+                                            <% } %>
+                                            <% if (vendorStats[vendor].noEta > 0) { %>
+                                                <span class="vendor-mini-badge badge-no-eta" title="<%= vendorStats[vendor].noEta %> no ETA">
+                                                    <%= vendorStats[vendor].noEta %>❓
+                                                </span>
+                                            <% } %>
+                                            <% if (vendorStats[vendor].approachingSoon > 0) { %>
+                                                <span class="vendor-mini-badge badge-approaching-soon" title="<%= vendorStats[vendor].approachingSoon %> due soon">
+                                                    <%= vendorStats[vendor].approachingSoon %>🕐
+                                                </span>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label">Sort by:</label>
                     <select class="form-select" onchange="updateFilter('sortBy', this.value)">
                         <option value="poNumber" <%= currentFilters.sortBy === 'poNumber' ? 'selected' : '' %>>PO Number</option>
@@ -1418,7 +1665,15 @@
                         <option value="eta" <%= currentFilters.sortBy === 'eta' ? 'selected' : '' %>>ETA Date</option>
                     </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <label class="form-label">Email Status:</label>
+                    <select class="form-select" onchange="updateFilter('emailStatus', this.value)">
+                        <option value="all" <%= currentFilters.emailStatus === 'all' ? 'selected' : '' %>>All POs</option>
+                        <option value="contacted" <%= currentFilters.emailStatus === 'contacted' ? 'selected' : '' %>>📧 Contacted</option>
+                        <option value="not-contacted" <%= currentFilters.emailStatus === 'not-contacted' ? 'selected' : '' %>>⚠️ Not Contacted</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
                     <label class="form-label">&nbsp;</label>
                     <div>
                         <button class="btn btn-success" onclick="exportData()">
@@ -1429,132 +1684,484 @@
             </div>
         </div>
 
-        <!-- Simplified Email Generator Section -->
-        <div class="email-generator">
-            <div class="email-generator-header">
-                <h4>
-                    <i class="fas fa-envelope"></i>
-                    Email Content Generator
-                </h4>
-                <p class="text-muted">Click on any PO section below to generate email content for vendor communication.</p>
-            </div>
+        <!-- Conditional Layout: Show vendors first if only one vendor -->
+        <% if (uniqueVendors.length === 1) { %>
+            <!-- Single Vendor: Show vendor sections first, then email generator -->
             
-            <div class="email-content" id="emailContent">
-                Select a PO below to generate email content for vendor communication...
-            </div>
-            <div class="email-actions">
-                <button class="email-btn btn-copy" onclick="copyToClipboard()" id="copyBtn" disabled>
-                    <i class="fas fa-copy"></i> Copy to Clipboard
-                </button>
-                <button class="email-btn btn-clear" onclick="clearEmailSelection()">
-                    <i class="fas fa-undo"></i> Clear Selection
-                </button>
-                <button class="email-btn btn-generate-all" onclick="generateAllPOsEmail()">
-                    <i class="fas fa-envelope-bulk"></i> Generate Summary for All POs
-                </button>
-            </div>
-        </div>
-
-        <!-- Results Section -->
-        <% if (troubleByPO.length === 0) { %>
-            <div class="empty-state">
-                <i class="fas fa-seedling"></i>
-                <h3>No Trouble Seeds Found</h3>
-                <p>All items in this category are on track! 🎉</p>
-            </div>
-        <% } else { %>
-            <% troubleByPO.forEach(po => { %>
-                <div class="po-section">
-                    <div class="po-header">
-                        <div class="po-info">
-                            <h3>
-                                <% if (po.poUrl) { %>
-                                    <a href="<%= po.poUrl %>" target="_blank" style="color: inherit; text-decoration: none;">
-                                        PO #<%= po.poNumber %> <i class="fas fa-external-link-alt" style="font-size: 0.8rem;"></i>
-                                    </a>
-                                <% } else { %>
-                                    PO #<%= po.poNumber %>
-                                <% } %>
-                            </h3>
-                            <div class="vendor-info">
-                                <strong><%= po.vendor %></strong>
-                                <% if (po.vendorData && (po.vendorData.mainEmail || po.vendorData.mainPhone)) { %>
-                                    <% if (po.vendorData.mainEmail) { %>
-                                        <a href="mailto:<%= po.vendorData.mainEmail %>" class="vendor-contact-btn">
-                                            <i class="fas fa-envelope"></i> Email
+            <!-- Results Section -->
+            <% if (troubleByPO.length === 0) { %>
+                <div class="empty-state">
+                    <i class="fas fa-seedling"></i>
+                    <h3>No Trouble Seeds Found</h3>
+                    <p>All items in this category are on track! 🎉</p>
+                </div>
+            <% } else { %>
+                <% troubleByPO.forEach(po => { %>
+                    <div class="po-section">
+                        <div class="po-header">
+                            <div class="po-info">
+                                <h3>
+                                    <% if (po.poUrl) { %>
+                                        <a href="<%= po.poUrl %>" target="_blank" style="color: inherit; text-decoration: none;">
+                                            PO #<%= po.poNumber %> <i class="fas fa-external-link-alt" style="font-size: 0.8rem;"></i>
+                                        </a>
+                                    <% } else { %>
+                                        PO #<%= po.poNumber %>
+                                    <% } %>
+                                </h3>
+                                <div class="vendor-info">
+                                    <strong><%= po.vendor %></strong>
+                                    <% if (po.vendorData && po.vendorData._id) { %>
+                                        <a href="/vendors/<%= po.vendorData._id %>" class="vendor-contact-btn" style="background: #007bff; border-color: #007bff;" title="View/Edit Vendor Details">
+                                            <i class="fas fa-building"></i> View Vendor
                                         </a>
                                     <% } %>
-                                    <% if (po.vendorData.mainPhone) { %>
-                                        <a href="tel:<%= po.vendorData.mainPhone %>" class="vendor-contact-btn">
-                                            <i class="fas fa-phone"></i> Call
-                                        </a>
+                                    <% if (po.vendorData && (po.vendorData.mainEmail || po.vendorData.mainPhone)) { %>
+                                        <% if (po.vendorData.mainEmail) { %>
+                                            <a href="mailto:<%= po.vendorData.mainEmail %>" class="vendor-contact-btn">
+                                                <i class="fas fa-envelope"></i> Email
+                                            </a>
+                                        <% } %>
+                                        <% if (po.vendorData.mainPhone) { %>
+                                            <a href="tel:<%= po.vendorData.mainPhone %>" class="vendor-contact-btn">
+                                                <i class="fas fa-phone"></i> Call
+                                            </a>
+                                        <% } %>
                                     <% } %>
-                                <% } %>
-                                <% if (po.poDate) { %>
-                                    <span class="text-muted">• PO Date: <%= new Date(po.poDate).toLocaleDateString() %></span>
-                                <% } %>
+                                    <% if (po.poDate) { %>
+                                        <span class="text-muted">• PO Date: <%= new Date(po.poDate).toLocaleDateString() %></span>
+                                    <% } %>
+                                    <% if (po.lastEmailSent) { %>
+                                        <span class="last-email-info" style="color: #28a745; font-weight: 500;">
+                                            • 📧 Last contacted: <%= new Date(po.lastEmailSent).toLocaleDateString() %>
+                                            <% if (po.lastEmailRecipient) { %>
+                                                (<%= po.lastEmailRecipient %>)
+                                            <% } %>
+                                        </span>
+                                    <% } %>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="items-list">
-                        <% po.items.forEach(item => { %>
-                            <div class="item-row">
-                                <div class="item-info">
-                                    <div class="item-memo"><%= item.memo %></div>
-                                    <div class="item-details">
-                                        <% if (item.sku) { %>SKU: <%= item.sku %> • <% } %>
-                                        Status: <%= item.itemStatus || 'Pending' %>
-                                        <% if (item.notes) { %>• Notes: <%= item.notes %><% } %>
-                                    </div>
-                                </div>
+                        
+                        <!-- PO Summary Section -->
+                        <% 
+                        // Calculate summary statistics for this PO
+                        const totalItems = po.items.length;
+                        const overdueItems = po.items.filter(item => item.etaStatus === 'overdue').length;
+                        const noEtaItems = po.items.filter(item => item.etaStatus === 'no-eta').length;
+                        const approachingSoonItems = po.items.filter(item => item.etaStatus === 'approaching-soon').length;
+                        const approachingItems = po.items.filter(item => item.etaStatus === 'approaching').length;
+                        
+                        // Find most urgent item (most overdue or soonest approaching)
+                        let mostUrgent = null;
+                        let mostUrgentDays = Infinity;
+                        
+                        po.items.forEach(item => {
+                            if (item.daysFromToday !== null && item.daysFromToday !== undefined) {
+                                if (item.daysFromToday < mostUrgentDays) {
+                                    mostUrgentDays = item.daysFromToday;
+                                    mostUrgent = item;
+                                }
+                            }
+                        });
+                        %>
+                        
+                        <div class="po-summary">
+                            <div class="summary-badges">
+                                <span class="summary-badge badge-total">
+                                    <i class="fas fa-box"></i>
+                                    <%= totalItems %> Item<%= totalItems !== 1 ? 's' : '' %>
+                                </span>
                                 
-                                <div class="eta-info">
-                                    <% if (item.effectiveETA) { %>
-                                        <div class="eta-date">
-                                            <%= new Date(item.effectiveETA).toLocaleDateString() %>
-                                            <% if (item.daysFromToday !== null) { %>
-                                                <% const days = Math.round(item.daysFromToday); %>
-                                                <% if (days < 0) { %>
-                                                    (<%= Math.abs(days) %> days overdue)
-                                                <% } else if (days === 0) { %>
-                                                    (Today!)
-                                                <% } else { %>
-                                                    (<%= days %> days)
+                                <% if (po.lastEmailSent) { %>
+                                    <span class="summary-badge" style="background: #d4edda; color: #155724; border: 1px solid #c3e6cb;">
+                                        <i class="fas fa-check-circle"></i>
+                                        Contacted <%= new Date(po.lastEmailSent).toLocaleDateString() %>
+                                    </span>
+                                <% } else { %>
+                                    <span class="summary-badge" style="background: #fff3cd; color: #856404; border: 1px solid #ffeaa7;">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        Not Contacted
+                                    </span>
+                                <% } %>
+                                
+                                <% if (overdueItems > 0) { %>
+                                    <span class="summary-badge badge-overdue">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <%= overdueItems %> Overdue
+                                    </span>
+                                <% } %>
+                                
+                                <% if (noEtaItems > 0) { %>
+                                    <span class="summary-badge badge-no-eta">
+                                        <i class="fas fa-question-circle"></i>
+                                        <%= noEtaItems %> No ETA
+                                    </span>
+                                <% } %>
+                                
+                                <% if (approachingSoonItems > 0) { %>
+                                    <span class="summary-badge badge-approaching-soon">
+                                        <i class="fas fa-clock"></i>
+                                        <%= approachingSoonItems %> Due Soon
+                                    </span>
+                                <% } %>
+                                
+                                <% if (approachingItems > 0) { %>
+                                    <span class="summary-badge badge-approaching">
+                                        <i class="fas fa-calendar-check"></i>
+                                        <%= approachingItems %> Approaching
+                                    </span>
+                                <% } %>
+                            </div>
+                            
+                            <% if (mostUrgent) { %>
+                                <div class="most-urgent">
+                                    <i class="fas fa-fire"></i>
+                                    <span class="most-urgent-text">Most Urgent:</span>
+                                    <span class="most-urgent-date">
+                                        <% 
+                                        const days = Math.round(mostUrgent.daysFromToday);
+                                        if (days < 0) { %>
+                                            <%= Math.abs(days) %> days overdue
+                                        <% } else if (days === 0) { %>
+                                            Due today!
+                                        <% } else if (days <= 3) { %>
+                                            <%= days %> day<%= days !== 1 ? 's' : '' %> away
+                                        <% } else { %>
+                                            <%= days %> days
+                                        <% } %>
+                                    </span>
+                                </div>
+                            <% } %>
+                        </div>
+                        
+                        <div class="items-list">
+                            <% po.items.forEach(item => { %>
+                                <div class="item-row">
+                                    <div class="item-info">
+                                        <div class="item-memo"><%= item.memo %></div>
+                                        <div class="item-details">
+                                            <% if (item.sku) { %>SKU: <%= item.sku %> • <% } %>
+                                            Status: <%= item.itemStatus || 'Pending' %>
+                                            <% if (item.notes) { %>• Notes: <%= item.notes %><% } %>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="eta-info">
+                                        <% if (item.effectiveETA) { %>
+                                            <div class="eta-date">
+                                                <%= new Date(item.effectiveETA).toLocaleDateString() %>
+                                                <% if (item.daysFromToday !== null) { %>
+                                                    <% const days = Math.round(item.daysFromToday); %>
+                                                    <% if (days < 0) { %>
+                                                        (<%= Math.abs(days) %> days overdue)
+                                                    <% } else if (days === 0) { %>
+                                                        (Today!)
+                                                    <% } else { %>
+                                                        (<%= days %> days)
+                                                    <% } %>
                                                 <% } %>
+                                            </div>
+                                        <% } else { %>
+                                            <div class="eta-date text-muted">No ETA</div>
+                                        <% } %>
+                                        <div class="eta-status <%= item.etaStatus %>">
+                                            <% if (item.etaStatus === 'no-eta') { %>No ETA
+                                            <% } else if (item.etaStatus === 'approaching-soon') { %>Soon
+                                            <% } else if (item.etaStatus === 'approaching') { %>Approaching
+                                            <% } else if (item.etaStatus === 'overdue') { %>Overdue
+                                            <% } else { %>Future
                                             <% } %>
                                         </div>
-                                    <% } else { %>
-                                        <div class="eta-date text-muted">No ETA</div>
-                                    <% } %>
-                                    <div class="eta-status <%= item.etaStatus %>">
-                                        <% if (item.etaStatus === 'no-eta') { %>No ETA
-                                        <% } else if (item.etaStatus === 'approaching-soon') { %>Soon
-                                        <% } else if (item.etaStatus === 'approaching') { %>Approaching
-                                        <% } else if (item.etaStatus === 'overdue') { %>Overdue
-                                        <% } else { %>Future
+                                    </div>
+                                    
+                                    <div class="item-actions">
+                                        <button class="action-btn btn-update-eta" onclick="updateETA('<%= item._id %>')">
+                                            <i class="fas fa-calendar-alt"></i> Update ETA
+                                        </button>
+                                        <% if (po.vendorData && (po.vendorData.mainEmail || po.vendorData.mainPhone)) { %>
+                                            <button class="action-btn btn-contact-vendor" onclick="contactVendor('<%= po.vendor %>', '<%= item.memo %>')">
+                                                <i class="fas fa-phone"></i> Contact
+                                            </button>
                                         <% } %>
+                                        <button class="action-btn btn-mark-received" onclick="markReceived('<%= item._id %>')">
+                                            <i class="fas fa-check"></i> Received
+                                        </button>
                                     </div>
                                 </div>
-                                
-                                <div class="item-actions">
-                                    <button class="action-btn btn-update-eta" onclick="updateETA('<%= item._id %>')">
-                                        <i class="fas fa-calendar-alt"></i> Update ETA
-                                    </button>
-                                    <% if (po.vendorData && (po.vendorData.mainEmail || po.vendorData.mainPhone)) { %>
-                                        <button class="action-btn btn-contact-vendor" onclick="contactVendor('<%= po.vendor %>', '<%= item.memo %>')">
-                                            <i class="fas fa-phone"></i> Contact
-                                        </button>
+                            <% }); %>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } %>
+
+            <!-- Email Generator Section (after vendors for single vendor) -->
+            <div class="email-generator">
+                <div class="email-generator-header">
+                    <h4>
+                        <i class="fas fa-envelope"></i>
+                        Email Content Generator
+                    </h4>
+                    <p class="text-muted">Click on any PO section above to generate email content for vendor communication.</p>
+                </div>
+                
+                <div class="email-content" id="emailContent">
+                    Select a PO above to generate email content for vendor communication...
+                </div>
+                <div class="email-actions">
+                    <button class="email-btn btn-copy" onclick="copyToClipboard()" id="copyBtn" disabled>
+                        <i class="fas fa-copy"></i> Copy to Clipboard
+                    </button>
+                    <button class="email-btn btn-mark-sent" onclick="markEmailSent()" id="markSentBtn" disabled style="background: #28a745;">
+                        <i class="fas fa-check-circle"></i> Mark Email Sent
+                    </button>
+                    <button class="email-btn btn-clear" onclick="clearEmailSelection()">
+                        <i class="fas fa-undo"></i> Clear Selection
+                    </button>
+                    <button class="email-btn btn-generate-all" onclick="generateAllPOsEmail()">
+                        <i class="fas fa-envelope-bulk"></i> Generate Summary for All POs
+                    </button>
+                </div>
+            </div>
+
+        <% } else { %>
+            <!-- Multiple Vendors: Show email generator first, then vendor sections (original layout) -->
+            
+            <!-- Simplified Email Generator Section -->
+            <div class="email-generator">
+                <div class="email-generator-header">
+                    <h4>
+                        <i class="fas fa-envelope"></i>
+                        Email Content Generator
+                    </h4>
+                    <p class="text-muted">Click on any PO section below to generate email content for vendor communication.</p>
+                </div>
+                
+                <div class="email-content" id="emailContent">
+                    Select a PO below to generate email content for vendor communication...
+                </div>
+                <div class="email-actions">
+                    <button class="email-btn btn-copy" onclick="copyToClipboard()" id="copyBtn" disabled>
+                        <i class="fas fa-copy"></i> Copy to Clipboard
+                    </button>
+                    <button class="email-btn btn-mark-sent" onclick="markEmailSent()" id="markSentBtn" disabled style="background: #28a745;">
+                        <i class="fas fa-check-circle"></i> Mark Email Sent
+                    </button>
+                    <button class="email-btn btn-clear" onclick="clearEmailSelection()">
+                        <i class="fas fa-undo"></i> Clear Selection
+                    </button>
+                    <button class="email-btn btn-generate-all" onclick="generateAllPOsEmail()">
+                        <i class="fas fa-envelope-bulk"></i> Generate Summary for All POs
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <% if (troubleByPO.length === 0) { %>
+                <div class="empty-state">
+                    <i class="fas fa-seedling"></i>
+                    <h3>No Trouble Seeds Found</h3>
+                    <p>All items in this category are on track! 🎉</p>
+                </div>
+            <% } else { %>
+                <% troubleByPO.forEach(po => { %>
+                    <div class="po-section">
+                        <div class="po-header">
+                            <div class="po-info">
+                                <h3>
+                                    <% if (po.poUrl) { %>
+                                        <a href="<%= po.poUrl %>" target="_blank" style="color: inherit; text-decoration: none;">
+                                            PO #<%= po.poNumber %> <i class="fas fa-external-link-alt" style="font-size: 0.8rem;"></i>
+                                        </a>
+                                    <% } else { %>
+                                        PO #<%= po.poNumber %>
                                     <% } %>
-                                    <button class="action-btn btn-mark-received" onclick="markReceived('<%= item._id %>')">
-                                        <i class="fas fa-check"></i> Received
-                                    </button>
+                                </h3>
+                                <div class="vendor-info">
+                                    <strong><%= po.vendor %></strong>
+                                    <% if (po.vendorData && po.vendorData._id) { %>
+                                        <a href="/vendors/<%= po.vendorData._id %>" class="vendor-contact-btn" style="background: #007bff; border-color: #007bff;" title="View/Edit Vendor Details">
+                                            <i class="fas fa-building"></i> View Vendor
+                                        </a>
+                                    <% } %>
+                                    <% if (po.vendorData && (po.vendorData.mainEmail || po.vendorData.mainPhone)) { %>
+                                        <% if (po.vendorData.mainEmail) { %>
+                                            <a href="mailto:<%= po.vendorData.mainEmail %>" class="vendor-contact-btn">
+                                                <i class="fas fa-envelope"></i> Email
+                                            </a>
+                                        <% } %>
+                                        <% if (po.vendorData.mainPhone) { %>
+                                            <a href="tel:<%= po.vendorData.mainPhone %>" class="vendor-contact-btn">
+                                                <i class="fas fa-phone"></i> Call
+                                            </a>
+                                        <% } %>
+                                    <% } %>
+                                    <% if (po.poDate) { %>
+                                        <span class="text-muted">• PO Date: <%= new Date(po.poDate).toLocaleDateString() %></span>
+                                    <% } %>
+                                    <% if (po.lastEmailSent) { %>
+                                        <span class="last-email-info" style="color: #28a745; font-weight: 500;">
+                                            • 📧 Last contacted: <%= new Date(po.lastEmailSent).toLocaleDateString() %>
+                                            <% if (po.lastEmailRecipient) { %>
+                                                (<%= po.lastEmailRecipient %>)
+                                            <% } %>
+                                        </span>
+                                    <% } %>
                                 </div>
                             </div>
-                        <% }); %>
+                        </div>
+                        
+                        <!-- PO Summary Section -->
+                        <% 
+                        // Calculate summary statistics for this PO
+                        const totalItems = po.items.length;
+                        const overdueItems = po.items.filter(item => item.etaStatus === 'overdue').length;
+                        const noEtaItems = po.items.filter(item => item.etaStatus === 'no-eta').length;
+                        const approachingSoonItems = po.items.filter(item => item.etaStatus === 'approaching-soon').length;
+                        const approachingItems = po.items.filter(item => item.etaStatus === 'approaching').length;
+                        
+                        // Find most urgent item (most overdue or soonest approaching)
+                        let mostUrgent = null;
+                        let mostUrgentDays = Infinity;
+                        
+                        po.items.forEach(item => {
+                            if (item.daysFromToday !== null && item.daysFromToday !== undefined) {
+                                if (item.daysFromToday < mostUrgentDays) {
+                                    mostUrgentDays = item.daysFromToday;
+                                    mostUrgent = item;
+                                }
+                            }
+                        });
+                        %>
+                        
+                        <div class="po-summary">
+                            <div class="summary-badges">
+                                <span class="summary-badge badge-total">
+                                    <i class="fas fa-box"></i>
+                                    <%= totalItems %> Item<%= totalItems !== 1 ? 's' : '' %>
+                                </span>
+                                
+                                <% if (po.lastEmailSent) { %>
+                                    <span class="summary-badge" style="background: #d4edda; color: #155724; border: 1px solid #c3e6cb;">
+                                        <i class="fas fa-check-circle"></i>
+                                        Contacted <%= new Date(po.lastEmailSent).toLocaleDateString() %>
+                                    </span>
+                                <% } else { %>
+                                    <span class="summary-badge" style="background: #fff3cd; color: #856404; border: 1px solid #ffeaa7;">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        Not Contacted
+                                    </span>
+                                <% } %>
+                                
+                                <% if (overdueItems > 0) { %>
+                                    <span class="summary-badge badge-overdue">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <%= overdueItems %> Overdue
+                                    </span>
+                                <% } %>
+                                
+                                <% if (noEtaItems > 0) { %>
+                                    <span class="summary-badge badge-no-eta">
+                                        <i class="fas fa-question-circle"></i>
+                                        <%= noEtaItems %> No ETA
+                                    </span>
+                                <% } %>
+                                
+                                <% if (approachingSoonItems > 0) { %>
+                                    <span class="summary-badge badge-approaching-soon">
+                                        <i class="fas fa-clock"></i>
+                                        <%= approachingSoonItems %> Due Soon
+                                    </span>
+                                <% } %>
+                                
+                                <% if (approachingItems > 0) { %>
+                                    <span class="summary-badge badge-approaching">
+                                        <i class="fas fa-calendar-check"></i>
+                                        <%= approachingItems %> Approaching
+                                    </span>
+                                <% } %>
+                            </div>
+                            
+                            <% if (mostUrgent) { %>
+                                <div class="most-urgent">
+                                    <i class="fas fa-fire"></i>
+                                    <span class="most-urgent-text">Most Urgent:</span>
+                                    <span class="most-urgent-date">
+                                        <% 
+                                        const days = Math.round(mostUrgent.daysFromToday);
+                                        if (days < 0) { %>
+                                            <%= Math.abs(days) %> days overdue
+                                        <% } else if (days === 0) { %>
+                                            Due today!
+                                        <% } else if (days <= 3) { %>
+                                            <%= days %> day<%= days !== 1 ? 's' : '' %> away
+                                        <% } else { %>
+                                            <%= days %> days
+                                        <% } %>
+                                    </span>
+                                </div>
+                            <% } %>
+                        </div>
+                        
+                        <div class="items-list">
+                            <% po.items.forEach(item => { %>
+                                <div class="item-row">
+                                    <div class="item-info">
+                                        <div class="item-memo"><%= item.memo %></div>
+                                        <div class="item-details">
+                                            <% if (item.sku) { %>SKU: <%= item.sku %> • <% } %>
+                                            Status: <%= item.itemStatus || 'Pending' %>
+                                            <% if (item.notes) { %>• Notes: <%= item.notes %><% } %>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="eta-info">
+                                        <% if (item.effectiveETA) { %>
+                                            <div class="eta-date">
+                                                <%= new Date(item.effectiveETA).toLocaleDateString() %>
+                                                <% if (item.daysFromToday !== null) { %>
+                                                    <% const days = Math.round(item.daysFromToday); %>
+                                                    <% if (days < 0) { %>
+                                                        (<%= Math.abs(days) %> days overdue)
+                                                    <% } else if (days === 0) { %>
+                                                        (Today!)
+                                                    <% } else { %>
+                                                        (<%= days %> days)
+                                                    <% } %>
+                                                <% } %>
+                                            </div>
+                                        <% } else { %>
+                                            <div class="eta-date text-muted">No ETA</div>
+                                        <% } %>
+                                        <div class="eta-status <%= item.etaStatus %>">
+                                            <% if (item.etaStatus === 'no-eta') { %>No ETA
+                                            <% } else if (item.etaStatus === 'approaching-soon') { %>Soon
+                                            <% } else if (item.etaStatus === 'approaching') { %>Approaching
+                                            <% } else if (item.etaStatus === 'overdue') { %>Overdue
+                                            <% } else { %>Future
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="item-actions">
+                                        <button class="action-btn btn-update-eta" onclick="updateETA('<%= item._id %>')">
+                                            <i class="fas fa-calendar-alt"></i> Update ETA
+                                        </button>
+                                        <% if (po.vendorData && (po.vendorData.mainEmail || po.vendorData.mainPhone)) { %>
+                                            <button class="action-btn btn-contact-vendor" onclick="contactVendor('<%= po.vendor %>', '<%= item.memo %>')">
+                                                <i class="fas fa-phone"></i> Contact
+                                            </button>
+                                        <% } %>
+                                        <button class="action-btn btn-mark-received" onclick="markReceived('<%= item._id %>')">
+                                            <i class="fas fa-check"></i> Received
+                                        </button>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
                     </div>
-                </div>
-            <% }); %>
+                <% }); %>
+            <% } %>
         <% } %>
     </div>
 
@@ -1621,6 +2228,44 @@
                 alert('Create ERROR: ' + error.message);
             });
         }
+        
+        // Custom vendor dropdown functions
+        function toggleVendorDropdown() {
+            const dropdown = document.getElementById('vendorDropdown');
+            const display = document.querySelector('.vendor-select-display');
+            
+            if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+                dropdown.style.display = 'block';
+                display.classList.add('open');
+            } else {
+                dropdown.style.display = 'none';
+                display.classList.remove('open');
+            }
+        }
+
+        function selectVendor(value, displayText) {
+            document.getElementById('selectedVendorText').textContent = displayText;
+            document.getElementById('vendorDropdown').style.display = 'none';
+            document.querySelector('.vendor-select-display').classList.remove('open');
+            
+            // Update the filter
+            updateFilter('vendor', value);
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const container = document.getElementById('vendorSelectContainer');
+            if (container && !container.contains(event.target)) {
+                const dropdown = document.getElementById('vendorDropdown');
+                const display = document.querySelector('.vendor-select-display');
+                if (dropdown) {
+                    dropdown.style.display = 'none';
+                }
+                if (display) {
+                    display.classList.remove('open');
+                }
+            }
+        });
         
         function updateFilter(filterType, value) {
             const params = new URLSearchParams(window.location.search);
@@ -1769,9 +2414,11 @@
             // Generate email content
             generateEmailContent(selectedPOForEmail);
 
-            // Enable copy and edit buttons
+            // Enable copy, edit, and mark sent buttons
             document.getElementById('copyBtn').disabled = false;
             document.getElementById('editBtn').disabled = false;
+            const markSentBtn = document.getElementById('markSentBtn');
+            if (markSentBtn) markSentBtn.disabled = false;
         }
 
         function generateEmailContent(po) {
@@ -2108,6 +2755,81 @@ Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
             document.getElementById('emailContent').removeAttribute('data-plain-text');
             document.getElementById('copyBtn').disabled = true;
             document.getElementById('editBtn').disabled = true;
+            const markSentBtn = document.getElementById('markSentBtn');
+            if (markSentBtn) markSentBtn.disabled = true;
+        }
+
+        async function markEmailSent() {
+            if (!selectedPOForEmail) {
+                alert('Please select a PO and generate an email first.');
+                return;
+            }
+
+            // Get vendor email to pre-fill
+            let defaultRecipient = '';
+            if (selectedPOForEmail.vendorData) {
+                defaultRecipient = getVendorEmail(selectedPOForEmail.vendorData);
+                if (defaultRecipient === 'No email available') {
+                    defaultRecipient = '';
+                }
+            }
+
+            // Prompt for recipient email
+            const recipient = prompt('Enter recipient email address:', defaultRecipient);
+            if (!recipient) {
+                return; // User cancelled
+            }
+
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(recipient)) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+
+            // Parse subject from email content
+            const emailContent = document.getElementById('emailContent').textContent;
+            const lines = emailContent.split('\n');
+            const subjectLine = lines.find(line => line.startsWith('Subject:'));
+            const subject = subjectLine ? subjectLine.replace('Subject: ', '').trim() : '';
+
+            // Get notes (optional)
+            const notes = prompt('Add any notes about this communication (optional):', '');
+
+            // Show loading state
+            const markSentBtn = document.getElementById('markSentBtn');
+            const originalHTML = markSentBtn.innerHTML;
+            markSentBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            markSentBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/purchase-orders/${selectedPOForEmail._id}/email-sent`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        recipient: recipient,
+                        subject: subject,
+                        sentBy: 'System User', // TODO: Get from user session if available
+                        notes: notes || ''
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Email communication recorded successfully!');
+                    // Reload to show updated status
+                    location.reload();
+                } else {
+                    throw new Error(result.error || 'Unknown error occurred');
+                }
+            } catch (error) {
+                console.error('Failed to record email:', error);
+                alert('❌ Failed to record email communication: ' + error.message);
+                // Restore button state
+                markSentBtn.innerHTML = originalHTML;
+                markSentBtn.disabled = false;
+            }
         }
 
         function editGeneratedEmail() {

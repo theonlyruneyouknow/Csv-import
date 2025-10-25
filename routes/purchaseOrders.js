@@ -897,7 +897,7 @@ router.get('/trouble-seed', async (req, res) => {
     fourteenDaysFromNow.setDate(today.getDate() + 14);
 
     // Get filter parameters
-    const { category = 'all', vendor = 'all', sortBy = 'poNumber' } = req.query;
+    const { category = 'all', vendor = 'all', sortBy = 'poNumber', emailStatus = 'all' } = req.query;
 
     // Base query for items in partially received POs that are not yet received
     const baseMatch = {
@@ -1059,37 +1059,66 @@ router.get('/trouble-seed', async (req, res) => {
           vendorData: item.vendorData,
           poUrl: item.poUrl,
           poDate: item.poDate,
+          _id: item.purchaseOrder?.[0]?._id, // Store PO ID for email tracking
+          lastEmailSent: item.purchaseOrder?.[0]?.lastEmailSent,
+          lastEmailRecipient: item.purchaseOrder?.[0]?.lastEmailRecipient,
+          lastEmailSubject: item.purchaseOrder?.[0]?.lastEmailSubject,
           items: []
         };
       }
       troubleByPO[item.poNumber].items.push(item);
     });
 
+    // Filter by email status if specified
+    let filteredPOs = Object.values(troubleByPO);
+    if (emailStatus === 'contacted') {
+      filteredPOs = filteredPOs.filter(po => po.lastEmailSent);
+    } else if (emailStatus === 'not-contacted') {
+      filteredPOs = filteredPOs.filter(po => !po.lastEmailSent);
+    }
+
     // Get unique vendors for filter dropdown
     const uniqueVendors = [...new Set(troubleItems.map(item => item.vendor))].sort();
+
+    // Calculate statistics for each vendor
+    const vendorStats = {};
+    uniqueVendors.forEach(vendorName => {
+      const vendorItems = troubleItems.filter(item => item.vendor === vendorName);
+      vendorStats[vendorName] = {
+        total: vendorItems.length,
+        overdue: vendorItems.filter(item => item.etaStatus === 'overdue').length,
+        noEta: vendorItems.filter(item => item.etaStatus === 'no-eta').length,
+        approachingSoon: vendorItems.filter(item => item.etaStatus === 'approaching-soon').length,
+        approaching: vendorItems.filter(item => item.etaStatus === 'approaching').length
+      };
+    });
 
     // Calculate comprehensive statistics
     const stats = {
       totalItems: troubleItems.length,
-      totalPOs: Object.keys(troubleByPO).length,
+      totalPOs: filteredPOs.length,
       noEtaCount: categories.noEta.length,
       approachingSoonCount: categories.approachingSoon.length,
       approachingCount: categories.approaching.length,
       overdueCount: categories.overdue.length,
       needsFollowupCount: categories.needsFollowup.length,
       vendorsWithIssues: uniqueVendors.length,
-      uniqueVendors: uniqueVendors.length
+      uniqueVendors: uniqueVendors.length,
+      contactedPOs: Object.values(troubleByPO).filter(po => po.lastEmailSent).length,
+      notContactedPOs: Object.values(troubleByPO).filter(po => !po.lastEmailSent).length
     };
 
     res.render('trouble-seed', {
-      troubleByPO: Object.values(troubleByPO),
+      troubleByPO: filteredPOs,
       stats,
       categories,
       uniqueVendors,
+      vendorStats,
       currentFilters: {
         category,
         vendor,
-        sortBy
+        sortBy,
+        emailStatus
       },
       troubleItems: displayItems,
       currentPage: 'trouble-seed'
@@ -4920,6 +4949,64 @@ router.get('/unreceived-items', async (req, res) => {
         
     } catch (error) {
         console.error('❌ Error fetching unreceived items:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
+    }
+});
+
+// Record email communication for a PO
+router.post('/:id/email-sent', async (req, res) => {
+    try {
+        const { recipient, subject, sentBy, notes } = req.body;
+        
+        if (!recipient) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Recipient email is required' 
+            });
+        }
+
+        const po = await PurchaseOrder.findById(req.params.id);
+        
+        if (!po) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Purchase Order not found' 
+            });
+        }
+
+        // Update last email fields
+        po.lastEmailSent = new Date();
+        po.lastEmailRecipient = recipient;
+        po.lastEmailSubject = subject || '';
+        po.lastEmailSentBy = sentBy || 'Unknown';
+
+        // Add to communication history
+        if (!po.emailCommunicationHistory) {
+            po.emailCommunicationHistory = [];
+        }
+        
+        po.emailCommunicationHistory.push({
+            sentAt: new Date(),
+            recipient: recipient,
+            subject: subject || '',
+            sentBy: sentBy || 'Unknown',
+            notes: notes || ''
+        });
+
+        await po.save();
+
+        res.json({ 
+            success: true, 
+            message: 'Email communication recorded',
+            lastEmailSent: po.lastEmailSent,
+            lastEmailRecipient: po.lastEmailRecipient
+        });
+
+    } catch (error) {
+        console.error('❌ Error recording email communication:', error);
         res.status(500).json({ 
             success: false, 
             error: error.message 
