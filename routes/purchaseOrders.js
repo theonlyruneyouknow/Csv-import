@@ -1077,7 +1077,8 @@ router.get('/trouble-seed', async (req, res) => {
       approachingCount: categories.approaching.length,
       overdueCount: categories.overdue.length,
       needsFollowupCount: categories.needsFollowup.length,
-      vendorsWithIssues: uniqueVendors.length
+      vendorsWithIssues: uniqueVendors.length,
+      uniqueVendors: uniqueVendors.length
     };
 
     res.render('trouble-seed', {
