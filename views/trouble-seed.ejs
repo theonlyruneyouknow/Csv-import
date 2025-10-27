@@ -548,6 +548,86 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
         }
 
+        /* Filter Header Row - Title and Search on Same Line */
+        .filter-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+
+        .filter-header-row h4 {
+            margin: 0;
+            flex-shrink: 0;
+        }
+
+        /* Search Bar Styles */
+        .search-bar-container {
+            flex: 1;
+            max-width: 500px;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            color: #6c757d;
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 40px 10px 40px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            background: #f8f9fa;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #007bff;
+            background: white;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+        }
+
+        .clear-search-btn {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 5px 8px;
+            font-size: 0.9rem;
+            transition: color 0.2s ease;
+        }
+
+        .clear-search-btn:hover {
+            color: #dc3545;
+        }
+
+        /* Responsive: Stack on smaller screens */
+        @media (max-width: 768px) {
+            .filter-header-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .search-bar-container {
+                max-width: 100%;
+                width: 100%;
+            }
+        }
+
         /* Custom Vendor Select Dropdown */
         .custom-vendor-select {
             position: relative;
@@ -1666,7 +1746,23 @@
     <div class="container-fluid">
         <!-- Filter Options Header -->
         <div class="filters-section">
-            <h4><i class="fas fa-filter"></i> Filter Options</h4>
+            <!-- Header with Title and Search on Same Line -->
+            <div class="filter-header-row">
+                <h4><i class="fas fa-filter"></i> Filter Options</h4>
+                <div class="search-bar-container">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" 
+                               id="troubleSeedSearch" 
+                               class="search-input" 
+                               placeholder="Search by PO#, Vendor, SKU, or Item..."
+                               onkeyup="filterTroubleItems()">
+                        <button class="clear-search-btn" onclick="clearSearch()" style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
             
             <!-- Filter Buttons Grid (2 rows x 5 columns) -->
             <div class="stats-grid">
@@ -2631,6 +2727,96 @@
             document.querySelectorAll('.accordion-icon, .dropdown-icon').forEach(icon => {
                 icon.textContent = '▼';
             });
+        }
+
+        // Search Filter Functions
+        function filterTroubleItems() {
+            const searchInput = document.getElementById('troubleSeedSearch');
+            if (!searchInput) {
+                console.error('Search input not found!');
+                return;
+            }
+            
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const clearBtn = document.querySelector('.clear-search-btn');
+            
+            console.log('🔍 Search triggered with term:', searchTerm);
+            
+            // Show/hide clear button
+            if (clearBtn) {
+                clearBtn.style.display = searchTerm ? 'block' : 'none';
+            }
+            
+            // Get all PO sections
+            const poSections = document.querySelectorAll('.po-section');
+            console.log('📦 Found PO sections:', poSections.length);
+            
+            if (poSections.length === 0) {
+                console.warn('⚠️ No PO sections found on page!');
+                return;
+            }
+            
+            let visibleCount = 0;
+            
+            poSections.forEach((section, index) => {
+                // Get PO number from the h3 tag
+                const poNumberElement = section.querySelector('.po-info h3');
+                const poNumber = poNumberElement ? poNumberElement.textContent.toLowerCase() : '';
+                
+                // Get vendor name from the strong tag in vendor-info
+                const vendorElement = section.querySelector('.vendor-info strong');
+                const vendorName = vendorElement ? vendorElement.textContent.toLowerCase() : '';
+                
+                if (index === 0) {
+                    console.log('📋 First PO - Number:', poNumber.substring(0, 50), 'Vendor:', vendorName.substring(0, 30));
+                }
+                
+                // Get all item rows in this PO
+                const itemRows = section.querySelectorAll('.item-row');
+                let poHasVisibleItems = false;
+                
+                itemRows.forEach(row => {
+                    // Get item memo
+                    const itemMemoElement = row.querySelector('.item-memo');
+                    const itemMemo = itemMemoElement ? itemMemoElement.textContent.toLowerCase() : '';
+                    
+                    // Get SKU from item-details
+                    const itemDetailsElement = row.querySelector('.item-details');
+                    const itemDetails = itemDetailsElement ? itemDetailsElement.textContent.toLowerCase() : '';
+                    
+                    // Check if item matches search
+                    const matchesSearch = !searchTerm || 
+                        poNumber.includes(searchTerm) ||
+                        vendorName.includes(searchTerm) ||
+                        itemMemo.includes(searchTerm) ||
+                        itemDetails.includes(searchTerm);
+                    
+                    // Show/hide individual item
+                    if (matchesSearch) {
+                        row.style.display = '';
+                        poHasVisibleItems = true;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                
+                // Show/hide entire PO section based on whether it has visible items or matches PO/vendor
+                const poMatches = !searchTerm || poNumber.includes(searchTerm) || vendorName.includes(searchTerm);
+                
+                if (poHasVisibleItems || (poMatches && !searchTerm)) {
+                    section.style.display = '';
+                    visibleCount++;
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+            
+            console.log(`✅ Search: "${searchTerm}" - Visible POs: ${visibleCount}/${poSections.length}`);
+        }
+
+        function clearSearch() {
+            document.getElementById('troubleSeedSearch').value = '';
+            filterTroubleItems();
         }
 
         // Email Generator Functions
