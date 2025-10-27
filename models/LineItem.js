@@ -129,6 +129,45 @@ const lineItemSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    // Partial shipment tracking
+    partialShipmentStatus: {
+        type: String,
+        default: '',
+        enum: ['', 'will-fulfill', 'cancelled', 'backorder', 'remainder-shipped'],
+        index: true
+    },
+    partialShipmentNotes: {
+        type: String,
+        default: ''
+    },
+    partialShipmentDate: {      // Date when partial status was set
+        type: Date,
+        default: null
+    },
+    partialShipmentUpdatedBy: {
+        type: String,
+        default: ''
+    },
+    quantityOrdered: {          // Calculated from quantityExpected (for backward compatibility)
+        type: Number,
+        default: null
+    },
+    quantityRemaining: {        // Auto-calculated: quantityExpected - quantityReceived
+        type: Number,
+        default: null
+    },
+    remainderETA: {             // ETA for remainder of partial shipment
+        type: Date,
+        default: null
+    },
+    vendorResponse: {           // Vendor's response about remainder
+        type: String,
+        default: ''
+    },
+    vendorResponseDate: {       // When vendor responded
+        type: Date,
+        default: null
+    },
     // Soft delete/hide functionality
     isHidden: {
         type: Boolean,

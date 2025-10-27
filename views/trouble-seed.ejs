@@ -501,6 +501,14 @@
             background: #f3e5f5;
         }
 
+        .stat-card.partial-shipment {
+            border-left-color: #17a2b8;
+        }
+
+        .stat-card.partial-shipment.active {
+            background: #e8f5f7;
+        }
+
         .stat-card.contacted {
             border-left-color: #28a745;
         }
@@ -934,9 +942,76 @@
             color: white;
         }
 
+        .btn-mark-partial {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-mark-partial:hover {
+            background: #138496;
+        }
+
         .btn-mark-received {
             background: #6f42c1;
             color: white;
+        }
+
+        .partial-shipment-badge {
+            background: #e8f5f7;
+            color: #17a2b8;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid #17a2b8;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .partial-shipment-badge i {
+            font-size: 0.9rem;
+        }
+
+        .partial-indicator {
+            background: #e8f5f7;
+            color: #17a2b8;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            border-left: 3px solid #17a2b8;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+
+        .partial-indicator i {
+            color: #17a2b8;
+        }
+
+        .status-will-fulfill {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .status-cancelled {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .status-backorder {
+            color: #ffc107;
+            font-weight: 600;
+        }
+
+        .status-remainder-shipped {
+            color: #007bff;
+            font-weight: 600;
+        }
+
+        .badge-partial {
+            background: #e8f5f7;
+            color: #17a2b8;
+            border: 1px solid #17a2b8;
         }
 
         .empty-state {
@@ -1628,10 +1703,10 @@
                     <div class="stat-number"><%= stats.needsFollowupCount %></div>
                     <div class="stat-label">Need Vendor<br>Follow-up</div>
                 </a>
-                <a href="?category=<%= currentFilters.category %>&vendor=<%= currentFilters.vendor %>&sortBy=<%= currentFilters.sortBy %>&emailStatus=all" 
-                   class="stat-card <%= currentFilters.emailStatus === 'all' && currentFilters.category === 'all' ? 'active' : '' %>">
-                    <div class="stat-number"><%= stats.totalPOs %></div>
-                    <div class="stat-label">Affected<br>POs</div>
+                <a href="?category=partialShipment&vendor=<%= currentFilters.vendor %>&sortBy=<%= currentFilters.sortBy %>&emailStatus=<%= currentFilters.emailStatus %>" 
+                   class="stat-card partial-shipment <%= currentFilters.category === 'partialShipment' ? 'active' : '' %>">
+                    <div class="stat-number"><%= stats.partialShipmentCount || 0 %></div>
+                    <div class="stat-label">Partial<br>Shipments</div>
                 </a>
                 <a href="?category=<%= currentFilters.category %>&vendor=all&sortBy=<%= currentFilters.sortBy %>&emailStatus=<%= currentFilters.emailStatus %>" 
                    class="stat-card <%= currentFilters.vendor === 'all' ? 'active' : '' %>">
@@ -1932,12 +2007,22 @@
                                     </div>
                                     
                                     <div class="item-actions">
+                                        <% if (item.partialShipmentStatus === 'awaiting-remainder') { %>
+                                            <span class="partial-shipment-badge" title="Partial shipment - awaiting remainder">
+                                                <i class="fas fa-shipping-fast"></i> Awaiting Remainder
+                                            </span>
+                                        <% } %>
                                         <button class="action-btn btn-update-eta" onclick="updateETA('<%= item._id %>')">
                                             <i class="fas fa-calendar-alt"></i> Update ETA
                                         </button>
                                         <% if (po.vendorData && (po.vendorData.mainEmail || po.vendorData.mainPhone)) { %>
                                             <button class="action-btn btn-contact-vendor" onclick="contactVendor('<%= po.vendor %>', '<%= item.memo %>')">
                                                 <i class="fas fa-phone"></i> Contact
+                                            </button>
+                                        <% } %>
+                                        <% if (item.isPartialShipment) { %>
+                                            <button class="action-btn btn-mark-partial" onclick="markPartialShipment('<%= item._id %>', '<%= item.memo %>')" title="Update vendor response about remainder">
+                                                <i class="fas fa-box-open"></i> Update Remainder
                                             </button>
                                         <% } %>
                                         <button class="action-btn btn-mark-received" onclick="markReceived('<%= item._id %>')">
@@ -2236,12 +2321,22 @@
                                     </div>
                                     
                                     <div class="item-actions">
+                                        <% if (item.partialShipmentStatus === 'awaiting-remainder') { %>
+                                            <span class="partial-shipment-badge" title="Partial shipment - awaiting remainder">
+                                                <i class="fas fa-shipping-fast"></i> Awaiting Remainder
+                                            </span>
+                                        <% } %>
                                         <button class="action-btn btn-update-eta" onclick="updateETA('<%= item._id %>')">
                                             <i class="fas fa-calendar-alt"></i> Update ETA
                                         </button>
                                         <% if (po.vendorData && (po.vendorData.mainEmail || po.vendorData.mainPhone)) { %>
                                             <button class="action-btn btn-contact-vendor" onclick="contactVendor('<%= po.vendor %>', '<%= item.memo %>')">
                                                 <i class="fas fa-phone"></i> Contact
+                                            </button>
+                                        <% } %>
+                                        <% if (item.isPartialShipment) { %>
+                                            <button class="action-btn btn-mark-partial" onclick="markPartialShipment('<%= item._id %>', '<%= item.memo %>')" title="Update vendor response about remainder">
+                                                <i class="fas fa-box-open"></i> Update Remainder
                                             </button>
                                         <% } %>
                                         <button class="action-btn btn-mark-received" onclick="markReceived('<%= item._id %>')">
@@ -2413,6 +2508,63 @@
             }
         }
 
+        function markPartialShipment(itemId, itemMemo) {
+            const status = prompt(`Item: ${itemMemo}\n\nVendor response about the remainder:\n\n1 = Will fulfill\n2 = Cancelled\n3 = Backorder\n4 = Remainder shipped\n\nEnter 1-4:`);
+            
+            if (!status || !['1', '2', '3', '4'].includes(status)) {
+                if (status) alert('Invalid selection. Please enter 1, 2, 3, or 4.');
+                return;
+            }
+            
+            const statusMap = {
+                '1': 'will-fulfill',
+                '2': 'cancelled',
+                '3': 'backorder',
+                '4': 'remainder-shipped'
+            };
+            
+            const notes = prompt('Additional notes (optional):') || '';
+            const remainderETA = status === '1' || status === '3' ? 
+                prompt('Expected ETA for remainder (YYYY-MM-DD, optional):') || '' : '';
+            const vendorResponse = prompt('Vendor\'s full response (optional):') || '';
+            
+            const data = {
+                partialShipmentStatus: statusMap[status],
+                partialShipmentNotes: notes,
+                partialShipmentDate: new Date(),
+                vendorResponse: vendorResponse,
+                vendorResponseDate: vendorResponse ? new Date() : null
+            };
+            
+            if (remainderETA) {
+                data.remainderETA = new Date(remainderETA);
+            }
+            
+            fetch(`/purchase-orders/line-items/${itemId}/partial-shipment`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            }).then(response => {
+                if (response.ok) {
+                    const statusText = {
+                        'will-fulfill': 'Will Fulfill',
+                        'cancelled': 'Cancelled',
+                        'backorder': 'Backorder',
+                        'remainder-shipped': 'Remainder Shipped'
+                    };
+                    alert(`Vendor response recorded: ${statusText[statusMap[status]]}`);
+                    location.reload();
+                } else {
+                    alert('Failed to record vendor response');
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                alert('Failed to record vendor response');
+            });
+        }
+
         function exportData() {
             alert('Export functionality will be implemented');
         }
@@ -2520,22 +2672,35 @@
             console.log('🎯 PO items:', po.items);
             
             // Count different types of items using same logic as route
-            const noEtaItems = po.items.filter(item => item.etaStatus === 'no-eta');
-            const overdueItems = po.items.filter(item => item.etaStatus === 'overdue');
+            // Items with partial shipments (ordered > received, but something was received) - PRIORITY
+            const partialShipmentItems = po.items.filter(item => item.isPartialShipment === true);
+            
+            // Filter out partial shipment items from other categories to avoid redundancy
+            const noEtaItems = po.items.filter(item => 
+                item.etaStatus === 'no-eta' && !item.isPartialShipment
+            );
+            const overdueItems = po.items.filter(item => 
+                item.etaStatus === 'overdue' && !item.isPartialShipment
+            );
             // Items that need follow-up based on route logic
             const needsFollowupItems = po.items.filter(item => 
-                item.etaStatus === 'overdue' || 
-                (item.etaStatus === 'no-eta' && item.itemStatus === 'Delivery Delay') ||
-                (item.etaStatus === 'approaching-soon' && !item.vendorData)
+                !item.isPartialShipment && (
+                    item.etaStatus === 'overdue' || 
+                    (item.etaStatus === 'no-eta' && item.itemStatus === 'Delivery Delay') ||
+                    (item.etaStatus === 'approaching-soon' && !item.vendorData)
+                )
             );
             // Also include approaching-soon and approaching items as they may need attention
             const approachingItems = po.items.filter(item => 
-                item.etaStatus === 'approaching-soon' || item.etaStatus === 'approaching'
+                !item.isPartialShipment && (
+                    item.etaStatus === 'approaching-soon' || item.etaStatus === 'approaching'
+                )
             );
 
             console.log('📊 Item counts:');
             console.log('   - No ETA items:', noEtaItems.length, noEtaItems.map(i => ({memo: i.memo, status: i.etaStatus})));
             console.log('   - Overdue items:', overdueItems.length, overdueItems.map(i => ({memo: i.memo, status: i.etaStatus})));
+            console.log('   - Partial shipment items:', partialShipmentItems.length, partialShipmentItems.map(i => ({memo: i.memo, ordered: i.quantityExpected, received: i.quantityReceived, remaining: i.autoQuantityRemaining})));
             console.log('   - Needs followup items:', needsFollowupItems.length, needsFollowupItems.map(i => ({memo: i.memo, status: i.etaStatus, itemStatus: i.itemStatus})));
             console.log('   - Approaching items:', approachingItems.length, approachingItems.map(i => ({memo: i.memo, status: i.etaStatus})));
 
@@ -2555,6 +2720,26 @@
                 <div class="email-body">
                     <p><strong>Hi ${contactName},</strong></p>
                     <p>I need an update on Purchase Order ${po.poNumber}, which shows as "Partially Received" in our system.</p>
+                    
+                    ${partialShipmentItems.length > 0 ? `
+                    <div class="issue-section">
+                        <h4>📦 PARTIAL SHIPMENTS - REMAINDER STATUS NEEDED:</h4>
+                        <ul>${partialShipmentItems.map(item => {
+                            const unit = item.unit || 'M';
+                            const ordered = item.quantityExpected || 0;
+                            const received = item.quantityReceived || 0;
+                            const remaining = item.autoQuantityRemaining || (ordered - received);
+                            return `<li><strong>${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''}</strong><br>
+                                Ordered: ${ordered}${unit} | Received: ${received}${unit} | <span style="color: #dc3545;">Remaining: ${remaining}${unit}</span></li>`;
+                        }).join('')}</ul>
+                        <p><em><strong>Please advise on the status of the remaining quantities:</strong></em></p>
+                        <ul style="margin-left: 20px;">
+                            <li>Is it backordered? (If yes, please provide estimated delivery date)</li>
+                            <li>Has it been cancelled in your system?</li>
+                            <li>Is it shipping separately? (If yes, please provide tracking/ETA)</li>
+                            <li>Other status?</li>
+                        </ul>
+                    </div>` : ''}
                     
                     ${noEtaItems.length > 0 ? `
                     <div class="issue-section">
@@ -2610,7 +2795,23 @@ Hi ${contactName},
 
 I need an update on Purchase Order ${po.poNumber}, which shows as "Partially Received" in our system.
 
-${noEtaItems.length > 0 ? `DELIVERY DELAYS (No ETA Provided):
+${partialShipmentItems.length > 0 ? `PARTIAL SHIPMENTS - REMAINDER STATUS NEEDED:
+${partialShipmentItems.map(item => {
+    const unit = item.unit || 'M';
+    const ordered = item.quantityExpected || 0;
+    const received = item.quantityReceived || 0;
+    const remaining = item.autoQuantityRemaining || (ordered - received);
+    return `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''}
+  Ordered: ${ordered}${unit} | Received: ${received}${unit} | Remaining: ${remaining}${unit}`;
+}).join('\n')}
+
+Please advise on the status of the remaining quantities:
+  - Is it backordered? (If yes, please provide estimated delivery date)
+  - Has it been cancelled in your system?
+  - Is it shipping separately? (If yes, please provide tracking/ETA)
+  - Other status?
+
+` : ''}${noEtaItems.length > 0 ? `DELIVERY DELAYS (No ETA Provided):
 ${noEtaItems.map(item => `• ${item.memo}${item.sku ? ` (SKU: ${item.sku})` : ''}`).join('\n')}
 We urgently need estimated delivery dates for these items.
 

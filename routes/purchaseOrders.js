@@ -957,6 +957,33 @@ router.get('/trouble-seed', async (req, res) => {
       {
         $addFields: {
           vendorData: { $arrayElemAt: ['$vendorInfo', 0] },
+          // Auto-calculate if this is a partial shipment
+          isPartialShipment: {
+            $cond: {
+              if: {
+                $and: [
+                  { $gt: ['$quantityReceived', 0] },
+                  { $gt: ['$quantityExpected', 0] },
+                  { $lt: ['$quantityReceived', '$quantityExpected'] }
+                ]
+              },
+              then: true,
+              else: false
+            }
+          },
+          // Auto-calculate remaining quantity
+          autoQuantityRemaining: {
+            $cond: {
+              if: {
+                $and: [
+                  { $gt: ['$quantityExpected', 0] },
+                  { $gte: ['$quantityReceived', 0] }
+                ]
+              },
+              then: { $subtract: ['$quantityExpected', '$quantityReceived'] },
+              else: null
+            }
+          },
           // Use the best available ETA: eta field first, then expectedArrivalDate, then trackingEstimatedDelivery
           effectiveETA: {
             $cond: {
@@ -1036,6 +1063,7 @@ router.get('/trouble-seed', async (req, res) => {
       approachingSoon: troubleItems.filter(item => item.etaStatus === 'approaching-soon'), // 0-7 days
       approaching: troubleItems.filter(item => item.etaStatus === 'approaching'), // 8-14 days
       overdue: troubleItems.filter(item => item.etaStatus === 'overdue'),
+      partialShipment: troubleItems.filter(item => item.isPartialShipment === true),
       needsFollowup: troubleItems.filter(item => 
         item.etaStatus === 'overdue' || 
         (item.etaStatus === 'no-eta' && item.itemStatus === 'Delivery Delay') ||
@@ -1101,6 +1129,7 @@ router.get('/trouble-seed', async (req, res) => {
       approachingSoonCount: categories.approachingSoon.length,
       approachingCount: categories.approaching.length,
       overdueCount: categories.overdue.length,
+      partialShipmentCount: categories.partialShipment.length,
       needsFollowupCount: categories.needsFollowup.length,
       vendorsWithIssues: uniqueVendors.length,
       uniqueVendors: uniqueVendors.length,
@@ -1201,6 +1230,54 @@ router.put('/line-items/:itemId/receive', async (req, res) => {
     
   } catch (error) {
     console.error('Error marking item as received:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API route to mark item as partial shipment
+router.put('/line-items/:itemId/partial-shipment', async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const { 
+      partialShipmentStatus, 
+      partialShipmentNotes, 
+      remainderETA,
+      vendorResponse,
+      vendorResponseDate
+    } = req.body;
+    
+    const username = req.user ? req.user.username : 'System';
+    
+    console.log(`📦 Recording vendor response for partial shipment ${itemId}: ${partialShipmentStatus}`);
+    
+    const updateData = {
+      partialShipmentStatus: partialShipmentStatus || '',
+      partialShipmentNotes: partialShipmentNotes || '',
+      partialShipmentDate: new Date(),
+      partialShipmentUpdatedBy: username,
+      vendorResponse: vendorResponse || '',
+      vendorResponseDate: vendorResponseDate ? new Date(vendorResponseDate) : new Date()
+    };
+    
+    if (remainderETA) {
+      updateData.remainderETA = new Date(remainderETA);
+    }
+    
+    const updatedItem = await LineItem.findByIdAndUpdate(
+      itemId,
+      updateData,
+      { new: true }
+    );
+    
+    if (!updatedItem) {
+      return res.status(404).json({ error: 'Line item not found' });
+    }
+    
+    console.log(`✅ Vendor response recorded for: ${updatedItem.memo} - Status: ${partialShipmentStatus}`);
+    res.json({ success: true, item: updatedItem });
+    
+  } catch (error) {
+    console.error('Error recording vendor response:', error);
     res.status(500).json({ error: error.message });
   }
 });
