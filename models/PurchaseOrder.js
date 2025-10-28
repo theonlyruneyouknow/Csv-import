@@ -188,6 +188,20 @@ const purchaseOrderSchema = new mongoose.Schema({
       default: ''
     }
   }],
+  // Snooze functionality for trouble seed dashboard
+  snoozedUntil: {             // Date until which this PO is snoozed
+    type: Date,
+    default: null,
+    index: true
+  },
+  snoozedBy: {                // User who snoozed the PO
+    type: String,
+    default: ''
+  },
+  snoozeDuration: {           // Duration in days (1, 7, or 14)
+    type: Number,
+    default: null
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

@@ -1081,24 +1081,33 @@ router.get('/trouble-seed', async (req, res) => {
     const troubleByPO = {};
     displayItems.forEach(item => {
       if (!troubleByPO[item.poNumber]) {
+        const purchaseOrderData = item.purchaseOrder?.[0];
         troubleByPO[item.poNumber] = {
           poNumber: item.poNumber,
           vendor: item.vendor,
           vendorData: item.vendorData,
           poUrl: item.poUrl,
           poDate: item.poDate,
-          _id: item.purchaseOrder?.[0]?._id, // Store PO ID for email tracking
-          lastEmailSent: item.purchaseOrder?.[0]?.lastEmailSent,
-          lastEmailRecipient: item.purchaseOrder?.[0]?.lastEmailRecipient,
-          lastEmailSubject: item.purchaseOrder?.[0]?.lastEmailSubject,
+          _id: purchaseOrderData?._id, // Store PO ID for email tracking and snoozing
+          lastEmailSent: purchaseOrderData?.lastEmailSent,
+          lastEmailRecipient: purchaseOrderData?.lastEmailRecipient,
+          lastEmailSubject: purchaseOrderData?.lastEmailSubject,
+          snoozedUntil: purchaseOrderData?.snoozedUntil, // Include snooze data
+          snoozedBy: purchaseOrderData?.snoozedBy,
+          snoozeDuration: purchaseOrderData?.snoozeDuration,
           items: []
         };
       }
       troubleByPO[item.poNumber].items.push(item);
     });
 
+    // Filter out snoozed POs (only show if snoozedUntil is null or in the past)
+    let filteredPOs = Object.values(troubleByPO).filter(po => {
+      if (!po.snoozedUntil) return true;
+      return new Date(po.snoozedUntil) <= new Date();
+    });
+    
     // Filter by email status if specified
-    let filteredPOs = Object.values(troubleByPO);
     if (emailStatus === 'contacted') {
       filteredPOs = filteredPOs.filter(po => po.lastEmailSent);
     } else if (emailStatus === 'not-contacted') {
@@ -1278,6 +1287,185 @@ router.put('/line-items/:itemId/partial-shipment', async (req, res) => {
     
   } catch (error) {
     console.error('Error recording vendor response:', error);
+    res.status(500).json({ error: 'Failed to record vendor response' });
+  }
+});
+
+// Snooze POs in trouble seed dashboard
+router.put('/pos/:poId/snooze', async (req, res) => {
+  try {
+    const { poId } = req.params;
+    const { days } = req.body; // 1, 7, or 14 days
+    
+    if (!days || ![1, 7, 14].includes(Number(days))) {
+      return res.status(400).json({ error: 'Invalid snooze duration. Must be 1, 7, or 14 days.' });
+    }
+    
+    const username = req.user ? req.user.username : 'System';
+    const snoozedUntil = new Date();
+    snoozedUntil.setDate(snoozedUntil.getDate() + Number(days));
+    
+    console.log(`⏰ Snoozing PO ${poId} for ${days} days until ${snoozedUntil.toLocaleDateString()}`);
+    
+    const updatedPO = await PurchaseOrder.findByIdAndUpdate(
+      poId,
+      {
+        snoozedUntil: snoozedUntil,
+        snoozedBy: username,
+        snoozeDuration: Number(days)
+      },
+      { new: true }
+    );
+    
+    if (!updatedPO) {
+      return res.status(404).json({ error: 'Purchase Order not found' });
+    }
+    
+    console.log(`✅ Snoozed PO ${updatedPO.poNumber} until ${snoozedUntil.toLocaleDateString()}`);
+    res.json({ 
+      success: true, 
+      po: updatedPO,
+      snoozedUntil: snoozedUntil,
+      message: `Snoozed for ${days} day${days > 1 ? 's' : ''}`
+    });
+    
+  } catch (error) {
+    console.error('Error snoozing PO:', error);
+    res.status(500).json({ error: 'Failed to snooze PO' });
+  }
+});
+
+// Unsnooze (wake up) a PO
+router.put('/pos/:poId/unsnooze', async (req, res) => {
+  try {
+    const { poId } = req.params;
+    
+    console.log(`⏰ Unsnoozing PO ${poId}`);
+    
+    const updatedPO = await PurchaseOrder.findByIdAndUpdate(
+      poId,
+      {
+        snoozedUntil: null,
+        snoozedBy: '',
+        snoozeDuration: null
+      },
+      { new: true }
+    );
+    
+    if (!updatedPO) {
+      return res.status(404).json({ error: 'Purchase Order not found' });
+    }
+    
+    console.log(`✅ Unsnoozed PO ${updatedPO.poNumber}`);
+    res.json({ success: true, po: updatedPO });
+    
+  } catch (error) {
+    console.error('Error unsnoozing PO:', error);
+    res.status(500).json({ error: 'Failed to unsnooze PO' });
+  }
+});
+
+// Get all currently snoozed POs
+router.get('/pos/snoozed/list', async (req, res) => {
+  try {
+    const now = new Date();
+    
+    const snoozedPOs = await PurchaseOrder.find({
+      snoozedUntil: { $exists: true, $ne: null, $gt: now }
+    }).sort({ snoozedUntil: 1 }); // Sort by wake-up date, soonest first
+    
+    console.log(`📋 Found ${snoozedPOs.length} snoozed POs`);
+    
+    res.json({
+      success: true,
+      snoozedPOs: snoozedPOs.map(po => ({
+        _id: po._id,
+        poNumber: po.poNumber,
+        vendor: po.vendor,
+        snoozedUntil: po.snoozedUntil,
+        snoozedBy: po.snoozedBy,
+        snoozeDuration: po.snoozeDuration,
+        nsStatus: po.nsStatus
+      }))
+    });
+    
+  } catch (error) {
+    console.error('Error fetching snoozed POs:', error);
+    res.status(500).json({ error: 'Failed to fetch snoozed POs' });
+  }
+});
+
+// Snooze line items in trouble seed dashboard (DEPRECATED - keeping for backward compatibility)
+router.put('/line-items/:itemId/snooze', async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const { days } = req.body; // 1, 7, or 14 days
+    
+    if (!days || ![1, 7, 14].includes(Number(days))) {
+      return res.status(400).json({ error: 'Invalid snooze duration. Must be 1, 7, or 14 days.' });
+    }
+    
+    const username = req.user ? req.user.username : 'System';
+    const snoozedUntil = new Date();
+    snoozedUntil.setDate(snoozedUntil.getDate() + Number(days));
+    
+    console.log(`⏰ Snoozing line item ${itemId} for ${days} days until ${snoozedUntil.toLocaleDateString()}`);
+    
+    const updatedItem = await LineItem.findByIdAndUpdate(
+      itemId,
+      {
+        snoozedUntil: snoozedUntil,
+        snoozedBy: username,
+        snoozeDuration: Number(days)
+      },
+      { new: true }
+    );
+    
+    if (!updatedItem) {
+      return res.status(404).json({ error: 'Line item not found' });
+    }
+    
+    console.log(`✅ Snoozed: ${updatedItem.memo} until ${snoozedUntil.toLocaleDateString()}`);
+    res.json({ 
+      success: true, 
+      item: updatedItem,
+      snoozedUntil: snoozedUntil,
+      message: `Snoozed for ${days} day${days > 1 ? 's' : ''}`
+    });
+    
+  } catch (error) {
+    console.error('Error snoozing line item:', error);
+    res.status(500).json({ error: 'Failed to snooze item' });
+  }
+});
+
+// Unsnooze (wake up) a line item
+router.put('/line-items/:itemId/unsnooze', async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    
+    console.log(`⏰ Unsnoozing line item ${itemId}`);
+    
+    const updatedItem = await LineItem.findByIdAndUpdate(
+      itemId,
+      {
+        snoozedUntil: null,
+        snoozedBy: '',
+        snoozeDuration: null
+      },
+      { new: true }
+    );
+    
+    if (!updatedItem) {
+      return res.status(404).json({ error: 'Line item not found' });
+    }
+    
+    console.log(`✅ Unsnoozed: ${updatedItem.memo}`);
+    res.json({ success: true, item: updatedItem });
+    
+  } catch (error) {
+    console.error('Error unsnoozing line item:', error);
+
     res.status(500).json({ error: error.message });
   }
 });

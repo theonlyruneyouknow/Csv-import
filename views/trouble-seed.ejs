@@ -15,12 +15,14 @@
             margin: 0;
             padding: 20px;
             background: #f8f9fa;
+            overflow-x: hidden;
         }
 
         /* Navigation Styles */
         .container {
             max-width: 1400px;
             margin: 0 auto;
+            overflow-x: hidden;
         }
 
         .header {
@@ -564,14 +566,18 @@
 
         /* Search Bar Styles */
         .search-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             flex: 1;
-            max-width: 500px;
+            max-width: 700px;
         }
 
         .search-input-wrapper {
             position: relative;
             display: flex;
             align-items: center;
+            flex: 1;
         }
 
         .search-icon {
@@ -1034,6 +1040,114 @@
         .btn-mark-received {
             background: #6f42c1;
             color: white;
+        }
+
+        /* Snooze Button and Dropdown */
+        .btn-snooze {
+            background: #ffc107;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .btn-snooze:hover {
+            background: #e0a800;
+        }
+
+        /* Segmented Snooze Button */
+        .snooze-button-group {
+            display: inline-flex;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-left: 10px;
+        }
+
+        .snooze-segment {
+            background: #ffc107;
+            border: none;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #000;
+            transition: all 0.2s ease;
+            border-right: 1px solid #e0a800;
+            font-size: 0.85rem;
+        }
+
+        .snooze-segment:last-child {
+            border-right: none;
+        }
+
+        .snooze-segment:hover {
+            background: #e0a800;
+            transform: scale(1.05);
+        }
+
+        .snooze-segment:active {
+            background: #d39e00;
+        }
+
+        .snooze-segment i {
+            margin-right: 4px;
+            font-size: 0.9rem;
+        }
+
+        .snooze-label {
+            display: inline-block;
+            background: #fff3cd;
+            color: #856404;
+            padding: 6px 10px;
+            border-radius: 4px 0 0 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid #ffc107;
+            border-right: none;
+        }
+
+        .snooze-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            margin-top: 5px;
+            min-width: 150px;
+        }
+
+        .snooze-option {
+            display: block;
+            width: 100%;
+            padding: 10px 15px;
+            border: none;
+            background: white;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s ease;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .snooze-option:first-child {
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+        }
+
+        .snooze-option:last-child {
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+            border-bottom: none;
+        }
+
+        .snooze-option:hover {
+            background: #f8f9fa;
+        }
+
+        .snooze-option i {
+            margin-right: 8px;
+            color: #ffc107;
         }
 
         .partial-shipment-badge {
@@ -1761,6 +1875,21 @@
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
+                    
+                    <!-- Snoozed POs Dropdown -->
+                    <div class="nav-section" style="margin-left: 15px; position: relative;">
+                        <button class="nav-imports-btn" onclick="toggleSnoozedPOsDropdown()" style="background: #ffc107; color: #000; padding: 10px 20px;">
+                            <i class="fas fa-bed"></i> Snoozed POs <span class="dropdown-icon">▼</span>
+                        </button>
+                        <div id="snoozedPOsDropdown" class="nav-dropdown-content" style="min-width: 280px; max-width: 320px; max-height: 400px; overflow-y: auto; overflow-x: hidden; right: 0; left: auto;">
+                            <!-- Will be populated dynamically -->
+                            <div id="snoozedPOsList" style="padding: 10px;">
+                                <div style="text-align: center; color: #666;">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -1968,6 +2097,22 @@
                                     <% } %>
                                 </div>
                             </div>
+                            
+                            <!-- Segmented Snooze Button for PO (Single Vendor Section) -->
+                            <div class="snooze-button-group">
+                                <span class="snooze-label">
+                                    <i class="fas fa-clock"></i> Snooze:
+                                </span>
+                                <button class="snooze-segment" onclick="snoozePO('<%= po._id %>', '<%= po.poNumber %>', 1)" title="Snooze for 1 day">
+                                    1d
+                                </button>
+                                <button class="snooze-segment" onclick="snoozePO('<%= po._id %>', '<%= po.poNumber %>', 7)" title="Snooze for 7 days">
+                                    7d
+                                </button>
+                                <button class="snooze-segment" onclick="snoozePO('<%= po._id %>', '<%= po.poNumber %>', 14)" title="Snooze for 14 days">
+                                    14d
+                                </button>
+                            </div>
                         </div>
                         
                         <!-- PO Summary Section -->
@@ -2108,6 +2253,7 @@
                                                 <i class="fas fa-shipping-fast"></i> Awaiting Remainder
                                             </span>
                                         <% } %>
+                                        
                                         <button class="action-btn btn-update-eta" onclick="updateETA('<%= item._id %>')">
                                             <i class="fas fa-calendar-alt"></i> Update ETA
                                         </button>
@@ -2282,9 +2428,25 @@
                                     <% } %>
                                 </div>
                             </div>
+                            
+                            <!-- Segmented Snooze Button for PO (Multiple Vendors Section) -->
+                            <div class="snooze-button-group">
+                                <span class="snooze-label">
+                                    <i class="fas fa-clock"></i> Snooze:
+                                </span>
+                                <button class="snooze-segment" onclick="snoozePO('<%= po._id %>', '<%= po.poNumber %>', 1)" title="Snooze for 1 day">
+                                    1d
+                                </button>
+                                <button class="snooze-segment" onclick="snoozePO('<%= po._id %>', '<%= po.poNumber %>', 7)" title="Snooze for 7 days">
+                                    7d
+                                </button>
+                                <button class="snooze-segment" onclick="snoozePO('<%= po._id %>', '<%= po.poNumber %>', 14)" title="Snooze for 14 days">
+                                    14d
+                                </button>
+                            </div>
                         </div>
                         
-                        <!-- PO Summary Section -->
+                        <!-- PO Summary Section for Multiple Vendors -->                        <!-- PO Summary Section -->
                         <% 
                         // Calculate summary statistics for this PO
                         const totalItems = po.items.length;
@@ -2422,6 +2584,7 @@
                                                 <i class="fas fa-shipping-fast"></i> Awaiting Remainder
                                             </span>
                                         <% } %>
+                                        
                                         <button class="action-btn btn-update-eta" onclick="updateETA('<%= item._id %>')">
                                             <i class="fas fa-calendar-alt"></i> Update ETA
                                         </button>
@@ -2601,6 +2764,197 @@
                     console.error('Error:', error);
                     alert('Failed to mark item as received');
                 });
+            }
+        }
+
+        // Snooze Functions
+        async function snoozePO(poId, poNumber, days) {
+            console.log('🔧 snoozePO called with:', { poId, poNumber, days });
+            
+            const confirmMsg = `Snooze PO #${poNumber} for ${days} day${days > 1 ? 's' : ''}?\n\nThis entire PO will be hidden from the trouble seed dashboard until ${new Date(Date.now() + days * 24 * 60 * 60 * 1000).toLocaleDateString()}.`;
+            
+            if (!confirm(confirmMsg)) {
+                console.log('❌ User cancelled snooze');
+                return;
+            }
+            
+            try {
+                console.log('📡 Sending snooze request to:', `/purchase-orders/pos/${poId}/snooze`);
+                console.log('📦 Request body:', { days });
+                
+                const response = await fetch(`/purchase-orders/pos/${poId}/snooze`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ days: days })
+                });
+                
+                console.log('📨 Response status:', response.status);
+                console.log('📨 Response ok:', response.ok);
+                
+                const result = await response.json();
+                console.log('📨 Response data:', result);
+                
+                if (response.ok) {
+                    alert(`✅ PO #${poNumber} snoozed for ${days} day${days > 1 ? 's' : ''}!\n\nWill reappear on ${new Date(result.snoozedUntil).toLocaleDateString()}.`);
+                    console.log('✅ Snooze successful, reloading page...');
+                    location.reload();
+                } else {
+                    console.error('❌ Server returned error:', result);
+                    alert('❌ Error: ' + (result.error || 'Failed to snooze PO'));
+                }
+            } catch (error) {
+                console.error('❌ Fetch error:', error);
+                alert('❌ Error snoozing PO. Please try again.\n\nError: ' + error.message);
+            }
+        }
+
+        // Snoozed POs Management
+        async function toggleSnoozedPOsDropdown() {
+            console.log('🔧 toggleSnoozedPOsDropdown called');
+            const dropdown = document.getElementById('snoozedPOsDropdown');
+            console.log('📍 Dropdown element:', dropdown);
+            
+            const icon = event.currentTarget.querySelector('.dropdown-icon');
+            console.log('📍 Icon element:', icon);
+            
+            // Close all other dropdowns
+            document.querySelectorAll('.nav-accordion-content, .nav-dropdown-content').forEach(d => {
+                if (d.id !== 'snoozedPOsDropdown') {
+                    d.style.display = 'none';
+                    d.classList.remove('show');
+                }
+            });
+            
+            if (dropdown.classList.contains('show')) {
+                console.log('⬇️ Closing dropdown');
+                dropdown.classList.remove('show');
+                dropdown.style.display = 'none';
+                icon.textContent = '▼';
+            } else {
+                console.log('⬆️ Opening dropdown');
+                dropdown.classList.add('show');
+                dropdown.style.display = 'block';
+                dropdown.style.opacity = '1';
+                dropdown.style.visibility = 'visible';
+                dropdown.style.transform = 'translateY(0)';
+                icon.textContent = '▲';
+                await loadSnoozedPOs();
+            }
+        }
+
+        async function loadSnoozedPOs() {
+            console.log('🔧 loadSnoozedPOs called');
+            const listContainer = document.getElementById('snoozedPOsList');
+            console.log('📍 Container element:', listContainer);
+            
+            listContainer.innerHTML = '<div style="text-align: center; color: #666;"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+            
+            try {
+                console.log('📡 Fetching snoozed POs from /purchase-orders/pos/snoozed/list');
+                const response = await fetch('/purchase-orders/pos/snoozed/list');
+                console.log('📨 Response status:', response.status);
+                console.log('📨 Response ok:', response.ok);
+                
+                const result = await response.json();
+                console.log('📨 Response data:', result);
+                console.log('📨 Number of snoozed POs:', result.snoozedPOs ? result.snoozedPOs.length : 0);
+                
+                if (response.ok && result.snoozedPOs && result.snoozedPOs.length > 0) {
+                    console.log('✅ Building HTML for', result.snoozedPOs.length, 'POs');
+                    let html = '<div style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 2px solid #ffc107; font-weight: 600; font-size: 0.9rem;">Snoozed POs</div>';
+                    
+                    result.snoozedPOs.forEach(po => {
+                        console.log('  - Adding PO:', po.poNumber);
+                        const wakeDate = new Date(po.snoozedUntil);
+                        const daysRemaining = Math.ceil((wakeDate - new Date()) / (1000 * 60 * 60 * 24));
+                        
+                        // Truncate vendor name if too long
+                        const vendorDisplay = po.vendor.length > 18 ? po.vendor.substring(0, 15) + '...' : po.vendor;
+                        
+                        html += `
+                            <div class="snoozed-po-item" style="padding: 6px 8px; margin-bottom: 4px; background: #fff3cd; border-left: 3px solid #ffc107; border-radius: 3px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;"
+                                 onmouseover="this.style.background='#ffe69c'; this.querySelector('.wake-up-overlay').style.opacity='1';"
+                                 onmouseout="this.style.background='#fff3cd'; this.querySelector('.wake-up-overlay').style.opacity='0';">
+                                <div style="position: relative; overflow: hidden;">
+                                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.85rem;">
+                                        <strong style="color: #000;">PO #${po.poNumber}</strong>
+                                        <span style="color: #666; margin-left: 6px;">${vendorDisplay}</span>
+                                    </div>
+                                    <div style="color: #856404; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        <i class="fas fa-clock"></i> ${wakeDate.toLocaleDateString()} (${daysRemaining}d)
+                                    </div>
+                                </div>
+                                <div class="wake-up-overlay" 
+                                     onclick="event.stopPropagation(); unsnoozePO('${po._id}', '${po.poNumber}');"
+                                     style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+                                            background: rgba(40, 167, 69, 0.95); color: white; 
+                                            display: flex; align-items: center; justify-content: center;
+                                            opacity: 0; transition: opacity 0.2s; border-radius: 3px;
+                                            font-weight: 600; font-size: 0.85rem;">
+                                    <i class="fas fa-bell"></i> Click to Wake
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    console.log('✅ Setting innerHTML with', html.length, 'characters');
+                    listContainer.innerHTML = html;
+                    console.log('✅ HTML set successfully');
+                } else {
+                    console.log('ℹ️ No snoozed POs found or response not ok');
+                    listContainer.innerHTML = `
+                        <div style="text-align: center; padding: 20px; color: #666;">
+                            <i class="fas fa-check-circle" style="font-size: 2rem; color: #28a745;"></i><br>
+                            <strong>No Snoozed POs</strong><br>
+                            <small>All POs are active</small>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading snoozed POs:', error);
+                listContainer.innerHTML = '<div style="text-align: center; color: #dc3545; padding: 20px;">❌ Error loading snoozed POs</div>';
+            }
+        }
+
+        async function unsnoozePO(poId, poNumber) {
+            console.log('🔧 unsnoozePO called with:', { poId, poNumber });
+            
+            if (!confirm(`Wake up PO #${poNumber}?\n\nThis will make it visible again in the trouble seed dashboard.`)) {
+                console.log('❌ User cancelled unsnooze');
+                return;
+            }
+            
+            try {
+                console.log('📡 Sending unsnooze request to:', `/purchase-orders/pos/${poId}/unsnooze`);
+                
+                const response = await fetch(`/purchase-orders/pos/${poId}/unsnooze`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                console.log('📨 Response status:', response.status);
+                console.log('📨 Response ok:', response.ok);
+                
+                const result = await response.json();
+                console.log('📨 Response data:', result);
+                
+                if (response.ok) {
+                    alert(`✅ PO #${poNumber} is now awake!`);
+                    console.log('✅ Unsnooze successful, refreshing list...');
+                    await loadSnoozedPOs(); // Refresh the list
+                    console.log('✅ List refreshed, reloading page in 500ms...');
+                    setTimeout(() => location.reload(), 500); // Reload page to show the PO
+                } else {
+                    console.error('❌ Server returned error:', result);
+                    alert('❌ Error: ' + (result.error || 'Failed to unsnooze PO'));
+                }
+            } catch (error) {
+                console.error('❌ Fetch error:', error);
+                alert('❌ Error unsnoozing PO. Please try again.\n\nError: ' + error.message);
             }
         }
 
