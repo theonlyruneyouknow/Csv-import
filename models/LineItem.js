@@ -187,6 +187,14 @@ const lineItemSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    lastUpdatedBy: {
+        type: String,
+        default: ''
+    },
+    lastUpdatedDate: {
+        type: Date,
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now

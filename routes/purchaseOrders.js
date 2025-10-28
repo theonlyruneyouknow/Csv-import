@@ -897,7 +897,7 @@ router.get('/trouble-seed', async (req, res) => {
     fourteenDaysFromNow.setDate(today.getDate() + 14);
 
     // Get filter parameters
-    const { category = 'all', vendor = 'all', sortBy = 'poNumber', emailStatus = 'all' } = req.query;
+    const { category = 'all', vendor = 'all', sortBy = 'poNumber', emailStatus = 'all', includeHidden = 'false' } = req.query;
 
     // Base query for items in partially received POs that are not yet received
     const baseMatch = {
@@ -924,13 +924,15 @@ router.get('/trouble-seed', async (req, res) => {
           vendor: { $arrayElemAt: ['$purchaseOrder.vendor', 0] },
           poNsStatus: { $arrayElemAt: ['$purchaseOrder.nsStatus', 0] },
           poUrl: { $arrayElemAt: ['$purchaseOrder.poUrl', 0] },
-          poDate: { $arrayElemAt: ['$purchaseOrder.date', 0] }
+          poDate: { $arrayElemAt: ['$purchaseOrder.date', 0] },
+          poIsHidden: { $arrayElemAt: ['$purchaseOrder.isHidden', 0] }
         }
       },
       {
         $match: {
           ...baseMatch,
-          poNsStatus: { $in: ['Partially Received', 'Pending Receipt'] }
+          poNsStatus: { $in: ['Partially Received', 'Pending Receipt'] },
+          ...(includeHidden === 'true' ? {} : { poIsHidden: { $ne: true } }) // Conditionally exclude hidden POs
         }
       },
       {
@@ -1156,7 +1158,8 @@ router.get('/trouble-seed', async (req, res) => {
         category,
         vendor,
         sortBy,
-        emailStatus
+        emailStatus,
+        includeHidden
       },
       troubleItems: displayItems,
       currentPage: 'trouble-seed',
@@ -1395,6 +1398,40 @@ router.get('/pos/snoozed/list', async (req, res) => {
   }
 });
 
+// Un-hide a PO
+router.put('/pos/:poId/unhide', async (req, res) => {
+  try {
+    const { poId } = req.params;
+    const username = req.user ? req.user.username : 'System';
+    
+    console.log(`🔓 Un-hiding PO ${poId} by ${username}`);
+    
+    const updatedPO = await PurchaseOrder.findByIdAndUpdate(
+      poId,
+      {
+        isHidden: false,
+        hiddenBy: '',
+        hiddenDate: null,
+        hiddenReason: '',
+        unhiddenBy: username,
+        unhiddenDate: new Date()
+      },
+      { new: true }
+    );
+    
+    if (!updatedPO) {
+      return res.status(404).json({ error: 'Purchase Order not found' });
+    }
+    
+    console.log(`✅ Un-hidden PO ${updatedPO.poNumber}`);
+    res.json({ success: true, po: updatedPO });
+    
+  } catch (error) {
+    console.error('Error un-hiding PO:', error);
+    res.status(500).json({ error: 'Failed to un-hide PO' });
+  }
+});
+
 // Snooze line items in trouble seed dashboard (DEPRECATED - keeping for backward compatibility)
 router.put('/line-items/:itemId/snooze', async (req, res) => {
   try {
@@ -1501,6 +1538,78 @@ router.put('/line-items/:itemId/follow-up', async (req, res) => {
     
   } catch (error) {
     console.error('Error adding follow-up note:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API route to update line item quantities and details
+router.put('/line-items/:itemId/update', async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const { quantityOrdered, quantityReceived, itemStatus, notes } = req.body;
+    const username = req.user ? req.user.username : 'System';
+
+    console.log(`📝 Updating line item ${itemId}:`, {
+      quantityOrdered,
+      quantityReceived,
+      itemStatus,
+      notes: notes ? 'provided' : 'none'
+    });
+
+    const updateData = {};
+    
+    if (quantityOrdered !== undefined) {
+      const qty = parseFloat(quantityOrdered);
+      updateData.quantityOrdered = qty;
+      updateData.quantityExpected = qty; // Keep both fields in sync
+    }
+    
+    if (quantityReceived !== undefined) {
+      updateData.quantityReceived = parseFloat(quantityReceived);
+    }
+    
+    if (itemStatus !== undefined && itemStatus !== '') {
+      updateData.itemStatus = itemStatus;
+    }
+
+    // Add update tracking
+    updateData.lastUpdatedBy = username;
+    updateData.lastUpdatedDate = new Date();
+
+    const updatedItem = await LineItem.findByIdAndUpdate(
+      itemId,
+      updateData,
+      { new: true }
+    );
+
+    if (!updatedItem) {
+      return res.status(404).json({ error: 'Line item not found' });
+    }
+
+    // If notes provided, add them
+    if (notes && notes.trim()) {
+      // Get the PO details to populate vendor and poNumber for the note
+      const po = await PurchaseOrder.findById(updatedItem.poId);
+      if (po) {
+        const note = new Note({
+          poId: updatedItem.poId,
+          poNumber: po.poNumber,
+          vendor: po.vendor,
+          content: `[Quantity Update by ${username}] ${notes}`
+        });
+        await note.save();
+        console.log(`📝 Created note for line item ${itemId}`);
+      }
+    }
+
+    console.log(`✅ Successfully updated line item ${itemId}`);
+    res.json({ 
+      success: true, 
+      lineItem: updatedItem,
+      message: 'Line item updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating line item:', error);
     res.status(500).json({ error: error.message });
   }
 });
