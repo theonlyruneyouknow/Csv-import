@@ -98,6 +98,16 @@ const purchaseOrderSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  // Dropship flag - to distinguish dropship POs from regular POs
+  isDropship: {
+    type: Boolean,
+    default: false,
+    index: true                // Index for efficient filtering
+  },
+  dropshipNotes: {            // Special notes for dropship orders
+    type: String,
+    default: ''
+  },
   // File attachments for PO documents and PDFs
   attachments: [{
     filename: {               // Original filename

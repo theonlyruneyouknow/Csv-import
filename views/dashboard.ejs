@@ -2632,6 +2632,99 @@
             opacity: 0.9;
         }
 
+        /* Dropship Toggle Button */
+        .dropship-toggle-btn {
+            background: #e0e0e0; /* Gray for non-dropship */
+            color: #666;
+            border: none;
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            opacity: 0.6;
+        }
+
+        .dropship-toggle-btn.is-dropship {
+            background: #ff9800; /* Orange for dropship POs */
+            color: white;
+            opacity: 1;
+            box-shadow: 0 0 8px rgba(255, 152, 0, 0.5);
+        }
+
+        .dropship-toggle-btn:hover {
+            transform: scale(1.05);
+            opacity: 1;
+        }
+
+        .dropship-toggle-btn.is-dropship:hover {
+            background: #f57c00;
+        }
+
+        /* Toggle Switch for Dropship Filter */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #ff9800; /* Orange for dropship */
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .toggle-switch input:focus + .toggle-slider {
+            box-shadow: 0 0 1px #ff9800;
+        }
+
+        /* Hover effect for toggle */
+        .toggle-slider:hover {
+            background-color: #bbb;
+        }
+
+        .toggle-switch input:checked + .toggle-slider:hover {
+            background-color: #f57c00; /* Darker orange on hover */
+        }
+
         /* Create Task Button */
         .create-task-btn {
             background: #17a2b8; /* Teal/Cyan */
@@ -3815,6 +3908,17 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     </label>
                 </div>
 
+                <div class="filter-group">
+                    <label style="margin-bottom: 8px; display: block;">🚚 Dropship Filter</label>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="showOnlyDropship">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span style="font-size: 12px; color: #666;" id="dropshipToggleLabel">Show All POs</span>
+                    </div>
+                </div>
+
                 <div class="filter-group filter-actions">
                     <button class="btn btn-sm btn-outline-primary" onclick="updateAllTracking()"
                         id="bulkTrackingBtn" title="Update all shipping tracking" style="width: 100%;">
@@ -3908,6 +4012,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                                 data-po-number="<%= po.poNumber %>"
                                                                 title="<%= po.attachments && po.attachments.length > 0 ? `Manage ${po.attachments.length} attachment(s)` : 'Manage attachments' %>">
                                                                 📎
+                                                            </button>
+                                                            <button
+                                                                class="dropship-toggle-btn <%= po.isDropship ? 'is-dropship' : '' %>"
+                                                                data-id="<%- po._id %>"
+                                                                data-po="<%- po.poNumber %>"
+                                                                data-is-dropship="<%= po.isDropship ? 'true' : 'false' %>"
+                                                                title="<%= po.isDropship ? 'Dropship PO - Click to unmark' : 'Click to mark as dropship' %>">
+                                                                🚚
                                                             </button>
                                             </div>
                                         </td>
@@ -5118,6 +5230,18 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
             }
 
+            // Handle dropship toggle button using event delegation
+            if (event.target.closest('.dropship-toggle-btn')) {
+                const btn = event.target.closest('.dropship-toggle-btn');
+                const poId = btn.getAttribute('data-id');
+                const poNumber = btn.getAttribute('data-po');
+                const isCurrentlyDropship = btn.getAttribute('data-is-dropship') === 'true';
+                
+                if (poId) {
+                    toggleDropshipStatus(poId, poNumber, !isCurrentlyDropship, btn);
+                }
+            }
+
             // Handle create task button using event delegation
             if (event.target.closest('.create-task-btn')) {
                 const btn = event.target.closest('.create-task-btn');
@@ -6221,6 +6345,58 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             // Show a toast notification
             const message = isCurrentlyVisible ? '📦 NS Status column hidden' : '📦 NS Status column shown';
             showTrackingToast(message, 'success');
+        }
+
+        async function toggleDropshipStatus(poId, poNumber, newDropshipStatus, btn) {
+            try {
+                console.log(`🚚 Toggling dropship status for PO ${poNumber}: ${newDropshipStatus}`);
+                
+                const response = await fetch(`/purchase-orders/${poId}/dropship`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ isDropship: newDropshipStatus })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to update dropship status: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                // Update button visual state
+                if (newDropshipStatus) {
+                    btn.classList.add('is-dropship');
+                    btn.setAttribute('data-is-dropship', 'true');
+                    btn.setAttribute('title', 'Dropship PO - Click to unmark');
+                } else {
+                    btn.classList.remove('is-dropship');
+                    btn.setAttribute('data-is-dropship', 'false');
+                    btn.setAttribute('title', 'Click to mark as dropship');
+                }
+
+                // Update the row's data attribute
+                const row = btn.closest('tr[data-po]');
+                if (row) {
+                    const poData = JSON.parse(row.getAttribute('data-po'));
+                    poData.isDropship = newDropshipStatus;
+                    row.setAttribute('data-po', JSON.stringify(poData));
+                }
+
+                // Re-apply filters to update visibility if dropship filter is active
+                applyFilters();
+
+                // Show success message
+                const message = newDropshipStatus ? 
+                    `🚚 PO ${poNumber} marked as dropship` : 
+                    `📦 PO ${poNumber} unmarked as dropship`;
+                showTrackingToast(message, 'success');
+
+            } catch (error) {
+                console.error('❌ Error toggling dropship status:', error);
+                showTrackingToast(`Error updating dropship status: ${error.message}`, 'error');
+            }
         }
 
         function toggleUserDropdown() {
@@ -7434,12 +7610,15 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const showPendingBill = showPendingBillCheckbox ? showPendingBillCheckbox.checked : false;
             const showOnlyMissingUrlsCheckbox = document.getElementById('showOnlyMissingUrls');
             const showOnlyMissingUrls = showOnlyMissingUrlsCheckbox ? showOnlyMissingUrlsCheckbox.checked : false;
+            const showOnlyDropshipCheckbox = document.getElementById('showOnlyDropship');
+            const showOnlyDropship = showOnlyDropshipCheckbox ? showOnlyDropshipCheckbox.checked : false;
 
             const rows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]'); // Only main rows
             let visibleCount = 0;
             let hiddenNotMyConcernCount = 0;
             let hiddenPendingBillCount = 0;
             let hiddenHasUrlCount = 0;
+            let hiddenNonDropshipCount = 0;
 
             rows.forEach(row => {
                 const poData = JSON.parse(row.dataset.po);
@@ -7473,6 +7652,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const hasUrl = poUrl && poUrl.trim().length > 0;
                 const shouldShowBasedOnUrl = !showOnlyMissingUrls || !hasUrl;
 
+                // Dropship filter - only show dropship POs if checkbox is checked
+                const isDropship = poData.isDropship === true;
+                const shouldShowBasedOnDropship = !showOnlyDropship || isDropship;
+
                 if (isNotMyConcern && !showNotMyConcern) {
                     hiddenNotMyConcernCount++;
                 }
@@ -7483,6 +7666,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
                 if (showOnlyMissingUrls && hasUrl) {
                     hiddenHasUrlCount++;
+                }
+
+                if (showOnlyDropship && !isDropship) {
+                    hiddenNonDropshipCount++;
                 }
 
                 // Notes filter
@@ -7496,7 +7683,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 // Priority filter
                 const matchesPriority = priorityFilter === 'all' || (poData.priority && poData.priority.toString() === priorityFilter);
 
-                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowBasedOnUrl) {
+                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowBasedOnUrl && shouldShowBasedOnDropship) {
                     row.classList.remove('hidden');
                     // Also show the corresponding notes row if it's expanded
                     const notesRow = document.getElementById(`notes-row-${index}`);
@@ -7514,7 +7701,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
             });
 
-            console.log(`🔍 Filter results: ${visibleCount} visible, ${hiddenNotMyConcernCount} "Not my concern" hidden, ${hiddenPendingBillCount} "Pending Bill" hidden, ${hiddenHasUrlCount} with URLs hidden`);
+            console.log(`🔍 Filter results: ${visibleCount} visible, ${hiddenNotMyConcernCount} "Not my concern" hidden, ${hiddenPendingBillCount} "Pending Bill" hidden, ${hiddenHasUrlCount} with URLs hidden, ${hiddenNonDropshipCount} non-dropship hidden`);
 
             // Update results info
             const totalCount = rows.length;
@@ -7664,11 +7851,21 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById('showNotMyConcern').checked = false;
             document.getElementById('showPendingBill').checked = false;
             document.getElementById('showOnlyMissingUrls').checked = false;
+            document.getElementById('showOnlyDropship').checked = false;
+            
+            // Reset dropship toggle label
+            const dropshipLabel = document.getElementById('dropshipToggleLabel');
+            if (dropshipLabel) {
+                dropshipLabel.textContent = 'Show All POs';
+                dropshipLabel.style.fontWeight = '400';
+                dropshipLabel.style.color = '#666';
+            }
             
             // Clear localStorage for filter states
             localStorage.removeItem('filter_showNotMyConcern');
             localStorage.removeItem('filter_showPendingBill');
             localStorage.removeItem('filter_showOnlyMissingUrls');
+            localStorage.removeItem('filter_showOnlyDropship');
             
             applyFilters();
         }
@@ -7685,7 +7882,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         }
 
         function restoreFilterStates() {
-            const filters = ['showNotMyConcern', 'showPendingBill', 'showOnlyMissingUrls'];
+            const filters = ['showNotMyConcern', 'showPendingBill', 'showOnlyMissingUrls', 'showOnlyDropship'];
             
             filters.forEach(filterId => {
                 const savedState = localStorage.getItem(`filter_${filterId}`);
@@ -7710,6 +7907,25 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 });
             }
         });
+
+        // Special handling for dropship toggle with label update
+        const dropshipToggle = document.getElementById('showOnlyDropship');
+        const dropshipLabel = document.getElementById('dropshipToggleLabel');
+        if (dropshipToggle && dropshipLabel) {
+            // Set initial label text based on restored state
+            dropshipLabel.textContent = dropshipToggle.checked ? 'Dropship Only' : 'Show All POs';
+            dropshipLabel.style.fontWeight = dropshipToggle.checked ? '600' : '400';
+            dropshipLabel.style.color = dropshipToggle.checked ? '#ff9800' : '#666';
+
+            // Add change listener
+            dropshipToggle.addEventListener('change', function() {
+                saveFilterState('showOnlyDropship', this.checked);
+                // Update label text and style
+                dropshipLabel.textContent = this.checked ? 'Dropship Only' : 'Show All POs';
+                dropshipLabel.style.fontWeight = this.checked ? '600' : '400';
+                dropshipLabel.style.color = this.checked ? '#ff9800' : '#666';
+            });
+        }
 
         // Apply filters after restoring state to show correct initial view
         setTimeout(() => {

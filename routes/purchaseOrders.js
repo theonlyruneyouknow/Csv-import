@@ -3049,6 +3049,38 @@ router.put('/:id/priority', async (req, res) => {
   }
 });
 
+// Update dropship status
+router.put('/:id/dropship', async (req, res) => {
+  try {
+    const { isDropship } = req.body;
+    
+    // Validate isDropship is a boolean
+    if (typeof isDropship !== 'boolean') {
+      return res.status(400).json({ error: 'isDropship must be a boolean value' });
+    }
+
+    const updated = await PurchaseOrder.findByIdAndUpdate(
+      req.params.id,
+      { isDropship: isDropship, updatedAt: new Date() },
+      { new: true }
+    );
+    
+    if (!updated) {
+      return res.status(404).json({ error: 'Purchase order not found' });
+    }
+    
+    console.log(`🚚 Updated dropship status for PO ${updated.poNumber}: ${isDropship ? 'YES' : 'NO'}`);
+    res.json({ 
+      success: true, 
+      isDropship: updated.isDropship,
+      poNumber: updated.poNumber
+    });
+  } catch (error) {
+    console.error('❌ Dropship update error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Route to identify and manage orphaned line items
 router.get('/orphaned-line-items', async (req, res) => {
   try {
