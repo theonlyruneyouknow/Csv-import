@@ -596,6 +596,94 @@
             font-size: 13px;
         }
 
+        /* Search History Dropdown */
+        .search-history-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            margin-top: -1px;
+        }
+
+        .search-history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 12px;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .clear-history-btn {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            transition: background 0.2s;
+        }
+
+        .clear-history-btn:hover {
+            background: #f8d7da;
+        }
+
+        .search-history-dropdown ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .search-history-dropdown li {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+            color: #333;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-history-dropdown li:last-child {
+            border-bottom: none;
+        }
+
+        .search-history-dropdown li:hover {
+            background: #f8f9fa;
+        }
+
+        .search-history-item-text {
+            flex: 1;
+        }
+
+        .search-history-item-icon {
+            color: #6c757d;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+
+        .search-history-empty {
+            padding: 20px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 13px;
+            font-style: italic;
+        }
+
         /* Action buttons in filter grid */
         .filter-group.filter-actions {
             display: flex;
@@ -3434,9 +3522,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             <!-- Filters Section -->
             <div class="filters" id="filtersSection">
-                <div class="filter-group">
+                <div class="filter-group" style="position: relative;">
                     <label>Search Vendor, PO#, or Tracking#</label>
-                    <input type="text" id="searchFilter" placeholder="Type to search...">
+                    <input type="text" id="searchFilter" placeholder="Type to search..." autocomplete="off">
+                    <div id="searchHistoryDropdown" class="search-history-dropdown" style="display: none;">
+                        <div class="search-history-header">
+                            <span>Recent Searches</span>
+                            <button onclick="clearSearchHistory()" class="clear-history-btn">Clear</button>
+                        </div>
+                        <ul id="searchHistoryList"></ul>
+                    </div>
                 </div>
 
                 <div class="filter-group">
@@ -3503,6 +3598,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
                         <input type="checkbox" id="showPendingBill" style="margin: 0;">
                         <span style="font-size: 12px;">Show billed POs</span>
+                    </label>
+                </div>
+
+                <div class="filter-group">
+                    <label style="margin-bottom: 5px;">Missing URLs Only</label>
+                    <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
+                        <input type="checkbox" id="showOnlyMissingUrls" style="margin: 0;">
+                        <span style="font-size: 12px;">Show POs without URLs</span>
                     </label>
                 </div>
 
@@ -3957,7 +4060,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             <div class="url-form">
                 <label for="urlInput">URL:</label>
-                <input type="url" id="urlInput" class="url-input" placeholder="https://example.com" autocomplete="off">
+                <input type="url" id="urlInput" class="url-input" placeholder="https://example.com">
 
                 <div class="url-actions">
                     <button id="urlRemoveBtn" class="url-remove-btn" onclick="removeUrl()" style="display: none;">Remove
@@ -6935,11 +7038,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const showNotMyConcern = showNotMyConcernCheckbox ? showNotMyConcernCheckbox.checked : false;
             const showPendingBillCheckbox = document.getElementById('showPendingBill');
             const showPendingBill = showPendingBillCheckbox ? showPendingBillCheckbox.checked : false;
+            const showOnlyMissingUrlsCheckbox = document.getElementById('showOnlyMissingUrls');
+            const showOnlyMissingUrls = showOnlyMissingUrlsCheckbox ? showOnlyMissingUrlsCheckbox.checked : false;
 
             const rows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]'); // Only main rows
             let visibleCount = 0;
             let hiddenNotMyConcernCount = 0;
             let hiddenPendingBillCount = 0;
+            let hiddenHasUrlCount = 0;
 
             rows.forEach(row => {
                 const poData = JSON.parse(row.dataset.po);
@@ -6949,6 +7055,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const nsStatus = poData.nsStatus || '';
                 const status = poData.status || '';
                 const notes = poData.notes || '';
+                const poUrl = poData.poUrl || '';
                 const index = row.dataset.index;
 
                 // Search filter - search vendor, PO number, or tracking number
@@ -6968,12 +7075,20 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const isPendingBill = nsStatus === 'Pending Bill';
                 const shouldShowPendingBill = !isPendingBill || showPendingBill;
 
+                // Missing URL filter - only show POs without URLs if checkbox is checked
+                const hasUrl = poUrl && poUrl.trim().length > 0;
+                const shouldShowBasedOnUrl = !showOnlyMissingUrls || !hasUrl;
+
                 if (isNotMyConcern && !showNotMyConcern) {
                     hiddenNotMyConcernCount++;
                 }
 
                 if (isPendingBill && !showPendingBill) {
                     hiddenPendingBillCount++;
+                }
+
+                if (showOnlyMissingUrls && hasUrl) {
+                    hiddenHasUrlCount++;
                 }
 
                 // Notes filter
@@ -6987,7 +7102,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 // Priority filter
                 const matchesPriority = priorityFilter === 'all' || (poData.priority && poData.priority.toString() === priorityFilter);
 
-                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill) {
+                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowBasedOnUrl) {
                     row.classList.remove('hidden');
                     // Also show the corresponding notes row if it's expanded
                     const notesRow = document.getElementById(`notes-row-${index}`);
@@ -7005,7 +7120,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
             });
 
-            console.log(`🔍 Filter results: ${visibleCount} visible, ${hiddenNotMyConcernCount} "Not my concern" hidden, ${hiddenPendingBillCount} "Pending Bill" hidden`);
+            console.log(`🔍 Filter results: ${visibleCount} visible, ${hiddenNotMyConcernCount} "Not my concern" hidden, ${hiddenPendingBillCount} "Pending Bill" hidden, ${hiddenHasUrlCount} with URLs hidden`);
 
             // Update results info
             const totalCount = rows.length;
@@ -7154,8 +7269,127 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById('priorityFilter').value = 'all';
             document.getElementById('showNotMyConcern').checked = false;
             document.getElementById('showPendingBill').checked = false;
+            document.getElementById('showOnlyMissingUrls').checked = false;
             applyFilters();
         }
+
+        // ============ SEARCH HISTORY FUNCTIONALITY ============
+        const SEARCH_HISTORY_KEY = 'po_search_history';
+        const MAX_HISTORY_ITEMS = 10;
+
+        function getSearchHistory() {
+            try {
+                const history = localStorage.getItem(SEARCH_HISTORY_KEY);
+                return history ? JSON.parse(history) : [];
+            } catch (e) {
+                console.error('Error reading search history:', e);
+                return [];
+            }
+        }
+
+        function saveSearchHistory(searchTerm) {
+            if (!searchTerm || searchTerm.trim() === '') return;
+            
+            try {
+                let history = getSearchHistory();
+                
+                // Remove if already exists (to move to top)
+                history = history.filter(item => item.toLowerCase() !== searchTerm.toLowerCase());
+                
+                // Add to beginning
+                history.unshift(searchTerm);
+                
+                // Keep only last MAX_HISTORY_ITEMS
+                history = history.slice(0, MAX_HISTORY_ITEMS);
+                
+                localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
+            } catch (e) {
+                console.error('Error saving search history:', e);
+            }
+        }
+
+        function clearSearchHistory() {
+            if (confirm('Clear all search history?')) {
+                localStorage.removeItem(SEARCH_HISTORY_KEY);
+                updateSearchHistoryDropdown();
+            }
+        }
+
+        function updateSearchHistoryDropdown() {
+            const history = getSearchHistory();
+            const list = document.getElementById('searchHistoryList');
+            
+            if (history.length === 0) {
+                list.innerHTML = '<li class="search-history-empty">No recent searches</li>';
+                return;
+            }
+            
+            list.innerHTML = history.map(term => `
+                <li onclick="selectSearchHistory('${term.replace(/'/g, "\\'")}')">
+                    <span class="search-history-item-text">${escapeHtml(term)}</span>
+                    <span class="search-history-item-icon">🔍</span>
+                </li>
+            `).join('');
+        }
+
+        function selectSearchHistory(term) {
+            document.getElementById('searchFilter').value = term;
+            hideSearchHistoryDropdown();
+            applyFilters();
+        }
+
+        function showSearchHistoryDropdown() {
+            updateSearchHistoryDropdown();
+            document.getElementById('searchHistoryDropdown').style.display = 'block';
+        }
+
+        function hideSearchHistoryDropdown() {
+            document.getElementById('searchHistoryDropdown').style.display = 'none';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Search input event listeners
+        const searchInput = document.getElementById('searchFilter');
+        
+        searchInput.addEventListener('focus', showSearchHistoryDropdown);
+        
+        searchInput.addEventListener('blur', () => {
+            // Delay to allow clicking on dropdown items
+            setTimeout(hideSearchHistoryDropdown, 200);
+        });
+
+        // Save search when user types and pauses (debounced)
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const value = this.value.trim();
+                if (value.length >= 2) {  // Only save searches with 2+ characters
+                    saveSearchHistory(value);
+                }
+            }, 1000);  // Save 1 second after user stops typing
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('searchHistoryDropdown');
+            const searchInput = document.getElementById('searchFilter');
+            
+            // Only close if clicking outside both the dropdown and the search input
+            if (dropdown && searchInput && 
+                !dropdown.contains(event.target) && 
+                event.target !== searchInput &&
+                !searchInput.contains(event.target)) {
+                hideSearchHistoryDropdown();
+            }
+        });
+
+        // ============ END SEARCH HISTORY FUNCTIONALITY ============
 
         // Event listeners for filters
         document.getElementById('searchFilter').addEventListener('input', applyFilters);
@@ -7165,6 +7399,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         document.getElementById('priorityFilter').addEventListener('change', applyFilters);
         document.getElementById('showNotMyConcern').addEventListener('change', applyFilters);
         document.getElementById('showPendingBill').addEventListener('change', applyFilters);
+        document.getElementById('showOnlyMissingUrls').addEventListener('change', applyFilters);
 
         // Event listeners for sorting
         document.querySelectorAll('th.sortable').forEach(header => {

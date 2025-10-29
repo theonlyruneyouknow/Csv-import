@@ -2919,9 +2919,21 @@
 
                 if (response.ok) {
                     console.log('✅ Line item updated successfully');
-                    alert('Line item updated successfully!');
-                    closeEditModal();
-                    location.reload();
+                    
+                    // Show success message briefly
+                    const modal = document.getElementById('editLineItemModal');
+                    modal.innerHTML = `
+                        <div style="padding: 40px; text-align: center;">
+                            <div style="font-size: 48px; color: #28a745; margin-bottom: 15px;">✓</div>
+                            <h3 style="color: #28a745; margin: 0;">Updated Successfully!</h3>
+                            <p style="color: #6c757d; margin-top: 10px;">Refreshing...</p>
+                        </div>
+                    `;
+                    
+                    // Reload after brief delay to show success message
+                    setTimeout(() => {
+                        location.reload();
+                    }, 800);
                 } else {
                     console.error('❌ Failed to update line item:', data.error);
                     alert('Failed to update line item: ' + (data.error || 'Unknown error'));
