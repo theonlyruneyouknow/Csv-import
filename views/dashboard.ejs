@@ -7270,8 +7270,60 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById('showNotMyConcern').checked = false;
             document.getElementById('showPendingBill').checked = false;
             document.getElementById('showOnlyMissingUrls').checked = false;
+            
+            // Clear localStorage for filter states
+            localStorage.removeItem('filter_showNotMyConcern');
+            localStorage.removeItem('filter_showPendingBill');
+            localStorage.removeItem('filter_showOnlyMissingUrls');
+            
             applyFilters();
         }
+
+        // ============ FILTER STATE PERSISTENCE ============
+        // Save and restore filter checkbox states using localStorage
+        
+        function saveFilterState(filterId, checked) {
+            try {
+                localStorage.setItem(`filter_${filterId}`, checked.toString());
+            } catch (e) {
+                console.error('Error saving filter state:', e);
+            }
+        }
+
+        function restoreFilterStates() {
+            const filters = ['showNotMyConcern', 'showPendingBill', 'showOnlyMissingUrls'];
+            
+            filters.forEach(filterId => {
+                const savedState = localStorage.getItem(`filter_${filterId}`);
+                if (savedState !== null) {
+                    const checkbox = document.getElementById(filterId);
+                    if (checkbox) {
+                        checkbox.checked = savedState === 'true';
+                    }
+                }
+            });
+        }
+
+        // Restore filter states on page load
+        restoreFilterStates();
+
+        // Add event listeners to save state when checkboxes change
+        ['showNotMyConcern', 'showPendingBill', 'showOnlyMissingUrls'].forEach(filterId => {
+            const checkbox = document.getElementById(filterId);
+            if (checkbox) {
+                checkbox.addEventListener('change', function() {
+                    saveFilterState(filterId, this.checked);
+                });
+            }
+        });
+
+        // Apply filters after restoring state to show correct initial view
+        setTimeout(() => {
+            console.log('🔄 Applying filters with restored state');
+            applyFilters();
+        }, 100);
+
+        // ============ END FILTER STATE PERSISTENCE ============
 
         // ============ SEARCH HISTORY FUNCTIONALITY ============
         const SEARCH_HISTORY_KEY = 'po_search_history';
