@@ -495,8 +495,186 @@
             background: #545b62;
         }
 
+        .netsuite-import-modal .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .netsuite-import-modal .btn-info:hover {
+            background: #138496;
+        }
+
         .import-mode-options {
             margin-top: 10px;
+        }
+
+        /* Preview Modal Styles */
+        .preview-modal-content {
+            max-height: 600px;
+            overflow-y: auto;
+            overflow-x: auto;
+            margin-bottom: 15px;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+
+        .preview-table th,
+        .preview-table td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+        }
+
+        .preview-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .preview-table tr.new-item {
+            background: #d4edda;
+        }
+
+        .preview-table tr.updated-item {
+            background: #fff3cd;
+        }
+
+        .preview-table tr.removed-item {
+            background: #f8d7da;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .preview-table tr.unchanged-item {
+            background: #f8f9fa;
+        }
+
+        .preview-diff {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .preview-old-value {
+            color: #dc3545;
+            text-decoration: line-through;
+            font-size: 12px;
+        }
+
+        .preview-new-value {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .preview-legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        .preview-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .preview-legend-box {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        .preview-warning {
+            padding: 12px 15px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .preview-warning h4 {
+            margin: 0 0 8px 0;
+            color: #856404;
+            font-size: 14px;
+        }
+
+        .preview-warning ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #856404;
+        }
+
+        .preview-error {
+            padding: 12px 15px;
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .preview-error h4 {
+            margin: 0 0 8px 0;
+            color: #721c24;
+            font-size: 14px;
+        }
+
+        .preview-error ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #721c24;
+        }
+
+        .preview-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .preview-summary-item {
+            padding: 12px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        .preview-summary-item strong {
+            display: block;
+            color: #6c757d;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .preview-summary-item .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .preview-summary-item.new .value {
+            color: #28a745;
+        }
+
+        .preview-summary-item.updated .value {
+            color: #ffc107;
+        }
+
+        .preview-summary-item.removed .value {
+            color: #dc3545;
         }
 
         .checkbox-label {
@@ -3370,12 +3548,12 @@
 
         <!-- NetSuite Import Modal -->
         <div id="netsuiteImportModal" class="modal" style="display: none;">
-            <div class="modal-content netsuite-import-modal">
-                <div class="modal-header">
+            <div class="modal-content netsuite-import-modal" style="max-height: 90vh; display: flex; flex-direction: column;">
+                <div class="modal-header" style="flex-shrink: 0;">
                     <h3>Import NetSuite PO Form Data</h3>
                     <span class="close" onclick="closeNetSuiteImportModal()">&times;</span>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="flex: 1; overflow-y: auto; overflow-x: hidden; padding: 20px;">
                     <p>Paste your NetSuite PO form data below. The system will automatically parse the line items and
                         associate them with the corresponding purchase order.</p>
 
@@ -3436,10 +3614,38 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             </p>
                         </div>
                     </div>
+                </div>
+                <div class="form-actions" style="flex-shrink: 0; border-top: 1px solid #dee2e6; padding: 15px 20px; background: #f8f9fa; margin: 0;">
+                    <button class="btn btn-secondary" onclick="closeNetSuiteImportModal()">Cancel</button>
+                    <button class="btn btn-info" onclick="previewNetSuiteImport()" style="background: #17a2b8; color: white;">📋 Preview Changes</button>
+                    <button class="btn btn-primary" onclick="processNetSuiteImport()">Import Line Items</button>
+                </div>
+            </div>
+        </div>
 
-                    <div class="form-actions">
-                        <button class="btn btn-secondary" onclick="closeNetSuiteImportModal()">Cancel</button>
-                        <button class="btn btn-primary" onclick="processNetSuiteImport()">Import Line Items</button>
+        <!-- NetSuite Import Preview Modal -->
+        <div id="netsuitePreviewModal" class="modal" style="display: none;">
+            <div class="modal-content" style="max-width: 1400px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+                <div class="modal-header">
+                    <h3>📋 Preview Import Changes</h3>
+                    <span class="close" onclick="closePreviewModal()">&times;</span>
+                </div>
+                <div class="modal-body" style="flex: 1; overflow: hidden; display: flex; flex-direction: column;">
+                    <div id="previewSummary" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; flex-shrink: 0;">
+                        <!-- Summary will be populated by JavaScript -->
+                    </div>
+                    
+                    <div id="previewWarnings" style="margin-bottom: 20px; flex-shrink: 0;">
+                        <!-- Warnings will be populated if there are issues -->
+                    </div>
+
+                    <div id="previewContent" class="preview-modal-content">
+                        <!-- Preview table will be populated by JavaScript -->
+                    </div>
+
+                    <div class="form-actions" style="margin-top: 20px; flex-shrink: 0; border-top: 1px solid #dee2e6; padding-top: 15px;">
+                        <button class="btn btn-secondary" onclick="closePreviewModal()">Cancel</button>
+                        <button class="btn btn-primary" onclick="confirmAndImport()">✓ Confirm & Import</button>
                     </div>
                 </div>
             </div>
@@ -4491,6 +4697,194 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 console.error('Import error:', error);
                 alert('Import failed: Network error');
             }
+        }
+
+        // Preview Import Functions
+        let previewData = null; // Store preview data for confirmation
+
+        async function previewNetSuiteImport() {
+            const netsuiteData = document.getElementById('netsuiteData').value.trim();
+            const targetPOId = document.getElementById('targetPO').value;
+            const addToExisting = document.getElementById('addToExisting').checked;
+
+            if (!netsuiteData) {
+                alert('Please paste the NetSuite PO form data');
+                return;
+            }
+
+            try {
+                // Call preview API endpoint
+                const response = await fetch('/api/preview-netsuite-import', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        data: netsuiteData,
+                        targetPOId: targetPOId,
+                        addToExisting: addToExisting
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    previewData = result;
+                    displayPreview(result);
+                    document.getElementById('netsuitePreviewModal').style.display = 'block';
+                } else {
+                    alert(`Preview failed: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Preview error:', error);
+                alert('Preview failed: Network error');
+            }
+        }
+
+        function displayPreview(data) {
+            // Display summary
+            const summaryHtml = `
+                <div class="preview-summary-grid">
+                    <div class="preview-summary-item new">
+                        <strong>New Items</strong>
+                        <div class="value">${data.summary.newItems || 0}</div>
+                    </div>
+                    <div class="preview-summary-item updated">
+                        <strong>Updated Items</strong>
+                        <div class="value">${data.summary.updatedItems || 0}</div>
+                    </div>
+                    <div class="preview-summary-item removed">
+                        <strong>Removed Items</strong>
+                        <div class="value">${data.summary.removedItems || 0}</div>
+                    </div>
+                    <div class="preview-summary-item">
+                        <strong>Unchanged Items</strong>
+                        <div class="value">${data.summary.unchangedItems || 0}</div>
+                    </div>
+                    <div class="preview-summary-item">
+                        <strong>Total Items</strong>
+                        <div class="value">${data.summary.totalItems || 0}</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('previewSummary').innerHTML = summaryHtml;
+
+            // Display warnings/errors
+            let warningsHtml = '';
+            if (data.warnings && data.warnings.length > 0) {
+                warningsHtml += '<div class="preview-warning"><h4>⚠️ Warnings:</h4><ul>';
+                data.warnings.forEach(warning => {
+                    warningsHtml += `<li>${warning}</li>`;
+                });
+                warningsHtml += '</ul></div>';
+            }
+            if (data.errors && data.errors.length > 0) {
+                warningsHtml += '<div class="preview-error"><h4>❌ Errors:</h4><ul>';
+                data.errors.forEach(error => {
+                    warningsHtml += `<li>${error}</li>`;
+                });
+                warningsHtml += '</ul></div>';
+            }
+            document.getElementById('previewWarnings').innerHTML = warningsHtml;
+
+            // Display legend
+            const legendHtml = `
+                <div class="preview-legend">
+                    <div class="preview-legend-item">
+                        <div class="preview-legend-box" style="background: #d4edda;"></div>
+                        <span>New Item</span>
+                    </div>
+                    <div class="preview-legend-item">
+                        <div class="preview-legend-box" style="background: #fff3cd;"></div>
+                        <span>Updated Item</span>
+                    </div>
+                    <div class="preview-legend-item">
+                        <div class="preview-legend-box" style="background: #f8d7da;"></div>
+                        <span>Removed Item</span>
+                    </div>
+                    <div class="preview-legend-item">
+                        <div class="preview-legend-box" style="background: #f8f9fa;"></div>
+                        <span>Unchanged Item</span>
+                    </div>
+                </div>
+            `;
+
+            // Display preview table
+            let tableHtml = legendHtml + '<table class="preview-table"><thead><tr>';
+            tableHtml += '<th>Status</th><th>Item</th><th>Description</th><th>Quantity</th><th>Received</th><th>Billed</th><th>Rate</th><th>Changes</th>';
+            tableHtml += '</tr></thead><tbody>';
+
+            data.items.forEach(item => {
+                const rowClass = item.changeType || 'unchanged-item';
+                const statusIcon = {
+                    'new-item': '🆕',
+                    'updated-item': '📝',
+                    'removed-item': '🗑️',
+                    'unchanged-item': '✓'
+                }[rowClass] || '';
+
+                tableHtml += `<tr class="${rowClass}">`;
+                tableHtml += `<td>${statusIcon}</td>`;
+                tableHtml += `<td>${item.item || ''}</td>`;
+                tableHtml += `<td>${item.memo || item.description || ''}</td>`;
+                tableHtml += `<td>${formatQuantityChange(item, 'quantityExpected')}</td>`;
+                tableHtml += `<td>${formatQuantityChange(item, 'quantityReceived')}</td>`;
+                tableHtml += `<td>${formatQuantityChange(item, 'quantityBilled')}</td>`;
+                tableHtml += `<td>${formatPriceChange(item, 'rate')}</td>`;
+                tableHtml += `<td>${item.changes || ''}</td>`;
+                tableHtml += '</tr>';
+            });
+
+            tableHtml += '</tbody></table>';
+            document.getElementById('previewContent').innerHTML = tableHtml;
+        }
+
+        function formatQuantityChange(item, field) {
+            if (item.changeType === 'new-item') {
+                return `<span class="preview-new-value">${item[field] || 0}</span>`;
+            } else if (item.changes && item.changes.includes(field)) {
+                return `
+                    <div class="preview-diff">
+                        <span class="preview-old-value">${item.old && item.old[field] !== undefined ? item.old[field] : 0}</span>
+                        <span>→</span>
+                        <span class="preview-new-value">${item[field] || 0}</span>
+                    </div>
+                `;
+            }
+            return item[field] || 0;
+        }
+
+        function formatPriceChange(item, field) {
+            if (item.changeType === 'new-item') {
+                return `<span class="preview-new-value">$${(item[field] || 0).toFixed(2)}</span>`;
+            } else if (item.changes && item.changes.includes(field)) {
+                return `
+                    <div class="preview-diff">
+                        <span class="preview-old-value">$${(item.old && item.old[field] !== undefined ? item.old[field] : 0).toFixed(2)}</span>
+                        <span>→</span>
+                        <span class="preview-new-value">$${(item[field] || 0).toFixed(2)}</span>
+                    </div>
+                `;
+            }
+            return `$${(item[field] || 0).toFixed(2)}`;
+        }
+
+        function closePreviewModal() {
+            document.getElementById('netsuitePreviewModal').style.display = 'none';
+            previewData = null;
+        }
+
+        async function confirmAndImport() {
+            if (!previewData) {
+                alert('No preview data available');
+                return;
+            }
+
+            // Close preview modal
+            closePreviewModal();
+
+            // Process the actual import
+            await processNetSuiteImport();
         }
 
         // Line Items Count Button Click Handler

@@ -3334,6 +3334,217 @@ router.get('/export-orphaned-items', async (req, res) => {
 });
 
 // NetSuite PO Form Import Route
+// Preview NetSuite import - parse and analyze without saving
+router.post('/preview-netsuite-import', async (req, res) => {
+  console.log('👀 NetSuite preview route called');
+  try {
+    const { data, targetPOId, addToExisting } = req.body;
+
+    if (!data || !data.trim()) {
+      return res.status(400).json({ error: 'No data provided' });
+    }
+
+    // Parse the NetSuite data
+    const lines = data.trim().split('\n');
+    if (lines.length < 2) {
+      return res.status(400).json({ error: 'Invalid data format - need header and at least one data row' });
+    }
+
+    // Parse headers (same logic as import)
+    let headers = [];
+    let dataStartIndex = 1;
+
+    if (lines[0].includes('\t')) {
+      headers = lines[0].split('\t');
+      dataStartIndex = 1;
+    } else {
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].includes('\t') && lines[i].split('\t').length > 3) {
+          headers = lines.slice(0, i);
+          dataStartIndex = i;
+          break;
+        }
+      }
+    }
+
+    // Get column indices
+    const getColumnIndex = (headerName) => {
+      return headers.findIndex(h => h.toLowerCase().includes(headerName.toLowerCase()));
+    };
+
+    const itemIndex = getColumnIndex('item');
+    const quantityIndex = getColumnIndex('quantity');
+    const descriptionIndex = getColumnIndex('description');
+    const vendorDescIndex = getColumnIndex('vendor desc');
+    const receivedIndex = getColumnIndex('received');
+    const billedIndex = getColumnIndex('billed');
+    const rateIndex = getColumnIndex('rate');
+    const unitsIndex = getColumnIndex('units');
+
+    // Get target PO if specified
+    let targetPO = null;
+    let currentLineItems = [];
+    if (targetPOId) {
+      targetPO = await PurchaseOrder.findById(targetPOId).populate('lineItems');
+      if (targetPO && targetPO.lineItems) {
+        currentLineItems = targetPO.lineItems;
+      }
+    }
+
+    // Parse new items from import data
+    const newItems = [];
+    const warnings = [];
+    const errors = [];
+
+    for (let i = dataStartIndex; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line || line === 'History') continue;
+
+      const row = line.split('\t');
+      const itemCode = row[itemIndex] || '';
+      const quantity = parseFloat(row[quantityIndex]) || 0;
+      const description = row[descriptionIndex] || '';
+      const vendorDesc = row[vendorDescIndex] || '';
+      const received = parseFloat(row[receivedIndex]) || 0;
+      const billed = parseFloat(row[billedIndex]) || 0;
+      const rate = parseFloat(row[rateIndex]?.replace(/,/g, '') || '0') || 0;
+      const units = row[unitsIndex] || '';
+
+      if (!itemCode && !description) {
+        warnings.push(`Line ${i + 1}: Skipped - missing item code and description`);
+        continue;
+      }
+
+      newItems.push({
+        item: itemCode,
+        memo: vendorDesc || description,
+        description: description,
+        quantityExpected: quantity,
+        quantityReceived: received,
+        quantityBilled: billed,
+        rate: rate,
+        units: units,
+        lineNumber: i + 1
+      });
+    }
+
+    // Compare with existing items
+    const previewItems = [];
+    const itemMap = new Map();
+    
+    // Add current items to map
+    currentLineItems.forEach(item => {
+      itemMap.set(item.item || item.memo, { ...item.toObject(), isExisting: true });
+    });
+
+    // Process new items
+    newItems.forEach(newItem => {
+      const key = newItem.item || newItem.memo;
+      const existingItem = itemMap.get(key);
+
+      if (!existingItem) {
+        // New item
+        previewItems.push({
+          ...newItem,
+          changeType: 'new-item',
+          changes: 'New item will be added'
+        });
+      } else if (!addToExisting) {
+        // Check for changes
+        const changes = [];
+        if (existingItem.quantityExpected !== newItem.quantityExpected) {
+          changes.push('quantityExpected');
+        }
+        if (existingItem.quantityReceived !== newItem.quantityReceived) {
+          changes.push('quantityReceived');
+        }
+        if (existingItem.rate !== newItem.rate) {
+          changes.push('rate');
+        }
+
+        if (changes.length > 0) {
+          previewItems.push({
+            ...newItem,
+            old: existingItem,
+            changeType: 'updated-item',
+            changes: changes.join(', ')
+          });
+        } else {
+          previewItems.push({
+            ...newItem,
+            changeType: 'unchanged-item',
+            changes: ''
+          });
+        }
+        itemMap.delete(key); // Mark as processed
+      } else {
+        // Adding to existing
+        previewItems.push({
+          ...newItem,
+          changeType: 'new-item',
+          changes: 'Will be added to existing items'
+        });
+      }
+    });
+
+    // Remaining items in map are being removed (if not addToExisting)
+    if (!addToExisting) {
+      itemMap.forEach((item, key) => {
+        if (item.isExisting) {
+          previewItems.push({
+            item: item.item,
+            memo: item.memo,
+            description: item.description,
+            quantityExpected: item.quantityExpected,
+            quantityReceived: item.quantityReceived,
+            quantityBilled: item.quantityBilled,
+            rate: item.rate,
+            changeType: 'removed-item',
+            changes: 'Will be removed (not in new data)'
+          });
+        }
+      });
+    }
+
+    // Generate summary
+    const summary = {
+      newItems: previewItems.filter(i => i.changeType === 'new-item').length,
+      updatedItems: previewItems.filter(i => i.changeType === 'updated-item').length,
+      removedItems: previewItems.filter(i => i.changeType === 'removed-item').length,
+      unchangedItems: previewItems.filter(i => i.changeType === 'unchanged-item').length,
+      totalItems: previewItems.length
+    };
+
+    // Add warning if no target PO
+    if (!targetPO) {
+      warnings.push('No target PO specified - items will be imported to POs based on vendor name matching');
+    }
+
+    // Add warning about history mismatch
+    if (targetPO && !addToExisting) {
+      const currentCount = currentLineItems.length;
+      const newCount = newItems.length;
+      if (currentCount !== newCount) {
+        warnings.push(`History count mismatch: Current has ${currentCount} items, import has ${newCount} items`);
+      }
+    }
+
+    res.json({
+      success: true,
+      summary,
+      items: previewItems,
+      warnings,
+      errors,
+      targetPO: targetPO ? { poNumber: targetPO.poNumber, vendor: targetPO.vendor } : null,
+      mode: addToExisting ? 'add' : 'replace'
+    });
+
+  } catch (error) {
+    console.error('Preview error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.post('/import-netsuite', async (req, res) => {
   console.log('🏢 NetSuite import route called with body:', req.body);
   try {
