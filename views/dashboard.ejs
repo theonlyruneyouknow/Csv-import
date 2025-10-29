@@ -4014,11 +4014,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                                 📎
                                                             </button>
                                                             <button
-                                                                class="dropship-toggle-btn <%= po.isDropship ? 'is-dropship' : '' %>"
+                                                                class="dropship-toggle-btn <%= (po.isDropship || (po.location && po.location.toLowerCase().includes('dropship'))) ? 'is-dropship' : '' %>"
                                                                 data-id="<%- po._id %>"
                                                                 data-po="<%- po.poNumber %>"
-                                                                data-is-dropship="<%= po.isDropship ? 'true' : 'false' %>"
-                                                                title="<%= po.isDropship ? 'Dropship PO - Click to unmark' : 'Click to mark as dropship' %>">
+                                                                data-is-dropship="<%= (po.isDropship || (po.location && po.location.toLowerCase().includes('dropship'))) ? 'true' : 'false' %>"
+                                                                title="<%= (po.isDropship || (po.location && po.location.toLowerCase().includes('dropship'))) ? 'Dropship PO - Click to unmark' : 'Click to mark as dropship' %>">
                                                                 🚚
                                                             </button>
                                             </div>
@@ -7652,8 +7652,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const hasUrl = poUrl && poUrl.trim().length > 0;
                 const shouldShowBasedOnUrl = !showOnlyMissingUrls || !hasUrl;
 
-                // Dropship filter - only show dropship POs if checkbox is checked
-                const isDropship = poData.isDropship === true;
+                // Dropship filter - check both location field and isDropship flag
+                const location = (poData.location || '').toLowerCase();
+                const isDropshipByLocation = location.includes('dropship');
+                const isDropshipByFlag = poData.isDropship === true;
+                const isDropship = isDropshipByLocation || isDropshipByFlag;
                 const shouldShowBasedOnDropship = !showOnlyDropship || isDropship;
 
                 if (isNotMyConcern && !showNotMyConcern) {
