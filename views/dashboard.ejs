@@ -3909,6 +3909,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 </div>
 
                 <div class="filter-group">
+                    <label style="margin-bottom: 5px;">No Line Items</label>
+                    <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
+                        <input type="checkbox" id="showOnlyNoLineItems" style="margin: 0;">
+                        <span style="font-size: 12px;">Show POs without line items</span>
+                    </label>
+                </div>
+
+                <div class="filter-group">
                     <label style="margin-bottom: 8px; display: block;">🚚 Dropship Filter</label>
                     <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
                         <label class="toggle-switch">
@@ -7610,6 +7618,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const showPendingBill = showPendingBillCheckbox ? showPendingBillCheckbox.checked : false;
             const showOnlyMissingUrlsCheckbox = document.getElementById('showOnlyMissingUrls');
             const showOnlyMissingUrls = showOnlyMissingUrlsCheckbox ? showOnlyMissingUrlsCheckbox.checked : false;
+            const showOnlyNoLineItemsCheckbox = document.getElementById('showOnlyNoLineItems');
+            const showOnlyNoLineItems = showOnlyNoLineItemsCheckbox ? showOnlyNoLineItemsCheckbox.checked : false;
             const showOnlyDropshipCheckbox = document.getElementById('showOnlyDropship');
             const showOnlyDropship = showOnlyDropshipCheckbox ? showOnlyDropshipCheckbox.checked : false;
 
@@ -7618,6 +7628,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             let hiddenNotMyConcernCount = 0;
             let hiddenPendingBillCount = 0;
             let hiddenHasUrlCount = 0;
+            let hiddenWithLineItemsCount = 0;
             let hiddenNonDropshipCount = 0;
 
             rows.forEach(row => {
@@ -7652,6 +7663,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const hasUrl = poUrl && poUrl.trim().length > 0;
                 const shouldShowBasedOnUrl = !showOnlyMissingUrls || !hasUrl;
 
+                // No line items filter - only show POs without line items if checkbox is checked
+                const hasLineItems = poData.lineItems && poData.lineItems.length > 0;
+                const shouldShowBasedOnLineItems = !showOnlyNoLineItems || !hasLineItems;
+
                 // Dropship filter - check both location field and isDropship flag
                 const location = (poData.location || '').toLowerCase();
                 const isDropshipByLocation = location.includes('dropship');
@@ -7671,6 +7686,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     hiddenHasUrlCount++;
                 }
 
+                if (showOnlyNoLineItems && hasLineItems) {
+                    hiddenWithLineItemsCount++;
+                }
+
                 if (showOnlyDropship && !isDropship) {
                     hiddenNonDropshipCount++;
                 }
@@ -7686,7 +7705,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 // Priority filter
                 const matchesPriority = priorityFilter === 'all' || (poData.priority && poData.priority.toString() === priorityFilter);
 
-                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowBasedOnUrl && shouldShowBasedOnDropship) {
+                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowBasedOnUrl && shouldShowBasedOnLineItems && shouldShowBasedOnDropship) {
                     row.classList.remove('hidden');
                     // Also show the corresponding notes row if it's expanded
                     const notesRow = document.getElementById(`notes-row-${index}`);
@@ -7704,7 +7723,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
             });
 
-            console.log(`🔍 Filter results: ${visibleCount} visible, ${hiddenNotMyConcernCount} "Not my concern" hidden, ${hiddenPendingBillCount} "Pending Bill" hidden, ${hiddenHasUrlCount} with URLs hidden, ${hiddenNonDropshipCount} non-dropship hidden`);
+            console.log(`🔍 Filter results: ${visibleCount} visible, ${hiddenNotMyConcernCount} "Not my concern" hidden, ${hiddenPendingBillCount} "Pending Bill" hidden, ${hiddenHasUrlCount} with URLs hidden, ${hiddenWithLineItemsCount} with line items hidden, ${hiddenNonDropshipCount} non-dropship hidden`);
 
             // Update results info
             const totalCount = rows.length;
@@ -7854,6 +7873,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById('showNotMyConcern').checked = false;
             document.getElementById('showPendingBill').checked = false;
             document.getElementById('showOnlyMissingUrls').checked = false;
+            document.getElementById('showOnlyNoLineItems').checked = false;
             document.getElementById('showOnlyDropship').checked = false;
             
             // Reset dropship toggle label
@@ -8065,6 +8085,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         document.getElementById('showNotMyConcern').addEventListener('change', applyFilters);
         document.getElementById('showPendingBill').addEventListener('change', applyFilters);
         document.getElementById('showOnlyMissingUrls').addEventListener('change', applyFilters);
+        document.getElementById('showOnlyNoLineItems').addEventListener('change', applyFilters);
 
         // Event listeners for sorting
         document.querySelectorAll('th.sortable').forEach(header => {
