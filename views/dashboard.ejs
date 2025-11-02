@@ -426,8 +426,12 @@
 
         /* NetSuite Import Modal Styles */
         .netsuite-import-modal {
-            max-width: 800px;
+            max-width: 900px;
             width: 90%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         .netsuite-import-modal textarea {
@@ -511,10 +515,21 @@
 
         /* Preview Modal Styles */
         .preview-modal-content {
-            max-height: 600px;
+            max-height: calc(90vh - 300px);
+            min-height: 300px;
             overflow-y: auto;
             overflow-x: auto;
             margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+
+        /* Ensure modal body can scroll properly */
+        #netsuitePreviewModal .modal-body {
+            overflow-y: auto;
+            overflow-x: hidden;
         }
 
         .preview-table {
