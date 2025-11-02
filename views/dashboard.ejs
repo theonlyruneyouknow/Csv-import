@@ -515,8 +515,7 @@
 
         /* Preview Modal Styles */
         .preview-modal-content {
-            max-height: calc(90vh - 300px);
-            min-height: 300px;
+            flex: 1;
             overflow-y: auto;
             overflow-x: auto;
             margin-bottom: 15px;
@@ -526,10 +525,9 @@
             background: #f8f9fa;
         }
 
-        /* Ensure modal body can scroll properly */
+        /* Ensure modal body stays as flex container */
         #netsuitePreviewModal .modal-body {
-            overflow-y: auto;
-            overflow-x: hidden;
+            overflow: hidden !important;
         }
 
         .preview-table {
