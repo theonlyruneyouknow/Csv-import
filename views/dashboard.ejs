@@ -7954,6 +7954,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             localStorage.removeItem('filter_showPendingBill');
             localStorage.removeItem('filter_showOnlyMissingUrls');
             localStorage.removeItem('filter_showOnlyDropship');
+            localStorage.removeItem('filter_showOnlyNoLineItems');
 
             applyFilters();
         }
@@ -7970,7 +7971,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         }
 
         function restoreFilterStates() {
-            const filters = ['showNotMyConcern', 'showPendingBill', 'showOnlyMissingUrls', 'showOnlyDropship'];
+            const filters = ['showNotMyConcern', 'showPendingBill', 'showOnlyMissingUrls', 'showOnlyDropship', 'showOnlyNoLineItems'];
 
             filters.forEach(filterId => {
                 const savedState = localStorage.getItem(`filter_${filterId}`);
@@ -7987,7 +7988,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         restoreFilterStates();
 
         // Add event listeners to save state when checkboxes change
-        ['showNotMyConcern', 'showPendingBill', 'showOnlyMissingUrls'].forEach(filterId => {
+        ['showNotMyConcern', 'showPendingBill', 'showOnlyMissingUrls', 'showOnlyNoLineItems'].forEach(filterId => {
             const checkbox = document.getElementById(filterId);
             if (checkbox) {
                 checkbox.addEventListener('change', function () {
