@@ -428,7 +428,7 @@
         .netsuite-import-modal {
             max-width: 900px;
             width: 90%;
-            max-height: 90vh;
+            max-height: 85vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -518,7 +518,7 @@
             flex: 1;
             overflow-y: auto;
             overflow-x: auto;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             padding: 10px;
             border: 1px solid #dee2e6;
             border-radius: 4px;
@@ -3764,18 +3764,18 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         <!-- NetSuite Import Preview Modal -->
         <div id="netsuitePreviewModal" class="modal" style="display: none;">
             <div class="modal-content"
-                style="max-width: 1400px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
-                <div class="modal-header">
-                    <h3>📋 Preview Import Changes</h3>
+                style="max-width: 1400px; width: 95%; max-height: 85vh; display: flex; flex-direction: column;">
+                <div class="modal-header" style="padding: 12px 20px;">
+                    <h3 style="margin: 0; font-size: 18px;">📋 Preview Import Changes</h3>
                     <span class="close" onclick="closePreviewModal()">&times;</span>
                 </div>
-                <div class="modal-body" style="flex: 1; overflow: hidden; display: flex; flex-direction: column;">
+                <div class="modal-body" style="flex: 1; overflow: hidden; display: flex; flex-direction: column; padding: 15px 20px;">
                     <div id="previewSummary"
-                        style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; flex-shrink: 0;">
+                        style="margin-bottom: 12px; padding: 10px; background: #f8f9fa; border-radius: 4px; flex-shrink: 0;">
                         <!-- Summary will be populated by JavaScript -->
                     </div>
 
-                    <div id="previewWarnings" style="margin-bottom: 20px; flex-shrink: 0;">
+                    <div id="previewWarnings" style="margin-bottom: 12px; flex-shrink: 0;">
                         <!-- Warnings will be populated if there are issues -->
                     </div>
 
@@ -3784,7 +3784,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     </div>
 
                     <div class="form-actions"
-                        style="margin-top: 20px; flex-shrink: 0; border-top: 1px solid #dee2e6; padding-top: 15px;">
+                        style="margin-top: 12px; flex-shrink: 0; border-top: 1px solid #dee2e6; padding-top: 12px;">
                         <button class="btn btn-secondary" onclick="closePreviewModal()">Cancel</button>
                         <button class="btn btn-primary" onclick="confirmAndImport()">✓ Confirm & Import</button>
                     </div>
