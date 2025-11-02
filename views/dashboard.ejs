@@ -8,7 +8,8 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            padding-top: 80px; /* Space for sticky header */
+            padding-top: 80px;
+            /* Space for sticky header */
         }
 
         .container {
@@ -28,13 +29,13 @@
             right: 0;
             z-index: 1000;
             padding: 15px 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
         }
 
         .header.scrolled {
             padding: 8px 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
         .header.scrolled h1 {
@@ -94,7 +95,7 @@
             right: 0;
             background-color: white;
             min-width: 280px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
             border-radius: 8px;
             z-index: 1001;
             border: 1px solid #dee2e6;
@@ -723,16 +724,18 @@
             grid-template-columns: repeat(6, 1fr);
             gap: 10px;
             position: sticky;
-            top: 80px; /* Below the header */
+            top: 80px;
+            /* Below the header */
             z-index: 999;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .filters.scrolled {
             padding: 8px 12px;
-            top: 60px; /* Adjust for compact header */
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            top: 60px;
+            /* Adjust for compact header */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             gap: 8px;
         }
 
@@ -901,15 +904,18 @@
         /* Sticky Table Headers */
         #purchaseOrdersTable thead {
             position: sticky;
-            top: 140px; /* Below header (60px compact) + filters (varies) */
-            z-index: 998; /* Below filters (999) */
+            top: 140px;
+            /* Below header (60px compact) + filters (varies) */
+            z-index: 998;
+            /* Below filters (999) */
             transition: top 0.3s ease;
         }
 
         /* Adjust sticky position when filters are compact */
-        .filters.scrolled ~ table thead,
-        .filters.scrolled ~ div table thead {
-            top: 110px; /* Compact header (60px) + compact filters (~50px) */
+        .filters.scrolled~table thead,
+        .filters.scrolled~div table thead {
+            top: 110px;
+            /* Compact header (60px) + compact filters (~50px) */
         }
 
         th,
@@ -925,7 +931,7 @@
             cursor: pointer;
             user-select: none;
             position: relative;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         th:hover {
@@ -1628,7 +1634,8 @@
 
         /* Pre-Purchase Orders Styles */
         .pre-purchase-section {
-            display: none; /* Hidden by default */
+            display: none;
+            /* Hidden by default */
             margin-bottom: 30px;
             padding: 20px;
             background: #f8f9fa;
@@ -1637,7 +1644,8 @@
         }
 
         .pre-purchase-section.show {
-            display: block; /* Show when toggled */
+            display: block;
+            /* Show when toggled */
         }
 
         .pre-purchase-header {
@@ -2535,8 +2543,10 @@
         /* Show tracking column when tracking is explicitly enabled */
         .show-tracking .shipping-tracking-cell {
             display: table-cell !important;
-            background-color: #f8f9fa; /* Light background to indicate it's active */
-            border-left: 3px solid #28a745; /* Green border to indicate active state */
+            background-color: #f8f9fa;
+            /* Light background to indicate it's active */
+            border-left: 3px solid #28a745;
+            /* Green border to indicate active state */
         }
 
         /* Default behavior: NS Status column hidden until explicitly shown */
@@ -2551,11 +2561,12 @@
 
         /* On smaller screens, add mobile indicator */
         @media (max-width: 1400px) {
+
             /* Show a hint that tracking column can be toggled */
             #toggleTrackingBtn {
                 position: relative;
             }
-            
+
             #toggleTrackingBtn::after {
                 content: "📱";
                 position: absolute;
@@ -2574,14 +2585,16 @@
         /* On larger screens, remove the green border for cleaner look */
         @media (min-width: 1401px) {
             .show-tracking .shipping-tracking-cell {
-                border-left: none; /* Remove border on larger screens where it's naturally visible */
+                border-left: none;
+                /* Remove border on larger screens where it's naturally visible */
                 background-color: transparent;
             }
         }
 
         /* Tracking toggle button styles */
         .tracking-toggle-btn {
-            background: #ffc107; /* Yellow for no status */
+            background: #ffc107;
+            /* Yellow for no status */
             color: #212529;
             border: none;
             border-radius: 4px;
@@ -2597,7 +2610,8 @@
         }
 
         .tracking-toggle-btn.has-status {
-            background: #007bff; /* Blue when there's tracking status */
+            background: #007bff;
+            /* Blue when there's tracking status */
             color: white;
         }
 
@@ -2608,7 +2622,8 @@
 
         /* Manage Attachments Button */
         .manage-attachments-btn {
-            background: #6c757d; /* Gray for no attachments */
+            background: #6c757d;
+            /* Gray for no attachments */
             color: white;
             border: none;
             border-radius: 4px;
@@ -2623,7 +2638,8 @@
         }
 
         .manage-attachments-btn.has-attachments {
-            background: #28a745; /* Green when there are attachments */
+            background: #28a745;
+            /* Green when there are attachments */
             color: white;
         }
 
@@ -2634,7 +2650,8 @@
 
         /* Dropship Toggle Button */
         .dropship-toggle-btn {
-            background: #e0e0e0; /* Gray for non-dropship */
+            background: #e0e0e0;
+            /* Gray for non-dropship */
             color: #666;
             border: none;
             border-radius: 4px;
@@ -2650,7 +2667,8 @@
         }
 
         .dropship-toggle-btn.is-dropship {
-            background: #ff9800; /* Orange for dropship POs */
+            background: #ff9800;
+            /* Orange for dropship POs */
             color: white;
             opacity: 1;
             box-shadow: 0 0 8px rgba(255, 152, 0, 0.5);
@@ -2704,15 +2722,16 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        .toggle-switch input:checked + .toggle-slider {
-            background-color: #ff9800; /* Orange for dropship */
+        .toggle-switch input:checked+.toggle-slider {
+            background-color: #ff9800;
+            /* Orange for dropship */
         }
 
-        .toggle-switch input:checked + .toggle-slider:before {
+        .toggle-switch input:checked+.toggle-slider:before {
             transform: translateX(26px);
         }
 
-        .toggle-switch input:focus + .toggle-slider {
+        .toggle-switch input:focus+.toggle-slider {
             box-shadow: 0 0 1px #ff9800;
         }
 
@@ -2721,13 +2740,15 @@
             background-color: #bbb;
         }
 
-        .toggle-switch input:checked + .toggle-slider:hover {
-            background-color: #f57c00; /* Darker orange on hover */
+        .toggle-switch input:checked+.toggle-slider:hover {
+            background-color: #f57c00;
+            /* Darker orange on hover */
         }
 
         /* Create Task Button */
         .create-task-btn {
-            background: #17a2b8; /* Teal/Cyan */
+            background: #17a2b8;
+            /* Teal/Cyan */
             color: white;
             border: none;
             border-radius: 4px;
@@ -2913,7 +2934,7 @@
             padding: 8px 15px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .stat-item {
@@ -2930,12 +2951,12 @@
 
         .stat-item .stat-label {
             font-size: 13px;
-            color: rgba(255,255,255,0.9);
+            color: rgba(255, 255, 255, 0.9);
             font-weight: 500;
         }
 
         .stat-divider {
-            color: rgba(255,255,255,0.5);
+            color: rgba(255, 255, 255, 0.5);
             font-size: 18px;
             font-weight: 300;
         }
@@ -3337,7 +3358,7 @@
         }
 
         .attachment-item:hover {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .attachment-info {
@@ -3538,12 +3559,14 @@
                         <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
                         <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items
                             Manager</a>
-                        <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 Tracking Dashboard</a>
+                        <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 Tracking
+                            Dashboard</a>
                         <a href="/shipments/dashboard" class="nav-accordion-item">📦 Shipment Management</a>
                         <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
                         <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
                         <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
-                        <a href="/purchase-orders/unreceived-items-report" class="nav-accordion-item">📋 Unreceived Items Report</a>
+                        <a href="/purchase-orders/unreceived-items-report" class="nav-accordion-item">📋 Unreceived
+                            Items Report</a>
                     </div>
                 </div>
 
@@ -3578,7 +3601,8 @@
                         <a href="/organic-vendors" class="nav-dropdown-item">🌱 Organic Vendors</a>
                         <a href="/trouble-seed" class="nav-dropdown-item">⚠️ Trouble Seed</a>
                         <a href="/orphaned-line-items" class="nav-dropdown-item">� Orphaned Items</a>
-                        <button class="nav-dropdown-item" onclick="fixMissingVendorsBoth()">🔗 Fix Missing Vendors (Both)</button>
+                        <button class="nav-dropdown-item" onclick="fixMissingVendorsBoth()">🔗 Fix Missing Vendors
+                            (Both)</button>
                         <button class="nav-dropdown-item" onclick="fixMainVendors()">🔧 Fix Main Vendors</button>
                         <button class="nav-dropdown-item" onclick="fixOrganicVendors()">🌱 Fix Organic Vendors</button>
                         <button class="nav-dropdown-item" onclick="openEmailClient()">📧 Email Client</button>
@@ -3602,46 +3626,52 @@
 
                 <!-- User Profile -->
                 <% if (user) { %>
-                <div class="user-profile-section">
-                    <div class="user-dropdown">
-                        <div class="user-avatar" onclick="toggleUserDropdown()">
-                            <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : '' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
-                        </div>
-                        <div id="userDropdown" class="user-dropdown-content">
-                            <div class="user-dropdown-header">
-                                <div class="user-avatar-large">
-                                    <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : '' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
-                                </div>
-                                <div class="user-info">
-                                    <strong><%= user.firstName %> <%= user.lastName %></strong>
-                                    <small class="user-role">Admin</small>
-                                    <small class="user-status">● Online</small>
-                                </div>
+                    <div class="user-profile-section">
+                        <div class="user-dropdown">
+                            <div class="user-avatar" onclick="toggleUserDropdown()">
+                                <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : '' %>
+                                    <%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
                             </div>
-                            <a href="/auth/admin/users" class="user-dropdown-item">
-                                <span class="dropdown-icon">�</span> User Management
-                            </a>
-                            <a href="/auth/admin/audit-logs" class="user-dropdown-item">
-                                <span class="dropdown-icon">🔄</span> Audit Logs
-                            </a>
-                            <a href="/auth/admin/test-email" class="user-dropdown-item">
-                                <span class="dropdown-icon">✉️</span> Test Email
-                            </a>
-                            <form action="/auth/logout" method="POST" style="margin: 0;">
-                                <button type="submit" class="user-dropdown-item logout">
-                                    <span class="dropdown-icon">🚪</span> Logout
-                                </button>
-                            </form>
+                            <div id="userDropdown" class="user-dropdown-content">
+                                <div class="user-dropdown-header">
+                                    <div class="user-avatar-large">
+                                        <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : '' %>
+                                            <%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                                    </div>
+                                    <div class="user-info">
+                                        <strong>
+                                            <%= user.firstName %>
+                                                <%= user.lastName %>
+                                        </strong>
+                                        <small class="user-role">Admin</small>
+                                        <small class="user-status">● Online</small>
+                                    </div>
+                                </div>
+                                <a href="/auth/admin/users" class="user-dropdown-item">
+                                    <span class="dropdown-icon">�</span> User Management
+                                </a>
+                                <a href="/auth/admin/audit-logs" class="user-dropdown-item">
+                                    <span class="dropdown-icon">🔄</span> Audit Logs
+                                </a>
+                                <a href="/auth/admin/test-email" class="user-dropdown-item">
+                                    <span class="dropdown-icon">✉️</span> Test Email
+                                </a>
+                                <form action="/auth/logout" method="POST" style="margin: 0;">
+                                    <button type="submit" class="user-dropdown-item logout">
+                                        <span class="dropdown-icon">🚪</span> Logout
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <% } %>
+                    <% } %>
             </div>
         </div>
 
         <!-- NetSuite Import Modal -->
         <div id="netsuiteImportModal" class="modal" style="display: none;">
-            <div class="modal-content netsuite-import-modal" style="max-height: 90vh; display: flex; flex-direction: column;">
+            <div class="modal-content netsuite-import-modal"
+                style="max-height: 90vh; display: flex; flex-direction: column;">
                 <div class="modal-header" style="flex-shrink: 0;">
                     <h3>Import NetSuite PO Form Data</h3>
                     <span class="close" onclick="closeNetSuiteImportModal()">&times;</span>
@@ -3708,9 +3738,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         </div>
                     </div>
                 </div>
-                <div class="form-actions" style="flex-shrink: 0; border-top: 1px solid #dee2e6; padding: 15px 20px; background: #f8f9fa; margin: 0;">
+                <div class="form-actions"
+                    style="flex-shrink: 0; border-top: 1px solid #dee2e6; padding: 15px 20px; background: #f8f9fa; margin: 0;">
                     <button class="btn btn-secondary" onclick="closeNetSuiteImportModal()">Cancel</button>
-                    <button class="btn btn-info" onclick="previewNetSuiteImport()" style="background: #17a2b8; color: white;">📋 Preview Changes</button>
+                    <button class="btn btn-info" onclick="previewNetSuiteImport()"
+                        style="background: #17a2b8; color: white;">📋 Preview Changes</button>
                     <button class="btn btn-primary" onclick="processNetSuiteImport()">Import Line Items</button>
                 </div>
             </div>
@@ -3718,16 +3750,18 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         <!-- NetSuite Import Preview Modal -->
         <div id="netsuitePreviewModal" class="modal" style="display: none;">
-            <div class="modal-content" style="max-width: 1400px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+            <div class="modal-content"
+                style="max-width: 1400px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
                 <div class="modal-header">
                     <h3>📋 Preview Import Changes</h3>
                     <span class="close" onclick="closePreviewModal()">&times;</span>
                 </div>
                 <div class="modal-body" style="flex: 1; overflow: hidden; display: flex; flex-direction: column;">
-                    <div id="previewSummary" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; flex-shrink: 0;">
+                    <div id="previewSummary"
+                        style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; flex-shrink: 0;">
                         <!-- Summary will be populated by JavaScript -->
                     </div>
-                    
+
                     <div id="previewWarnings" style="margin-bottom: 20px; flex-shrink: 0;">
                         <!-- Warnings will be populated if there are issues -->
                     </div>
@@ -3736,7 +3770,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         <!-- Preview table will be populated by JavaScript -->
                     </div>
 
-                    <div class="form-actions" style="margin-top: 20px; flex-shrink: 0; border-top: 1px solid #dee2e6; padding-top: 15px;">
+                    <div class="form-actions"
+                        style="margin-top: 20px; flex-shrink: 0; border-top: 1px solid #dee2e6; padding-top: 15px;">
                         <button class="btn btn-secondary" onclick="closePreviewModal()">Cancel</button>
                         <button class="btn btn-primary" onclick="confirmAndImport()">✓ Confirm & Import</button>
                     </div>
@@ -3804,17 +3839,23 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             <!-- Combined Stats and Results Section -->
             <div class="stats-combined">
                 <div class="stat-item">
-                    <span class="stat-number" id="totalCount"><%= purchaseOrders.length %></span>
+                    <span class="stat-number" id="totalCount">
+                        <%= purchaseOrders.length %>
+                    </span>
                     <span class="stat-label">Total POs</span>
                 </div>
                 <div class="stat-divider">|</div>
                 <div class="stat-item">
-                    <span class="stat-number" id="notesCount"><%= purchaseOrders.filter(po=> po.notes && po.notes.trim()).length %></span>
+                    <span class="stat-number" id="notesCount">
+                        <%= purchaseOrders.filter(po=> po.notes && po.notes.trim()).length %>
+                    </span>
                     <span class="stat-label">With Notes</span>
                 </div>
                 <div class="stat-divider">|</div>
                 <div class="stat-item">
-                    <span class="stat-number" id="visibleCount"><%= purchaseOrders.length %></span>
+                    <span class="stat-number" id="visibleCount">
+                        <%= purchaseOrders.length %>
+                    </span>
                     <span class="stat-label">Showing</span>
                 </div>
             </div>
@@ -3928,8 +3969,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 </div>
 
                 <div class="filter-group filter-actions">
-                    <button class="btn btn-sm btn-outline-primary" onclick="updateAllTracking()"
-                        id="bulkTrackingBtn" title="Update all shipping tracking" style="width: 100%;">
+                    <button class="btn btn-sm btn-outline-primary" onclick="updateAllTracking()" id="bulkTrackingBtn"
+                        title="Update all shipping tracking" style="width: 100%;">
                         🚚 Update Tracking
                     </button>
                 </div>
@@ -3974,7 +4015,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     <th class="sortable status-cell" data-column="status">Status</th>
                                     <th class="sortable shipping-tracking-cell" data-column="shippingTracking">Tracking
                                         <br><small style="font-weight: normal;">(Carrier & #)</small>
-                                        <button class="toggle-tracking-column-btn" onclick="toggleTrackingColumn()" title="Show/Hide tracking column">
+                                        <button class="toggle-tracking-column-btn" onclick="toggleTrackingColumn()"
+                                            title="Show/Hide tracking column">
                                             👁️
                                         </button>
                                     </th>
@@ -4008,23 +4050,20 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                                 title="<%= po.poUrl && po.poUrl.trim() ? 'Edit URL' : 'Add URL' %>">
                                                                 🔗
                                                             </button>
-                                                            <button
-                                                                class="copy-po-btn"
-                                                                data-po="<%- po.poNumber %>"
+                                                            <button class="copy-po-btn" data-po="<%- po.poNumber %>"
                                                                 title="Copy PO Number">
                                                                 📋
                                                             </button>
-                                                            <button class="manage-attachments-btn <%= po.attachments && po.attachments.length > 0 ? 'has-attachments' : '' %>"
-                                                                type="button"
-                                                                data-po-id="<%= po._id %>"
+                                                            <button
+                                                                class="manage-attachments-btn <%= po.attachments && po.attachments.length > 0 ? 'has-attachments' : '' %>"
+                                                                type="button" data-po-id="<%= po._id %>"
                                                                 data-po-number="<%= po.poNumber %>"
                                                                 title="<%= po.attachments && po.attachments.length > 0 ? `Manage ${po.attachments.length} attachment(s)` : 'Manage attachments' %>">
                                                                 📎
                                                             </button>
                                                             <button
                                                                 class="dropship-toggle-btn <%= (po.isDropship || (po.location && po.location.toLowerCase().includes('dropship'))) ? 'is-dropship' : '' %>"
-                                                                data-id="<%- po._id %>"
-                                                                data-po="<%- po.poNumber %>"
+                                                                data-id="<%- po._id %>" data-po="<%- po.poNumber %>"
                                                                 data-is-dropship="<%= (po.isDropship || (po.location && po.location.toLowerCase().includes('dropship'))) ? 'true' : 'false' %>"
                                                                 title="<%= (po.isDropship || (po.location && po.location.toLowerCase().includes('dropship'))) ? 'Dropship PO - Click to unmark' : 'Click to mark as dropship' %>">
                                                                 🚚
@@ -4032,31 +4071,35 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                             </div>
                                         </td>
                                         <td class="priority-cell">
-                                            <select class="priority-select" data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
+                                            <select class="priority-select" data-id="<%= po._id %>"
+                                                data-po="<%= po.poNumber %>"
                                                 title="Set priority for PO <%= po.poNumber %>">
-                                                <option value="1" <%= (po.priority || 3) == 1 ? 'selected' : '' %> class="priority-1">🔴 1</option>
-                                                <option value="2" <%= (po.priority || 3) == 2 ? 'selected' : '' %> class="priority-2">🩷 2</option>
-                                                <option value="3" <%= (po.priority || 3) == 3 ? 'selected' : '' %> class="priority-3">🟠 3</option>
-                                                <option value="4" <%= (po.priority || 3) == 4 ? 'selected' : '' %> class="priority-4">🟡 4</option>
-                                                <option value="5" <%= (po.priority || 3) == 5 ? 'selected' : '' %> class="priority-5">🟢 5</option>
+                                                <option value="1" <%=(po.priority || 3)==1 ? 'selected' : '' %>
+                                                    class="priority-1">🔴 1</option>
+                                                <option value="2" <%=(po.priority || 3)==2 ? 'selected' : '' %>
+                                                    class="priority-2">🩷 2</option>
+                                                <option value="3" <%=(po.priority || 3)==3 ? 'selected' : '' %>
+                                                    class="priority-3">🟠 3</option>
+                                                <option value="4" <%=(po.priority || 3)==4 ? 'selected' : '' %>
+                                                    class="priority-4">🟡 4</option>
+                                                <option value="5" <%=(po.priority || 3)==5 ? 'selected' : '' %>
+                                                    class="priority-5">🟢 5</option>
                                             </select>
                                         </td>
                                         <td class="vendor" title="<%= po.vendor %>">
                                             <% if (po.linkedVendor && po.linkedVendor._id) { %>
-                                                <a href="/vendors/<%= po.linkedVendor._id %>" 
-                                                   class="vendor-link"
-                                                   title="View vendor details for <%= po.vendor %>">
+                                                <a href="/vendors/<%= po.linkedVendor._id %>" class="vendor-link"
+                                                    title="View vendor details for <%= po.vendor %>">
                                                     <%= po.vendor %>
                                                 </a>
-                                            <% } else if (po.linkedVendor) { %>
-                                                <a href="/vendors/<%= po.linkedVendor %>" 
-                                                   class="vendor-link"
-                                                   title="View vendor details for <%= po.vendor %>">
-                                                    <%= po.vendor %>
-                                                </a>
-                                            <% } else { %>
-                                                <%= po.vendor %>
-                                            <% } %>
+                                                <% } else if (po.linkedVendor) { %>
+                                                    <a href="/vendors/<%= po.linkedVendor %>" class="vendor-link"
+                                                        title="View vendor details for <%= po.vendor %>">
+                                                        <%= po.vendor %>
+                                                    </a>
+                                                    <% } else { %>
+                                                        <%= po.vendor %>
+                                                            <% } %>
                                         </td>
                                         <td class="line-items-count-cell">
                                             <% if (po.lineItems && po.lineItems.length> 0) { %>
@@ -4158,8 +4201,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                         </button>
                                                         <button
                                                             class="btn btn-sm btn-outline-success tracking-update-btn"
-                                                            data-po-id="<%= po._id %>"
-                                                            title="Update tracking">
+                                                            data-po-id="<%= po._id %>" title="Update tracking">
                                                             🔄
                                                         </button>
                                                     </div>
@@ -4184,20 +4226,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                     title="<%= po.notes && po.notes.trim() ? 'View/Edit notes' : 'Add notes' %>">
                                                     <%= po.notes && po.notes.trim() ? '📝' : '➕' %>
                                                 </button>
-                                                <button class="tracking-toggle-btn <%= po.shippingTracking ? 'has-status' : '' %>"
-                                                    type="button" 
-                                                    data-index="<%= index %>"
-                                                    data-po-id="<%= po._id %>"
+                                                <button
+                                                    class="tracking-toggle-btn <%= po.shippingTracking ? 'has-status' : '' %>"
+                                                    type="button" data-index="<%= index %>" data-po-id="<%= po._id %>"
                                                     data-tracking="<%= po.shippingTracking || '' %>"
                                                     data-carrier="<%= po.shippingCarrier || 'FedEx' %>"
                                                     title="<%= po.shippingTracking ? `Tracking: ${po.shippingTracking} (${po.shippingCarrier || 'FedEx'})` : 'View tracking information' %>">
                                                     🚚
                                                 </button>
-                                                <button class="create-task-btn"
-                                                    type="button"
-                                                    data-po-id="<%= po._id %>"
-                                                    data-po-number="<%= po.poNumber %>"
-                                                    data-vendor="<%= po.vendor %>"
+                                                <button class="create-task-btn" type="button" data-po-id="<%= po._id %>"
+                                                    data-po-number="<%= po.poNumber %>" data-vendor="<%= po.vendor %>"
                                                     title="Create task for PO <%= po.poNumber %> and vendor <%= po.vendor %>">
                                                     ✅
                                                 </button>
@@ -4252,55 +4290,62 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     <tr class="tracking-row" id="tracking-row-<%= index %>">
                                         <td colspan="11" class="tracking-cell-expanded">
                                             <div class="tracking-header">
-                                                <div class="tracking-title">🚚 Tracking Information for PO <%= po.poNumber %>
+                                                <div class="tracking-title">🚚 Tracking Information for PO <%=
+                                                        po.poNumber %>
                                                 </div>
                                                 <div class="tracking-actions">
-                                                    <button class="tracking-close" data-index="<%= index %>">Close</button>
+                                                    <button class="tracking-close"
+                                                        data-index="<%= index %>">Close</button>
                                                 </div>
                                             </div>
                                             <div class="tracking-container">
                                                 <% if (po.shippingTracking) { %>
-                                                <div class="tracking-info-row">
-                                                    <div class="tracking-info-item">
-                                                        <div class="tracking-info-label">Tracking Number</div>
-                                                        <div class="tracking-info-value">
-                                                            <a href="#" class="tracking-link" onclick="openTrackingUrl('<%= po.shippingTracking %>', '<%= po.shippingCarrier || 'FedEx' %>'); return false;">
-                                                                <%= po.shippingTracking %>
-                                                            </a>
+                                                    <div class="tracking-info-row">
+                                                        <div class="tracking-info-item">
+                                                            <div class="tracking-info-label">Tracking Number</div>
+                                                            <div class="tracking-info-value">
+                                                                <a href="#" class="tracking-link"
+                                                                    onclick="openTrackingUrl('<%= po.shippingTracking %>', '<%= po.shippingCarrier || 'FedEx' %>'); return false;">
+                                                                    <%= po.shippingTracking %>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="tracking-info-item">
+                                                            <div class="tracking-info-label">Carrier</div>
+                                                            <div class="tracking-info-value">
+                                                                <%= po.shippingCarrier || 'FedEx' %>
+                                                            </div>
+                                                        </div>
+                                                        <div class="tracking-info-item">
+                                                            <div class="tracking-info-label">Vendor</div>
+                                                            <div class="tracking-info-value">
+                                                                <%= po.vendor %>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div class="tracking-info-item">
-                                                        <div class="tracking-info-label">Carrier</div>
-                                                        <div class="tracking-info-value">
-                                                            <%= po.shippingCarrier || 'FedEx' %>
-                                                        </div>
+                                                    <div class="tracking-button-group">
+                                                        <button class="tracking-action-btn primary"
+                                                            onclick="openTrackingUrl('<%= po.shippingTracking %>', '<%= po.shippingCarrier || 'FedEx' %>')">
+                                                            🌐 View on <%= po.shippingCarrier || 'FedEx' %> Website
+                                                        </button>
+                                                        <button class="tracking-action-btn secondary"
+                                                            onclick="checkTrackingStatus('<%= po._id %>', '<%= po.shippingTracking %>', '<%= po.shippingCarrier || 'FedEx' %>')">
+                                                            🔍 Check Status
+                                                        </button>
+                                                        <button class="tracking-action-btn secondary"
+                                                            onclick="updateTrackingInfo('<%= po._id %>')">
+                                                            ✏️ Update Tracking
+                                                        </button>
                                                     </div>
-                                                    <div class="tracking-info-item">
-                                                        <div class="tracking-info-label">Vendor</div>
-                                                        <div class="tracking-info-value">
-                                                            <%= po.vendor %>
+                                                    <% } else { %>
+                                                        <div style="text-align: center; padding: 20px; color: #6c757d;">
+                                                            <p>No tracking information available for this PO.</p>
+                                                            <button class="tracking-action-btn primary"
+                                                                onclick="updateTrackingInfo('<%= po._id %>')">
+                                                                ➕ Add Tracking Information
+                                                            </button>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                                <div class="tracking-button-group">
-                                                    <button class="tracking-action-btn primary" onclick="openTrackingUrl('<%= po.shippingTracking %>', '<%= po.shippingCarrier || 'FedEx' %>')">
-                                                        🌐 View on <%= po.shippingCarrier || 'FedEx' %> Website
-                                                    </button>
-                                                    <button class="tracking-action-btn secondary" onclick="checkTrackingStatus('<%= po._id %>', '<%= po.shippingTracking %>', '<%= po.shippingCarrier || 'FedEx' %>')">
-                                                        🔍 Check Status
-                                                    </button>
-                                                    <button class="tracking-action-btn secondary" onclick="updateTrackingInfo('<%= po._id %>')">
-                                                        ✏️ Update Tracking
-                                                    </button>
-                                                </div>
-                                                <% } else { %>
-                                                <div style="text-align: center; padding: 20px; color: #6c757d;">
-                                                    <p>No tracking information available for this PO.</p>
-                                                    <button class="tracking-action-btn primary" onclick="updateTrackingInfo('<%= po._id %>')">
-                                                        ➕ Add Tracking Information
-                                                    </button>
-                                                </div>
-                                                <% } %>
+                                                        <% } %>
                                             </div>
                                         </td>
                                     </tr>
@@ -4428,22 +4473,23 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 <div class="attachments-section">
                     <div class="attachments-header">
                         <h4>Document Attachments</h4>
-                        <p class="attachments-description">Upload purchase orders, invoices, packing slips, and other documents related to this PO.</p>
+                        <p class="attachments-description">Upload purchase orders, invoices, packing slips, and other
+                            documents related to this PO.</p>
                     </div>
-                    
+
                     <div class="attachment-upload-form">
                         <form id="attachmentUploadForm" enctype="multipart/form-data">
                             <input type="hidden" id="attachmentPOId" name="poId">
-                            
+
                             <div class="upload-form-row">
                                 <div class="form-group">
                                     <label for="attachmentFile">Select File:</label>
-                                    <input type="file" id="attachmentFile" name="attachment" 
-                                           accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.txt"
-                                           required>
-                                    <small class="file-hint">Supported: PDF, Images, Word, Excel, Text files (Max: 10MB)</small>
+                                    <input type="file" id="attachmentFile" name="attachment"
+                                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.txt" required>
+                                    <small class="file-hint">Supported: PDF, Images, Word, Excel, Text files (Max:
+                                        10MB)</small>
                                 </div>
-                                
+
                                 <div class="form-group">
                                     <label for="documentType">Document Type:</label>
                                     <select id="documentType" name="documentType">
@@ -4460,19 +4506,19 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="attachmentDescription">Description (Optional):</label>
-                                <input type="text" id="attachmentDescription" name="description" 
-                                       placeholder="Brief description of this document...">
+                                <input type="text" id="attachmentDescription" name="description"
+                                    placeholder="Brief description of this document...">
                             </div>
-                            
+
                             <button type="submit" class="upload-attachment-btn">
                                 📎 Upload Document
                             </button>
                         </form>
                     </div>
-                    
+
                     <div class="attachments-list">
                         <h5>Uploaded Documents:</h5>
                         <div id="attachmentsList" class="attachments-container">
@@ -4509,49 +4555,54 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             <div class="status-modal-body" style="padding: 20px;">
                 <form id="createTaskForm">
                     <input type="hidden" id="taskPOId" name="poId">
-                    
+
                     <div class="form-group" style="margin-bottom: 15px;">
-                        <label for="taskTitle" style="display: block; margin-bottom: 5px; font-weight: 500;">Task Title:</label>
-                        <input type="text" id="taskTitle" name="title" required 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <label for="taskTitle" style="display: block; margin-bottom: 5px; font-weight: 500;">Task
+                            Title:</label>
+                        <input type="text" id="taskTitle" name="title" required
+                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
-                    
+
                     <div class="form-group" style="margin-bottom: 15px;">
-                        <label for="taskDescription" style="display: block; margin-bottom: 5px; font-weight: 500;">Description:</label>
-                        <textarea id="taskDescription" name="description" rows="4" 
-                                  style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;"></textarea>
+                        <label for="taskDescription"
+                            style="display: block; margin-bottom: 5px; font-weight: 500;">Description:</label>
+                        <textarea id="taskDescription" name="description" rows="4"
+                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;"></textarea>
                     </div>
-                    
+
                     <div class="form-group" style="margin-bottom: 15px;">
-                        <label for="taskDueDate" style="display: block; margin-bottom: 5px; font-weight: 500;">Due Date:</label>
-                        <input type="date" id="taskDueDate" name="dueDate" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <label for="taskDueDate" style="display: block; margin-bottom: 5px; font-weight: 500;">Due
+                            Date:</label>
+                        <input type="date" id="taskDueDate" name="dueDate"
+                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
-                    
+
                     <div class="form-group" style="margin-bottom: 15px;">
-                        <label for="taskPriority" style="display: block; margin-bottom: 5px; font-weight: 500;">Priority:</label>
-                        <select id="taskPriority" name="priority" 
-                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <label for="taskPriority"
+                            style="display: block; margin-bottom: 5px; font-weight: 500;">Priority:</label>
+                        <select id="taskPriority" name="priority"
+                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                             <option value="low">Low</option>
                             <option value="medium" selected>Medium</option>
                             <option value="high">High</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group" style="margin-bottom: 20px;">
                         <label style="display: block; margin-bottom: 5px; font-weight: 500;">Related To:</label>
-                        <div id="taskRelatedInfo" style="padding: 10px; background: #f8f9fa; border-radius: 4px; font-size: 14px;">
+                        <div id="taskRelatedInfo"
+                            style="padding: 10px; background: #f8f9fa; border-radius: 4px; font-size: 14px;">
                             <!-- PO and vendor info will be displayed here -->
                         </div>
                     </div>
-                    
+
                     <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                        <button type="button" onclick="closeCreateTaskModal()" 
-                                style="padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer;">
+                        <button type="button" onclick="closeCreateTaskModal()"
+                            style="padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer;">
                             Cancel
                         </button>
-                        <button type="submit" 
-                                style="padding: 8px 16px; border: none; background: #007bff; color: white; border-radius: 4px; cursor: pointer;">
+                        <button type="submit"
+                            style="padding: 8px 16px; border: none; background: #007bff; color: white; border-radius: 4px; cursor: pointer;">
                             Create Task
                         </button>
                     </div>
@@ -4600,12 +4651,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function togglePrePurchaseSection() {
             const section = document.querySelector('.pre-purchase-section');
             section.classList.toggle('show');
-            
+
             // Scroll to the section if it's being shown
             if (section.classList.contains('show')) {
                 section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
-            
+
             // Close the options dropdown
             document.getElementById('optionsDropdown').classList.remove('show');
             document.querySelector('.nav-options-btn .dropdown-icon').classList.remove('rotated');
@@ -5070,7 +5121,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             if (event.target.closest('.copy-po-btn')) {
                 const btn = event.target.closest('.copy-po-btn');
                 const poNumber = btn.getAttribute('data-po');
-                
+
                 try {
                     // Copy to clipboard
                     navigator.clipboard.writeText(poNumber).then(() => {
@@ -5078,13 +5129,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         btn.classList.add('copied');
                         const originalTitle = btn.title;
                         btn.title = 'Copied!';
-                        
+
                         // Reset visual feedback after 2 seconds
                         setTimeout(() => {
                             btn.classList.remove('copied');
                             btn.title = originalTitle;
                         }, 2000);
-                        
+
                         console.log(`📋 Copied PO Number: ${poNumber}`);
                     }).catch(error => {
                         console.error('Failed to copy PO number:', error);
@@ -5103,22 +5154,22 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const index = btn.getAttribute('data-index');
                 const poId = btn.getAttribute('data-id');
                 const poNumber = btn.getAttribute('data-po');
-                
+
                 console.log('📦 PO Details button clicked:', { index, poId, poNumber });
-                
+
                 if (index !== null) {
                     const lineItemsRow = document.getElementById(`line-items-row-${index}`);
-                    
+
                     if (lineItemsRow) {
                         const isExpanded = lineItemsRow.classList.contains('expanded');
-                        
+
                         if (isExpanded) {
                             // Close the line items row
                             lineItemsRow.classList.remove('expanded');
                         } else {
                             // Open the line items row and load data
                             lineItemsRow.classList.add('expanded');
-                            
+
                             // Load line items data if not already loaded
                             const container = document.getElementById(`line-items-container-${index}`);
                             if (container && container.querySelector('.loading-line-items')) {
@@ -5136,10 +5187,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const btn = event.target.closest('.notes-toggle');
                 const index = btn.getAttribute('data-index');
                 const notesRow = document.getElementById(`notes-row-${index}`);
-                
+
                 if (notesRow) {
                     const isExpanded = notesRow.classList.contains('expanded');
-                    
+
                     if (isExpanded) {
                         notesRow.classList.remove('expanded');
                     } else {
@@ -5157,10 +5208,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const btn = event.target.closest('.tracking-toggle-btn');
                 const index = btn.getAttribute('data-index');
                 const trackingRow = document.getElementById(`tracking-row-${index}`);
-                
+
                 if (trackingRow) {
                     const isExpanded = trackingRow.classList.contains('expanded');
-                    
+
                     if (isExpanded) {
                         trackingRow.classList.remove('expanded');
                     } else {
@@ -5175,7 +5226,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const btn = event.target.closest('.show-received-toggle');
                 const btnId = btn.getAttribute('id');
                 const index = btnId ? btnId.replace('show-received-', '') : null;
-                
+
                 if (index !== null) {
                     console.log('👁️ Show Received button clicked for index:', index);
                     toggleReceivedItems(index);
@@ -5189,7 +5240,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const btn = event.target.closest('.line-items-close');
                 const index = btn.getAttribute('data-index');
                 const lineItemsRow = document.getElementById(`line-items-row-${index}`);
-                
+
                 if (lineItemsRow) {
                     lineItemsRow.classList.remove('expanded');
                 }
@@ -5200,7 +5251,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const btn = event.target.closest('.notes-close');
                 const index = btn.getAttribute('data-index');
                 const notesRow = document.getElementById(`notes-row-${index}`);
-                
+
                 if (notesRow) {
                     notesRow.classList.remove('expanded');
                 }
@@ -5211,7 +5262,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const btn = event.target.closest('.tracking-close');
                 const index = btn.getAttribute('data-index');
                 const trackingRow = document.getElementById(`tracking-row-${index}`);
-                
+
                 if (trackingRow) {
                     trackingRow.classList.remove('expanded');
                 }
@@ -5222,7 +5273,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const btn = event.target.closest('.manage-attachments-btn');
                 const poId = btn.getAttribute('data-po-id');
                 const poNumber = btn.getAttribute('data-po-number');
-                
+
                 if (poId && poNumber) {
                     console.log('📎 Manage Attachments button clicked:', { poId, poNumber });
                     // Open PO Details modal and switch to attachments tab
@@ -5244,7 +5295,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const poId = btn.getAttribute('data-id');
                 const poNumber = btn.getAttribute('data-po');
                 const isCurrentlyDropship = btn.getAttribute('data-is-dropship') === 'true';
-                
+
                 if (poId) {
                     toggleDropshipStatus(poId, poNumber, !isCurrentlyDropship, btn);
                 }
@@ -5256,7 +5307,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const poId = btn.getAttribute('data-po-id');
                 const poNumber = btn.getAttribute('data-po-number');
                 const vendor = btn.getAttribute('data-vendor');
-                
+
                 if (poId && poNumber && vendor) {
                     console.log('✅ Create Task button clicked:', { poId, poNumber, vendor });
                     openCreateTaskModal(poId, poNumber, vendor);
@@ -6123,7 +6174,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const poDetailsModal = document.getElementById('poDetailsModal');
             const trackingDetailsModal = document.getElementById('trackingDetailsModal');
             const createTaskModal = document.getElementById('createTaskModal');
-            
+
             if (event.target === urlModal) {
                 closeUrlModal();
             }
@@ -6142,23 +6193,23 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         async function openPoDetailsModal(poId, poNumber) {
             const modal = document.getElementById('poDetailsModal');
             const title = document.getElementById('poDetailsTitle');
-            
+
             title.textContent = `PO Details - ${poNumber}`;
             modal.dataset.poId = poId; // Store poId for later use
             modal.style.display = 'block';
-            
+
             // Set PO ID in attachment form
             const attachmentPOIdInput = document.getElementById('attachmentPOId');
             if (attachmentPOIdInput) {
                 attachmentPOIdInput.value = poId;
             }
-            
+
             // Reset to line items tab
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             document.getElementById('lineItemsTab').classList.add('active');
             document.querySelector('.tab-button').classList.add('active');
-            
+
             // Load line items by default
             await loadPoDetailsLineItems(poId);
         }
@@ -6172,13 +6223,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const container = document.getElementById(`line-items-container-${index}`);
             const statusSpan = document.getElementById(`line-items-status-${index}`);
             const showReceivedBtn = document.getElementById(`show-received-${index}`);
-            
+
             try {
                 container.innerHTML = '<div class="loading-line-items">Loading line items...</div>';
-                
+
                 const response = await fetch(`/purchase-orders/${poId}/line-items`);
                 const lineItems = await response.json();
-                
+
                 if (lineItems.length === 0) {
                     container.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
                     if (statusSpan) statusSpan.textContent = '';
@@ -6186,19 +6237,19 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     const receivedCount = lineItems.filter(item => item.received).length;
                     const totalCount = lineItems.length;
                     const unreceivedCount = totalCount - receivedCount;
-                    
+
                     // Update status
                     if (statusSpan) {
                         statusSpan.textContent = `(${receivedCount}/${totalCount} received)`;
                     }
-                    
+
                     // Show the "Show Received" button if there are received items
                     if (showReceivedBtn && receivedCount > 0) {
                         showReceivedBtn.style.display = 'inline-block';
                         // Store the initial state
                         showReceivedBtn.dataset.showingReceived = 'false';
                     }
-                    
+
                     // Generate the HTML for line items table
                     const lineItemsHtml = lineItems.map(item => `
                         <tr class="line-item-row ${item.received ? 'received' : ''}" data-item-id="${item._id}">
@@ -6221,7 +6272,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             <td>${item.expectedArrivalDate ? new Date(item.expectedArrivalDate).toLocaleDateString() : '-'}</td>
                         </tr>
                     `).join('');
-                    
+
                     container.innerHTML = `
                         <div class="line-items-summary">
                             <strong>Summary:</strong> ${receivedCount}/${totalCount} items received
@@ -6315,7 +6366,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function toggleTrackingColumn() {
             const table = document.getElementById('purchaseOrdersTable');
             const isCurrentlyVisible = table.classList.contains('show-tracking');
-            
+
             if (isCurrentlyVisible) {
                 // Hide tracking column
                 table.classList.remove('show-tracking');
@@ -6323,10 +6374,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 // Show tracking column
                 table.classList.add('show-tracking');
             }
-            
+
             // Update button state
             updateTrackingButtonState(!isCurrentlyVisible);
-            
+
             // Show a toast notification
             const message = isCurrentlyVisible ? '👁️ Tracking column hidden' : '👁️ Tracking column shown';
             showTrackingToast(message, 'success');
@@ -6335,7 +6386,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function toggleNSStatusColumn() {
             const table = document.getElementById('purchaseOrdersTable');
             const isCurrentlyVisible = table.classList.contains('show-ns-status');
-            
+
             if (isCurrentlyVisible) {
                 // Hide NS Status column
                 table.classList.remove('show-ns-status');
@@ -6343,13 +6394,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 // Show NS Status column
                 table.classList.add('show-ns-status');
             }
-            
+
             // Update button text
             const btnText = document.getElementById('nsStatusColumnText');
             if (btnText) {
                 btnText.textContent = isCurrentlyVisible ? 'Show NS Status' : 'Hide NS Status';
             }
-            
+
             // Show a toast notification
             const message = isCurrentlyVisible ? '📦 NS Status column hidden' : '📦 NS Status column shown';
             showTrackingToast(message, 'success');
@@ -6358,7 +6409,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         async function toggleDropshipStatus(poId, poNumber, newDropshipStatus, btn) {
             try {
                 console.log(`🚚 Toggling dropship status for PO ${poNumber}: ${newDropshipStatus}`);
-                
+
                 const response = await fetch(`/purchase-orders/${poId}/dropship`, {
                     method: 'PUT',
                     headers: {
@@ -6372,7 +6423,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
 
                 const data = await response.json();
-                
+
                 // Update button visual state
                 if (newDropshipStatus) {
                     btn.classList.add('is-dropship');
@@ -6396,8 +6447,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 applyFilters();
 
                 // Show success message
-                const message = newDropshipStatus ? 
-                    `🚚 PO ${poNumber} marked as dropship` : 
+                const message = newDropshipStatus ?
+                    `🚚 PO ${poNumber} marked as dropship` :
                     `📦 PO ${poNumber} unmarked as dropship`;
                 showTrackingToast(message, 'success');
 
@@ -6421,13 +6472,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const trackingBtn = document.querySelector(`[data-po-id="${poId}"].tracking-toggle-btn`);
             const tracking = trackingBtn.dataset.tracking;
             const carrier = trackingBtn.dataset.carrier;
-            
+
             if (!tracking) {
                 // Show a simple message if no tracking
                 showTrackingDetailsModal(poId, null, null, 'No tracking information available for this PO.');
                 return;
             }
-            
+
             showTrackingDetailsModal(poId, tracking, carrier);
         }
 
@@ -6435,9 +6486,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const modal = document.getElementById('trackingDetailsModal');
             const title = document.getElementById('trackingDetailsTitle');
             const content = document.getElementById('trackingDetailsContent');
-            
+
             title.textContent = trackingNumber ? `Tracking: ${trackingNumber}` : 'Tracking Information';
-            
+
             if (message) {
                 content.innerHTML = `<div style="text-align: center; padding: 20px; color: #6c757d;">${message}</div>`;
             } else {
@@ -6464,7 +6515,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     </div>
                 `;
             }
-            
+
             modal.style.display = 'block';
         }
 
@@ -6478,19 +6529,19 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const poIdInput = document.getElementById('taskPOId');
             const relatedInfo = document.getElementById('taskRelatedInfo');
             const titleInput = document.getElementById('taskTitle');
-            
+
             // Set hidden PO ID
             poIdInput.value = poId;
-            
+
             // Display related PO and vendor info
             relatedInfo.innerHTML = `
                 <div><strong>PO Number:</strong> ${poNumber}</div>
                 <div><strong>Vendor:</strong> ${vendor}</div>
             `;
-            
+
             // Pre-fill title with PO reference
             titleInput.value = `Follow up on PO ${poNumber} - ${vendor}`;
-            
+
             modal.style.display = 'block';
         }
 
@@ -6501,9 +6552,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         }
 
         // Handle task form submission
-        document.getElementById('createTaskForm').addEventListener('submit', async function(e) {
+        document.getElementById('createTaskForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            
+
             const formData = {
                 title: document.getElementById('taskTitle').value,
                 description: document.getElementById('taskDescription').value,
@@ -6512,7 +6563,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 relatedPOs: [document.getElementById('taskPOId').value],
                 status: 'pending'
             };
-            
+
             try {
                 const response = await fetch('/tasks/create', {
                     method: 'POST',
@@ -6521,9 +6572,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     },
                     body: JSON.stringify(formData)
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     showTrackingToast('Task created successfully!', 'success');
                     closeCreateTaskModal();
@@ -6541,7 +6592,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             statusDiv.innerHTML = '🔄 Checking status...';
             statusDiv.style.background = '#007bff';
             statusDiv.style.color = 'white';
-            
+
             try {
                 // This would call your existing tracking API
                 const response = await fetch('/purchase-orders/tracking-info', {
@@ -6549,13 +6600,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ trackingNumber, carrier })
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success && result.trackingInfo) {
                     statusDiv.innerHTML = `📦 ${result.trackingInfo.status || 'In Transit'}`;
                     statusDiv.style.background = '#28a745';
-                    
+
                     if (result.trackingInfo.description) {
                         statusDiv.innerHTML += `<br><small>${result.trackingInfo.description}</small>`;
                     }
@@ -6576,9 +6627,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     showTrackingToast('📦 Tracking information updated', 'success');
                     // Refresh the modal content or page as needed
@@ -6593,7 +6644,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         function openTrackingUrl(trackingNumber, carrier) {
             let url = '';
-            
+
             switch (carrier.toLowerCase()) {
                 case 'fedex':
                     url = `https://www.fedex.com/apps/fedextrack/?tracknumbers=${trackingNumber}`;
@@ -6611,7 +6662,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     alert('Tracking URL not available for this carrier');
                     return;
             }
-            
+
             window.open(url, '_blank');
         }
 
@@ -6630,9 +6681,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 background: ${type === 'success' ? '#28a745' : '#dc3545'};
             `;
             toast.textContent = message;
-            
+
             document.body.appendChild(toast);
-            
+
             setTimeout(() => {
                 document.body.removeChild(toast);
             }, 3000);
@@ -6643,7 +6694,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             // Set initial state based on screen size
             const table = document.getElementById('purchaseOrdersTable');
             const isLargeScreen = window.innerWidth > 1400;
-            
+
             if (isLargeScreen) {
                 // On large screens, show tracking by default
                 table.classList.add('show-tracking');
@@ -6653,20 +6704,20 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 table.classList.remove('show-tracking');
                 updateTrackingButtonState(false);
             }
-            
+
             // Add keyboard shortcut (Ctrl+T)
-            document.addEventListener('keydown', function(event) {
+            document.addEventListener('keydown', function (event) {
                 if (event.ctrlKey && event.key === 't') {
                     event.preventDefault();
                     toggleTrackingColumn();
                 }
             });
-            
+
             // Handle window resize
-            window.addEventListener('resize', function() {
+            window.addEventListener('resize', function () {
                 const newIsLargeScreen = window.innerWidth > 1400;
                 const currentlyVisible = table.classList.contains('show-tracking');
-                
+
                 // Auto-show on large screens if not manually hidden
                 if (newIsLargeScreen && !currentlyVisible) {
                     table.classList.add('show-tracking');
@@ -6678,9 +6729,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function updateTrackingButtonState(isVisible) {
             const toggleBtn = document.getElementById('toggleTrackingBtn');
             const buttonText = document.getElementById('trackingColumnText');
-            
+
             if (!toggleBtn || !buttonText) return; // Elements might not exist yet
-            
+
             if (isVisible) {
                 toggleBtn.classList.remove('btn-outline-secondary');
                 toggleBtn.classList.add('btn-outline-success');
@@ -6697,13 +6748,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         // Attachment Management Functions
         async function loadAttachments(poId) {
             const container = document.getElementById('attachmentsList');
-            
+
             try {
                 container.innerHTML = '<div style="text-align: center; padding: 20px; color: #6c757d;">Loading attachments...</div>';
-                
+
                 const response = await fetch(`/purchase-orders/attachments/${poId}`);
                 const result = await response.json();
-                
+
                 if (result.success) {
                     renderAttachmentsList(result.attachments);
                 } else {
@@ -6718,16 +6769,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         function renderAttachmentsList(attachments) {
             const container = document.getElementById('attachmentsList');
-            
+
             if (!attachments || attachments.length === 0) {
                 container.innerHTML = '<div class="no-attachments">No documents uploaded yet.</div>';
                 return;
             }
-            
+
             const attachmentsHtml = attachments.map(attachment => {
                 const uploadDate = new Date(attachment.uploadedAt).toLocaleDateString();
                 const fileSize = formatFileSize(attachment.fileSize);
-                
+
                 return `
                     <div class="attachment-item" data-attachment-id="${attachment._id}">
                         <div class="attachment-info">
@@ -6755,7 +6806,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     </div>
                 `;
             }).join('');
-            
+
             container.innerHTML = attachmentsHtml;
         }
 
@@ -6763,27 +6814,27 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             if (!confirm('Are you sure you want to delete this attachment? This action cannot be undone.')) {
                 return;
             }
-            
+
             try {
                 const response = await fetch(`/purchase-orders/attachments/${attachmentId}`, {
                     method: 'DELETE'
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     // Remove the attachment from the UI
                     const attachmentElement = document.querySelector(`[data-attachment-id="${attachmentId}"]`);
                     if (attachmentElement) {
                         attachmentElement.remove();
                     }
-                    
+
                     // Check if any attachments are left
                     const container = document.getElementById('attachmentsList');
                     if (container.children.length === 0) {
                         container.innerHTML = '<div class="no-attachments">No documents uploaded yet.</div>';
                     }
-                    
+
                     showAttachmentToast('Document deleted successfully', 'success');
                 } else {
                     showAttachmentToast('Error deleting document: ' + result.error, 'error');
@@ -6817,9 +6868,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             `;
             toast.textContent = message;
-            
+
             document.body.appendChild(toast);
-            
+
             setTimeout(() => {
                 if (document.body.contains(toast)) {
                     document.body.removeChild(toast);
@@ -6828,63 +6879,63 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         }
 
         // Initialize attachment upload form when page loads
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const attachmentForm = document.getElementById('attachmentUploadForm');
             if (attachmentForm) {
-                attachmentForm.addEventListener('submit', async function(event) {
+                attachmentForm.addEventListener('submit', async function (event) {
                     event.preventDefault();
-                    
+
                     const poId = document.getElementById('attachmentPOId').value;
                     const fileInput = document.getElementById('attachmentFile');
                     const documentType = document.getElementById('documentType').value;
                     const description = document.getElementById('attachmentDescription').value;
-                    
+
                     if (!poId) {
                         showAttachmentToast('PO ID is required', 'error');
                         return;
                     }
-                    
+
                     if (!fileInput.files || fileInput.files.length === 0) {
                         showAttachmentToast('Please select a file to upload', 'error');
                         return;
                     }
-                    
+
                     const file = fileInput.files[0];
-                    
+
                     // Check file size (10MB limit)
                     if (file.size > 10 * 1024 * 1024) {
                         showAttachmentToast('File size must be less than 10MB', 'error');
                         return;
                     }
-                    
+
                     // Show upload progress
                     const submitBtn = attachmentForm.querySelector('.upload-attachment-btn');
                     const originalText = submitBtn.textContent;
                     submitBtn.disabled = true;
                     submitBtn.textContent = '📤 Uploading...';
-                    
+
                     try {
                         const formData = new FormData();
                         formData.append('attachment', file);
                         formData.append('poId', poId);
                         formData.append('documentType', documentType);
                         formData.append('description', description);
-                        
+
                         const response = await fetch('/purchase-orders/upload-attachment', {
                             method: 'POST',
                             body: formData
                         });
-                        
+
                         const result = await response.json();
-                        
+
                         if (result.success) {
                             showAttachmentToast('Document uploaded successfully', 'success');
-                            
+
                             // Reset form
                             attachmentForm.reset();
                             document.getElementById('attachmentPOId').value = poId; // Restore PO ID
                             document.getElementById('documentType').value = 'Other'; // Reset to default
-                            
+
                             // Reload attachments list
                             await loadAttachments(poId);
                         } else {
@@ -6908,18 +6959,18 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
-            
+
             // Remove active class from all tab buttons
             document.querySelectorAll('.tab-button').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
+
             // Show selected tab content
             document.getElementById(tabName + 'Tab').classList.add('active');
-            
+
             // Add active class to clicked button
             event.target.classList.add('active');
-            
+
             // Load content if needed
             if (tabName === 'notesHistory') {
                 const modal = document.getElementById('poDetailsModal');
@@ -6927,14 +6978,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const title = titleElement.textContent;
                 const poNumber = title.split(' - ')[1];
                 const poId = modal.dataset.poId;
-                
+
                 if (poId && poNumber) {
                     await loadPoDetailsNotesHistory(poId, poNumber);
                 }
             } else if (tabName === 'attachments') {
                 const modal = document.getElementById('poDetailsModal');
                 const poId = modal.dataset.poId;
-                
+
                 if (poId) {
                     await loadAttachments(poId);
                 }
@@ -6943,19 +6994,19 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         async function loadPoDetailsLineItems(poId) {
             const container = document.getElementById('poDetailsLineItems');
-            
+
             try {
                 container.innerHTML = '<div class="loading-line-items">Loading line items...</div>';
-                
+
                 const response = await fetch(`/purchase-orders/${poId}/line-items`);
                 const lineItems = await response.json();
-                
+
                 if (lineItems.length === 0) {
                     container.innerHTML = '<div class="no-line-items">No line items found for this purchase order.</div>';
                 } else {
                     const receivedCount = lineItems.filter(item => item.received).length;
                     const totalCount = lineItems.length;
-                    
+
                     // Generate the HTML for line items
                     const lineItemsHtml = lineItems.map(item => `
                         <div class="line-item ${item.received ? 'received' : ''}" data-item-id="${item._id}">
@@ -6989,7 +7040,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                         ${item.trackingStatusDescription ? item.trackingStatusDescription : ''}
                                     </div>
                                     ${item.trackingLastUpdate ?
-                                        `<div class="line-item-tracking-info">
+                                `<div class="line-item-tracking-info">
                                             Last updated: ${new Date(item.trackingLastUpdate).toLocaleDateString()}
                                             ${item.trackingLocation ? ` • ${item.trackingLocation}` : ''}
                                         </div>` : ''}
@@ -7007,7 +7058,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             </div>
                         </div>
                     `).join('');
-                    
+
                     container.innerHTML = `
                         <div class="line-items-summary">
                             <strong>Summary:</strong> ${receivedCount}/${totalCount} items received
@@ -7024,13 +7075,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         async function loadPoDetailsNotesHistory(poId, poNumber) {
             const container = document.getElementById('poDetailsNotesHistory');
-            
+
             try {
                 container.innerHTML = '<div style="text-align: center; padding: 20px;">Loading...</div>';
-                
+
                 const response = await fetch(`/purchase-orders/${poId}/notes-history`);
                 const notes = await response.json();
-                
+
                 if (notes.length === 0) {
                     container.innerHTML = '<div class="no-notes">No notes found for this PO</div>';
                 } else {
@@ -7875,7 +7926,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById('showOnlyMissingUrls').checked = false;
             document.getElementById('showOnlyNoLineItems').checked = false;
             document.getElementById('showOnlyDropship').checked = false;
-            
+
             // Reset dropship toggle label
             const dropshipLabel = document.getElementById('dropshipToggleLabel');
             if (dropshipLabel) {
@@ -7883,19 +7934,19 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 dropshipLabel.style.fontWeight = '400';
                 dropshipLabel.style.color = '#666';
             }
-            
+
             // Clear localStorage for filter states
             localStorage.removeItem('filter_showNotMyConcern');
             localStorage.removeItem('filter_showPendingBill');
             localStorage.removeItem('filter_showOnlyMissingUrls');
             localStorage.removeItem('filter_showOnlyDropship');
-            
+
             applyFilters();
         }
 
         // ============ FILTER STATE PERSISTENCE ============
         // Save and restore filter checkbox states using localStorage
-        
+
         function saveFilterState(filterId, checked) {
             try {
                 localStorage.setItem(`filter_${filterId}`, checked.toString());
@@ -7906,7 +7957,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         function restoreFilterStates() {
             const filters = ['showNotMyConcern', 'showPendingBill', 'showOnlyMissingUrls', 'showOnlyDropship'];
-            
+
             filters.forEach(filterId => {
                 const savedState = localStorage.getItem(`filter_${filterId}`);
                 if (savedState !== null) {
@@ -7925,7 +7976,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         ['showNotMyConcern', 'showPendingBill', 'showOnlyMissingUrls'].forEach(filterId => {
             const checkbox = document.getElementById(filterId);
             if (checkbox) {
-                checkbox.addEventListener('change', function() {
+                checkbox.addEventListener('change', function () {
                     saveFilterState(filterId, this.checked);
                 });
             }
@@ -7941,7 +7992,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             dropshipLabel.style.color = dropshipToggle.checked ? '#ff9800' : '#666';
 
             // Add change listener
-            dropshipToggle.addEventListener('change', function() {
+            dropshipToggle.addEventListener('change', function () {
                 saveFilterState('showOnlyDropship', this.checked);
                 // Update label text and style
                 dropshipLabel.textContent = this.checked ? 'Dropship Only' : 'Show All POs';
@@ -7974,19 +8025,19 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         function saveSearchHistory(searchTerm) {
             if (!searchTerm || searchTerm.trim() === '') return;
-            
+
             try {
                 let history = getSearchHistory();
-                
+
                 // Remove if already exists (to move to top)
                 history = history.filter(item => item.toLowerCase() !== searchTerm.toLowerCase());
-                
+
                 // Add to beginning
                 history.unshift(searchTerm);
-                
+
                 // Keep only last MAX_HISTORY_ITEMS
                 history = history.slice(0, MAX_HISTORY_ITEMS);
-                
+
                 localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
             } catch (e) {
                 console.error('Error saving search history:', e);
@@ -8003,12 +8054,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function updateSearchHistoryDropdown() {
             const history = getSearchHistory();
             const list = document.getElementById('searchHistoryList');
-            
+
             if (history.length === 0) {
                 list.innerHTML = '<li class="search-history-empty">No recent searches</li>';
                 return;
             }
-            
+
             list.innerHTML = history.map(term => `
                 <li onclick="selectSearchHistory('${term.replace(/'/g, "\\'")}')">
                     <span class="search-history-item-text">${escapeHtml(term)}</span>
@@ -8040,9 +8091,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         // Search input event listeners
         const searchInput = document.getElementById('searchFilter');
-        
+
         searchInput.addEventListener('focus', showSearchHistoryDropdown);
-        
+
         searchInput.addEventListener('blur', () => {
             // Delay to allow clicking on dropdown items
             setTimeout(hideSearchHistoryDropdown, 200);
@@ -8050,7 +8101,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         // Save search when user types and pauses (debounced)
         let searchTimeout;
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 const value = this.value.trim();
@@ -8061,13 +8112,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         });
 
         // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const dropdown = document.getElementById('searchHistoryDropdown');
             const searchInput = document.getElementById('searchFilter');
-            
+
             // Only close if clicking outside both the dropdown and the search input
-            if (dropdown && searchInput && 
-                !dropdown.contains(event.target) && 
+            if (dropdown && searchInput &&
+                !dropdown.contains(event.target) &&
                 event.target !== searchInput &&
                 !searchInput.contains(event.target)) {
                 hideSearchHistoryDropdown();
@@ -8626,7 +8677,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 initUrlInputListeners();
                 // Apply filters when DOM is loaded
                 setTimeout(() => applyFilters(), 50);
-                
+
                 // Initialize tracking column state
                 initializeTrackingColumn();
             });
@@ -8641,7 +8692,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             // Initialize URL input listeners
             initUrlInputListeners();
             setTimeout(() => applyFilters(), 50);
-            
+
             // Initialize tracking column state
             initializeTrackingColumn();
         }
@@ -8650,16 +8701,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function fallbackCopyTextToClipboard(text) {
             const textArea = document.createElement("textarea");
             textArea.value = text;
-            
+
             // Avoid scrolling to bottom
             textArea.style.top = "0";
             textArea.style.left = "0";
             textArea.style.position = "fixed";
-            
+
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
-            
+
             try {
                 const successful = document.execCommand('copy');
                 if (successful) {
@@ -8670,7 +8721,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             } catch (err) {
                 console.error('❌ Fallback copy error:', err);
             }
-            
+
             document.body.removeChild(textArea);
         }
     </script>
@@ -8838,9 +8889,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         const filtersSection = document.getElementById('filtersSection');
         const tableHeader = document.querySelector('#purchaseOrdersTable thead');
 
-        window.addEventListener('scroll', function() {
+        window.addEventListener('scroll', function () {
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            
+
             // Add/remove scrolled class to header
             if (scrollTop > 50) {
                 header.classList.add('scrolled');
@@ -8862,7 +8913,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const headerHeight = header.offsetHeight;
                 const filtersHeight = filtersSection ? filtersSection.offsetHeight : 0;
                 const statsHeight = document.querySelector('.stats-combined')?.offsetHeight || 0;
-                
+
                 // Calculate total offset (header + filters)
                 const topOffset = headerHeight + filtersHeight;
                 tableHeader.style.top = topOffset + 'px';
@@ -8894,4 +8945,3 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 </body>
 
 </html>
-
