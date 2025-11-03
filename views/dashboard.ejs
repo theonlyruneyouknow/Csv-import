@@ -4047,15 +4047,28 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                 </tr>
                             </thead>
                             <tbody>
-                                <% purchaseOrders.forEach((po, index)=> { %>
-                                    <% // Extract unique locations from line items const lineItemLocations=po.lineItems
-                                        && po.lineItems.length> 0
-                                        ? [...new Set(po.lineItems.map(item => item.locationName).filter(loc =>
-                                        loc))].join(', ')
+                                <% purchaseOrders.forEach((po, index) => { 
+                                    // Extract unique locations from line items 
+                                    const lineItemLocations = po.lineItems && po.lineItems.length > 0
+                                        ? [...new Set(po.lineItems.map(item => item.locationName).filter(loc => loc))].join(', ')
                                         : '';
-                                        %>
+                                    
+                                    // Create a safe version of po for JSON serialization (avoid circular references)
+                                    const safePoData = {
+                                        _id: po._id,
+                                        poNumber: po.poNumber,
+                                        vendor: po.vendor,
+                                        date: po.date,
+                                        status: po.status,
+                                        nsStatus: po.nsStatus,
+                                        priority: po.priority,
+                                        isDropship: po.isDropship,
+                                        location: po.location,
+                                        lineItemCount: po.lineItemCount
+                                    };
+                                %>
                                         <!-- Main data row -->
-                                        <tr data-po='<%= JSON.stringify(po) %>' data-index="<%= index %>"
+                                        <tr data-po='<%= JSON.stringify(safePoData) %>' data-index="<%= index %>"
                                             data-line-item-locations="<%= lineItemLocations %>">
                                             <td class="date-cell">
                                                 <%= po.date %>
