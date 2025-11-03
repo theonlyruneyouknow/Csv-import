@@ -24,14 +24,14 @@ router.get('/test-upload', (req, res) => {
 // Helper function to calculate the earliest upcoming ETA from line items
 const calculateUpcomingETA = (lineItems) => {
   if (!lineItems || lineItems.length === 0) return null;
-  
+
   const now = new Date();
   const upcomingETAs = lineItems
     .filter(item => {
       // Check for any type of ETA (eta, expectedArrivalDate, or trackingEstimatedDelivery)
       const hasETA = item.eta || item.expectedArrivalDate || item.trackingEstimatedDelivery;
       if (!hasETA) return false;
-      
+
       // Use the best available ETA
       const etaDate = item.eta || item.expectedArrivalDate || item.trackingEstimatedDelivery;
       return new Date(etaDate) > now;
@@ -41,25 +41,25 @@ const calculateUpcomingETA = (lineItems) => {
       return new Date(etaDate);
     })
     .sort((a, b) => a - b); // Sort chronologically
-  
+
   return upcomingETAs.length > 0 ? upcomingETAs[0] : null;
 };
 
 // Helper function to format ETA display
 const formatETA = (eta) => {
   if (!eta) return 'No ETA';
-  
+
   const etaDate = new Date(eta);
   const now = new Date();
   const diffDays = Math.ceil((etaDate - now) / (1000 * 60 * 60 * 24));
-  
+
   if (diffDays < 0) return 'Past Due';
   if (diffDays === 0) return 'Today';
   if (diffDays === 1) return 'Tomorrow';
   if (diffDays <= 7) return `${diffDays} days`;
-  
-  return etaDate.toLocaleDateString('en-US', { 
-    month: 'short', 
+
+  return etaDate.toLocaleDateString('en-US', {
+    month: 'short',
     day: 'numeric',
     year: etaDate.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
   });
@@ -69,14 +69,14 @@ const formatETA = (eta) => {
 const ensureVendorExists = async (vendorData) => {
   try {
     const { vendorNumber, vendorName, originalVendor } = vendorData;
-    
+
     // Enhanced debugging for vendor creation
     console.log(`🔍 VENDOR DEBUG - Processing vendor:`, {
       original: originalVendor,
       vendorNumber: vendorNumber,
       vendorName: vendorName
     });
-    
+
     // Skip if no vendor data
     if (!vendorNumber && !vendorName) {
       console.log(`⚠️ VENDOR DEBUG - Skipping vendor creation: no vendor number or name`);
@@ -85,9 +85,9 @@ const ensureVendorExists = async (vendorData) => {
 
     // Create a unique internal ID from vendor number or name
     const internalId = vendorNumber || vendorName.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-    
+
     console.log(`🔍 VENDOR DEBUG - Generated internal ID: ${internalId}`);
-    
+
     // Check if vendor already exists by internal ID or vendor number
     const searchCriteria = {
       $or: [
@@ -96,9 +96,9 @@ const ensureVendorExists = async (vendorData) => {
         ...(vendorNumber ? [{ internalId: vendorNumber }] : [])
       ]
     };
-    
+
     console.log(`🔍 VENDOR DEBUG - Searching with criteria:`, searchCriteria);
-    
+
     let existingVendor = await OrganicVendor.findOne(searchCriteria);
 
     if (existingVendor) {
@@ -132,7 +132,7 @@ const ensureVendorExists = async (vendorData) => {
 
     await newVendor.save();
     console.log(`� VENDOR DEBUG - Successfully created new vendor: "${vendorName}" (${vendorNumber}) with ID: ${internalId}`);
-    
+
     return newVendor;
   } catch (error) {
     console.error(`❌ VENDOR DEBUG - Error ensuring vendor exists for "${vendorData.originalVendor}":`, error);
@@ -146,7 +146,7 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
   console.log('🚨 UPLOAD ENDPOINT HIT! File upload detected!');
   console.log('📁 Request file:', req.file ? req.file.originalname : 'NO FILE');
   console.log('📁 Request body:', req.body);
-  
+
   try {
     if (!req.file) {
       console.log('❌ No file uploaded!');
@@ -158,7 +158,7 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
 
     console.log('📁 CSV UPLOAD DEBUG - Starting CSV processing...');
     console.log('📁 File content preview:', fileContent.substring(0, 200) + '...');
-    
+
     const parsed = Papa.parse(fileContent, { header: false });
     const reportDate = parsed.data[3][0]; // Extract report date
 
@@ -177,12 +177,12 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
     }
 
     const dataRows = parsed.data.slice(dataStartIndex, dataEndIndex);
-    
+
     console.log(`📊 CSV UPLOAD DEBUG - Processing rows ${dataStartIndex} to ${dataEndIndex} (${dataRows.length} data rows)`);
     console.log(`📊 CSV UPLOAD DEBUG - Sample data rows:`, dataRows.slice(0, 3).map((row, idx) => ({
       rowIndex: dataStartIndex + idx,
       date: row[1],
-      poNumber: row[2], 
+      poNumber: row[2],
       vendor: row[3],
       status: row[4],
       amount: row[5]
@@ -221,7 +221,7 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
       // ALWAYS split vendor data and ensure vendor exists FIRST
       const vendorData = splitVendorData(vendorString);
       console.log(`🔄 CSV ROW DEBUG - Split vendor data:`, vendorData);
-      
+
       // CRITICAL: Always ensure vendor exists in vendor database BEFORE processing PO
       console.log(`🔍 VENDOR CHECK - Ensuring vendor exists for PO ${poNumber}`);
       const vendorResult = await ensureVendorExists(vendorData);
@@ -229,7 +229,7 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
 
       if (existingPO) {
         console.log(`🔄 CSV ROW DEBUG - Updating existing PO ${poNumber}`);
-        
+
         // Update existing PO - CSV status goes to nsStatus, preserve custom status
         const updateData = {
           reportDate,
@@ -251,13 +251,13 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
           console.log(`🔄 RESURRECTING PO ${poNumber}!`);
           console.log(`   Previously hidden: ${existingPO.hiddenReason} (by ${existingPO.hiddenBy} on ${existingPO.hiddenDate})`);
           console.log(`   Now unhiding PO and associated line items...`);
-          
+
           // Special extra logging for PO11322
           if (poNumber.includes('11322')) {
             console.log(`🎯 PO11322 RESURRECTION DETECTED!`);
             console.log(`   This is the PO we're specifically testing!`);
           }
-          
+
           // FIRST: Unhide the PO using $unset (separate operation)
           await PurchaseOrder.findByIdAndUpdate(existingPO._id, {
             $unset: {
@@ -293,7 +293,7 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
         console.log(`Updated PO ${poNumber} - NS Status: "${csvStatus}", Custom Status: "${existingPO.status}"${existingPO.isHidden ? ' (UNHIDDEN)' : ''}`);
       } else {
         console.log(`🔄 CSV ROW DEBUG - Creating new PO ${poNumber}`);
-        
+
         // Create new PO - CSV status goes to nsStatus, custom status starts empty
         await PurchaseOrder.create({
           reportDate,
@@ -318,7 +318,7 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
     // Use the actually processed PO numbers, not raw CSV data
     const currentPONumbers = Array.from(processedPONumbers);
     console.log(`📋 Processed ${currentPONumbers.length} PO numbers in this import:`, currentPONumbers.slice(0, 5), '...');
-    
+
     const hiddenResult = await PurchaseOrder.updateMany(
       {
         reportDate: reportDate,
@@ -341,36 +341,36 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
     } else {
       console.log(`✅ No POs needed to be hidden - all existing POs are still in the import`);
     }
-      
-      // Also hide line items for these hidden POs
-      const hiddenPONumbers = await PurchaseOrder.find({
-        reportDate: reportDate,
-        poNumber: { $nin: currentPONumbers },
-        isHidden: true
-      }, 'poNumber');
-      
-      const hiddenPONumbersArray = hiddenPONumbers.map(po => po.poNumber);
-      
-      if (hiddenPONumbersArray.length > 0) {
-        const hiddenLineItemsResult = await LineItem.updateMany(
-          {
-            poNumber: { $in: hiddenPONumbersArray },
-            isHidden: { $ne: true }
-          },
-          {
-            $set: {
-              isHidden: true,
-              hiddenDate: new Date(),
-              hiddenReason: 'Parent PO hidden',
-              hiddenBy: 'System'
-            }
+
+    // Also hide line items for these hidden POs
+    const hiddenPONumbers = await PurchaseOrder.find({
+      reportDate: reportDate,
+      poNumber: { $nin: currentPONumbers },
+      isHidden: true
+    }, 'poNumber');
+
+    const hiddenPONumbersArray = hiddenPONumbers.map(po => po.poNumber);
+
+    if (hiddenPONumbersArray.length > 0) {
+      const hiddenLineItemsResult = await LineItem.updateMany(
+        {
+          poNumber: { $in: hiddenPONumbersArray },
+          isHidden: { $ne: true }
+        },
+        {
+          $set: {
+            isHidden: true,
+            hiddenDate: new Date(),
+            hiddenReason: 'Parent PO hidden',
+            hiddenBy: 'System'
           }
-        );
-        
-        if (hiddenLineItemsResult.modifiedCount > 0) {
-          console.log(`Also hidden ${hiddenLineItemsResult.modifiedCount} line items for hidden POs`);
         }
+      );
+
+      if (hiddenLineItemsResult.modifiedCount > 0) {
+        console.log(`Also hidden ${hiddenLineItemsResult.modifiedCount} line items for hidden POs`);
       }
+    }
 
     // Clean up uploaded file
     fs.unlinkSync(req.file.path);
@@ -1054,8 +1054,8 @@ router.get('/trouble-seed', async (req, res) => {
       },
       {
         $sort: sortBy === 'eta' ? { eta: 1, poNumber: 1 } :
-               sortBy === 'vendor' ? { vendor: 1, poNumber: 1 } :
-               { poNumber: 1, memo: 1 }
+          sortBy === 'vendor' ? { vendor: 1, poNumber: 1 } :
+            { poNumber: 1, memo: 1 }
       }
     ]);
 
@@ -1066,8 +1066,8 @@ router.get('/trouble-seed', async (req, res) => {
       approaching: troubleItems.filter(item => item.etaStatus === 'approaching'), // 8-14 days
       overdue: troubleItems.filter(item => item.etaStatus === 'overdue'),
       partialShipment: troubleItems.filter(item => item.isPartialShipment === true),
-      needsFollowup: troubleItems.filter(item => 
-        item.etaStatus === 'overdue' || 
+      needsFollowup: troubleItems.filter(item =>
+        item.etaStatus === 'overdue' ||
         (item.etaStatus === 'no-eta' && item.itemStatus === 'Delivery Delay') ||
         (item.etaStatus === 'approaching-soon' && !item.vendorData)
       )
@@ -1108,7 +1108,7 @@ router.get('/trouble-seed', async (req, res) => {
       if (!po.snoozedUntil) return true;
       return new Date(po.snoozedUntil) <= new Date();
     });
-    
+
     // Filter by email status if specified
     if (emailStatus === 'contacted') {
       filteredPOs = filteredPOs.filter(po => po.lastEmailSent);
@@ -1169,10 +1169,10 @@ router.get('/trouble-seed', async (req, res) => {
   } catch (error) {
     console.error('🚨 Enhanced Trouble Seed dashboard error:', error);
     console.error('🚨 Error stack:', error.stack);
-    res.status(500).render('error', { 
+    res.status(500).render('error', {
       error: 'System Error',
       message: 'Something went wrong!',
-      details: error.message 
+      details: error.message
     });
   }
 });
@@ -1182,31 +1182,31 @@ router.put('/line-items/:itemId/eta', async (req, res) => {
   try {
     const { itemId } = req.params;
     const { eta } = req.body;
-    
+
     console.log(`🗓️ Updating ETA for item ${itemId} to ${eta}`);
-    
+
     // Validate ETA format
     const etaDate = new Date(eta);
     if (isNaN(etaDate.getTime())) {
       return res.status(400).json({ error: 'Invalid ETA date format' });
     }
-    
+
     const updatedItem = await LineItem.findByIdAndUpdate(
       itemId,
-      { 
+      {
         eta: etaDate,
         notes: `ETA updated to ${etaDate.toLocaleDateString()} on ${new Date().toLocaleDateString()}`
       },
       { new: true }
     );
-    
+
     if (!updatedItem) {
       return res.status(404).json({ error: 'Line item not found' });
     }
-    
+
     console.log(`✅ ETA updated successfully for item: ${updatedItem.memo}`);
     res.json({ success: true, item: updatedItem });
-    
+
   } catch (error) {
     console.error('Error updating ETA:', error);
     res.status(500).json({ error: error.message });
@@ -1218,12 +1218,12 @@ router.put('/line-items/:itemId/receive', async (req, res) => {
   try {
     const { itemId } = req.params;
     const { receivedDate = new Date(), receivedBy = 'System' } = req.body;
-    
+
     console.log(`📦 Marking item ${itemId} as received`);
-    
+
     const updatedItem = await LineItem.findByIdAndUpdate(
       itemId,
-      { 
+      {
         received: true,
         receivedDate: new Date(receivedDate),
         receivedBy: receivedBy,
@@ -1232,14 +1232,14 @@ router.put('/line-items/:itemId/receive', async (req, res) => {
       },
       { new: true }
     );
-    
+
     if (!updatedItem) {
       return res.status(404).json({ error: 'Line item not found' });
     }
-    
+
     console.log(`✅ Item marked as received: ${updatedItem.memo}`);
     res.json({ success: true, item: updatedItem });
-    
+
   } catch (error) {
     console.error('Error marking item as received:', error);
     res.status(500).json({ error: error.message });
@@ -1250,18 +1250,18 @@ router.put('/line-items/:itemId/receive', async (req, res) => {
 router.put('/line-items/:itemId/partial-shipment', async (req, res) => {
   try {
     const { itemId } = req.params;
-    const { 
-      partialShipmentStatus, 
-      partialShipmentNotes, 
+    const {
+      partialShipmentStatus,
+      partialShipmentNotes,
       remainderETA,
       vendorResponse,
       vendorResponseDate
     } = req.body;
-    
+
     const username = req.user ? req.user.username : 'System';
-    
+
     console.log(`📦 Recording vendor response for partial shipment ${itemId}: ${partialShipmentStatus}`);
-    
+
     const updateData = {
       partialShipmentStatus: partialShipmentStatus || '',
       partialShipmentNotes: partialShipmentNotes || '',
@@ -1270,24 +1270,24 @@ router.put('/line-items/:itemId/partial-shipment', async (req, res) => {
       vendorResponse: vendorResponse || '',
       vendorResponseDate: vendorResponseDate ? new Date(vendorResponseDate) : new Date()
     };
-    
+
     if (remainderETA) {
       updateData.remainderETA = new Date(remainderETA);
     }
-    
+
     const updatedItem = await LineItem.findByIdAndUpdate(
       itemId,
       updateData,
       { new: true }
     );
-    
+
     if (!updatedItem) {
       return res.status(404).json({ error: 'Line item not found' });
     }
-    
+
     console.log(`✅ Vendor response recorded for: ${updatedItem.memo} - Status: ${partialShipmentStatus}`);
     res.json({ success: true, item: updatedItem });
-    
+
   } catch (error) {
     console.error('Error recording vendor response:', error);
     res.status(500).json({ error: 'Failed to record vendor response' });
@@ -1299,17 +1299,17 @@ router.put('/pos/:poId/snooze', async (req, res) => {
   try {
     const { poId } = req.params;
     const { days } = req.body; // 1, 7, or 14 days
-    
+
     if (!days || ![1, 7, 14].includes(Number(days))) {
       return res.status(400).json({ error: 'Invalid snooze duration. Must be 1, 7, or 14 days.' });
     }
-    
+
     const username = req.user ? req.user.username : 'System';
     const snoozedUntil = new Date();
     snoozedUntil.setDate(snoozedUntil.getDate() + Number(days));
-    
+
     console.log(`⏰ Snoozing PO ${poId} for ${days} days until ${snoozedUntil.toLocaleDateString()}`);
-    
+
     const updatedPO = await PurchaseOrder.findByIdAndUpdate(
       poId,
       {
@@ -1319,19 +1319,19 @@ router.put('/pos/:poId/snooze', async (req, res) => {
       },
       { new: true }
     );
-    
+
     if (!updatedPO) {
       return res.status(404).json({ error: 'Purchase Order not found' });
     }
-    
+
     console.log(`✅ Snoozed PO ${updatedPO.poNumber} until ${snoozedUntil.toLocaleDateString()}`);
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       po: updatedPO,
       snoozedUntil: snoozedUntil,
       message: `Snoozed for ${days} day${days > 1 ? 's' : ''}`
     });
-    
+
   } catch (error) {
     console.error('Error snoozing PO:', error);
     res.status(500).json({ error: 'Failed to snooze PO' });
@@ -1342,9 +1342,9 @@ router.put('/pos/:poId/snooze', async (req, res) => {
 router.put('/pos/:poId/unsnooze', async (req, res) => {
   try {
     const { poId } = req.params;
-    
+
     console.log(`⏰ Unsnoozing PO ${poId}`);
-    
+
     const updatedPO = await PurchaseOrder.findByIdAndUpdate(
       poId,
       {
@@ -1354,14 +1354,14 @@ router.put('/pos/:poId/unsnooze', async (req, res) => {
       },
       { new: true }
     );
-    
+
     if (!updatedPO) {
       return res.status(404).json({ error: 'Purchase Order not found' });
     }
-    
+
     console.log(`✅ Unsnoozed PO ${updatedPO.poNumber}`);
     res.json({ success: true, po: updatedPO });
-    
+
   } catch (error) {
     console.error('Error unsnoozing PO:', error);
     res.status(500).json({ error: 'Failed to unsnooze PO' });
@@ -1372,13 +1372,13 @@ router.put('/pos/:poId/unsnooze', async (req, res) => {
 router.get('/pos/snoozed/list', async (req, res) => {
   try {
     const now = new Date();
-    
+
     const snoozedPOs = await PurchaseOrder.find({
       snoozedUntil: { $exists: true, $ne: null, $gt: now }
     }).sort({ snoozedUntil: 1 }); // Sort by wake-up date, soonest first
-    
+
     console.log(`📋 Found ${snoozedPOs.length} snoozed POs`);
-    
+
     res.json({
       success: true,
       snoozedPOs: snoozedPOs.map(po => ({
@@ -1391,7 +1391,7 @@ router.get('/pos/snoozed/list', async (req, res) => {
         nsStatus: po.nsStatus
       }))
     });
-    
+
   } catch (error) {
     console.error('Error fetching snoozed POs:', error);
     res.status(500).json({ error: 'Failed to fetch snoozed POs' });
@@ -1403,9 +1403,9 @@ router.put('/pos/:poId/unhide', async (req, res) => {
   try {
     const { poId } = req.params;
     const username = req.user ? req.user.username : 'System';
-    
+
     console.log(`🔓 Un-hiding PO ${poId} by ${username}`);
-    
+
     const updatedPO = await PurchaseOrder.findByIdAndUpdate(
       poId,
       {
@@ -1418,14 +1418,14 @@ router.put('/pos/:poId/unhide', async (req, res) => {
       },
       { new: true }
     );
-    
+
     if (!updatedPO) {
       return res.status(404).json({ error: 'Purchase Order not found' });
     }
-    
+
     console.log(`✅ Un-hidden PO ${updatedPO.poNumber}`);
     res.json({ success: true, po: updatedPO });
-    
+
   } catch (error) {
     console.error('Error un-hiding PO:', error);
     res.status(500).json({ error: 'Failed to un-hide PO' });
@@ -1437,17 +1437,17 @@ router.put('/line-items/:itemId/snooze', async (req, res) => {
   try {
     const { itemId } = req.params;
     const { days } = req.body; // 1, 7, or 14 days
-    
+
     if (!days || ![1, 7, 14].includes(Number(days))) {
       return res.status(400).json({ error: 'Invalid snooze duration. Must be 1, 7, or 14 days.' });
     }
-    
+
     const username = req.user ? req.user.username : 'System';
     const snoozedUntil = new Date();
     snoozedUntil.setDate(snoozedUntil.getDate() + Number(days));
-    
+
     console.log(`⏰ Snoozing line item ${itemId} for ${days} days until ${snoozedUntil.toLocaleDateString()}`);
-    
+
     const updatedItem = await LineItem.findByIdAndUpdate(
       itemId,
       {
@@ -1457,19 +1457,19 @@ router.put('/line-items/:itemId/snooze', async (req, res) => {
       },
       { new: true }
     );
-    
+
     if (!updatedItem) {
       return res.status(404).json({ error: 'Line item not found' });
     }
-    
+
     console.log(`✅ Snoozed: ${updatedItem.memo} until ${snoozedUntil.toLocaleDateString()}`);
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       item: updatedItem,
       snoozedUntil: snoozedUntil,
       message: `Snoozed for ${days} day${days > 1 ? 's' : ''}`
     });
-    
+
   } catch (error) {
     console.error('Error snoozing line item:', error);
     res.status(500).json({ error: 'Failed to snooze item' });
@@ -1480,9 +1480,9 @@ router.put('/line-items/:itemId/snooze', async (req, res) => {
 router.put('/line-items/:itemId/unsnooze', async (req, res) => {
   try {
     const { itemId } = req.params;
-    
+
     console.log(`⏰ Unsnoozing line item ${itemId}`);
-    
+
     const updatedItem = await LineItem.findByIdAndUpdate(
       itemId,
       {
@@ -1492,14 +1492,14 @@ router.put('/line-items/:itemId/unsnooze', async (req, res) => {
       },
       { new: true }
     );
-    
+
     if (!updatedItem) {
       return res.status(404).json({ error: 'Line item not found' });
     }
-    
+
     console.log(`✅ Unsnoozed: ${updatedItem.memo}`);
     res.json({ success: true, item: updatedItem });
-    
+
   } catch (error) {
     console.error('Error unsnoozing line item:', error);
 
@@ -1512,30 +1512,30 @@ router.put('/line-items/:itemId/follow-up', async (req, res) => {
   try {
     const { itemId } = req.params;
     const { followUpNote, contactMethod = 'Email' } = req.body;
-    
+
     console.log(`📞 Adding follow-up note for item ${itemId}`);
-    
+
     const currentItem = await LineItem.findById(itemId);
     if (!currentItem) {
       return res.status(404).json({ error: 'Line item not found' });
     }
-    
+
     const followUpEntry = `[${new Date().toLocaleDateString()}] ${contactMethod} Follow-up: ${followUpNote}`;
     const existingNotes = currentItem.notes || '';
     const updatedNotes = existingNotes ? `${existingNotes}\n${followUpEntry}` : followUpEntry;
-    
+
     const updatedItem = await LineItem.findByIdAndUpdate(
       itemId,
-      { 
+      {
         notes: updatedNotes,
         itemStatus: 'Vendor Contacted'
       },
       { new: true }
     );
-    
+
     console.log(`✅ Follow-up note added: ${updatedItem.memo}`);
     res.json({ success: true, item: updatedItem });
-    
+
   } catch (error) {
     console.error('Error adding follow-up note:', error);
     res.status(500).json({ error: error.message });
@@ -1557,17 +1557,17 @@ router.put('/line-items/:itemId/update', async (req, res) => {
     });
 
     const updateData = {};
-    
+
     if (quantityOrdered !== undefined) {
       const qty = parseFloat(quantityOrdered);
       updateData.quantityOrdered = qty;
       updateData.quantityExpected = qty; // Keep both fields in sync
     }
-    
+
     if (quantityReceived !== undefined) {
       updateData.quantityReceived = parseFloat(quantityReceived);
     }
-    
+
     if (itemStatus !== undefined && itemStatus !== '') {
       updateData.itemStatus = itemStatus;
     }
@@ -1603,8 +1603,8 @@ router.put('/line-items/:itemId/update', async (req, res) => {
     }
 
     console.log(`✅ Successfully updated line item ${itemId}`);
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       lineItem: updatedItem,
       message: 'Line item updated successfully'
     });
@@ -1619,12 +1619,12 @@ router.get('/api/validate-po/:poNumber', async (req, res) => {
   try {
     const { poNumber } = req.params;
     console.log(`🔍 Validating PO: ${poNumber}`);
-    
+
     const po = await PurchaseOrder.findOne({ poNumber: poNumber });
-    
+
     if (po) {
-      res.json({ 
-        exists: true, 
+      res.json({
+        exists: true,
         po: {
           poNumber: po.poNumber,
           vendor: po.vendor,
@@ -1839,17 +1839,17 @@ router.get('/line-items-api', async (req, res) => {
 router.get('/line-items-with-tracking', async (req, res) => {
   try {
     console.log('📦 Fetching line items with tracking numbers...');
-    
+
     const limit = parseInt(req.query.limit) || 1000;
-    
+
     // Query for items with tracking numbers
     const lineItems = await LineItem.find({
       trackingNumber: { $exists: true, $ne: '', $ne: null }
     })
-    .populate('poId', 'poNumber vendor')
-    .sort({ trackingLastUpdate: -1 })
-    .limit(limit)
-    .lean();
+      .populate('poId', 'poNumber vendor')
+      .sort({ trackingLastUpdate: -1 })
+      .limit(limit)
+      .lean();
 
     console.log(`✅ Found ${lineItems.length} line items with tracking numbers`);
 
@@ -1947,15 +1947,15 @@ router.get('/', async (req, res) => {
 
     // Check if we should include hidden POs
     const includeHidden = req.query.includeHidden === 'true';
-    
+
     // Check for vendor filter
     const vendorFilter = req.query.vendor;
-    
+
     let query = {};
     if (!includeHidden) {
       query.isHidden = { $ne: true }; // Only show non-hidden POs by default
     }
-    
+
     // Add vendor filter if provided
     if (vendorFilter) {
       query.vendor = { $regex: new RegExp(vendorFilter, 'i') }; // Case-insensitive match
@@ -1972,7 +1972,7 @@ router.get('/', async (req, res) => {
         const lineItems = await LineItem.find({ poId: po._id, isHidden: { $ne: true } });
         const upcomingETA = calculateUpcomingETA(lineItems);
         const formattedETA = formatETA(upcomingETA);
-        
+
         return {
           ...po.toObject(),
           lineItems,
@@ -1984,8 +1984,8 @@ router.get('/', async (req, res) => {
     );
 
     // Get all tasks that are related to purchase orders
-    const allTasks = await Task.find({ 
-      relatedPOs: { $exists: true, $ne: [] } 
+    const allTasks = await Task.find({
+      relatedPOs: { $exists: true, $ne: [] }
     }).populate('relatedPOs', 'poNumber');
 
     // Create a map of PO ObjectId to tasks
@@ -2044,7 +2044,7 @@ router.get('/', async (req, res) => {
     // Create vendor mapping for clickable links using the Vendor model (main vendor dashboard)
     const Vendor = require('../models/Vendor');
     const { splitVendorData } = require('../lib/vendorUtils');
-    
+
     // First, try to use the linkedVendor field if it exists
     const vendorMap = {};
     purchaseOrdersWithETA.forEach(po => {
@@ -2057,21 +2057,21 @@ router.get('/', async (req, res) => {
     const unmappedVendors = uniqueVendors.filter(v => !vendorMap[v]);
     if (unmappedVendors.length > 0) {
       const allVendorRecords = await Vendor.find();
-      
+
       unmappedVendors.forEach(poVendor => {
         const vendorData = splitVendorData(poVendor);
-        
+
         // Try to find matching vendor in the database
         const matchingVendor = allVendorRecords.find(vendor => {
           // Match by vendor code (number)
-          if (vendorData.vendorNumber && 
-              (vendor.vendorCode === vendorData.vendorNumber ||
-               vendor.vendorCode === vendorData.vendorNumber.padStart(3, '0'))) {
+          if (vendorData.vendorNumber &&
+            (vendor.vendorCode === vendorData.vendorNumber ||
+              vendor.vendorCode === vendorData.vendorNumber.padStart(3, '0'))) {
             return true;
           }
           // Match by vendor name (case-insensitive)
-          if (vendorData.vendorName && 
-              vendor.vendorName.toLowerCase() === vendorData.vendorName.toLowerCase()) {
+          if (vendorData.vendorName &&
+            vendor.vendorName.toLowerCase() === vendorData.vendorName.toLowerCase()) {
             return true;
           }
           // Match full vendor string
@@ -2080,7 +2080,7 @@ router.get('/', async (req, res) => {
           }
           return false;
         });
-        
+
         if (matchingVendor) {
           vendorMap[poVendor] = matchingVendor._id;
         }
@@ -2090,7 +2090,7 @@ router.get('/', async (req, res) => {
     console.log(`📝 Created vendor mapping for ${Object.keys(vendorMap).length} vendors (using Vendor model)`);
     console.log(`🔍 Vendor map sample:`, Object.keys(vendorMap).slice(0, 5));
     console.log(`🔍 Sample PO vendors:`, uniqueVendors.slice(0, 5));
-    
+
     // Check for matches
     const matchedVendors = uniqueVendors.filter(vendor => vendorMap[vendor]);
     console.log(`✅ ${matchedVendors.length} vendors have links out of ${uniqueVendors.length} total vendors`);
@@ -2151,17 +2151,17 @@ router.get('/', async (req, res) => {
 router.get('/api/purchase-orders', async (req, res) => {
   try {
     const includeHidden = req.query.includeHidden === 'true';
-    
+
     let query = {};
     if (!includeHidden) {
       query.isHidden = { $ne: true };
     }
-    
+
     const purchaseOrders = await PurchaseOrder.find(query).sort({ date: 1 });
-    
+
     // Get all tasks that are related to purchase orders
-    const allTasks = await Task.find({ 
-      relatedPOs: { $exists: true, $ne: [] } 
+    const allTasks = await Task.find({
+      relatedPOs: { $exists: true, $ne: [] }
     }).populate('relatedPOs', 'poNumber');
 
     // Create a map of PO ObjectId to tasks
@@ -2179,7 +2179,7 @@ router.get('/api/purchase-orders', async (req, res) => {
     purchaseOrders.forEach(po => {
       po.relatedTasks = tasksByPOId[po._id] || [];
     });
-    
+
     res.json({ success: true, purchaseOrders });
   } catch (error) {
     console.error('❌ API purchase orders error:', error);
@@ -3029,7 +3029,7 @@ router.put('/:id/shipping-tracking', async (req, res) => {
 router.put('/:id/priority', async (req, res) => {
   try {
     const { priority } = req.body;
-    
+
     // Validate priority is between 1-5 or null/undefined to clear
     if (priority !== null && priority !== undefined && (isNaN(priority) || priority < 1 || priority > 5)) {
       return res.status(400).json({ error: 'Priority must be between 1 and 5, or null to clear' });
@@ -3040,7 +3040,7 @@ router.put('/:id/priority', async (req, res) => {
       { priority: priority, updatedAt: new Date() },
       { new: true }
     );
-    
+
     console.log(`Updated priority for PO ${updated.poNumber}: ${priority || 'cleared'}`);
     res.json({ success: true });
   } catch (error) {
@@ -3053,7 +3053,7 @@ router.put('/:id/priority', async (req, res) => {
 router.put('/:id/dropship', async (req, res) => {
   try {
     const { isDropship } = req.body;
-    
+
     // Validate isDropship is a boolean
     if (typeof isDropship !== 'boolean') {
       return res.status(400).json({ error: 'isDropship must be a boolean value' });
@@ -3064,14 +3064,14 @@ router.put('/:id/dropship', async (req, res) => {
       { isDropship: isDropship, updatedAt: new Date() },
       { new: true }
     );
-    
+
     if (!updated) {
       return res.status(404).json({ error: 'Purchase order not found' });
     }
-    
+
     console.log(`🚚 Updated dropship status for PO ${updated.poNumber}: ${isDropship ? 'YES' : 'NO'}`);
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       isDropship: updated.isDropship,
       poNumber: updated.poNumber
     });
@@ -3463,7 +3463,7 @@ router.post('/preview-netsuite-import', async (req, res) => {
     // Compare with existing items
     const previewItems = [];
     const itemMap = new Map();
-    
+
     // Add current items to map
     currentLineItems.forEach(item => {
       itemMap.set(item.item || item.memo, { ...item.toObject(), isExisting: true });
@@ -3700,7 +3700,7 @@ router.post('/import-netsuite', async (req, res) => {
       const itemCode = row[itemIndex] || '';
       const vendorName = row[vendorNameIndex] || '';
       const locationName = row[locationNameIndex] || '';
-      
+
       // Parse quantity with comma support (e.g., "6,000" -> 6000)
       let quantity = 0;
       if (row[quantityIndex]) {
@@ -3708,11 +3708,11 @@ router.post('/import-netsuite', async (req, res) => {
         const cleanQuantityStr = quantityStr.replace(/,/g, ''); // Remove commas
         quantity = parseFloat(cleanQuantityStr) || 0;
       }
-      
+
       const description = row[descriptionIndex] || '';
       const vendorDescription = row[vendorDescIndex] || '';
       const units = row[unitsIndex] || '';
-      
+
       // Parse received with comma support
       let received = 0;
       if (row[receivedIndex]) {
@@ -3720,7 +3720,7 @@ router.post('/import-netsuite', async (req, res) => {
         const cleanReceivedStr = receivedStr.replace(/,/g, '');
         received = parseFloat(cleanReceivedStr) || 0;
       }
-      
+
       // Parse billed with comma support  
       let billed = 0;
       if (row[billedIndex]) {
@@ -3728,7 +3728,7 @@ router.post('/import-netsuite', async (req, res) => {
         const cleanBilledStr = billedStr.replace(/,/g, '');
         billed = parseFloat(cleanBilledStr) || 0;
       }
-      
+
       const expectedReceiptDate = row[expectedReceiptIndex] || '';
       const expectedArrivalDate = row[expectedArrivalIndex] || '';
       const billVarianceStatus = row[billVarianceStatusIndex] || '';
@@ -3801,19 +3801,19 @@ router.post('/import-netsuite', async (req, res) => {
       // Implement ETA logic and quantity discrepancy detection
       let calculatedEta = parseDate(expectedArrivalDate);
       let notesArray = [`NetSuite Import - Qty: ${quantity}, Received: ${received}, Billed: ${billed}`];
-      
+
       // Add vendor description if available
       if (vendorDescription) {
         notesArray.push(`Vendor Desc: ${vendorDescription}`);
       }
-      
+
       // Quantity Discrepancy Detection:
       // If Bill Variance Status is empty BUT there's a value in Bill Variance Field
       if (!billVarianceStatus && billVarianceField) {
         notesArray.push('Quantity Discrepancy');
         console.log(`⚠️ Quantity discrepancy detected for ${itemCode}: No variance status but variance field has value`);
       }
-      
+
       // ETA Logic: Use Expected Arrival Date only if no Bill Variance Field value
       if (!billVarianceField && expectedArrivalDate) {
         calculatedEta = parseDate(expectedArrivalDate);
@@ -3939,7 +3939,7 @@ router.put('/line-items/:lineItemId/tracking', async (req, res) => {
 
     // Generate tracking URL
     const trackingURL = trackingService.getTrackingURL(
-      trackingNumber?.trim() || '', 
+      trackingNumber?.trim() || '',
       finalCarrier || lineItem.trackingCarrier
     );
 
@@ -3947,20 +3947,20 @@ router.put('/line-items/:lineItemId/tracking', async (req, res) => {
     lineItem.trackingNumber = trackingNumber?.trim() || '';
     lineItem.trackingCarrier = finalCarrier?.trim() || '';
     lineItem.trackingURL = trackingURL || '';
-    
+
     if (status) {
       lineItem.trackingStatus = status;
       lineItem.trackingLastUpdate = new Date();
     }
-    
+
     if (location) {
       lineItem.trackingLocation = location;
     }
-    
+
     if (description) {
       lineItem.trackingStatusDescription = description;
     }
-    
+
     if (estimatedDelivery) {
       lineItem.trackingEstimatedDelivery = new Date(estimatedDelivery);
     }
@@ -3970,7 +3970,7 @@ router.put('/line-items/:lineItemId/tracking', async (req, res) => {
       if (!lineItem.trackingHistory) {
         lineItem.trackingHistory = [];
       }
-      
+
       lineItem.trackingHistory.push({
         timestamp: new Date(),
         status: status,
@@ -3984,9 +3984,9 @@ router.put('/line-items/:lineItemId/tracking', async (req, res) => {
     await lineItem.save();
 
     console.log(`✅ Updated tracking for line item ${lineItem._id} (PO ${lineItem.poNumber}): ${trackingNumber || 'cleared'}`);
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       lineItem,
       trackingURL
     });
@@ -4019,7 +4019,7 @@ router.put('/line-items/:lineItemId/tracking/update', async (req, res) => {
     if (status) {
       lineItem.trackingStatus = status;
       lineItem.trackingLastUpdate = new Date();
-      
+
       // Add to history
       if (!lineItem.trackingHistory) {
         lineItem.trackingHistory = [];
@@ -4060,35 +4060,35 @@ router.put('/line-items/:lineItemId/tracking/update', async (req, res) => {
 router.post('/tracking/bulk-update', async (req, res) => {
   try {
     console.log('🔄 Starting bulk tracking update using carrier APIs...');
-    
+
     const trackingService = require('../services/trackingService');
     const fedexService = require('../services/fedexService');
-    
+
     // Find all line items with tracking numbers
     const lineItems = await LineItem.find({
       trackingNumber: { $exists: true, $ne: '', $ne: null }
     }).limit(100); // Limit to prevent API overuse
-    
+
     console.log(`📦 Found ${lineItems.length} line items with tracking numbers`);
-    
+
     let updated = 0;
     let failed = 0;
     let skipped = 0;
-    
+
     for (const lineItem of lineItems) {
       try {
         const carrier = lineItem.trackingCarrier || trackingService.detectCarrier(lineItem.trackingNumber);
-        
+
         // Currently only FedEx is supported, skip others
         if (carrier.toLowerCase() !== 'fedex') {
           console.log(`⏭️  Skipping ${lineItem.trackingNumber} - ${carrier} API not yet implemented`);
           skipped++;
           continue;
         }
-        
+
         // Fetch live tracking data from FedEx
         const trackingData = await fedexService.trackPackage(lineItem.trackingNumber);
-        
+
         if (trackingData.success && trackingData.status) {
           // Update line item with live data
           lineItem.trackingStatus = trackingData.status;
@@ -4096,21 +4096,21 @@ router.post('/tracking/bulk-update', async (req, res) => {
           lineItem.trackingLastUpdate = new Date();
           lineItem.trackingLocation = trackingData.lastLocation || '';
           lineItem.trackingCarrier = 'FedEx';
-          
+
           if (trackingData.estimatedDelivery) {
             lineItem.trackingEstimatedDelivery = trackingData.estimatedDelivery;
           }
-          
+
           if (trackingData.actualDelivery) {
             lineItem.trackingActualDelivery = trackingData.actualDelivery;
           }
-          
+
           // Add to tracking history if we have new events
           if (trackingData.history && trackingData.history.length > 0) {
             if (!lineItem.trackingHistory) {
               lineItem.trackingHistory = [];
             }
-            
+
             // Add the most recent event
             const latestEvent = trackingData.history[0];
             lineItem.trackingHistory.push({
@@ -4121,7 +4121,7 @@ router.post('/tracking/bulk-update', async (req, res) => {
               updatedBy: 'FedEx API'
             });
           }
-          
+
           await lineItem.save();
           updated++;
           console.log(`✅ Updated ${lineItem.trackingNumber}: ${trackingData.status}`);
@@ -4129,18 +4129,18 @@ router.post('/tracking/bulk-update', async (req, res) => {
           failed++;
           console.log(`❌ Failed to get tracking for ${lineItem.trackingNumber}: ${trackingData.error || 'Unknown error'}`);
         }
-        
+
         // Add small delay to avoid rate limiting
         await new Promise(resolve => setTimeout(resolve, 100));
-        
+
       } catch (error) {
         console.error(`❌ Error updating ${lineItem.trackingNumber}:`, error.message);
         failed++;
       }
     }
-    
+
     console.log(`✅ Bulk update complete: ${updated} updated, ${failed} failed, ${skipped} skipped`);
-    
+
     res.json({
       success: true,
       message: `Updated ${updated} of ${lineItems.length} tracking numbers`,
@@ -4155,7 +4155,7 @@ router.post('/tracking/bulk-update', async (req, res) => {
         dhlSupported: false
       }
     });
-    
+
   } catch (error) {
     console.error('❌ Bulk tracking update error:', error);
     res.status(500).json({
@@ -4175,10 +4175,10 @@ router.get('/tracking/debug/:trackingNumber/:carrier', async (req, res) => {
 
     // Auto-detect carrier if not provided
     const detectedCarrier = carrier || trackingService.detectCarrier(trackingNumber);
-    
+
     // Validate tracking number
     const isValid = trackingService.validateTrackingNumber(trackingNumber, detectedCarrier);
-    
+
     // Generate tracking URL
     const trackingURL = trackingService.getTrackingURL(trackingNumber, detectedCarrier);
 
@@ -4212,10 +4212,10 @@ router.get('/tracking/debug/:trackingNumber', async (req, res) => {
 
     // Auto-detect carrier
     const detectedCarrier = trackingService.detectCarrier(trackingNumber);
-    
+
     // Validate tracking number
     const isValid = trackingService.validateTrackingNumber(trackingNumber, detectedCarrier);
-    
+
     // Generate tracking URL
     const trackingURL = trackingService.getTrackingURL(trackingNumber, detectedCarrier);
 
@@ -4334,12 +4334,12 @@ router.get('/tracking/:trackingNumber/live', async (req, res) => {
       // Only add the most recent event if it's new
       const latestEvent = liveData.history[0];
       const existingLineItem = await LineItem.findOne({ trackingNumber });
-      
+
       if (existingLineItem) {
         const hasEvent = existingLineItem.trackingHistory?.some(
           h => h.timestamp?.getTime() === latestEvent.timestamp?.getTime()
         );
-        
+
         if (!hasEvent) {
           updateData.$push = {
             trackingHistory: {
@@ -4372,9 +4372,9 @@ router.get('/tracking/:trackingNumber/live', async (req, res) => {
 
   } catch (error) {
     console.error('❌ Live tracking error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: error.message 
+      error: error.message
     });
   }
 });
@@ -4394,23 +4394,23 @@ router.get('/tracking-dashboard', async (req, res) => {
     const itemsWithTracking = await LineItem.countDocuments({
       trackingNumber: { $exists: true, $ne: '', $ne: null }
     });
-    
+
     // Count by status using standardized status values from carrier APIs
     const deliveredItems = await LineItem.countDocuments({
       trackingStatus: { $in: ['Delivered', 'delivered'] }
     });
     const inTransitItems = await LineItem.countDocuments({
-      trackingStatus: { 
+      trackingStatus: {
         $in: [
           'In Transit', 'in transit',
           'Out for Delivery', 'out for delivery',
           'Picked Up', 'picked up',
           'Label Created', 'label created'
-        ] 
+        ]
       }
     });
     const exceptionItems = await LineItem.countDocuments({
-      trackingStatus: { 
+      trackingStatus: {
         $in: [
           'Exception', 'exception',
           'Delayed', 'delayed',
@@ -4447,7 +4447,7 @@ router.get('/tracking-dashboard', async (req, res) => {
     // Get items needing attention (exceptions, delays, etc.)
     const trackingIssues = await LineItem.find({
       trackingNumber: { $exists: true, $ne: '' },
-      trackingStatus: { 
+      trackingStatus: {
         $in: [
           'Exception', 'exception',
           'Delayed', 'delayed',
@@ -4517,10 +4517,10 @@ router.get('/tracking-dashboard', async (req, res) => {
 router.get('/api/po/:poId/tasks', async (req, res) => {
   try {
     const { poId } = req.params;
-    const tasks = await Task.find({ 
-      relatedPOs: poId 
+    const tasks = await Task.find({
+      relatedPOs: poId
     }).populate('relatedPOs', 'poNumber vendor');
-    
+
     res.json({ success: true, tasks });
   } catch (error) {
     console.error('Get PO tasks error:', error);
@@ -4561,7 +4561,7 @@ router.post('/api/po/:poId/tasks', async (req, res) => {
 
     await task.save();
     await task.populate('relatedPOs', 'poNumber vendor');
-    
+
     console.log(`✅ Task created from dashboard for PO ${po.poNumber}:`, task.title);
     res.json({ success: true, task });
   } catch (error) {
@@ -4687,7 +4687,7 @@ const attachmentUpload = multer({
     // Check file type
     const allowedTypes = /\.(pdf|jpg|jpeg|png|doc|docx|xls|xlsx|txt)$/i;
     const isValidType = allowedTypes.test(file.originalname);
-    
+
     if (isValidType) {
       cb(null, true);
     } else {
@@ -4701,25 +4701,25 @@ router.post('/upload-attachment', attachmentUpload.single('attachment'), async (
   console.log('📎 UPLOAD ROUTE HIT - File upload attempt');
   console.log('📎 Request body:', req.body);
   console.log('📎 File info:', req.file ? { name: req.file.originalname, size: req.file.size } : 'No file');
-  
+
   try {
     const { poId, description, documentType } = req.body;
     const uploadedBy = req.user ? req.user.username : 'Unknown User';
-    
+
     console.log('📎 Upload params:', { poId, description, documentType, uploadedBy });
-    
+
     if (!req.file) {
       console.log('❌ No file uploaded');
       return res.status(400).json({ success: false, error: 'No file uploaded' });
     }
-    
+
     if (!poId) {
       console.log('❌ No PO ID provided');
       return res.status(400).json({ success: false, error: 'PO ID is required' });
     }
-    
+
     console.log('📎 Looking for PO with ID:', poId);
-    
+
     // Find the PO
     const po = await PurchaseOrder.findById(poId);
     if (!po) {
@@ -4728,24 +4728,24 @@ router.post('/upload-attachment', attachmentUpload.single('attachment'), async (
       fs.unlinkSync(req.file.path);
       return res.status(404).json({ success: false, error: 'Purchase Order not found' });
     }
-    
+
     console.log('✅ Found PO:', po.poNumber, '-', po.vendor);
-    
+
     // Ensure attachments array exists
     if (!po.attachments) {
       console.log('📎 Initializing attachments array for PO');
       po.attachments = [];
     }
-    
+
     // Create unique filename with timestamp
     const timestamp = Date.now();
     const fileExtension = path.extname(req.file.originalname);
     const savedFilename = `${timestamp}-${req.file.originalname}`;
     const finalPath = path.join('uploads/po-attachments', savedFilename);
-    
+
     // Move file to final location
     fs.renameSync(req.file.path, finalPath);
-    
+
     // Add attachment to PO
     const attachment = {
       filename: req.file.originalname,
@@ -4758,16 +4758,16 @@ router.post('/upload-attachment', attachmentUpload.single('attachment'), async (
       description: description || '',
       documentType: documentType || 'Other'
     };
-    
+
     console.log('📎 Adding attachment to PO:', attachment);
-    
+
     po.attachments.push(attachment);
     await po.save();
-    
+
     // Get the attachment ID that was just created
     const newAttachment = po.attachments[po.attachments.length - 1];
     const attachmentId = newAttachment._id.toString();
-    
+
     console.log('═══════════════════════════════════════════════════════════');
     console.log('✅ FILE UPLOADED SUCCESSFULLY');
     console.log('═══════════════════════════════════════════════════════════');
@@ -4789,9 +4789,9 @@ router.post('/upload-attachment', attachmentUpload.single('attachment'), async (
     console.log('🔗 DOWNLOAD URL:');
     console.log(`   http://localhost:3002/purchase-orders/download-attachment/${attachmentId}`);
     console.log('═══════════════════════════════════════════════════════════');
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       message: 'File uploaded successfully',
       attachment: {
         ...attachment,
@@ -4800,15 +4800,15 @@ router.post('/upload-attachment', attachmentUpload.single('attachment'), async (
         downloadUrl: `/purchase-orders/download-attachment/${attachmentId}`
       }
     });
-    
+
   } catch (error) {
     console.error('Upload attachment error:', error);
-    
+
     // Clean up uploaded file if it exists
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
-    
+
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -4818,21 +4818,21 @@ router.get('/attachments/:poId', async (req, res) => {
   try {
     const { poId } = req.params;
     console.log('📎 GET ATTACHMENTS: Request for PO ID:', poId);
-    
+
     const po = await PurchaseOrder.findById(poId);
     if (!po) {
       console.log('❌ GET ATTACHMENTS: PO not found');
       return res.status(404).json({ success: false, error: 'Purchase Order not found' });
     }
-    
+
     console.log('✅ GET ATTACHMENTS: Found PO:', po.poNumber);
     console.log('📎 GET ATTACHMENTS: Attachments count:', po.attachments ? po.attachments.length : 'No attachments array');
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       attachments: po.attachments || []
     });
-    
+
   } catch (error) {
     console.error('Get attachments error:', error);
     res.status(500).json({ success: false, error: error.message });
@@ -4843,35 +4843,35 @@ router.get('/attachments/:poId', async (req, res) => {
 router.get('/download-attachment/:attachmentId', async (req, res) => {
   try {
     const { attachmentId } = req.params;
-    
+
     // Find PO with this attachment
     const po = await PurchaseOrder.findOne({
       'attachments._id': attachmentId
     });
-    
+
     if (!po) {
       return res.status(404).json({ success: false, error: 'Attachment not found' });
     }
-    
+
     // Find the specific attachment
     const attachment = po.attachments.id(attachmentId);
     if (!attachment) {
       return res.status(404).json({ success: false, error: 'Attachment not found' });
     }
-    
+
     // Check if file exists
     if (!fs.existsSync(attachment.filePath)) {
       return res.status(404).json({ success: false, error: 'File not found on disk' });
     }
-    
+
     // Set headers for download
     res.setHeader('Content-Disposition', `attachment; filename="${attachment.filename}"`);
     res.setHeader('Content-Type', attachment.fileType);
-    
+
     // Stream the file
     const fileStream = fs.createReadStream(attachment.filePath);
     fileStream.pipe(res);
-    
+
   } catch (error) {
     console.error('Download attachment error:', error);
     res.status(500).json({ success: false, error: error.message });
@@ -4883,48 +4883,48 @@ router.get('/view-attachment/:attachmentId', async (req, res) => {
   try {
     const { attachmentId } = req.params;
     console.log(`📄 View attachment request for ID: ${attachmentId}`);
-    
+
     // Find PO with this attachment
     const po = await PurchaseOrder.findOne({
       'attachments._id': attachmentId
     });
-    
+
     if (!po) {
       console.log(`❌ Attachment not found: ${attachmentId}`);
       return res.status(404).send('Attachment not found');
     }
-    
+
     // Find the specific attachment
     const attachment = po.attachments.id(attachmentId);
     if (!attachment) {
       console.log(`❌ Attachment not found in PO: ${attachmentId}`);
       return res.status(404).send('Attachment not found');
     }
-    
+
     console.log(`📋 Found attachment: ${attachment.filename} in PO ${po.poNumber}`);
-    
+
     // Check if file exists
     if (!fs.existsSync(attachment.filePath)) {
       console.log(`❌ File not found on disk: ${attachment.filePath}`);
       return res.status(404).send('File not found');
     }
-    
+
     console.log(`📤 Serving attachment for viewing: ${attachment.filename}`);
-    
+
     // Set headers optimized for iframe viewing
     res.setHeader('Content-Type', attachment.fileType || 'application/octet-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    
+
     // For PDFs and images, use inline display
     if (attachment.fileType && (attachment.fileType.includes('pdf') || attachment.fileType.includes('image'))) {
       res.setHeader('Content-Disposition', `inline; filename="${attachment.filename}"`);
     }
-    
+
     // Stream the file
     const fileStream = fs.createReadStream(attachment.filePath);
     fileStream.pipe(res);
-    
+
   } catch (error) {
     console.error('View attachment error:', error);
     res.status(500).send('Error loading attachment');
@@ -4935,38 +4935,38 @@ router.get('/view-attachment/:attachmentId', async (req, res) => {
 router.delete('/attachments/:attachmentId', async (req, res) => {
   try {
     const { attachmentId } = req.params;
-    
+
     // Find PO with this attachment
     const po = await PurchaseOrder.findOne({
       'attachments._id': attachmentId
     });
-    
+
     if (!po) {
       return res.status(404).json({ success: false, error: 'Attachment not found' });
     }
-    
+
     // Find the specific attachment
     const attachment = po.attachments.id(attachmentId);
     if (!attachment) {
       return res.status(404).json({ success: false, error: 'Attachment not found' });
     }
-    
+
     // Delete file from disk if it exists
     if (fs.existsSync(attachment.filePath)) {
       fs.unlinkSync(attachment.filePath);
     }
-    
+
     // Remove attachment from PO
     po.attachments.pull(attachmentId);
     await po.save();
-    
+
     console.log(`🗑️ Attachment deleted: ${attachment.filename} from PO ${po.poNumber}`);
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       message: 'Attachment deleted successfully'
     });
-    
+
   } catch (error) {
     console.error('Delete attachment error:', error);
     res.status(500).json({ success: false, error: error.message });
@@ -4978,15 +4978,15 @@ router.get('/test-po/:poNumber', async (req, res) => {
   try {
     const { poNumber } = req.params;
     console.log(`🔍 Testing PO status for: ${poNumber}`);
-    
+
     const po = await PurchaseOrder.findOne({ poNumber: poNumber });
     if (!po) {
       return res.json({ found: false, message: `PO ${poNumber} not found` });
     }
-    
+
     const lineItems = await LineItem.find({ poNumber: poNumber });
     const hiddenLineItems = lineItems.filter(item => item.isHidden);
-    
+
     res.json({
       found: true,
       po: {
@@ -5014,625 +5014,625 @@ router.get('/test-po/:poNumber', async (req, res) => {
 
 // POST route to reconcile missing vendors after import
 router.post('/reconcile-vendors', async (req, res) => {
-    try {
-        console.log('🔄 Starting vendor reconciliation...');
-        
-        // Find all POs that have vendor strings but no linked organic vendor
-        const unlinkedPOs = await PurchaseOrder.find({
-            vendor: { $exists: true, $ne: null, $ne: '' },
-            $or: [
-                { organicVendor: { $exists: false } },
-                { organicVendor: null }
-            ]
-        });
-        
-        console.log(`📊 Found ${unlinkedPOs.length} POs with unlinked vendors`);
-        
-        if (unlinkedPOs.length === 0) {
-            return res.json({ 
-                success: true, 
-                message: 'No unlinked vendors found. All POs are properly linked!',
-                created: 0,
-                linked: 0
-            });
-        }
-        
-        // Extract unique vendor strings
-        const uniqueVendors = [...new Set(unlinkedPOs.map(po => po.vendor))];
-        console.log(`📋 Unique vendor strings to process: ${uniqueVendors.length}`);
-        uniqueVendors.forEach(v => console.log(`  - "${v}"`));
-        
-        let vendorsCreated = 0;
-        let posLinked = 0;
-        
-        // Process each unique vendor
-        for (const vendorString of uniqueVendors) {
-            console.log(`\n🔍 Processing vendor: "${vendorString}"`);
-            
-            // Split vendor data using our utility
-            const vendorData = splitVendorData(vendorString);
-            console.log(`📊 Split data:`, vendorData);
-            
-            // Check if vendor already exists by internalId (using vendorNumber from split)
-            let vendor = await OrganicVendor.findOne({ internalId: vendorData.vendorNumber });
-            
-            if (!vendor) {
-                // Create new vendor - use vendorNumber as internalId
-                console.log(`➕ Creating new vendor: ${vendorData.vendorName} (ID: ${vendorData.vendorNumber})`);
-                vendor = new OrganicVendor({
-                    vendorName: vendorData.vendorName,
-                    internalId: vendorData.vendorNumber,
-                    lastOrganicCertificationDate: new Date('2024-01-01'),
-                    status: 'Active'
-                });
-                
-                await vendor.save();
-                vendorsCreated++;
-                console.log(`✅ Created vendor: ${vendor.vendorName} (ID: ${vendor._id})`);
-            } else {
-                console.log(`ℹ️ Vendor already exists: ${vendor.vendorName} (ID: ${vendor._id})`);
-            }
-            
-            // Link this vendor to all matching POs
-            const matchingPOs = unlinkedPOs.filter(po => po.vendor === vendorString);
-            console.log(`🔗 Linking vendor to ${matchingPOs.length} POs...`);
-            
-            for (const po of matchingPOs) {
-                po.organicVendor = vendor._id;
-                await po.save();
-                posLinked++;
-                console.log(`✅ Linked PO ${po.poNumber} to vendor ${vendor.vendorName}`);
-            }
-        }
-        
-        console.log(`\n🎉 Reconciliation complete!`);
-        console.log(`📈 Summary: ${vendorsCreated} vendors created, ${posLinked} POs linked`);
-        
-        res.json({
-            success: true,
-            message: `Reconciliation complete! Created ${vendorsCreated} vendors and linked ${posLinked} POs.`,
-            created: vendorsCreated,
-            linked: posLinked,
-            processedVendors: uniqueVendors
-        });
-        
-    } catch (error) {
-        console.error('❌ Reconciliation failed:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to reconcile vendors',
-            details: error.message
-        });
+  try {
+    console.log('🔄 Starting vendor reconciliation...');
+
+    // Find all POs that have vendor strings but no linked organic vendor
+    const unlinkedPOs = await PurchaseOrder.find({
+      vendor: { $exists: true, $ne: null, $ne: '' },
+      $or: [
+        { organicVendor: { $exists: false } },
+        { organicVendor: null }
+      ]
+    });
+
+    console.log(`📊 Found ${unlinkedPOs.length} POs with unlinked vendors`);
+
+    if (unlinkedPOs.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No unlinked vendors found. All POs are properly linked!',
+        created: 0,
+        linked: 0
+      });
     }
+
+    // Extract unique vendor strings
+    const uniqueVendors = [...new Set(unlinkedPOs.map(po => po.vendor))];
+    console.log(`📋 Unique vendor strings to process: ${uniqueVendors.length}`);
+    uniqueVendors.forEach(v => console.log(`  - "${v}"`));
+
+    let vendorsCreated = 0;
+    let posLinked = 0;
+
+    // Process each unique vendor
+    for (const vendorString of uniqueVendors) {
+      console.log(`\n🔍 Processing vendor: "${vendorString}"`);
+
+      // Split vendor data using our utility
+      const vendorData = splitVendorData(vendorString);
+      console.log(`📊 Split data:`, vendorData);
+
+      // Check if vendor already exists by internalId (using vendorNumber from split)
+      let vendor = await OrganicVendor.findOne({ internalId: vendorData.vendorNumber });
+
+      if (!vendor) {
+        // Create new vendor - use vendorNumber as internalId
+        console.log(`➕ Creating new vendor: ${vendorData.vendorName} (ID: ${vendorData.vendorNumber})`);
+        vendor = new OrganicVendor({
+          vendorName: vendorData.vendorName,
+          internalId: vendorData.vendorNumber,
+          lastOrganicCertificationDate: new Date('2024-01-01'),
+          status: 'Active'
+        });
+
+        await vendor.save();
+        vendorsCreated++;
+        console.log(`✅ Created vendor: ${vendor.vendorName} (ID: ${vendor._id})`);
+      } else {
+        console.log(`ℹ️ Vendor already exists: ${vendor.vendorName} (ID: ${vendor._id})`);
+      }
+
+      // Link this vendor to all matching POs
+      const matchingPOs = unlinkedPOs.filter(po => po.vendor === vendorString);
+      console.log(`🔗 Linking vendor to ${matchingPOs.length} POs...`);
+
+      for (const po of matchingPOs) {
+        po.organicVendor = vendor._id;
+        await po.save();
+        posLinked++;
+        console.log(`✅ Linked PO ${po.poNumber} to vendor ${vendor.vendorName}`);
+      }
+    }
+
+    console.log(`\n🎉 Reconciliation complete!`);
+    console.log(`📈 Summary: ${vendorsCreated} vendors created, ${posLinked} POs linked`);
+
+    res.json({
+      success: true,
+      message: `Reconciliation complete! Created ${vendorsCreated} vendors and linked ${posLinked} POs.`,
+      created: vendorsCreated,
+      linked: posLinked,
+      processedVendors: uniqueVendors
+    });
+
+  } catch (error) {
+    console.error('❌ Reconciliation failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to reconcile vendors',
+      details: error.message
+    });
+  }
 });
 
 // GET route to preview what vendors would be reconciled (for debugging)
 router.get('/preview-vendor-reconciliation', async (req, res) => {
-    try {
-        console.log('🔍 Previewing vendor reconciliation...');
-        
-        // Find all POs that have vendor strings but no linked organic vendor
-        const unlinkedPOs = await PurchaseOrder.find({
-            vendor: { $exists: true, $ne: null, $ne: '' },
-            $or: [
-                { organicVendor: { $exists: false } },
-                { organicVendor: null }
-            ]
-        }).select('poNumber vendor');
-        
-        // Extract unique vendor strings
-        const uniqueVendors = [...new Set(unlinkedPOs.map(po => po.vendor))];
-        
-        const preview = {
-            totalUnlinkedPOs: unlinkedPOs.length,
-            uniqueVendors: uniqueVendors.length,
-            vendors: uniqueVendors.map(vendorString => {
-                const vendorData = splitVendorData(vendorString);
-                const relatedPOs = unlinkedPOs.filter(po => po.vendor === vendorString);
-                return {
-                    originalString: vendorString,
-                    parsedName: vendorData.vendorName,
-                    parsedId: vendorData.vendorNumber,  // Using vendorNumber instead of internalId
-                    affectedPOs: relatedPOs.length,
-                    samplePOs: relatedPOs.slice(0, 3).map(po => po.poNumber)
-                };
-            })
+  try {
+    console.log('🔍 Previewing vendor reconciliation...');
+
+    // Find all POs that have vendor strings but no linked organic vendor
+    const unlinkedPOs = await PurchaseOrder.find({
+      vendor: { $exists: true, $ne: null, $ne: '' },
+      $or: [
+        { organicVendor: { $exists: false } },
+        { organicVendor: null }
+      ]
+    }).select('poNumber vendor');
+
+    // Extract unique vendor strings
+    const uniqueVendors = [...new Set(unlinkedPOs.map(po => po.vendor))];
+
+    const preview = {
+      totalUnlinkedPOs: unlinkedPOs.length,
+      uniqueVendors: uniqueVendors.length,
+      vendors: uniqueVendors.map(vendorString => {
+        const vendorData = splitVendorData(vendorString);
+        const relatedPOs = unlinkedPOs.filter(po => po.vendor === vendorString);
+        return {
+          originalString: vendorString,
+          parsedName: vendorData.vendorName,
+          parsedId: vendorData.vendorNumber,  // Using vendorNumber instead of internalId
+          affectedPOs: relatedPOs.length,
+          samplePOs: relatedPOs.slice(0, 3).map(po => po.poNumber)
         };
-        
-        res.json({
-            success: true,
-            preview: preview
-        });
-        
-    } catch (error) {
-        console.error('❌ Preview failed:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to preview reconciliation',
-            details: error.message
-        });
-    }
+      })
+    };
+
+    res.json({
+      success: true,
+      preview: preview
+    });
+
+  } catch (error) {
+    console.error('❌ Preview failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to preview reconciliation',
+      details: error.message
+    });
+  }
 });
 
 // GET route for direct reconciliation (for testing - will actually perform the reconciliation)
 router.get('/reconcile-vendors', async (req, res) => {
-    try {
-        console.log('🔄 Starting vendor reconciliation via GET...');
-        
-        // Find all POs that have vendor strings but no linked organic vendor
-        const unlinkedPOs = await PurchaseOrder.find({
-            vendor: { $exists: true, $ne: null, $ne: '' },
-            $or: [
-                { organicVendor: { $exists: false } },
-                { organicVendor: null }
-            ]
-        });
-        
-        console.log(`📊 Found ${unlinkedPOs.length} POs with unlinked vendors`);
-        
-        if (unlinkedPOs.length === 0) {
-            return res.json({ 
-                success: true, 
-                message: 'No unlinked vendors found. All POs are properly linked!',
-                created: 0,
-                linked: 0
-            });
-        }
-        
-        // Extract unique vendor strings
-        const uniqueVendors = [...new Set(unlinkedPOs.map(po => po.vendor))];
-        console.log(`📋 Unique vendor strings to process: ${uniqueVendors.length}`);
-        uniqueVendors.forEach(v => console.log(`  - "${v}"`));
-        
-        let vendorsCreated = 0;
-        let posLinked = 0;
-        
-        // Process each unique vendor
-        for (const vendorString of uniqueVendors) {
-            console.log(`\n🔍 Processing vendor: "${vendorString}"`);
-            
-            // Split vendor data using our utility
-            const vendorData = splitVendorData(vendorString);
-            console.log(`📊 Split data:`, vendorData);
-            
-            // Check if vendor already exists by internalId (using vendorNumber from split)
-            let vendor = await OrganicVendor.findOne({ internalId: vendorData.vendorNumber });
-            
-            if (!vendor) {
-                // Create new vendor - use vendorNumber as internalId
-                console.log(`➕ Creating new vendor: ${vendorData.vendorName} (ID: ${vendorData.vendorNumber})`);
-                vendor = new OrganicVendor({
-                    vendorName: vendorData.vendorName,
-                    internalId: vendorData.vendorNumber,
-                    lastOrganicCertificationDate: new Date('2024-01-01'),
-                    status: 'Active'
-                });
-                
-                await vendor.save();
-                vendorsCreated++;
-                console.log(`✅ Created vendor: ${vendor.vendorName} (ID: ${vendor._id})`);
-            } else {
-                console.log(`ℹ️ Vendor already exists: ${vendor.vendorName} (ID: ${vendor._id})`);
-            }
-            
-            // Link this vendor to all matching POs
-            const matchingPOs = unlinkedPOs.filter(po => po.vendor === vendorString);
-            console.log(`🔗 Linking vendor to ${matchingPOs.length} POs...`);
-            
-            for (const po of matchingPOs) {
-                po.organicVendor = vendor._id;
-                await po.save();
-                posLinked++;
-                console.log(`✅ Linked PO ${po.poNumber} to vendor ${vendor.vendorName}`);
-            }
-        }
-        
-        console.log(`\n🎉 Reconciliation complete!`);
-        console.log(`📈 Summary: ${vendorsCreated} vendors created, ${posLinked} POs linked`);
-        
-        res.json({
-            success: true,
-            message: `Reconciliation complete! Created ${vendorsCreated} vendors and linked ${posLinked} POs.`,
-            created: vendorsCreated,
-            linked: posLinked,
-            processedVendors: uniqueVendors,
-            refreshPage: true
-        });
-        
-    } catch (error) {
-        console.error('❌ Reconciliation failed:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to reconcile vendors',
-            details: error.message
-        });
+  try {
+    console.log('🔄 Starting vendor reconciliation via GET...');
+
+    // Find all POs that have vendor strings but no linked organic vendor
+    const unlinkedPOs = await PurchaseOrder.find({
+      vendor: { $exists: true, $ne: null, $ne: '' },
+      $or: [
+        { organicVendor: { $exists: false } },
+        { organicVendor: null }
+      ]
+    });
+
+    console.log(`📊 Found ${unlinkedPOs.length} POs with unlinked vendors`);
+
+    if (unlinkedPOs.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No unlinked vendors found. All POs are properly linked!',
+        created: 0,
+        linked: 0
+      });
     }
+
+    // Extract unique vendor strings
+    const uniqueVendors = [...new Set(unlinkedPOs.map(po => po.vendor))];
+    console.log(`📋 Unique vendor strings to process: ${uniqueVendors.length}`);
+    uniqueVendors.forEach(v => console.log(`  - "${v}"`));
+
+    let vendorsCreated = 0;
+    let posLinked = 0;
+
+    // Process each unique vendor
+    for (const vendorString of uniqueVendors) {
+      console.log(`\n🔍 Processing vendor: "${vendorString}"`);
+
+      // Split vendor data using our utility
+      const vendorData = splitVendorData(vendorString);
+      console.log(`📊 Split data:`, vendorData);
+
+      // Check if vendor already exists by internalId (using vendorNumber from split)
+      let vendor = await OrganicVendor.findOne({ internalId: vendorData.vendorNumber });
+
+      if (!vendor) {
+        // Create new vendor - use vendorNumber as internalId
+        console.log(`➕ Creating new vendor: ${vendorData.vendorName} (ID: ${vendorData.vendorNumber})`);
+        vendor = new OrganicVendor({
+          vendorName: vendorData.vendorName,
+          internalId: vendorData.vendorNumber,
+          lastOrganicCertificationDate: new Date('2024-01-01'),
+          status: 'Active'
+        });
+
+        await vendor.save();
+        vendorsCreated++;
+        console.log(`✅ Created vendor: ${vendor.vendorName} (ID: ${vendor._id})`);
+      } else {
+        console.log(`ℹ️ Vendor already exists: ${vendor.vendorName} (ID: ${vendor._id})`);
+      }
+
+      // Link this vendor to all matching POs
+      const matchingPOs = unlinkedPOs.filter(po => po.vendor === vendorString);
+      console.log(`🔗 Linking vendor to ${matchingPOs.length} POs...`);
+
+      for (const po of matchingPOs) {
+        po.organicVendor = vendor._id;
+        await po.save();
+        posLinked++;
+        console.log(`✅ Linked PO ${po.poNumber} to vendor ${vendor.vendorName}`);
+      }
+    }
+
+    console.log(`\n🎉 Reconciliation complete!`);
+    console.log(`📈 Summary: ${vendorsCreated} vendors created, ${posLinked} POs linked`);
+
+    res.json({
+      success: true,
+      message: `Reconciliation complete! Created ${vendorsCreated} vendors and linked ${posLinked} POs.`,
+      created: vendorsCreated,
+      linked: posLinked,
+      processedVendors: uniqueVendors,
+      refreshPage: true
+    });
+
+  } catch (error) {
+    console.error('❌ Reconciliation failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to reconcile vendors',
+      details: error.message
+    });
+  }
 });
 
 // POST route to reconcile missing vendors in the main Vendor model
 router.post('/reconcile-main-vendors', async (req, res) => {
-    try {
-        console.log('🔄 Starting main vendor reconciliation...');
-        
-        const Vendor = require('../models/Vendor');
-        const { splitVendorData } = require('../lib/vendorUtils');
-        
-        // Find all POs that don't have a linkedVendor
-        const unlinkedPOs = await PurchaseOrder.find({
-            vendor: { $exists: true, $ne: null, $ne: '' },
-            $or: [
-                { linkedVendor: { $exists: false } },
-                { linkedVendor: null }
-            ]
-        });
-        
-        console.log(`📊 Found ${unlinkedPOs.length} POs with unlinked vendors`);
-        
-        if (unlinkedPOs.length === 0) {
-            return res.json({ 
-                success: true, 
-                message: 'No unlinked vendors found. All POs are properly linked to the Vendor model!',
-                created: 0,
-                linked: 0
-            });
-        }
-        
-        // Extract unique vendor strings
-        const uniqueVendors = [...new Set(unlinkedPOs.map(po => po.vendor))];
-        console.log(`📋 Unique vendor strings to process: ${uniqueVendors.length}`);
-        uniqueVendors.forEach(v => console.log(`  - "${v}"`));
-        
-        let vendorsCreated = 0;
-        let posLinked = 0;
-        
-        // Process each unique vendor
-        for (const vendorString of uniqueVendors) {
-            console.log(`\n🔍 Processing vendor: "${vendorString}"`);
-            
-            // Split vendor data using our utility
-            const vendorData = splitVendorData(vendorString);
-            console.log(`📊 Split data:`, vendorData);
-            
-            // Generate a vendor code if vendorNumber is empty
-            let vendorCode = vendorData.vendorNumber || '';
-            if (!vendorCode || vendorCode.trim() === '') {
-                // Generate vendor code from vendor name
-                const words = vendorData.vendorName.trim().split(/\s+/);
-                if (words.length === 1) {
-                    // Single word: take first 3-4 characters
-                    vendorCode = words[0].substring(0, 4).toUpperCase();
-                } else {
-                    // Multiple words: take first letter of each word, max 5 characters
-                    vendorCode = words.slice(0, 5).map(word => word.charAt(0)).join('').toUpperCase();
-                }
-                console.log(`📝 Generated vendor code: ${vendorCode} for vendor: ${vendorData.vendorName}`);
-            }
-            
-            // Check if vendor already exists by vendorCode
-            let vendor = await Vendor.findOne({ vendorCode: vendorCode });
-            
-            if (!vendor) {
-                // Ensure vendor code is unique
-                let finalVendorCode = vendorCode;
-                let counter = 1;
-                while (await Vendor.findOne({ vendorCode: finalVendorCode })) {
-                    finalVendorCode = vendorCode + counter;
-                    counter++;
-                }
-                
-                // Create new vendor in the Vendor model
-                console.log(`➕ Creating new vendor: ${vendorData.vendorName} (Code: ${finalVendorCode})`);
-                vendor = new Vendor({
-                    vendorName: vendorData.vendorName,
-                    vendorCode: finalVendorCode,
-                    vendorType: 'Seeds', // Default type
-                    status: 'Active'
-                });
-                
-                await vendor.save();
-                vendorsCreated++;
-                console.log(`✅ Created vendor: ${vendor.vendorName} (ID: ${vendor._id})`);
-            } else {
-                console.log(`ℹ️ Vendor already exists: ${vendor.vendorName} (ID: ${vendor._id})`);
-            }
-            
-            // Link this vendor to all matching POs
-            const matchingPOs = unlinkedPOs.filter(po => po.vendor === vendorString);
-            console.log(`🔗 Linking vendor to ${matchingPOs.length} POs...`);
-            
-            for (const po of matchingPOs) {
-                po.linkedVendor = vendor._id;
-                await po.save();
-                posLinked++;
-                console.log(`✅ Linked PO ${po.poNumber} to vendor ${vendor.vendorName}`);
-            }
-        }
-        
-        console.log(`\n🎉 Reconciliation complete!`);
-        console.log(`📈 Summary: ${vendorsCreated} vendors created, ${posLinked} POs linked`);
-        
-        res.json({
-            success: true,
-            message: `Reconciliation complete! Created ${vendorsCreated} vendors and linked ${posLinked} POs to the main Vendor model.`,
-            created: vendorsCreated,
-            linked: posLinked,
-            processedVendors: uniqueVendors
-        });
-        
-    } catch (error) {
-        console.error('❌ Reconciliation failed:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to reconcile vendors',
-            details: error.message
-        });
+  try {
+    console.log('🔄 Starting main vendor reconciliation...');
+
+    const Vendor = require('../models/Vendor');
+    const { splitVendorData } = require('../lib/vendorUtils');
+
+    // Find all POs that don't have a linkedVendor
+    const unlinkedPOs = await PurchaseOrder.find({
+      vendor: { $exists: true, $ne: null, $ne: '' },
+      $or: [
+        { linkedVendor: { $exists: false } },
+        { linkedVendor: null }
+      ]
+    });
+
+    console.log(`📊 Found ${unlinkedPOs.length} POs with unlinked vendors`);
+
+    if (unlinkedPOs.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No unlinked vendors found. All POs are properly linked to the Vendor model!',
+        created: 0,
+        linked: 0
+      });
     }
+
+    // Extract unique vendor strings
+    const uniqueVendors = [...new Set(unlinkedPOs.map(po => po.vendor))];
+    console.log(`📋 Unique vendor strings to process: ${uniqueVendors.length}`);
+    uniqueVendors.forEach(v => console.log(`  - "${v}"`));
+
+    let vendorsCreated = 0;
+    let posLinked = 0;
+
+    // Process each unique vendor
+    for (const vendorString of uniqueVendors) {
+      console.log(`\n🔍 Processing vendor: "${vendorString}"`);
+
+      // Split vendor data using our utility
+      const vendorData = splitVendorData(vendorString);
+      console.log(`📊 Split data:`, vendorData);
+
+      // Generate a vendor code if vendorNumber is empty
+      let vendorCode = vendorData.vendorNumber || '';
+      if (!vendorCode || vendorCode.trim() === '') {
+        // Generate vendor code from vendor name
+        const words = vendorData.vendorName.trim().split(/\s+/);
+        if (words.length === 1) {
+          // Single word: take first 3-4 characters
+          vendorCode = words[0].substring(0, 4).toUpperCase();
+        } else {
+          // Multiple words: take first letter of each word, max 5 characters
+          vendorCode = words.slice(0, 5).map(word => word.charAt(0)).join('').toUpperCase();
+        }
+        console.log(`📝 Generated vendor code: ${vendorCode} for vendor: ${vendorData.vendorName}`);
+      }
+
+      // Check if vendor already exists by vendorCode
+      let vendor = await Vendor.findOne({ vendorCode: vendorCode });
+
+      if (!vendor) {
+        // Ensure vendor code is unique
+        let finalVendorCode = vendorCode;
+        let counter = 1;
+        while (await Vendor.findOne({ vendorCode: finalVendorCode })) {
+          finalVendorCode = vendorCode + counter;
+          counter++;
+        }
+
+        // Create new vendor in the Vendor model
+        console.log(`➕ Creating new vendor: ${vendorData.vendorName} (Code: ${finalVendorCode})`);
+        vendor = new Vendor({
+          vendorName: vendorData.vendorName,
+          vendorCode: finalVendorCode,
+          vendorType: 'Seeds', // Default type
+          status: 'Active'
+        });
+
+        await vendor.save();
+        vendorsCreated++;
+        console.log(`✅ Created vendor: ${vendor.vendorName} (ID: ${vendor._id})`);
+      } else {
+        console.log(`ℹ️ Vendor already exists: ${vendor.vendorName} (ID: ${vendor._id})`);
+      }
+
+      // Link this vendor to all matching POs
+      const matchingPOs = unlinkedPOs.filter(po => po.vendor === vendorString);
+      console.log(`🔗 Linking vendor to ${matchingPOs.length} POs...`);
+
+      for (const po of matchingPOs) {
+        po.linkedVendor = vendor._id;
+        await po.save();
+        posLinked++;
+        console.log(`✅ Linked PO ${po.poNumber} to vendor ${vendor.vendorName}`);
+      }
+    }
+
+    console.log(`\n🎉 Reconciliation complete!`);
+    console.log(`📈 Summary: ${vendorsCreated} vendors created, ${posLinked} POs linked`);
+
+    res.json({
+      success: true,
+      message: `Reconciliation complete! Created ${vendorsCreated} vendors and linked ${posLinked} POs to the main Vendor model.`,
+      created: vendorsCreated,
+      linked: posLinked,
+      processedVendors: uniqueVendors
+    });
+
+  } catch (error) {
+    console.error('❌ Reconciliation failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to reconcile vendors',
+      details: error.message
+    });
+  }
 });
 
 // GET route for direct reconciliation (for testing - will actually perform the reconciliation)
 router.get('/reconcile-main-vendors', async (req, res) => {
-    try {
-        console.log('🔄 Starting main vendor reconciliation via GET...');
-        
-        const Vendor = require('../models/Vendor');
-        const { splitVendorData } = require('../lib/vendorUtils');
-        
-        // Find all POs that don't have a linkedVendor
-        const unlinkedPOs = await PurchaseOrder.find({
-            vendor: { $exists: true, $ne: null, $ne: '' },
-            $or: [
-                { linkedVendor: { $exists: false } },
-                { linkedVendor: null }
-            ]
-        });
-        
-        console.log(`📊 Found ${unlinkedPOs.length} POs with unlinked vendors`);
-        
-        if (unlinkedPOs.length === 0) {
-            return res.json({ 
-                success: true, 
-                message: 'No unlinked vendors found. All POs are properly linked to the Vendor model!',
-                created: 0,
-                linked: 0
-            });
-        }
-        
-        // Extract unique vendor strings
-        const uniqueVendors = [...new Set(unlinkedPOs.map(po => po.vendor))];
-        console.log(`📋 Unique vendor strings to process: ${uniqueVendors.length}`);
-        uniqueVendors.forEach(v => console.log(`  - "${v}"`));
-        
-        let vendorsCreated = 0;
-        let posLinked = 0;
-        
-        // Process each unique vendor
-        for (const vendorString of uniqueVendors) {
-            console.log(`\n🔍 Processing vendor: "${vendorString}"`);
-            
-            // Split vendor data using our utility
-            const vendorData = splitVendorData(vendorString);
-            console.log(`📊 Split data:`, vendorData);
-            
-            // Check if vendor already exists by vendorCode (using vendorNumber from split)
-            let vendor = await Vendor.findOne({ vendorCode: vendorData.vendorNumber });
-            
-            if (!vendor) {
-                // Create new vendor in the Vendor model
-                console.log(`➕ Creating new vendor: ${vendorData.vendorName} (Code: ${vendorData.vendorNumber})`);
-                vendor = new Vendor({
-                    vendorName: vendorData.vendorName,
-                    vendorCode: vendorData.vendorNumber,
-                    vendorType: 'Seeds', // Default type
-                    status: 'Active'
-                });
-                
-                await vendor.save();
-                vendorsCreated++;
-                console.log(`✅ Created vendor: ${vendor.vendorName} (ID: ${vendor._id})`);
-            } else {
-                console.log(`ℹ️ Vendor already exists: ${vendor.vendorName} (ID: ${vendor._id})`);
-            }
-            
-            // Link this vendor to all matching POs
-            const matchingPOs = unlinkedPOs.filter(po => po.vendor === vendorString);
-            console.log(`🔗 Linking vendor to ${matchingPOs.length} POs...`);
-            
-            for (const po of matchingPOs) {
-                po.linkedVendor = vendor._id;
-                await po.save();
-                posLinked++;
-                console.log(`✅ Linked PO ${po.poNumber} to vendor ${vendor.vendorName}`);
-            }
-        }
-        
-        console.log(`\n🎉 Reconciliation complete!`);
-        console.log(`📈 Summary: ${vendorsCreated} vendors created, ${posLinked} POs linked`);
-        
-        res.json({
-            success: true,
-            message: `Reconciliation complete! Created ${vendorsCreated} vendors and linked ${posLinked} POs to the main Vendor model.`,
-            created: vendorsCreated,
-            linked: posLinked,
-            processedVendors: uniqueVendors
-        });
-        
-    } catch (error) {
-        console.error('❌ Reconciliation failed:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to reconcile vendors',
-            details: error.message
-        });
+  try {
+    console.log('🔄 Starting main vendor reconciliation via GET...');
+
+    const Vendor = require('../models/Vendor');
+    const { splitVendorData } = require('../lib/vendorUtils');
+
+    // Find all POs that don't have a linkedVendor
+    const unlinkedPOs = await PurchaseOrder.find({
+      vendor: { $exists: true, $ne: null, $ne: '' },
+      $or: [
+        { linkedVendor: { $exists: false } },
+        { linkedVendor: null }
+      ]
+    });
+
+    console.log(`📊 Found ${unlinkedPOs.length} POs with unlinked vendors`);
+
+    if (unlinkedPOs.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No unlinked vendors found. All POs are properly linked to the Vendor model!',
+        created: 0,
+        linked: 0
+      });
     }
+
+    // Extract unique vendor strings
+    const uniqueVendors = [...new Set(unlinkedPOs.map(po => po.vendor))];
+    console.log(`📋 Unique vendor strings to process: ${uniqueVendors.length}`);
+    uniqueVendors.forEach(v => console.log(`  - "${v}"`));
+
+    let vendorsCreated = 0;
+    let posLinked = 0;
+
+    // Process each unique vendor
+    for (const vendorString of uniqueVendors) {
+      console.log(`\n🔍 Processing vendor: "${vendorString}"`);
+
+      // Split vendor data using our utility
+      const vendorData = splitVendorData(vendorString);
+      console.log(`📊 Split data:`, vendorData);
+
+      // Check if vendor already exists by vendorCode (using vendorNumber from split)
+      let vendor = await Vendor.findOne({ vendorCode: vendorData.vendorNumber });
+
+      if (!vendor) {
+        // Create new vendor in the Vendor model
+        console.log(`➕ Creating new vendor: ${vendorData.vendorName} (Code: ${vendorData.vendorNumber})`);
+        vendor = new Vendor({
+          vendorName: vendorData.vendorName,
+          vendorCode: vendorData.vendorNumber,
+          vendorType: 'Seeds', // Default type
+          status: 'Active'
+        });
+
+        await vendor.save();
+        vendorsCreated++;
+        console.log(`✅ Created vendor: ${vendor.vendorName} (ID: ${vendor._id})`);
+      } else {
+        console.log(`ℹ️ Vendor already exists: ${vendor.vendorName} (ID: ${vendor._id})`);
+      }
+
+      // Link this vendor to all matching POs
+      const matchingPOs = unlinkedPOs.filter(po => po.vendor === vendorString);
+      console.log(`🔗 Linking vendor to ${matchingPOs.length} POs...`);
+
+      for (const po of matchingPOs) {
+        po.linkedVendor = vendor._id;
+        await po.save();
+        posLinked++;
+        console.log(`✅ Linked PO ${po.poNumber} to vendor ${vendor.vendorName}`);
+      }
+    }
+
+    console.log(`\n🎉 Reconciliation complete!`);
+    console.log(`📈 Summary: ${vendorsCreated} vendors created, ${posLinked} POs linked`);
+
+    res.json({
+      success: true,
+      message: `Reconciliation complete! Created ${vendorsCreated} vendors and linked ${posLinked} POs to the main Vendor model.`,
+      created: vendorsCreated,
+      linked: posLinked,
+      processedVendors: uniqueVendors
+    });
+
+  } catch (error) {
+    console.error('❌ Reconciliation failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to reconcile vendors',
+      details: error.message
+    });
+  }
 });
 
 // Test route to check vendor links without authentication
 router.get('/check-vendor-links', async (req, res) => {
-    try {
-        console.log('🔍 Checking vendor links...');
-        
-        const Vendor = require('../models/Vendor');
-        const OrganicVendor = require('../models/OrganicVendor');
-        
-        // Count vendors in both collections
-        const vendorCount = await Vendor.countDocuments();
-        const organicVendorCount = await OrganicVendor.countDocuments();
-        
-        // Get all POs with populated vendors
-        const pos = await PurchaseOrder.find()
-            .populate('linkedVendor')
-            .populate('organicVendor')
-            .select('poNumber vendor linkedVendor organicVendor');
-        
-        const withMainLinks = pos.filter(po => po.linkedVendor);
-        const withOrganicLinks = pos.filter(po => po.organicVendor);
-        const withoutAnyLinks = pos.filter(po => !po.linkedVendor && !po.organicVendor);
-        
-        res.json({
-            vendorCollections: {
-                mainVendors: vendorCount,
-                organicVendors: organicVendorCount
-            },
-            purchaseOrders: {
-                total: pos.length,
-                withMainVendorLinks: withMainLinks.length,
-                withOrganicVendorLinks: withOrganicLinks.length,
-                withoutAnyLinks: withoutAnyLinks.length
-            },
-            sampleLinkedPOs: withMainLinks.slice(0, 5).map(po => ({
-                poNumber: po.poNumber,
-                vendor: po.vendor,
-                linkedToMainVendor: po.linkedVendor ? po.linkedVendor.vendorName : null,
-                linkedToOrganicVendor: po.organicVendor ? po.organicVendor.vendorName : null
-            })),
-            unlinkedPOs: withoutAnyLinks.slice(0, 10).map(po => ({
-                poNumber: po.poNumber,
-                vendor: po.vendor
-            }))
-        });
-        
-    } catch (error) {
-        console.error('❌ Check failed:', error);
-        res.status(500).json({ error: error.message });
-    }
+  try {
+    console.log('🔍 Checking vendor links...');
+
+    const Vendor = require('../models/Vendor');
+    const OrganicVendor = require('../models/OrganicVendor');
+
+    // Count vendors in both collections
+    const vendorCount = await Vendor.countDocuments();
+    const organicVendorCount = await OrganicVendor.countDocuments();
+
+    // Get all POs with populated vendors
+    const pos = await PurchaseOrder.find()
+      .populate('linkedVendor')
+      .populate('organicVendor')
+      .select('poNumber vendor linkedVendor organicVendor');
+
+    const withMainLinks = pos.filter(po => po.linkedVendor);
+    const withOrganicLinks = pos.filter(po => po.organicVendor);
+    const withoutAnyLinks = pos.filter(po => !po.linkedVendor && !po.organicVendor);
+
+    res.json({
+      vendorCollections: {
+        mainVendors: vendorCount,
+        organicVendors: organicVendorCount
+      },
+      purchaseOrders: {
+        total: pos.length,
+        withMainVendorLinks: withMainLinks.length,
+        withOrganicVendorLinks: withOrganicLinks.length,
+        withoutAnyLinks: withoutAnyLinks.length
+      },
+      sampleLinkedPOs: withMainLinks.slice(0, 5).map(po => ({
+        poNumber: po.poNumber,
+        vendor: po.vendor,
+        linkedToMainVendor: po.linkedVendor ? po.linkedVendor.vendorName : null,
+        linkedToOrganicVendor: po.organicVendor ? po.organicVendor.vendorName : null
+      })),
+      unlinkedPOs: withoutAnyLinks.slice(0, 10).map(po => ({
+        poNumber: po.poNumber,
+        vendor: po.vendor
+      }))
+    });
+
+  } catch (error) {
+    console.error('❌ Check failed:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Get all unreceived items report
 router.get('/unreceived-items', async (req, res) => {
-    try {
-        console.log('📋 Fetching unreceived items report...');
-        
-        // Find all line items where received = false
-        const unreceivedItems = await LineItem.find({ received: false })
-            .populate('poId')
-            .sort({ poNumber: 1, sku: 1 })
-            .lean();
-        
-        console.log(`Found ${unreceivedItems.length} unreceived items`);
-        
-        // Format the data for the report - filter out items from hidden POs
-        const formattedItems = unreceivedItems
-            .filter(item => {
-                // Only include items with valid PO references
-                if (!item.poId) return false;
-                // Exclude items from hidden POs (matching dashboard behavior)
-                if (item.poId.isHidden === true) return false;
-                return true;
-            })
-            .map(item => ({
-                poNumber: item.poNumber,
-                poUrl: item.poId.poUrl || null,
-                vendor: item.poId.vendor || 'N/A',
-                vendorId: item.poId.linkedVendor || null,
-                poDate: item.poId.date || item.date || 'N/A',
-                eta: item.poId.eta || null,
-                sku: item.sku || 'N/A',
-                memo: item.memo || 'N/A',
-                itemStatus: item.itemStatus || 'N/A',
-                poStatus: item.poId.status || 'N/A'
-            }));
-        
-        // Get stats
-        const uniquePOs = new Set(formattedItems.map(item => item.poNumber));
-        const stats = {
-            totalItems: formattedItems.length,
-            totalPOs: uniquePOs.size
-        };
-        
-        const hiddenCount = unreceivedItems.length - formattedItems.length;
-        console.log(`📊 Stats: ${stats.totalItems} items across ${stats.totalPOs} POs (${hiddenCount} items excluded from hidden POs)`);
-        
-        res.json({
-            success: true,
-            items: formattedItems,
-            stats: stats
-        });
-        
-    } catch (error) {
-        console.error('❌ Error fetching unreceived items:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message 
-        });
-    }
+  try {
+    console.log('📋 Fetching unreceived items report...');
+
+    // Find all line items where received = false
+    const unreceivedItems = await LineItem.find({ received: false })
+      .populate('poId')
+      .sort({ poNumber: 1, sku: 1 })
+      .lean();
+
+    console.log(`Found ${unreceivedItems.length} unreceived items`);
+
+    // Format the data for the report - filter out items from hidden POs
+    const formattedItems = unreceivedItems
+      .filter(item => {
+        // Only include items with valid PO references
+        if (!item.poId) return false;
+        // Exclude items from hidden POs (matching dashboard behavior)
+        if (item.poId.isHidden === true) return false;
+        return true;
+      })
+      .map(item => ({
+        poNumber: item.poNumber,
+        poUrl: item.poId.poUrl || null,
+        vendor: item.poId.vendor || 'N/A',
+        vendorId: item.poId.linkedVendor || null,
+        poDate: item.poId.date || item.date || 'N/A',
+        eta: item.poId.eta || null,
+        sku: item.sku || 'N/A',
+        memo: item.memo || 'N/A',
+        itemStatus: item.itemStatus || 'N/A',
+        poStatus: item.poId.status || 'N/A'
+      }));
+
+    // Get stats
+    const uniquePOs = new Set(formattedItems.map(item => item.poNumber));
+    const stats = {
+      totalItems: formattedItems.length,
+      totalPOs: uniquePOs.size
+    };
+
+    const hiddenCount = unreceivedItems.length - formattedItems.length;
+    console.log(`📊 Stats: ${stats.totalItems} items across ${stats.totalPOs} POs (${hiddenCount} items excluded from hidden POs)`);
+
+    res.json({
+      success: true,
+      items: formattedItems,
+      stats: stats
+    });
+
+  } catch (error) {
+    console.error('❌ Error fetching unreceived items:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
 });
 
 // Record email communication for a PO
 router.post('/:id/email-sent', async (req, res) => {
-    try {
-        const { recipient, subject, sentBy, notes } = req.body;
-        
-        if (!recipient) {
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Recipient email is required' 
-            });
-        }
+  try {
+    const { recipient, subject, sentBy, notes } = req.body;
 
-        const po = await PurchaseOrder.findById(req.params.id);
-        
-        if (!po) {
-            return res.status(404).json({ 
-                success: false, 
-                error: 'Purchase Order not found' 
-            });
-        }
-
-        // Update last email fields
-        po.lastEmailSent = new Date();
-        po.lastEmailRecipient = recipient;
-        po.lastEmailSubject = subject || '';
-        po.lastEmailSentBy = sentBy || 'Unknown';
-
-        // Add to communication history
-        if (!po.emailCommunicationHistory) {
-            po.emailCommunicationHistory = [];
-        }
-        
-        po.emailCommunicationHistory.push({
-            sentAt: new Date(),
-            recipient: recipient,
-            subject: subject || '',
-            sentBy: sentBy || 'Unknown',
-            notes: notes || ''
-        });
-
-        await po.save();
-
-        res.json({ 
-            success: true, 
-            message: 'Email communication recorded',
-            lastEmailSent: po.lastEmailSent,
-            lastEmailRecipient: po.lastEmailRecipient
-        });
-
-    } catch (error) {
-        console.error('❌ Error recording email communication:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message 
-        });
+    if (!recipient) {
+      return res.status(400).json({
+        success: false,
+        error: 'Recipient email is required'
+      });
     }
+
+    const po = await PurchaseOrder.findById(req.params.id);
+
+    if (!po) {
+      return res.status(404).json({
+        success: false,
+        error: 'Purchase Order not found'
+      });
+    }
+
+    // Update last email fields
+    po.lastEmailSent = new Date();
+    po.lastEmailRecipient = recipient;
+    po.lastEmailSubject = subject || '';
+    po.lastEmailSentBy = sentBy || 'Unknown';
+
+    // Add to communication history
+    if (!po.emailCommunicationHistory) {
+      po.emailCommunicationHistory = [];
+    }
+
+    po.emailCommunicationHistory.push({
+      sentAt: new Date(),
+      recipient: recipient,
+      subject: subject || '',
+      sentBy: sentBy || 'Unknown',
+      notes: notes || ''
+    });
+
+    await po.save();
+
+    res.json({
+      success: true,
+      message: 'Email communication recorded',
+      lastEmailSent: po.lastEmailSent,
+      lastEmailRecipient: po.lastEmailRecipient
+    });
+
+  } catch (error) {
+    console.error('❌ Error recording email communication:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
 });
 
 module.exports = router;

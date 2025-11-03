@@ -3973,7 +3973,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
                 <div class="filter-group">
                     <label for="locationFilter" style="margin-bottom: 5px;">📍 Location</label>
-                    <select id="locationFilter" style="width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                    <select id="locationFilter"
+                        style="width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
                         <option value="">All Locations</option>
                     </select>
                 </div>
@@ -4047,338 +4048,346 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             </thead>
                             <tbody>
                                 <% purchaseOrders.forEach((po, index)=> { %>
-                                    <% 
-                                    // Extract unique locations from line items
-                                    const lineItemLocations = po.lineItems && po.lineItems.length > 0 
-                                        ? [...new Set(po.lineItems.map(item => item.locationName).filter(loc => loc))].join(', ')
+                                    <% // Extract unique locations from line items const lineItemLocations=po.lineItems
+                                        && po.lineItems.length> 0
+                                        ? [...new Set(po.lineItems.map(item => item.locationName).filter(loc =>
+                                        loc))].join(', ')
                                         : '';
-                                    %>
-                                    <!-- Main data row -->
-                                    <tr data-po='<%= JSON.stringify(po) %>' 
-                                        data-index="<%= index %>"
-                                        data-line-item-locations="<%= lineItemLocations %>">
-                                        <td class="date-cell">
-                                            <%= po.date %>
-                                        </td>
-                                        <td class="po-number">
-                                            <div class="po-container">
-                                                <% if (po.poUrl && po.poUrl.trim()) { %>
-                                                    <a href="<%= po.poUrl %>" target="_blank" class="po-link"
-                                                        title="Open <%= po.poNumber %> link">
-                                                        <%= po.poNumber %>
-                                                    </a>
-                                                    <% } else { %>
-                                                        <span class="po-text">
+                                        %>
+                                        <!-- Main data row -->
+                                        <tr data-po='<%= JSON.stringify(po) %>' data-index="<%= index %>"
+                                            data-line-item-locations="<%= lineItemLocations %>">
+                                            <td class="date-cell">
+                                                <%= po.date %>
+                                            </td>
+                                            <td class="po-number">
+                                                <div class="po-container">
+                                                    <% if (po.poUrl && po.poUrl.trim()) { %>
+                                                        <a href="<%= po.poUrl %>" target="_blank" class="po-link"
+                                                            title="Open <%= po.poNumber %> link">
                                                             <%= po.poNumber %>
-                                                        </span>
-                                                        <% } %>
-                                                            <button
-                                                                class="url-btn <%= po.poUrl && po.poUrl.trim() ? 'has-url' : '' %>"
-                                                                data-id="<%- po._id %>" data-po="<%- po.poNumber %>"
-                                                                data-url="<%- po.poUrl || '' %>"
-                                                                title="<%= po.poUrl && po.poUrl.trim() ? 'Edit URL' : 'Add URL' %>">
-                                                                🔗
-                                                            </button>
-                                                            <button class="copy-po-btn" data-po="<%- po.poNumber %>"
-                                                                title="Copy PO Number">
-                                                                📋
-                                                            </button>
-                                                            <button
-                                                                class="manage-attachments-btn <%= po.attachments && po.attachments.length > 0 ? 'has-attachments' : '' %>"
-                                                                type="button" data-po-id="<%= po._id %>"
-                                                                data-po-number="<%= po.poNumber %>"
-                                                                title="<%= po.attachments && po.attachments.length > 0 ? `Manage ${po.attachments.length} attachment(s)` : 'Manage attachments' %>">
-                                                                📎
-                                                            </button>
-                                                            <button
-                                                                class="dropship-toggle-btn <%= (po.isDropship || (po.location && po.location.toLowerCase().includes('dropship'))) ? 'is-dropship' : '' %>"
-                                                                data-id="<%- po._id %>" data-po="<%- po.poNumber %>"
-                                                                data-is-dropship="<%= (po.isDropship || (po.location && po.location.toLowerCase().includes('dropship'))) ? 'true' : 'false' %>"
-                                                                title="<%= (po.isDropship || (po.location && po.location.toLowerCase().includes('dropship'))) ? 'Dropship PO - Click to unmark' : 'Click to mark as dropship' %>">
-                                                                🚚
-                                                            </button>
-                                            </div>
-                                        </td>
-                                        <td class="priority-cell">
-                                            <select class="priority-select" data-id="<%= po._id %>"
-                                                data-po="<%= po.poNumber %>"
-                                                title="Set priority for PO <%= po.poNumber %>">
-                                                <option value="1" <%=(po.priority || 3)==1 ? 'selected' : '' %>
-                                                    class="priority-1">🔴 1</option>
-                                                <option value="2" <%=(po.priority || 3)==2 ? 'selected' : '' %>
-                                                    class="priority-2">🩷 2</option>
-                                                <option value="3" <%=(po.priority || 3)==3 ? 'selected' : '' %>
-                                                    class="priority-3">🟠 3</option>
-                                                <option value="4" <%=(po.priority || 3)==4 ? 'selected' : '' %>
-                                                    class="priority-4">🟡 4</option>
-                                                <option value="5" <%=(po.priority || 3)==5 ? 'selected' : '' %>
-                                                    class="priority-5">🟢 5</option>
-                                            </select>
-                                        </td>
-                                        <td class="vendor" title="<%= po.vendor %>">
-                                            <% if (po.linkedVendor && po.linkedVendor._id) { %>
-                                                <a href="/vendors/<%= po.linkedVendor._id %>" class="vendor-link"
-                                                    title="View vendor details for <%= po.vendor %>">
-                                                    <%= po.vendor %>
-                                                </a>
-                                                <% } else if (po.linkedVendor) { %>
-                                                    <a href="/vendors/<%= po.linkedVendor %>" class="vendor-link"
+                                                        </a>
+                                                        <% } else { %>
+                                                            <span class="po-text">
+                                                                <%= po.poNumber %>
+                                                            </span>
+                                                            <% } %>
+                                                                <button
+                                                                    class="url-btn <%= po.poUrl && po.poUrl.trim() ? 'has-url' : '' %>"
+                                                                    data-id="<%- po._id %>" data-po="<%- po.poNumber %>"
+                                                                    data-url="<%- po.poUrl || '' %>"
+                                                                    title="<%= po.poUrl && po.poUrl.trim() ? 'Edit URL' : 'Add URL' %>">
+                                                                    🔗
+                                                                </button>
+                                                                <button class="copy-po-btn" data-po="<%- po.poNumber %>"
+                                                                    title="Copy PO Number">
+                                                                    📋
+                                                                </button>
+                                                                <button
+                                                                    class="manage-attachments-btn <%= po.attachments && po.attachments.length > 0 ? 'has-attachments' : '' %>"
+                                                                    type="button" data-po-id="<%= po._id %>"
+                                                                    data-po-number="<%= po.poNumber %>"
+                                                                    title="<%= po.attachments && po.attachments.length > 0 ? `Manage ${po.attachments.length} attachment(s)` : 'Manage attachments' %>">
+                                                                    📎
+                                                                </button>
+                                                                <button
+                                                                    class="dropship-toggle-btn <%= (po.isDropship || (po.location && po.location.toLowerCase().includes('dropship'))) ? 'is-dropship' : '' %>"
+                                                                    data-id="<%- po._id %>" data-po="<%- po.poNumber %>"
+                                                                    data-is-dropship="<%= (po.isDropship || (po.location && po.location.toLowerCase().includes('dropship'))) ? 'true' : 'false' %>"
+                                                                    title="<%= (po.isDropship || (po.location && po.location.toLowerCase().includes('dropship'))) ? 'Dropship PO - Click to unmark' : 'Click to mark as dropship' %>">
+                                                                    🚚
+                                                                </button>
+                                                </div>
+                                            </td>
+                                            <td class="priority-cell">
+                                                <select class="priority-select" data-id="<%= po._id %>"
+                                                    data-po="<%= po.poNumber %>"
+                                                    title="Set priority for PO <%= po.poNumber %>">
+                                                    <option value="1" <%=(po.priority || 3)==1 ? 'selected' : '' %>
+                                                        class="priority-1">🔴 1</option>
+                                                    <option value="2" <%=(po.priority || 3)==2 ? 'selected' : '' %>
+                                                        class="priority-2">🩷 2</option>
+                                                    <option value="3" <%=(po.priority || 3)==3 ? 'selected' : '' %>
+                                                        class="priority-3">🟠 3</option>
+                                                    <option value="4" <%=(po.priority || 3)==4 ? 'selected' : '' %>
+                                                        class="priority-4">🟡 4</option>
+                                                    <option value="5" <%=(po.priority || 3)==5 ? 'selected' : '' %>
+                                                        class="priority-5">🟢 5</option>
+                                                </select>
+                                            </td>
+                                            <td class="vendor" title="<%= po.vendor %>">
+                                                <% if (po.linkedVendor && po.linkedVendor._id) { %>
+                                                    <a href="/vendors/<%= po.linkedVendor._id %>" class="vendor-link"
                                                         title="View vendor details for <%= po.vendor %>">
                                                         <%= po.vendor %>
                                                     </a>
-                                                    <% } else { %>
-                                                        <%= po.vendor %>
-                                                            <% } %>
-                                        </td>
-                                        <td class="line-items-count-cell">
-                                            <% if (po.lineItems && po.lineItems.length> 0) { %>
-                                                <div class="line-items-count-display">
-                                                    <button class="po-details-btn" data-index="<%= index %>"
-                                                        data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
-                                                        title="View PO details: <%= po.lineItems.filter(item => item.received).length %> received / <%= po.lineItems.length %> total">
-                                                        📦 <span class="count-number">
-                                                            <% const totalItems=po.lineItems.length; const
-                                                                receivedItems=po.lineItems.filter(item=>
-                                                                item.received).length;
-                                                                %>
-                                                                <%= receivedItems %>/<%= totalItems %>
-                                                        </span>
-                                                    </button>
-                                                    <button class="update-netsuite-btn" data-po-id="<%= po._id %>"
-                                                        data-po-number="<%= po.poNumber %>"
-                                                        title="Update line items for PO <%= po.poNumber %>">
-                                                        🔄
-                                                    </button>
-                                                </div>
-                                                <% } else { %>
-                                                    <div class="no-line-items-display">
+                                                    <% } else if (po.linkedVendor) { %>
+                                                        <a href="/vendors/<%= po.linkedVendor %>" class="vendor-link"
+                                                            title="View vendor details for <%= po.vendor %>">
+                                                            <%= po.vendor %>
+                                                        </a>
+                                                        <% } else { %>
+                                                            <%= po.vendor %>
+                                                                <% } %>
+                                            </td>
+                                            <td class="line-items-count-cell">
+                                                <% if (po.lineItems && po.lineItems.length> 0) { %>
+                                                    <div class="line-items-count-display">
                                                         <button class="po-details-btn" data-index="<%= index %>"
                                                             data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
-                                                            title="View PO details for <%= po.poNumber %>">
-                                                            📋 Details
+                                                            title="View PO details: <%= po.lineItems.filter(item => item.received).length %> received / <%= po.lineItems.length %> total">
+                                                            📦 <span class="count-number">
+                                                                <% const totalItems=po.lineItems.length; const
+                                                                    receivedItems=po.lineItems.filter(item=>
+                                                                    item.received).length;
+                                                                    %>
+                                                                    <%= receivedItems %>/<%= totalItems %>
+                                                            </span>
                                                         </button>
-                                                        <button class="import-netsuite-btn" data-po-id="<%= po._id %>"
+                                                        <button class="update-netsuite-btn" data-po-id="<%= po._id %>"
                                                             data-po-number="<%= po.poNumber %>"
-                                                            title="Import NetSuite line items for PO <%= po.poNumber %>">
-                                                            📥
-                                                        </button>
-                                                    </div>
-                                                    <% } %>
-                                        </td>
-                                        <td class="eta-cell">
-                                            <input type="date" class="eta-input" data-id="<%= po._id %>"
-                                                data-po="<%= po.poNumber %>"
-                                                value="<%= po.eta ? new Date(po.eta).toISOString().split('T')[0] : '' %>"
-                                                title="ETA for PO <%= po.poNumber %>">
-                                        </td>
-                                        <td class="ns-status-cell">
-                                            <span class="ns-status-display">
-                                                <%= po.nsStatus %>
-                                            </span>
-                                        </td>
-                                        <td class="status-cell">
-                                            <select class="status-select <%= po.status ? 'has-status' : '' %>"
-                                                data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
-                                                title="Custom Status for PO <%= po.poNumber %>">
-                                                <option value="">Select Status...</option>
-                                                <% statusOptions.forEach(option=> { %>
-                                                    <option value="<%= option %>" <%=po.status===option ? 'selected'
-                                                        : '' %>>
-                                                        <%= option %>
-                                                    </option>
-                                                    <% }); %>
-                                            </select>
-                                        </td>
-                                        <td class="shipping-tracking-cell">
-                                            <div class="tracking-container">
-                                                <div class="tracking-input-row">
-                                                    <select class="shipping-carrier-select form-control-sm"
-                                                        data-po-id="<%= po._id %>"
-                                                        style="font-size: 12px; border: 1px solid #ddd; padding: 4px 8px; width: 80px; margin-right: 4px;">
-                                                        <option value="FedEx" <%=(po.shippingCarrier || 'FedEx'
-                                                            )==='FedEx' ? 'selected' : '' %>>FedEx</option>
-                                                        <option value="UPS" <%=(po.shippingCarrier || 'FedEx' )==='UPS'
-                                                            ? 'selected' : '' %>>UPS</option>
-                                                        <option value="USPS" <%=(po.shippingCarrier || 'FedEx'
-                                                            )==='USPS' ? 'selected' : '' %>>USPS</option>
-                                                        <option value="DHL" <%=(po.shippingCarrier || 'FedEx' )==='DHL'
-                                                            ? 'selected' : '' %>>DHL</option>
-                                                        <option value="Amazon" <%=(po.shippingCarrier || 'FedEx'
-                                                            )==='Amazon' ? 'selected' : '' %>>Amazon</option>
-                                                        <option value="OnTrac" <%=(po.shippingCarrier || 'FedEx'
-                                                            )==='OnTrac' ? 'selected' : '' %>>OnTrac</option>
-                                                        <option value="LaserShip" <%=(po.shippingCarrier || 'FedEx'
-                                                            )==='LaserShip' ? 'selected' : '' %>>LaserShip</option>
-                                                        <option value="Canada Post" <%=(po.shippingCarrier || 'FedEx'
-                                                            )==='Canada Post' ? 'selected' : '' %>>Canada Post</option>
-                                                        <option value="Other" <%=(po.shippingCarrier || 'FedEx'
-                                                            )==='Other' ? 'selected' : '' %>>Other</option>
-                                                    </select>
-                                                    <input type="text" class="shipping-tracking-input form-control-sm"
-                                                        placeholder="Enter tracking #"
-                                                        value="<%= po.shippingTracking || '' %>"
-                                                        data-po-id="<%= po._id %>"
-                                                        style="font-size: 12px; border: 1px solid #ddd; padding: 4px 8px; flex: 1;">
-                                                </div>
-                                                <% if (po.shippingTracking) { %>
-                                                    <div class="tracking-actions">
-                                                        <button class="btn btn-sm btn-outline-primary tracking-info-btn"
-                                                            data-tracking="<%= po.shippingTracking %>"
-                                                            data-carrier="<%= po.shippingCarrier || 'FedEx' %>"
-                                                            data-po-id="<%= po._id %>" title="Get tracking info">
-                                                            🔍
-                                                        </button>
-                                                        <button
-                                                            class="btn btn-sm btn-outline-success tracking-update-btn"
-                                                            data-po-id="<%= po._id %>" title="Update tracking">
+                                                            title="Update line items for PO <%= po.poNumber %>">
                                                             🔄
                                                         </button>
                                                     </div>
-                                                    <div class="tracking-status" data-po-id="<%= po._id %>">
-                                                        <small class="text-muted">Click 🔍 to check status</small>
-                                                    </div>
-                                                    <% } %>
-                                            </div>
-                                        </td>
-                                        <td class="next-update-cell">
-                                            <input type="date"
-                                                class="date-input <%= po.nextUpdateDate ? 'has-date' : '' %> <%= po.nextUpdateDate && new Date(po.nextUpdateDate) < new Date() ? 'overdue' : '' %>"
-                                                value="<%= po.nextUpdateDate ? new Date(po.nextUpdateDate).toISOString().split('T')[0] : '' %>"
-                                                data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
-                                                title="Set next update date for PO <%= po.poNumber %>">
-                                        </td>
-                                        <td class="notes-toggle-cell">
-                                            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                                                <button
-                                                    class="notes-toggle <%= po.notes && po.notes.trim() ? 'has-notes' : '' %>"
-                                                    type="button" data-index="<%= index %>"
-                                                    title="<%= po.notes && po.notes.trim() ? 'View/Edit notes' : 'Add notes' %>">
-                                                    <%= po.notes && po.notes.trim() ? '📝' : '➕' %>
-                                                </button>
-                                                <button
-                                                    class="tracking-toggle-btn <%= po.shippingTracking ? 'has-status' : '' %>"
-                                                    type="button" data-index="<%= index %>" data-po-id="<%= po._id %>"
-                                                    data-tracking="<%= po.shippingTracking || '' %>"
-                                                    data-carrier="<%= po.shippingCarrier || 'FedEx' %>"
-                                                    title="<%= po.shippingTracking ? `Tracking: ${po.shippingTracking} (${po.shippingCarrier || 'FedEx'})` : 'View tracking information' %>">
-                                                    🚚
-                                                </button>
-                                                <button class="create-task-btn" type="button" data-po-id="<%= po._id %>"
-                                                    data-po-number="<%= po.poNumber %>" data-vendor="<%= po.vendor %>"
-                                                    title="Create task for PO <%= po.poNumber %> and vendor <%= po.vendor %>">
-                                                    ✅
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <!-- Expandable line items row -->
-                                    <tr class="line-items-row" id="line-items-row-<%= index %>">
-                                        <td colspan="11" class="line-items-cell-expanded">
-                                            <div class="line-items-header">
-                                                <div class="line-items-title">Line Items for PO <%= po.poNumber %>
-                                                        <span class="line-items-status"
-                                                            id="line-items-status-<%= index %>"></span>
-                                                </div>
-                                                <div class="line-items-actions">
-                                                    <button class="show-received-toggle" id="show-received-<%= index %>"
-                                                        style="display: none;">
-                                                        👁️ Show Received
-                                                    </button>
-                                                    <button class="line-items-close"
-                                                        data-index="<%= index %>">Close</button>
-                                                </div>
-                                            </div>
-                                            <div class="line-items-container" id="line-items-container-<%= index %>">
-                                                <div class="loading-line-items">Loading line items...</div>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <!-- Expandable notes row -->
-                                    <tr class="notes-row" id="notes-row-<%= index %>">
-                                        <td colspan="11" class="notes-cell-expanded">
-                                            <div class="notes-header">
-                                                <div class="notes-title">Notes for PO <%= po.poNumber %>
-                                                </div>
-                                                <div class="notes-actions">
-                                                    <button class="notes-close" data-index="<%= index %>">Close</button>
-                                                </div>
-                                            </div>
-                                            <div class="notes-container">
-                                                <textarea
-                                                    class="notes-input <%= po.notes && po.notes.trim() ? 'has-notes' : '' %>"
-                                                    data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
-                                                    data-index="<%= index %>"
-                                                    placeholder="Add detailed notes for <%= po.poNumber %>... (These notes persist across CSV uploads)"><%= po.notes %></textarea>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <!-- Expandable tracking row -->
-                                    <tr class="tracking-row" id="tracking-row-<%= index %>">
-                                        <td colspan="11" class="tracking-cell-expanded">
-                                            <div class="tracking-header">
-                                                <div class="tracking-title">🚚 Tracking Information for PO <%=
-                                                        po.poNumber %>
-                                                </div>
-                                                <div class="tracking-actions">
-                                                    <button class="tracking-close"
-                                                        data-index="<%= index %>">Close</button>
-                                                </div>
-                                            </div>
-                                            <div class="tracking-container">
-                                                <% if (po.shippingTracking) { %>
-                                                    <div class="tracking-info-row">
-                                                        <div class="tracking-info-item">
-                                                            <div class="tracking-info-label">Tracking Number</div>
-                                                            <div class="tracking-info-value">
-                                                                <a href="#" class="tracking-link"
-                                                                    onclick="openTrackingUrl('<%= po.shippingTracking %>', '<%= po.shippingCarrier || 'FedEx' %>'); return false;">
-                                                                    <%= po.shippingTracking %>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                        <div class="tracking-info-item">
-                                                            <div class="tracking-info-label">Carrier</div>
-                                                            <div class="tracking-info-value">
-                                                                <%= po.shippingCarrier || 'FedEx' %>
-                                                            </div>
-                                                        </div>
-                                                        <div class="tracking-info-item">
-                                                            <div class="tracking-info-label">Vendor</div>
-                                                            <div class="tracking-info-value">
-                                                                <%= po.vendor %>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="tracking-button-group">
-                                                        <button class="tracking-action-btn primary"
-                                                            onclick="openTrackingUrl('<%= po.shippingTracking %>', '<%= po.shippingCarrier || 'FedEx' %>')">
-                                                            🌐 View on <%= po.shippingCarrier || 'FedEx' %> Website
-                                                        </button>
-                                                        <button class="tracking-action-btn secondary"
-                                                            onclick="checkTrackingStatus('<%= po._id %>', '<%= po.shippingTracking %>', '<%= po.shippingCarrier || 'FedEx' %>')">
-                                                            🔍 Check Status
-                                                        </button>
-                                                        <button class="tracking-action-btn secondary"
-                                                            onclick="updateTrackingInfo('<%= po._id %>')">
-                                                            ✏️ Update Tracking
-                                                        </button>
-                                                    </div>
                                                     <% } else { %>
-                                                        <div style="text-align: center; padding: 20px; color: #6c757d;">
-                                                            <p>No tracking information available for this PO.</p>
-                                                            <button class="tracking-action-btn primary"
-                                                                onclick="updateTrackingInfo('<%= po._id %>')">
-                                                                ➕ Add Tracking Information
+                                                        <div class="no-line-items-display">
+                                                            <button class="po-details-btn" data-index="<%= index %>"
+                                                                data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
+                                                                title="View PO details for <%= po.poNumber %>">
+                                                                📋 Details
+                                                            </button>
+                                                            <button class="import-netsuite-btn"
+                                                                data-po-id="<%= po._id %>"
+                                                                data-po-number="<%= po.poNumber %>"
+                                                                title="Import NetSuite line items for PO <%= po.poNumber %>">
+                                                                📥
                                                             </button>
                                                         </div>
                                                         <% } %>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <% }); %>
+                                            </td>
+                                            <td class="eta-cell">
+                                                <input type="date" class="eta-input" data-id="<%= po._id %>"
+                                                    data-po="<%= po.poNumber %>"
+                                                    value="<%= po.eta ? new Date(po.eta).toISOString().split('T')[0] : '' %>"
+                                                    title="ETA for PO <%= po.poNumber %>">
+                                            </td>
+                                            <td class="ns-status-cell">
+                                                <span class="ns-status-display">
+                                                    <%= po.nsStatus %>
+                                                </span>
+                                            </td>
+                                            <td class="status-cell">
+                                                <select class="status-select <%= po.status ? 'has-status' : '' %>"
+                                                    data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
+                                                    title="Custom Status for PO <%= po.poNumber %>">
+                                                    <option value="">Select Status...</option>
+                                                    <% statusOptions.forEach(option=> { %>
+                                                        <option value="<%= option %>" <%=po.status===option ? 'selected'
+                                                            : '' %>>
+                                                            <%= option %>
+                                                        </option>
+                                                        <% }); %>
+                                                </select>
+                                            </td>
+                                            <td class="shipping-tracking-cell">
+                                                <div class="tracking-container">
+                                                    <div class="tracking-input-row">
+                                                        <select class="shipping-carrier-select form-control-sm"
+                                                            data-po-id="<%= po._id %>"
+                                                            style="font-size: 12px; border: 1px solid #ddd; padding: 4px 8px; width: 80px; margin-right: 4px;">
+                                                            <option value="FedEx" <%=(po.shippingCarrier || 'FedEx'
+                                                                )==='FedEx' ? 'selected' : '' %>>FedEx</option>
+                                                            <option value="UPS" <%=(po.shippingCarrier || 'FedEx'
+                                                                )==='UPS' ? 'selected' : '' %>>UPS</option>
+                                                            <option value="USPS" <%=(po.shippingCarrier || 'FedEx'
+                                                                )==='USPS' ? 'selected' : '' %>>USPS</option>
+                                                            <option value="DHL" <%=(po.shippingCarrier || 'FedEx'
+                                                                )==='DHL' ? 'selected' : '' %>>DHL</option>
+                                                            <option value="Amazon" <%=(po.shippingCarrier || 'FedEx'
+                                                                )==='Amazon' ? 'selected' : '' %>>Amazon</option>
+                                                            <option value="OnTrac" <%=(po.shippingCarrier || 'FedEx'
+                                                                )==='OnTrac' ? 'selected' : '' %>>OnTrac</option>
+                                                            <option value="LaserShip" <%=(po.shippingCarrier || 'FedEx'
+                                                                )==='LaserShip' ? 'selected' : '' %>>LaserShip</option>
+                                                            <option value="Canada Post" <%=(po.shippingCarrier
+                                                                || 'FedEx' )==='Canada Post' ? 'selected' : '' %>>Canada
+                                                                Post</option>
+                                                            <option value="Other" <%=(po.shippingCarrier || 'FedEx'
+                                                                )==='Other' ? 'selected' : '' %>>Other</option>
+                                                        </select>
+                                                        <input type="text"
+                                                            class="shipping-tracking-input form-control-sm"
+                                                            placeholder="Enter tracking #"
+                                                            value="<%= po.shippingTracking || '' %>"
+                                                            data-po-id="<%= po._id %>"
+                                                            style="font-size: 12px; border: 1px solid #ddd; padding: 4px 8px; flex: 1;">
+                                                    </div>
+                                                    <% if (po.shippingTracking) { %>
+                                                        <div class="tracking-actions">
+                                                            <button
+                                                                class="btn btn-sm btn-outline-primary tracking-info-btn"
+                                                                data-tracking="<%= po.shippingTracking %>"
+                                                                data-carrier="<%= po.shippingCarrier || 'FedEx' %>"
+                                                                data-po-id="<%= po._id %>" title="Get tracking info">
+                                                                🔍
+                                                            </button>
+                                                            <button
+                                                                class="btn btn-sm btn-outline-success tracking-update-btn"
+                                                                data-po-id="<%= po._id %>" title="Update tracking">
+                                                                🔄
+                                                            </button>
+                                                        </div>
+                                                        <div class="tracking-status" data-po-id="<%= po._id %>">
+                                                            <small class="text-muted">Click 🔍 to check status</small>
+                                                        </div>
+                                                        <% } %>
+                                                </div>
+                                            </td>
+                                            <td class="next-update-cell">
+                                                <input type="date"
+                                                    class="date-input <%= po.nextUpdateDate ? 'has-date' : '' %> <%= po.nextUpdateDate && new Date(po.nextUpdateDate) < new Date() ? 'overdue' : '' %>"
+                                                    value="<%= po.nextUpdateDate ? new Date(po.nextUpdateDate).toISOString().split('T')[0] : '' %>"
+                                                    data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
+                                                    title="Set next update date for PO <%= po.poNumber %>">
+                                            </td>
+                                            <td class="notes-toggle-cell">
+                                                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                                    <button
+                                                        class="notes-toggle <%= po.notes && po.notes.trim() ? 'has-notes' : '' %>"
+                                                        type="button" data-index="<%= index %>"
+                                                        title="<%= po.notes && po.notes.trim() ? 'View/Edit notes' : 'Add notes' %>">
+                                                        <%= po.notes && po.notes.trim() ? '📝' : '➕' %>
+                                                    </button>
+                                                    <button
+                                                        class="tracking-toggle-btn <%= po.shippingTracking ? 'has-status' : '' %>"
+                                                        type="button" data-index="<%= index %>"
+                                                        data-po-id="<%= po._id %>"
+                                                        data-tracking="<%= po.shippingTracking || '' %>"
+                                                        data-carrier="<%= po.shippingCarrier || 'FedEx' %>"
+                                                        title="<%= po.shippingTracking ? `Tracking: ${po.shippingTracking} (${po.shippingCarrier || 'FedEx'})` : 'View tracking information' %>">
+                                                        🚚
+                                                    </button>
+                                                    <button class="create-task-btn" type="button"
+                                                        data-po-id="<%= po._id %>" data-po-number="<%= po.poNumber %>"
+                                                        data-vendor="<%= po.vendor %>"
+                                                        title="Create task for PO <%= po.poNumber %> and vendor <%= po.vendor %>">
+                                                        ✅
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Expandable line items row -->
+                                        <tr class="line-items-row" id="line-items-row-<%= index %>">
+                                            <td colspan="11" class="line-items-cell-expanded">
+                                                <div class="line-items-header">
+                                                    <div class="line-items-title">Line Items for PO <%= po.poNumber %>
+                                                            <span class="line-items-status"
+                                                                id="line-items-status-<%= index %>"></span>
+                                                    </div>
+                                                    <div class="line-items-actions">
+                                                        <button class="show-received-toggle"
+                                                            id="show-received-<%= index %>" style="display: none;">
+                                                            👁️ Show Received
+                                                        </button>
+                                                        <button class="line-items-close"
+                                                            data-index="<%= index %>">Close</button>
+                                                    </div>
+                                                </div>
+                                                <div class="line-items-container"
+                                                    id="line-items-container-<%= index %>">
+                                                    <div class="loading-line-items">Loading line items...</div>
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Expandable notes row -->
+                                        <tr class="notes-row" id="notes-row-<%= index %>">
+                                            <td colspan="11" class="notes-cell-expanded">
+                                                <div class="notes-header">
+                                                    <div class="notes-title">Notes for PO <%= po.poNumber %>
+                                                    </div>
+                                                    <div class="notes-actions">
+                                                        <button class="notes-close"
+                                                            data-index="<%= index %>">Close</button>
+                                                    </div>
+                                                </div>
+                                                <div class="notes-container">
+                                                    <textarea
+                                                        class="notes-input <%= po.notes && po.notes.trim() ? 'has-notes' : '' %>"
+                                                        data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
+                                                        data-index="<%= index %>"
+                                                        placeholder="Add detailed notes for <%= po.poNumber %>... (These notes persist across CSV uploads)"><%= po.notes %></textarea>
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Expandable tracking row -->
+                                        <tr class="tracking-row" id="tracking-row-<%= index %>">
+                                            <td colspan="11" class="tracking-cell-expanded">
+                                                <div class="tracking-header">
+                                                    <div class="tracking-title">🚚 Tracking Information for PO <%=
+                                                            po.poNumber %>
+                                                    </div>
+                                                    <div class="tracking-actions">
+                                                        <button class="tracking-close"
+                                                            data-index="<%= index %>">Close</button>
+                                                    </div>
+                                                </div>
+                                                <div class="tracking-container">
+                                                    <% if (po.shippingTracking) { %>
+                                                        <div class="tracking-info-row">
+                                                            <div class="tracking-info-item">
+                                                                <div class="tracking-info-label">Tracking Number</div>
+                                                                <div class="tracking-info-value">
+                                                                    <a href="#" class="tracking-link"
+                                                                        onclick="openTrackingUrl('<%= po.shippingTracking %>', '<%= po.shippingCarrier || 'FedEx' %>'); return false;">
+                                                                        <%= po.shippingTracking %>
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tracking-info-item">
+                                                                <div class="tracking-info-label">Carrier</div>
+                                                                <div class="tracking-info-value">
+                                                                    <%= po.shippingCarrier || 'FedEx' %>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tracking-info-item">
+                                                                <div class="tracking-info-label">Vendor</div>
+                                                                <div class="tracking-info-value">
+                                                                    <%= po.vendor %>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="tracking-button-group">
+                                                            <button class="tracking-action-btn primary"
+                                                                onclick="openTrackingUrl('<%= po.shippingTracking %>', '<%= po.shippingCarrier || 'FedEx' %>')">
+                                                                🌐 View on <%= po.shippingCarrier || 'FedEx' %> Website
+                                                            </button>
+                                                            <button class="tracking-action-btn secondary"
+                                                                onclick="checkTrackingStatus('<%= po._id %>', '<%= po.shippingTracking %>', '<%= po.shippingCarrier || 'FedEx' %>')">
+                                                                🔍 Check Status
+                                                            </button>
+                                                            <button class="tracking-action-btn secondary"
+                                                                onclick="updateTrackingInfo('<%= po._id %>')">
+                                                                ✏️ Update Tracking
+                                                            </button>
+                                                        </div>
+                                                        <% } else { %>
+                                                            <div
+                                                                style="text-align: center; padding: 20px; color: #6c757d;">
+                                                                <p>No tracking information available for this PO.</p>
+                                                                <button class="tracking-action-btn primary"
+                                                                    onclick="updateTrackingInfo('<%= po._id %>')">
+                                                                    ➕ Add Tracking Information
+                                                                </button>
+                                                            </div>
+                                                            <% } %>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
                             </tbody>
                         </table>
 
