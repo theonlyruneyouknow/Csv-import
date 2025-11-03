@@ -85,6 +85,11 @@ const lineItemSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    locationName: {              // Location name from NetSuite (e.g., "Main Warehouse", "Dropship")
+        type: String,
+        default: '',
+        index: true              // Index for efficient filtering
+    },
     // Tracking integration fields
     trackingNumber: {
         type: String,

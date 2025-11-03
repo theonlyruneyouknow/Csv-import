@@ -3972,6 +3972,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 </div>
 
                 <div class="filter-group">
+                    <label for="locationFilter" style="margin-bottom: 5px;">📍 Location</label>
+                    <select id="locationFilter" style="width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                        <option value="">All Locations</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
                     <label style="margin-bottom: 8px; display: block;">🚚 Dropship Filter</label>
                     <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
                         <label class="toggle-switch">
@@ -4040,8 +4047,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             </thead>
                             <tbody>
                                 <% purchaseOrders.forEach((po, index)=> { %>
+                                    <% 
+                                    // Extract unique locations from line items
+                                    const lineItemLocations = po.lineItems && po.lineItems.length > 0 
+                                        ? [...new Set(po.lineItems.map(item => item.locationName).filter(loc => loc))].join(', ')
+                                        : '';
+                                    %>
                                     <!-- Main data row -->
-                                    <tr data-po='<%= JSON.stringify(po) %>' data-index="<%= index %>">
+                                    <tr data-po='<%= JSON.stringify(po) %>' 
+                                        data-index="<%= index %>"
+                                        data-line-item-locations="<%= lineItemLocations %>">
                                         <td class="date-cell">
                                             <%= po.date %>
                                         </td>
@@ -7670,6 +7685,40 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             return div.innerHTML;
         }
 
+        // Populate location filter dropdown with unique locations from all POs
+        function populateLocationFilter() {
+            const locationFilter = document.getElementById('locationFilter');
+            const allRows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]');
+            const uniqueLocations = new Set();
+
+            allRows.forEach(row => {
+                const locations = row.dataset.lineItemLocations;
+                if (locations) {
+                    // Split by comma and trim each location
+                    locations.split(',').forEach(loc => {
+                        const trimmedLoc = loc.trim();
+                        if (trimmedLoc) {
+                            uniqueLocations.add(trimmedLoc);
+                        }
+                    });
+                }
+            });
+
+            // Convert to array and sort alphabetically
+            const sortedLocations = Array.from(uniqueLocations).sort();
+
+            // Clear existing options except "All Locations"
+            locationFilter.innerHTML = '<option value="">All Locations</option>';
+
+            // Add each unique location as an option
+            sortedLocations.forEach(location => {
+                const option = document.createElement('option');
+                option.value = location;
+                option.textContent = location;
+                locationFilter.appendChild(option);
+            });
+        }
+
         // Filtering functionality
         function applyFilters() {
             const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
@@ -7687,6 +7736,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const showOnlyNoLineItems = showOnlyNoLineItemsCheckbox ? showOnlyNoLineItemsCheckbox.checked : false;
             const showOnlyDropshipCheckbox = document.getElementById('showOnlyDropship');
             const showOnlyDropship = showOnlyDropshipCheckbox ? showOnlyDropshipCheckbox.checked : false;
+            const locationFilter = document.getElementById('locationFilter').value.trim();
 
             const rows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]'); // Only main rows
             let visibleCount = 0;
@@ -7695,6 +7745,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             let hiddenHasUrlCount = 0;
             let hiddenWithLineItemsCount = 0;
             let hiddenNonDropshipCount = 0;
+            let hiddenLocationMismatchCount = 0;
 
             rows.forEach(row => {
                 const poData = JSON.parse(row.dataset.po);
@@ -7739,6 +7790,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const isDropship = isDropshipByLocation || isDropshipByFlag;
                 const shouldShowBasedOnDropship = !showOnlyDropship || isDropship;
 
+                // Location filter - filter by line item locations (exact match)
+                const lineItemLocations = row.dataset.lineItemLocations || '';
+                const locationArray = lineItemLocations.split(',').map(loc => loc.trim());
+                const matchesLocation = !locationFilter || locationArray.includes(locationFilter);
+
                 if (isNotMyConcern && !showNotMyConcern) {
                     hiddenNotMyConcernCount++;
                 }
@@ -7759,6 +7815,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     hiddenNonDropshipCount++;
                 }
 
+                if (locationFilter && !matchesLocation) {
+                    hiddenLocationMismatchCount++;
+                }
+
                 // Notes filter
                 let matchesNotes = true;
                 if (notesFilter === 'with-notes') {
@@ -7770,7 +7830,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 // Priority filter
                 const matchesPriority = priorityFilter === 'all' || (poData.priority && poData.priority.toString() === priorityFilter);
 
-                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowBasedOnUrl && shouldShowBasedOnLineItems && shouldShowBasedOnDropship) {
+                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowBasedOnUrl && shouldShowBasedOnLineItems && shouldShowBasedOnDropship && matchesLocation) {
                     row.classList.remove('hidden');
                     // Also show the corresponding notes row if it's expanded
                     const notesRow = document.getElementById(`notes-row-${index}`);
@@ -7788,7 +7848,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
             });
 
-            console.log(`🔍 Filter results: ${visibleCount} visible, ${hiddenNotMyConcernCount} "Not my concern" hidden, ${hiddenPendingBillCount} "Pending Bill" hidden, ${hiddenHasUrlCount} with URLs hidden, ${hiddenWithLineItemsCount} with line items hidden, ${hiddenNonDropshipCount} non-dropship hidden`);
+            console.log(`🔍 Filter results: ${visibleCount} visible, ${hiddenNotMyConcernCount} "Not my concern" hidden, ${hiddenPendingBillCount} "Pending Bill" hidden, ${hiddenHasUrlCount} with URLs hidden, ${hiddenWithLineItemsCount} with line items hidden, ${hiddenNonDropshipCount} non-dropship hidden, ${hiddenLocationMismatchCount} location mismatch hidden`);
 
             // Update results info
             const totalCount = rows.length;
@@ -7935,6 +7995,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById('statusFilter').value = 'all';
             document.getElementById('notesFilter').value = 'all';
             document.getElementById('priorityFilter').value = 'all';
+            document.getElementById('locationFilter').value = '';
             document.getElementById('showNotMyConcern').checked = false;
             document.getElementById('showPendingBill').checked = false;
             document.getElementById('showOnlyMissingUrls').checked = false;
@@ -8148,6 +8209,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         document.getElementById('statusFilter').addEventListener('change', applyFilters);
         document.getElementById('notesFilter').addEventListener('change', applyFilters);
         document.getElementById('priorityFilter').addEventListener('change', applyFilters);
+        document.getElementById('locationFilter').addEventListener('change', applyFilters);
         document.getElementById('showNotMyConcern').addEventListener('change', applyFilters);
         document.getElementById('showPendingBill').addEventListener('change', applyFilters);
         document.getElementById('showOnlyMissingUrls').addEventListener('change', applyFilters);
@@ -8943,6 +9005,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         // Ensure filters are applied after everything is loaded
         window.addEventListener('load', function () {
             console.log('🔄 Window loaded, applying final filter initialization...');
+
+            // Populate location dropdown with unique locations
+            populateLocationFilter();
 
             const notMyConcernCheckbox = document.getElementById('showNotMyConcern');
             const pendingBillCheckbox = document.getElementById('showPendingBill');

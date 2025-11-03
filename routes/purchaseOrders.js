@@ -3651,8 +3651,9 @@ router.post('/import-netsuite', async (req, res) => {
     const billVarianceStatusIndex = getColumnIndex('bill variance status');
     const billVarianceFieldIndex = getColumnIndex('bill variance');
     const closedIndex = getColumnIndex('closed');
+    const locationNameIndex = getColumnIndex('location: name');
 
-    console.log('🔍 Column indices:', { itemIndex, quantityIndex, descriptionIndex });
+    console.log('🔍 Column indices:', { itemIndex, quantityIndex, descriptionIndex, locationNameIndex });
 
     if (itemIndex === -1 || quantityIndex === -1 || descriptionIndex === -1) {
       console.log('❌ Missing required columns. Available headers:', headers);
@@ -3698,6 +3699,7 @@ router.post('/import-netsuite', async (req, res) => {
       // Extract item data
       const itemCode = row[itemIndex] || '';
       const vendorName = row[vendorNameIndex] || '';
+      const locationName = row[locationNameIndex] || '';
       
       // Parse quantity with comma support (e.g., "6,000" -> 6000)
       let quantity = 0;
@@ -3838,7 +3840,8 @@ router.post('/import-netsuite', async (req, res) => {
         received: received >= quantity, // Convert to boolean - true if fully received
         receivedDate: received > 0 ? new Date() : null,
         eta: calculatedEta, // Use calculated ETA based on logic
-        notes: notesArray.join(', ')
+        notes: notesArray.join(', '),
+        locationName: locationName // Add location name from NetSuite
       });
 
       console.log(`💾 Creating LineItem with eta:`, parseDate(expectedArrivalDate));
