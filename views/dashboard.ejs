@@ -4040,14 +4040,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             </thead>
                             <tbody>
                                 <% purchaseOrders.forEach((po, index)=> {
-                                    // Extract unique locations from line items OR use PO-level location
                                     let lineItemLocations = '';
                                     if (po.lineItems && po.lineItems.length > 0) {
-                                    const itemLocs = [...new Set(po.lineItems.map(item => item.locationName).filter(loc
-                                    => loc))];
-                                    lineItemLocations = itemLocs.length > 0 ? itemLocs.join(', ') : '';
+                                        const locs = po.lineItems.map(item => item.locationName).filter(loc => loc);
+                                        const itemLocs = [...new Set(locs)];
+                                        lineItemLocations = itemLocs.length > 0 ? itemLocs.join(', ') : '';
                                     }
-                                    // Fallback to PO-level location if no line item locations
                                     const displayLocation = lineItemLocations || po.location || '';
 
                                     // Create a safe version of po for JSON serialization (avoid circular references)

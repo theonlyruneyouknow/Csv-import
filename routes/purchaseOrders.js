@@ -2130,6 +2130,19 @@ router.get('/', async (req, res) => {
     console.log('📝 Status options:', statusOptionNames);
 
     console.log(`🎨 Rendering dashboard with ${prePurchaseOrders.length} pre-purchase orders...`);
+    
+    // Log sample PO data to verify location fields
+    if (purchaseOrdersWithETA.length > 0) {
+      const samplePO = purchaseOrdersWithETA[0];
+      console.log('📦 Sample PO data:');
+      console.log('  - poNumber:', samplePO.poNumber);
+      console.log('  - location field:', samplePO.location);
+      console.log('  - lineItems count:', samplePO.lineItems?.length || 0);
+      if (samplePO.lineItems && samplePO.lineItems.length > 0) {
+        console.log('  - First line item locationName:', samplePO.lineItems[0].locationName);
+      }
+    }
+    
     res.render('dashboard', {
       purchaseOrders: purchaseOrdersWithETA,
       prePurchaseOrders,
@@ -2143,7 +2156,14 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Dashboard route error:', error);
-    res.status(500).json({ error: error.message });
+    console.error('❌ Error stack:', error.stack);
+    console.error('❌ Error name:', error.name);
+    console.error('❌ Error message:', error.message);
+    res.status(500).json({ 
+      error: error.message,
+      stack: error.stack,
+      name: error.name
+    });
   }
 });
 
