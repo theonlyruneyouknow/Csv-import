@@ -2130,7 +2130,7 @@ router.get('/', async (req, res) => {
     console.log('📝 Status options:', statusOptionNames);
 
     console.log(`🎨 Rendering dashboard with ${prePurchaseOrders.length} pre-purchase orders...`);
-    
+
     // Log sample PO data to verify location fields
     if (purchaseOrdersWithETA.length > 0) {
       const samplePO = purchaseOrdersWithETA[0];
@@ -2142,7 +2142,7 @@ router.get('/', async (req, res) => {
         console.log('  - First line item locationName:', samplePO.lineItems[0].locationName);
       }
     }
-    
+
     res.render('dashboard', {
       purchaseOrders: purchaseOrdersWithETA,
       prePurchaseOrders,
@@ -2159,7 +2159,7 @@ router.get('/', async (req, res) => {
     console.error('❌ Error stack:', error.stack);
     console.error('❌ Error name:', error.name);
     console.error('❌ Error message:', error.message);
-    res.status(500).json({ 
+    res.status(500).json({
       error: error.message,
       stack: error.stack,
       name: error.name
