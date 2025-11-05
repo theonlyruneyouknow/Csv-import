@@ -6610,32 +6610,32 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     dueDate: document.getElementById('taskDueDate').value,
                     priority: document.getElementById('taskPriority').value,
                     relatedPOs: [document.getElementById('taskPOId').value],
-                status: 'pending'
-            };
+                    status: 'pending'
+                };
 
-            try {
-                const response = await fetch('/tasks/create', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
+                try {
+                    const response = await fetch('/tasks/create', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
 
-                const result = await response.json();
+                    const result = await response.json();
 
-                if (result.success) {
-                    showTrackingToast('Task created successfully!', 'success');
-                    closeCreateTaskModal();
-                } else {
-                    showTrackingToast('Failed to create task: ' + result.error, 'error');
+                    if (result.success) {
+                        showTrackingToast('Task created successfully!', 'success');
+                        closeCreateTaskModal();
+                    } else {
+                        showTrackingToast('Failed to create task: ' + result.error, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error creating task:', error);
+                    showTrackingToast('Error creating task', 'error');
                 }
-            } catch (error) {
-                console.error('Error creating task:', error);
-                showTrackingToast('Error creating task', 'error');
-            }
-        });
-    }
+            });
+        }
 
         async function checkTrackingStatus(poId, trackingNumber, carrier) {
             const statusDiv = document.querySelector('.tracking-status-display');
