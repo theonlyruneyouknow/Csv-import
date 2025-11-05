@@ -2897,6 +2897,12 @@
             text-align: center;
         }
 
+        /* Location column styling */
+        .location-cell {
+            min-width: 150px;
+            max-width: 250px;
+        }
+
         .eta-input {
             width: 100%;
             min-width: 130px;
@@ -3933,9 +3939,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     </select>
                 </div>
 
-                <!-- Clear Filters button next to Notes Filter -->
-                <div class="filter-group filter-actions">
-                    <button class="clear-filters" onclick="clearAllFilters()">Clear Filters</button>
+                <div class="filter-group">
+                    <label for="locationFilter">📍 Location</label>
+                    <select id="locationFilter">
+                        <option value="">All Locations</option>
+                    </select>
                 </div>
 
                 <!-- Second Row: Checkboxes and Action Buttons -->
@@ -3971,25 +3979,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     </label>
                 </div>
 
-                <div class="filter-group">
-                    <label for="locationFilter" style="margin-bottom: 5px;">📍 Location</label>
-                    <select id="locationFilter"
-                        style="width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
-                        <option value="">All Locations</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label style="margin-bottom: 8px; display: block;">🚚 Dropship Filter</label>
-                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="showOnlyDropship">
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <span style="font-size: 12px; color: #666;" id="dropshipToggleLabel">Show All POs</span>
-                    </div>
-                </div>
-
                 <div class="filter-group filter-actions">
                     <button class="btn btn-sm btn-outline-primary" onclick="updateAllTracking()" id="bulkTrackingBtn"
                         title="Update all shipping tracking" style="width: 100%;">
@@ -4011,8 +4000,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     </button>
                 </div>
 
-                <!-- Empty cell for alignment -->
-                <div class="filter-group"></div>
+                <!-- Clear Filters button in lower right corner -->
+                <div class="filter-group filter-actions">
+                    <button class="clear-filters" onclick="clearAllFilters()">Clear Filters</button>
+                </div>
             </div>
             <% } %>
 
@@ -4043,16 +4034,20 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                         </button>
                                     </th>
                                     <th class="sortable next-update-cell" data-column="nextUpdateDate">Next Update</th>
+                                    <th class="sortable" data-column="location">📍 Location</th>
                                     <th class="notes-toggle-cell">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <% purchaseOrders.forEach((po, index)=> {
-                                    // Extract unique locations from line items
-                                    const lineItemLocations = po.lineItems && po.lineItems.length > 0
-                                    ? [...new Set(po.lineItems.map(item => item.locationName).filter(loc =>
-                                    loc))].join(', ')
-                                    : '';
+                                    // Extract unique locations from line items OR use PO-level location
+                                    let lineItemLocations = '';
+                                    if (po.lineItems && po.lineItems.length > 0) {
+                                        const itemLocs = [...new Set(po.lineItems.map(item => item.locationName).filter(loc => loc))];
+                                        lineItemLocations = itemLocs.length > 0 ? itemLocs.join(', ') : '';
+                                    }
+                                    // Fallback to PO-level location if no line item locations
+                                    const displayLocation = lineItemLocations || po.location || '';
 
                                     // Create a safe version of po for JSON serialization (avoid circular references)
                                     const safePoData = {
@@ -4070,7 +4065,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     %>
                                     <!-- Main data row -->
                                     <tr data-po='<%= JSON.stringify(safePoData) %>' data-index="<%= index %>"
-                                        data-line-item-locations="<%= lineItemLocations %>">
+                                        data-line-item-locations="<%= displayLocation %>">
                                         <td class="date-cell">
                                             <%= po.date %>
                                         </td>
@@ -4261,6 +4256,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                 value="<%= po.nextUpdateDate ? new Date(po.nextUpdateDate).toISOString().split('T')[0] : '' %>"
                                                 data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
                                                 title="Set next update date for PO <%= po.poNumber %>">
+                                        </td>
+                                        <td class="location-cell">
+                                            <span style="font-size: 13px; color: <%= displayLocation ? '#495057' : '#999' %>;">
+                                                <%= displayLocation || 'No locations' %>
+                                            </span>
                                         </td>
                                         <td class="notes-toggle-cell">
                                             <div style="display: flex; gap: 4px; flex-wrap: wrap;">
@@ -7749,8 +7749,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const showOnlyMissingUrls = showOnlyMissingUrlsCheckbox ? showOnlyMissingUrlsCheckbox.checked : false;
             const showOnlyNoLineItemsCheckbox = document.getElementById('showOnlyNoLineItems');
             const showOnlyNoLineItems = showOnlyNoLineItemsCheckbox ? showOnlyNoLineItemsCheckbox.checked : false;
-            const showOnlyDropshipCheckbox = document.getElementById('showOnlyDropship');
-            const showOnlyDropship = showOnlyDropshipCheckbox ? showOnlyDropshipCheckbox.checked : false;
             const locationFilter = document.getElementById('locationFilter').value.trim();
 
             const rows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]'); // Only main rows
@@ -7759,7 +7757,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             let hiddenPendingBillCount = 0;
             let hiddenHasUrlCount = 0;
             let hiddenWithLineItemsCount = 0;
-            let hiddenNonDropshipCount = 0;
             let hiddenLocationMismatchCount = 0;
 
             rows.forEach(row => {
@@ -7798,13 +7795,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const hasLineItems = poData.lineItems && poData.lineItems.length > 0;
                 const shouldShowBasedOnLineItems = !showOnlyNoLineItems || !hasLineItems;
 
-                // Dropship filter - check both location field and isDropship flag
-                const location = (poData.location || '').toLowerCase();
-                const isDropshipByLocation = location.includes('dropship');
-                const isDropshipByFlag = poData.isDropship === true;
-                const isDropship = isDropshipByLocation || isDropshipByFlag;
-                const shouldShowBasedOnDropship = !showOnlyDropship || isDropship;
-
                 // Location filter - filter by line item locations (exact match)
                 const lineItemLocations = row.dataset.lineItemLocations || '';
                 const locationArray = lineItemLocations.split(',').map(loc => loc.trim());
@@ -7826,10 +7816,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     hiddenWithLineItemsCount++;
                 }
 
-                if (showOnlyDropship && !isDropship) {
-                    hiddenNonDropshipCount++;
-                }
-
                 if (locationFilter && !matchesLocation) {
                     hiddenLocationMismatchCount++;
                 }
@@ -7845,7 +7831,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 // Priority filter
                 const matchesPriority = priorityFilter === 'all' || (poData.priority && poData.priority.toString() === priorityFilter);
 
-                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowBasedOnUrl && shouldShowBasedOnLineItems && shouldShowBasedOnDropship && matchesLocation) {
+                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowBasedOnUrl && shouldShowBasedOnLineItems && matchesLocation) {
                     row.classList.remove('hidden');
                     // Also show the corresponding notes row if it's expanded
                     const notesRow = document.getElementById(`notes-row-${index}`);
@@ -7863,7 +7849,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
             });
 
-            console.log(`🔍 Filter results: ${visibleCount} visible, ${hiddenNotMyConcernCount} "Not my concern" hidden, ${hiddenPendingBillCount} "Pending Bill" hidden, ${hiddenHasUrlCount} with URLs hidden, ${hiddenWithLineItemsCount} with line items hidden, ${hiddenNonDropshipCount} non-dropship hidden, ${hiddenLocationMismatchCount} location mismatch hidden`);
+            console.log(`🔍 Filter results: ${visibleCount} visible, ${hiddenNotMyConcernCount} "Not my concern" hidden, ${hiddenPendingBillCount} "Pending Bill" hidden, ${hiddenHasUrlCount} with URLs hidden, ${hiddenWithLineItemsCount} with line items hidden, ${hiddenLocationMismatchCount} location mismatch hidden`);
 
             // Update results info
             const totalCount = rows.length;
@@ -8017,19 +8003,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById('showOnlyNoLineItems').checked = false;
             document.getElementById('showOnlyDropship').checked = false;
 
-            // Reset dropship toggle label
-            const dropshipLabel = document.getElementById('dropshipToggleLabel');
-            if (dropshipLabel) {
-                dropshipLabel.textContent = 'Show All POs';
-                dropshipLabel.style.fontWeight = '400';
-                dropshipLabel.style.color = '#666';
-            }
-
             // Clear localStorage for filter states
             localStorage.removeItem('filter_showNotMyConcern');
             localStorage.removeItem('filter_showPendingBill');
             localStorage.removeItem('filter_showOnlyMissingUrls');
-            localStorage.removeItem('filter_showOnlyDropship');
             localStorage.removeItem('filter_showOnlyNoLineItems');
 
             applyFilters();
@@ -8072,25 +8049,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 });
             }
         });
-
-        // Special handling for dropship toggle with label update
-        const dropshipToggle = document.getElementById('showOnlyDropship');
-        const dropshipLabel = document.getElementById('dropshipToggleLabel');
-        if (dropshipToggle && dropshipLabel) {
-            // Set initial label text based on restored state
-            dropshipLabel.textContent = dropshipToggle.checked ? 'Dropship Only' : 'Show All POs';
-            dropshipLabel.style.fontWeight = dropshipToggle.checked ? '600' : '400';
-            dropshipLabel.style.color = dropshipToggle.checked ? '#ff9800' : '#666';
-
-            // Add change listener
-            dropshipToggle.addEventListener('change', function () {
-                saveFilterState('showOnlyDropship', this.checked);
-                // Update label text and style
-                dropshipLabel.textContent = this.checked ? 'Dropship Only' : 'Show All POs';
-                dropshipLabel.style.fontWeight = this.checked ? '600' : '400';
-                dropshipLabel.style.color = this.checked ? '#ff9800' : '#666';
-            });
-        }
 
         // Apply filters after restoring state to show correct initial view
         setTimeout(() => {

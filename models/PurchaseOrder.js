@@ -77,7 +77,8 @@ const purchaseOrderSchema = new mongoose.Schema({
     netsuiteQuantity: Number,
     netsuiteReceived: Number,
     netsuiteBilled: Number,
-    vendorDescription: String
+    vendorDescription: String,
+    locationName: String      // Location name from NetSuite (e.g., "Main Warehouse", "Dropship")
   }],
   // Soft delete/hide functionality
   isHidden: {

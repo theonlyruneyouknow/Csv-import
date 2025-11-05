@@ -3870,7 +3870,8 @@ router.post('/import-netsuite', async (req, res) => {
           netsuiteQuantity: quantity,
           netsuiteReceived: received,
           netsuiteBilled: billed,
-          vendorDescription: vendorDescription
+          vendorDescription: vendorDescription,
+          locationName: locationName // Add location name to embedded array
         };
 
         poToUse.lineItems.push(lineItemData);
@@ -3887,7 +3888,8 @@ router.post('/import-netsuite', async (req, res) => {
           netsuiteQuantity: quantity,
           netsuiteReceived: received,
           netsuiteBilled: billed,
-          vendorDescription: vendorDescription
+          vendorDescription: vendorDescription,
+          locationName: locationName // Add location name to embedded array
         };
         console.log(`🔄 Updated existing line item in PO: ${itemCode}`);
       }
