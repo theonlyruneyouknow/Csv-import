@@ -7739,11 +7739,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         // Filtering functionality
         function applyFilters() {
-            const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
-            const nsStatusFilter = document.getElementById('nsStatusFilter').value;
-            const statusFilter = document.getElementById('statusFilter').value;
-            const notesFilter = document.getElementById('notesFilter').value;
-            const priorityFilter = document.getElementById('priorityFilter').value;
+            const searchFilterEl = document.getElementById('searchFilter');
+            const searchTerm = searchFilterEl ? searchFilterEl.value.toLowerCase() : '';
+            const nsStatusFilterEl = document.getElementById('nsStatusFilter');
+            const nsStatusFilter = nsStatusFilterEl ? nsStatusFilterEl.value : 'all';
+            const statusFilterEl = document.getElementById('statusFilter');
+            const statusFilter = statusFilterEl ? statusFilterEl.value : 'all';
+            const notesFilterEl = document.getElementById('notesFilter');
+            const notesFilter = notesFilterEl ? notesFilterEl.value : 'all';
+            const priorityFilterEl = document.getElementById('priorityFilter');
+            const priorityFilter = priorityFilterEl ? priorityFilterEl.value : 'all';
             const showNotMyConcernCheckbox = document.getElementById('showNotMyConcern');
             const showNotMyConcern = showNotMyConcernCheckbox ? showNotMyConcernCheckbox.checked : false;
             const showPendingBillCheckbox = document.getElementById('showPendingBill');
@@ -7752,7 +7757,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const showOnlyMissingUrls = showOnlyMissingUrlsCheckbox ? showOnlyMissingUrlsCheckbox.checked : false;
             const showOnlyNoLineItemsCheckbox = document.getElementById('showOnlyNoLineItems');
             const showOnlyNoLineItems = showOnlyNoLineItemsCheckbox ? showOnlyNoLineItemsCheckbox.checked : false;
-            const locationFilter = document.getElementById('locationFilter').value.trim();
+            const locationFilterEl = document.getElementById('locationFilter');
+            const locationFilter = locationFilterEl ? locationFilterEl.value.trim() : '';
 
             const rows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]'); // Only main rows
             let visibleCount = 0;
@@ -7854,24 +7860,27 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             console.log(`🔍 Filter results: ${visibleCount} visible, ${hiddenNotMyConcernCount} "Not my concern" hidden, ${hiddenPendingBillCount} "Pending Bill" hidden, ${hiddenHasUrlCount} with URLs hidden, ${hiddenWithLineItemsCount} with line items hidden, ${hiddenLocationMismatchCount} location mismatch hidden`);
 
-            // Update results info
+            // Update results info - with null checks
             const totalCount = rows.length;
             const resultsInfo = document.getElementById('resultsInfo');
             const noResults = document.getElementById('noResults');
+            const purchaseOrdersTable = document.getElementById('purchaseOrdersTable');
 
             if (visibleCount === 0) {
-                resultsInfo.style.display = 'none';
-                noResults.style.display = 'block';
-                document.getElementById('purchaseOrdersTable').style.display = 'none';
+                if (resultsInfo) resultsInfo.style.display = 'none';
+                if (noResults) noResults.style.display = 'block';
+                if (purchaseOrdersTable) purchaseOrdersTable.style.display = 'none';
             } else {
-                resultsInfo.style.display = 'block';
-                noResults.style.display = 'none';
-                document.getElementById('purchaseOrdersTable').style.display = 'table';
+                if (resultsInfo) resultsInfo.style.display = 'block';
+                if (noResults) noResults.style.display = 'none';
+                if (purchaseOrdersTable) purchaseOrdersTable.style.display = 'table';
 
-                if (visibleCount === totalCount) {
-                    resultsInfo.textContent = `Showing all ${totalCount} purchase orders`;
-                } else {
-                    resultsInfo.textContent = `Showing ${visibleCount} of ${totalCount} purchase orders`;
+                if (resultsInfo) {
+                    if (visibleCount === totalCount) {
+                        resultsInfo.textContent = `Showing all ${totalCount} purchase orders`;
+                    } else {
+                        resultsInfo.textContent = `Showing ${visibleCount} of ${totalCount} purchase orders`;
+                    }
                 }
             }
 
@@ -7890,8 +7899,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
             });
 
-            document.getElementById('visibleCount').textContent = visibleRows.length;
-            document.getElementById('notesCount').textContent = notesCount;
+            const visibleCountEl = document.getElementById('visibleCount');
+            const notesCountEl = document.getElementById('notesCount');
+            if (visibleCountEl) visibleCountEl.textContent = visibleRows.length;
+            if (notesCountEl) notesCountEl.textContent = notesCount;
         }
 
         // Sorting functionality
@@ -8179,17 +8190,28 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         // ============ END SEARCH HISTORY FUNCTIONALITY ============
 
-        // Event listeners for filters
-        document.getElementById('searchFilter').addEventListener('input', applyFilters);
-        document.getElementById('nsStatusFilter').addEventListener('change', applyFilters);
-        document.getElementById('statusFilter').addEventListener('change', applyFilters);
-        document.getElementById('notesFilter').addEventListener('change', applyFilters);
-        document.getElementById('priorityFilter').addEventListener('change', applyFilters);
-        document.getElementById('locationFilter').addEventListener('change', applyFilters);
-        document.getElementById('showNotMyConcern').addEventListener('change', applyFilters);
-        document.getElementById('showPendingBill').addEventListener('change', applyFilters);
-        document.getElementById('showOnlyMissingUrls').addEventListener('change', applyFilters);
-        document.getElementById('showOnlyNoLineItems').addEventListener('change', applyFilters);
+        // Event listeners for filters - with null checks
+        const searchFilter = document.getElementById('searchFilter');
+        const nsStatusFilter = document.getElementById('nsStatusFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        const notesFilter = document.getElementById('notesFilter');
+        const priorityFilter = document.getElementById('priorityFilter');
+        const locationFilter = document.getElementById('locationFilter');
+        const showNotMyConcern = document.getElementById('showNotMyConcern');
+        const showPendingBill = document.getElementById('showPendingBill');
+        const showOnlyMissingUrls = document.getElementById('showOnlyMissingUrls');
+        const showOnlyNoLineItems = document.getElementById('showOnlyNoLineItems');
+
+        if (searchFilter) searchFilter.addEventListener('input', applyFilters);
+        if (nsStatusFilter) nsStatusFilter.addEventListener('change', applyFilters);
+        if (statusFilter) statusFilter.addEventListener('change', applyFilters);
+        if (notesFilter) notesFilter.addEventListener('change', applyFilters);
+        if (priorityFilter) priorityFilter.addEventListener('change', applyFilters);
+        if (locationFilter) locationFilter.addEventListener('change', applyFilters);
+        if (showNotMyConcern) showNotMyConcern.addEventListener('change', applyFilters);
+        if (showPendingBill) showPendingBill.addEventListener('change', applyFilters);
+        if (showOnlyMissingUrls) showOnlyMissingUrls.addEventListener('change', applyFilters);
+        if (showOnlyNoLineItems) showOnlyNoLineItems.addEventListener('change', applyFilters);
 
         // Event listeners for sorting
         document.querySelectorAll('th.sortable').forEach(header => {
