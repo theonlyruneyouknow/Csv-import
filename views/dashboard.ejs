@@ -6598,16 +6598,18 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById('createTaskForm').reset();
         }
 
-        // Handle task form submission
-        document.getElementById('createTaskForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
+        // Handle task form submission - with null check
+        const createTaskForm = document.getElementById('createTaskForm');
+        if (createTaskForm) {
+            createTaskForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
 
-            const formData = {
-                title: document.getElementById('taskTitle').value,
-                description: document.getElementById('taskDescription').value,
-                dueDate: document.getElementById('taskDueDate').value,
-                priority: document.getElementById('taskPriority').value,
-                relatedPOs: [document.getElementById('taskPOId').value],
+                const formData = {
+                    title: document.getElementById('taskTitle').value,
+                    description: document.getElementById('taskDescription').value,
+                    dueDate: document.getElementById('taskDueDate').value,
+                    priority: document.getElementById('taskPriority').value,
+                    relatedPOs: [document.getElementById('taskPOId').value],
                 status: 'pending'
             };
 
@@ -6633,6 +6635,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 showTrackingToast('Error creating task', 'error');
             }
         });
+    }
 
         async function checkTrackingStatus(poId, trackingNumber, carrier) {
             const statusDiv = document.querySelector('.tracking-status-display');
@@ -8348,12 +8351,15 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             }
         }
 
-        // Allow Enter key to add status
-        document.getElementById('statusInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                addStatusOption();
-            }
-        });
+        // Allow Enter key to add status - with null check
+        const statusInput = document.getElementById('statusInput');
+        if (statusInput) {
+            statusInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    addStatusOption();
+                }
+            });
+        }
 
         // Line Item Status Management Functions
         let currentLineItemStatusOptions = [];
@@ -8469,12 +8475,15 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             }
         }
 
-        // Allow Enter key to add line item status
-        document.getElementById('lineItemStatusInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                addLineItemStatusOption();
-            }
-        });
+        // Allow Enter key to add line item status - with null check
+        const lineItemStatusInput = document.getElementById('lineItemStatusInput');
+        if (lineItemStatusInput) {
+            lineItemStatusInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    addLineItemStatusOption();
+                }
+            });
+        }
 
         // Carrier Management Functions
         let currentCarrierOptions = [
@@ -8636,52 +8645,55 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById(modalId).style.display = 'none';
         }
 
-        // Handle form submission
-        document.getElementById('prePurchaseOrderForm').addEventListener('submit', function (e) {
-            e.preventDefault();
+        // Handle form submission - with null check
+        const prePurchaseOrderForm = document.getElementById('prePurchaseOrderForm');
+        if (prePurchaseOrderForm) {
+            prePurchaseOrderForm.addEventListener('submit', function (e) {
+                e.preventDefault();
 
-            console.log('🔍 Form submitted!');
+                console.log('🔍 Form submitted!');
 
-            const formData = new FormData(this);
-            const data = {};
-            for (let [key, value] of formData.entries()) {
-                if (value) data[key] = value;
-            }
+                const formData = new FormData(this);
+                const data = {};
+                for (let [key, value] of formData.entries()) {
+                    if (value) data[key] = value;
+                }
 
-            console.log('📝 Form data:', data);
+                console.log('📝 Form data:', data);
 
-            const isEdit = data.id;
-            const url = isEdit ? `/purchase-orders/pre-purchase-orders/${data.id}` : '/purchase-orders/pre-purchase-orders';
-            const method = isEdit ? 'PUT' : 'POST';
+                const isEdit = data.id;
+                const url = isEdit ? `/purchase-orders/pre-purchase-orders/${data.id}` : '/purchase-orders/pre-purchase-orders';
+                const method = isEdit ? 'PUT' : 'POST';
 
-            console.log(`🔗 Making ${method} request to ${url}`);
+                console.log(`🔗 Making ${method} request to ${url}`);
 
-            fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-                .then(response => {
-                    console.log('📡 Response received:', response.status);
-                    return response.json();
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
                 })
-                .then(result => {
-                    console.log('✅ Response data:', result);
-                    if (result.success) {
-                        alert('Pre-purchase order saved successfully!');
-                        closeModal('prePurchaseOrderModal');
-                        location.reload();
-                    } else {
-                        alert('Error saving pre-purchase order: ' + result.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('❌ Error:', error);
-                    alert('Error saving pre-purchase order: ' + error.message);
-                });
-        });
+                    .then(response => {
+                        console.log('📡 Response received:', response.status);
+                        return response.json();
+                    })
+                    .then(result => {
+                        console.log('✅ Response data:', result);
+                        if (result.success) {
+                            alert('Pre-purchase order saved successfully!');
+                            closeModal('prePurchaseOrderModal');
+                            location.reload();
+                        } else {
+                            alert('Error saving pre-purchase order: ' + result.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ Error:', error);
+                        alert('Error saving pre-purchase order: ' + error.message);
+                    });
+            });
+        }
 
         // Close modal when clicking outside
         window.onclick = function (event) {
