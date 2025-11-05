@@ -4043,9 +4043,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     // Extract unique locations from line items OR use PO-level location
                                     let lineItemLocations = '';
                                     if (po.lineItems && po.lineItems.length > 0) {
-                                    const itemLocs = [...new Set(po.lineItems.map(item => item.locationName).filter(loc
-                                    => loc))];
-                                    lineItemLocations = itemLocs.length > 0 ? itemLocs.join(', ') : '';
+                                        const itemLocs = [...new Set(po.lineItems.map(item => item.locationName).filter(loc => loc))];
+                                        lineItemLocations = itemLocs.length > 0 ? itemLocs.join(', ') : '';
                                     }
                                     // Fallback to PO-level location if no line item locations
                                     const displayLocation = lineItemLocations || po.location || '';
@@ -4097,7 +4096,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                                 class="manage-attachments-btn <%= po.attachments && po.attachments.length > 0 ? 'has-attachments' : '' %>"
                                                                 type="button" data-po-id="<%= po._id %>"
                                                                 data-po-number="<%= po.poNumber %>"
-                                                                title="<%= po.attachments && po.attachments.length > 0 ? `Manage ${po.attachments.length} attachment(s)` : 'Manage attachments' %>">
+                                                                title="<%= po.attachments && po.attachments.length > 0 ? 'Manage ' + po.attachments.length + ' attachment(s)' : 'Manage attachments' %>">
                                                                 📎
                                                             </button>
                                                             <button
@@ -4259,10 +4258,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                 title="Set next update date for PO <%= po.poNumber %>">
                                         </td>
                                         <td class="location-cell">
-                                            <span
-                                                style="font-size: 13px; color: <%= displayLocation ? '#495057' : '#999' %>;">
-                                                <%= displayLocation || 'No locations' %>
-                                            </span>
+                                            <% if (displayLocation) { %>
+                                                <span style="font-size: 13px; color: #495057;"><%= displayLocation %></span>
+                                            <% } else { %>
+                                                <span style="font-size: 13px; color: #999;">No locations</span>
+                                            <% } %>
                                         </td>
                                         <td class="notes-toggle-cell">
                                             <div style="display: flex; gap: 4px; flex-wrap: wrap;">
@@ -4277,7 +4277,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                     type="button" data-index="<%= index %>" data-po-id="<%= po._id %>"
                                                     data-tracking="<%= po.shippingTracking || '' %>"
                                                     data-carrier="<%= po.shippingCarrier || 'FedEx' %>"
-                                                    title="<%= po.shippingTracking ? `Tracking: ${po.shippingTracking} (${po.shippingCarrier || 'FedEx'})` : 'View tracking information' %>">
+                                                    title="<%= po.shippingTracking ? 'Tracking: ' + po.shippingTracking + ' (' + (po.shippingCarrier || 'FedEx') + ')' : 'View tracking information' %>">
                                                     🚚
                                                 </button>
                                                 <button class="create-task-btn" type="button" data-po-id="<%= po._id %>"
