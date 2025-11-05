@@ -4043,8 +4043,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     // Extract unique locations from line items OR use PO-level location
                                     let lineItemLocations = '';
                                     if (po.lineItems && po.lineItems.length > 0) {
-                                        const itemLocs = [...new Set(po.lineItems.map(item => item.locationName).filter(loc => loc))];
-                                        lineItemLocations = itemLocs.length > 0 ? itemLocs.join(', ') : '';
+                                    const itemLocs = [...new Set(po.lineItems.map(item => item.locationName).filter(loc
+                                    => loc))];
+                                    lineItemLocations = itemLocs.length > 0 ? itemLocs.join(', ') : '';
                                     }
                                     // Fallback to PO-level location if no line item locations
                                     const displayLocation = lineItemLocations || po.location || '';
@@ -4258,7 +4259,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                 title="Set next update date for PO <%= po.poNumber %>">
                                         </td>
                                         <td class="location-cell">
-                                            <span style="font-size: 13px; color: <%= displayLocation ? '#495057' : '#999' %>;">
+                                            <span
+                                                style="font-size: 13px; color: <%= displayLocation ? '#495057' : '#999' %>;">
                                                 <%= displayLocation || 'No locations' %>
                                             </span>
                                         </td>

@@ -148,7 +148,7 @@ const purchaseOrderSchema = new mongoose.Schema({
       default: 'Other',
       enum: [
         'Purchase Order',
-        'Invoice', 
+        'Invoice',
         'Packing Slip',
         'Bill of Lading (BOL)',
         'Shipping Confirmation',
