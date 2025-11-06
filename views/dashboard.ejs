@@ -4094,7 +4094,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     priority: po.priority,
                                     isDropship: po.isDropship,
                                     location: po.location,
-                                    lineItemCount: po.lineItemCount
+                                    lineItemCount: po.lineItemCount,
+                                    poUrl: po.poUrl || '',
+                                    notes: po.notes || '',
+                                    shippingTracking: po.shippingTracking || '',
+                                    lineItems: po.lineItems || []
                                     };
                                     %>
                                     <!-- Main data row -->
