@@ -2572,6 +2572,18 @@
             display: table-cell !important;
         }
 
+        /* Default behavior: Location column hidden until explicitly shown */
+        .location-cell {
+            display: none;
+            min-width: 150px;
+            max-width: 250px;
+        }
+
+        /* Show Location column when explicitly enabled */
+        .show-location .location-cell {
+            display: table-cell !important;
+        }
+
         /* On smaller screens, add mobile indicator */
         @media (max-width: 1400px) {
 
@@ -2895,12 +2907,6 @@
         .eta-cell {
             width: 140px;
             text-align: center;
-        }
-
-        /* Location column styling */
-        .location-cell {
-            min-width: 150px;
-            max-width: 250px;
         }
 
         .eta-input {
@@ -4000,6 +4006,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     </button>
                 </div>
 
+                <div class="filter-group filter-actions">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="toggleLocationColumn()"
+                        id="toggleLocationBtn" title="Show/Hide Location column" style="width: 100%;">
+                        📍 <span id="locationColumnText">Show Location</span>
+                    </button>
+                </div>
+
                 <!-- Clear Filters button in lower right corner -->
                 <div class="filter-group filter-actions">
                     <button class="clear-filters" onclick="clearAllFilters()">Clear Filters</button>
@@ -4034,7 +4047,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                         </button>
                                     </th>
                                     <th class="sortable next-update-cell" data-column="nextUpdateDate">Next Update</th>
-                                    <th class="sortable" data-column="location">📍 Location</th>
+                                    <th class="sortable location-cell" data-column="location">📍 Location</th>
                                     <th class="notes-toggle-cell">Actions</th>
                                 </tr>
                             </thead>
@@ -6450,6 +6463,29 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             // Show a toast notification
             const message = isCurrentlyVisible ? '📦 NS Status column hidden' : '📦 NS Status column shown';
+            showTrackingToast(message, 'success');
+        }
+
+        function toggleLocationColumn() {
+            const table = document.getElementById('purchaseOrdersTable');
+            const isCurrentlyVisible = table.classList.contains('show-location');
+
+            if (isCurrentlyVisible) {
+                // Hide Location column
+                table.classList.remove('show-location');
+            } else {
+                // Show Location column
+                table.classList.add('show-location');
+            }
+
+            // Update button text
+            const btnText = document.getElementById('locationColumnText');
+            if (btnText) {
+                btnText.textContent = isCurrentlyVisible ? 'Show Location' : 'Hide Location';
+            }
+
+            // Show a toast notification
+            const message = isCurrentlyVisible ? '📍 Location column hidden' : '📍 Location column shown';
             showTrackingToast(message, 'success');
         }
 
