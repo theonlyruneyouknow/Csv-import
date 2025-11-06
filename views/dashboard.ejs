@@ -733,8 +733,8 @@
             padding: 12px 15px;
             border-radius: 6px;
             margin-bottom: 15px;
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            display: flex;
+            flex-direction: column;
             gap: 10px;
             position: sticky;
             top: 80px;
@@ -744,11 +744,25 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+        }
+
+        .filter-row.actions-row {
+            grid-template-columns: repeat(6, 1fr);
+        }
+
         .filters.scrolled {
             padding: 8px 12px;
             top: 60px;
             /* Adjust for compact header */
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            gap: 8px;
+        }
+
+        .filters.scrolled .filter-row {
             gap: 8px;
         }
 
@@ -3888,134 +3902,142 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             <!-- Filters Section -->
             <div class="filters" id="filtersSection">
-                <div class="filter-group" style="position: relative;">
-                    <label>Search Vendor, PO#, or Tracking#</label>
-                    <input type="text" id="searchFilter" placeholder="Type to search..." autocomplete="off">
-                    <div id="searchHistoryDropdown" class="search-history-dropdown" style="display: none;">
-                        <div class="search-history-header">
-                            <span>Recent Searches</span>
-                            <button onclick="clearSearchHistory()" class="clear-history-btn">Clear</button>
+                <!-- First Row: All Filter Controls -->
+                <div class="filter-row">
+                    <div class="filter-group" style="position: relative;">
+                        <label>Search Vendor, PO#, or Tracking#</label>
+                        <input type="text" id="searchFilter" placeholder="Type to search..." autocomplete="off">
+                        <div id="searchHistoryDropdown" class="search-history-dropdown" style="display: none;">
+                            <div class="search-history-header">
+                                <span>Recent Searches</span>
+                                <button onclick="clearSearchHistory()" class="clear-history-btn">Clear</button>
+                            </div>
+                            <ul id="searchHistoryList"></ul>
                         </div>
-                        <ul id="searchHistoryList"></ul>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Priority Filter</label>
+                        <select id="priorityFilter">
+                            <option value="all">All Priorities</option>
+                            <option value="1">🔴 1 (Highest)</option>
+                            <option value="2">🩷 2 (High)</option>
+                            <option value="3">🟠 3 (Medium)</option>
+                            <option value="4">🟡 4 (Low)</option>
+                            <option value="5">🟢 5 (Lowest)</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>NS Status Filter</label>
+                        <select id="nsStatusFilter">
+                            <option value="all">All NS Statuses</option>
+                            <% uniqueNSStatuses.forEach(status=> { %>
+                                <option value="<%= status %>">
+                                    <%= status %>
+                                </option>
+                                <% }); %>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Status Filter</label>
+                        <select id="statusFilter">
+                            <option value="all">All Statuses</option>
+                            <% uniqueStatuses.forEach(status=> { %>
+                                <option value="<%= status %>">
+                                    <%= status %>
+                                </option>
+                                <% }); %>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Notes Filter</label>
+                        <select id="notesFilter">
+                            <option value="all">All POs</option>
+                            <option value="with-notes">With Notes Only</option>
+                            <option value="without-notes">Without Notes Only</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="locationFilter">📍 Location</label>
+                        <select id="locationFilter">
+                            <option value="">All Locations</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label style="margin-bottom: 5px;">Show "Not my concern"</label>
+                        <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
+                            <input type="checkbox" id="showNotMyConcern" style="margin: 0;">
+                            <span style="font-size: 12px;">Show hidden POs</span>
+                        </label>
+                    </div>
+
+                    <div class="filter-group">
+                        <label style="margin-bottom: 5px;">Show "Pending Bill"</label>
+                        <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
+                            <input type="checkbox" id="showPendingBill" style="margin: 0;">
+                            <span style="font-size: 12px;">Show billed POs</span>
+                        </label>
+                    </div>
+
+                    <div class="filter-group">
+                        <label style="margin-bottom: 5px;">Missing URLs Only</label>
+                        <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
+                            <input type="checkbox" id="showOnlyMissingUrls" style="margin: 0;">
+                            <span style="font-size: 12px;">Show POs without URLs</span>
+                        </label>
+                    </div>
+
+                    <div class="filter-group">
+                        <label style="margin-bottom: 5px;">No Line Items</label>
+                        <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
+                            <input type="checkbox" id="showOnlyNoLineItems" style="margin: 0;">
+                            <span style="font-size: 12px;">Show POs without line items</span>
+                        </label>
                     </div>
                 </div>
 
-                <div class="filter-group">
-                    <label>Priority Filter</label>
-                    <select id="priorityFilter">
-                        <option value="all">All Priorities</option>
-                        <option value="1">🔴 1 (Highest)</option>
-                        <option value="2">🩷 2 (High)</option>
-                        <option value="3">🟠 3 (Medium)</option>
-                        <option value="4">🟡 4 (Low)</option>
-                        <option value="5">🟢 5 (Lowest)</option>
-                    </select>
-                </div>
+                <!-- Second Row: Action Buttons -->
+                <div class="filter-row actions-row">
+                    <div class="filter-group filter-actions">
+                        <button class="btn btn-sm btn-outline-primary" onclick="updateAllTracking()" id="bulkTrackingBtn"
+                            title="Update all shipping tracking" style="width: 100%;">
+                            🚚 Update Tracking
+                        </button>
+                    </div>
 
-                <div class="filter-group">
-                    <label>NS Status Filter</label>
-                    <select id="nsStatusFilter">
-                        <option value="all">All NS Statuses</option>
-                        <% uniqueNSStatuses.forEach(status=> { %>
-                            <option value="<%= status %>">
-                                <%= status %>
-                            </option>
-                            <% }); %>
-                    </select>
-                </div>
+                    <div class="filter-group filter-actions">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleTrackingColumn()"
+                            id="toggleTrackingBtn" title="Show/Hide tracking column" style="width: 100%;">
+                            👁️ <span id="trackingColumnText">Show Tracking</span>
+                        </button>
+                    </div>
 
-                <div class="filter-group">
-                    <label>Status Filter</label>
-                    <select id="statusFilter">
-                        <option value="all">All Statuses</option>
-                        <% uniqueStatuses.forEach(status=> { %>
-                            <option value="<%= status %>">
-                                <%= status %>
-                            </option>
-                            <% }); %>
-                    </select>
-                </div>
+                    <div class="filter-group filter-actions">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleNSStatusColumn()"
+                            id="toggleNSStatusBtn" title="Show/Hide NS Status column" style="width: 100%;">
+                            📦 <span id="nsStatusColumnText">Show NS Status</span>
+                        </button>
+                    </div>
 
-                <div class="filter-group">
-                    <label>Notes Filter</label>
-                    <select id="notesFilter">
-                        <option value="all">All POs</option>
-                        <option value="with-notes">With Notes Only</option>
-                        <option value="without-notes">Without Notes Only</option>
-                    </select>
-                </div>
+                    <div class="filter-group filter-actions">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleLocationColumn()"
+                            id="toggleLocationBtn" title="Show/Hide Location column" style="width: 100%;">
+                            📍 <span id="locationColumnText">Show Location</span>
+                        </button>
+                    </div>
 
-                <div class="filter-group">
-                    <label for="locationFilter">📍 Location</label>
-                    <select id="locationFilter">
-                        <option value="">All Locations</option>
-                    </select>
-                </div>
+                    <!-- Reserved space for future button -->
+                    <div class="filter-group filter-actions"></div>
 
-                <!-- Second Row: Checkboxes and Action Buttons -->
-                <div class="filter-group">
-                    <label style="margin-bottom: 5px;">Show "Not my concern"</label>
-                    <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
-                        <input type="checkbox" id="showNotMyConcern" style="margin: 0;">
-                        <span style="font-size: 12px;">Show hidden POs</span>
-                    </label>
-                </div>
-
-                <div class="filter-group">
-                    <label style="margin-bottom: 5px;">Show "Pending Bill"</label>
-                    <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
-                        <input type="checkbox" id="showPendingBill" style="margin: 0;">
-                        <span style="font-size: 12px;">Show billed POs</span>
-                    </label>
-                </div>
-
-                <div class="filter-group">
-                    <label style="margin-bottom: 5px;">Missing URLs Only</label>
-                    <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
-                        <input type="checkbox" id="showOnlyMissingUrls" style="margin: 0;">
-                        <span style="font-size: 12px;">Show POs without URLs</span>
-                    </label>
-                </div>
-
-                <div class="filter-group">
-                    <label style="margin-bottom: 5px;">No Line Items</label>
-                    <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
-                        <input type="checkbox" id="showOnlyNoLineItems" style="margin: 0;">
-                        <span style="font-size: 12px;">Show POs without line items</span>
-                    </label>
-                </div>
-
-                <div class="filter-group filter-actions">
-                    <button class="btn btn-sm btn-outline-primary" onclick="updateAllTracking()" id="bulkTrackingBtn"
-                        title="Update all shipping tracking" style="width: 100%;">
-                        🚚 Update Tracking
-                    </button>
-                </div>
-
-                <div class="filter-group filter-actions">
-                    <button class="btn btn-sm btn-outline-secondary" onclick="toggleTrackingColumn()"
-                        id="toggleTrackingBtn" title="Show/Hide tracking column" style="width: 100%;">
-                        👁️ <span id="trackingColumnText">Show Tracking</span>
-                    </button>
-                </div>
-
-                <div class="filter-group filter-actions">
-                    <button class="btn btn-sm btn-outline-secondary" onclick="toggleNSStatusColumn()"
-                        id="toggleNSStatusBtn" title="Show/Hide NS Status column" style="width: 100%;">
-                        📦 <span id="nsStatusColumnText">Show NS Status</span>
-                    </button>
-                </div>
-
-                <div class="filter-group filter-actions">
-                    <button class="btn btn-sm btn-outline-secondary" onclick="toggleLocationColumn()"
-                        id="toggleLocationBtn" title="Show/Hide Location column" style="width: 100%;">
-                        📍 <span id="locationColumnText">Show Location</span>
-                    </button>
-                </div>
-
-                <!-- Clear Filters button in lower right corner -->
-                <div class="filter-group filter-actions">
-                    <button class="clear-filters" onclick="clearAllFilters()">Clear Filters</button>
+                    <!-- Clear Filters button -->
+                    <div class="filter-group filter-actions">
+                        <button class="clear-filters" onclick="clearAllFilters()">Clear Filters</button>
+                    </div>
                 </div>
             </div>
             <% } %>
