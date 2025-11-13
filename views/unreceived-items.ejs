@@ -704,7 +704,8 @@
                     </label>
                 </div>
             </div>
-            <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; padding: 15px; border-top: 1px solid #dee2e6;">
+            <div class="modal-footer"
+                style="display: flex; gap: 10px; justify-content: flex-end; padding: 15px; border-top: 1px solid #dee2e6;">
                 <button class="btn btn-secondary" onclick="closeColumnModal()">Cancel</button>
                 <button class="btn btn-success" onclick="performExport()">📥 Export Selected</button>
             </div>
@@ -1002,21 +1003,21 @@
             // Create CSV headers from selected columns
             const headers = selectedColumns.map(col => col.label);
             const csvRows = [headers.join(',')];
-            
+
             filteredItems.forEach(item => {
                 const row = selectedColumns.map(col => {
                     let value = item[col.key];
-                    
+
                     // Format dates
                     if ((col.key === 'eta' || col.key === 'poDate') && value) {
                         value = new Date(value).toLocaleDateString();
                     }
-                    
+
                     return escapeCSV(value);
                 });
                 csvRows.push(row.join(','));
             });
-            
+
             const csvContent = csvRows.join('\n');
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -1027,10 +1028,10 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
+
             closeColumnModal();
             showToast(`CSV exported successfully with ${selectedColumns.length} column(s)!`);
-        }        function showToast(message) {
+        } function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.add('show');
