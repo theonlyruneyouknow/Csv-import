@@ -3997,6 +3997,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
                             <input type="checkbox" id="showOnlyNoLineItems" style="margin: 0;">
                             <span style="font-size: 12px;">Show POs without line items</span>
+                        </label>I
+                    </div>
+
+                    <div class="filter-group">
+                        <label style="margin-bottom: 5px;">Missing ETA Only</label>
+                        <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
+                            <input type="checkbox" id="showOnlyMissingEta" style="margin: 0;">
+                            <span style="font-size: 12px;">Show POs without ETA</span>
                         </label>
                     </div>
                 </div>
@@ -4089,6 +4097,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     poNumber: po.poNumber,
                                     vendor: po.vendor,
                                     date: po.date,
+                                    eta: po.eta,
                                     status: po.status,
                                     nsStatus: po.nsStatus,
                                     priority: po.priority,
@@ -7820,6 +7829,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const showPendingBill = showPendingBillCheckbox ? showPendingBillCheckbox.checked : false;
             const showOnlyMissingUrlsCheckbox = document.getElementById('showOnlyMissingUrls');
             const showOnlyMissingUrls = showOnlyMissingUrlsCheckbox ? showOnlyMissingUrlsCheckbox.checked : false;
+            const showOnlyMissingEtaCheckbox = document.getElementById('showOnlyMissingEta');
+            const showOnlyMissingEta = showOnlyMissingEtaCheckbox ? showOnlyMissingEtaCheckbox.checked : false;
             const showOnlyNoLineItemsCheckbox = document.getElementById('showOnlyNoLineItems');
             const showOnlyNoLineItems = showOnlyNoLineItemsCheckbox ? showOnlyNoLineItemsCheckbox.checked : false;
             const locationFilterEl = document.getElementById('locationFilter');
@@ -7830,6 +7841,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             let hiddenNotMyConcernCount = 0;
             let hiddenPendingBillCount = 0;
             let hiddenHasUrlCount = 0;
+            let hiddenMissingEtaCount = 0;
             let hiddenWithLineItemsCount = 0;
             let hiddenLocationMismatchCount = 0;
 
@@ -7865,6 +7877,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const hasUrl = poUrl && poUrl.trim().length > 0;
                 const shouldShowBasedOnUrl = !showOnlyMissingUrls || !hasUrl;
 
+                // Missing ETA filter - only show POs without ETA if checkbox is checked
+                const eta = poData.eta || '';
+                const hasEta = eta && eta.trim().length > 0;
+                const shouldShowBasedOnEta = !showOnlyMissingEta || !hasEta;
+
                 // No line items filter - only show POs without line items if checkbox is checked
                 const hasLineItems = poData.lineItems && poData.lineItems.length > 0;
                 const shouldShowBasedOnLineItems = !showOnlyNoLineItems || !hasLineItems;
@@ -7886,6 +7903,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     hiddenHasUrlCount++;
                 }
 
+                if (showOnlyMissingEta && hasEta) {
+                    hiddenMissingEtaCount++;
+                }
+
                 if (showOnlyNoLineItems && hasLineItems) {
                     hiddenWithLineItemsCount++;
                 }
@@ -7905,7 +7926,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 // Priority filter
                 const matchesPriority = priorityFilter === 'all' || (poData.priority && poData.priority.toString() === priorityFilter);
 
-                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowBasedOnUrl && shouldShowBasedOnLineItems && matchesLocation) {
+                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowBasedOnUrl && shouldShowBasedOnEta && shouldShowBasedOnLineItems && matchesLocation) {
                     row.classList.remove('hidden');
                     // Also show the corresponding notes row if it's expanded
                     const notesRow = document.getElementById(`notes-row-${index}`);
@@ -7923,7 +7944,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
             });
 
-            console.log(`🔍 Filter results: ${visibleCount} visible, ${hiddenNotMyConcernCount} "Not my concern" hidden, ${hiddenPendingBillCount} "Pending Bill" hidden, ${hiddenHasUrlCount} with URLs hidden, ${hiddenWithLineItemsCount} with line items hidden, ${hiddenLocationMismatchCount} location mismatch hidden`);
+            console.log(`🔍 Filter results: ${visibleCount} visible, ${hiddenNotMyConcernCount} "Not my concern" hidden, ${hiddenPendingBillCount} "Pending Bill" hidden, ${hiddenHasUrlCount} with URLs hidden, ${hiddenMissingEtaCount} with ETA hidden, ${hiddenWithLineItemsCount} with line items hidden, ${hiddenLocationMismatchCount} location mismatch hidden`);
 
             // Update results info - with null checks
             const totalCount = rows.length;
@@ -8265,6 +8286,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         const showNotMyConcern = document.getElementById('showNotMyConcern');
         const showPendingBill = document.getElementById('showPendingBill');
         const showOnlyMissingUrls = document.getElementById('showOnlyMissingUrls');
+        const showOnlyMissingEta = document.getElementById('showOnlyMissingEta');
         const showOnlyNoLineItems = document.getElementById('showOnlyNoLineItems');
 
         if (searchFilter) searchFilter.addEventListener('input', applyFilters);
@@ -8276,6 +8298,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         if (showNotMyConcern) showNotMyConcern.addEventListener('change', applyFilters);
         if (showPendingBill) showPendingBill.addEventListener('change', applyFilters);
         if (showOnlyMissingUrls) showOnlyMissingUrls.addEventListener('change', applyFilters);
+        if (showOnlyMissingEta) showOnlyMissingEta.addEventListener('change', applyFilters);
         if (showOnlyNoLineItems) showOnlyNoLineItems.addEventListener('change', applyFilters);
 
         // Event listeners for sorting
