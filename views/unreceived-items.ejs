@@ -506,6 +506,71 @@
                 font-size: 18px;
             }
         }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #212529;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #212529;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
     </style>
 </head>
 
@@ -582,6 +647,67 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Column Selection Modal -->
+    <div id="columnModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Select Columns to Export</h3>
+                <button class="close-btn" onclick="closeColumnModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 15px; color: #666;">Choose which columns to include in the CSV export:</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="col_poNumber" checked>
+                        <span>PO Number</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="col_vendor" checked>
+                        <span>Vendor</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="col_poDate" checked>
+                        <span>PO Date</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="col_eta" checked>
+                        <span>ETA</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="col_sku" checked>
+                        <span>SKU</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="col_memo" checked>
+                        <span>Description</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="col_quantity" checked>
+                        <span>Quantity</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="col_itemStatus" checked>
+                        <span>Item Status</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="col_poStatus" checked>
+                        <span>PO Status</span>
+                    </label>
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
+                        <input type="checkbox" id="selectAllColumns" checked onchange="toggleAllColumns(this.checked)">
+                        <span>Select All</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; padding: 15px; border-top: 1px solid #dee2e6;">
+                <button class="btn btn-secondary" onclick="closeColumnModal()">Cancel</button>
+                <button class="btn btn-success" onclick="performExport()">📥 Export Selected</button>
+            </div>
         </div>
     </div>
 
@@ -819,6 +945,47 @@
         }
 
         function exportToCSV() {
+            // Show column selection modal instead of directly exporting
+            document.getElementById('columnModal').style.display = 'flex';
+        }
+
+        function closeColumnModal() {
+            document.getElementById('columnModal').style.display = 'none';
+        }
+
+        function toggleAllColumns(checked) {
+            const checkboxes = ['col_poNumber', 'col_vendor', 'col_poDate', 'col_eta', 'col_sku', 'col_memo', 'col_quantity', 'col_itemStatus', 'col_poStatus'];
+            checkboxes.forEach(id => {
+                document.getElementById(id).checked = checked;
+            });
+        }
+
+        function performExport() {
+            // Get selected columns
+            const columnMap = {
+                col_poNumber: { key: 'poNumber', label: 'PO Number' },
+                col_vendor: { key: 'vendor', label: 'Vendor' },
+                col_poDate: { key: 'poDate', label: 'PO Date' },
+                col_eta: { key: 'eta', label: 'ETA' },
+                col_sku: { key: 'sku', label: 'SKU' },
+                col_memo: { key: 'memo', label: 'Description' },
+                col_quantity: { key: 'quantity', label: 'Quantity' },
+                col_itemStatus: { key: 'itemStatus', label: 'Item Status' },
+                col_poStatus: { key: 'poStatus', label: 'PO Status' }
+            };
+
+            const selectedColumns = [];
+            Object.keys(columnMap).forEach(id => {
+                if (document.getElementById(id).checked) {
+                    selectedColumns.push(columnMap[id]);
+                }
+            });
+
+            if (selectedColumns.length === 0) {
+                alert('Please select at least one column to export');
+                return;
+            }
+
             // Helper function to properly escape CSV values
             function escapeCSV(value) {
                 if (value === null || value === undefined) {
@@ -832,23 +999,24 @@
                 return stringValue;
             }
 
-            const headers = ['PO Number', 'Vendor', 'PO Date', 'ETA', 'SKU', 'Description', 'Item Status', 'PO Status'];
+            // Create CSV headers from selected columns
+            const headers = selectedColumns.map(col => col.label);
             const csvRows = [headers.join(',')];
-
+            
             filteredItems.forEach(item => {
-                const row = [
-                    escapeCSV(item.poNumber),
-                    escapeCSV(item.vendor),
-                    escapeCSV(item.poDate),
-                    escapeCSV(item.eta ? new Date(item.eta).toLocaleDateString() : ''),
-                    escapeCSV(item.sku),
-                    escapeCSV(item.memo),
-                    escapeCSV(item.itemStatus),
-                    escapeCSV(item.poStatus)
-                ];
+                const row = selectedColumns.map(col => {
+                    let value = item[col.key];
+                    
+                    // Format dates
+                    if ((col.key === 'eta' || col.key === 'poDate') && value) {
+                        value = new Date(value).toLocaleDateString();
+                    }
+                    
+                    return escapeCSV(value);
+                });
                 csvRows.push(row.join(','));
             });
-
+            
             const csvContent = csvRows.join('\n');
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -859,11 +1027,10 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-
-            showToast('CSV exported successfully!');
-        }
-
-        function showToast(message) {
+            
+            closeColumnModal();
+            showToast(`CSV exported successfully with ${selectedColumns.length} column(s)!`);
+        }        function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.add('show');

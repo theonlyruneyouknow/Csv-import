@@ -5583,6 +5583,7 @@ router.get('/unreceived-items', async (req, res) => {
         eta: item.poId.eta || null,
         sku: item.sku || 'N/A',
         memo: item.memo || 'N/A',
+        quantity: item.netsuiteQuantity || 'N/A',
         itemStatus: item.itemStatus || 'N/A',
         poStatus: item.poId.status || 'N/A'
       }));
