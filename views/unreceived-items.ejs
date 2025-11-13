@@ -807,19 +807,32 @@
         }
 
         function exportToCSV() {
+            // Helper function to properly escape CSV values
+            function escapeCSV(value) {
+                if (value === null || value === undefined) {
+                    return '';
+                }
+                const stringValue = String(value);
+                // If the value contains comma, quote, or newline, wrap it in quotes and escape existing quotes
+                if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n') || stringValue.includes('\r')) {
+                    return `"${stringValue.replace(/"/g, '""')}"`;
+                }
+                return stringValue;
+            }
+
             const headers = ['PO Number', 'Vendor', 'PO Date', 'ETA', 'SKU', 'Description', 'Item Status', 'PO Status'];
             const csvRows = [headers.join(',')];
             
             filteredItems.forEach(item => {
                 const row = [
-                    item.poNumber,
-                    item.vendor || '',
-                    item.poDate || '',
-                    item.eta ? new Date(item.eta).toLocaleDateString() : '',
-                    item.sku || '',
-                    `"${(item.memo || '').replace(/"/g, '""')}"`,
-                    item.itemStatus || '',
-                    item.poStatus || ''
+                    escapeCSV(item.poNumber),
+                    escapeCSV(item.vendor),
+                    escapeCSV(item.poDate),
+                    escapeCSV(item.eta ? new Date(item.eta).toLocaleDateString() : ''),
+                    escapeCSV(item.sku),
+                    escapeCSV(item.memo),
+                    escapeCSV(item.itemStatus),
+                    escapeCSV(item.poStatus)
                 ];
                 csvRows.push(row.join(','));
             });

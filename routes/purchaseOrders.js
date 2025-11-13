@@ -3357,6 +3357,19 @@ router.get('/export-orphaned-items', async (req, res) => {
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename="orphaned-line-items.csv"');
 
+    // Helper function to properly escape CSV values
+    function escapeCSV(value) {
+      if (value === null || value === undefined) {
+        return '';
+      }
+      const stringValue = String(value);
+      // If the value contains comma, quote, or newline, wrap it in quotes and escape existing quotes
+      if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n') || stringValue.includes('\r')) {
+        return `"${stringValue.replace(/"/g, '""')}"`;
+      }
+      return stringValue;
+    }
+
     // Create CSV content
     const csvHeaders = 'PO Number,Vendor,Item Description,SKU,Amount,Received,Item Status,Date,Notes,Issue Type\n';
     const csvRows = orphanedItems.map(item => {
@@ -3364,16 +3377,16 @@ router.get('/export-orphaned-items', async (req, res) => {
         (!item.vendor || item.vendor === 'N/A') ? 'No Vendor' : 'No Status';
 
       return [
-        item.poNumber || '',
-        item.vendor || 'N/A',
-        `"${(item.memo || '').replace(/"/g, '""')}"`, // Escape quotes
-        item.sku || '',
-        item.amount || '',
-        item.received ? 'Yes' : 'No',
-        item.itemStatus || '',
-        item.date ? new Date(item.date).toLocaleDateString() : '',
-        `"${(item.notes || '').replace(/"/g, '""')}"`, // Escape quotes
-        issueType
+        escapeCSV(item.poNumber),
+        escapeCSV(item.vendor || 'N/A'),
+        escapeCSV(item.memo),
+        escapeCSV(item.sku),
+        escapeCSV(item.amount),
+        escapeCSV(item.received ? 'Yes' : 'No'),
+        escapeCSV(item.itemStatus),
+        escapeCSV(item.date ? new Date(item.date).toLocaleDateString() : ''),
+        escapeCSV(item.notes),
+        escapeCSV(issueType)
       ].join(',');
     }).join('\n');
 
