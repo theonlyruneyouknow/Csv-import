@@ -571,6 +571,73 @@
             gap: 10px;
             justify-content: flex-end;
         }
+
+        /* Column list drag and drop styles */
+        .column-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .column-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            cursor: move;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .column-item:hover {
+            background: #e9ecef;
+            border-color: #007bff;
+        }
+
+        .column-item.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+        .column-item.drag-over {
+            border-color: #28a745;
+            border-style: dashed;
+            background: #d4edda;
+        }
+
+        .drag-handle {
+            font-size: 16px;
+            color: #6c757d;
+            cursor: grab;
+            line-height: 1;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .column-item input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .column-item label {
+            flex: 1;
+            cursor: pointer;
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+            gap: 10px;
+            justify-content: flex-end;
+        }
     </style>
 </head>
 
@@ -652,50 +719,59 @@
 
     <!-- Column Selection Modal -->
     <div id="columnModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-content" style="max-width: 550px;">
             <div class="modal-header">
-                <h3>Select Columns to Export</h3>
+                <h3>Select & Order Columns to Export</h3>
                 <button class="close-btn" onclick="closeColumnModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <p style="margin-bottom: 15px; color: #666;">Choose which columns to include in the CSV export:</p>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <p style="margin-bottom: 10px; color: #666;">Choose columns and drag to reorder:</p>
+                <div id="columnList" class="column-list">
+                    <div class="column-item" draggable="true" data-col="col_poNumber">
+                        <span class="drag-handle">⋮⋮</span>
                         <input type="checkbox" id="col_poNumber" checked>
-                        <span>PO Number</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <label for="col_poNumber">PO Number</label>
+                    </div>
+                    <div class="column-item" draggable="true" data-col="col_vendor">
+                        <span class="drag-handle">⋮⋮</span>
                         <input type="checkbox" id="col_vendor" checked>
-                        <span>Vendor</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <label for="col_vendor">Vendor</label>
+                    </div>
+                    <div class="column-item" draggable="true" data-col="col_poDate">
+                        <span class="drag-handle">⋮⋮</span>
                         <input type="checkbox" id="col_poDate" checked>
-                        <span>PO Date</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <label for="col_poDate">PO Date</label>
+                    </div>
+                    <div class="column-item" draggable="true" data-col="col_eta">
+                        <span class="drag-handle">⋮⋮</span>
                         <input type="checkbox" id="col_eta" checked>
-                        <span>ETA</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <label for="col_eta">ETA</label>
+                    </div>
+                    <div class="column-item" draggable="true" data-col="col_sku">
+                        <span class="drag-handle">⋮⋮</span>
                         <input type="checkbox" id="col_sku" checked>
-                        <span>SKU</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <label for="col_sku">SKU</label>
+                    </div>
+                    <div class="column-item" draggable="true" data-col="col_memo">
+                        <span class="drag-handle">⋮⋮</span>
                         <input type="checkbox" id="col_memo" checked>
-                        <span>Description</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <label for="col_memo">Description</label>
+                    </div>
+                    <div class="column-item" draggable="true" data-col="col_quantity">
+                        <span class="drag-handle">⋮⋮</span>
                         <input type="checkbox" id="col_quantity" checked>
-                        <span>Quantity</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <label for="col_quantity">Quantity</label>
+                    </div>
+                    <div class="column-item" draggable="true" data-col="col_itemStatus">
+                        <span class="drag-handle">⋮⋮</span>
                         <input type="checkbox" id="col_itemStatus" checked>
-                        <span>Item Status</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <label for="col_itemStatus">Item Status</label>
+                    </div>
+                    <div class="column-item" draggable="true" data-col="col_poStatus">
+                        <span class="drag-handle">⋮⋮</span>
                         <input type="checkbox" id="col_poStatus" checked>
-                        <span>PO Status</span>
-                    </label>
+                        <label for="col_poStatus">PO Status</label>
+                    </div>
                 </div>
                 <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
@@ -729,6 +805,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadData();
             setupEventListeners();
+            setupDragAndDrop();
             // Check for saved compact mode preference
             const savedCompactMode = localStorage.getItem('unreceivedItemsCompactMode');
             if (savedCompactMode === 'true') {
@@ -954,6 +1031,60 @@
             document.getElementById('columnModal').style.display = 'none';
         }
 
+        function setupDragAndDrop() {
+            const columnList = document.getElementById('columnList');
+            let draggedElement = null;
+
+            // Add drag event listeners to all column items
+            const columnItems = columnList.querySelectorAll('.column-item');
+            
+            columnItems.forEach(item => {
+                item.addEventListener('dragstart', function(e) {
+                    draggedElement = this;
+                    this.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                item.addEventListener('dragend', function(e) {
+                    this.classList.remove('dragging');
+                    // Remove all drag-over classes
+                    columnItems.forEach(item => item.classList.remove('drag-over'));
+                });
+
+                item.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    
+                    if (this !== draggedElement) {
+                        this.classList.add('drag-over');
+                    }
+                });
+
+                item.addEventListener('dragleave', function(e) {
+                    this.classList.remove('drag-over');
+                });
+
+                item.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('drag-over');
+                    
+                    if (this !== draggedElement) {
+                        // Get all items
+                        const allItems = [...columnList.querySelectorAll('.column-item')];
+                        const draggedIndex = allItems.indexOf(draggedElement);
+                        const targetIndex = allItems.indexOf(this);
+                        
+                        // Insert dragged element before or after target
+                        if (draggedIndex < targetIndex) {
+                            this.parentNode.insertBefore(draggedElement, this.nextSibling);
+                        } else {
+                            this.parentNode.insertBefore(draggedElement, this);
+                        }
+                    }
+                });
+            });
+        }
+
         function toggleAllColumns(checked) {
             const checkboxes = ['col_poNumber', 'col_vendor', 'col_poDate', 'col_eta', 'col_sku', 'col_memo', 'col_quantity', 'col_itemStatus', 'col_poStatus'];
             checkboxes.forEach(id => {
@@ -962,7 +1093,7 @@
         }
 
         function performExport() {
-            // Get selected columns
+            // Get columns in the order they appear in the list
             const columnMap = {
                 col_poNumber: { key: 'poNumber', label: 'PO Number' },
                 col_vendor: { key: 'vendor', label: 'Vendor' },
@@ -975,10 +1106,16 @@
                 col_poStatus: { key: 'poStatus', label: 'PO Status' }
             };
 
+            // Get columns in the order they appear in the DOM
+            const columnList = document.getElementById('columnList');
+            const columnItems = columnList.querySelectorAll('.column-item');
             const selectedColumns = [];
-            Object.keys(columnMap).forEach(id => {
-                if (document.getElementById(id).checked) {
-                    selectedColumns.push(columnMap[id]);
+            
+            columnItems.forEach(item => {
+                const colId = item.dataset.col;
+                const checkbox = document.getElementById(colId);
+                if (checkbox && checkbox.checked && columnMap[colId]) {
+                    selectedColumns.push(columnMap[colId]);
                 }
             });
 
