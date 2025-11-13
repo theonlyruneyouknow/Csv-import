@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,7 +23,7 @@
             margin: 0 auto;
             background: white;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -306,8 +307,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .badge {
@@ -328,13 +334,15 @@
             color: #0c5460;
         }
 
-        .po-link, .vendor-link {
+        .po-link,
+        .vendor-link {
             color: #007bff;
             text-decoration: none;
             transition: all 0.2s ease;
         }
 
-        .po-link:hover, .vendor-link:hover {
+        .po-link:hover,
+        .vendor-link:hover {
             color: #0056b3;
             text-decoration: underline;
         }
@@ -347,7 +355,7 @@
             color: white;
             padding: 15px 20px;
             border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 1000;
             display: none;
             animation: slideIn 0.3s ease;
@@ -358,6 +366,7 @@
                 transform: translateX(100%);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -380,7 +389,7 @@
             color: white;
             border: none;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -486,7 +495,8 @@
                 font-size: 12px;
             }
 
-            th, td {
+            th,
+            td {
                 padding: 8px 6px;
             }
 
@@ -498,6 +508,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -530,7 +541,8 @@
             <div class="filters-section">
                 <div class="filter-group">
                     <label>Search</label>
-                    <input type="text" id="searchFilter" class="filter-input" placeholder="Search by PO, vendor, SKU...">
+                    <input type="text" id="searchFilter" class="filter-input"
+                        placeholder="Search by PO, vendor, SKU...">
                 </div>
                 <div class="filter-group">
                     <label>Vendor</label>
@@ -574,7 +586,7 @@
     </div>
 
     <div id="toast" class="toast"></div>
-    
+
     <!-- Compact Mode Toggle Button -->
     <button class="compact-mode-toggle" onclick="toggleCompactMode()" title="Toggle Compact Mode">
         ⬍
@@ -602,7 +614,7 @@
             const header = document.querySelector('.header');
             const statsAndFiltersBar = document.querySelector('.stats-and-filters-bar');
             const toggleBtn = document.querySelector('.compact-mode-toggle');
-            
+
             if (isCompactMode) {
                 header.classList.add('compact');
                 statsAndFiltersBar.classList.add('compact');
@@ -614,7 +626,7 @@
                 toggleBtn.textContent = '⬍';
                 toggleBtn.title = 'Compact View';
             }
-            
+
             // Save preference
             localStorage.setItem('unreceivedItemsCompactMode', isCompactMode);
         }
@@ -622,11 +634,11 @@
         function setupEventListeners() {
             // Search filter
             document.getElementById('searchFilter').addEventListener('input', applyFilters);
-            
+
             // Dropdown filters
             document.getElementById('vendorFilter').addEventListener('change', applyFilters);
             document.getElementById('statusFilter').addEventListener('change', applyFilters);
-            
+
             // Sort headers
             document.querySelectorAll('th.sortable').forEach(th => {
                 th.addEventListener('click', () => {
@@ -640,7 +652,7 @@
             try {
                 const response = await fetch('/purchase-orders/unreceived-items');
                 const data = await response.json();
-                
+
                 if (data.success) {
                     allItems = data.items;
                     filteredItems = [...allItems];
@@ -659,7 +671,7 @@
         function updateStats(stats) {
             document.getElementById('totalItems').textContent = stats.totalItems.toLocaleString();
             document.getElementById('totalPOs').textContent = stats.totalPOs.toLocaleString();
-            
+
             // Calculate unique vendors
             const uniqueVendors = new Set(allItems.map(item => item.vendor));
             document.getElementById('totalVendors').textContent = uniqueVendors.size.toLocaleString();
@@ -675,7 +687,7 @@
                 option.textContent = vendor;
                 vendorSelect.appendChild(option);
             });
-            
+
             // Populate status filter
             const statuses = [...new Set(allItems.map(item => item.poStatus).filter(s => s))].sort();
             const statusSelect = document.getElementById('statusFilter');
@@ -691,24 +703,24 @@
             const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
             const vendorFilter = document.getElementById('vendorFilter').value;
             const statusFilter = document.getElementById('statusFilter').value;
-            
+
             filteredItems = allItems.filter(item => {
                 // Search filter
-                const matchesSearch = !searchTerm || 
+                const matchesSearch = !searchTerm ||
                     item.poNumber.toLowerCase().includes(searchTerm) ||
                     item.vendor.toLowerCase().includes(searchTerm) ||
                     (item.sku && item.sku.toLowerCase().includes(searchTerm)) ||
                     (item.memo && item.memo.toLowerCase().includes(searchTerm));
-                
+
                 // Vendor filter
                 const matchesVendor = !vendorFilter || item.vendor === vendorFilter;
-                
+
                 // Status filter
                 const matchesStatus = !statusFilter || item.poStatus === statusFilter;
-                
+
                 return matchesSearch && matchesVendor && matchesStatus;
             });
-            
+
             renderTable();
         }
 
@@ -719,7 +731,7 @@
                 currentSort.column = column;
                 currentSort.direction = 'asc';
             }
-            
+
             // Update header classes
             document.querySelectorAll('th.sortable').forEach(th => {
                 th.classList.remove('sort-asc', 'sort-desc');
@@ -727,7 +739,7 @@
                     th.classList.add(currentSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
                 }
             });
-            
+
             sortItems();
             renderTable();
         }
@@ -736,17 +748,17 @@
             filteredItems.sort((a, b) => {
                 let aVal = a[currentSort.column];
                 let bVal = b[currentSort.column];
-                
+
                 // Handle null/undefined
                 if (!aVal) aVal = '';
                 if (!bVal) bVal = '';
-                
+
                 // Handle dates
                 if (currentSort.column === 'eta' || currentSort.column === 'poDate') {
                     aVal = aVal ? new Date(aVal) : new Date(0);
                     bVal = bVal ? new Date(bVal) : new Date(0);
                 }
-                
+
                 // Compare
                 if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
                 if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
@@ -756,7 +768,7 @@
 
         function renderTable() {
             const tbody = document.getElementById('itemsBody');
-            
+
             if (filteredItems.length === 0) {
                 tbody.innerHTML = `
                     <tr>
@@ -771,29 +783,29 @@
                 `;
                 return;
             }
-            
+
             tbody.innerHTML = filteredItems.map(item => {
                 // Use poUrl directly if available
                 const poLink = item.poUrl || '#';
-                
+
                 // Build vendor link
-                const vendorLink = item.vendorId 
+                const vendorLink = item.vendorId
                     ? `/vendors/${item.vendorId}`
                     : '#';
-                
+
                 return `
                 <tr>
                     <td>
-                        ${item.poUrl 
-                            ? `<a href="${poLink}" target="_blank" class="po-link">${item.poNumber}</a>`
-                            : item.poNumber
-                        }
+                        ${item.poUrl
+                        ? `<a href="${poLink}" target="_blank" class="po-link">${item.poNumber}</a>`
+                        : item.poNumber
+                    }
                     </td>
                     <td>
-                        ${item.vendorId 
-                            ? `<a href="${vendorLink}" class="vendor-link">${item.vendor}</a>`
-                            : item.vendor || 'N/A'
-                        }
+                        ${item.vendorId
+                        ? `<a href="${vendorLink}" class="vendor-link">${item.vendor}</a>`
+                        : item.vendor || 'N/A'
+                    }
                     </td>
                     <td>${item.poDate || 'N/A'}</td>
                     <td>${item.eta ? new Date(item.eta).toLocaleDateString() : 'N/A'}</td>
@@ -822,7 +834,7 @@
 
             const headers = ['PO Number', 'Vendor', 'PO Date', 'ETA', 'SKU', 'Description', 'Item Status', 'PO Status'];
             const csvRows = [headers.join(',')];
-            
+
             filteredItems.forEach(item => {
                 const row = [
                     escapeCSV(item.poNumber),
@@ -836,7 +848,7 @@
                 ];
                 csvRows.push(row.join(','));
             });
-            
+
             const csvContent = csvRows.join('\n');
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -847,7 +859,7 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
+
             showToast('CSV exported successfully!');
         }
 
@@ -876,4 +888,5 @@
         }
     </script>
 </body>
+
 </html>
