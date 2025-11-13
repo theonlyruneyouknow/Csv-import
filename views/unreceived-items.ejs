@@ -635,8 +635,9 @@
             font-size: 14px;
             font-weight: 500;
         }
-            gap: 10px;
-            justify-content: flex-end;
+
+        gap: 10px;
+        justify-content: flex-end;
         }
     </style>
 </head>
@@ -1037,43 +1038,43 @@
 
             // Add drag event listeners to all column items
             const columnItems = columnList.querySelectorAll('.column-item');
-            
+
             columnItems.forEach(item => {
-                item.addEventListener('dragstart', function(e) {
+                item.addEventListener('dragstart', function (e) {
                     draggedElement = this;
                     this.classList.add('dragging');
                     e.dataTransfer.effectAllowed = 'move';
                 });
 
-                item.addEventListener('dragend', function(e) {
+                item.addEventListener('dragend', function (e) {
                     this.classList.remove('dragging');
                     // Remove all drag-over classes
                     columnItems.forEach(item => item.classList.remove('drag-over'));
                 });
 
-                item.addEventListener('dragover', function(e) {
+                item.addEventListener('dragover', function (e) {
                     e.preventDefault();
                     e.dataTransfer.dropEffect = 'move';
-                    
+
                     if (this !== draggedElement) {
                         this.classList.add('drag-over');
                     }
                 });
 
-                item.addEventListener('dragleave', function(e) {
+                item.addEventListener('dragleave', function (e) {
                     this.classList.remove('drag-over');
                 });
 
-                item.addEventListener('drop', function(e) {
+                item.addEventListener('drop', function (e) {
                     e.preventDefault();
                     this.classList.remove('drag-over');
-                    
+
                     if (this !== draggedElement) {
                         // Get all items
                         const allItems = [...columnList.querySelectorAll('.column-item')];
                         const draggedIndex = allItems.indexOf(draggedElement);
                         const targetIndex = allItems.indexOf(this);
-                        
+
                         // Insert dragged element before or after target
                         if (draggedIndex < targetIndex) {
                             this.parentNode.insertBefore(draggedElement, this.nextSibling);
@@ -1110,7 +1111,7 @@
             const columnList = document.getElementById('columnList');
             const columnItems = columnList.querySelectorAll('.column-item');
             const selectedColumns = [];
-            
+
             columnItems.forEach(item => {
                 const colId = item.dataset.col;
                 const checkbox = document.getElementById(colId);
