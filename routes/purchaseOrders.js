@@ -1368,6 +1368,39 @@ router.put('/pos/:poId/unsnooze', async (req, res) => {
   }
 });
 
+// Update PO Type (Seed, Hardgood, Greengood)
+router.put('/:poId/type', async (req, res) => {
+  try {
+    const { poId } = req.params;
+    const { poType } = req.body;
+
+    // Validate PO Type
+    const validTypes = ['Seed', 'Hardgood', 'Greengood'];
+    if (!poType || !validTypes.includes(poType)) {
+      return res.status(400).json({ error: 'Invalid PO type. Must be Seed, Hardgood, or Greengood.' });
+    }
+
+    console.log(`🏷️  Updating PO ${poId} type to ${poType}`);
+
+    const updatedPO = await PurchaseOrder.findByIdAndUpdate(
+      poId,
+      { poType: poType },
+      { new: true }
+    );
+
+    if (!updatedPO) {
+      return res.status(404).json({ error: 'Purchase Order not found' });
+    }
+
+    console.log(`✅ Updated PO ${updatedPO.poNumber} type to ${poType}`);
+    res.json({ success: true, po: updatedPO });
+
+  } catch (error) {
+    console.error('Error updating PO type:', error);
+    res.status(500).json({ error: 'Failed to update PO type' });
+  }
+});
+
 // Get all currently snoozed POs
 router.get('/pos/snoozed/list', async (req, res) => {
   try {

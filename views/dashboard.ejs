@@ -23,7 +23,6 @@
                 max-width: 80%;
             }
         }
-
         .header {
             display: flex;
             justify-content: space-between;
@@ -2377,6 +2376,76 @@
             border-color: #198754;
         }
 
+        /* PO Type System */
+        .po-type-cell {
+            width: 100px;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .po-type-select {
+            width: 100%;
+            font-size: 14px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            padding: 4px 6px;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .po-type-select:hover {
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+        }
+
+        .po-type-select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+        }
+
+        .po-type-select option.type-seed {
+            background-color: #d4edda;
+            color: #155724;
+            font-weight: 600;
+        }
+
+        .po-type-select option.type-hardgood {
+            background-color: #e2e3e5;
+            color: #383d41;
+            font-weight: 600;
+        }
+
+        .po-type-select option.type-greengood {
+            background-color: #d1f0e6;
+            color: #0c5460;
+            font-weight: 600;
+        }
+
+        /* PO Type select background colors based on value */
+        .po-type-select[data-type="Seed"] {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: #28a745;
+            border-width: 2px;
+        }
+
+        .po-type-select[data-type="Hardgood"] {
+            background-color: #e2e3e5;
+            color: #383d41;
+            border-color: #6c757d;
+            border-width: 2px;
+        }
+
+        .po-type-select[data-type="Greengood"] {
+            background-color: #d1f0e6;
+            color: #0c5460;
+            border-color: #20c997;
+            border-width: 2px;
+        }
+
         /* URL Modal */
         .url-modal {
             display: none;
@@ -4034,6 +4103,24 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             <span style="font-size: 12px;">Show POs without ETA</span>
                         </label>
                     </div>
+
+                    <div class="filter-group">
+                        <label style="margin-bottom: 5px;">PO Type Filter</label>
+                        <div style="display: flex; gap: 10px; margin-top: 19px;">
+                            <label style="display: flex; align-items: center; gap: 3px;" title="Seed">
+                                <input type="checkbox" id="filterSeed" checked style="margin: 0;">
+                                <span style="font-size: 12px; font-weight: 600; color: #28a745;">S</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 3px;" title="Hardgood">
+                                <input type="checkbox" id="filterHardgood" checked style="margin: 0;">
+                                <span style="font-size: 12px; font-weight: 600; color: #6c757d;">H</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 3px;" title="Greengood">
+                                <input type="checkbox" id="filterGreengood" checked style="margin: 0;">
+                                <span style="font-size: 12px; font-weight: 600; color: #20c997;">G</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Second Row: Action Buttons -->
@@ -4090,6 +4177,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     <th class="sortable date-cell" data-column="date">Date</th>
                                     <th class="sortable po-number" data-column="poNumber">PO Number</th>
                                     <th class="sortable priority-cell" data-column="priority">Priority</th>
+                                    <th class="sortable po-type-cell" data-column="poType">Type</th>
                                     <th class="sortable vendor" data-column="vendor">Vendor</th>
                                     <th class="sortable line-items-count-cell" data-column="lineItemsCount">Line Items
                                     </th>
@@ -4128,6 +4216,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     status: po.status,
                                     nsStatus: po.nsStatus,
                                     priority: po.priority,
+                                    poType: po.poType || 'Seed',
                                     isDropship: po.isDropship,
                                     location: po.location,
                                     lineItemCount: po.lineItemCount,
@@ -4196,6 +4285,18 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                     class="priority-4">🟡 4</option>
                                                 <option value="5" <%=(po.priority || 3)==5 ? 'selected' : '' %>
                                                     class="priority-5">🟢 5</option>
+                                            </select>
+                                        </td>
+                                        <td class="po-type-cell">
+                                            <select class="po-type-select" data-id="<%= po._id.toString() %>"
+                                                data-po="<%= po.poNumber %>" data-type="<%= po.poType || 'Seed' %>"
+                                                title="Set type for PO <%= po.poNumber %>">
+                                                <option value="Seed" <%= (po.poType || 'Seed') === 'Seed' ? 'selected' : '' %>
+                                                    class="type-seed">🌱 Seed</option>
+                                                <option value="Hardgood" <%= (po.poType || 'Seed') === 'Hardgood' ? 'selected' : '' %>
+                                                    class="type-hardgood">🔧 Hardgood</option>
+                                                <option value="Greengood" <%= (po.poType || 'Seed') === 'Greengood' ? 'selected' : '' %>
+                                                    class="type-greengood">🌿 Greengood</option>
                                             </select>
                                         </td>
                                         <td class="vendor" title="<%= po.vendor %>">
@@ -7863,6 +7964,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const locationFilterEl = document.getElementById('locationFilter');
             const locationFilter = locationFilterEl ? locationFilterEl.value.trim() : '';
 
+            // PO Type filters
+            const filterSeedCheckbox = document.getElementById('filterSeed');
+            const filterSeed = filterSeedCheckbox ? filterSeedCheckbox.checked : true;
+            const filterHardgoodCheckbox = document.getElementById('filterHardgood');
+            const filterHardgood = filterHardgoodCheckbox ? filterHardgoodCheckbox.checked : true;
+            const filterGreengoodCheckbox = document.getElementById('filterGreengood');
+            const filterGreengood = filterGreengoodCheckbox ? filterGreengoodCheckbox.checked : true;
+
             const rows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]'); // Only main rows
             let visibleCount = 0;
             let hiddenNotMyConcernCount = 0;
@@ -7871,6 +7980,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             let hiddenMissingEtaCount = 0;
             let hiddenWithLineItemsCount = 0;
             let hiddenLocationMismatchCount = 0;
+            let hiddenPoTypeCount = 0;
 
             rows.forEach(row => {
                 const poData = JSON.parse(row.dataset.po);
@@ -7918,6 +8028,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const locationArray = lineItemLocations.split(',').map(loc => loc.trim());
                 const matchesLocation = !locationFilter || locationArray.includes(locationFilter);
 
+                // PO Type filter - show only checked types
+                const poType = poData.poType || 'Seed';
+                const matchesPoType = (poType === 'Seed' && filterSeed) ||
+                                     (poType === 'Hardgood' && filterHardgood) ||
+                                     (poType === 'Greengood' && filterGreengood);
+
                 if (isNotMyConcern && !showNotMyConcern) {
                     hiddenNotMyConcernCount++;
                 }
@@ -7942,6 +8058,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     hiddenLocationMismatchCount++;
                 }
 
+                if (!matchesPoType) {
+                    hiddenPoTypeCount++;
+                }
+
                 // Notes filter
                 let matchesNotes = true;
                 if (notesFilter === 'with-notes') {
@@ -7953,7 +8073,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 // Priority filter
                 const matchesPriority = priorityFilter === 'all' || (poData.priority && poData.priority.toString() === priorityFilter);
 
-                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowBasedOnUrl && shouldShowBasedOnEta && shouldShowBasedOnLineItems && matchesLocation) {
+                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowBasedOnUrl && shouldShowBasedOnEta && shouldShowBasedOnLineItems && matchesLocation && matchesPoType) {
                     row.classList.remove('hidden');
                     // Also show the corresponding notes row if it's expanded
                     const notesRow = document.getElementById(`notes-row-${index}`);
@@ -7971,7 +8091,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
             });
 
-            console.log(`🔍 Filter results: ${visibleCount} visible, ${hiddenNotMyConcernCount} "Not my concern" hidden, ${hiddenPendingBillCount} "Pending Bill" hidden, ${hiddenHasUrlCount} with URLs hidden, ${hiddenMissingEtaCount} with ETA hidden, ${hiddenWithLineItemsCount} with line items hidden, ${hiddenLocationMismatchCount} location mismatch hidden`);
+            console.log(`🔍 Filter results: ${visibleCount} visible, ${hiddenNotMyConcernCount} "Not my concern" hidden, ${hiddenPendingBillCount} "Pending Bill" hidden, ${hiddenHasUrlCount} with URLs hidden, ${hiddenMissingEtaCount} with ETA hidden, ${hiddenWithLineItemsCount} with line items hidden, ${hiddenLocationMismatchCount} location mismatch hidden, ${hiddenPoTypeCount} PO type filtered`);
 
             // Update results info - with null checks
             const totalCount = rows.length;
@@ -8315,6 +8435,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         const showOnlyMissingUrls = document.getElementById('showOnlyMissingUrls');
         const showOnlyMissingEta = document.getElementById('showOnlyMissingEta');
         const showOnlyNoLineItems = document.getElementById('showOnlyNoLineItems');
+        const filterSeed = document.getElementById('filterSeed');
+        const filterHardgood = document.getElementById('filterHardgood');
+        const filterGreengood = document.getElementById('filterGreengood');
 
         if (searchFilter) searchFilter.addEventListener('input', applyFilters);
         if (nsStatusFilter) nsStatusFilter.addEventListener('change', applyFilters);
@@ -8327,6 +8450,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         if (showOnlyMissingUrls) showOnlyMissingUrls.addEventListener('change', applyFilters);
         if (showOnlyMissingEta) showOnlyMissingEta.addEventListener('change', applyFilters);
         if (showOnlyNoLineItems) showOnlyNoLineItems.addEventListener('change', applyFilters);
+        if (filterSeed) filterSeed.addEventListener('change', applyFilters);
+        if (filterHardgood) filterHardgood.addEventListener('change', applyFilters);
+        if (filterGreengood) filterGreengood.addEventListener('change', applyFilters);
 
         // Event listeners for sorting
         document.querySelectorAll('th.sortable').forEach(header => {
@@ -8923,6 +9049,75 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             document.body.removeChild(textArea);
         }
+
+        // Event delegation for PO Type select changes
+        document.addEventListener('change', async function(e) {
+            if (e.target && e.target.classList.contains('po-type-select')) {
+                const select = e.target;
+                const poId = select.dataset.id;
+                const poNumber = select.dataset.po;
+                const newType = select.value;
+                
+                console.log(`📋 PO Type change detected:`, { poId, poNumber, newType });
+                
+                // Validate poId exists
+                if (!poId || poId === 'undefined') {
+                    console.error('❌ Invalid PO ID:', poId);
+                    alert('Error: Invalid PO ID. Please refresh the page and try again.');
+                    return;
+                }
+                
+                // Update data-type attribute for styling
+                select.setAttribute('data-type', newType);
+                
+                try {
+                    const url = `/purchase-orders/${poId}/type`;
+                    console.log(`🔄 Updating PO ${poNumber} (ID: ${poId}) type to ${newType}`);
+                    console.log(`📡 Sending request to: ${url}`);
+                    console.log(`📡 Full URL: ${window.location.origin}${url}`);
+                    
+                    const response = await fetch(url, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ poType: newType }),
+                        credentials: 'include'  // Include cookies for authentication
+                    });
+                    
+                    console.log(`📡 Response status: ${response.status}`);
+                    console.log(`📡 Response URL: ${response.url}`);
+                    
+                    // Check if we were redirected to login
+                    if (response.redirected && response.url.includes('/splash')) {
+                        console.error('❌ Session expired - redirected to login');
+                        alert('Your session has expired. Please refresh the page and log in again.');
+                        window.location.reload();
+                        return;
+                    }
+                    
+                    if (response.ok) {
+                        console.log(`✅ Updated PO ${poNumber} type to ${newType}`);
+                        // Update the poData in the row's dataset
+                        const row = select.closest('tr');
+                        if (row && row.dataset.po) {
+                            const poData = JSON.parse(row.dataset.po);
+                            poData.poType = newType;
+                            row.dataset.po = JSON.stringify(poData);
+                        }
+                        // Reapply filters in case type filter is active
+                        applyFilters();
+                    } else {
+                        const error = await response.json();
+                        alert(`Error updating PO type: ${error.error || error.message || 'Unknown error'}`);
+                        console.error('Error updating PO type:', error);
+                    }
+                } catch (error) {
+                    console.error('Error updating PO type:', error);
+                    alert('Error updating PO type. Please try again.');
+                }
+            }
+        });
     </script>
 
     <!-- Pre-Purchase Order Modals -->

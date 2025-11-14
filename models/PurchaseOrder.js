@@ -67,6 +67,12 @@ const purchaseOrderSchema = new mongoose.Schema({
     max: 5,
     default: null             // No priority by default
   },
+  poType: {                 // Type of PO: Seed, Hardgood, or Greengood
+    type: String,
+    enum: ['Seed', 'Hardgood', 'Greengood'],
+    default: 'Seed',          // Default to Seed
+    index: true               // Index for efficient filtering
+  },
   lineItems: [{             // Array of line items for this PO
     sku: String,
     memo: String,
