@@ -23,6 +23,7 @@
                 max-width: 80%;
             }
         }
+
         .header {
             display: flex;
             justify-content: space-between;
@@ -4107,17 +4108,17 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     <div class="filter-group">
                         <label style="margin-bottom: 5px;">PO Type Filter</label>
                         <div style="display: flex; gap: 10px; margin-top: 19px;">
-                            <label style="display: flex; align-items: center; gap: 3px;" title="Seed">
+                            <label style="display: flex; align-items: center; gap: 3px;" title="Show Seed POs">
                                 <input type="checkbox" id="filterSeed" checked style="margin: 0;">
-                                <span style="font-size: 12px; font-weight: 600; color: #28a745;">S</span>
+                                <span style="font-size: 12px; font-weight: 600; color: #28a745;">Seed</span>
                             </label>
-                            <label style="display: flex; align-items: center; gap: 3px;" title="Hardgood">
+                            <label style="display: flex; align-items: center; gap: 3px;" title="Show Hardgood POs">
                                 <input type="checkbox" id="filterHardgood" checked style="margin: 0;">
-                                <span style="font-size: 12px; font-weight: 600; color: #6c757d;">H</span>
+                                <span style="font-size: 12px; font-weight: 600; color: #6c757d;">Hardgood</span>
                             </label>
-                            <label style="display: flex; align-items: center; gap: 3px;" title="Greengood">
+                            <label style="display: flex; align-items: center; gap: 3px;" title="Show Greengood POs">
                                 <input type="checkbox" id="filterGreengood" checked style="margin: 0;">
-                                <span style="font-size: 12px; font-weight: 600; color: #20c997;">G</span>
+                                <span style="font-size: 12px; font-weight: 600; color: #20c997;">Greengood</span>
                             </label>
                         </div>
                     </div>
@@ -4291,11 +4292,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                             <select class="po-type-select" data-id="<%= po._id.toString() %>"
                                                 data-po="<%= po.poNumber %>" data-type="<%= po.poType || 'Seed' %>"
                                                 title="Set type for PO <%= po.poNumber %>">
-                                                <option value="Seed" <%= (po.poType || 'Seed') === 'Seed' ? 'selected' : '' %>
+                                                <option value="Seed" <%=(po.poType || 'Seed' )==='Seed' ? 'selected'
+                                                    : '' %>
                                                     class="type-seed">🌱 Seed</option>
-                                                <option value="Hardgood" <%= (po.poType || 'Seed') === 'Hardgood' ? 'selected' : '' %>
+                                                <option value="Hardgood" <%=(po.poType || 'Seed' )==='Hardgood'
+                                                    ? 'selected' : '' %>
                                                     class="type-hardgood">🔧 Hardgood</option>
-                                                <option value="Greengood" <%= (po.poType || 'Seed') === 'Greengood' ? 'selected' : '' %>
+                                                <option value="Greengood" <%=(po.poType || 'Seed' )==='Greengood'
+                                                    ? 'selected' : '' %>
                                                     class="type-greengood">🌿 Greengood</option>
                                             </select>
                                         </td>
@@ -8031,8 +8035,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 // PO Type filter - show only checked types
                 const poType = poData.poType || 'Seed';
                 const matchesPoType = (poType === 'Seed' && filterSeed) ||
-                                     (poType === 'Hardgood' && filterHardgood) ||
-                                     (poType === 'Greengood' && filterGreengood);
+                    (poType === 'Hardgood' && filterHardgood) ||
+                    (poType === 'Greengood' && filterGreengood);
 
                 if (isNotMyConcern && !showNotMyConcern) {
                     hiddenNotMyConcernCount++;
@@ -9051,31 +9055,31 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         }
 
         // Event delegation for PO Type select changes
-        document.addEventListener('change', async function(e) {
+        document.addEventListener('change', async function (e) {
             if (e.target && e.target.classList.contains('po-type-select')) {
                 const select = e.target;
                 const poId = select.dataset.id;
                 const poNumber = select.dataset.po;
                 const newType = select.value;
-                
+
                 console.log(`📋 PO Type change detected:`, { poId, poNumber, newType });
-                
+
                 // Validate poId exists
                 if (!poId || poId === 'undefined') {
                     console.error('❌ Invalid PO ID:', poId);
                     alert('Error: Invalid PO ID. Please refresh the page and try again.');
                     return;
                 }
-                
+
                 // Update data-type attribute for styling
                 select.setAttribute('data-type', newType);
-                
+
                 try {
                     const url = `/purchase-orders/${poId}/type`;
                     console.log(`🔄 Updating PO ${poNumber} (ID: ${poId}) type to ${newType}`);
                     console.log(`📡 Sending request to: ${url}`);
                     console.log(`📡 Full URL: ${window.location.origin}${url}`);
-                    
+
                     const response = await fetch(url, {
                         method: 'PUT',
                         headers: {
@@ -9084,10 +9088,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         body: JSON.stringify({ poType: newType }),
                         credentials: 'include'  // Include cookies for authentication
                     });
-                    
+
                     console.log(`📡 Response status: ${response.status}`);
                     console.log(`📡 Response URL: ${response.url}`);
-                    
+
                     // Check if we were redirected to login
                     if (response.redirected && response.url.includes('/splash')) {
                         console.error('❌ Session expired - redirected to login');
@@ -9095,7 +9099,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         window.location.reload();
                         return;
                     }
-                    
+
                     if (response.ok) {
                         console.log(`✅ Updated PO ${poNumber} type to ${newType}`);
                         // Update the poData in the row's dataset
