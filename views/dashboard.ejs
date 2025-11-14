@@ -13,8 +13,15 @@
         }
 
         .container {
-            max-width: 80%;
+            max-width: 1600px;
             margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        @media (min-width: 1920px) {
+            .container {
+                max-width: 80%;
+            }
         }
 
         .header {
@@ -1945,6 +1952,25 @@
             width: 140px;
             /* Width for 3 buttons (notes, tracking, task) side by side */
             min-width: 140px;
+        }
+
+        .notes-toggle-cell > div {
+            display: flex;
+            gap: 4px;
+            flex-wrap: nowrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @media (max-width: 1366px) {
+            .notes-toggle-cell {
+                width: 110px;
+                min-width: 110px;
+            }
+            
+            .notes-toggle-cell > div {
+                flex-wrap: wrap;
+            }
         }
 
         .notes-toggle {
