@@ -26,7 +26,7 @@ router.get('/test-upload', (req, res) => {
 const initializeDefaultPoTypes = async () => {
   try {
     const count = await PoTypeOption.countDocuments();
-    
+
     if (count === 0) {
       const defaultTypes = [
         { name: 'Seed', color: '#28a745', emoji: '🌱', isDefault: true },

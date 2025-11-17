@@ -2420,20 +2420,22 @@
         }
 
         /* Dynamic PO Type select option and background colors */
-        <% poTypeOptions.forEach(type => { %>
-            .po-type-select option.type-<%= type.name.toLowerCase() %> {
-                background-color: <%= type.color %>22;
-                color: <%= type.color %>;
-                font-weight: 600;
-            }
+        <% poTypeOptions.forEach(type=> {
+                %> .po-type-select option.type-<%=type.name.toLowerCase() %> {
+                    background-color: <%=type.color %>22;
+                    color: <%=type.color %>;
+                    font-weight: 600;
+                }
 
-            .po-type-select[data-type="<%= type.name %>"] {
-                background-color: <%= type.color %>22;
-                color: <%= type.color %>;
-                border-color: <%= type.color %>;
-                border-width: 2px;
-            }
-        <% }) %>
+                .po-type-select[data-type="<%= type.name %>"] {
+                    background-color: <%=type.color %>22;
+                    color: <%=type.color %>;
+                    border-color: <%=type.color %>;
+                    border-width: 2px;
+                }
+
+                <%
+            }) %>
 
         /* URL Modal */
         .url-modal {
@@ -4099,14 +4101,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     <div class="filter-group">
                         <label style="margin-bottom: 5px;">PO Type Filter</label>
                         <div style="display: flex; gap: 10px; margin-top: 19px;">
-                            <% poTypeOptions.forEach(type => { %>
-                                <label style="display: flex; align-items: center; gap: 3px;" title="Show <%= type.name %> POs">
+                            <% poTypeOptions.forEach(type=> { %>
+                                <label style="display: flex; align-items: center; gap: 3px;"
+                                    title="Show <%= type.name %> POs">
                                     <input type="checkbox" id="filter<%= type.name %>" checked style="margin: 0;">
                                     <span style="font-size: 12px; font-weight: 600; color: <%= type.color %>;">
-                                        <%= type.emoji %> <%= type.name %>
+                                        <%= type.emoji %>
+                                            <%= type.name %>
                                     </span>
                                 </label>
-                            <% }) %>
+                                <% }) %>
                         </div>
                     </div>
                 </div>
@@ -4279,13 +4283,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                             <select class="po-type-select" data-id="<%= po._id.toString() %>"
                                                 data-po="<%= po.poNumber %>" data-type="<%= po.poType || 'Seed' %>"
                                                 title="Set type for PO <%= po.poNumber %>">
-                                                <% poTypeOptions.forEach(type => { %>
-                                                    <option value="<%= type.name %>" 
-                                                        <%= (po.poType || 'Seed') === type.name ? 'selected' : '' %>
+                                                <% poTypeOptions.forEach(type=> { %>
+                                                    <option value="<%= type.name %>" <%=(po.poType || 'Seed'
+                                                        )===type.name ? 'selected' : '' %>
                                                         class="type-<%= type.name.toLowerCase() %>">
-                                                        <%= type.emoji %> <%= type.name %>
+                                                            <%= type.emoji %>
+                                                                <%= type.name %>
                                                     </option>
-                                                <% }) %>
+                                                    <% }) %>
                                             </select>
                                         </td>
                                         <td class="vendor" title="<%= po.vendor %>">
@@ -7980,8 +7985,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             // PO Type filters - dynamic based on poTypeOptions
             const poTypeFilters = {};
             <% poTypeOptions.forEach(type => { %>
-                const filter<%= type.name %>Checkbox = document.getElementById('filter<%= type.name %>');
-                poTypeFilters['<%= type.name %>'] = filter<%= type.name %>Checkbox ? filter<%= type.name %>Checkbox.checked : true;
+                const filter<%= type.name %> Checkbox = document.getElementById('filter<%= type.name %>');
+                poTypeFilters['<%= type.name %>'] = filter <%= type.name %> Checkbox ? filter <%= type.name %> Checkbox.checked : true;
             <% }) %>
 
             const rows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]'); // Only main rows
@@ -8461,15 +8466,15 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         // Dynamic PO Type filter event listeners
         <% poTypeOptions.forEach(type => { %>
             const filter<%= type.name %> = document.getElementById('filter<%= type.name %>');
-            if (filter<%= type.name %>) filter<%= type.name %>.addEventListener('change', applyFilters);
+            if (filter <%= type.name %>) filter <%= type.name %>.addEventListener('change', applyFilters);
         <% }) %>
 
-        // Event listeners for sorting
-        document.querySelectorAll('th.sortable').forEach(header => {
-            header.addEventListener('click', () => {
-                sortTable(header.dataset.column);
+            // Event listeners for sorting
+            document.querySelectorAll('th.sortable').forEach(header => {
+                header.addEventListener('click', () => {
+                    sortTable(header.dataset.column);
+                });
             });
-        });
 
         // Status Management Functions
         let currentStatusOptions = [];
@@ -8952,7 +8957,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 colorInput.value = '#6c757d';
 
                 await loadPoTypeOptions();
-                
+
                 // Reload page to update filters and dropdowns
                 alert(`Successfully added PO type: ${name}. The page will reload to update all dropdowns.`);
                 location.reload();
@@ -8993,7 +8998,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
 
                 console.log('✅ Deleted PO type:', poType.name);
-                
+
                 // Reload page to update filters and dropdowns
                 alert(`Successfully deleted PO type: ${poType.name}. The page will reload to update all dropdowns.`);
                 location.reload();
