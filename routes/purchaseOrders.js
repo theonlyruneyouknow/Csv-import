@@ -6,6 +6,7 @@ const PurchaseOrder = require('../models/PurchaseOrder');
 const PrePurchaseOrder = require('../models/PrePurchaseOrder');
 const StatusOption = require('../models/StatusOption');
 const LineItemStatusOption = require('../models/LineItemStatusOption');
+const PoTypeOption = require('../models/PoTypeOption');
 const Note = require('../models/Note');
 const LineItem = require('../models/LineItem');
 const OrganicVendor = require('../models/OrganicVendor');
@@ -20,6 +21,29 @@ router.get('/test-upload', (req, res) => {
   console.log('🧪 TEST ROUTE HIT - Upload route is accessible!');
   res.json({ status: 'Upload route is working', timestamp: new Date() });
 });
+
+// Initialize default PO type options if they don't exist
+const initializeDefaultPoTypes = async () => {
+  try {
+    const count = await PoTypeOption.countDocuments();
+    
+    if (count === 0) {
+      const defaultTypes = [
+        { name: 'Seed', color: '#28a745', emoji: '🌱', isDefault: true },
+        { name: 'Hardgood', color: '#6c757d', emoji: '🔧', isDefault: true },
+        { name: 'Greengood', color: '#20c997', emoji: '🌿', isDefault: true }
+      ];
+
+      await PoTypeOption.insertMany(defaultTypes);
+      console.log('✅ Initialized default PO type options:', defaultTypes.map(t => t.name).join(', '));
+    }
+  } catch (error) {
+    console.error('❌ Error initializing default PO types:', error);
+  }
+};
+
+// Initialize on module load
+initializeDefaultPoTypes();
 
 // Helper function to calculate the earliest upcoming ETA from line items
 const calculateUpcomingETA = (lineItems) => {
@@ -1374,10 +1398,13 @@ router.put('/:poId/type', async (req, res) => {
     const { poId } = req.params;
     const { poType } = req.body;
 
+    // Get valid types from database
+    const validTypeOptions = await PoTypeOption.find({}, 'name');
+    const validTypes = validTypeOptions.map(opt => opt.name);
+
     // Validate PO Type
-    const validTypes = ['Seed', 'Hardgood', 'Greengood'];
     if (!poType || !validTypes.includes(poType)) {
-      return res.status(400).json({ error: 'Invalid PO type. Must be Seed, Hardgood, or Greengood.' });
+      return res.status(400).json({ error: `Invalid PO type. Must be one of: ${validTypes.join(', ')}` });
     }
 
     console.log(`🏷️  Updating PO ${poId} type to ${poType}`);
@@ -1398,6 +1425,80 @@ router.put('/:poId/type', async (req, res) => {
   } catch (error) {
     console.error('Error updating PO type:', error);
     res.status(500).json({ error: 'Failed to update PO type' });
+  }
+});
+
+// PO Type Options Management Routes
+
+// Get all PO type options
+router.get('/po-type-options', async (req, res) => {
+  try {
+    const poTypeOptions = await PoTypeOption.find().sort({ name: 1 });
+    res.json(poTypeOptions);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add new PO type option
+router.post('/po-type-options', async (req, res) => {
+  try {
+    const { name, color, emoji } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Type name is required' });
+    }
+
+    const poTypeOption = await PoTypeOption.create({
+      name: name.trim(),
+      color: color || '#6c757d',
+      emoji: emoji || '📦',
+      isDefault: false
+    });
+
+    console.log(`Added new PO type option: "${poTypeOption.name}" with color ${poTypeOption.color} and emoji ${poTypeOption.emoji}`);
+    res.json({ success: true, poTypeOption });
+  } catch (error) {
+    if (error.code === 11000) {
+      res.status(400).json({ error: 'PO type option already exists' });
+    } else {
+      console.error('PO type option creation error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+});
+
+// Delete PO type option
+router.delete('/po-type-options/:id', async (req, res) => {
+  try {
+    const poTypeOption = await PoTypeOption.findById(req.params.id);
+
+    if (!poTypeOption) {
+      return res.status(404).json({ error: 'PO type option not found' });
+    }
+
+    // Prevent deletion of default types
+    if (poTypeOption.isDefault) {
+      return res.status(400).json({
+        error: `Cannot delete default type "${poTypeOption.name}"`
+      });
+    }
+
+    // Check if this type is being used by any purchase orders
+    const usageCount = await PurchaseOrder.countDocuments({ poType: poTypeOption.name });
+
+    if (usageCount > 0) {
+      return res.status(400).json({
+        error: `Cannot delete "${poTypeOption.name}" - it's being used by ${usageCount} purchase order(s)`
+      });
+    }
+
+    await PoTypeOption.findByIdAndDelete(req.params.id);
+    console.log(`Deleted PO type option: "${poTypeOption.name}"`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('PO type option deletion error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -2162,6 +2263,10 @@ router.get('/', async (req, res) => {
     const statusOptionNames = statusOptions.map(option => option.name);
     console.log('📝 Status options:', statusOptionNames);
 
+    // Get PO type options from database
+    const poTypeOptions = await PoTypeOption.find().sort({ name: 1 });
+    console.log('📦 PO type options:', poTypeOptions.map(t => t.name).join(', '));
+
     console.log(`🎨 Rendering dashboard with ${prePurchaseOrders.length} pre-purchase orders...`);
 
     // Log sample PO data to verify location fields
@@ -2185,6 +2290,7 @@ router.get('/', async (req, res) => {
       vendorMap, // Add vendor ID mapping for clickable links
       statusOptions: statusOptionNames,
       allStatusOptions: statusOptions, // Send full objects for management
+      poTypeOptions: poTypeOptions, // Send PO type options for dynamic rendering
       user: req.user // Pass user information for authentication status
     });
   } catch (error) {

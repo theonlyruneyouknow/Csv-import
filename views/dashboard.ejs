@@ -2419,33 +2419,21 @@
             font-weight: 600;
         }
 
-        .po-type-select option.type-greengood {
-            background-color: #d1f0e6;
-            color: #0c5460;
-            font-weight: 600;
-        }
+        /* Dynamic PO Type select option and background colors */
+        <% poTypeOptions.forEach(type => { %>
+            .po-type-select option.type-<%= type.name.toLowerCase() %> {
+                background-color: <%= type.color %>22;
+                color: <%= type.color %>;
+                font-weight: 600;
+            }
 
-        /* PO Type select background colors based on value */
-        .po-type-select[data-type="Seed"] {
-            background-color: #d4edda;
-            color: #155724;
-            border-color: #28a745;
-            border-width: 2px;
-        }
-
-        .po-type-select[data-type="Hardgood"] {
-            background-color: #e2e3e5;
-            color: #383d41;
-            border-color: #6c757d;
-            border-width: 2px;
-        }
-
-        .po-type-select[data-type="Greengood"] {
-            background-color: #d1f0e6;
-            color: #0c5460;
-            border-color: #20c997;
-            border-width: 2px;
-        }
+            .po-type-select[data-type="<%= type.name %>"] {
+                background-color: <%= type.color %>22;
+                color: <%= type.color %>;
+                border-color: <%= type.color %>;
+                border-width: 2px;
+            }
+        <% }) %>
 
         /* URL Modal */
         .url-modal {
@@ -3724,6 +3712,9 @@
                         <button class="nav-dropdown-item" onclick="openCarrierModal()">
                             🚚 Manage Carriers
                         </button>
+                        <button class="nav-dropdown-item" onclick="openPoTypeModal()">
+                            📦 Manage PO Types
+                        </button>
                     </div>
                 </div>
 
@@ -4108,18 +4099,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     <div class="filter-group">
                         <label style="margin-bottom: 5px;">PO Type Filter</label>
                         <div style="display: flex; gap: 10px; margin-top: 19px;">
-                            <label style="display: flex; align-items: center; gap: 3px;" title="Show Seed POs">
-                                <input type="checkbox" id="filterSeed" checked style="margin: 0;">
-                                <span style="font-size: 12px; font-weight: 600; color: #28a745;">Seed</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 3px;" title="Show Hardgood POs">
-                                <input type="checkbox" id="filterHardgood" checked style="margin: 0;">
-                                <span style="font-size: 12px; font-weight: 600; color: #6c757d;">Hardgood</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 3px;" title="Show Greengood POs">
-                                <input type="checkbox" id="filterGreengood" checked style="margin: 0;">
-                                <span style="font-size: 12px; font-weight: 600; color: #20c997;">Greengood</span>
-                            </label>
+                            <% poTypeOptions.forEach(type => { %>
+                                <label style="display: flex; align-items: center; gap: 3px;" title="Show <%= type.name %> POs">
+                                    <input type="checkbox" id="filter<%= type.name %>" checked style="margin: 0;">
+                                    <span style="font-size: 12px; font-weight: 600; color: <%= type.color %>;">
+                                        <%= type.emoji %> <%= type.name %>
+                                    </span>
+                                </label>
+                            <% }) %>
                         </div>
                     </div>
                 </div>
@@ -4292,15 +4279,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                             <select class="po-type-select" data-id="<%= po._id.toString() %>"
                                                 data-po="<%= po.poNumber %>" data-type="<%= po.poType || 'Seed' %>"
                                                 title="Set type for PO <%= po.poNumber %>">
-                                                <option value="Seed" <%=(po.poType || 'Seed' )==='Seed' ? 'selected'
-                                                    : '' %>
-                                                    class="type-seed">🌱 Seed</option>
-                                                <option value="Hardgood" <%=(po.poType || 'Seed' )==='Hardgood'
-                                                    ? 'selected' : '' %>
-                                                    class="type-hardgood">🔧 Hardgood</option>
-                                                <option value="Greengood" <%=(po.poType || 'Seed' )==='Greengood'
-                                                    ? 'selected' : '' %>
-                                                    class="type-greengood">🌿 Greengood</option>
+                                                <% poTypeOptions.forEach(type => { %>
+                                                    <option value="<%= type.name %>" 
+                                                        <%= (po.poType || 'Seed') === type.name ? 'selected' : '' %>
+                                                        class="type-<%= type.name.toLowerCase() %>">
+                                                        <%= type.emoji %> <%= type.name %>
+                                                    </option>
+                                                <% }) %>
                                             </select>
                                         </td>
                                         <td class="vendor" title="<%= po.vendor %>">
@@ -4644,6 +4629,30 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             <div id="carrierList" class="status-list">
                 <!-- Carrier options will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- PO Type Management Modal -->
+    <div id="poTypeModal" class="status-modal">
+        <div class="status-modal-content">
+            <div class="status-modal-header">
+                <div class="status-modal-title">Manage PO Type Options</div>
+                <button class="status-close" onclick="closePoTypeModal()">&times;</button>
+            </div>
+
+            <div class="status-form">
+                <input type="text" id="poTypeNameInput" class="status-input" placeholder="Enter type name..."
+                    maxlength="30">
+                <input type="text" id="poTypeEmojiInput" class="status-input" placeholder="Emoji (e.g., 🌱)"
+                    maxlength="5" style="width: 80px; margin-left: 10px;">
+                <input type="color" id="poTypeColorInput" class="status-input" value="#6c757d"
+                    style="width: 60px; height: 38px; margin-left: 10px; cursor: pointer;">
+                <button id="addPoTypeBtn" class="status-add-btn" onclick="addPoTypeOption()">Add</button>
+            </div>
+
+            <div id="poTypeList" class="status-list">
+                <!-- PO type options will be loaded here -->
             </div>
         </div>
     </div>
@@ -7968,13 +7977,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const locationFilterEl = document.getElementById('locationFilter');
             const locationFilter = locationFilterEl ? locationFilterEl.value.trim() : '';
 
-            // PO Type filters
-            const filterSeedCheckbox = document.getElementById('filterSeed');
-            const filterSeed = filterSeedCheckbox ? filterSeedCheckbox.checked : true;
-            const filterHardgoodCheckbox = document.getElementById('filterHardgood');
-            const filterHardgood = filterHardgoodCheckbox ? filterHardgoodCheckbox.checked : true;
-            const filterGreengoodCheckbox = document.getElementById('filterGreengood');
-            const filterGreengood = filterGreengoodCheckbox ? filterGreengoodCheckbox.checked : true;
+            // PO Type filters - dynamic based on poTypeOptions
+            const poTypeFilters = {};
+            <% poTypeOptions.forEach(type => { %>
+                const filter<%= type.name %>Checkbox = document.getElementById('filter<%= type.name %>');
+                poTypeFilters['<%= type.name %>'] = filter<%= type.name %>Checkbox ? filter<%= type.name %>Checkbox.checked : true;
+            <% }) %>
 
             const rows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]'); // Only main rows
             let visibleCount = 0;
@@ -8032,11 +8040,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const locationArray = lineItemLocations.split(',').map(loc => loc.trim());
                 const matchesLocation = !locationFilter || locationArray.includes(locationFilter);
 
-                // PO Type filter - show only checked types
+                // PO Type filter - show only checked types (dynamic)
                 const poType = poData.poType || 'Seed';
-                const matchesPoType = (poType === 'Seed' && filterSeed) ||
-                    (poType === 'Hardgood' && filterHardgood) ||
-                    (poType === 'Greengood' && filterGreengood);
+                const matchesPoType = poTypeFilters[poType] === true;
 
                 if (isNotMyConcern && !showNotMyConcern) {
                     hiddenNotMyConcernCount++;
@@ -8439,9 +8445,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         const showOnlyMissingUrls = document.getElementById('showOnlyMissingUrls');
         const showOnlyMissingEta = document.getElementById('showOnlyMissingEta');
         const showOnlyNoLineItems = document.getElementById('showOnlyNoLineItems');
-        const filterSeed = document.getElementById('filterSeed');
-        const filterHardgood = document.getElementById('filterHardgood');
-        const filterGreengood = document.getElementById('filterGreengood');
 
         if (searchFilter) searchFilter.addEventListener('input', applyFilters);
         if (nsStatusFilter) nsStatusFilter.addEventListener('change', applyFilters);
@@ -8454,9 +8457,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         if (showOnlyMissingUrls) showOnlyMissingUrls.addEventListener('change', applyFilters);
         if (showOnlyMissingEta) showOnlyMissingEta.addEventListener('change', applyFilters);
         if (showOnlyNoLineItems) showOnlyNoLineItems.addEventListener('change', applyFilters);
-        if (filterSeed) filterSeed.addEventListener('change', applyFilters);
-        if (filterHardgood) filterHardgood.addEventListener('change', applyFilters);
-        if (filterGreengood) filterGreengood.addEventListener('change', applyFilters);
+
+        // Dynamic PO Type filter event listeners
+        <% poTypeOptions.forEach(type => { %>
+            const filter<%= type.name %> = document.getElementById('filter<%= type.name %>');
+            if (filter<%= type.name %>) filter<%= type.name %>.addEventListener('change', applyFilters);
+        <% }) %>
 
         // Event listeners for sorting
         document.querySelectorAll('th.sortable').forEach(header => {
@@ -8835,7 +8841,168 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     }
                 });
             }
+
+            // Allow Enter key to add PO type
+            const poTypeNameInput = document.getElementById('poTypeNameInput');
+            if (poTypeNameInput) {
+                poTypeNameInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        addPoTypeOption();
+                    }
+                });
+            }
         });
+
+        // PO Type Management Functions
+        let currentPoTypeOptions = [];
+
+        function openPoTypeModal() {
+            document.getElementById('poTypeModal').style.display = 'block';
+            loadPoTypeOptions();
+        }
+
+        function closePoTypeModal() {
+            document.getElementById('poTypeModal').style.display = 'none';
+            document.getElementById('poTypeNameInput').value = '';
+            document.getElementById('poTypeEmojiInput').value = '';
+            document.getElementById('poTypeColorInput').value = '#6c757d';
+        }
+
+        // Load PO type options from backend
+        async function loadPoTypeOptions() {
+            try {
+                const response = await fetch('/purchase-orders/po-type-options', {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load PO type options');
+                }
+
+                currentPoTypeOptions = await response.json();
+                renderPoTypeList();
+            } catch (error) {
+                console.error('Error loading PO type options:', error);
+                alert('Failed to load PO type options');
+            }
+        }
+
+        // Render the PO type options list
+        function renderPoTypeList() {
+            const poTypeList = document.getElementById('poTypeList');
+            poTypeList.innerHTML = '';
+
+            currentPoTypeOptions.forEach((poType) => {
+                const poTypeItem = document.createElement('div');
+                poTypeItem.className = `status-item ${poType.isDefault ? 'default' : ''}`;
+
+                poTypeItem.innerHTML = `
+                    <span class="status-item-name" style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 20px;">${poType.emoji}</span>
+                        <span style="color: ${poType.color}; font-weight: 600;">${poType.name}</span>
+                        ${poType.isDefault ? '<span style="color: #666; font-size: 12px;">(Default)</span>' : ''}
+                    </span>
+                    <button class="status-delete-btn" onclick="deletePoTypeOption('${poType._id}')" 
+                            ${poType.isDefault ? 'disabled title="Cannot delete default type"' : ''}>
+                        Delete
+                    </button>
+                `;
+
+                poTypeList.appendChild(poTypeItem);
+            });
+        }
+
+        // Add new PO type option
+        async function addPoTypeOption() {
+            const nameInput = document.getElementById('poTypeNameInput');
+            const emojiInput = document.getElementById('poTypeEmojiInput');
+            const colorInput = document.getElementById('poTypeColorInput');
+            const addBtn = document.getElementById('addPoTypeBtn');
+
+            const name = nameInput.value.trim();
+            const emoji = emojiInput.value.trim() || '📦';
+            const color = colorInput.value;
+
+            if (!name) {
+                alert('Please enter a type name');
+                return;
+            }
+
+            // Disable button during request
+            addBtn.disabled = true;
+            addBtn.textContent = 'Adding...';
+
+            try {
+                const response = await fetch('/purchase-orders/po-type-options', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ name, emoji, color })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to add PO type');
+                }
+
+                console.log('✅ Added PO type:', data.poTypeOption.name);
+                nameInput.value = '';
+                emojiInput.value = '';
+                colorInput.value = '#6c757d';
+
+                await loadPoTypeOptions();
+                
+                // Reload page to update filters and dropdowns
+                alert(`Successfully added PO type: ${name}. The page will reload to update all dropdowns.`);
+                location.reload();
+
+            } catch (error) {
+                console.error('Error adding PO type:', error);
+                alert(error.message);
+            } finally {
+                addBtn.disabled = false;
+                addBtn.textContent = 'Add';
+            }
+        }
+
+        // Delete PO type option
+        async function deletePoTypeOption(id) {
+            const poType = currentPoTypeOptions.find(t => t._id === id);
+            if (!poType) return;
+
+            if (poType.isDefault) {
+                alert('Cannot delete default type');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to delete "${poType.name}"?\n\nThis will fail if any POs are using this type.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/purchase-orders/po-type-options/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to delete PO type');
+                }
+
+                console.log('✅ Deleted PO type:', poType.name);
+                
+                // Reload page to update filters and dropdowns
+                alert(`Successfully deleted PO type: ${poType.name}. The page will reload to update all dropdowns.`);
+                location.reload();
+
+            } catch (error) {
+                console.error('Error deleting PO type:', error);
+                alert(error.message);
+            }
+        }
 
         // Pre-Purchase Order Functions
         function addPrePurchaseOrder() {
