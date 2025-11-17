@@ -7985,9 +7985,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             // PO Type filters - dynamic based on poTypeOptions
             const poTypeFilters = {};
             <% poTypeOptions.forEach(type => { %>
-                const filter<%= type.name %> Checkbox = document.getElementById('filter<%= type.name %>');
-                poTypeFilters['<%= type.name %>'] = filter <%= type.name %> Checkbox ? filter <%= type.name %> Checkbox.checked : true;
+                const filter<%= type.name %>Checkbox = document.getElementById('filter<%= type.name %>');
+                poTypeFilters['<%= type.name %>'] = filter<%= type.name %>Checkbox ? filter<%= type.name %>Checkbox.checked : true;
             <% }) %>
+            console.log('🎯 PO Type Filters:', poTypeFilters);
 
             const rows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]'); // Only main rows
             let visibleCount = 0;
@@ -8048,6 +8049,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 // PO Type filter - show only checked types (dynamic)
                 const poType = poData.poType || 'Seed';
                 const matchesPoType = poTypeFilters[poType] === true;
+                
+                // Debug logging for first few rows
+                if (visibleCount < 3) {
+                    console.log(`🔍 PO ${poData.poNumber}: type="${poType}", matchesPoType=${matchesPoType}, filters=`, poTypeFilters);
+                }
 
                 if (isNotMyConcern && !showNotMyConcern) {
                     hiddenNotMyConcernCount++;
@@ -8466,10 +8472,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         // Dynamic PO Type filter event listeners
         <% poTypeOptions.forEach(type => { %>
             const filter<%= type.name %> = document.getElementById('filter<%= type.name %>');
-            if (filter <%= type.name %>) filter <%= type.name %>.addEventListener('change', applyFilters);
+            if (filter<%= type.name %>) filter<%= type.name %>.addEventListener('change', applyFilters);
         <% }) %>
 
-            // Event listeners for sorting
+        // Event listeners for sorting
             document.querySelectorAll('th.sortable').forEach(header => {
                 header.addEventListener('click', () => {
                     sortTable(header.dataset.column);
