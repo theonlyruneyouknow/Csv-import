@@ -7959,6 +7959,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         // Filtering functionality
         function applyFilters() {
+            console.log('🔄 applyFilters() called');
             const searchFilterEl = document.getElementById('searchFilter');
             const searchTerm = searchFilterEl ? searchFilterEl.value.toLowerCase() : '';
             const nsStatusFilterEl = document.getElementById('nsStatusFilter');
@@ -7984,11 +7985,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             // PO Type filters - dynamic based on poTypeOptions
             const poTypeFilters = {};
+            console.log('🔍 Loading PO Type filters...');
             <% poTypeOptions.forEach(type => { %>
-                const filter<%= type.name %> Checkbox = document.getElementById('filter<%= type.name %>');
-                poTypeFilters['<%= type.name %>'] = filter <%= type.name %> Checkbox ? filter <%= type.name %> Checkbox.checked : true;
+                const filter<%= type.name %>Checkbox = document.getElementById('filter<%= type.name %>');
+                console.log('🔍 Checkbox for <%= type.name %>:', filter<%= type.name %>Checkbox, 'checked:', filter<%= type.name %>Checkbox?.checked);
+                poTypeFilters['<%= type.name %>'] = filter<%= type.name %>Checkbox ? filter<%= type.name %>Checkbox.checked : true;
             <% }) %>
-                console.log('🎯 PO Type Filters:', poTypeFilters);
+            console.log('🎯 PO Type Filters:', poTypeFilters);
 
             const rows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]'); // Only main rows
             let visibleCount = 0;
@@ -8470,12 +8473,19 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         if (showOnlyNoLineItems) showOnlyNoLineItems.addEventListener('change', applyFilters);
 
         // Dynamic PO Type filter event listeners
+        console.log('🎧 Setting up PO Type filter event listeners...');
         <% poTypeOptions.forEach(type => { %>
-            const filter<%= type.name %> = document.getElementById('filter<%= type.name %>');
-            if (filter <%= type.name %>) filter <%= type.name %>.addEventListener('change', applyFilters);
+            const filter<%= type.name %>EventListener = document.getElementById('filter<%= type.name %>');
+            console.log('🎧 Setting up listener for <%= type.name %>:', filter<%= type.name %>EventListener);
+            if (filter<%= type.name %>EventListener) {
+                filter<%= type.name %>EventListener.addEventListener('change', function(e) {
+                    console.log('🔔 <%= type.name %> filter changed to:', e.target.checked);
+                    applyFilters();
+                });
+            }
         <% }) %>
 
-            // Event listeners for sorting
+        // Event listeners for sorting
             document.querySelectorAll('th.sortable').forEach(header => {
                 header.addEventListener('click', () => {
                     sortTable(header.dataset.column);
@@ -9174,6 +9184,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             console.log('DOM is loading, adding event listener');
             document.addEventListener('DOMContentLoaded', function () {
                 console.log('DOMContentLoaded event fired');
+                
+                // Debug: Check if PO Type filter checkboxes exist
+                console.log('🔍 Checking PO Type filter checkboxes...');
+                <% poTypeOptions.forEach(type => { %>
+                    const check<%= type.name %> = document.getElementById('filter<%= type.name %>');
+                    console.log('  - <%= type.name %>:', check<%= type.name %>, 'exists:', !!check<%= type.name %>);
+                <% }) %>
+                
                 // Load line item status options for dropdowns
                 loadGlobalLineItemStatusOptions();
                 // Initialize URL buttons - now using event delegation instead
