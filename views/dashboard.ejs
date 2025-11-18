@@ -2748,30 +2748,35 @@
 
         /* Manage Attachments Button */
         .manage-attachments-btn {
-            background: #6c757d;
-            /* Gray for no attachments */
+            background: #ff0000 !important;
+            /* BRIGHT RED for visibility - temporary */
             color: white;
-            border: none;
+            border: 2px solid #cc0000 !important;
             border-radius: 4px;
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 16px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5) !important;
         }
 
         .manage-attachments-btn.has-attachments {
-            background: #28a745;
-            /* Green when there are attachments */
+            background: #ff0000 !important;
+            /* Still red even with attachments */
             color: white;
+            border: 2px solid #cc0000 !important;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.8) !important;
         }
 
         .manage-attachments-btn:hover {
-            transform: scale(1.05);
-            opacity: 0.9;
+            transform: scale(1.15);
+            opacity: 1;
+            background: #cc0000 !important;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 1) !important;
         }
 
         /* Dropship Toggle Button */
@@ -4249,8 +4254,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                             </button>
                                                             <button
                                                                 class="manage-attachments-btn <%= po.attachments && po.attachments.length > 0 ? 'has-attachments' : '' %>"
-                                                                type="button" data-po-id="<%= po._id %>"
+                                                                type="button" 
+                                                                data-po-id="<%= po._id %>"
                                                                 data-po-number="<%= po.poNumber %>"
+                                                                onclick="console.log('🔴 BUTTON CLICKED!', this); openPoDetailsModal('<%= po._id %>', '<%= po.poNumber %>').then(() => { const tab = document.querySelector('.tab-button[onclick*=\'attachments\']'); if (tab) tab.click(); }); return false;"
                                                                 title="<%= po.attachments && po.attachments.length > 0 ? 'Manage ' + po.attachments.length + ' attachment(s)' : 'Manage attachments' %>">
                                                                 📎
                                                             </button>
@@ -5511,22 +5518,39 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             // Handle manage attachments button using event delegation
             if (event.target.closest('.manage-attachments-btn')) {
+                event.preventDefault();
+                event.stopPropagation();
+                
                 const btn = event.target.closest('.manage-attachments-btn');
                 const poId = btn.getAttribute('data-po-id');
                 const poNumber = btn.getAttribute('data-po-number');
 
+                console.log('🔴 RED BUTTON CLICKED! Event detected!', { 
+                    target: event.target, 
+                    btn: btn,
+                    poId: poId, 
+                    poNumber: poNumber 
+                });
+
                 if (poId && poNumber) {
-                    console.log('📎 Manage Attachments button clicked:', { poId, poNumber });
+                    console.log('📎 Opening modal for PO:', poNumber);
                     // Open PO Details modal and switch to attachments tab
                     openPoDetailsModal(poId, poNumber).then(() => {
+                        console.log('✅ Modal opened, switching to attachments tab');
                         // Switch to attachments tab after modal opens
                         const attachmentsTabBtn = document.querySelector('.tab-button[onclick*="attachments"]');
+                        console.log('📑 Attachments tab button:', attachmentsTabBtn);
                         if (attachmentsTabBtn) {
                             attachmentsTabBtn.click();
+                            console.log('✅ Clicked attachments tab');
+                        } else {
+                            console.error('❌ Could not find attachments tab button');
                         }
+                    }).catch(err => {
+                        console.error('❌ Error opening modal:', err);
                     });
                 } else {
-                    console.error('❌ Missing PO ID or number for attachments button');
+                    console.error('❌ Missing PO ID or number for attachments button', { poId, poNumber });
                 }
             }
 
@@ -7987,9 +8011,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const poTypeFilters = {};
             console.log('🔍 Loading PO Type filters...');
             <% poTypeOptions.forEach(type => { %>
-                const filter<%= type.name %>Checkbox = document.getElementById('filter<%= type.name %>');
-                console.log('🔍 Checkbox for <%= type.name %>:', filter<%= type.name %>Checkbox, 'checked:', filter<%= type.name %>Checkbox?.checked);
-                poTypeFilters['<%= type.name %>'] = filter<%= type.name %>Checkbox ? filter<%= type.name %>Checkbox.checked : true;
+                (function() {
+                    const checkbox = document.getElementById('filter<%= type.name %>');
+                    console.log('🔍 Checkbox for <%= type.name %>:', checkbox, 'checked:', checkbox?.checked);
+                    poTypeFilters['<%= type.name %>'] = checkbox ? checkbox.checked : true;
+                })();
             <% }) %>
             console.log('🎯 PO Type Filters:', poTypeFilters);
 
@@ -8475,17 +8501,19 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         // Dynamic PO Type filter event listeners
         console.log('🎧 Setting up PO Type filter event listeners...');
         <% poTypeOptions.forEach(type => { %>
-            const filter<%= type.name %>EventListener = document.getElementById('filter<%= type.name %>');
-            console.log('🎧 Setting up listener for <%= type.name %>:', filter<%= type.name %>EventListener);
-            if (filter<%= type.name %>EventListener) {
-                filter<%= type.name %>EventListener.addEventListener('change', function(e) {
-                    console.log('🔔 <%= type.name %> filter changed to:', e.target.checked);
-                    applyFilters();
-                });
-            }
+            (function() {
+                const checkbox = document.getElementById('filter<%= type.name %>');
+                console.log('🎧 Setting up listener for <%= type.name %>:', checkbox);
+                if (checkbox) {
+                    checkbox.addEventListener('change', function (e) {
+                        console.log('🔔 <%= type.name %> filter changed to:', e.target.checked);
+                        applyFilters();
+                    });
+                }
+            })();
         <% }) %>
 
-        // Event listeners for sorting
+            // Event listeners for sorting
             document.querySelectorAll('th.sortable').forEach(header => {
                 header.addEventListener('click', () => {
                     sortTable(header.dataset.column);
@@ -9184,16 +9212,18 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             console.log('DOM is loading, adding event listener');
             document.addEventListener('DOMContentLoaded', function () {
                 console.log('DOMContentLoaded event fired');
-                
+
                 // Debug: Check if PO Type filter checkboxes exist
                 console.log('🔍 Checking PO Type filter checkboxes...');
                 <% poTypeOptions.forEach(type => { %>
-                    const check<%= type.name %> = document.getElementById('filter<%= type.name %>');
-                    console.log('  - <%= type.name %>:', check<%= type.name %>, 'exists:', !!check<%= type.name %>);
+                    (function() {
+                        const checkbox = document.getElementById('filter<%= type.name %>');
+                        console.log('  - <%= type.name %>:', checkbox, 'exists:', !!checkbox);
+                    })();
                 <% }) %>
-                
-                // Load line item status options for dropdowns
-                loadGlobalLineItemStatusOptions();
+
+                    // Load line item status options for dropdowns
+                    loadGlobalLineItemStatusOptions();
                 // Initialize URL buttons - now using event delegation instead
                 // console.log('About to call initUrlButtons');
                 // initUrlButtons();
