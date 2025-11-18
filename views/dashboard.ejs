@@ -4254,8 +4254,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                             </button>
                                                             <button
                                                                 class="manage-attachments-btn <%= po.attachments && po.attachments.length > 0 ? 'has-attachments' : '' %>"
-                                                                type="button" 
-                                                                data-po-id="<%= po._id %>"
+                                                                type="button" data-po-id="<%= po._id %>"
                                                                 data-po-number="<%= po.poNumber %>"
                                                                 onclick="console.log('🔴 BUTTON CLICKED!', this); openPoDetailsModal('<%= po._id %>', '<%= po.poNumber %>').then(() => { const tab = document.querySelector('.tab-button[onclick*=\'attachments\']'); if (tab) tab.click(); }); return false;"
                                                                 title="<%= po.attachments && po.attachments.length > 0 ? 'Manage ' + po.attachments.length + ' attachment(s)' : 'Manage attachments' %>">
@@ -5520,16 +5519,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             if (event.target.closest('.manage-attachments-btn')) {
                 event.preventDefault();
                 event.stopPropagation();
-                
+
                 const btn = event.target.closest('.manage-attachments-btn');
                 const poId = btn.getAttribute('data-po-id');
                 const poNumber = btn.getAttribute('data-po-number');
 
-                console.log('🔴 RED BUTTON CLICKED! Event detected!', { 
-                    target: event.target, 
+                console.log('🔴 RED BUTTON CLICKED! Event detected!', {
+                    target: event.target,
                     btn: btn,
-                    poId: poId, 
-                    poNumber: poNumber 
+                    poId: poId,
+                    poNumber: poNumber
                 });
 
                 if (poId && poNumber) {
@@ -8011,13 +8010,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const poTypeFilters = {};
             console.log('🔍 Loading PO Type filters...');
             <% poTypeOptions.forEach(type => { %>
-                (function() {
+                (function () {
                     const checkbox = document.getElementById('filter<%= type.name %>');
                     console.log('🔍 Checkbox for <%= type.name %>:', checkbox, 'checked:', checkbox?.checked);
                     poTypeFilters['<%= type.name %>'] = checkbox ? checkbox.checked : true;
                 })();
             <% }) %>
-            console.log('🎯 PO Type Filters:', poTypeFilters);
+                console.log('🎯 PO Type Filters:', poTypeFilters);
 
             const rows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]'); // Only main rows
             let visibleCount = 0;
@@ -8501,7 +8500,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         // Dynamic PO Type filter event listeners
         console.log('🎧 Setting up PO Type filter event listeners...');
         <% poTypeOptions.forEach(type => { %>
-            (function() {
+            (function () {
                 const checkbox = document.getElementById('filter<%= type.name %>');
                 console.log('🎧 Setting up listener for <%= type.name %>:', checkbox);
                 if (checkbox) {
@@ -9216,7 +9215,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 // Debug: Check if PO Type filter checkboxes exist
                 console.log('🔍 Checking PO Type filter checkboxes...');
                 <% poTypeOptions.forEach(type => { %>
-                    (function() {
+                    (function () {
                         const checkbox = document.getElementById('filter<%= type.name %>');
                         console.log('  - <%= type.name %>:', checkbox, 'exists:', !!checkbox);
                     })();
