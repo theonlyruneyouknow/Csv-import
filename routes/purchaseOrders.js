@@ -5703,7 +5703,7 @@ router.get('/unreceived-items', async (req, res) => {
       .lean();
 
     console.log(`Found ${unreceivedItems.length} unreceived items`);
-    
+
     // Debug: Log the first item to see what fields are available
     if (unreceivedItems.length > 0) {
       console.log('📊 Sample unreceived item fields:', {
