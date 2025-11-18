@@ -5703,6 +5703,16 @@ router.get('/unreceived-items', async (req, res) => {
       .lean();
 
     console.log(`Found ${unreceivedItems.length} unreceived items`);
+    
+    // Debug: Log the first item to see what fields are available
+    if (unreceivedItems.length > 0) {
+      console.log('📊 Sample unreceived item fields:', {
+        quantityExpected: unreceivedItems[0].quantityExpected,
+        quantityOrdered: unreceivedItems[0].quantityOrdered,
+        quantityReceived: unreceivedItems[0].quantityReceived,
+        allKeys: Object.keys(unreceivedItems[0]).filter(k => k.toLowerCase().includes('quant'))
+      });
+    }
 
     // Format the data for the report - filter out items from hidden POs
     const formattedItems = unreceivedItems
@@ -5722,7 +5732,7 @@ router.get('/unreceived-items', async (req, res) => {
         eta: item.poId.eta || null,
         sku: item.sku || 'N/A',
         memo: item.memo || 'N/A',
-        quantity: item.netsuiteQuantity || 'N/A',
+        quantity: item.quantityRemaining || item.quantityExpected || item.quantityOrdered || 0,
         itemStatus: item.itemStatus || 'N/A',
         poStatus: item.poId.status || 'N/A'
       }));
