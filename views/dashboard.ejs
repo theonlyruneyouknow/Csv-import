@@ -2748,35 +2748,33 @@
 
         /* Manage Attachments Button */
         .manage-attachments-btn {
-            background: #ff0000 !important;
-            /* BRIGHT RED for visibility - temporary */
-            color: white;
-            border: 2px solid #cc0000 !important;
+            background: #fffacd;
+            /* Pale yellow for documents */
+            color: #000;
+            border: 1px solid #e6e6b8;
             border-radius: 4px;
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
+            font-weight: bold;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
-            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5) !important;
         }
 
         .manage-attachments-btn.has-attachments {
-            background: #ff0000 !important;
-            /* Still red even with attachments */
-            color: white;
-            border: 2px solid #cc0000 !important;
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.8) !important;
+            background: #ffeb3b;
+            /* Brighter yellow when there are attachments */
+            color: #000;
+            border-color: #d4c935;
         }
 
         .manage-attachments-btn:hover {
-            transform: scale(1.15);
-            opacity: 1;
-            background: #cc0000 !important;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 1) !important;
+            transform: scale(1.05);
+            opacity: 0.9;
+            background: #fff9c4;
         }
 
         /* Dropship Toggle Button */
@@ -4258,7 +4256,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                                 data-po-number="<%= po.poNumber %>"
                                                                 onclick="console.log('🔴 BUTTON CLICKED!', this); openPoDetailsModal('<%= po._id %>', '<%= po.poNumber %>').then(() => { const tab = document.querySelector('.tab-button[onclick*=\'attachments\']'); if (tab) tab.click(); }); return false;"
                                                                 title="<%= po.attachments && po.attachments.length > 0 ? 'Manage ' + po.attachments.length + ' attachment(s)' : 'Manage attachments' %>">
-                                                                📎
+                                                                D
                                                             </button>
                                                             <button
                                                                 class="dropship-toggle-btn <%= (po.isDropship || (po.location && po.location.toLowerCase().includes('dropship'))) ? 'is-dropship' : '' %>"
