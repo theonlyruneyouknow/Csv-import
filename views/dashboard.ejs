@@ -4947,10 +4947,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             try {
                 const response = await fetch('/forms/api/forms');
                 const data = await response.json();
-                
+
                 if (data.success && data.forms.length > 0) {
                     const dropdown = document.getElementById('formsDropdown');
-                    dropdown.innerHTML = data.forms.map(form => 
+                    dropdown.innerHTML = data.forms.map(form =>
                         `<a href="/forms/${form._id}" class="nav-dropdown-item" target="_blank">${form.name}</a>`
                     ).join('');
                 }
@@ -9303,7 +9303,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 setTimeout(() => applyFilters(), 50);
 
                 // Initialize tracking column state
-                
+
                 // Load forms for navigation dropdown
                 loadForms();
                 initializeTrackingColumn();

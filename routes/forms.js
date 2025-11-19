@@ -59,14 +59,14 @@ router.get('/:id', async (req, res) => {
 router.post('/api/forms', async (req, res) => {
     try {
         const { name, embedCode, description, category } = req.body;
-        
+
         // Get the highest order number for this category
         const lastForm = await Form.findOne({ category })
             .sort({ order: -1 })
             .lean();
-        
+
         const order = lastForm ? lastForm.order + 1 : 0;
-        
+
         const form = new Form({
             name,
             embedCode,
@@ -74,9 +74,9 @@ router.post('/api/forms', async (req, res) => {
             category,
             order
         });
-        
+
         await form.save();
-        
+
         res.json({ success: true, form });
     } catch (error) {
         console.error('Error creating form:', error);
@@ -88,17 +88,17 @@ router.post('/api/forms', async (req, res) => {
 router.put('/api/forms/:id', async (req, res) => {
     try {
         const { name, embedCode, description, category, isActive } = req.body;
-        
+
         const form = await Form.findByIdAndUpdate(
             req.params.id,
             { name, embedCode, description, category, isActive },
             { new: true, runValidators: true }
         );
-        
+
         if (!form) {
             return res.status(404).json({ success: false, error: 'Form not found' });
         }
-        
+
         res.json({ success: true, form });
     } catch (error) {
         console.error('Error updating form:', error);
@@ -110,11 +110,11 @@ router.put('/api/forms/:id', async (req, res) => {
 router.delete('/api/forms/:id', async (req, res) => {
     try {
         const form = await Form.findByIdAndDelete(req.params.id);
-        
+
         if (!form) {
             return res.status(404).json({ success: false, error: 'Form not found' });
         }
-        
+
         res.json({ success: true, message: 'Form deleted successfully' });
     } catch (error) {
         console.error('Error deleting form:', error);
@@ -126,14 +126,14 @@ router.delete('/api/forms/:id', async (req, res) => {
 router.post('/api/forms/reorder', async (req, res) => {
     try {
         const { formIds } = req.body; // Array of form IDs in new order
-        
+
         // Update order for each form
-        const updatePromises = formIds.map((id, index) => 
+        const updatePromises = formIds.map((id, index) =>
             Form.findByIdAndUpdate(id, { order: index })
         );
-        
+
         await Promise.all(updatePromises);
-        
+
         res.json({ success: true, message: 'Forms reordered successfully' });
     } catch (error) {
         console.error('Error reordering forms:', error);

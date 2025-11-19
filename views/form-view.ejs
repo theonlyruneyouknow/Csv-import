@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= form.name %> - Purchase Order Management</title>
+    <title>
+        <%= form.name %> - Purchase Order Management
+    </title>
     <style>
         * {
             margin: 0;
@@ -90,15 +93,20 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <a href="/purchase-orders" class="back-link">Back to Dashboard</a>
-        
+
         <div class="header">
-            <h1><%= form.name %></h1>
+            <h1>
+                <%= form.name %>
+            </h1>
             <% if (form.description) { %>
-                <p><%= form.description %></p>
-            <% } %>
+                <p>
+                    <%= form.description %>
+                </p>
+                <% } %>
         </div>
 
         <div class="form-container">
@@ -106,4 +114,5 @@
         </div>
     </div>
 </body>
+
 </html>

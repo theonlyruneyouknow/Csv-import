@@ -60,18 +60,18 @@ app.get('/check-po11322', async (req, res) => {
     try {
         const PurchaseOrder = require('./models/PurchaseOrder');
         const LineItem = require('./models/LineItem');
-        
+
         const po = await PurchaseOrder.findOne({ poNumber: 'PO11322' });
         if (!po) {
             console.log('❌ PO11322 not found');
             return res.json({ found: false, message: 'PO11322 not found' });
         }
-        
+
         console.log(`📋 Found PO11322: isHidden=${po.isHidden}, reason=${po.hiddenReason}`);
-        
+
         const lineItems = await LineItem.find({ poNumber: 'PO11322' });
         const hiddenLineItems = lineItems.filter(item => item.isHidden);
-        
+
         const result = {
             found: true,
             poNumber: po.poNumber,
@@ -83,7 +83,7 @@ app.get('/check-po11322', async (req, res) => {
             lineItemsTotal: lineItems.length,
             lineItemsHidden: hiddenLineItems.length
         };
-        
+
         console.log('🔍 PO11322 result:', result);
         res.json(result);
     } catch (error) {
@@ -96,7 +96,7 @@ app.get('/emergency-food', (req, res) => {
     console.log('🚨 EMERGENCY FOOD ROUTE HIT!');
     try {
         const mockUser = { username: 'emergency-test', firstName: 'Emergency', lastName: 'Test' };
-        res.render('food-dashboard', { 
+        res.render('food-dashboard', {
             user: mockUser,
             stats: {
                 foodItems: 0,
@@ -168,7 +168,7 @@ console.log('🔄 Connecting to MongoDB...');
 mongoose.connect(mongoURI)
     .then(() => {
         console.log('✅ Connected to MongoDB successfully');
-        
+
         // Schedule announcement cleanup
         setupAnnouncementCleanup();
     })
@@ -181,7 +181,7 @@ mongoose.connect(mongoURI)
 // Setup automatic announcement cleanup
 function setupAnnouncementCleanup() {
     const Announcement = require('./models/Announcement');
-    
+
     // Clean up expired announcements immediately on startup
     console.log('🧹 Running initial announcement cleanup...');
     Announcement.cleanupExpired()
@@ -193,18 +193,18 @@ function setupAnnouncementCleanup() {
         .catch(error => {
             console.error('❌ Error during initial announcement cleanup:', error);
         });
-    
+
     // Schedule daily cleanup at midnight
     const scheduleNextCleanup = () => {
         const now = new Date();
         const tomorrow = new Date(now);
         tomorrow.setDate(tomorrow.getDate() + 1);
         tomorrow.setHours(0, 0, 0, 0); // Set to midnight
-        
+
         const timeUntilMidnight = tomorrow.getTime() - now.getTime();
-        
+
         console.log(`⏰ Next announcement cleanup scheduled for ${tomorrow.toLocaleString()}`);
-        
+
         setTimeout(() => {
             console.log('🧹 Running scheduled announcement cleanup...');
             Announcement.cleanupExpired()
@@ -216,12 +216,12 @@ function setupAnnouncementCleanup() {
                 .catch(error => {
                     console.error('❌ Error during scheduled announcement cleanup:', error);
                 });
-            
+
             // Schedule next cleanup for tomorrow
             scheduleNextCleanup();
         }, timeUntilMidnight);
     };
-    
+
     scheduleNextCleanup();
 }
 
@@ -294,14 +294,14 @@ app.get('/api/hymns/search', async (req, res) => {
         const Hymn = require('./models/Hymn');
         const { q } = req.query;
         console.log('🎵 Unprotected hymn search:', q);
-        
+
         if (!q) {
             console.log('🎵 No query provided, returning empty array');
             return res.json([]);
         }
 
         let hymns = [];
-        
+
         if (!isNaN(q)) {
             const number = parseInt(q);
             console.log('🎵 Searching by number:', number);
@@ -312,7 +312,7 @@ app.get('/api/hymns/search', async (req, res) => {
                 title: { $regex: q, $options: 'i' }
             }).limit(10);
         }
-        
+
         console.log('🎵 Found hymns:', hymns.length);
         if (hymns.length > 0) {
             console.log('🎵 First hymn:', hymns[0]);
@@ -346,7 +346,7 @@ app.get('/simple-test', (req, res) => {
 app.get('/food-debug', (req, res) => {
     console.log('📨 /food-debug accessed successfully!');
     const mockUser = { username: 'test-user', firstName: 'Test', lastName: 'User' };
-    res.render('food-dashboard', { 
+    res.render('food-dashboard', {
         user: mockUser,
         stats: {
             foodItems: 0,
@@ -364,16 +364,16 @@ app.get('/create-test-user', async (req, res) => {
     try {
         const User = require('./models/User');
         const bcrypt = require('bcryptjs');
-        
+
         // Check if test user already exists
         let testUser = await User.findOne({ username: 'tuser' });
-        
+
         if (testUser) {
             // Update existing user to ensure it's approved
             testUser.status = 'approved';
             testUser.role = 'admin';
             await testUser.save();
-            
+
             return res.json({
                 success: true,
                 message: 'Test user already exists and has been updated',
@@ -385,10 +385,10 @@ app.get('/create-test-user', async (req, res) => {
                 }
             });
         }
-        
+
         // Hash the password
         const hashedPassword = await bcrypt.hash('tpass123', 10);
-        
+
         // Create new test user
         testUser = new User({
             username: 'tuser',
@@ -410,9 +410,9 @@ app.get('/create-test-user', async (req, res) => {
                 systemSettings: true
             }
         });
-        
+
         await testUser.save();
-        
+
         res.json({
             success: true,
             message: 'Test user created successfully!',
@@ -427,7 +427,7 @@ app.get('/create-test-user', async (req, res) => {
                 status: testUser.status
             }
         });
-        
+
     } catch (error) {
         console.error('Error creating test user:', error);
         res.status(500).json({
@@ -443,33 +443,33 @@ app.get('/food-test-dashboard', async (req, res) => {
         const FoodItem = require('./models/FoodItem');
         const Recipe = require('./models/Recipe');
         const MealPlan = require('./models/MealPlan');
-        
+
         // Create a mock user for testing
         const mockUser = {
             username: 'test-user',
             firstName: 'Test',
             lastName: 'User'
         };
-        
+
         // Get basic stats for the dashboard
         const stats = {
             foodItems: await FoodItem.countDocuments(),
             recipes: await Recipe.countDocuments(),
             mealPlans: await MealPlan.countDocuments(),
             pantryItems: await FoodItem.countDocuments({ quantity: { $gt: 0 } }),
-            expiringSoon: await FoodItem.countDocuments({ 
-                expirationDate: { 
+            expiringSoon: await FoodItem.countDocuments({
+                expirationDate: {
                     $lte: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
-                } 
+                }
             }),
-            lowStock: await FoodItem.countDocuments({ 
-                quantity: { $lt: 5, $gt: 0 } 
+            lowStock: await FoodItem.countDocuments({
+                quantity: { $lt: 5, $gt: 0 }
             })
         };
 
-        res.render('food-dashboard', { 
+        res.render('food-dashboard', {
             user: mockUser,
-            stats: stats 
+            stats: stats
         });
     } catch (error) {
         console.error('Error loading food dashboard:', error);
@@ -489,7 +489,7 @@ app.get('/test-route', (req, res) => {
 app.get('/food-test-simple', (req, res) => {
     console.log('📨 GET /food-test-simple accessed');
     const mockUser = { username: 'test-user', firstName: 'Test', lastName: 'User' };
-    res.render('food-dashboard', { 
+    res.render('food-dashboard', {
         user: mockUser,
         stats: {
             foodItems: 0,
@@ -563,20 +563,20 @@ app.use('/dropship-test', ensureAuthenticated, ensureApproved, dropshipTestRoute
 app.get('/office365-test-direct', async (req, res) => {
     try {
         const office365ImapService = require('./services/office365ImapService');
-        
+
         const envCheck = {
             OFFICE365_USER: process.env.OFFICE365_USER || 'NOT SET',
             OFFICE365_PASSWORD: process.env.OFFICE365_PASSWORD ? '***SET***' : 'NOT SET',
             OFFICE365_PASSWORD_LENGTH: process.env.OFFICE365_PASSWORD ? process.env.OFFICE365_PASSWORD.length : 0
         };
-        
+
         // Test Office 365 IMAP connection
         let connectionTest = {
             status: 'unknown',
             error: null,
             stats: null
         };
-        
+
         try {
             console.log('🔍 Testing Office 365 connection...');
             await office365ImapService.connect();
@@ -615,13 +615,13 @@ app.get('/test-dashboard-vendor-links', async (req, res) => {
     try {
         const PurchaseOrder = require('./models/PurchaseOrder');
         const Vendor = require('./models/Vendor');
-        
+
         // Get a few sample POs
         const samplePOs = await PurchaseOrder.find().limit(3).lean();
-        
+
         // Get unique vendors
         const uniqueVendors = [...new Set(samplePOs.map(po => po.vendor).filter(Boolean))];
-        
+
         // Get vendor records
         const vendorRecords = await Vendor.find({
             $or: [
@@ -661,13 +661,13 @@ app.get('/test-dashboard-vendor-links', async (req, res) => {
             <h2>Sample Purchase Orders</h2>
             <table>
                 <tr><th>PO Number</th><th>Vendor</th><th>Has Link?</th><th>Vendor Display</th></tr>`;
-        
+
         samplePOs.forEach(po => {
             const hasLink = vendorMap && vendorMap[po.vendor];
-            const vendorDisplay = hasLink 
+            const vendorDisplay = hasLink
                 ? `<a href="/vendors/${vendorMap[po.vendor]}" class="vendor-link" title="View ${po.vendor} profile">${po.vendor}</a>`
                 : po.vendor;
-            
+
             html += `<tr>
                 <td>${po.poNumber}</td>
                 <td>${po.vendor}</td>
@@ -675,10 +675,10 @@ app.get('/test-dashboard-vendor-links', async (req, res) => {
                 <td>${vendorDisplay}</td>
             </tr>`;
         });
-        
+
         html += `</table></body></html>`;
         res.send(html);
-        
+
     } catch (error) {
         res.status(500).send(`Error: ${error.message}<br>Stack: ${error.stack}`);
     }
@@ -689,14 +689,14 @@ app.get('/debug-vendor-links', async (req, res) => {
     try {
         const Vendor = require('./models/Vendor');
         const PurchaseOrder = require('./models/PurchaseOrder');
-        
+
         // Get first 10 purchase orders
         const samplePOs = await PurchaseOrder.find().limit(10).lean();
         const vendorNamesFromPOs = [...new Set(samplePOs.map(po => po.vendor).filter(Boolean))];
-        
+
         // Get all vendor records
         const allVendors = await Vendor.find().lean();
-        
+
         // Get vendor records that match PO vendor names
         const vendorRecords = await Vendor.find({
             $or: [
@@ -745,11 +745,11 @@ app.get('/test-vendor-mapping', async (req, res) => {
     try {
         const Vendor = require('./models/Vendor');
         const PurchaseOrder = require('./models/PurchaseOrder');
-        
+
         // Get some sample purchase orders
         const samplePOs = await PurchaseOrder.find().limit(5).lean();
         const vendorNames = samplePOs.map(po => po.vendor).filter(Boolean);
-        
+
         // Get vendor records
         const vendorRecords = await Vendor.find({
             $or: [
@@ -808,7 +808,7 @@ app.use('/api', ensureAuthenticated, ensureApproved, purchaseOrderRoutes); // AP
 // Root route - show splash page for visitors, redirect authenticated users
 app.get('/', (req, res) => {
     if (!req.isAuthenticated()) {
-        return res.render('splash', { 
+        return res.render('splash', {
             user: null,
             messages: {
                 error: req.flash('error'),
@@ -825,7 +825,7 @@ app.get('/', (req, res) => {
 
 // Splash page route (can be accessed directly)
 app.get('/splash', (req, res) => {
-    res.render('splash', { 
+    res.render('splash', {
         user: req.isAuthenticated() ? req.user : null,
         messages: {
             error: req.flash('error'),
@@ -877,9 +877,9 @@ app.get('/food-dashboard', ensureAuthenticated, ensureApproved, async (req, res)
             lowStock: 0
         };
 
-        res.render('food-dashboard', { 
+        res.render('food-dashboard', {
             user: req.user,
-            stats: stats 
+            stats: stats
         });
     } catch (error) {
         console.error('Error loading food dashboard:', error);
@@ -890,9 +890,9 @@ app.get('/food-dashboard', ensureAuthenticated, ensureApproved, async (req, res)
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error('Error:', err);
-    res.status(500).render('error', { 
-        message: 'Something went wrong!', 
-        error: process.env.NODE_ENV === 'development' ? err : {} 
+    res.status(500).render('error', {
+        message: 'Something went wrong!',
+        error: process.env.NODE_ENV === 'development' ? err : {}
     });
 });
 

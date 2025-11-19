@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -279,10 +280,11 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <a href="/purchase-orders" class="back-link">Back to Dashboard</a>
-        
+
         <div class="header">
             <h1>📝 Manage Forms</h1>
             <button class="add-form-btn" onclick="openAddFormModal()">➕ Add New Form</button>
@@ -299,7 +301,7 @@
             <div class="modal-header" id="modalTitle">Add New Form</div>
             <form id="formForm">
                 <input type="hidden" id="formId">
-                
+
                 <div class="form-group">
                     <label for="formName">Form Name*</label>
                     <input type="text" id="formName" required placeholder="e.g., PO Confirmation">
@@ -312,7 +314,8 @@
 
                 <div class="form-group">
                     <label for="formEmbedCode">Microsoft Form Embed Code*</label>
-                    <textarea id="formEmbedCode" required placeholder="Paste the complete <iframe> embed code from Microsoft Forms"></textarea>
+                    <textarea id="formEmbedCode" required
+                        placeholder="Paste the complete <iframe> embed code from Microsoft Forms"></textarea>
                 </div>
 
                 <div class="form-group">
@@ -341,7 +344,7 @@
             try {
                 const response = await fetch('/forms/api/forms/all');
                 const data = await response.json();
-                
+
                 if (data.success) {
                     renderForms(data.forms);
                 } else {
@@ -354,7 +357,7 @@
 
         function renderForms(forms) {
             const container = document.getElementById('formsList');
-            
+
             if (forms.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -400,7 +403,7 @@
                 const response = await fetch('/forms/api/forms/all');
                 const data = await response.json();
                 const form = data.forms.find(f => f._id === id);
-                
+
                 if (form) {
                     document.getElementById('modalTitle').textContent = 'Edit Form';
                     document.getElementById('formId').value = form._id;
@@ -427,7 +430,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ isActive: newState })
                 });
-                
+
                 const data = await response.json();
                 if (data.success) {
                     loadForms();
@@ -449,7 +452,7 @@
                 const response = await fetch(`/forms/api/forms/${id}`, {
                     method: 'DELETE'
                 });
-                
+
                 const data = await response.json();
                 if (data.success) {
                     loadForms();
@@ -465,7 +468,7 @@
         // Form submission
         document.getElementById('formForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const formId = document.getElementById('formId').value;
             const formData = {
                 name: document.getElementById('formName').value,
@@ -477,13 +480,13 @@
             try {
                 const url = formId ? `/forms/api/forms/${formId}` : '/forms/api/forms';
                 const method = formId ? 'PUT' : 'POST';
-                
+
                 const response = await fetch(url, {
                     method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData)
                 });
-                
+
                 const data = await response.json();
                 if (data.success) {
                     closeFormModal();
@@ -505,4 +508,5 @@
         });
     </script>
 </body>
+
 </html>
