@@ -174,14 +174,14 @@ router.get('/api/links/all', async (req, res) => {
 router.post('/api/links', async (req, res) => {
     try {
         const { name, url, description, category, openInNewTab } = req.body;
-        
+
         // Get the highest order number for this category
         const lastLink = await Link.findOne({ category })
             .sort({ order: -1 })
             .lean();
-        
+
         const order = lastLink ? lastLink.order + 1 : 0;
-        
+
         const link = new Link({
             name,
             url,
@@ -190,9 +190,9 @@ router.post('/api/links', async (req, res) => {
             openInNewTab: openInNewTab !== false, // default to true
             order
         });
-        
+
         await link.save();
-        
+
         res.json({ success: true, link });
     } catch (error) {
         console.error('Error creating link:', error);
@@ -204,17 +204,17 @@ router.post('/api/links', async (req, res) => {
 router.put('/api/links/:id', async (req, res) => {
     try {
         const { name, url, description, category, isActive, openInNewTab } = req.body;
-        
+
         const link = await Link.findByIdAndUpdate(
             req.params.id,
             { name, url, description, category, isActive, openInNewTab },
             { new: true, runValidators: true }
         );
-        
+
         if (!link) {
             return res.status(404).json({ success: false, error: 'Link not found' });
         }
-        
+
         res.json({ success: true, link });
     } catch (error) {
         console.error('Error updating link:', error);
@@ -226,11 +226,11 @@ router.put('/api/links/:id', async (req, res) => {
 router.delete('/api/links/:id', async (req, res) => {
     try {
         const link = await Link.findByIdAndDelete(req.params.id);
-        
+
         if (!link) {
             return res.status(404).json({ success: false, error: 'Link not found' });
         }
-        
+
         res.json({ success: true, message: 'Link deleted successfully' });
     } catch (error) {
         console.error('Error deleting link:', error);
@@ -242,14 +242,14 @@ router.delete('/api/links/:id', async (req, res) => {
 router.post('/api/links/reorder', async (req, res) => {
     try {
         const { linkIds } = req.body; // Array of link IDs in new order
-        
+
         // Update order for each link
         const updatePromises = linkIds.map((id, index) =>
             Link.findByIdAndUpdate(id, { order: index })
         );
-        
+
         await Promise.all(updatePromises);
-        
+
         res.json({ success: true, message: 'Links reordered successfully' });
     } catch (error) {
         console.error('Error reordering links:', error);
