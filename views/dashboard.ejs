@@ -4945,17 +4945,43 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         async function loadForms() {
             try {
-                const response = await fetch('/forms/api/forms');
-                const data = await response.json();
-
-                if (data.success && data.forms.length > 0) {
-                    const dropdown = document.getElementById('formsDropdown');
-                    dropdown.innerHTML = data.forms.map(form =>
-                        `<a href="/forms/${form._id}" class="nav-dropdown-item" target="_blank">${form.name}</a>`
-                    ).join('');
+                // Fetch both forms and links
+                const [formsResponse, linksResponse] = await Promise.all([
+                    fetch('/forms/api/forms'),
+                    fetch('/forms/api/links')
+                ]);
+                
+                const formsData = await formsResponse.json();
+                const linksData = await linksResponse.json();
+                
+                const dropdown = document.getElementById('formsDropdown');
+                let items = [];
+                
+                // Add forms
+                if (formsData.success && formsData.forms.length > 0) {
+                    items.push('<div style="padding: 5px 15px; font-weight: 600; font-size: 11px; color: #7f8c8d; text-transform: uppercase;">Forms</div>');
+                    items = items.concat(formsData.forms.map(form =>
+                        `<a href="/forms/${form._id}" class="nav-dropdown-item" target="_blank">📋 ${form.name}</a>`
+                    ));
+                }
+                
+                // Add links
+                if (linksData.success && linksData.links.length > 0) {
+                    if (items.length > 0) {
+                        items.push('<div style="padding: 5px 15px; margin-top: 8px; font-weight: 600; font-size: 11px; color: #7f8c8d; text-transform: uppercase;">Links</div>');
+                    }
+                    items = items.concat(linksData.links.map(link =>
+                        `<a href="${link.url}" class="nav-dropdown-item" ${link.openInNewTab ? 'target="_blank"' : ''}>🔗 ${link.name}</a>`
+                    ));
+                }
+                
+                if (items.length > 0) {
+                    dropdown.innerHTML = items.join('');
+                } else {
+                    dropdown.innerHTML = '<div style="padding: 15px; text-align: center; color: #7f8c8d;">No forms or links available</div>';
                 }
             } catch (error) {
-                console.error('Error loading forms:', error);
+                console.error('Error loading forms and links:', error);
             }
         }
 

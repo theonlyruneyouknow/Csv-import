@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Form = require('../models/Form');
+const Link = require('../models/Link');
 
 // Render forms management page
 router.get('/manage', (req, res) => {
@@ -137,6 +138,121 @@ router.post('/api/forms/reorder', async (req, res) => {
         res.json({ success: true, message: 'Forms reordered successfully' });
     } catch (error) {
         console.error('Error reordering forms:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============= LINKS ROUTES =============
+
+// Get all active links
+router.get('/api/links', async (req, res) => {
+    try {
+        const links = await Link.find({ isActive: true })
+            .sort({ category: 1, order: 1 })
+            .lean();
+        res.json({ success: true, links });
+    } catch (error) {
+        console.error('Error fetching links:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get all links (for management)
+router.get('/api/links/all', async (req, res) => {
+    try {
+        const links = await Link.find()
+            .sort({ category: 1, order: 1 })
+            .lean();
+        res.json({ success: true, links });
+    } catch (error) {
+        console.error('Error fetching all links:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Create new link
+router.post('/api/links', async (req, res) => {
+    try {
+        const { name, url, description, category, openInNewTab } = req.body;
+        
+        // Get the highest order number for this category
+        const lastLink = await Link.findOne({ category })
+            .sort({ order: -1 })
+            .lean();
+        
+        const order = lastLink ? lastLink.order + 1 : 0;
+        
+        const link = new Link({
+            name,
+            url,
+            description,
+            category,
+            openInNewTab: openInNewTab !== false, // default to true
+            order
+        });
+        
+        await link.save();
+        
+        res.json({ success: true, link });
+    } catch (error) {
+        console.error('Error creating link:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Update link
+router.put('/api/links/:id', async (req, res) => {
+    try {
+        const { name, url, description, category, isActive, openInNewTab } = req.body;
+        
+        const link = await Link.findByIdAndUpdate(
+            req.params.id,
+            { name, url, description, category, isActive, openInNewTab },
+            { new: true, runValidators: true }
+        );
+        
+        if (!link) {
+            return res.status(404).json({ success: false, error: 'Link not found' });
+        }
+        
+        res.json({ success: true, link });
+    } catch (error) {
+        console.error('Error updating link:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Delete link
+router.delete('/api/links/:id', async (req, res) => {
+    try {
+        const link = await Link.findByIdAndDelete(req.params.id);
+        
+        if (!link) {
+            return res.status(404).json({ success: false, error: 'Link not found' });
+        }
+        
+        res.json({ success: true, message: 'Link deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting link:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Reorder links
+router.post('/api/links/reorder', async (req, res) => {
+    try {
+        const { linkIds } = req.body; // Array of link IDs in new order
+        
+        // Update order for each link
+        const updatePromises = linkIds.map((id, index) =>
+            Link.findByIdAndUpdate(id, { order: index })
+        );
+        
+        await Promise.all(updatePromises);
+        
+        res.json({ success: true, message: 'Links reordered successfully' });
+    } catch (error) {
+        console.error('Error reordering links:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
