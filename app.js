@@ -18,6 +18,7 @@ const receivingRoutes = require('./routes/receiving');
 const emailTemplateRoutes = require('./routes/emailTemplates');
 const trackingRoutes = require('./routes/tracking'); // NEW: Self-managed tracking
 const shipmentRoutes = require('./routes/shipments'); // NEW: Shipment management
+const formRoutes = require('./routes/forms'); // NEW: Dynamic forms management
 const foodRoutes = require('./routes/food');
 const storyRoutes = require('./routes/story');
 const medicineRoutes = require('./routes/medicine');
@@ -555,6 +556,7 @@ app.use('/enhanced-vendors', ensureAuthenticated, ensureApproved, enhancedVendor
 app.use('/tasks', ensureAuthenticated, ensureApproved, taskRoutes);
 app.use('/receiving', ensureAuthenticated, ensureApproved, receivingRoutes);
 app.use('/email-templates', ensureAuthenticated, ensureApproved, emailTemplateRoutes);
+app.use('/forms', ensureAuthenticated, ensureApproved, formRoutes); // NEW: Forms management
 app.use('/dropship', ensureAuthenticated, ensureApproved, dropshipRoutes);
 app.use('/dropship-test', ensureAuthenticated, ensureApproved, dropshipTestRoutes);
 // Quick Office 365 test route (unprotected for debugging)

@@ -328,6 +328,30 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
+        /* Forms Button Styles */
+        .nav-forms-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 100px;
+            justify-content: space-between;
+        }
+
+        .nav-forms-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
         /* Dropdown Styles */
         .nav-dropdown-content {
             position: absolute;
@@ -3720,6 +3744,9 @@
                         <button class="nav-dropdown-item" onclick="openPoTypeModal()">
                             📦 Manage PO Types
                         </button>
+                        <button class="nav-dropdown-item" onclick="openFormsManagement()">
+                            📝 Manage Forms
+                        </button>
                     </div>
                 </div>
 
@@ -3754,6 +3781,16 @@
                     <a href="/tasks" class="nav-accordion-btn" style="text-decoration: none;">
                         ✅ Task Management
                     </a>
+                </div>
+
+                <!-- Forms Section -->
+                <div class="nav-section">
+                    <button class="nav-forms-btn" onclick="toggleFormsDropdown()">
+                        📋 Forms <span class="dropdown-icon">▼</span>
+                    </button>
+                    <div id="formsDropdown" class="nav-dropdown-content">
+                        <!-- Dynamic forms will be loaded here -->
+                    </div>
                 </div>
 
                 <!-- User Profile -->
@@ -4891,6 +4928,41 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById('optionsDropdown').classList.remove('show');
             document.querySelector('.nav-options-btn .dropdown-icon').classList.remove('rotated');
         }
+
+        function toggleFormsDropdown() {
+            const content = document.getElementById('formsDropdown');
+            const icon = document.querySelector('.nav-forms-btn .dropdown-icon');
+
+            content.classList.toggle('show');
+            icon.classList.toggle('rotated');
+
+            // Close other dropdowns
+            document.getElementById('optionsDropdown').classList.remove('show');
+            document.querySelector('.nav-options-btn .dropdown-icon').classList.remove('rotated');
+            document.getElementById('importsDropdown').classList.remove('show');
+            document.querySelector('.nav-imports-btn .dropdown-icon').classList.remove('rotated');
+        }
+
+        async function loadForms() {
+            try {
+                const response = await fetch('/forms/api/forms');
+                const data = await response.json();
+                
+                if (data.success && data.forms.length > 0) {
+                    const dropdown = document.getElementById('formsDropdown');
+                    dropdown.innerHTML = data.forms.map(form => 
+                        `<a href="/forms/${form._id}" class="nav-dropdown-item" target="_blank">${form.name}</a>`
+                    ).join('');
+                }
+            } catch (error) {
+                console.error('Error loading forms:', error);
+            }
+        }
+
+        function openFormsManagement() {
+            window.location.href = '/forms/manage';
+        }
+
 
         // Toggle Pre-Purchase Orders section visibility
         function togglePrePurchaseSection() {
@@ -9231,6 +9303,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 setTimeout(() => applyFilters(), 50);
 
                 // Initialize tracking column state
+                
+                // Load forms for navigation dropdown
+                loadForms();
                 initializeTrackingColumn();
             });
         } else {
