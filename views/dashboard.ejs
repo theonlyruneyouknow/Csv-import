@@ -3744,6 +3744,9 @@
                         <button class="nav-dropdown-item" onclick="openPoTypeModal()">
                             📦 Manage PO Types
                         </button>
+                        <button class="nav-dropdown-item" onclick="openAssigneeModal()">
+                            👥 Manage Assignees
+                        </button>
                         <button class="nav-dropdown-item" onclick="openFormsManagement()">
                             📝 Manage Forms
                         </button>
@@ -4211,6 +4214,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     <th class="sortable priority-cell" data-column="priority">Priority</th>
                                     <th class="sortable po-type-cell" data-column="poType">Type</th>
                                     <th class="sortable vendor" data-column="vendor">Vendor</th>
+                                    <th class="sortable assignee-cell" data-column="assignedTo" style="text-align: center;">ASGN</th>
                                     <th class="sortable line-items-count-cell" data-column="lineItemsCount">Line Items
                                     </th>
                                     <th class="sortable eta-cell" data-column="eta">ETA</th>
@@ -4348,6 +4352,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                     <% } else { %>
                                                         <%= po.vendor %>
                                                             <% } %>
+                                        </td>
+                                        <td class="assignee-cell" style="text-align: center;">
+                                            <select class="assignee-select" data-po-id="<%= po._id %>" onchange="updateAssignment(this)" style="min-width: 60px; font-size: 11px; padding: 2px 4px;">
+                                                <option value="">-</option>
+                                                <% assignees.forEach(assignee => { %>
+                                                    <option value="<%= assignee._id %>" <%= po.assignedTo && po.assignedTo._id && po.assignedTo._id.toString() === assignee._id.toString() ? 'selected' : '' %>>
+                                                        <%= assignee.initials %>
+                                                    </option>
+                                                <% }) %>
+                                            </select>
                                         </td>
                                         <td class="line-items-count-cell">
                                             <% if (po.lineItems && po.lineItems.length> 0) { %>
@@ -4699,6 +4713,28 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             <div id="poTypeList" class="status-list">
                 <!-- PO type options will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Assignee Management Modal -->
+    <div id="assigneeModal" class="status-modal">
+        <div class="status-modal-content">
+            <div class="status-modal-header">
+                <div class="status-modal-title">Manage Assignees</div>
+                <button class="status-close" onclick="closeAssigneeModal()">&times;</button>
+            </div>
+
+            <div class="status-form">
+                <input type="text" id="assigneeNameInput" class="status-input" placeholder="Enter name..." maxlength="100">
+                <input type="text" id="assigneeInitialsInput" class="status-input" placeholder="Initials" maxlength="5" style="width: 80px; margin-left: 10px; text-transform: uppercase;">
+                <input type="email" id="assigneeEmailInput" class="status-input" placeholder="Email (optional)" style="width: 200px; margin-left: 10px;">
+                <input type="color" id="assigneeColorInput" class="status-input" value="#3498db" style="width: 60px; height: 38px; margin-left: 10px; cursor: pointer;">
+                <button id="addAssigneeBtn" class="status-add-btn" onclick="addAssignee()">Add</button>
+            </div>
+
+            <div id="assigneeList" class="status-list">
+                <!-- Assignees will be loaded here -->
             </div>
         </div>
     </div>
@@ -9145,6 +9181,203 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             } catch (error) {
                 console.error('Error deleting PO type:', error);
                 alert(error.message);
+            }
+        }
+
+        // Assignee Management Functions
+        let currentAssignees = [];
+
+        function openAssigneeModal() {
+            document.getElementById('assigneeModal').style.display = 'block';
+            loadAssignees();
+        }
+
+        function closeAssigneeModal() {
+            document.getElementById('assigneeModal').style.display = 'none';
+            document.getElementById('assigneeNameInput').value = '';
+            document.getElementById('assigneeInitialsInput').value = '';
+            document.getElementById('assigneeEmailInput').value = '';
+            document.getElementById('assigneeColorInput').value = '#3498db';
+        }
+
+        // Load assignees from backend
+        async function loadAssignees() {
+            try {
+                const response = await fetch('/purchase-orders/assignees', {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load assignees');
+                }
+
+                currentAssignees = await response.json();
+                renderAssigneeList();
+            } catch (error) {
+                console.error('Error loading assignees:', error);
+                alert('Failed to load assignees');
+            }
+        }
+
+        // Render the assignee list
+        function renderAssigneeList() {
+            const assigneeList = document.getElementById('assigneeList');
+            assigneeList.innerHTML = '';
+
+            currentAssignees.forEach((assignee) => {
+                const assigneeItem = document.createElement('div');
+                assigneeItem.className = 'status-item';
+
+                assigneeItem.innerHTML = `
+                    <span class="status-item-name" style="display: flex; align-items: center; gap: 8px;">
+                        <span style="background-color: ${assignee.color}; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">
+                            ${assignee.initials}
+                        </span>
+                        <span style="font-weight: 600;">${assignee.name}</span>
+                        ${assignee.email ? `<span style="color: #666; font-size: 12px;">(${assignee.email})</span>` : ''}
+                    </span>
+                    <button class="status-delete-btn" onclick="deleteAssignee('${assignee._id}')">
+                        Delete
+                    </button>
+                `;
+
+                assigneeList.appendChild(assigneeItem);
+            });
+        }
+
+        // Add new assignee
+        async function addAssignee() {
+            const nameInput = document.getElementById('assigneeNameInput');
+            const initialsInput = document.getElementById('assigneeInitialsInput');
+            const emailInput = document.getElementById('assigneeEmailInput');
+            const colorInput = document.getElementById('assigneeColorInput');
+            const addBtn = document.getElementById('addAssigneeBtn');
+
+            const name = nameInput.value.trim();
+            const initials = initialsInput.value.trim().toUpperCase();
+            const email = emailInput.value.trim();
+            const color = colorInput.value;
+
+            if (!name) {
+                alert('Please enter a name');
+                return;
+            }
+
+            if (!initials) {
+                alert('Please enter initials');
+                return;
+            }
+
+            if (initials.length > 5) {
+                alert('Initials must be 5 characters or less');
+                return;
+            }
+
+            // Disable button during request
+            addBtn.disabled = true;
+            addBtn.textContent = 'Adding...';
+
+            try {
+                const response = await fetch('/purchase-orders/assignees', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ name, initials, email, color })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to add assignee');
+                }
+
+                console.log('✅ Added assignee:', data.assignee.name);
+                nameInput.value = '';
+                initialsInput.value = '';
+                emailInput.value = '';
+                colorInput.value = '#3498db';
+
+                await loadAssignees();
+
+                // Reload page to update dropdowns
+                alert(`Successfully added assignee: ${name}. The page will reload to update all dropdowns.`);
+                location.reload();
+
+            } catch (error) {
+                console.error('Error adding assignee:', error);
+                alert(error.message);
+            } finally {
+                addBtn.disabled = false;
+                addBtn.textContent = 'Add';
+            }
+        }
+
+        // Delete assignee
+        async function deleteAssignee(id) {
+            const assignee = currentAssignees.find(a => a._id === id);
+            if (!assignee) return;
+
+            if (!confirm(`Are you sure you want to delete "${assignee.name}"?\n\nThis will fail if any POs are assigned to this person.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/purchase-orders/assignees/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to delete assignee');
+                }
+
+                console.log('✅ Deleted assignee:', assignee.name);
+
+                // Reload page to update dropdowns
+                alert(`Successfully deleted assignee: ${assignee.name}. The page will reload to update all dropdowns.`);
+                location.reload();
+
+            } catch (error) {
+                console.error('Error deleting assignee:', error);
+                alert(error.message);
+            }
+        }
+
+        // Update PO assignment
+        async function updateAssignment(selectElement) {
+            const poId = selectElement.getAttribute('data-po-id');
+            const assignedTo = selectElement.value || null;
+
+            try {
+                const response = await fetch(`/purchase-orders/pos/${poId}/assign`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ assignedTo })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to update assignment');
+                }
+
+                console.log('✅ Updated assignment for PO:', poId);
+                
+                // Optional: Show brief success indicator
+                const originalBg = selectElement.style.backgroundColor;
+                selectElement.style.backgroundColor = '#d4edda';
+                setTimeout(() => {
+                    selectElement.style.backgroundColor = originalBg;
+                }, 1000);
+
+            } catch (error) {
+                console.error('Error updating assignment:', error);
+                alert(error.message);
+                // Reload to restore correct state
+                location.reload();
             }
         }
 

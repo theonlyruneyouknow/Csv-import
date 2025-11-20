@@ -72,6 +72,11 @@ const purchaseOrderSchema = new mongoose.Schema({
     default: 'Seed',          // Default to Seed
     index: true               // Index for efficient filtering
   },
+  assignedTo: {               // Person assigned to this PO
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Assignee',
+    default: null
+  },
   lineItems: [{             // Array of line items for this PO
     sku: String,
     memo: String,

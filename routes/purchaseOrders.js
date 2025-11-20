@@ -1502,6 +1502,127 @@ router.delete('/po-type-options/:id', async (req, res) => {
   }
 });
 
+// ============= ASSIGNEE MANAGEMENT ROUTES =============
+
+const Assignee = require('../models/Assignee');
+
+// Get all assignees
+router.get('/assignees', async (req, res) => {
+  try {
+    const assignees = await Assignee.find().sort({ order: 1, name: 1 });
+    res.json(assignees);
+  } catch (error) {
+    console.error('Error fetching assignees:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Create new assignee
+router.post('/assignees', async (req, res) => {
+  try {
+    const { name, initials, email, color } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, error: 'Name is required' });
+    }
+
+    if (!initials || !initials.trim()) {
+      return res.status(400).json({ success: false, error: 'Initials are required' });
+    }
+
+    // Get the highest order number
+    const lastAssignee = await Assignee.findOne().sort({ order: -1 });
+    const order = lastAssignee ? lastAssignee.order + 1 : 0;
+
+    const assignee = await Assignee.create({
+      name: name.trim(),
+      initials: initials.trim().toUpperCase(),
+      email: email?.trim() || '',
+      color: color || '#3498db',
+      order
+    });
+
+    console.log(`✅ Created assignee: ${assignee.name} (${assignee.initials})`);
+    res.json({ success: true, assignee });
+  } catch (error) {
+    console.error('Error creating assignee:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update assignee
+router.put('/assignees/:id', async (req, res) => {
+  try {
+    const { name, initials, email, color, isActive } = req.body;
+
+    const assignee = await Assignee.findByIdAndUpdate(
+      req.params.id,
+      { name, initials: initials?.toUpperCase(), email, color, isActive },
+      { new: true, runValidators: true }
+    );
+
+    if (!assignee) {
+      return res.status(404).json({ success: false, error: 'Assignee not found' });
+    }
+
+    console.log(`✅ Updated assignee: ${assignee.name}`);
+    res.json({ success: true, assignee });
+  } catch (error) {
+    console.error('Error updating assignee:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Delete assignee
+router.delete('/assignees/:id', async (req, res) => {
+  try {
+    // Check if assignee is assigned to any POs
+    const assignedCount = await PurchaseOrder.countDocuments({ assignedTo: req.params.id });
+
+    if (assignedCount > 0) {
+      return res.status(400).json({
+        success: false,
+        error: `Cannot delete this assignee - assigned to ${assignedCount} PO(s)`
+      });
+    }
+
+    const assignee = await Assignee.findByIdAndDelete(req.params.id);
+
+    if (!assignee) {
+      return res.status(404).json({ success: false, error: 'Assignee not found' });
+    }
+
+    console.log(`✅ Deleted assignee: ${assignee.name}`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting assignee:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update PO assignment
+router.put('/pos/:id/assign', async (req, res) => {
+  try {
+    const { assignedTo } = req.body;
+    
+    const po = await PurchaseOrder.findByIdAndUpdate(
+      req.params.id,
+      { assignedTo: assignedTo || null },
+      { new: true }
+    ).populate('assignedTo');
+
+    if (!po) {
+      return res.status(404).json({ success: false, error: 'PO not found' });
+    }
+
+    console.log(`✅ Updated PO ${po.poNumber} assignment to ${po.assignedTo?.name || 'None'}`);
+    res.json({ success: true, po });
+  } catch (error) {
+    console.error('Error updating PO assignment:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Get all currently snoozed POs
 router.get('/pos/snoozed/list', async (req, res) => {
   try {
@@ -2098,6 +2219,7 @@ router.get('/', async (req, res) => {
     const purchaseOrders = await PurchaseOrder.find(query)
       .populate('linkedVendor')  // Populate the linked vendor from Vendor model
       .populate('organicVendor') // Populate the organic vendor from OrganicVendor model
+      .populate('assignedTo')    // Populate the assigned person
       .sort({ date: 1 });
 
     // Fetch line items for each PO and calculate ETAs
@@ -2267,6 +2389,10 @@ router.get('/', async (req, res) => {
     const poTypeOptions = await PoTypeOption.find().sort({ name: 1 });
     console.log('📦 PO type options:', poTypeOptions.map(t => t.name).join(', '));
 
+    // Get assignees from database
+    const assignees = await Assignee.find({ isActive: true }).sort({ order: 1, name: 1 });
+    console.log('👥 Active assignees:', assignees.map(a => a.name).join(', '));
+
     console.log(`🎨 Rendering dashboard with ${prePurchaseOrders.length} pre-purchase orders...`);
 
     // Log sample PO data to verify location fields
@@ -2291,6 +2417,7 @@ router.get('/', async (req, res) => {
       statusOptions: statusOptionNames,
       allStatusOptions: statusOptions, // Send full objects for management
       poTypeOptions: poTypeOptions, // Send PO type options for dynamic rendering
+      assignees: assignees, // Send assignees for assignment dropdown
       user: req.user // Pass user information for authentication status
     });
   } catch (error) {
@@ -5734,7 +5861,8 @@ router.get('/unreceived-items', async (req, res) => {
         memo: item.memo || 'N/A',
         quantity: item.quantityRemaining || item.quantityExpected || item.quantityOrdered || 0,
         itemStatus: item.itemStatus || 'N/A',
-        poStatus: item.poId.status || 'N/A'
+        poStatus: item.poId.status || 'N/A',
+        poType: item.poId.poType || 'N/A'
       }));
 
     // Get stats
