@@ -781,8 +781,7 @@
                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <h4 style="margin: 0; font-size: 14px; color: #2c3e50;">📦 Filter by PO Type</h4>
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px;">
-                            <input type="checkbox" id="selectAllTypes" checked
-                                onchange="toggleAllTypes(this.checked)">
+                            <input type="checkbox" id="selectAllTypes" checked onchange="toggleAllTypes(this.checked)">
                             <span>Select All</span>
                         </label>
                     </div>
@@ -1065,16 +1064,16 @@
             // Show column selection modal instead of directly exporting
             document.getElementById('columnModal').style.display = 'flex';
         }
-        
+
         function populateTypeFilters() {
             const typeContainer = document.getElementById('typeFilterList');
             const uniqueTypes = [...new Set(filteredItems.map(item => item.poType).filter(t => t && t !== 'N/A'))].sort();
-            
+
             if (uniqueTypes.length === 0) {
                 typeContainer.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #999; padding: 10px;">No types available</div>';
                 return;
             }
-            
+
             typeContainer.innerHTML = uniqueTypes.map(type => `
                 <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px;">
                     <input type="checkbox" class="type-filter-checkbox" value="${type}" checked>
@@ -1082,7 +1081,7 @@
                 </label>
             `).join('');
         }
-        
+
         function toggleAllTypes(checked) {
             const checkboxes = document.querySelectorAll('.type-filter-checkbox');
             checkboxes.forEach(cb => cb.checked = checked);
@@ -1199,7 +1198,7 @@
             }
 
             // Filter items by selected types and statuses
-            const itemsToExport = filteredItems.filter(item => 
+            const itemsToExport = filteredItems.filter(item =>
                 selectedTypes.has(item.poType) && selectedStatuses.has(item.poStatus)
             );
 

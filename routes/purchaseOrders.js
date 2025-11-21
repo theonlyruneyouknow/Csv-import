@@ -1604,7 +1604,7 @@ router.delete('/assignees/:id', async (req, res) => {
 router.put('/pos/:id/assign', async (req, res) => {
   try {
     const { assignedTo } = req.body;
-    
+
     const po = await PurchaseOrder.findByIdAndUpdate(
       req.params.id,
       { assignedTo: assignedTo || null },

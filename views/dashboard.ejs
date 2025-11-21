@@ -4214,7 +4214,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     <th class="sortable priority-cell" data-column="priority">Priority</th>
                                     <th class="sortable po-type-cell" data-column="poType">Type</th>
                                     <th class="sortable vendor" data-column="vendor">Vendor</th>
-                                    <th class="sortable assignee-cell" data-column="assignedTo" style="text-align: center;">ASGN</th>
+                                    <th class="sortable assignee-cell" data-column="assignedTo"
+                                        style="text-align: center;">ASGN</th>
                                     <th class="sortable line-items-count-cell" data-column="lineItemsCount">Line Items
                                     </th>
                                     <th class="sortable eta-cell" data-column="eta">ETA</th>
@@ -4354,13 +4355,18 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                             <% } %>
                                         </td>
                                         <td class="assignee-cell" style="text-align: center;">
-                                            <select class="assignee-select" data-po-id="<%= po._id %>" onchange="updateAssignment(this)" style="min-width: 60px; font-size: 11px; padding: 2px 4px;">
+                                            <select class="assignee-select" data-po-id="<%= po._id %>"
+                                                onchange="updateAssignment(this)"
+                                                style="min-width: 60px; font-size: 11px; padding: 2px 4px;">
                                                 <option value="">-</option>
-                                                <% assignees.forEach(assignee => { %>
-                                                    <option value="<%= assignee._id %>" <%= po.assignedTo && po.assignedTo._id && po.assignedTo._id.toString() === assignee._id.toString() ? 'selected' : '' %>>
+                                                <% assignees.forEach(assignee=> { %>
+                                                    <option value="<%= assignee._id %>" <%=po.assignedTo &&
+                                                        po.assignedTo._id &&
+                                                        po.assignedTo._id.toString()===assignee._id.toString()
+                                                        ? 'selected' : '' %>>
                                                         <%= assignee.initials %>
                                                     </option>
-                                                <% }) %>
+                                                    <% }) %>
                                             </select>
                                         </td>
                                         <td class="line-items-count-cell">
@@ -4726,10 +4732,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             </div>
 
             <div class="status-form">
-                <input type="text" id="assigneeNameInput" class="status-input" placeholder="Enter name..." maxlength="100">
-                <input type="text" id="assigneeInitialsInput" class="status-input" placeholder="Initials" maxlength="5" style="width: 80px; margin-left: 10px; text-transform: uppercase;">
-                <input type="email" id="assigneeEmailInput" class="status-input" placeholder="Email (optional)" style="width: 200px; margin-left: 10px;">
-                <input type="color" id="assigneeColorInput" class="status-input" value="#3498db" style="width: 60px; height: 38px; margin-left: 10px; cursor: pointer;">
+                <input type="text" id="assigneeNameInput" class="status-input" placeholder="Enter name..."
+                    maxlength="100">
+                <input type="text" id="assigneeInitialsInput" class="status-input" placeholder="Initials" maxlength="5"
+                    style="width: 80px; margin-left: 10px; text-transform: uppercase;">
+                <input type="email" id="assigneeEmailInput" class="status-input" placeholder="Email (optional)"
+                    style="width: 200px; margin-left: 10px;">
+                <input type="color" id="assigneeColorInput" class="status-input" value="#3498db"
+                    style="width: 60px; height: 38px; margin-left: 10px; cursor: pointer;">
                 <button id="addAssigneeBtn" class="status-add-btn" onclick="addAssignee()">Add</button>
             </div>
 
@@ -8116,7 +8126,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function applyFilters() {
             console.log('🔄 applyFilters() called');
             const searchFilterEl = document.getElementById('searchFilter');
-            const searchTerm = searchFilterEl ? searchFilterEl.value.toLowerCase() : '';
+            const searchTerm = searchFilterEl ? searchFilterEl.value.trim().toLowerCase() : '';
             const nsStatusFilterEl = document.getElementById('nsStatusFilter');
             const nsStatusFilter = nsStatusFilterEl ? nsStatusFilterEl.value : 'all';
             const statusFilterEl = document.getElementById('statusFilter');
@@ -9365,7 +9375,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
 
                 console.log('✅ Updated assignment for PO:', poId);
-                
+
                 // Optional: Show brief success indicator
                 const originalBg = selectElement.style.backgroundColor;
                 selectElement.style.backgroundColor = '#d4edda';
