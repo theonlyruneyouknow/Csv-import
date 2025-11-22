@@ -636,6 +636,110 @@
             font-weight: 500;
         }
 
+        /* Favorites Section */
+        .favorites-section {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .favorites-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .favorites-header h4 {
+            margin: 0;
+            font-size: 14px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .favorites-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .favorite-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .favorite-item:hover {
+            background: #e7f3ff;
+            border-color: #007bff;
+        }
+
+        .favorite-item-name {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .favorite-item-delete {
+            color: #dc3545;
+            font-size: 16px;
+            margin-left: 4px;
+            cursor: pointer;
+            opacity: 0.6;
+        }
+
+        .favorite-item-delete:hover {
+            opacity: 1;
+        }
+
+        .save-favorite-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .save-favorite-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .btn-save-favorite {
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+
+        .btn-save-favorite:hover {
+            background: #0056b3;
+        }
+
+        .favorites-empty {
+            text-align: center;
+            color: #6c757d;
+            font-size: 13px;
+            font-style: italic;
+            padding: 10px;
+        }
+
         gap: 10px;
         justify-content: flex-end;
         }
@@ -726,6 +830,20 @@
                 <button class="close-btn" onclick="closeColumnModal()">&times;</button>
             </div>
             <div class="modal-body">
+                <!-- Favorites Section -->
+                <div class="favorites-section">
+                    <div class="favorites-header">
+                        <h4>⭐ Report Favorites</h4>
+                    </div>
+                    <div id="favoritesList" class="favorites-list">
+                        <div class="favorites-empty">No saved favorites yet</div>
+                    </div>
+                    <div class="save-favorite-row">
+                        <input type="text" id="favoriteName" class="save-favorite-input" placeholder="Enter name for current configuration..." maxlength="50">
+                        <button class="btn-save-favorite" onclick="saveFavorite()">💾 Save</button>
+                    </div>
+                </div>
+
                 <p style="margin-bottom: 10px; color: #666;">Choose columns and drag to reorder:</p>
                 <div id="columnList" class="column-list">
                     <div class="column-item" draggable="true" data-col="col_poNumber">
@@ -846,6 +964,8 @@
             if (savedCompactMode === 'true') {
                 toggleCompactMode();
             }
+            // Load favorites
+            loadFavoritesList();
         });
 
         function toggleCompactMode() {
@@ -1111,6 +1231,159 @@
 
         function closeColumnModal() {
             document.getElementById('columnModal').style.display = 'none';
+            document.getElementById('favoriteName').value = '';
+        }
+
+        // ============= FAVORITES MANAGEMENT =============
+
+        function loadFavoritesList() {
+            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+            const favoritesList = document.getElementById('favoritesList');
+
+            if (favorites.length === 0) {
+                favoritesList.innerHTML = '<div class="favorites-empty">No saved favorites yet</div>';
+                return;
+            }
+
+            favoritesList.innerHTML = favorites.map((fav, index) => `
+                <div class="favorite-item" onclick="loadFavorite(${index})" title="Click to load this configuration">
+                    <span class="favorite-item-name">⭐ ${fav.name}</span>
+                    <span class="favorite-item-delete" onclick="event.stopPropagation(); deleteFavorite(${index})" title="Delete">
+                        ×
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function saveFavorite() {
+            const nameInput = document.getElementById('favoriteName');
+            const name = nameInput.value.trim();
+
+            if (!name) {
+                alert('Please enter a name for this favorite');
+                return;
+            }
+
+            // Get current configuration
+            const config = getCurrentExportConfig();
+
+            // Get existing favorites
+            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+
+            // Check for duplicate name
+            const existingIndex = favorites.findIndex(f => f.name.toLowerCase() === name.toLowerCase());
+            if (existingIndex !== -1) {
+                if (!confirm(`A favorite named "${name}" already exists. Overwrite it?`)) {
+                    return;
+                }
+                favorites[existingIndex] = { name, config };
+            } else {
+                favorites.push({ name, config });
+            }
+
+            // Save to localStorage
+            localStorage.setItem('unreceivedItemsFavorites', JSON.stringify(favorites));
+
+            // Clear input and reload list
+            nameInput.value = '';
+            loadFavoritesList();
+            showToast(`✅ Favorite "${name}" saved successfully!`);
+        }
+
+        function getCurrentExportConfig() {
+            // Get column selections and order
+            const columnList = document.getElementById('columnList');
+            const columnItems = columnList.querySelectorAll('.column-item');
+            const columns = Array.from(columnItems).map(item => ({
+                id: item.dataset.col,
+                checked: document.getElementById(item.dataset.col).checked
+            }));
+
+            // Get PO type selections
+            const types = Array.from(document.querySelectorAll('.type-filter-checkbox')).map(cb => ({
+                value: cb.value,
+                checked: cb.checked
+            }));
+
+            // Get status selections
+            const statuses = Array.from(document.querySelectorAll('.status-filter-checkbox')).map(cb => ({
+                value: cb.value,
+                checked: cb.checked
+            }));
+
+            return { columns, types, statuses };
+        }
+
+        function loadFavorite(index) {
+            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+            if (!favorites[index]) return;
+
+            const favorite = favorites[index];
+            const config = favorite.config;
+
+            // Restore column selections
+            config.columns.forEach(col => {
+                const checkbox = document.getElementById(col.id);
+                if (checkbox) {
+                    checkbox.checked = col.checked;
+                }
+            });
+
+            // Restore column order by reordering DOM elements
+            const columnList = document.getElementById('columnList');
+            config.columns.forEach(col => {
+                const item = columnList.querySelector(`[data-col="${col.id}"]`);
+                if (item) {
+                    columnList.appendChild(item);
+                }
+            });
+
+            // Restore PO type selections
+            config.types.forEach(type => {
+                const checkbox = Array.from(document.querySelectorAll('.type-filter-checkbox')).find(cb => cb.value === type.value);
+                if (checkbox) {
+                    checkbox.checked = type.checked;
+                }
+            });
+
+            // Update select all types checkbox
+            const allTypesChecked = config.types.every(t => t.checked);
+            const selectAllTypes = document.getElementById('selectAllTypes');
+            if (selectAllTypes) {
+                selectAllTypes.checked = allTypesChecked;
+            }
+
+            // Restore status selections
+            config.statuses.forEach(status => {
+                const checkbox = Array.from(document.querySelectorAll('.status-filter-checkbox')).find(cb => cb.value === status.value);
+                if (checkbox) {
+                    checkbox.checked = status.checked;
+                }
+            });
+
+            // Update select all statuses checkbox
+            const allStatusesChecked = config.statuses.every(s => s.checked);
+            const selectAllStatuses = document.getElementById('selectAllStatuses');
+            if (selectAllStatuses) {
+                selectAllStatuses.checked = allStatusesChecked;
+            }
+
+            showToast(`✅ Loaded favorite: ${favorite.name}`);
+        }
+
+        function deleteFavorite(index) {
+            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+            if (!favorites[index]) return;
+
+            const name = favorites[index].name;
+            if (!confirm(`Delete favorite "${name}"?`)) {
+                return;
+            }
+
+            favorites.splice(index, 1);
+            localStorage.setItem('unreceivedItemsFavorites', JSON.stringify(favorites));
+            loadFavoritesList();
+            showToast(`🗑️ Deleted favorite: ${name}`);
         }
 
         function setupDragAndDrop() {
