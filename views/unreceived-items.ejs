@@ -1050,21 +1050,21 @@
                     <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #856404;">
                         📝 Excel Filename:
                     </label>
-                    <input type="text" 
-                           id="excelFilenameInput" 
-                           class="excel-filename-input" 
-                           placeholder="Enter filename (without .xlsx)..."
-                           maxlength="100">
+                    <input type="text" id="excelFilenameInput" class="excel-filename-input"
+                        placeholder="Enter filename (without .xlsx)..." maxlength="100">
                     <small style="display: block; margin-top: 5px; color: #856404;">
                         Leave blank to auto-generate with date
                     </small>
                 </div>
 
                 <!-- Reports Selection -->
-                <p style="margin-bottom: 15px; color: #666; font-weight: 500;">Select reports and customize sheet names:</p>
-                <div style="margin-bottom: 15px; padding: 10px; background: #e7f3ff; border-radius: 4px; border-left: 4px solid #17a2b8;">
+                <p style="margin-bottom: 15px; color: #666; font-weight: 500;">Select reports and customize sheet names:
+                </p>
+                <div
+                    style="margin-bottom: 15px; padding: 10px; background: #e7f3ff; border-radius: 4px; border-left: 4px solid #17a2b8;">
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
-                        <input type="checkbox" id="selectAllExcelFavorites" checked onchange="toggleAllExcelFavorites(this.checked)">
+                        <input type="checkbox" id="selectAllExcelFavorites" checked
+                            onchange="toggleAllExcelFavorites(this.checked)">
                         <span>Select All Reports</span>
                     </label>
                 </div>
@@ -1712,7 +1712,7 @@
                     const colWidths = selectedColumns.map((col, colIndex) => {
                         const maxLength = Math.max(
                             col.label.length,
-                            ...worksheetData.slice(1).map(row => 
+                            ...worksheetData.slice(1).map(row =>
                                 String(row[colIndex] || '').length
                             )
                         );
