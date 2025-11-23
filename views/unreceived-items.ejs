@@ -740,6 +740,98 @@
             padding: 10px;
         }
 
+        /* Excel Export Selection Modal */
+        .excel-select-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .excel-favorite-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .excel-favorite-item:hover {
+            background: #e7f3ff;
+            border-color: #007bff;
+        }
+
+        .excel-favorite-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .excel-favorite-label {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .excel-favorite-badge {
+            background: #17a2b8;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .excel-tab-name-input {
+            flex: 1;
+            padding: 4px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .excel-tab-name-input:focus {
+            outline: none;
+            border-color: #17a2b8;
+            box-shadow: 0 0 0 2px rgba(23, 162, 184, 0.1);
+        }
+
+        .excel-filename-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .excel-filename-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ffc107;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .excel-filename-input:focus {
+            outline: none;
+            border-color: #ff9800;
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+        }
+
         gap: 10px;
         justify-content: flex-end;
         }
@@ -756,6 +848,9 @@
                 </a>
                 <button onclick="exportToCSV()" class="btn btn-success">
                     📥 Export to CSV
+                </button>
+                <button onclick="exportMultiTabExcel()" class="btn btn-success" style="background: #17a2b8;">
+                    📊 Export Multi-Tab Excel
                 </button>
             </div>
         </div>
@@ -942,12 +1037,59 @@
         </div>
     </div>
 
+    <!-- Excel Export Selection Modal -->
+    <div id="excelSelectModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>📊 Configure Excel Export</h3>
+                <button class="close-btn" onclick="closeExcelSelectModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Filename Section -->
+                <div class="excel-filename-section">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #856404;">
+                        📝 Excel Filename:
+                    </label>
+                    <input type="text" 
+                           id="excelFilenameInput" 
+                           class="excel-filename-input" 
+                           placeholder="Enter filename (without .xlsx)..."
+                           maxlength="100">
+                    <small style="display: block; margin-top: 5px; color: #856404;">
+                        Leave blank to auto-generate with date
+                    </small>
+                </div>
+
+                <!-- Reports Selection -->
+                <p style="margin-bottom: 15px; color: #666; font-weight: 500;">Select reports and customize sheet names:</p>
+                <div style="margin-bottom: 15px; padding: 10px; background: #e7f3ff; border-radius: 4px; border-left: 4px solid #17a2b8;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
+                        <input type="checkbox" id="selectAllExcelFavorites" checked onchange="toggleAllExcelFavorites(this.checked)">
+                        <span>Select All Reports</span>
+                    </label>
+                </div>
+                <div id="excelFavoritesList" class="excel-select-list">
+                    <!-- Favorite checkboxes will be populated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeExcelSelectModal()">Cancel</button>
+                <button class="btn btn-success" style="background: #17a2b8;" onclick="performExcelExport()">
+                    📊 Export to Excel
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast" class="toast"></div>
 
     <!-- Compact Mode Toggle Button -->
     <button class="compact-mode-toggle" onclick="toggleCompactMode()" title="Toggle Compact Mode">
         ⬍
     </button>
+
+    <!-- XLSX Library for Excel Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
     <script>
         let allItems = [];
@@ -1385,6 +1527,234 @@
             localStorage.setItem('unreceivedItemsFavorites', JSON.stringify(favorites));
             loadFavoritesList();
             showToast(`🗑️ Deleted favorite: ${name}`);
+        }
+
+        // ============= MULTI-TAB EXCEL EXPORT =============
+
+        function exportMultiTabExcel() {
+            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+
+            if (favorites.length === 0) {
+                alert('No saved favorites found. Please save at least one favorite report configuration first.');
+                return;
+            }
+
+            // Open selection modal
+            openExcelSelectModal();
+        }
+
+        function openExcelSelectModal() {
+            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+            const listContainer = document.getElementById('excelFavoritesList');
+
+            // Populate the list with checkboxes and editable tab names
+            listContainer.innerHTML = favorites.map((fav, index) => `
+                <div class="excel-favorite-item">
+                    <input type="checkbox" 
+                           id="excelFav_${index}" 
+                           class="excel-favorite-checkbox" 
+                           data-index="${index}"
+                           checked 
+                           onclick="updateSelectAllExcelCheckbox()">
+                    <label for="excelFav_${index}" class="excel-favorite-label" style="flex-direction: column; align-items: flex-start; gap: 6px;">
+                        <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                            <span style="font-weight: 600; color: #495057;">⭐ ${fav.name}</span>
+                            <span class="excel-favorite-badge">Sheet ${index + 1}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                            <label style="font-size: 12px; color: #6c757d; white-space: nowrap;">Tab Name:</label>
+                            <input type="text" 
+                                   id="tabName_${index}"
+                                   class="excel-tab-name-input" 
+                                   value="${fav.name.substring(0, 31)}" 
+                                   placeholder="Enter sheet tab name..."
+                                   maxlength="31"
+                                   onclick="event.stopPropagation()">
+                        </div>
+                    </label>
+                </div>
+            `).join('');
+
+            // Set default filename with today's date
+            const today = new Date().toISOString().slice(0, 10);
+            document.getElementById('excelFilenameInput').value = `Unreceived_Items_Report_${today}`;
+
+            document.getElementById('excelSelectModal').style.display = 'block';
+        }
+
+        function closeExcelSelectModal() {
+            document.getElementById('excelSelectModal').style.display = 'none';
+        }
+
+        function toggleAllExcelFavorites(checked) {
+            document.querySelectorAll('.excel-favorite-checkbox').forEach(cb => {
+                cb.checked = checked;
+            });
+        }
+
+        function updateSelectAllExcelCheckbox() {
+            const checkboxes = document.querySelectorAll('.excel-favorite-checkbox');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            const selectAll = document.getElementById('selectAllExcelFavorites');
+            if (selectAll) {
+                selectAll.checked = allChecked;
+            }
+        }
+
+        function performExcelExport() {
+            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+
+            // Get custom filename
+            const customFilename = document.getElementById('excelFilenameInput').value.trim();
+            const filename = customFilename || `Unreceived_Items_Report_${new Date().toISOString().slice(0, 10)}`;
+
+            // Get selected favorites with custom tab names
+            const selectedConfigs = [];
+            document.querySelectorAll('.excel-favorite-checkbox:checked').forEach(cb => {
+                const index = parseInt(cb.dataset.index);
+                const customTabName = document.getElementById(`tabName_${index}`).value.trim();
+                if (favorites[index]) {
+                    selectedConfigs.push({
+                        favorite: favorites[index],
+                        tabName: customTabName || favorites[index].name.substring(0, 31)
+                    });
+                }
+            });
+
+            if (selectedConfigs.length === 0) {
+                alert('Please select at least one report to export.');
+                return;
+            }
+
+            if (!window.XLSX) {
+                alert('Excel library not loaded. Please refresh the page and try again.');
+                return;
+            }
+
+            // Close the selection modal
+            closeExcelSelectModal();
+
+            showToast(`📊 Generating Excel workbook with ${selectedConfigs.length} sheet(s)...`);
+
+            try {
+                // Create a new workbook
+                const workbook = XLSX.utils.book_new();
+
+                // Column map for data extraction
+                const columnMap = {
+                    col_poNumber: { key: 'poNumber', label: 'PO Number' },
+                    col_vendor: { key: 'vendor', label: 'Vendor' },
+                    col_poDate: { key: 'poDate', label: 'PO Date' },
+                    col_eta: { key: 'eta', label: 'ETA' },
+                    col_sku: { key: 'sku', label: 'SKU' },
+                    col_memo: { key: 'memo', label: 'Description' },
+                    col_quantity: { key: 'quantity', label: 'Quantity' },
+                    col_itemStatus: { key: 'itemStatus', label: 'Item Status' },
+                    col_poStatus: { key: 'poStatus', label: 'PO Status' }
+                };
+
+                // Process each selected configuration
+                selectedConfigs.forEach((config, index) => {
+                    const favorite = config.favorite;
+                    const customTabName = config.tabName;
+                    const config = favorite.config;
+
+                    // Get selected types for this favorite
+                    const selectedTypes = new Set(
+                        config.types.filter(t => t.checked).map(t => t.value)
+                    );
+
+                    // Get selected statuses for this favorite
+                    const selectedStatuses = new Set(
+                        config.statuses.filter(s => s.checked).map(s => s.value)
+                    );
+
+                    // Filter items based on favorite's configuration
+                    const itemsToExport = filteredItems.filter(item =>
+                        selectedTypes.has(item.poType) && selectedStatuses.has(item.poStatus)
+                    );
+
+                    // Get selected columns in order
+                    const selectedColumns = config.columns
+                        .filter(col => col.checked && columnMap[col.id])
+                        .map(col => columnMap[col.id]);
+
+                    if (itemsToExport.length === 0 || selectedColumns.length === 0) {
+                        console.warn(`Skipping favorite "${favorite.name}" - no data or columns`);
+                        return;
+                    }
+
+                    // Create worksheet data
+                    const worksheetData = [];
+
+                    // Add headers
+                    worksheetData.push(selectedColumns.map(col => col.label));
+
+                    // Add data rows
+                    itemsToExport.forEach(item => {
+                        const row = selectedColumns.map(col => {
+                            let value = item[col.key];
+
+                            // Format dates
+                            if ((col.key === 'eta' || col.key === 'poDate') && value) {
+                                value = new Date(value).toLocaleDateString();
+                            }
+
+                            return value || '';
+                        });
+                        worksheetData.push(row);
+                    });
+
+                    // Create worksheet from data
+                    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+
+                    // Auto-size columns
+                    const colWidths = selectedColumns.map((col, colIndex) => {
+                        const maxLength = Math.max(
+                            col.label.length,
+                            ...worksheetData.slice(1).map(row => 
+                                String(row[colIndex] || '').length
+                            )
+                        );
+                        return { wch: Math.min(maxLength + 2, 50) };
+                    });
+                    worksheet['!cols'] = colWidths;
+
+                    // Sanitize custom tab name (Excel has restrictions)
+                    let sheetName = customTabName
+                        .replace(/[\\\/?\*\[\]]/g, '') // Remove invalid characters
+                        .substring(0, 31); // Max 31 characters for Excel sheet names
+
+                    // Ensure unique sheet name
+                    let uniqueName = sheetName;
+                    let counter = 1;
+                    while (workbook.SheetNames.includes(uniqueName)) {
+                        uniqueName = `${sheetName.substring(0, 28)}_${counter}`;
+                        counter++;
+                    }
+
+                    // Add worksheet to workbook
+                    XLSX.utils.book_append_sheet(workbook, worksheet, uniqueName);
+                });
+
+                if (workbook.SheetNames.length === 0) {
+                    alert('No data to export. Please check your favorite configurations.');
+                    return;
+                }
+
+                // Use custom filename with .xlsx extension
+                const finalFilename = `${filename}.xlsx`;
+
+                // Write and download the workbook
+                XLSX.writeFile(workbook, finalFilename);
+
+                showToast(`✅ Excel file exported with ${workbook.SheetNames.length} sheets!`);
+                console.log(`📊 Exported sheets: ${workbook.SheetNames.join(', ')}`);
+
+            } catch (error) {
+                console.error('Error exporting Excel:', error);
+                alert(`Error exporting Excel file: ${error.message}`);
+            }
         }
 
         function setupDragAndDrop() {
