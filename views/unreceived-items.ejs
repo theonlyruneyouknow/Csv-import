@@ -1041,6 +1041,20 @@
                 <button class="close-btn" onclick="closeExcelSelectModal()">&times;</button>
             </div>
             <div class="modal-body">
+                <!-- Saved Excel Presets Section -->
+                <div class="favorites-section" style="background: #d4edda; border-left-color: #28a745;">
+                    <div class="favorites-header">
+                        <h4 style="color: #155724;">💾 Saved Excel Presets</h4>
+                    </div>
+                    <div id="excelPresetsList" class="favorites-list" style="margin-bottom: 10px;">
+                        <div class="favorites-empty">No saved presets yet</div>
+                    </div>
+                    <div class="save-favorite-row">
+                        <input type="text" id="excelPresetName" class="save-favorite-input" placeholder="Save current configuration as preset..." maxlength="50">
+                        <button class="btn-save-favorite" style="background: #28a745;" onclick="saveExcelPreset()">💾 Save Preset</button>
+                    </div>
+                </div>
+
                 <!-- Filename Section -->
                 <div class="excel-filename-section">
                     <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #856404;">
@@ -1558,6 +1572,9 @@
             const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
             const listContainer = document.getElementById('excelFavoritesList');
 
+            // Load saved Excel presets
+            loadExcelPresetsList();
+
             // Populate the list with checkboxes and editable tab names
             listContainer.innerHTML = favorites.map((fav, index) => `
                 <div class="excel-favorite-item">
@@ -1595,6 +1612,134 @@
 
         function closeExcelSelectModal() {
             document.getElementById('excelSelectModal').style.display = 'none';
+        }
+
+        // ============= EXCEL PRESET MANAGEMENT =============
+
+        function loadExcelPresetsList() {
+            const presets = JSON.parse(localStorage.getItem('excelExportPresets') || '[]');
+            const presetsList = document.getElementById('excelPresetsList');
+
+            if (presets.length === 0) {
+                presetsList.innerHTML = '<div class="favorites-empty">No saved presets yet</div>';
+                return;
+            }
+
+            presetsList.innerHTML = presets.map((preset, index) => `
+                <div class="favorite-item" onclick="loadExcelPreset(${index})" title="Click to load this preset">
+                    <span class="favorite-item-name">💾 ${preset.name}</span>
+                    <span class="favorite-item-delete" onclick="event.stopPropagation(); deleteExcelPreset(${index})" title="Delete">
+                        ×
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function saveExcelPreset() {
+            const nameInput = document.getElementById('excelPresetName');
+            const name = nameInput.value.trim();
+
+            if (!name) {
+                alert('Please enter a name for this Excel preset');
+                return;
+            }
+
+            // Get current Excel export configuration
+            const filename = document.getElementById('excelFilenameInput').value.trim();
+            const selectedReports = [];
+
+            document.querySelectorAll('.excel-favorite-checkbox:checked').forEach(cb => {
+                const index = parseInt(cb.dataset.index);
+                const tabNameInput = document.getElementById(`tabName_${index}`);
+                if (tabNameInput) {
+                    selectedReports.push({
+                        favoriteIndex: index,
+                        tabName: tabNameInput.value.trim()
+                    });
+                }
+            });
+
+            if (selectedReports.length === 0) {
+                alert('Please select at least one report to save in the preset');
+                return;
+            }
+
+            const preset = {
+                name: name,
+                filename: filename,
+                selectedReports: selectedReports,
+                createdAt: new Date().toISOString()
+            };
+
+            // Get existing presets
+            const presets = JSON.parse(localStorage.getItem('excelExportPresets') || '[]');
+
+            // Check for duplicate name
+            const existingIndex = presets.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
+            if (existingIndex !== -1) {
+                if (!confirm(`A preset named "${name}" already exists. Overwrite it?`)) {
+                    return;
+                }
+                presets[existingIndex] = preset;
+            } else {
+                presets.push(preset);
+            }
+
+            // Save to localStorage
+            localStorage.setItem('excelExportPresets', JSON.stringify(presets));
+
+            // Clear input and reload list
+            nameInput.value = '';
+            loadExcelPresetsList();
+            showToast(`✅ Excel preset "${name}" saved successfully!`);
+        }
+
+        function loadExcelPreset(index) {
+            const presets = JSON.parse(localStorage.getItem('excelExportPresets') || '[]');
+            if (!presets[index]) return;
+
+            const preset = presets[index];
+
+            // Set filename
+            document.getElementById('excelFilenameInput').value = preset.filename || '';
+
+            // Uncheck all checkboxes first
+            document.querySelectorAll('.excel-favorite-checkbox').forEach(cb => {
+                cb.checked = false;
+            });
+
+            // Check and set tab names for selected reports
+            preset.selectedReports.forEach(report => {
+                const checkbox = document.getElementById(`excelFav_${report.favoriteIndex}`);
+                const tabNameInput = document.getElementById(`tabName_${report.favoriteIndex}`);
+
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+                if (tabNameInput && report.tabName) {
+                    tabNameInput.value = report.tabName;
+                }
+            });
+
+            // Update select all checkbox
+            updateSelectAllExcelCheckbox();
+
+            showToast(`✅ Loaded Excel preset: ${preset.name}`);
+        }
+
+        function deleteExcelPreset(index) {
+            const presets = JSON.parse(localStorage.getItem('excelExportPresets') || '[]');
+            if (!presets[index]) return;
+
+            const name = presets[index].name;
+            if (!confirm(`Delete Excel preset "${name}"?`)) {
+                return;
+            }
+
+            presets.splice(index, 1);
+            localStorage.setItem('excelExportPresets', JSON.stringify(presets));
+            loadExcelPresetsList();
+            showToast(`🗑️ Deleted preset: ${name}`);
         }
 
         function toggleAllExcelFavorites(checked) {
