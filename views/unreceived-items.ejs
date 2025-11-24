@@ -831,10 +831,6 @@
             border-color: #ff9800;
             box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
         }
-
-        gap: 10px;
-        justify-content: flex-end;
-        }
     </style>
 </head>
 
@@ -1152,21 +1148,28 @@
 
         async function loadData() {
             try {
+                console.log('🔄 Starting to load unreceived items data...');
                 const response = await fetch('/purchase-orders/unreceived-items');
+                console.log('📡 Received response:', response.status);
+                
                 const data = await response.json();
+                console.log('📊 Data received:', { success: data.success, itemCount: data.items?.length });
 
                 if (data.success) {
                     allItems = data.items;
                     filteredItems = [...allItems];
+                    console.log('✅ Data loaded successfully, rendering table...');
                     updateStats(data.stats);
                     populateFilters();
                     renderTable();
+                    console.log('✅ Table rendered successfully');
                 } else {
+                    console.error('❌ Server returned error:', data.error);
                     showError('Failed to load data: ' + data.error);
                 }
             } catch (error) {
-                console.error('Error loading data:', error);
-                showError('Error loading unreceived items');
+                console.error('❌ Error loading data:', error);
+                showError('Error loading unreceived items: ' + error.message);
             }
         }
 
@@ -1269,9 +1272,16 @@
         }
 
         function renderTable() {
+            console.log('🎨 Rendering table with', filteredItems.length, 'items');
             const tbody = document.getElementById('itemsBody');
 
+            if (!tbody) {
+                console.error('❌ Cannot find tbody element with id "itemsBody"');
+                return;
+            }
+
             if (filteredItems.length === 0) {
+                console.log('📭 No items to display, showing empty state');
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="8">
@@ -1286,6 +1296,7 @@
                 return;
             }
 
+            console.log('📝 Generating table HTML...');
             tbody.innerHTML = filteredItems.map(item => {
                 // Use poUrl directly if available
                 const poLink = item.poUrl || '#';
@@ -1654,9 +1665,9 @@
                 };
 
                 // Process each selected configuration
-                selectedConfigs.forEach((config, index) => {
-                    const favorite = config.favorite;
-                    const customTabName = config.tabName;
+                selectedConfigs.forEach((selectedConfig, index) => {
+                    const favorite = selectedConfig.favorite;
+                    const customTabName = selectedConfig.tabName;
                     const config = favorite.config;
 
                     // Get selected types for this favorite
