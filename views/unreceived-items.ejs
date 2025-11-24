@@ -1151,7 +1151,7 @@
                 console.log('🔄 Starting to load unreceived items data...');
                 const response = await fetch('/purchase-orders/unreceived-items');
                 console.log('📡 Received response:', response.status);
-                
+
                 const data = await response.json();
                 console.log('📊 Data received:', { success: data.success, itemCount: data.items?.length });
 
