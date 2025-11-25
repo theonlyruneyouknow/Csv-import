@@ -3093,6 +3093,43 @@ router.post('/migrate-notes', async (req, res) => {
   }
 });
 
+// Update item notes for unreceived items (MUST be before /:id/ routes)
+router.patch('/line-item/:itemId/notes', async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const { receivingNotes } = req.body;
+
+    console.log(`📝 Updating notes for item ${itemId}`);
+
+    const lineItem = await LineItem.findByIdAndUpdate(
+      itemId,
+      { receivingNotes },
+      { new: true }
+    );
+
+    if (!lineItem) {
+      return res.status(404).json({
+        success: false,
+        error: 'Line item not found'
+      });
+    }
+
+    console.log(`✅ Notes updated for item ${itemId}`);
+
+    res.json({
+      success: true,
+      receivingNotes: lineItem.receivingNotes
+    });
+
+  } catch (error) {
+    console.error('❌ Error updating item notes:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // =============================================================================
 // PARAMETERIZED ROUTES (/:id/*) - These MUST be at the end to avoid conflicts
 // =============================================================================
@@ -5885,43 +5922,6 @@ router.get('/unreceived-items', async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error fetching unreceived items:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-// Update item notes for unreceived items
-router.patch('/line-item/:itemId/notes', async (req, res) => {
-  try {
-    const { itemId } = req.params;
-    const { receivingNotes } = req.body;
-
-    console.log(`📝 Updating notes for item ${itemId}`);
-
-    const lineItem = await LineItem.findByIdAndUpdate(
-      itemId,
-      { receivingNotes },
-      { new: true }
-    );
-
-    if (!lineItem) {
-      return res.status(404).json({
-        success: false,
-        error: 'Line item not found'
-      });
-    }
-
-    console.log(`✅ Notes updated for item ${itemId}`);
-
-    res.json({
-      success: true,
-      receivingNotes: lineItem.receivingNotes
-    });
-
-  } catch (error) {
-    console.error('❌ Error updating item notes:', error);
     res.status(500).json({
       success: false,
       error: error.message

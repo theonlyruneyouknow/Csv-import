@@ -1246,6 +1246,7 @@
                     allItems = data.items;
                     filteredItems = [...allItems];
                     console.log('✅ Data loaded successfully, rendering table...');
+                    console.log('📋 Sample item:', filteredItems[0]); // Debug: Check item structure
                     updateStats(data.stats);
                     populateFilters();
                     renderTable();
@@ -1560,6 +1561,7 @@
             }
 
             console.log('📝 Generating table HTML...');
+            console.log('🔍 First item structure:', JSON.stringify(filteredItems[0], null, 2)); // Debug: Full item structure
             tbody.innerHTML = filteredItems.map(item => {
                 const poLink = item.poUrl || '#';
                 const vendorLink = item.vendorId ? `/vendors/${item.vendorId}` : '#';
@@ -1597,7 +1599,10 @@
 
         async function updateItemNotes(itemId, notes) {
             const input = document.querySelector(`.item-notes-input[data-item-id="${itemId}"]`);
-            if (!input) return;
+            if (!input) {
+                console.error('❌ Could not find input element for item', itemId);
+                return;
+            }
 
             // Find the item in filteredItems and check if notes actually changed
             const item = filteredItems.find(i => i.itemId === itemId);
@@ -1607,16 +1612,25 @@
 
             try {
                 input.classList.add('saving');
+                console.log('💾 Saving notes for item', itemId, ':', notes);
 
                 const response = await fetch(`/purchase-orders/line-item/${itemId}/notes`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'same-origin',
                     body: JSON.stringify({ receivingNotes: notes })
                 });
 
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('❌ Server response not OK:', response.status, errorText);
+                    throw new Error(`Server error: ${response.status} - ${errorText}`);
+                }
+
                 const result = await response.json();
+                console.log('📥 Server response:', result);
 
                 if (result.success) {
                     // Update the item in our local data
@@ -1638,7 +1652,16 @@
             } catch (error) {
                 console.error('❌ Error updating notes:', error);
                 input.classList.remove('saving');
-                showToast('❌ Failed to update notes: ' + error.message);
+                
+                // Show more specific error message
+                let errorMessage = 'Failed to update notes';
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Network error - please check your connection';
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                showToast('❌ ' + errorMessage);
             }
         }
 
