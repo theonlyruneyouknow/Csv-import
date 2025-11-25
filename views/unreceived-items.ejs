@@ -2361,11 +2361,26 @@
             if (filteredOutByType.length > 0) {
                 const excludedTypes = [...new Set(filteredOutByType.map(i => i.poType))];
                 console.log('  - Excluded PO Types:', excludedTypes);
+                console.log('  - Sample excluded items:', filteredOutByType.slice(0, 5).map(i => ({
+                    poNumber: i.poNumber,
+                    sku: i.sku,
+                    memo: i.memo,
+                    poType: i.poType,
+                    poStatus: i.poStatus
+                })));
             }
             if (filteredOutByStatus.length > 0) {
                 const excludedStatuses = [...new Set(filteredOutByStatus.map(i => i.poStatus))];
                 console.log('  - Excluded Statuses:', excludedStatuses);
             }
+            
+            // Show detailed type breakdown
+            const typeBreakdown = {};
+            filteredItems.forEach(item => {
+                const type = item.poType || '(empty/null)';
+                typeBreakdown[type] = (typeBreakdown[type] || 0) + 1;
+            });
+            console.log('  - Complete Type Breakdown:', typeBreakdown);
 
             if (itemsToExport.length === 0) {
                 alert('No items match the selected filters');
