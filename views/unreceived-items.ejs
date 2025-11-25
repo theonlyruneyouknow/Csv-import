@@ -1675,7 +1675,7 @@
 
         function populateTypeFilters() {
             const typeContainer = document.getElementById('typeFilterList');
-            const uniqueTypes = [...new Set(filteredItems.map(item => item.poType).filter(t => t && t !== 'N/A'))].sort();
+            const uniqueTypes = [...new Set(filteredItems.map(item => item.poType).filter(t => t))].sort();
 
             if (uniqueTypes.length === 0) {
                 typeContainer.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #999; padding: 10px;">No types available</div>';
@@ -2346,8 +2346,26 @@
                 selectedTypes.has(item.poType) && selectedStatuses.has(item.poStatus)
             );
 
-            console.log('📊 Exporting items:', itemsToExport.length);
-            console.log('🔍 Sample item for export:', itemsToExport[0]);
+            console.log('📊 Export Filter Summary:');
+            console.log('  - Total items in view:', filteredItems.length);
+            console.log('  - Selected PO types:', Array.from(selectedTypes));
+            console.log('  - Selected statuses:', Array.from(selectedStatuses));
+            console.log('  - Items matching filters:', itemsToExport.length);
+            
+            // Show what's being filtered out
+            const filteredOutByType = filteredItems.filter(item => !selectedTypes.has(item.poType));
+            const filteredOutByStatus = filteredItems.filter(item => !selectedStatuses.has(item.poStatus));
+            console.log('  - Items excluded by PO Type:', filteredOutByType.length);
+            console.log('  - Items excluded by Status:', filteredOutByStatus.length);
+            
+            if (filteredOutByType.length > 0) {
+                const excludedTypes = [...new Set(filteredOutByType.map(i => i.poType))];
+                console.log('  - Excluded PO Types:', excludedTypes);
+            }
+            if (filteredOutByStatus.length > 0) {
+                const excludedStatuses = [...new Set(filteredOutByStatus.map(i => i.poStatus))];
+                console.log('  - Excluded Statuses:', excludedStatuses);
+            }
 
             if (itemsToExport.length === 0) {
                 alert('No items match the selected filters');
