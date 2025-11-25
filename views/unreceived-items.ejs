@@ -1377,7 +1377,7 @@
             if (saved) {
                 try {
                     const savedColumns = JSON.parse(saved);
-                    
+
                     // Merge saved preferences with default columns to add any new columns
                     const defaultColumns = [
                         { id: 'poNumber', label: 'PO Number', visible: true, sortable: true },
@@ -1391,14 +1391,14 @@
                         { id: 'poStatus', label: 'PO Status', visible: true, sortable: true },
                         { id: 'notes', label: 'Notes', visible: true, sortable: false }
                     ];
-                    
+
                     // Find columns in default that aren't in saved
                     const savedIds = savedColumns.map(col => col.id);
                     const newColumns = defaultColumns.filter(col => !savedIds.includes(col.id));
-                    
+
                     // Append new columns to saved columns
                     viewColumns = [...savedColumns, ...newColumns];
-                    
+
                     // Save the updated preferences
                     if (newColumns.length > 0) {
                         console.log('Added new columns:', newColumns.map(c => c.label).join(', '));
