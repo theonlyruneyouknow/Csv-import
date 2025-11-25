@@ -842,6 +842,9 @@
                 <a href="/purchase-orders" class="btn btn-primary">
                     ← Back to Dashboard
                 </a>
+                <button onclick="openViewColumnModal()" class="btn btn-primary" style="background: #6c757d;">
+                    ⚙️ Manage Columns
+                </button>
                 <button onclick="exportToCSV()" class="btn btn-success">
                     📥 Export to CSV
                 </button>
@@ -910,6 +913,34 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- View Column Management Modal -->
+    <div id="viewColumnModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="modal-header">
+                <h3>⚙️ Manage Visible Columns</h3>
+                <button class="close-btn" onclick="closeViewColumnModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 10px; color: #666;">Choose columns to display and drag to reorder:</p>
+                <div id="viewColumnList" class="column-list">
+                    <!-- Column items will be populated here -->
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
+                        <input type="checkbox" id="selectAllViewColumns" checked onchange="toggleAllViewColumns(this.checked)">
+                        <span>Select All Columns</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeViewColumnModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="applyViewColumns()">
+                    ✓ Apply Changes
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1121,6 +1152,8 @@
             }
             // Load favorites
             loadFavoritesList();
+            // Load saved column preferences
+            loadViewColumnPreferences();
         });
 
         function toggleCompactMode() {
@@ -1287,6 +1320,151 @@
             });
         }
 
+        // View column configuration
+        let viewColumns = [
+            { id: 'poNumber', label: 'PO Number', visible: true, sortable: true },
+            { id: 'vendor', label: 'Vendor', visible: true, sortable: true },
+            { id: 'poDate', label: 'PO Date', visible: true, sortable: true },
+            { id: 'eta', label: 'ETA', visible: true, sortable: true },
+            { id: 'sku', label: 'SKU', visible: true, sortable: true },
+            { id: 'memo', label: 'Description', visible: true, sortable: false },
+            { id: 'quantity', label: 'Quantity', visible: true, sortable: true },
+            { id: 'itemStatus', label: 'Item Status', visible: true, sortable: true },
+            { id: 'poStatus', label: 'PO Status', visible: true, sortable: true }
+        ];
+
+        function loadViewColumnPreferences() {
+            const saved = localStorage.getItem('unreceivedItemsViewColumns');
+            if (saved) {
+                try {
+                    viewColumns = JSON.parse(saved);
+                } catch (e) {
+                    console.error('Failed to load column preferences:', e);
+                }
+            }
+            updateTableHeaders();
+        }
+
+        function saveViewColumnPreferences() {
+            localStorage.setItem('unreceivedItemsViewColumns', JSON.stringify(viewColumns));
+        }
+
+        function updateTableHeaders() {
+            const thead = document.querySelector('#itemsTable thead tr');
+            if (!thead) return;
+
+            const visibleColumns = viewColumns.filter(col => col.visible);
+            thead.innerHTML = visibleColumns.map(col => {
+                const sortClass = col.sortable ? 'sortable' : '';
+                return `<th class="${sortClass}" data-sort="${col.id}">${col.label}</th>`;
+            }).join('');
+        }
+
+        function openViewColumnModal() {
+            const listContainer = document.getElementById('viewColumnList');
+            listContainer.innerHTML = viewColumns.map((col, index) => `
+                <div class="column-item" draggable="true" data-col-index="${index}">
+                    <span class="drag-handle">⋮⋮</span>
+                    <input type="checkbox" id="viewCol_${col.id}" ${col.visible ? 'checked' : ''}>
+                    <label for="viewCol_${col.id}">${col.label}</label>
+                </div>
+            `).join('');
+
+            // Setup drag and drop after creating the items
+            setupViewColumnDragAndDrop();
+
+            document.getElementById('viewColumnModal').style.display = 'flex';
+        }
+
+        function closeViewColumnModal() {
+            document.getElementById('viewColumnModal').style.display = 'none';
+        }
+
+        function toggleAllViewColumns(checked) {
+            viewColumns.forEach(col => {
+                const checkbox = document.getElementById(`viewCol_${col.id}`);
+                if (checkbox) checkbox.checked = checked;
+            });
+        }
+
+        function applyViewColumns() {
+            // Get order from DOM
+            const items = document.querySelectorAll('#viewColumnList .column-item');
+            const newOrder = [];
+            items.forEach(item => {
+                const index = parseInt(item.getAttribute('data-col-index'));
+                const col = viewColumns[index];
+                const checkbox = document.getElementById(`viewCol_${col.id}`);
+                newOrder.push({
+                    ...col,
+                    visible: checkbox ? checkbox.checked : col.visible
+                });
+            });
+
+            viewColumns = newOrder;
+            saveViewColumnPreferences();
+            updateTableHeaders();
+            renderTable();
+            closeViewColumnModal();
+            showToast('✅ Column settings applied');
+        }
+
+        function setupViewColumnDragAndDrop() {
+            const viewColumnList = document.getElementById('viewColumnList');
+            if (!viewColumnList) return;
+            
+            let draggedElement = null;
+
+            // Add drag event listeners to all column items
+            const columnItems = viewColumnList.querySelectorAll('.column-item');
+
+            columnItems.forEach(item => {
+                item.addEventListener('dragstart', function (e) {
+                    draggedElement = this;
+                    this.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                item.addEventListener('dragend', function (e) {
+                    this.classList.remove('dragging');
+                    // Remove all drag-over classes
+                    columnItems.forEach(item => item.classList.remove('drag-over'));
+                });
+
+                item.addEventListener('dragover', function (e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+
+                    if (this !== draggedElement) {
+                        this.classList.add('drag-over');
+                    }
+                });
+
+                item.addEventListener('dragleave', function (e) {
+                    this.classList.remove('drag-over');
+                });
+
+                item.addEventListener('drop', function (e) {
+                    e.preventDefault();
+                    this.classList.remove('drag-over');
+
+                    if (this !== draggedElement) {
+                        // Get all items
+                        const allItems = [...viewColumnList.querySelectorAll('.column-item')];
+                        const draggedIndex = allItems.indexOf(draggedElement);
+                        const targetIndex = allItems.indexOf(this);
+
+                        // Insert dragged element before or after target
+                        if (draggedIndex < targetIndex) {
+                            this.parentNode.insertBefore(draggedElement, this.nextSibling);
+                        } else {
+                            this.parentNode.insertBefore(draggedElement, this);
+                        }
+                    }
+                });
+            });
+        }
+
         function renderTable() {
             console.log('🎨 Rendering table with', filteredItems.length, 'items');
             const tbody = document.getElementById('itemsBody');
@@ -1296,11 +1474,14 @@
                 return;
             }
 
+            const visibleColumns = viewColumns.filter(col => col.visible);
+            const colCount = visibleColumns.length;
+
             if (filteredItems.length === 0) {
                 console.log('📭 No items to display, showing empty state');
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="8">
+                        <td colspan="${colCount}">
                             <div class="empty-state">
                                 <div class="empty-state-icon">✅</div>
                                 <h2>All Items Received!</h2>
@@ -1314,36 +1495,35 @@
 
             console.log('📝 Generating table HTML...');
             tbody.innerHTML = filteredItems.map(item => {
-                // Use poUrl directly if available
                 const poLink = item.poUrl || '#';
+                const vendorLink = item.vendorId ? `/vendors/${item.vendorId}` : '#';
 
-                // Build vendor link
-                const vendorLink = item.vendorId
-                    ? `/vendors/${item.vendorId}`
-                    : '#';
+                const cells = visibleColumns.map(col => {
+                    switch(col.id) {
+                        case 'poNumber':
+                            return `<td>${item.poUrl ? `<a href="${poLink}" target="_blank" class="po-link">${item.poNumber}</a>` : item.poNumber}</td>`;
+                        case 'vendor':
+                            return `<td>${item.vendorId ? `<a href="${vendorLink}" class="vendor-link">${item.vendor}</a>` : item.vendor || 'N/A'}</td>`;
+                        case 'poDate':
+                            return `<td>${item.poDate || 'N/A'}</td>`;
+                        case 'eta':
+                            return `<td>${item.eta ? new Date(item.eta).toLocaleDateString() : 'N/A'}</td>`;
+                        case 'sku':
+                            return `<td><strong>${item.sku || 'N/A'}</strong></td>`;
+                        case 'memo':
+                            return `<td style="max-width: 400px; white-space: normal;" title="${item.memo || ''}">${item.memo || 'N/A'}</td>`;
+                        case 'quantity':
+                            return `<td>${item.quantity || 0}</td>`;
+                        case 'itemStatus':
+                            return `<td>${item.itemStatus ? `<span class="badge badge-info">${item.itemStatus}</span>` : 'N/A'}</td>`;
+                        case 'poStatus':
+                            return `<td>${item.poStatus ? `<span class="badge badge-warning">${item.poStatus}</span>` : 'N/A'}</td>`;
+                        default:
+                            return '<td>N/A</td>';
+                    }
+                }).join('');
 
-                return `
-                <tr>
-                    <td>
-                        ${item.poUrl
-                        ? `<a href="${poLink}" target="_blank" class="po-link">${item.poNumber}</a>`
-                        : item.poNumber
-                    }
-                    </td>
-                    <td>
-                        ${item.vendorId
-                        ? `<a href="${vendorLink}" class="vendor-link">${item.vendor}</a>`
-                        : item.vendor || 'N/A'
-                    }
-                    </td>
-                    <td>${item.poDate || 'N/A'}</td>
-                    <td>${item.eta ? new Date(item.eta).toLocaleDateString() : 'N/A'}</td>
-                    <td><strong>${item.sku || 'N/A'}</strong></td>
-                    <td style="max-width: 400px; white-space: normal;" title="${item.memo || ''}">${item.memo || 'N/A'}</td>
-                    <td>${item.itemStatus ? `<span class="badge badge-info">${item.itemStatus}</span>` : 'N/A'}</td>
-                    <td>${item.poStatus ? `<span class="badge badge-warning">${item.poStatus}</span>` : 'N/A'}</td>
-                </tr>
-                `;
+                return `<tr>${cells}</tr>`;
             }).join('');
         }
 
