@@ -1726,6 +1726,29 @@
 
         function loadFavoritesList() {
             const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+            
+            // Migrate old favorites to include notes column if missing
+            let needsSave = false;
+            favorites.forEach(favorite => {
+                if (favorite.config && favorite.config.columns) {
+                    const hasNotesColumn = favorite.config.columns.some(col => col.id === 'col_notes');
+                    if (!hasNotesColumn) {
+                        // Add notes column to the end, checked by default
+                        favorite.config.columns.push({
+                            id: 'col_notes',
+                            checked: true
+                        });
+                        needsSave = true;
+                    }
+                }
+            });
+            
+            // Save migrated favorites back to localStorage
+            if (needsSave) {
+                localStorage.setItem('unreceivedItemsFavorites', JSON.stringify(favorites));
+                console.log('✅ Migrated favorites to include notes column');
+            }
+            
             const favoritesList = document.getElementById('favoritesList');
 
             if (favorites.length === 0) {
@@ -2322,6 +2345,9 @@
             const itemsToExport = filteredItems.filter(item =>
                 selectedTypes.has(item.poType) && selectedStatuses.has(item.poStatus)
             );
+
+            console.log('📊 Exporting items:', itemsToExport.length);
+            console.log('🔍 Sample item for export:', itemsToExport[0]);
 
             if (itemsToExport.length === 0) {
                 alert('No items match the selected filters');
