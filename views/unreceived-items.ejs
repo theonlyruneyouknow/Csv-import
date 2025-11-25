@@ -1726,7 +1726,7 @@
 
         function loadFavoritesList() {
             const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
-            
+
             // Migrate old favorites to include notes column if missing
             let needsSave = false;
             favorites.forEach(favorite => {
@@ -1742,13 +1742,13 @@
                     }
                 }
             });
-            
+
             // Save migrated favorites back to localStorage
             if (needsSave) {
                 localStorage.setItem('unreceivedItemsFavorites', JSON.stringify(favorites));
                 console.log('✅ Migrated favorites to include notes column');
             }
-            
+
             const favoritesList = document.getElementById('favoritesList');
 
             if (favorites.length === 0) {
