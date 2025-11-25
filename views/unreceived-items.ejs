@@ -1652,7 +1652,7 @@
             } catch (error) {
                 console.error('❌ Error updating notes:', error);
                 input.classList.remove('saving');
-                
+
                 // Show more specific error message
                 let errorMessage = 'Failed to update notes';
                 if (error.message.includes('Failed to fetch')) {
@@ -1660,7 +1660,7 @@
                 } else if (error.message) {
                     errorMessage = error.message;
                 }
-                
+
                 showToast('❌ ' + errorMessage);
             }
         }
