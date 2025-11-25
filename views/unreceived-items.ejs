@@ -930,7 +930,8 @@
                 </div>
                 <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
-                        <input type="checkbox" id="selectAllViewColumns" checked onchange="toggleAllViewColumns(this.checked)">
+                        <input type="checkbox" id="selectAllViewColumns" checked
+                            onchange="toggleAllViewColumns(this.checked)">
                         <span>Select All Columns</span>
                     </label>
                 </div>
@@ -1412,7 +1413,7 @@
         function setupViewColumnDragAndDrop() {
             const viewColumnList = document.getElementById('viewColumnList');
             if (!viewColumnList) return;
-            
+
             let draggedElement = null;
 
             // Add drag event listeners to all column items
@@ -1499,7 +1500,7 @@
                 const vendorLink = item.vendorId ? `/vendors/${item.vendorId}` : '#';
 
                 const cells = visibleColumns.map(col => {
-                    switch(col.id) {
+                    switch (col.id) {
                         case 'poNumber':
                             return `<td>${item.poUrl ? `<a href="${poLink}" target="_blank" class="po-link">${item.poNumber}</a>` : item.poNumber}</td>`;
                         case 'vendor':
