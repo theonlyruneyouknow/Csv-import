@@ -831,6 +831,38 @@
             border-color: #ff9800;
             box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
         }
+
+        /* Item Notes Input */
+        .item-notes-input {
+            width: 100%;
+            min-width: 200px;
+            padding: 6px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .item-notes-input:focus {
+            outline: none;
+            border-color: #17a2b8;
+            box-shadow: 0 0 0 2px rgba(23, 162, 184, 0.15);
+        }
+
+        .item-notes-input:hover {
+            border-color: #adb5bd;
+        }
+
+        .item-notes-input.saving {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+
+        .item-notes-input.saved {
+            background: #d4edda;
+            border-color: #28a745;
+        }
     </style>
 </head>
 
@@ -1014,6 +1046,11 @@
                         <span class="drag-handle">⋮⋮</span>
                         <input type="checkbox" id="col_poStatus" checked>
                         <label for="col_poStatus">PO Status</label>
+                    </div>
+                    <div class="column-item" draggable="true" data-col="col_notes">
+                        <span class="drag-handle">⋮⋮</span>
+                        <input type="checkbox" id="col_notes" checked>
+                        <label for="col_notes">Notes</label>
                     </div>
                 </div>
 
@@ -1331,14 +1368,42 @@
             { id: 'memo', label: 'Description', visible: true, sortable: false },
             { id: 'quantity', label: 'Quantity', visible: true, sortable: true },
             { id: 'itemStatus', label: 'Item Status', visible: true, sortable: true },
-            { id: 'poStatus', label: 'PO Status', visible: true, sortable: true }
+            { id: 'poStatus', label: 'PO Status', visible: true, sortable: true },
+            { id: 'notes', label: 'Notes', visible: true, sortable: false }
         ];
 
         function loadViewColumnPreferences() {
             const saved = localStorage.getItem('unreceivedItemsViewColumns');
             if (saved) {
                 try {
-                    viewColumns = JSON.parse(saved);
+                    const savedColumns = JSON.parse(saved);
+                    
+                    // Merge saved preferences with default columns to add any new columns
+                    const defaultColumns = [
+                        { id: 'poNumber', label: 'PO Number', visible: true, sortable: true },
+                        { id: 'vendor', label: 'Vendor', visible: true, sortable: true },
+                        { id: 'poDate', label: 'PO Date', visible: true, sortable: true },
+                        { id: 'eta', label: 'ETA', visible: true, sortable: true },
+                        { id: 'sku', label: 'SKU', visible: true, sortable: true },
+                        { id: 'memo', label: 'Description', visible: true, sortable: false },
+                        { id: 'quantity', label: 'Quantity', visible: true, sortable: true },
+                        { id: 'itemStatus', label: 'Item Status', visible: true, sortable: true },
+                        { id: 'poStatus', label: 'PO Status', visible: true, sortable: true },
+                        { id: 'notes', label: 'Notes', visible: true, sortable: false }
+                    ];
+                    
+                    // Find columns in default that aren't in saved
+                    const savedIds = savedColumns.map(col => col.id);
+                    const newColumns = defaultColumns.filter(col => !savedIds.includes(col.id));
+                    
+                    // Append new columns to saved columns
+                    viewColumns = [...savedColumns, ...newColumns];
+                    
+                    // Save the updated preferences
+                    if (newColumns.length > 0) {
+                        console.log('Added new columns:', newColumns.map(c => c.label).join(', '));
+                        saveViewColumnPreferences();
+                    }
                 } catch (e) {
                     console.error('Failed to load column preferences:', e);
                 }
@@ -1519,6 +1584,8 @@
                             return `<td>${item.itemStatus ? `<span class="badge badge-info">${item.itemStatus}</span>` : 'N/A'}</td>`;
                         case 'poStatus':
                             return `<td>${item.poStatus ? `<span class="badge badge-warning">${item.poStatus}</span>` : 'N/A'}</td>`;
+                        case 'notes':
+                            return `<td><input type="text" class="item-notes-input" value="${(item.receivingNotes || '').replace(/"/g, '&quot;')}" placeholder="Add notes..." onblur="updateItemNotes('${item.itemId}', this.value)" data-item-id="${item.itemId}"></td>`;
                         default:
                             return '<td>N/A</td>';
                     }
@@ -1526,6 +1593,53 @@
 
                 return `<tr>${cells}</tr>`;
             }).join('');
+        }
+
+        async function updateItemNotes(itemId, notes) {
+            const input = document.querySelector(`.item-notes-input[data-item-id="${itemId}"]`);
+            if (!input) return;
+
+            // Find the item in filteredItems and check if notes actually changed
+            const item = filteredItems.find(i => i.itemId === itemId);
+            if (item && item.receivingNotes === notes) {
+                return; // No change, don't save
+            }
+
+            try {
+                input.classList.add('saving');
+
+                const response = await fetch(`/purchase-orders/line-item/${itemId}/notes`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ receivingNotes: notes })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Update the item in our local data
+                    if (item) {
+                        item.receivingNotes = notes;
+                    }
+
+                    // Show success feedback
+                    input.classList.remove('saving');
+                    input.classList.add('saved');
+                    setTimeout(() => {
+                        input.classList.remove('saved');
+                    }, 1500);
+
+                    console.log('✅ Notes updated for item', itemId);
+                } else {
+                    throw new Error(result.error || 'Failed to update notes');
+                }
+            } catch (error) {
+                console.error('❌ Error updating notes:', error);
+                input.classList.remove('saving');
+                showToast('❌ Failed to update notes: ' + error.message);
+            }
         }
 
         function exportToCSV() {
@@ -1989,7 +2103,8 @@
                     col_memo: { key: 'memo', label: 'Description' },
                     col_quantity: { key: 'quantity', label: 'Quantity' },
                     col_itemStatus: { key: 'itemStatus', label: 'Item Status' },
-                    col_poStatus: { key: 'poStatus', label: 'PO Status' }
+                    col_poStatus: { key: 'poStatus', label: 'PO Status' },
+                    col_notes: { key: 'receivingNotes', label: 'Notes' }
                 };
 
                 // Process each selected configuration
@@ -2151,7 +2266,7 @@
         }
 
         function toggleAllColumns(checked) {
-            const checkboxes = ['col_poNumber', 'col_vendor', 'col_poDate', 'col_eta', 'col_sku', 'col_memo', 'col_quantity', 'col_itemStatus', 'col_poStatus'];
+            const checkboxes = ['col_poNumber', 'col_vendor', 'col_poDate', 'col_eta', 'col_sku', 'col_memo', 'col_quantity', 'col_itemStatus', 'col_poStatus', 'col_notes'];
             checkboxes.forEach(id => {
                 document.getElementById(id).checked = checked;
             });
@@ -2200,7 +2315,8 @@
                 col_memo: { key: 'memo', label: 'Description' },
                 col_quantity: { key: 'quantity', label: 'Quantity' },
                 col_itemStatus: { key: 'itemStatus', label: 'Item Status' },
-                col_poStatus: { key: 'poStatus', label: 'PO Status' }
+                col_poStatus: { key: 'poStatus', label: 'PO Status' },
+                col_notes: { key: 'receivingNotes', label: 'Notes' }
             };
 
             // Get columns in the order they appear in the DOM
