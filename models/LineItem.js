@@ -200,6 +200,23 @@ const lineItemSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
+    // Inventory data fields - for on-hand quantities
+    inventoryRawQuantity: {     // Raw seed quantity on hand
+        type: Number,
+        default: null
+    },
+    inventoryChildQuantity: {   // Combined/child quantity on hand
+        type: Number,
+        default: null
+    },
+    inventoryMeasure: {         // Unit of measure (POUND, M, etc.)
+        type: String,
+        default: ''
+    },
+    inventoryLastUpdated: {     // When inventory data was last imported
+        type: Date,
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now

@@ -3130,6 +3130,74 @@ router.patch('/line-item/:itemId/notes', async (req, res) => {
   }
 });
 
+// Import inventory data (MUST be before /:id/ routes)
+router.post('/import-inventory-data', async (req, res) => {
+  try {
+    const { inventoryData } = req.body;
+
+    if (!inventoryData || !Array.isArray(inventoryData)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid inventory data format'
+      });
+    }
+
+    console.log(`📦 Importing inventory data for ${inventoryData.length} SKUs`);
+
+    let updatedCount = 0;
+    let notFoundCount = 0;
+    const notFoundSkus = [];
+
+    // Process each inventory item
+    for (const item of inventoryData) {
+      const { sku, measure, raw, child } = item;
+
+      if (!sku) continue;
+
+      // Find all line items with this SKU (could be multiple)
+      const lineItems = await LineItem.find({ sku: sku });
+
+      if (lineItems.length === 0) {
+        notFoundCount++;
+        notFoundSkus.push(sku);
+        continue;
+      }
+
+      // Update all line items with this SKU
+      await LineItem.updateMany(
+        { sku: sku },
+        {
+          $set: {
+            inventoryRawQuantity: parseFloat(raw) || null,
+            inventoryChildQuantity: parseFloat(child) || null,
+            inventoryMeasure: measure || '',
+            inventoryLastUpdated: new Date()
+          }
+        }
+      );
+
+      updatedCount += lineItems.length;
+    }
+
+    console.log(`✅ Inventory import complete: ${updatedCount} line items updated, ${notFoundCount} SKUs not found`);
+
+    res.json({
+      success: true,
+      updatedCount,
+      notFoundCount,
+      notFoundSkus: notFoundSkus.slice(0, 10), // Only return first 10 for display
+      totalNotFound: notFoundSkus.length
+    });
+
+  } catch (error) {
+    console.error('❌ Error importing inventory data:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // =============================================================================
 // PARAMETERIZED ROUTES (/:id/*) - These MUST be at the end to avoid conflicts
 // =============================================================================
@@ -5901,7 +5969,11 @@ router.get('/unreceived-items', async (req, res) => {
         itemStatus: item.itemStatus || 'N/A',
         poStatus: item.poId.status || 'N/A',
         poType: item.poId.poType || 'N/A',
-        receivingNotes: item.receivingNotes || ''
+        receivingNotes: item.receivingNotes || '',
+        inventoryRawQuantity: item.inventoryRawQuantity || null,
+        inventoryChildQuantity: item.inventoryChildQuantity || null,
+        inventoryMeasure: item.inventoryMeasure || '',
+        inventoryLastUpdated: item.inventoryLastUpdated || null
       }));
 
     // Get stats

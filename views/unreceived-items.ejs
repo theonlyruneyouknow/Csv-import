@@ -874,6 +874,9 @@
                 <a href="/purchase-orders" class="btn btn-primary">
                     ← Back to Dashboard
                 </a>
+                <button onclick="openInventoryImportModal()" class="btn btn-primary" style="background: #28a745;">
+                    📦 Import Inventory Data
+                </button>
                 <button onclick="openViewColumnModal()" class="btn btn-primary" style="background: #6c757d;">
                     ⚙️ Manage Columns
                 </button>
@@ -1052,6 +1055,21 @@
                         <input type="checkbox" id="col_notes" checked>
                         <label for="col_notes">Notes</label>
                     </div>
+                    <div class="column-item" draggable="true" data-col="col_invRaw">
+                        <span class="drag-handle">⋮⋮</span>
+                        <input type="checkbox" id="col_invRaw" checked>
+                        <label for="col_invRaw">Inventory Raw Qty</label>
+                    </div>
+                    <div class="column-item" draggable="true" data-col="col_invChild">
+                        <span class="drag-handle">⋮⋮</span>
+                        <input type="checkbox" id="col_invChild" checked>
+                        <label for="col_invChild">Inventory Child Qty</label>
+                    </div>
+                    <div class="column-item" draggable="true" data-col="col_invMeasure">
+                        <span class="drag-handle">⋮⋮</span>
+                        <input type="checkbox" id="col_invMeasure" checked>
+                        <label for="col_invMeasure">Inventory Measure</label>
+                    </div>
                 </div>
 
                 <!-- PO Type Filter Section -->
@@ -1157,6 +1175,41 @@
                 <button class="btn btn-secondary" onclick="closeExcelSelectModal()">Cancel</button>
                 <button class="btn btn-success" style="background: #17a2b8;" onclick="performExcelExport()">
                     📊 Export to Excel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Import Modal -->
+    <div id="inventoryImportModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>📦 Import Inventory Data</h3>
+                <button class="close-btn" onclick="closeInventoryImportModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 15px; color: #666;">
+                    Paste inventory data from Excel with columns: <strong>Name (SKU), Measure, Raw, Child</strong>
+                </p>
+                <textarea 
+                    id="inventoryDataInput" 
+                    placeholder="Paste your data here (tab-separated from Excel)&#10;Example:&#10;BR094 : BR094/OR.M.OG    POUND    2    1.244951&#10;HR1132 :    POUND    66.937    5.787867"
+                    style="width: 100%; height: 300px; font-family: monospace; font-size: 12px; padding: 10px; border: 2px solid #ced4da; border-radius: 4px; resize: vertical;">
+                </textarea>
+                <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                    <p style="margin: 0; font-size: 13px;"><strong>⚠️ Important:</strong></p>
+                    <ul style="margin: 5px 0 0 20px; font-size: 13px;">
+                        <li>Data should be tab-separated (copy directly from Excel)</li>
+                        <li>First column must contain the SKU code</li>
+                        <li>System will match SKUs and update inventory data</li>
+                        <li>This will overwrite existing inventory data</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeInventoryImportModal()" class="btn btn-secondary">Cancel</button>
+                <button onclick="processInventoryImport()" class="btn btn-success">
+                    📥 Import Data
                 </button>
             </div>
         </div>
@@ -2150,7 +2203,10 @@
                     col_quantity: { key: 'quantity', label: 'Quantity' },
                     col_itemStatus: { key: 'itemStatus', label: 'Item Status' },
                     col_poStatus: { key: 'poStatus', label: 'PO Status' },
-                    col_notes: { key: 'receivingNotes', label: 'Notes' }
+                    col_notes: { key: 'receivingNotes', label: 'Notes' },
+                    col_invRaw: { key: 'inventoryRawQuantity', label: 'Inventory Raw Qty' },
+                    col_invChild: { key: 'inventoryChildQuantity', label: 'Inventory Child Qty' },
+                    col_invMeasure: { key: 'inventoryMeasure', label: 'Inventory Measure' }
                 };
 
                 // Process each selected configuration
@@ -2312,7 +2368,7 @@
         }
 
         function toggleAllColumns(checked) {
-            const checkboxes = ['col_poNumber', 'col_vendor', 'col_poDate', 'col_eta', 'col_sku', 'col_memo', 'col_quantity', 'col_itemStatus', 'col_poStatus', 'col_notes'];
+            const checkboxes = ['col_poNumber', 'col_vendor', 'col_poDate', 'col_eta', 'col_sku', 'col_memo', 'col_quantity', 'col_itemStatus', 'col_poStatus', 'col_notes', 'col_invRaw', 'col_invChild', 'col_invMeasure'];
             checkboxes.forEach(id => {
                 document.getElementById(id).checked = checked;
             });
@@ -2398,7 +2454,10 @@
                 col_quantity: { key: 'quantity', label: 'Quantity' },
                 col_itemStatus: { key: 'itemStatus', label: 'Item Status' },
                 col_poStatus: { key: 'poStatus', label: 'PO Status' },
-                col_notes: { key: 'receivingNotes', label: 'Notes' }
+                col_notes: { key: 'receivingNotes', label: 'Notes' },
+                col_invRaw: { key: 'inventoryRawQuantity', label: 'Inventory Raw Qty' },
+                col_invChild: { key: 'inventoryChildQuantity', label: 'Inventory Child Qty' },
+                col_invMeasure: { key: 'inventoryMeasure', label: 'Inventory Measure' }
             };
 
             // Get columns in the order they appear in the DOM
@@ -2485,6 +2544,118 @@
                     </td>
                 </tr>
             `;
+        }
+
+        // ============= INVENTORY DATA IMPORT =============
+
+        function openInventoryImportModal() {
+            document.getElementById('inventoryImportModal').style.display = 'flex';
+            document.getElementById('inventoryDataInput').value = '';
+            document.getElementById('inventoryDataInput').focus();
+        }
+
+        function closeInventoryImportModal() {
+            document.getElementById('inventoryImportModal').style.display = 'none';
+        }
+
+        async function processInventoryImport() {
+            const textarea = document.getElementById('inventoryDataInput');
+            const rawData = textarea.value.trim();
+
+            if (!rawData) {
+                alert('Please paste inventory data to import');
+                return;
+            }
+
+            try {
+                // Parse the pasted data (tab-separated from Excel)
+                const lines = rawData.split('\n').filter(line => line.trim());
+                const inventoryData = [];
+
+                console.log('📊 Parsing', lines.length, 'lines of inventory data');
+
+                for (const line of lines) {
+                    // Split by tab (from Excel copy/paste)
+                    const parts = line.split('\t').map(p => p.trim());
+                    
+                    if (parts.length < 4) {
+                        console.warn('⚠️ Skipping line (not enough columns):', line);
+                        continue;
+                    }
+
+                    const [name, measure, raw, child] = parts;
+                    
+                    // Extract SKU from name (might have description after :)
+                    const sku = name.split(':')[0].trim();
+                    
+                    if (sku) {
+                        const rawQty = parseFloat(raw);
+                        const childQty = parseFloat(child);
+                        
+                        inventoryData.push({
+                            sku: sku,
+                            measure: measure || '',
+                            raw: isNaN(rawQty) ? 0 : rawQty,
+                            child: isNaN(childQty) ? 0 : childQty
+                        });
+                    }
+                }
+
+                if (inventoryData.length === 0) {
+                    alert('No valid inventory data found. Please check your format.\n\nExpected format:\nSKU [tab] Measure [tab] Raw [tab] Child');
+                    return;
+                }
+
+                console.log('📦 Parsed inventory data:', inventoryData.length, 'items');
+                console.log('🔍 Sample parsed items:', inventoryData.slice(0, 3));
+
+                // Show loading message
+                showToast('⏳ Importing inventory data...');
+
+                // Send to server
+                const response = await fetch('/purchase-orders/import-inventory-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ inventoryData })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('❌ Server error:', response.status, errorText);
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    closeInventoryImportModal();
+                    
+                    let message = `✅ Inventory import complete!\n`;
+                    message += `   - ${result.updatedCount} line items updated\n`;
+                    if (result.notFoundCount > 0) {
+                        message += `   - ${result.notFoundCount} SKUs not found in system`;
+                    }
+                    
+                    showToast(message);
+                    console.log('✅ Import result:', result);
+                    
+                    if (result.notFoundSkus && result.notFoundSkus.length > 0) {
+                        console.log('⚠️ SKUs not found:', result.notFoundSkus);
+                    }
+
+                    // Reload data to show updated inventory values
+                    loadData();
+                } else {
+                    throw new Error(result.error || 'Failed to import inventory data');
+                }
+
+            } catch (error) {
+                console.error('❌ Error importing inventory data:', error);
+                showToast('❌ Failed to import: ' + error.message);
+            }
         }
     </script>
 </body>

@@ -250,9 +250,9 @@ app.use(session({
     }
 }));
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Middleware - increase limit for inventory data imports
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views'); // Set the views directory explicitly
 
