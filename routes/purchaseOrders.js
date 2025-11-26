@@ -3159,7 +3159,7 @@ router.post('/preview-inventory-import', async (req, res) => {
       let lineItems = await LineItem.find({ sku: sku })
         .populate('poId')
         .lean();
-      
+
       // If no exact match, try partial match
       if (lineItems.length === 0) {
         const skuPattern = new RegExp(`^${sku.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s*:|$)`, 'i');
@@ -3254,16 +3254,16 @@ router.post('/import-inventory-data', async (req, res) => {
       // Find all line items with this SKU (could be multiple)
       // Try exact match first, then partial match (SKU might be stored as "SKU : Description")
       let lineItems = await LineItem.find({ sku: sku });
-      
+
       if (lineItems.length > 0) {
         exactMatches++;
       }
-      
+
       // If no exact match, try matching where the sku field starts with this SKU code
       if (lineItems.length === 0) {
         const skuPattern = new RegExp(`^${sku.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s*:|$)`, 'i');
         lineItems = await LineItem.find({ sku: skuPattern });
-        
+
         if (lineItems.length > 0) {
           partialMatches++;
         }
@@ -3293,7 +3293,7 @@ router.post('/import-inventory-data', async (req, res) => {
 
     console.log(`✅ Inventory import complete: ${updatedCount} line items updated, ${notFoundCount} SKUs not found`);
     console.log(`📊 Match statistics: ${exactMatches} exact matches, ${partialMatches} partial matches`);
-    
+
     if (notFoundSkus.length > 0) {
       console.log('⚠️ Sample not found SKUs:', notFoundSkus.slice(0, 5));
     }

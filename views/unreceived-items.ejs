@@ -1226,7 +1226,8 @@
                 <button class="close-btn" onclick="closeInventoryPreviewModal()">&times;</button>
             </div>
             <div class="modal-body" style="max-height: calc(90vh - 150px); overflow-y: auto;">
-                <div id="previewSummary" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                <div id="previewSummary"
+                    style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
                     <!-- Summary will be inserted here -->
                 </div>
                 <div style="overflow-x: auto;">
@@ -1238,8 +1239,10 @@
                                 <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Measure</th>
                                 <th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">Raw Qty</th>
                                 <th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">Child Qty</th>
-                                <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Matched Line Items</th>
-                                <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Current Values</th>
+                                <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Matched Line
+                                    Items</th>
+                                <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Current Values
+                                </th>
                             </tr>
                         </thead>
                         <tbody id="previewTableBody">
@@ -1266,7 +1269,9 @@
                 <p id="loadingDetails" style="color: #666; font-size: 14px;"></p>
                 <div style="margin-top: 20px;">
                     <div style="width: 100%; height: 4px; background: #e0e0e0; border-radius: 2px; overflow: hidden;">
-                        <div style="width: 100%; height: 100%; background: linear-gradient(90deg, #17a2b8 0%, #17a2b8 50%, transparent 50%, transparent 100%); background-size: 40px 100%; animation: loading-bar 1s linear infinite;"></div>
+                        <div
+                            style="width: 100%; height: 100%; background: linear-gradient(90deg, #17a2b8 0%, #17a2b8 50%, transparent 50%, transparent 100%); background-size: 40px 100%; animation: loading-bar 1s linear infinite;">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1275,8 +1280,13 @@
 
     <style>
         @keyframes loading-bar {
-            0% { background-position: 0 0; }
-            100% { background-position: 40px 0; }
+            0% {
+                background-position: 0 0;
+            }
+
+            100% {
+                background-position: 40px 0;
+            }
         }
     </style>
 
@@ -1365,17 +1375,17 @@
                     filteredItems = [...allItems];
                     console.log('✅ Data loaded successfully, rendering table...');
                     console.log('📋 Sample item:', filteredItems[0]); // Debug: Check item structure
-                    
+
                     // Debug: Check inventory fields specifically
                     if (filteredItems.length > 0) {
-                        const itemsWithInventory = filteredItems.filter(item => 
-                            item.inventoryRawQuantity !== null || 
+                        const itemsWithInventory = filteredItems.filter(item =>
+                            item.inventoryRawQuantity !== null ||
                             item.inventoryChildQuantity !== null ||
                             (item.inventoryMeasure && item.inventoryMeasure !== '')
                         );
-                        
+
                         console.log(`📦 Items with inventory data: ${itemsWithInventory.length} out of ${filteredItems.length}`);
-                        
+
                         if (itemsWithInventory.length > 0) {
                             const sample = itemsWithInventory[0];
                             console.log('📦 Sample item WITH inventory data:', {
@@ -1389,7 +1399,7 @@
                             console.log('⚠️ No items found with inventory data yet');
                         }
                     }
-                    
+
                     updateStats(data.stats);
                     populateFilters();
                     renderTable();
@@ -2365,7 +2375,7 @@
 
                     // Debug: Log sample row with inventory data if selected
                     if (selectedColumns.some(col => col.key.includes('inventory'))) {
-                        const sampleWithInventory = itemsToExport.find(item => 
+                        const sampleWithInventory = itemsToExport.find(item =>
                             item.inventoryRawQuantity !== null || item.inventoryChildQuantity !== null
                         );
                         if (sampleWithInventory) {
@@ -2700,21 +2710,21 @@
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i];
                     const parts = line.split('\t').map(p => p.trim());
-                    
+
                     // Skip header row
                     if (i === 0 && (parts[0].toLowerCase() === 'name' || parts[0].toLowerCase().includes('sku'))) {
                         continue;
                     }
-                    
+
                     if (parts.length < 4) continue;
 
                     const [name, measure, raw, child] = parts;
                     const sku = name.split(':')[0].trim();
-                    
+
                     if (sku) {
                         const rawQty = parseFloat(raw);
                         const childQty = parseFloat(child);
-                        
+
                         inventoryData.push({
                             sku: sku,
                             measure: measure || '',
@@ -2749,10 +2759,10 @@
                 }
 
                 const preview = await response.json();
-                
+
                 // Display preview
                 displayInventoryPreview(preview);
-                
+
                 // Close import modal and show preview modal
                 closeInventoryImportModal();
                 document.getElementById('inventoryPreviewModal').style.display = 'flex';
@@ -2766,7 +2776,7 @@
 
         function displayInventoryPreview(preview) {
             const { matches, notFound, summary } = preview;
-            
+
             // Update summary
             const summaryDiv = document.getElementById('previewSummary');
             summaryDiv.innerHTML = `
@@ -2795,10 +2805,10 @@
             matches.forEach(match => {
                 const unreceivedItems = match.lineItems.filter(item => !item.received);
                 const isInUnreceived = unreceivedItems.length > 0;
-                
+
                 const row = document.createElement('tr');
                 row.style.background = isInUnreceived ? '#d4edda' : '#fff3cd';
-                
+
                 row.innerHTML = `
                     <td style="padding: 8px; border: 1px solid #dee2e6;">
                         ${isInUnreceived ? '<span style="color: #28a745;">✅ In Unreceived</span>' : '<span style="color: #856404;">⚠️ Not Unreceived</span>'}
@@ -2808,17 +2818,17 @@
                     <td style="padding: 8px; border: 1px solid #dee2e6; text-align: right;">${match.raw}</td>
                     <td style="padding: 8px; border: 1px solid #dee2e6; text-align: right;">${match.child}</td>
                     <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 11px;">
-                        ${match.lineItems.map(item => 
-                            `<div style="margin: 2px 0;">
+                        ${match.lineItems.map(item =>
+                    `<div style="margin: 2px 0;">
                                 ${item.received ? '✓' : '○'} ${item.poNumber} - ${item.fullSku}
                                 ${isInUnreceived && !item.received ? '<strong>(will update)</strong>' : ''}
                             </div>`
-                        ).join('')}
+                ).join('')}
                     </td>
                     <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 11px; color: #666;">
-                        ${match.lineItems[0].currentInventory ? 
-                            `Raw: ${match.lineItems[0].currentInventory.raw || 'null'}, Child: ${match.lineItems[0].currentInventory.child || 'null'}` : 
-                            'No current data'}
+                        ${match.lineItems[0].currentInventory ?
+                        `Raw: ${match.lineItems[0].currentInventory.raw || 'null'}, Child: ${match.lineItems[0].currentInventory.child || 'null'}` :
+                        'No current data'}
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -2844,7 +2854,7 @@
                 alert('No data to import');
                 return;
             }
-            
+
             closeInventoryPreviewModal();
             performActualImport(parsedInventoryData);
         }
@@ -2917,10 +2927,10 @@
 
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i];
-                    
+
                     // Split by tab (from Excel copy/paste)
                     const parts = line.split('\t').map(p => p.trim());
-                    
+
                     // Skip header row (first line if it contains "name" or "sku")
                     if (i === 0 && (parts[0].toLowerCase() === 'name' || parts[0].toLowerCase().includes('sku'))) {
                         console.log('🔍 Skipping header row:', parts);
