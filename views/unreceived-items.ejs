@@ -1208,12 +1208,77 @@
             </div>
             <div class="modal-footer">
                 <button onclick="closeInventoryImportModal()" class="btn btn-secondary">Cancel</button>
+                <button onclick="previewInventoryImport()" class="btn btn-primary" style="background: #007bff;">
+                    🔍 Preview Import
+                </button>
                 <button onclick="processInventoryImport()" class="btn btn-success">
                     📥 Import Data
                 </button>
             </div>
         </div>
     </div>
+
+    <!-- Inventory Preview Modal -->
+    <div id="inventoryPreviewModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 1200px; max-height: 90vh;">
+            <div class="modal-header">
+                <h3>🔍 Import Preview</h3>
+                <button class="close-btn" onclick="closeInventoryPreviewModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="max-height: calc(90vh - 150px); overflow-y: auto;">
+                <div id="previewSummary" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <!-- Summary will be inserted here -->
+                </div>
+                <div style="overflow-x: auto;">
+                    <table id="previewTable" style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                        <thead>
+                            <tr style="background: #343a40; color: white;">
+                                <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Status</th>
+                                <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Import SKU</th>
+                                <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Measure</th>
+                                <th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">Raw Qty</th>
+                                <th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">Child Qty</th>
+                                <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Matched Line Items</th>
+                                <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Current Values</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewTableBody">
+                            <!-- Preview rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeInventoryPreviewModal()" class="btn btn-secondary">Cancel</button>
+                <button onclick="confirmImportFromPreview()" class="btn btn-success">
+                    ✅ Confirm Import
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-body" style="padding: 40px 20px;">
+                <div style="font-size: 48px; margin-bottom: 20px;">⏳</div>
+                <h3 id="loadingMessage" style="margin-bottom: 10px;">Processing...</h3>
+                <p id="loadingDetails" style="color: #666; font-size: 14px;"></p>
+                <div style="margin-top: 20px;">
+                    <div style="width: 100%; height: 4px; background: #e0e0e0; border-radius: 2px; overflow: hidden;">
+                        <div style="width: 100%; height: 100%; background: linear-gradient(90deg, #17a2b8 0%, #17a2b8 50%, transparent 50%, transparent 100%); background-size: 40px 100%; animation: loading-bar 1s linear infinite;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes loading-bar {
+            0% { background-position: 0 0; }
+            100% { background-position: 40px 0; }
+        }
+    </style>
 
     <div id="toast" class="toast"></div>
 
@@ -1300,6 +1365,31 @@
                     filteredItems = [...allItems];
                     console.log('✅ Data loaded successfully, rendering table...');
                     console.log('📋 Sample item:', filteredItems[0]); // Debug: Check item structure
+                    
+                    // Debug: Check inventory fields specifically
+                    if (filteredItems.length > 0) {
+                        const itemsWithInventory = filteredItems.filter(item => 
+                            item.inventoryRawQuantity !== null || 
+                            item.inventoryChildQuantity !== null ||
+                            (item.inventoryMeasure && item.inventoryMeasure !== '')
+                        );
+                        
+                        console.log(`📦 Items with inventory data: ${itemsWithInventory.length} out of ${filteredItems.length}`);
+                        
+                        if (itemsWithInventory.length > 0) {
+                            const sample = itemsWithInventory[0];
+                            console.log('📦 Sample item WITH inventory data:', {
+                                sku: sample.sku,
+                                inventoryRawQuantity: sample.inventoryRawQuantity,
+                                inventoryChildQuantity: sample.inventoryChildQuantity,
+                                inventoryMeasure: sample.inventoryMeasure,
+                                inventoryLastUpdated: sample.inventoryLastUpdated
+                            });
+                        } else {
+                            console.log('⚠️ No items found with inventory data yet');
+                        }
+                    }
+                    
                     updateStats(data.stats);
                     populateFilters();
                     renderTable();
@@ -1423,7 +1513,10 @@
             { id: 'quantity', label: 'Quantity', visible: true, sortable: true },
             { id: 'itemStatus', label: 'Item Status', visible: true, sortable: true },
             { id: 'poStatus', label: 'PO Status', visible: true, sortable: true },
-            { id: 'notes', label: 'Notes', visible: true, sortable: false }
+            { id: 'notes', label: 'Notes', visible: true, sortable: false },
+            { id: 'inventoryRawQuantity', label: 'Inv Raw', visible: true, sortable: true },
+            { id: 'inventoryChildQuantity', label: 'Inv Child', visible: true, sortable: true },
+            { id: 'inventoryMeasure', label: 'Inv Measure', visible: true, sortable: true }
         ];
 
         function loadViewColumnPreferences() {
@@ -1443,7 +1536,10 @@
                         { id: 'quantity', label: 'Quantity', visible: true, sortable: true },
                         { id: 'itemStatus', label: 'Item Status', visible: true, sortable: true },
                         { id: 'poStatus', label: 'PO Status', visible: true, sortable: true },
-                        { id: 'notes', label: 'Notes', visible: true, sortable: false }
+                        { id: 'notes', label: 'Notes', visible: true, sortable: false },
+                        { id: 'inventoryRawQuantity', label: 'Inv Raw', visible: true, sortable: true },
+                        { id: 'inventoryChildQuantity', label: 'Inv Child', visible: true, sortable: true },
+                        { id: 'inventoryMeasure', label: 'Inv Measure', visible: true, sortable: true }
                     ];
 
                     // Find columns in default that aren't in saved
@@ -1641,6 +1737,12 @@
                             return `<td>${item.poStatus ? `<span class="badge badge-warning">${item.poStatus}</span>` : 'N/A'}</td>`;
                         case 'notes':
                             return `<td><input type="text" class="item-notes-input" value="${(item.receivingNotes || '').replace(/"/g, '&quot;')}" placeholder="Add notes..." onblur="updateItemNotes('${item.itemId}', this.value)" data-item-id="${item.itemId}"></td>`;
+                        case 'inventoryRawQuantity':
+                            return `<td style="text-align: right; ${item.inventoryRawQuantity !== null ? 'background: #d4edda;' : ''}">${item.inventoryRawQuantity !== null ? item.inventoryRawQuantity : '-'}</td>`;
+                        case 'inventoryChildQuantity':
+                            return `<td style="text-align: right; ${item.inventoryChildQuantity !== null ? 'background: #d4edda;' : ''}">${item.inventoryChildQuantity !== null ? item.inventoryChildQuantity : '-'}</td>`;
+                        case 'inventoryMeasure':
+                            return `<td style="${item.inventoryMeasure ? 'background: #d4edda;' : ''}">${item.inventoryMeasure || '-'}</td>`;
                         default:
                             return '<td>N/A</td>';
                     }
@@ -2261,6 +2363,21 @@
                         worksheetData.push(row);
                     });
 
+                    // Debug: Log sample row with inventory data if selected
+                    if (selectedColumns.some(col => col.key.includes('inventory'))) {
+                        const sampleWithInventory = itemsToExport.find(item => 
+                            item.inventoryRawQuantity !== null || item.inventoryChildQuantity !== null
+                        );
+                        if (sampleWithInventory) {
+                            console.log('📦 Exporting item with inventory:', {
+                                sku: sampleWithInventory.sku,
+                                inventoryRawQuantity: sampleWithInventory.inventoryRawQuantity,
+                                inventoryChildQuantity: sampleWithInventory.inventoryChildQuantity,
+                                inventoryMeasure: sampleWithInventory.inventoryMeasure
+                            });
+                        }
+                    }
+
                     // Create worksheet from data
                     const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
 
@@ -2558,6 +2675,230 @@
             document.getElementById('inventoryImportModal').style.display = 'none';
         }
 
+        function closeInventoryPreviewModal() {
+            document.getElementById('inventoryPreviewModal').style.display = 'none';
+        }
+
+        let parsedInventoryData = null; // Store parsed data for confirmation
+
+        async function previewInventoryImport() {
+            const textarea = document.getElementById('inventoryDataInput');
+            const rawData = textarea.value.trim();
+
+            if (!rawData) {
+                alert('Please paste inventory data to import');
+                return;
+            }
+
+            try {
+                // Parse the data
+                const lines = rawData.split('\n').filter(line => line.trim());
+                const inventoryData = [];
+
+                console.log('📊 Parsing', lines.length, 'lines for preview');
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    const parts = line.split('\t').map(p => p.trim());
+                    
+                    // Skip header row
+                    if (i === 0 && (parts[0].toLowerCase() === 'name' || parts[0].toLowerCase().includes('sku'))) {
+                        continue;
+                    }
+                    
+                    if (parts.length < 4) continue;
+
+                    const [name, measure, raw, child] = parts;
+                    const sku = name.split(':')[0].trim();
+                    
+                    if (sku) {
+                        const rawQty = parseFloat(raw);
+                        const childQty = parseFloat(child);
+                        
+                        inventoryData.push({
+                            sku: sku,
+                            measure: measure || '',
+                            raw: isNaN(rawQty) ? 0 : rawQty,
+                            child: isNaN(childQty) ? 0 : childQty
+                        });
+                    }
+                }
+
+                if (inventoryData.length === 0) {
+                    alert('No valid inventory data found.');
+                    return;
+                }
+
+                parsedInventoryData = inventoryData;
+
+                // Show loading
+                showLoadingModal('Analyzing Import Data', `Checking ${inventoryData.length} SKUs...`);
+
+                // Get preview data from server
+                const response = await fetch('/purchase-orders/preview-inventory-import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ inventoryData })
+                });
+
+                hideLoadingModal();
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const preview = await response.json();
+                
+                // Display preview
+                displayInventoryPreview(preview);
+                
+                // Close import modal and show preview modal
+                closeInventoryImportModal();
+                document.getElementById('inventoryPreviewModal').style.display = 'flex';
+
+            } catch (error) {
+                hideLoadingModal();
+                console.error('❌ Error previewing import:', error);
+                alert('❌ Failed to preview import:\\n\\n' + error.message);
+            }
+        }
+
+        function displayInventoryPreview(preview) {
+            const { matches, notFound, summary } = preview;
+            
+            // Update summary
+            const summaryDiv = document.getElementById('previewSummary');
+            summaryDiv.innerHTML = `
+                <h4 style="margin: 0 0 10px 0;">📊 Import Summary</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div>
+                        <strong>Total SKUs:</strong> ${summary.totalSkus}
+                    </div>
+                    <div style="color: #28a745;">
+                        <strong>✅ Will Match:</strong> ${summary.matchCount} (${summary.lineItemCount} line items)
+                    </div>
+                    <div style="color: #dc3545;">
+                        <strong>❌ Not Found:</strong> ${summary.notFoundCount}
+                    </div>
+                    <div style="color: #ffc107;">
+                        <strong>⚠️ In Unreceived:</strong> ${summary.unreceivedCount} items
+                    </div>
+                </div>
+            `;
+
+            // Build table rows
+            const tbody = document.getElementById('previewTableBody');
+            tbody.innerHTML = '';
+
+            // Show matched items first
+            matches.forEach(match => {
+                const unreceivedItems = match.lineItems.filter(item => !item.received);
+                const isInUnreceived = unreceivedItems.length > 0;
+                
+                const row = document.createElement('tr');
+                row.style.background = isInUnreceived ? '#d4edda' : '#fff3cd';
+                
+                row.innerHTML = `
+                    <td style="padding: 8px; border: 1px solid #dee2e6;">
+                        ${isInUnreceived ? '<span style="color: #28a745;">✅ In Unreceived</span>' : '<span style="color: #856404;">⚠️ Not Unreceived</span>'}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; font-weight: bold;">${match.sku}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6;">${match.measure}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; text-align: right;">${match.raw}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; text-align: right;">${match.child}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 11px;">
+                        ${match.lineItems.map(item => 
+                            `<div style="margin: 2px 0;">
+                                ${item.received ? '✓' : '○'} ${item.poNumber} - ${item.fullSku}
+                                ${isInUnreceived && !item.received ? '<strong>(will update)</strong>' : ''}
+                            </div>`
+                        ).join('')}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 11px; color: #666;">
+                        ${match.lineItems[0].currentInventory ? 
+                            `Raw: ${match.lineItems[0].currentInventory.raw || 'null'}, Child: ${match.lineItems[0].currentInventory.child || 'null'}` : 
+                            'No current data'}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Show not found items
+            notFound.forEach(sku => {
+                const row = document.createElement('tr');
+                row.style.background = '#f8d7da';
+                row.innerHTML = `
+                    <td style="padding: 8px; border: 1px solid #dee2e6; color: #721c24;">❌ Not Found</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; font-weight: bold;">${sku}</td>
+                    <td colspan="5" style="padding: 8px; border: 1px solid #dee2e6; color: #721c24;">
+                        No matching line items found in database
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function confirmImportFromPreview() {
+            if (!parsedInventoryData) {
+                alert('No data to import');
+                return;
+            }
+            
+            closeInventoryPreviewModal();
+            performActualImport(parsedInventoryData);
+        }
+
+        async function performActualImport(inventoryData) {
+            try {
+                showLoadingModal('Importing Inventory Data', `Processing ${inventoryData.length} items...`);
+
+                const response = await fetch('/purchase-orders/import-inventory-data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ inventoryData })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('❌ Server error:', response.status, errorText);
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    hideLoadingModal();
+
+                    let message = `✅ Inventory import complete!\\n\\n`;
+                    message += `📊 ${result.updatedCount} line items updated\\n`;
+                    if (result.notFoundCount > 0) {
+                        message += `⚠️ ${result.notFoundCount} SKUs not found in system`;
+                    }
+
+                    alert(message);
+                    showToast('✅ Inventory data imported successfully!');
+                    console.log('✅ Import result:', result);
+
+                    if (result.notFoundSkus && result.notFoundSkus.length > 0) {
+                        console.log('⚠️ SKUs not found:', result.notFoundSkus);
+                    }
+
+                    // Reload data to show updated inventory values
+                    loadData();
+                } else {
+                    throw new Error(result.error || 'Failed to import inventory data');
+                }
+
+            } catch (error) {
+                hideLoadingModal();
+                console.error('❌ Error importing inventory data:', error);
+                alert('❌ Failed to import inventory data:\\n\\n' + error.message);
+                showToast('❌ Import failed');
+            }
+        }
+
         async function processInventoryImport() {
             const textarea = document.getElementById('inventoryDataInput');
             const rawData = textarea.value.trim();
@@ -2574,9 +2915,17 @@
 
                 console.log('📊 Parsing', lines.length, 'lines of inventory data');
 
-                for (const line of lines) {
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    
                     // Split by tab (from Excel copy/paste)
                     const parts = line.split('\t').map(p => p.trim());
+                    
+                    // Skip header row (first line if it contains "name" or "sku")
+                    if (i === 0 && (parts[0].toLowerCase() === 'name' || parts[0].toLowerCase().includes('sku'))) {
+                        console.log('🔍 Skipping header row:', parts);
+                        continue;
+                    }
 
                     if (parts.length < 4) {
                         console.warn('⚠️ Skipping line (not enough columns):', line);
@@ -2609,8 +2958,9 @@
                 console.log('📦 Parsed inventory data:', inventoryData.length, 'items');
                 console.log('🔍 Sample parsed items:', inventoryData.slice(0, 3));
 
-                // Show loading message
-                showToast('⏳ Importing inventory data...');
+                // Close import modal and show loading modal
+                closeInventoryImportModal();
+                showLoadingModal('Importing Inventory Data', `Processing ${inventoryData.length} items...`);
 
                 // Send to server
                 const response = await fetch('/purchase-orders/import-inventory-data', {
@@ -2631,15 +2981,16 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    closeInventoryImportModal();
+                    hideLoadingModal();
 
-                    let message = `✅ Inventory import complete!\n`;
-                    message += `   - ${result.updatedCount} line items updated\n`;
+                    let message = `✅ Inventory import complete!\n\n`;
+                    message += `📊 ${result.updatedCount} line items updated\n`;
                     if (result.notFoundCount > 0) {
-                        message += `   - ${result.notFoundCount} SKUs not found in system`;
+                        message += `⚠️ ${result.notFoundCount} SKUs not found in system`;
                     }
 
-                    showToast(message);
+                    alert(message);
+                    showToast('✅ Inventory data imported successfully!');
                     console.log('✅ Import result:', result);
 
                     if (result.notFoundSkus && result.notFoundSkus.length > 0) {
@@ -2653,9 +3004,21 @@
                 }
 
             } catch (error) {
+                hideLoadingModal();
                 console.error('❌ Error importing inventory data:', error);
-                showToast('❌ Failed to import: ' + error.message);
+                alert('❌ Failed to import inventory data:\n\n' + error.message);
+                showToast('❌ Import failed');
             }
+        }
+
+        function showLoadingModal(title, details) {
+            document.getElementById('loadingMessage').textContent = title;
+            document.getElementById('loadingDetails').textContent = details;
+            document.getElementById('loadingModal').style.display = 'flex';
+        }
+
+        function hideLoadingModal() {
+            document.getElementById('loadingModal').style.display = 'none';
         }
     </script>
 </body>

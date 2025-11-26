@@ -3130,6 +3130,98 @@ router.patch('/line-item/:itemId/notes', async (req, res) => {
   }
 });
 
+// Preview inventory data import (MUST be before /:id/ routes)
+router.post('/preview-inventory-import', async (req, res) => {
+  try {
+    const { inventoryData } = req.body;
+
+    if (!inventoryData || !Array.isArray(inventoryData)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid inventory data format'
+      });
+    }
+
+    console.log(`🔍 Previewing inventory import for ${inventoryData.length} SKUs`);
+
+    const matches = [];
+    const notFound = [];
+    let lineItemCount = 0;
+    let unreceivedCount = 0;
+
+    // Process each inventory item to find matches
+    for (const item of inventoryData) {
+      const { sku, measure, raw, child } = item;
+
+      if (!sku) continue;
+
+      // Try exact match first
+      let lineItems = await LineItem.find({ sku: sku })
+        .populate('poId')
+        .lean();
+      
+      // If no exact match, try partial match
+      if (lineItems.length === 0) {
+        const skuPattern = new RegExp(`^${sku.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s*:|$)`, 'i');
+        lineItems = await LineItem.find({ sku: skuPattern })
+          .populate('poId')
+          .lean();
+      }
+
+      if (lineItems.length === 0) {
+        notFound.push(sku);
+        continue;
+      }
+
+      // Count unreceived items
+      const unreceivedItems = lineItems.filter(item => !item.received);
+      unreceivedCount += unreceivedItems.length;
+      lineItemCount += lineItems.length;
+
+      matches.push({
+        sku,
+        measure,
+        raw,
+        child,
+        lineItems: lineItems.map(li => ({
+          poNumber: li.poNumber,
+          fullSku: li.sku,
+          received: li.received,
+          currentInventory: {
+            raw: li.inventoryRawQuantity,
+            child: li.inventoryChildQuantity,
+            measure: li.inventoryMeasure
+          }
+        }))
+      });
+    }
+
+    const summary = {
+      totalSkus: inventoryData.length,
+      matchCount: matches.length,
+      notFoundCount: notFound.length,
+      lineItemCount,
+      unreceivedCount
+    };
+
+    console.log(`✅ Preview complete: ${matches.length} SKUs matched (${lineItemCount} line items, ${unreceivedCount} unreceived)`);
+
+    res.json({
+      success: true,
+      matches,
+      notFound,
+      summary
+    });
+
+  } catch (error) {
+    console.error('❌ Error previewing inventory import:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Import inventory data (MUST be before /:id/ routes)
 router.post('/import-inventory-data', async (req, res) => {
   try {
@@ -3147,6 +3239,11 @@ router.post('/import-inventory-data', async (req, res) => {
     let updatedCount = 0;
     let notFoundCount = 0;
     const notFoundSkus = [];
+    let exactMatches = 0;
+    let partialMatches = 0;
+
+    // Log first few SKUs for debugging
+    console.log('🔍 Sample SKUs from import data:', inventoryData.slice(0, 5).map(item => item.sku));
 
     // Process each inventory item
     for (const item of inventoryData) {
@@ -3155,7 +3252,22 @@ router.post('/import-inventory-data', async (req, res) => {
       if (!sku) continue;
 
       // Find all line items with this SKU (could be multiple)
-      const lineItems = await LineItem.find({ sku: sku });
+      // Try exact match first, then partial match (SKU might be stored as "SKU : Description")
+      let lineItems = await LineItem.find({ sku: sku });
+      
+      if (lineItems.length > 0) {
+        exactMatches++;
+      }
+      
+      // If no exact match, try matching where the sku field starts with this SKU code
+      if (lineItems.length === 0) {
+        const skuPattern = new RegExp(`^${sku.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s*:|$)`, 'i');
+        lineItems = await LineItem.find({ sku: skuPattern });
+        
+        if (lineItems.length > 0) {
+          partialMatches++;
+        }
+      }
 
       if (lineItems.length === 0) {
         notFoundCount++;
@@ -3180,6 +3292,11 @@ router.post('/import-inventory-data', async (req, res) => {
     }
 
     console.log(`✅ Inventory import complete: ${updatedCount} line items updated, ${notFoundCount} SKUs not found`);
+    console.log(`📊 Match statistics: ${exactMatches} exact matches, ${partialMatches} partial matches`);
+    
+    if (notFoundSkus.length > 0) {
+      console.log('⚠️ Sample not found SKUs:', notFoundSkus.slice(0, 5));
+    }
 
     res.json({
       success: true,
