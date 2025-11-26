@@ -1191,12 +1191,12 @@
                 <p style="margin-bottom: 15px; color: #666;">
                     Paste inventory data from Excel with columns: <strong>Name (SKU), Measure, Raw, Child</strong>
                 </p>
-                <textarea 
-                    id="inventoryDataInput" 
+                <textarea id="inventoryDataInput"
                     placeholder="Paste your data here (tab-separated from Excel)&#10;Example:&#10;BR094 : BR094/OR.M.OG    POUND    2    1.244951&#10;HR1132 :    POUND    66.937    5.787867"
                     style="width: 100%; height: 300px; font-family: monospace; font-size: 12px; padding: 10px; border: 2px solid #ced4da; border-radius: 4px; resize: vertical;">
                 </textarea>
-                <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                <div
+                    style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
                     <p style="margin: 0; font-size: 13px;"><strong>⚠️ Important:</strong></p>
                     <ul style="margin: 5px 0 0 20px; font-size: 13px;">
                         <li>Data should be tab-separated (copy directly from Excel)</li>
@@ -2577,21 +2577,21 @@
                 for (const line of lines) {
                     // Split by tab (from Excel copy/paste)
                     const parts = line.split('\t').map(p => p.trim());
-                    
+
                     if (parts.length < 4) {
                         console.warn('⚠️ Skipping line (not enough columns):', line);
                         continue;
                     }
 
                     const [name, measure, raw, child] = parts;
-                    
+
                     // Extract SKU from name (might have description after :)
                     const sku = name.split(':')[0].trim();
-                    
+
                     if (sku) {
                         const rawQty = parseFloat(raw);
                         const childQty = parseFloat(child);
-                        
+
                         inventoryData.push({
                             sku: sku,
                             measure: measure || '',
@@ -2632,16 +2632,16 @@
 
                 if (result.success) {
                     closeInventoryImportModal();
-                    
+
                     let message = `✅ Inventory import complete!\n`;
                     message += `   - ${result.updatedCount} line items updated\n`;
                     if (result.notFoundCount > 0) {
                         message += `   - ${result.notFoundCount} SKUs not found in system`;
                     }
-                    
+
                     showToast(message);
                     console.log('✅ Import result:', result);
-                    
+
                     if (result.notFoundSkus && result.notFoundSkus.length > 0) {
                         console.log('⚠️ SKUs not found:', result.notFoundSkus);
                     }
