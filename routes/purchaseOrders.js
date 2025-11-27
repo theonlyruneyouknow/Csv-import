@@ -3254,9 +3254,11 @@ router.post('/import-inventory-data', async (req, res) => {
       // Find all line items with this SKU (could be multiple)
       // Try exact match first, then partial match (SKU might be stored as "SKU : Description")
       let lineItems = await LineItem.find({ sku: sku });
+      let usedExactMatch = false;
 
       if (lineItems.length > 0) {
         exactMatches++;
+        usedExactMatch = true;
       }
 
       // If no exact match, try matching where the sku field starts with this SKU code
@@ -3276,17 +3278,41 @@ router.post('/import-inventory-data', async (req, res) => {
       }
 
       // Update all line items with this SKU
-      await LineItem.updateMany(
-        { sku: sku },
-        {
-          $set: {
-            inventoryRawQuantity: parseFloat(raw) || null,
-            inventoryChildQuantity: parseFloat(child) || null,
-            inventoryMeasure: measure || '',
-            inventoryLastUpdated: new Date()
-          }
-        }
+      // Use the same matching logic as the find query
+      let updateQuery;
+      if (usedExactMatch) {
+        // Exact match was found for THIS sku
+        updateQuery = { sku: sku };
+      } else {
+        // Use regex pattern for partial match
+        const skuPattern = new RegExp(`^${sku.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s*:|$)`, 'i');
+        updateQuery = { sku: skuPattern };
+      }
+
+      const updateData = {
+        inventoryRawQuantity: isNaN(parseFloat(raw)) ? null : parseFloat(raw),  // Keep 0 as 0
+        inventoryChildQuantity: isNaN(parseFloat(child)) ? null : parseFloat(child),  // Keep 0 as 0
+        inventoryMeasure: measure || '',
+        inventoryLastUpdated: new Date()
+      };
+
+      // Log first few updates for debugging
+      if (updatedCount < 3 || sku.includes('ON540')) {
+        console.log(`🔄 Updating SKU "${sku}":`, {
+          query: updateQuery,
+          data: updateData,
+          matchedItems: lineItems.length
+        });
+      }
+
+      const updateResult = await LineItem.updateMany(
+        updateQuery,
+        { $set: updateData }
       );
+
+      if (updatedCount < 3 || sku.includes('ON540')) {
+        console.log(`   Result: matched=${updateResult.matchedCount}, modified=${updateResult.modifiedCount}`);
+      }
 
       updatedCount += lineItems.length;
     }
@@ -6087,8 +6113,8 @@ router.get('/unreceived-items', async (req, res) => {
         poStatus: item.poId.status || 'N/A',
         poType: item.poId.poType || 'N/A',
         receivingNotes: item.receivingNotes || '',
-        inventoryRawQuantity: item.inventoryRawQuantity || null,
-        inventoryChildQuantity: item.inventoryChildQuantity || null,
+        inventoryRawQuantity: item.inventoryRawQuantity !== null && item.inventoryRawQuantity !== undefined ? item.inventoryRawQuantity : null,
+        inventoryChildQuantity: item.inventoryChildQuantity !== null && item.inventoryChildQuantity !== undefined ? item.inventoryChildQuantity : null,
         inventoryMeasure: item.inventoryMeasure || '',
         inventoryLastUpdated: item.inventoryLastUpdated || null
       }));

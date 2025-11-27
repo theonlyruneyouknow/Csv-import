@@ -874,16 +874,16 @@
                 <a href="/purchase-orders" class="btn btn-primary">
                     ← Back to Dashboard
                 </a>
-                <button onclick="openInventoryImportModal()" class="btn btn-primary" style="background: #28a745;">
+                <button onclick="openInventoryImportModal()" class="btn btn-primary" style="background: #28a745; color: white;">
                     📦 Import Inventory Data
                 </button>
-                <button onclick="openViewColumnModal()" class="btn btn-primary" style="background: #6c757d;">
+                <button onclick="openViewColumnModal()" class="btn btn-primary" style="background: #6c757d; color: white;">
                     ⚙️ Manage Columns
                 </button>
                 <button onclick="exportToCSV()" class="btn btn-success">
                     📥 Export to CSV
                 </button>
-                <button onclick="exportMultiTabExcel()" class="btn btn-success" style="background: #17a2b8;">
+                <button onclick="exportMultiTabExcel()" class="btn btn-success" style="background: #17a2b8; color: white;">
                     📊 Export Multi-Tab Excel
                 </button>
             </div>
@@ -1748,9 +1748,9 @@
                         case 'notes':
                             return `<td><input type="text" class="item-notes-input" value="${(item.receivingNotes || '').replace(/"/g, '&quot;')}" placeholder="Add notes..." onblur="updateItemNotes('${item.itemId}', this.value)" data-item-id="${item.itemId}"></td>`;
                         case 'inventoryRawQuantity':
-                            return `<td style="text-align: right; ${item.inventoryRawQuantity !== null ? 'background: #d4edda;' : ''}">${item.inventoryRawQuantity !== null ? item.inventoryRawQuantity : '-'}</td>`;
+                            return `<td style="text-align: right; ${item.inventoryRawQuantity !== null && item.inventoryRawQuantity !== undefined ? 'background: #d4edda;' : ''}">${item.inventoryRawQuantity !== null && item.inventoryRawQuantity !== undefined ? item.inventoryRawQuantity : '-'}</td>`;
                         case 'inventoryChildQuantity':
-                            return `<td style="text-align: right; ${item.inventoryChildQuantity !== null ? 'background: #d4edda;' : ''}">${item.inventoryChildQuantity !== null ? item.inventoryChildQuantity : '-'}</td>`;
+                            return `<td style="text-align: right; ${item.inventoryChildQuantity !== null && item.inventoryChildQuantity !== undefined ? 'background: #d4edda;' : ''}">${item.inventoryChildQuantity !== null && item.inventoryChildQuantity !== undefined ? item.inventoryChildQuantity : '-'}</td>`;
                         case 'inventoryMeasure':
                             return `<td style="${item.inventoryMeasure ? 'background: #d4edda;' : ''}">${item.inventoryMeasure || '-'}</td>`;
                         default:
@@ -2709,7 +2709,14 @@
 
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i];
-                    const parts = line.split('\t').map(p => p.trim());
+                    let parts = line.split('\t').map(p => p.trim());
+                    
+                    // If not enough parts from tab split, try space split but be careful with " : "
+                    if (parts.length < 4) {
+                        // Replace " : " with a placeholder to preserve it
+                        const cleanedLine = line.replace(/\s*:\s*/g, '###COLON###');
+                        parts = cleanedLine.split(/\s+/).map(p => p.replace(/###COLON###/g, ' : ').trim());
+                    }
 
                     // Skip header row
                     if (i === 0 && (parts[0].toLowerCase() === 'name' || parts[0].toLowerCase().includes('sku'))) {
@@ -2719,7 +2726,8 @@
                     if (parts.length < 4) continue;
 
                     const [name, measure, raw, child] = parts;
-                    const sku = name.split(':')[0].trim();
+                    // Extract SKU - handle "SKU : Description" format
+                    const sku = name.includes(':') ? name.split(':')[0].trim() : name.trim();
 
                     if (sku) {
                         const rawQty = parseFloat(raw);
@@ -2728,8 +2736,8 @@
                         inventoryData.push({
                             sku: sku,
                             measure: measure || '',
-                            raw: isNaN(rawQty) ? 0 : rawQty,
-                            child: isNaN(childQty) ? 0 : childQty
+                            raw: isNaN(rawQty) ? null : rawQty,  // Keep 0 as 0, only null if invalid
+                            child: isNaN(childQty) ? null : childQty  // Keep 0 as 0, only null if invalid
                         });
                     }
                 }
@@ -2927,16 +2935,23 @@
 
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i];
-
+                    
                     // Split by tab (from Excel copy/paste)
-                    const parts = line.split('\t').map(p => p.trim());
-
+                    let parts = line.split('\t').map(p => p.trim());
+                    
+                    // If not enough parts from tab split, try space split but preserve " : "
+                    if (parts.length < 4) {
+                        // Replace " : " with a placeholder to preserve it
+                        const cleanedLine = line.replace(/\s*:\s*/g, '###COLON###');
+                        parts = cleanedLine.split(/\s+/).map(p => p.replace(/###COLON###/g, ' : ').trim());
+                    }
+                    
                     // Skip header row (first line if it contains "name" or "sku")
                     if (i === 0 && (parts[0].toLowerCase() === 'name' || parts[0].toLowerCase().includes('sku'))) {
                         console.log('🔍 Skipping header row:', parts);
                         continue;
                     }
-
+                    
                     if (parts.length < 4) {
                         console.warn('⚠️ Skipping line (not enough columns):', line);
                         continue;
@@ -2945,7 +2960,7 @@
                     const [name, measure, raw, child] = parts;
 
                     // Extract SKU from name (might have description after :)
-                    const sku = name.split(':')[0].trim();
+                    const sku = name.includes(':') ? name.split(':')[0].trim() : name.trim();
 
                     if (sku) {
                         const rawQty = parseFloat(raw);
@@ -2954,13 +2969,11 @@
                         inventoryData.push({
                             sku: sku,
                             measure: measure || '',
-                            raw: isNaN(rawQty) ? 0 : rawQty,
-                            child: isNaN(childQty) ? 0 : childQty
+                            raw: isNaN(rawQty) ? null : rawQty,  // Keep 0 as 0, only null if invalid
+                            child: isNaN(childQty) ? null : childQty  // Keep 0 as 0, only null if invalid
                         });
                     }
-                }
-
-                if (inventoryData.length === 0) {
+                }                if (inventoryData.length === 0) {
                     alert('No valid inventory data found. Please check your format.\n\nExpected format:\nSKU [tab] Measure [tab] Raw [tab] Child');
                     return;
                 }
