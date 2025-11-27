@@ -874,16 +874,19 @@
                 <a href="/purchase-orders" class="btn btn-primary">
                     ← Back to Dashboard
                 </a>
-                <button onclick="openInventoryImportModal()" class="btn btn-primary" style="background: #28a745; color: white;">
+                <button onclick="openInventoryImportModal()" class="btn btn-primary"
+                    style="background: #28a745; color: white;">
                     📦 Import Inventory Data
                 </button>
-                <button onclick="openViewColumnModal()" class="btn btn-primary" style="background: #6c757d; color: white;">
+                <button onclick="openViewColumnModal()" class="btn btn-primary"
+                    style="background: #6c757d; color: white;">
                     ⚙️ Manage Columns
                 </button>
                 <button onclick="exportToCSV()" class="btn btn-success">
                     📥 Export to CSV
                 </button>
-                <button onclick="exportMultiTabExcel()" class="btn btn-success" style="background: #17a2b8; color: white;">
+                <button onclick="exportMultiTabExcel()" class="btn btn-success"
+                    style="background: #17a2b8; color: white;">
                     📊 Export Multi-Tab Excel
                 </button>
             </div>
@@ -2710,7 +2713,7 @@
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i];
                     let parts = line.split('\t').map(p => p.trim());
-                    
+
                     // If not enough parts from tab split, try space split but be careful with " : "
                     if (parts.length < 4) {
                         // Replace " : " with a placeholder to preserve it
@@ -2935,23 +2938,23 @@
 
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i];
-                    
+
                     // Split by tab (from Excel copy/paste)
                     let parts = line.split('\t').map(p => p.trim());
-                    
+
                     // If not enough parts from tab split, try space split but preserve " : "
                     if (parts.length < 4) {
                         // Replace " : " with a placeholder to preserve it
                         const cleanedLine = line.replace(/\s*:\s*/g, '###COLON###');
                         parts = cleanedLine.split(/\s+/).map(p => p.replace(/###COLON###/g, ' : ').trim());
                     }
-                    
+
                     // Skip header row (first line if it contains "name" or "sku")
                     if (i === 0 && (parts[0].toLowerCase() === 'name' || parts[0].toLowerCase().includes('sku'))) {
                         console.log('🔍 Skipping header row:', parts);
                         continue;
                     }
-                    
+
                     if (parts.length < 4) {
                         console.warn('⚠️ Skipping line (not enough columns):', line);
                         continue;
@@ -2973,7 +2976,7 @@
                             child: isNaN(childQty) ? null : childQty  // Keep 0 as 0, only null if invalid
                         });
                     }
-                }                if (inventoryData.length === 0) {
+                } if (inventoryData.length === 0) {
                     alert('No valid inventory data found. Please check your format.\n\nExpected format:\nSKU [tab] Measure [tab] Raw [tab] Child');
                     return;
                 }
