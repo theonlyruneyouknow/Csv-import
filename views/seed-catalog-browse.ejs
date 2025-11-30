@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Seed Catalog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .filters {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .seeds-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .seed-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .seed-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        .seed-card .vendor {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .seed-card .category {
+            display: inline-block;
+            background: #27ae60;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+
+        .seed-card h3 {
+            color: #2c3e50;
+            margin: 10px 0;
+            font-size: 1.2em;
+        }
+
+        .seed-card .packets {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .packet {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .packet .price {
+            font-weight: 600;
+            color: #27ae60;
+        }
+
+        .stats {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .stats h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Browse Seed Catalog</h1>
+            <p>View and filter your saved seeds</p>
+        </div>
+
+        <div class="filters">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Vendor</label>
+                    <input type="text" id="vendorFilter" placeholder="Filter by vendor" value="<%= vendorFilter || '' %>">
+                </div>
+                <div class="filter-group">
+                    <label>Category</label>
+                    <select id="categoryFilter">
+                        <option value="">All Categories</option>
+                        <option value="Vegetable" <%= categoryFilter === 'Vegetable' ? 'selected' : '' %>>Vegetable</option>
+                        <option value="Flower" <%= categoryFilter === 'Flower' ? 'selected' : '' %>>Flower</option>
+                        <option value="Herb" <%= categoryFilter === 'Herb' ? 'selected' : '' %>>Herb</option>
+                        <option value="Fruit" <%= categoryFilter === 'Fruit' ? 'selected' : '' %>>Fruit</option>
+                        <option value="Other" <%= categoryFilter === 'Other' ? 'selected' : '' %>>Other</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Search</label>
+                    <input type="text" id="searchFilter" placeholder="Search varieties...">
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+                <button class="btn btn-secondary" onclick="window.location.href='/seed-catalog/search'">← Back to Search</button>
+            </div>
+        </div>
+
+        <% if (seeds.length > 0) { %>
+        <div class="stats">
+            <h3>Showing <%= seeds.length %> seed varieties</h3>
+        </div>
+
+        <div class="seeds-grid">
+            <% seeds.forEach(seed => { %>
+            <div class="seed-card">
+                <span class="vendor"><%= seed.vendor %></span>
+                <% if (seed.category) { %>
+                <span class="category"><%= seed.category %></span>
+                <% } %>
+                
+                <h3><%= seed.varietyName %></h3>
+                
+                <% if (seed.commonName) { %>
+                <p><strong><%= seed.commonName %></strong></p>
+                <% } %>
+                
+                <% if (seed.sku) { %>
+                <p style="color: #888; font-size: 0.9em;">SKU: <%= seed.sku %></p>
+                <% } %>
+                
+                <% if (seed.description) { %>
+                <p style="margin: 10px 0; color: #555; font-size: 14px;">
+                    <%= seed.description.substring(0, 150) %><%= seed.description.length > 150 ? '...' : '' %>
+                </p>
+                <% } %>
+                
+                <% if (seed.seedType) { %>
+                <p><strong>Type:</strong> <%= seed.seedType %></p>
+                <% } %>
+                
+                <% if (seed.daysToMaturity) { %>
+                <p><strong>Days to Maturity:</strong> <%= seed.daysToMaturity %></p>
+                <% } %>
+                
+                <% if (seed.organic) { %>
+                <p style="color: #27ae60;">✓ Organic</p>
+                <% } %>
+
+                <% if (seed.packets && seed.packets.length > 0) { %>
+                <div class="packets">
+                    <strong>Available Sizes:</strong>
+                    <% seed.packets.forEach(packet => { %>
+                    <div class="packet">
+                        <span><%= packet.size %></span>
+                        <span class="price">$<%= packet.price ? packet.price.toFixed(2) : 'N/A' %></span>
+                    </div>
+                    <% }); %>
+                </div>
+                <% } %>
+            </div>
+            <% }); %>
+        </div>
+        <% } else { %>
+        <div class="stats">
+            <h3>No seeds found</h3>
+            <p style="color: #666; margin-top: 10px;">Try adjusting your filters or <a href="/seed-catalog/search">search for new seeds</a></p>
+        </div>
+        <% } %>
+    </div>
+
+    <script>
+        function applyFilters() {
+            const vendor = document.getElementById('vendorFilter').value;
+            const category = document.getElementById('categoryFilter').value;
+            const search = document.getElementById('searchFilter').value;
+            
+            const params = new URLSearchParams();
+            if (vendor) params.set('vendor', vendor);
+            if (category) params.set('category', category);
+            if (search) params.set('search', search);
+            
+            window.location.href = '/seed-catalog/browse?' + params.toString();
+        }
+    </script>
+</body>
+</html>
