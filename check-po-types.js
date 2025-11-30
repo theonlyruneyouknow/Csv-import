@@ -17,7 +17,7 @@ async function checkPOTypes() {
 
             // Find the PO
             const po = await PurchaseOrder.findOne({ poNumber: poNum }).lean();
-            
+
             if (!po) {
                 console.log(`❌ PO not found: ${poNum}`);
                 continue;
@@ -40,13 +40,13 @@ async function checkPOTypes() {
             });
 
             // Find unreceived line items
-            const unreceivedItems = await LineItem.find({ 
+            const unreceivedItems = await LineItem.find({
                 poNumber: poNum,
-                received: false 
+                received: false
             }).lean();
 
             console.log(`\n📋 Found ${unreceivedItems.length} unreceived line items`);
-            
+
             if (unreceivedItems.length > 0) {
                 console.log('\n📊 Sample line items (first 3):');
                 unreceivedItems.slice(0, 3).forEach((item, idx) => {
@@ -63,7 +63,7 @@ async function checkPOTypes() {
         console.log('\n' + '='.repeat(60));
         console.log('🔍 MYSTERY INVESTIGATION');
         console.log('='.repeat(60));
-        
+
         // Find all POs with poType = "N/A" or undefined/null
         const naTypePOs = await PurchaseOrder.find({
             $or: [
@@ -75,7 +75,7 @@ async function checkPOTypes() {
         }).select('poNumber poType status vendor').lean();
 
         console.log(`\n📊 Found ${naTypePOs.length} POs with poType = N/A, null, or empty`);
-        
+
         if (naTypePOs.length > 0) {
             console.log('\n📋 Sample POs with N/A type (first 10):');
             naTypePOs.slice(0, 10).forEach(po => {

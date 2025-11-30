@@ -6,69 +6,69 @@ const LineItem = require('./models/LineItem');
 // SKU pattern detection rules
 function detectTypeFromSKU(sku) {
     if (!sku) return null;
-    
+
     const skuUpper = sku.toUpperCase();
-    
+
     // Seed patterns - typically have prefixes like these
     const seedPrefixes = ['BT', 'CR', 'FL', 'RD', 'SW', 'SM', 'SQ', 'LT', 'PE', 'TO', 'PU', 'BE', 'CA', 'ME', 'AR', 'BA', 'CO', 'CU', 'EG', 'LE', 'OK', 'ON', 'PA', 'SP', 'SU', 'TU', 'WA', 'ZU'];
-    
+
     // Check if SKU starts with common seed prefixes
     for (const prefix of seedPrefixes) {
         if (skuUpper.startsWith(prefix) && /^[A-Z]{2}\d/.test(skuUpper)) {
             return 'Seed';
         }
     }
-    
+
     // Hardgood patterns - tools, containers, equipment
     const hardgoodKeywords = ['TOOL', 'POT', 'TRAY', 'CONTAINER', 'STAKE', 'LABEL', 'TAG', 'KNIFE', 'PRUNER', 'SHEAR', 'HOSE', 'SPRAYER', 'GLOVE', 'BAG', 'BOX', 'BASKET', 'CART'];
     if (hardgoodKeywords.some(kw => skuUpper.includes(kw))) {
         return 'Hardgood';
     }
-    
+
     // Greengood patterns - plants, bulbs, starts
     const greengoodKeywords = ['PLANT', 'BULB', 'START', 'PLUG', 'TRANSPLANT', 'BARE ROOT', 'GRAFTED', 'ROSE', 'TREE', 'SHRUB', 'PERENNIAL', 'ANNUAL'];
     if (greengoodKeywords.some(kw => skuUpper.includes(kw))) {
         return 'Greengood';
     }
-    
+
     // Supplies patterns - soil, amendments, packaging
     const suppliesKeywords = ['SOIL', 'MIX', 'COMPOST', 'FERTILIZER', 'AMENDMENT', 'PEAT', 'PERLITE', 'VERMICULITE', 'MULCH', 'BARK', 'PACKAGING', 'PAPER', 'PLASTIC'];
     if (suppliesKeywords.some(kw => skuUpper.includes(kw))) {
         return 'Supplies';
     }
-    
+
     return null;
 }
 
 function detectTypeFromMemo(memo) {
     if (!memo) return null;
-    
+
     const memoUpper = memo.toUpperCase();
-    
+
     // Check for common vegetable/seed names
     const seedKeywords = ['CARROT', 'BEET', 'RADISH', 'LETTUCE', 'TOMATO', 'PEPPER', 'SQUASH', 'BEAN', 'PEA', 'CUCUMBER', 'MELON', 'SEED', 'ORGANIC', 'HYBRID', 'VARIETY'];
     if (seedKeywords.some(kw => memoUpper.includes(kw))) {
         return 'Seed';
     }
-    
+
     // Hardgood keywords
     const hardgoodKeywords = ['TOOL', 'POT', 'TRAY', 'CONTAINER', 'STAKE', 'LABEL'];
     if (hardgoodKeywords.some(kw => memoUpper.includes(kw))) {
         return 'Hardgood';
     }
-    
+
     // Greengood keywords
     const greengoodKeywords = ['PLANT', 'BULB', 'START', 'PLUG', 'ROSE', 'TREE'];
     if (greengoodKeywords.some(kw => memoUpper.includes(kw))) {
         return 'Greengood';
     }
-    
+
     // Supplies keywords
     const suppliesKeywords = ['SOIL', 'MIX', 'COMPOST', 'FERTILIZER', 'MULCH'];
     if (suppliesKeywords.some(kw => memoUpper.includes(kw))) {
         return 'Supplies';
     }
-    
+
     return null;
 }
 
@@ -122,7 +122,7 @@ async function autoPopulatePOTypes() {
                 if (!detectedType) {
                     detectedType = detectTypeFromMemo(item.memo);
                 }
-                
+
                 if (detectedType) {
                     typeVotes[detectedType]++;
                 }
@@ -130,12 +130,12 @@ async function autoPopulatePOTypes() {
 
             // Determine the final type based on votes
             const totalVotes = Object.values(typeVotes).reduce((a, b) => a + b, 0);
-            
+
             if (totalVotes === 0) {
                 // Could not determine type - default to Supplies
                 results.Unknown.push(po.poNumber);
                 console.log(`❓ ${po.poNumber}: Could not determine type (${lineItems.length} items) - Setting to Supplies as default`);
-                
+
                 await PurchaseOrder.updateOne(
                     { _id: po._id },
                     { $set: { poType: 'Supplies' } }

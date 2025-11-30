@@ -1284,8 +1284,10 @@
                                 <th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">Raw Qty</th>
                                 <th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">Child Qty</th>
                                 <th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">Forecast</th>
-                                <th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">Forecast Supply</th>
-                                <th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">Forecast Total</th>
+                                <th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">Forecast Supply
+                                </th>
+                                <th style="padding: 10px; text-align: right; border: 1px solid #dee2e6;">Forecast Total
+                                </th>
                                 <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Matched Line
                                     Items</th>
                                 <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Current Values
@@ -2045,7 +2047,7 @@
             if (!favorites[index]) return;
 
             const name = favorites[index].name;
-            
+
             if (!confirm(`Update favorite "${name}" with current configuration?`)) {
                 return;
             }

@@ -16,9 +16,9 @@ async function listUndefinedPOTypes() {
                 { poType: '' }
             ]
         })
-        .select('poNumber poType vendor status amount date eta')
-        .sort({ poNumber: 1 })
-        .lean();
+            .select('poNumber poType vendor status amount date eta')
+            .sort({ poNumber: 1 })
+            .lean();
 
         console.log('='.repeat(80));
         console.log(`📊 PURCHASE ORDERS WITHOUT VALID TYPE`);
@@ -38,7 +38,7 @@ async function listUndefinedPOTypes() {
                 const status = (po.status || 'N/A').substring(0, 22).padEnd(25);
                 const amount = ('$' + (po.amount || 0).toLocaleString()).padEnd(12);
                 const date = (po.date || 'N/A');
-                
+
                 console.log(`${poNum}${type}${vendor}${status}${amount}${date}`);
             });
 
@@ -62,9 +62,9 @@ async function listUndefinedPOTypes() {
             });
 
             // Check if any have unusual type values (not undefined/null/empty)
-            const unusualTypes = undefinedPOs.filter(po => 
-                po.poType && 
-                po.poType !== undefined && 
+            const unusualTypes = undefinedPOs.filter(po =>
+                po.poType &&
+                po.poType !== undefined &&
                 !['Seed', 'Hardgood', 'Greengood', 'Supplies'].includes(po.poType)
             );
 
