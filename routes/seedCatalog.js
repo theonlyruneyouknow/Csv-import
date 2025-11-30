@@ -91,7 +91,7 @@ IMPORTANT: Return ONLY the JSON array, nothing else.
 `;
 
         console.log('📝 Sending request to Gemini AI...');
-        
+
         // Call Gemini API - using gemini-2.5-flash (confirmed available)
         const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
         const result = await model.generateContent(aiPrompt);
@@ -140,7 +140,7 @@ IMPORTANT: Return ONLY the JSON array, nothing else.
                 };
 
                 // Check if seed already exists
-                const existingQuery = seedData.sku 
+                const existingQuery = seedData.sku
                     ? { vendor: vendor, sku: seedData.sku }
                     : { vendor: vendor, varietyName: seedData.varietyName };
 
@@ -231,7 +231,7 @@ router.get('/browse', async (req, res) => {
 router.get('/view/:id', async (req, res) => {
     try {
         const seed = await SeedCatalog.findById(req.params.id).populate('vendorId');
-        
+
         if (!seed) {
             return res.status(404).json({ success: false, error: 'Seed not found' });
         }
@@ -248,7 +248,7 @@ router.get('/view/:id', async (req, res) => {
 router.get('/edit/:id', async (req, res) => {
     try {
         const seed = await SeedCatalog.findById(req.params.id);
-        
+
         if (!seed) {
             return res.status(404).send('Seed not found');
         }

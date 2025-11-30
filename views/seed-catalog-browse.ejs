@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,7 +28,7 @@
             background: white;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
             text-align: center;
         }
@@ -42,7 +43,7 @@
             background: white;
             padding: 25px;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
         }
 
@@ -103,13 +104,13 @@
             background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s, box-shadow 0.3s;
         }
 
         .seed-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
         }
 
         .seed-card .vendor {
@@ -161,7 +162,7 @@
             background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
             text-align: center;
         }
@@ -172,6 +173,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -183,17 +185,19 @@
             <div class="filter-row">
                 <div class="filter-group">
                     <label>Vendor</label>
-                    <input type="text" id="vendorFilter" placeholder="Filter by vendor" value="<%= vendorFilter || '' %>">
+                    <input type="text" id="vendorFilter" placeholder="Filter by vendor"
+                        value="<%= vendorFilter || '' %>">
                 </div>
                 <div class="filter-group">
                     <label>Category</label>
                     <select id="categoryFilter">
                         <option value="">All Categories</option>
-                        <option value="Vegetable" <%= categoryFilter === 'Vegetable' ? 'selected' : '' %>>Vegetable</option>
-                        <option value="Flower" <%= categoryFilter === 'Flower' ? 'selected' : '' %>>Flower</option>
-                        <option value="Herb" <%= categoryFilter === 'Herb' ? 'selected' : '' %>>Herb</option>
-                        <option value="Fruit" <%= categoryFilter === 'Fruit' ? 'selected' : '' %>>Fruit</option>
-                        <option value="Other" <%= categoryFilter === 'Other' ? 'selected' : '' %>>Other</option>
+                        <option value="Vegetable" <%=categoryFilter==='Vegetable' ? 'selected' : '' %>>Vegetable
+                        </option>
+                        <option value="Flower" <%=categoryFilter==='Flower' ? 'selected' : '' %>>Flower</option>
+                        <option value="Herb" <%=categoryFilter==='Herb' ? 'selected' : '' %>>Herb</option>
+                        <option value="Fruit" <%=categoryFilter==='Fruit' ? 'selected' : '' %>>Fruit</option>
+                        <option value="Other" <%=categoryFilter==='Other' ? 'selected' : '' %>>Other</option>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -203,71 +207,96 @@
             </div>
             <div style="display: flex; gap: 10px;">
                 <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
-                <button class="btn btn-secondary" onclick="window.location.href='/seed-catalog/search'">← Back to Search</button>
+                <button class="btn btn-secondary" onclick="window.location.href='/seed-catalog/search'">← Back to
+                    Search</button>
             </div>
         </div>
 
-        <% if (seeds.length > 0) { %>
-        <div class="stats">
-            <h3>Showing <%= seeds.length %> seed varieties</h3>
-        </div>
+        <% if (seeds.length> 0) { %>
+            <div class="stats">
+                <h3>Showing <%= seeds.length %> seed varieties</h3>
+            </div>
 
-        <div class="seeds-grid">
-            <% seeds.forEach(seed => { %>
-            <div class="seed-card">
-                <span class="vendor"><%= seed.vendor %></span>
-                <% if (seed.category) { %>
-                <span class="category"><%= seed.category %></span>
-                <% } %>
-                
-                <h3><%= seed.varietyName %></h3>
-                
-                <% if (seed.commonName) { %>
-                <p><strong><%= seed.commonName %></strong></p>
-                <% } %>
-                
-                <% if (seed.sku) { %>
-                <p style="color: #888; font-size: 0.9em;">SKU: <%= seed.sku %></p>
-                <% } %>
-                
-                <% if (seed.description) { %>
-                <p style="margin: 10px 0; color: #555; font-size: 14px;">
-                    <%= seed.description.substring(0, 150) %><%= seed.description.length > 150 ? '...' : '' %>
-                </p>
-                <% } %>
-                
-                <% if (seed.seedType) { %>
-                <p><strong>Type:</strong> <%= seed.seedType %></p>
-                <% } %>
-                
-                <% if (seed.daysToMaturity) { %>
-                <p><strong>Days to Maturity:</strong> <%= seed.daysToMaturity %></p>
-                <% } %>
-                
-                <% if (seed.organic) { %>
-                <p style="color: #27ae60;">✓ Organic</p>
-                <% } %>
+            <div class="seeds-grid">
+                <% seeds.forEach(seed=> { %>
+                    <div class="seed-card">
+                        <span class="vendor">
+                            <%= seed.vendor %>
+                        </span>
+                        <% if (seed.category) { %>
+                            <span class="category">
+                                <%= seed.category %>
+                            </span>
+                            <% } %>
 
-                <% if (seed.packets && seed.packets.length > 0) { %>
-                <div class="packets">
-                    <strong>Available Sizes:</strong>
-                    <% seed.packets.forEach(packet => { %>
-                    <div class="packet">
-                        <span><%= packet.size %></span>
-                        <span class="price">$<%= packet.price ? packet.price.toFixed(2) : 'N/A' %></span>
+                                <h3>
+                                    <%= seed.varietyName %>
+                                </h3>
+
+                                <% if (seed.commonName) { %>
+                                    <p><strong>
+                                            <%= seed.commonName %>
+                                        </strong></p>
+                                    <% } %>
+
+                                        <% if (seed.sku) { %>
+                                            <p style="color: #888; font-size: 0.9em;">SKU: <%= seed.sku %>
+                                            </p>
+                                            <% } %>
+
+                                                <% if (seed.description) { %>
+                                                    <p style="margin: 10px 0; color: #555; font-size: 14px;">
+                                                        <%= seed.description.substring(0, 150) %>
+                                                            <%= seed.description.length> 150 ? '...' : '' %>
+                                                    </p>
+                                                    <% } %>
+
+                                                        <% if (seed.seedType) { %>
+                                                            <p><strong>Type:</strong>
+                                                                <%= seed.seedType %>
+                                                            </p>
+                                                            <% } %>
+
+                                                                <% if (seed.daysToMaturity) { %>
+                                                                    <p><strong>Days to Maturity:</strong>
+                                                                        <%= seed.daysToMaturity %>
+                                                                    </p>
+                                                                    <% } %>
+
+                                                                        <% if (seed.organic) { %>
+                                                                            <p style="color: #27ae60;">✓ Organic</p>
+                                                                            <% } %>
+
+                                                                                <% if (seed.packets &&
+                                                                                    seed.packets.length> 0) { %>
+                                                                                    <div class="packets">
+                                                                                        <strong>Available
+                                                                                            Sizes:</strong>
+                                                                                        <% seed.packets.forEach(packet=>
+                                                                                            { %>
+                                                                                            <div class="packet">
+                                                                                                <span>
+                                                                                                    <%= packet.size %>
+                                                                                                </span>
+                                                                                                <span class="price">$<%=
+                                                                                                        packet.price ?
+                                                                                                        packet.price.toFixed(2)
+                                                                                                        : 'N/A' %>
+                                                                                                        </span>
+                                                                                            </div>
+                                                                                            <% }); %>
+                                                                                    </div>
+                                                                                    <% } %>
                     </div>
                     <% }); %>
+            </div>
+            <% } else { %>
+                <div class="stats">
+                    <h3>No seeds found</h3>
+                    <p style="color: #666; margin-top: 10px;">Try adjusting your filters or <a
+                            href="/seed-catalog/search">search for new seeds</a></p>
                 </div>
                 <% } %>
-            </div>
-            <% }); %>
-        </div>
-        <% } else { %>
-        <div class="stats">
-            <h3>No seeds found</h3>
-            <p style="color: #666; margin-top: 10px;">Try adjusting your filters or <a href="/seed-catalog/search">search for new seeds</a></p>
-        </div>
-        <% } %>
     </div>
 
     <script>
@@ -275,14 +304,15 @@
             const vendor = document.getElementById('vendorFilter').value;
             const category = document.getElementById('categoryFilter').value;
             const search = document.getElementById('searchFilter').value;
-            
+
             const params = new URLSearchParams();
             if (vendor) params.set('vendor', vendor);
             if (category) params.set('category', category);
             if (search) params.set('search', search);
-            
+
             window.location.href = '/seed-catalog/browse?' + params.toString();
         }
     </script>
 </body>
+
 </html>

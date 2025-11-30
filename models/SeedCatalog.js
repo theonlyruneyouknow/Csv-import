@@ -11,7 +11,7 @@ const seedCatalogSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Vendor'
     },
-    
+
     // Product Identification
     sku: {
         type: String,
@@ -27,7 +27,7 @@ const seedCatalogSchema = new mongoose.Schema({
         index: true
     },
     botanicalName: String,
-    
+
     // Classification
     category: {
         type: String,
@@ -35,7 +35,7 @@ const seedCatalogSchema = new mongoose.Schema({
         index: true
     },
     subcategory: String, // e.g., 'Tomato', 'Lettuce', 'Rose', etc.
-    
+
     // Seed Details
     seedType: {
         type: String,
@@ -45,7 +45,7 @@ const seedCatalogSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    
+
     // Packet/Package Information
     packets: [{
         size: String,              // e.g., "100 seeds", "1 oz", "1000 seeds"
@@ -62,7 +62,7 @@ const seedCatalogSchema = new mongoose.Schema({
             default: 'Unknown'
         }
     }],
-    
+
     // Growing Information
     daysToMaturity: Number,
     plantingDepth: String,
@@ -71,12 +71,12 @@ const seedCatalogSchema = new mongoose.Schema({
     waterRequirement: String,
     hardiness: String,
     season: [String],             // ['Spring', 'Summer', 'Fall', 'Winter']
-    
+
     // Product Details
     description: String,
     features: [String],           // special characteristics
     resistances: [String],        // disease/pest resistances
-    
+
     // Source & References
     sourceUrl: String,            // URL where info was found
     catalogYear: Number,
@@ -86,10 +86,10 @@ const seedCatalogSchema = new mongoose.Schema({
         default: false
     },
     extractionNotes: String,
-    
+
     // Images
     imageUrls: [String],
-    
+
     // Status
     active: {
         type: Boolean,
@@ -99,7 +99,7 @@ const seedCatalogSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    
+
     // Metadata
     addedBy: String,
     updatedBy: String,

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,7 +28,7 @@
             background: white;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             margin-bottom: 30px;
             text-align: center;
         }
@@ -47,7 +48,7 @@
             background: white;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             margin-bottom: 30px;
         }
 
@@ -141,7 +142,7 @@
             background: white;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             display: none;
         }
 
@@ -165,8 +166,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .seed-grid {
@@ -186,7 +192,7 @@
 
         .seed-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             border-color: #667eea;
         }
 
@@ -303,6 +309,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <!-- Header -->
@@ -314,98 +321,114 @@
         <!-- Search Section -->
         <div class="search-section" id="searchSection">
             <h2 style="margin-bottom: 20px; color: #2c3e50;">Search for Seeds</h2>
-            
+
             <% if (!apiKeyConfigured) { %>
-            <div class="info-box" style="background: #fff3cd; border-left-color: #ffc107;">
-                <h4>⚙️ Setup Required:</h4>
-                <p><strong>Get your free Google Gemini API key:</strong> <a href="https://makersuite.google.com/app/apikey" target="_blank" style="color: #667eea; font-weight: 600;">https://makersuite.google.com/app/apikey</a></p>
-                <p>Add it to your .env file as: <code style="background: #f8f9fa; padding: 2px 6px; border-radius: 3px;">GEMINI_API_KEY=your_key_here</code></p>
-                <p style="font-size: 12px; margin-top: 5px; opacity: 0.8;">✨ Free tier: 60 requests/min, 1,500/day - Perfect for seed catalog management!</p>
-            </div>
-            <% } else { %>
-            <div class="info-box" style="background: #d4edda; border-left-color: #28a745;">
-                <h4>✅ Gemini AI Configured</h4>
-                <p style="color: #155724; margin: 0;">Your API key is set up and ready to use! Start searching for seeds below.</p>
-            </div>
-            <% } %>
-
-            <div class="info-box">
-                <h4>How it works:</h4>
-                <p>1. Enter a vendor name and optional search criteria (e.g., "tomatoes", "organic lettuce")</p>
-                <p>2. AI will search for seed information from that vendor's catalog</p>
-                <p>3. Found seeds will be parsed and stored in your database</p>
-                <p>4. You can review, edit, and manage the seed catalog</p>
-            </div>
-
-            <form id="searchForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="vendors">Vendor Names *</label>
-                        <textarea id="vendors" required placeholder="Enter one vendor per line:&#10;Johnny's Seeds&#10;Baker Creek&#10;High Mowing Seeds" style="min-height: 80px;"></textarea>
-                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
-                            💡 Enter multiple vendors (one per line) to search them all at once
-                        </small>
+                <div class="info-box" style="background: #fff3cd; border-left-color: #ffc107;">
+                    <h4>⚙️ Setup Required:</h4>
+                    <p><strong>Get your free Google Gemini API key:</strong> <a
+                            href="https://makersuite.google.com/app/apikey" target="_blank"
+                            style="color: #667eea; font-weight: 600;">https://makersuite.google.com/app/apikey</a></p>
+                    <p>Add it to your .env file as: <code
+                            style="background: #f8f9fa; padding: 2px 6px; border-radius: 3px;">GEMINI_API_KEY=your_key_here</code>
+                    </p>
+                    <p style="font-size: 12px; margin-top: 5px; opacity: 0.8;">✨ Free tier: 60 requests/min, 1,500/day -
+                        Perfect for seed catalog management!</p>
+                </div>
+                <% } else { %>
+                    <div class="info-box" style="background: #d4edda; border-left-color: #28a745;">
+                        <h4>✅ Gemini AI Configured</h4>
+                        <p style="color: #155724; margin: 0;">Your API key is set up and ready to use! Start searching
+                            for seeds below.</p>
                     </div>
-                    <div class="form-group">
-                        <label for="categories">Categories</label>
-                        <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                <input type="checkbox" name="categories" value="Vegetable" checked> Vegetable
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                <input type="checkbox" name="categories" value="Flower"> Flower
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                <input type="checkbox" name="categories" value="Herb"> Herb
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                <input type="checkbox" name="categories" value="Fruit"> Fruit
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                <input type="checkbox" name="categories" value="Other"> Other
-                            </label>
+                    <% } %>
+
+                        <div class="info-box">
+                            <h4>How it works:</h4>
+                            <p>1. Enter a vendor name and optional search criteria (e.g., "tomatoes", "organic lettuce")
+                            </p>
+                            <p>2. AI will search for seed information from that vendor's catalog</p>
+                            <p>3. Found seeds will be parsed and stored in your database</p>
+                            <p>4. You can review, edit, and manage the seed catalog</p>
                         </div>
-                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
-                            Select categories to search (leave all unchecked for all categories)
-                        </small>
-                    </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="searchQuery">Search Query (Optional)</label>
-                    <textarea id="searchQuery" placeholder="Describe what seeds you're looking for... e.g., 'organic tomato varieties with disease resistance' or 'heirloom lettuce seeds'"></textarea>
-                </div>
+                        <form id="searchForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="vendors">Vendor Names *</label>
+                                    <textarea id="vendors" required
+                                        placeholder="Enter one vendor per line:&#10;Johnny's Seeds&#10;Baker Creek&#10;High Mowing Seeds"
+                                        style="min-height: 80px;"></textarea>
+                                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                                        💡 Enter multiple vendors (one per line) to search them all at once
+                                    </small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="categories">Categories</label>
+                                    <div
+                                        style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" name="categories" value="Vegetable" checked>
+                                            Vegetable
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" name="categories" value="Flower"> Flower
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" name="categories" value="Herb"> Herb
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" name="categories" value="Fruit"> Fruit
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" name="categories" value="Other"> Other
+                                        </label>
+                                    </div>
+                                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                                        Select categories to search (leave all unchecked for all categories)
+                                    </small>
+                                </div>
+                            </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="catalogUrl">Vendor Catalog URL (Recommended)</label>
-                        <input type="text" id="catalogUrl" placeholder="vendor.com/seeds or https://vendor.com/seeds">
-                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
-                            💡 Tip: Enter URL with or without https:// - we'll add it automatically (e.g., "johnnyseeds.com/vegetables")
-                        </small>
-                    </div>
-                    <div class="form-group">
-                        <label for="maxResults">Max Results</label>
-                        <input type="number" id="maxResults" value="20" min="1" max="100">
-                    </div>
-                </div>
+                            <div class="form-group">
+                                <label for="searchQuery">Search Query (Optional)</label>
+                                <textarea id="searchQuery"
+                                    placeholder="Describe what seeds you're looking for... e.g., 'organic tomato varieties with disease resistance' or 'heirloom lettuce seeds'"></textarea>
+                            </div>
 
-                <div class="btn-group">
-                    <button type="submit" class="btn btn-primary">🔍 Search with AI</button>
-                    <button type="button" class="btn btn-secondary" onclick="window.location.href='/seed-catalog/browse'">📚 Browse Catalog</button>
-                    <button type="button" class="btn btn-success" onclick="window.location.href='/seed-catalog/manage'">⚙️ Manage Seeds</button>
-                </div>
-            </form>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="catalogUrl">Vendor Catalog URL (Recommended)</label>
+                                    <input type="text" id="catalogUrl"
+                                        placeholder="vendor.com/seeds or https://vendor.com/seeds">
+                                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                                        💡 Tip: Enter URL with or without https:// - we'll add it automatically (e.g.,
+                                        "johnnyseeds.com/vegetables")
+                                    </small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="maxResults">Max Results</label>
+                                    <input type="number" id="maxResults" value="20" min="1" max="100">
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary">🔍 Search with AI</button>
+                                <button type="button" class="btn btn-secondary"
+                                    onclick="window.location.href='/seed-catalog/browse'">📚 Browse Catalog</button>
+                                <button type="button" class="btn btn-success"
+                                    onclick="window.location.href='/seed-catalog/manage'">⚙️ Manage Seeds</button>
+                            </div>
+                        </form>
         </div>
 
         <!-- Results Section -->
         <div class="results-section" id="resultsSection">
             <button class="btn btn-secondary back-btn" onclick="backToSearch()">← Back to Search</button>
-            
+
             <h2 style="margin-bottom: 20px; color: #2c3e50;">Search Results</h2>
-            
+
             <div class="stats" id="statsContainer"></div>
-            
+
             <div id="loadingContainer" class="loading">
                 <div class="loading-spinner"></div>
                 <p>AI is searching for seeds...</p>
@@ -418,13 +441,13 @@
     <script>
         document.getElementById('searchForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const vendorsText = document.getElementById('vendors').value;
             const vendors = vendorsText.split('\n').map(v => v.trim()).filter(v => v);
-            
+
             const categoryCheckboxes = document.querySelectorAll('input[name="categories"]:checked');
             const categories = Array.from(categoryCheckboxes).map(cb => cb.value);
-            
+
             const searchQuery = document.getElementById('searchQuery').value;
             const catalogUrl = document.getElementById('catalogUrl').value;
             const maxResults = document.getElementById('maxResults').value;
@@ -449,7 +472,7 @@
             for (const vendor of vendors) {
                 // If categories selected, search each category, otherwise search all
                 const categoriesToSearch = categories.length > 0 ? categories : [''];
-                
+
                 for (const category of categoriesToSearch) {
                     try {
                         document.getElementById('loadingContainer').innerHTML = `
@@ -473,13 +496,13 @@
                         });
 
                         const data = await response.json();
-                        
+
                         if (data.success) {
                             allSeeds = allSeeds.concat(data.seeds);
                             totalStats.found += data.stats.found;
                             totalStats.saved += data.stats.saved;
                             totalStats.updated += data.stats.updated;
-                            
+
                             searchResults.push({
                                 vendor,
                                 category: category || 'All',
@@ -557,7 +580,7 @@
                     </tbody>
                 </table>
             `;
-            
+
             document.getElementById('resultsContainer').innerHTML = summaryHtml;
         }
 
@@ -637,4 +660,5 @@
         }
     </script>
 </body>
+
 </html>
