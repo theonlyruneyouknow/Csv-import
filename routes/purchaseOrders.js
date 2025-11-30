@@ -2195,6 +2195,19 @@ router.get('/unreceived-items-report', async (req, res) => {
   }
 });
 
+// Waiting for Approval Report - filtered by status
+router.get('/waiting-for-approval', async (req, res) => {
+  try {
+    console.log('📋 Loading waiting for approval report page...');
+    res.render('waiting-for-approval', {
+      user: req.user
+    });
+  } catch (error) {
+    console.error('❌ Error loading waiting for approval report page:', error);
+    res.status(500).send('Error loading report page: ' + error.message);
+  }
+});
+
 // Get all purchase orders with unique status values
 router.get('/', async (req, res) => {
   try {
@@ -3151,7 +3164,7 @@ router.post('/preview-inventory-import', async (req, res) => {
 
     // Process each inventory item to find matches
     for (const item of inventoryData) {
-      const { sku, measure, raw, child } = item;
+      const { sku, measure, raw, child, forecast, forecastSupply, forecastTotal } = item;
 
       if (!sku) continue;
 
@@ -3183,6 +3196,9 @@ router.post('/preview-inventory-import', async (req, res) => {
         measure,
         raw,
         child,
+        forecast,
+        forecastSupply,
+        forecastTotal,
         lineItems: lineItems.map(li => ({
           poNumber: li.poNumber,
           fullSku: li.sku,
@@ -3191,6 +3207,11 @@ router.post('/preview-inventory-import', async (req, res) => {
             raw: li.inventoryRawQuantity,
             child: li.inventoryChildQuantity,
             measure: li.inventoryMeasure
+          },
+          currentForecast: {
+            forecast: li.forecast,
+            forecastSupply: li.forecastSupply,
+            forecastTotal: li.forecastSupplyTotal
           }
         }))
       });
@@ -3247,7 +3268,7 @@ router.post('/import-inventory-data', async (req, res) => {
 
     // Process each inventory item
     for (const item of inventoryData) {
-      const { sku, measure, raw, child } = item;
+      const { sku, measure, raw, child, forecast, forecastSupply, forecastTotal } = item;
 
       if (!sku) continue;
 
@@ -3293,7 +3314,11 @@ router.post('/import-inventory-data', async (req, res) => {
         inventoryRawQuantity: isNaN(parseFloat(raw)) ? null : parseFloat(raw),  // Keep 0 as 0
         inventoryChildQuantity: isNaN(parseFloat(child)) ? null : parseFloat(child),  // Keep 0 as 0
         inventoryMeasure: measure || '',
-        inventoryLastUpdated: new Date()
+        inventoryLastUpdated: new Date(),
+        forecast: isNaN(parseFloat(forecast)) ? null : parseFloat(forecast),  // Keep 0 as 0
+        forecastSupply: isNaN(parseFloat(forecastSupply)) ? null : parseFloat(forecastSupply),  // Keep 0 as 0
+        forecastSupplyTotal: isNaN(parseFloat(forecastTotal)) ? null : parseFloat(forecastTotal),  // Keep 0 as 0
+        forecastLastUpdated: new Date()
       };
 
       // Log first few updates for debugging
@@ -6116,7 +6141,11 @@ router.get('/unreceived-items', async (req, res) => {
         inventoryRawQuantity: item.inventoryRawQuantity !== null && item.inventoryRawQuantity !== undefined ? item.inventoryRawQuantity : null,
         inventoryChildQuantity: item.inventoryChildQuantity !== null && item.inventoryChildQuantity !== undefined ? item.inventoryChildQuantity : null,
         inventoryMeasure: item.inventoryMeasure || '',
-        inventoryLastUpdated: item.inventoryLastUpdated || null
+        inventoryLastUpdated: item.inventoryLastUpdated || null,
+        forecast: item.forecast !== null && item.forecast !== undefined ? item.forecast : null,
+        forecastSupply: item.forecastSupply !== null && item.forecastSupply !== undefined ? item.forecastSupply : null,
+        forecastSupplyTotal: item.forecastSupplyTotal !== null && item.forecastSupplyTotal !== undefined ? item.forecastSupplyTotal : null,
+        forecastLastUpdated: item.forecastLastUpdated || null
       }));
 
     // Get stats
@@ -6137,6 +6166,80 @@ router.get('/unreceived-items', async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error fetching unreceived items:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get waiting for approval items (filtered by status)
+router.get('/waiting-for-approval-items', async (req, res) => {
+  try {
+    console.log('📋 Fetching waiting for approval items...');
+
+    // Find all line items where received = false AND poId.status = "Waiting for approval"
+    const waitingItems = await LineItem.find({ received: false })
+      .populate('poId')
+      .sort({ poNumber: 1, sku: 1 })
+      .lean();
+
+    console.log(`Found ${waitingItems.length} unreceived items`);
+
+    // Format the data for the report - filter by "Waiting for approval" status
+    const formattedItems = waitingItems
+      .filter(item => {
+        // Only include items with valid PO references
+        if (!item.poId) return false;
+        // Exclude items from hidden POs
+        if (item.poId.isHidden === true) return false;
+        // Only include items with "Waiting for approval" status
+        if (item.poId.status !== 'Waiting for approval') return false;
+        return true;
+      })
+      .map(item => ({
+        itemId: item._id,
+        poNumber: item.poNumber,
+        poUrl: item.poId.poUrl || null,
+        vendor: item.poId.vendor || 'N/A',
+        vendorId: item.poId.linkedVendor || null,
+        poDate: item.poId.date || item.date || 'N/A',
+        eta: item.poId.eta || null,
+        sku: item.sku || 'N/A',
+        memo: item.memo || 'N/A',
+        quantity: item.quantityRemaining || item.quantityExpected || item.quantityOrdered || 0,
+        itemStatus: item.itemStatus || 'N/A',
+        poStatus: item.poId.status || 'N/A',
+        poType: item.poId.poType || 'N/A',
+        receivingNotes: item.receivingNotes || '',
+        inventoryRawQuantity: item.inventoryRawQuantity !== null && item.inventoryRawQuantity !== undefined ? item.inventoryRawQuantity : null,
+        inventoryChildQuantity: item.inventoryChildQuantity !== null && item.inventoryChildQuantity !== undefined ? item.inventoryChildQuantity : null,
+        inventoryMeasure: item.inventoryMeasure || '',
+        inventoryLastUpdated: item.inventoryLastUpdated || null,
+        forecast: item.forecast !== null && item.forecast !== undefined ? item.forecast : null,
+        forecastSupply: item.forecastSupply !== null && item.forecastSupply !== undefined ? item.forecastSupply : null,
+        forecastSupplyTotal: item.forecastSupplyTotal !== null && item.forecastSupplyTotal !== undefined ? item.forecastSupplyTotal : null,
+        forecastLastUpdated: item.forecastLastUpdated || null
+      }));
+
+    // Get stats
+    const uniquePOs = new Set(formattedItems.map(item => item.poNumber));
+    const stats = {
+      totalItems: formattedItems.length,
+      totalPOs: uniquePOs.size
+    };
+
+    const hiddenCount = waitingItems.length - formattedItems.length;
+    console.log(`📊 Stats: ${stats.totalItems} items across ${stats.totalPOs} POs (${hiddenCount} items excluded)`);
+
+    res.json({
+      success: true,
+      items: formattedItems,
+      stats: stats
+    });
+
+  } catch (error) {
+    console.error('❌ Error fetching waiting for approval items:', error);
     res.status(500).json({
       success: false,
       error: error.message

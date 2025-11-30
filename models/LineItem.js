@@ -217,6 +217,23 @@ const lineItemSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
+    // Forecast data fields - for demand forecasting and supply planning
+    forecast: {                 // Forecast demand quantity
+        type: Number,
+        default: null
+    },
+    forecastSupply: {          // Forecast supply quantity
+        type: Number,
+        default: null
+    },
+    forecastSupplyTotal: {     // Forecast Supply Total (Raw + Child)
+        type: Number,
+        default: null
+    },
+    forecastLastUpdated: {     // When forecast data was last imported
+        type: Date,
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unreceived Items Report - Purchase Orders</title>
+    <title>Waiting for Approval - Purchase Orders</title>
     <style>
         * {
             margin: 0;
@@ -905,7 +905,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📋 Unreceived Items Report</h1>
+            <h1>⏳ Waiting for Approval</h1>
             <div class="header-actions">
                 <a href="/purchase-orders" class="btn btn-primary">
                     ← Back to Dashboard
@@ -1411,7 +1411,7 @@
         async function loadData() {
             try {
                 console.log('🔄 Starting to load unreceived items data...');
-                const response = await fetch('/purchase-orders/unreceived-items');
+                const response = await fetch('/purchase-orders/waiting-for-approval-items');
                 console.log('📡 Received response:', response.status);
 
                 const data = await response.json();
@@ -1449,8 +1449,17 @@
 
                     updateStats(data.stats);
                     populateFilters();
+                    
+                    // Auto-filter by "Waiting for approval" status
+                    const statusFilter = document.getElementById('statusFilter');
+                    if (statusFilter) {
+                        statusFilter.value = 'Waiting for approval';
+                    }
+                    
+                    applyFilters();
+                    
                     renderTable();
-                    console.log('✅ Table rendered successfully');
+                    console.log('✅ Table rendered successfully (filtered by Waiting for approval)');
                 } else {
                     console.error('❌ Server returned error:', data.error);
                     showError('Failed to load data: ' + data.error);
@@ -1954,7 +1963,7 @@
         let currentLoadedFavoriteIndex = null; // Track which favorite is currently loaded
 
         function loadFavoritesList() {
-            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+            const favorites = JSON.parse(localStorage.getItem('waitingForApprovalFavorites') || '[]');
 
             // Migrate old favorites to include notes column if missing
             let needsSave = false;
@@ -1974,7 +1983,7 @@
 
             // Save migrated favorites back to localStorage
             if (needsSave) {
-                localStorage.setItem('unreceivedItemsFavorites', JSON.stringify(favorites));
+                localStorage.setItem('waitingForApprovalFavorites', JSON.stringify(favorites));
                 console.log('✅ Migrated favorites to include notes column');
             }
 
@@ -2018,7 +2027,7 @@
             const config = getCurrentExportConfig();
 
             // Get existing favorites
-            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+            const favorites = JSON.parse(localStorage.getItem('waitingForApprovalFavorites') || '[]');
 
             // Check for duplicate name
             const existingIndex = favorites.findIndex(f => f.name.toLowerCase() === name.toLowerCase());
@@ -2032,7 +2041,7 @@
             }
 
             // Save to localStorage
-            localStorage.setItem('unreceivedItemsFavorites', JSON.stringify(favorites));
+            localStorage.setItem('waitingForApprovalFavorites', JSON.stringify(favorites));
 
             // Clear input and reload list
             nameInput.value = '';
@@ -2041,7 +2050,7 @@
         }
 
         function updateFavorite(index) {
-            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+            const favorites = JSON.parse(localStorage.getItem('waitingForApprovalFavorites') || '[]');
             if (!favorites[index]) return;
 
             const name = favorites[index].name;
@@ -2057,7 +2066,7 @@
             favorites[index] = { name, config };
 
             // Save to localStorage
-            localStorage.setItem('unreceivedItemsFavorites', JSON.stringify(favorites));
+            localStorage.setItem('waitingForApprovalFavorites', JSON.stringify(favorites));
 
             // Reload list
             loadFavoritesList();
@@ -2089,7 +2098,7 @@
         }
 
         function loadFavorite(index) {
-            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+            const favorites = JSON.parse(localStorage.getItem('waitingForApprovalFavorites') || '[]');
             if (!favorites[index]) return;
 
             const favorite = favorites[index];
@@ -2150,7 +2159,7 @@
         }
 
         function deleteFavorite(index) {
-            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+            const favorites = JSON.parse(localStorage.getItem('waitingForApprovalFavorites') || '[]');
             if (!favorites[index]) return;
 
             const name = favorites[index].name;
@@ -2159,7 +2168,7 @@
             }
 
             favorites.splice(index, 1);
-            localStorage.setItem('unreceivedItemsFavorites', JSON.stringify(favorites));
+            localStorage.setItem('waitingForApprovalFavorites', JSON.stringify(favorites));
             loadFavoritesList();
             showToast(`🗑️ Deleted favorite: ${name}`);
         }
@@ -2167,7 +2176,7 @@
         // ============= MULTI-TAB EXCEL EXPORT =============
 
         function exportMultiTabExcel() {
-            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+            const favorites = JSON.parse(localStorage.getItem('waitingForApprovalFavorites') || '[]');
 
             if (favorites.length === 0) {
                 alert('No saved favorites found. Please save at least one favorite report configuration first.');
@@ -2179,7 +2188,7 @@
         }
 
         function openExcelSelectModal() {
-            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+            const favorites = JSON.parse(localStorage.getItem('waitingForApprovalFavorites') || '[]');
             const listContainer = document.getElementById('excelFavoritesList');
 
             // Load saved Excel presets
@@ -2368,7 +2377,7 @@
         }
 
         function performExcelExport() {
-            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+            const favorites = JSON.parse(localStorage.getItem('waitingForApprovalFavorites') || '[]');
 
             // Get custom filename
             const customFilename = document.getElementById('excelFilenameInput').value.trim();
