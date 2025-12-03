@@ -25,7 +25,7 @@ router.get('/summary', async (req, res) => {
         // Build vendor summary with statistics
         const vendorSummary = vendors.map(vendor => {
             const vendorSeeds = seeds.filter(s => s.vendor === vendor.vendorName);
-            
+
             // Group by category
             const categoryGroups = {};
             vendorSeeds.forEach(seed => {
@@ -58,7 +58,7 @@ router.get('/summary', async (req, res) => {
         seeds.forEach(seed => {
             const cat = seed.category || 'Uncategorized';
             const common = seed.commonName || seed.varietyName;
-            
+
             if (!allCategories[cat]) {
                 allCategories[cat] = { vendors: new Set(), count: 0 };
             }

@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <title>
+        <%= title %>
+    </title>
     <style>
         * {
             margin: 0;
@@ -335,6 +338,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <!-- Header -->
@@ -352,19 +356,27 @@
         <!-- Global Statistics -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="number"><%= totalVendors %></div>
+                <div class="number">
+                    <%= totalVendors %>
+                </div>
                 <div class="label">Active Vendors</div>
             </div>
             <div class="stat-card">
-                <div class="number"><%= totalCategories %></div>
+                <div class="number">
+                    <%= totalCategories %>
+                </div>
                 <div class="label">Seed Categories</div>
             </div>
             <div class="stat-card">
-                <div class="number"><%= totalVarieties %></div>
+                <div class="number">
+                    <%= totalVarieties %>
+                </div>
                 <div class="label">Total Varieties</div>
             </div>
             <div class="stat-card">
-                <div class="number"><%= Math.round(totalVarieties / totalVendors) %></div>
+                <div class="number">
+                    <%= Math.round(totalVarieties / totalVendors) %>
+                </div>
                 <div class="label">Avg per Vendor</div>
             </div>
         </div>
@@ -372,7 +384,7 @@
         <!-- Category Statistics -->
         <div class="section">
             <h2>📊 Category Distribution</h2>
-            <% if (categoryStats.length > 0) { %>
+            <% if (categoryStats.length> 0) { %>
                 <table class="summary-table">
                     <thead>
                         <tr>
@@ -383,25 +395,33 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% categoryStats.forEach(cat => { %>
+                        <% categoryStats.forEach(cat=> { %>
                             <tr>
-                                <td><strong><%= cat.name %></strong></td>
-                                <td><%= cat.vendorCount %></td>
-                                <td><%= cat.varietyCount %></td>
-                                <td><%= Math.round(cat.varietyCount / cat.vendorCount) %></td>
+                                <td><strong>
+                                        <%= cat.name %>
+                                    </strong></td>
+                                <td>
+                                    <%= cat.vendorCount %>
+                                </td>
+                                <td>
+                                    <%= cat.varietyCount %>
+                                </td>
+                                <td>
+                                    <%= Math.round(cat.varietyCount / cat.vendorCount) %>
+                                </td>
                             </tr>
-                        <% }); %>
+                            <% }); %>
                     </tbody>
                 </table>
-            <% } else { %>
-                <div class="no-data">No category data available</div>
-            <% } %>
+                <% } else { %>
+                    <div class="no-data">No category data available</div>
+                    <% } %>
         </div>
 
         <!-- Top Common Names -->
         <div class="section">
             <h2>🌟 Top 20 Popular Seeds</h2>
-            <% if (commonNameStats.length > 0) { %>
+            <% if (commonNameStats.length> 0) { %>
                 <table class="summary-table">
                     <thead>
                         <tr>
@@ -411,108 +431,138 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% commonNameStats.forEach(seed => { %>
+                        <% commonNameStats.forEach(seed=> { %>
                             <tr>
-                                <td><strong><%= seed.name %></strong></td>
-                                <td><%= seed.vendorCount %></td>
-                                <td><%= seed.varietyCount %></td>
+                                <td><strong>
+                                        <%= seed.name %>
+                                    </strong></td>
+                                <td>
+                                    <%= seed.vendorCount %>
+                                </td>
+                                <td>
+                                    <%= seed.varietyCount %>
+                                </td>
                             </tr>
-                        <% }); %>
+                            <% }); %>
                     </tbody>
                 </table>
-            <% } else { %>
-                <div class="no-data">No seed data available</div>
-            <% } %>
+                <% } else { %>
+                    <div class="no-data">No seed data available</div>
+                    <% } %>
         </div>
 
         <!-- Vendor Details -->
         <div class="section">
             <h2>🏪 Vendors by Category & Variety</h2>
-            
+
             <div class="filter-section">
                 <input type="text" class="filter-input" id="vendorFilter" placeholder="🔍 Filter vendors by name...">
             </div>
 
-            <% if (vendorSummary.length > 0) { %>
-                <% vendorSummary.forEach((vendor, vendorIndex) => { %>
+            <% if (vendorSummary.length> 0) { %>
+                <% vendorSummary.forEach((vendor, vendorIndex)=> { %>
                     <div class="vendor-card" data-vendor-name="<%= vendor.vendorName.toLowerCase() %>">
                         <div class="vendor-header">
-                            <div class="vendor-name"><%= vendor.vendorName %></div>
+                            <div class="vendor-name">
+                                <%= vendor.vendorName %>
+                            </div>
                             <div class="vendor-stats">
                                 <div class="vendor-stat">
-                                    <span class="number"><%= vendor.categories.length %></span> categories
+                                    <span class="number">
+                                        <%= vendor.categories.length %>
+                                    </span> categories
                                 </div>
                                 <div class="vendor-stat">
-                                    <span class="number"><%= vendor.totalVarieties %></span> varieties
+                                    <span class="number">
+                                        <%= vendor.totalVarieties %>
+                                    </span> varieties
                                 </div>
                             </div>
                         </div>
 
                         <% if (vendor.baseUrl) { %>
                             <div style="margin-bottom: 10px;">
-                                <a href="<%= vendor.baseUrl %>" target="_blank" style="color: #667eea; text-decoration: none;">
+                                <a href="<%= vendor.baseUrl %>" target="_blank"
+                                    style="color: #667eea; text-decoration: none;">
                                     🔗 <%= vendor.baseUrl %>
                                 </a>
                             </div>
-                        <% } %>
-
-                        <div class="vendor-timestamps">
-                            <% if (vendor.lastIncrementalUpdate) { %>
-                                <div class="timestamp-badge">
-                                    🔄 Updated: <%= new Date(vendor.lastIncrementalUpdate).toLocaleDateString() %>
-                                </div>
                             <% } %>
-                            <% if (vendor.lastFullRefresh) { %>
-                                <div class="timestamp-badge">
-                                    ♻️ Refreshed: <%= new Date(vendor.lastFullRefresh).toLocaleDateString() %>
-                                </div>
-                            <% } %>
-                        </div>
 
-                        <% if (vendor.categories.length > 0) { %>
-                            <div class="categories-grid">
-                                <% vendor.categories.forEach((category, catIndex) => { %>
-                                    <div class="category-box" onclick="toggleVarieties('<%= vendorIndex %>-<%= catIndex %>')">
-                                        <div class="category-name"><%= category.name %></div>
-                                        <div class="category-count"><%= category.count %> varieties</div>
-                                        <button class="toggle-btn" style="margin-top: 10px;">View Varieties</button>
-                                        
-                                        <div id="varieties-<%= vendorIndex %>-<%= catIndex %>" class="varieties-list">
-                                            <% category.varieties.forEach(variety => { %>
-                                                <div class="variety-item">
-                                                    <div>
-                                                        <div class="variety-name"><%= variety.varietyName %></div>
-                                                        <div class="variety-details">
-                                                            <% if (variety.commonName) { %>
-                                                                <%= variety.commonName %>
-                                                            <% } %>
-                                                            <% if (variety.subcategory) { %>
-                                                                • <%= variety.subcategory %>
-                                                            <% } %>
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <% if (variety.seedType) { %>
-                                                            <span class="variety-badge"><%= variety.seedType %></span>
-                                                        <% } %>
-                                                        <% if (variety.organic) { %>
-                                                            <span class="variety-badge" style="background: #28a745;">🌿 Organic</span>
-                                                        <% } %>
-                                                    </div>
-                                                </div>
-                                            <% }); %>
+                                <div class="vendor-timestamps">
+                                    <% if (vendor.lastIncrementalUpdate) { %>
+                                        <div class="timestamp-badge">
+                                            🔄 Updated: <%= new Date(vendor.lastIncrementalUpdate).toLocaleDateString()
+                                                %>
                                         </div>
+                                        <% } %>
+                                            <% if (vendor.lastFullRefresh) { %>
+                                                <div class="timestamp-badge">
+                                                    ♻️ Refreshed: <%= new
+                                                        Date(vendor.lastFullRefresh).toLocaleDateString() %>
+                                                </div>
+                                                <% } %>
+                                </div>
+
+                                <% if (vendor.categories.length> 0) { %>
+                                    <div class="categories-grid">
+                                        <% vendor.categories.forEach((category, catIndex)=> { %>
+                                            <div class="category-box"
+                                                onclick="toggleVarieties('<%= vendorIndex %>-<%= catIndex %>')">
+                                                <div class="category-name">
+                                                    <%= category.name %>
+                                                </div>
+                                                <div class="category-count">
+                                                    <%= category.count %> varieties
+                                                </div>
+                                                <button class="toggle-btn" style="margin-top: 10px;">View
+                                                    Varieties</button>
+
+                                                <div id="varieties-<%= vendorIndex %>-<%= catIndex %>"
+                                                    class="varieties-list">
+                                                    <% category.varieties.forEach(variety=> { %>
+                                                        <div class="variety-item">
+                                                            <div>
+                                                                <div class="variety-name">
+                                                                    <%= variety.varietyName %>
+                                                                </div>
+                                                                <div class="variety-details">
+                                                                    <% if (variety.commonName) { %>
+                                                                        <%= variety.commonName %>
+                                                                            <% } %>
+                                                                                <% if (variety.subcategory) { %>
+                                                                                    • <%= variety.subcategory %>
+                                                                                        <% } %>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <% if (variety.seedType) { %>
+                                                                    <span class="variety-badge">
+                                                                        <%= variety.seedType %>
+                                                                    </span>
+                                                                    <% } %>
+                                                                        <% if (variety.organic) { %>
+                                                                            <span class="variety-badge"
+                                                                                style="background: #28a745;">🌿
+                                                                                Organic</span>
+                                                                            <% } %>
+                                                            </div>
+                                                        </div>
+                                                        <% }); %>
+                                                </div>
+                                            </div>
+                                            <% }); %>
                                     </div>
-                                <% }); %>
-                            </div>
-                        <% } else { %>
-                            <div class="no-data" style="padding: 20px;">No varieties found for this vendor</div>
-                        <% } %>
+                                    <% } else { %>
+                                        <div class="no-data" style="padding: 20px;">No varieties found for this vendor
+                                        </div>
+                                        <% } %>
                     </div>
-                <% }); %>
-            <% } else { %>
-                <div class="no-data">No vendors found. Add vendors and run AI searches to populate the catalog.</div>
-            <% } %>
+                    <% }); %>
+                        <% } else { %>
+                            <div class="no-data">No vendors found. Add vendors and run AI searches to populate the
+                                catalog.</div>
+                            <% } %>
         </div>
     </div>
 
@@ -520,7 +570,7 @@
         function toggleVarieties(id) {
             const element = document.getElementById('varieties-' + id);
             const btn = element.previousElementSibling;
-            
+
             if (element.classList.contains('show')) {
                 element.classList.remove('show');
                 btn.textContent = 'View Varieties';
@@ -531,10 +581,10 @@
         }
 
         // Vendor filter
-        document.getElementById('vendorFilter').addEventListener('input', function(e) {
+        document.getElementById('vendorFilter').addEventListener('input', function (e) {
             const filter = e.target.value.toLowerCase();
             const vendorCards = document.querySelectorAll('.vendor-card');
-            
+
             vendorCards.forEach(card => {
                 const vendorName = card.getAttribute('data-vendor-name');
                 if (vendorName.includes(filter)) {
@@ -546,4 +596,5 @@
         });
     </script>
 </body>
+
 </html>
