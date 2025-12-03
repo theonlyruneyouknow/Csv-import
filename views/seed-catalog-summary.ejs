@@ -275,6 +275,18 @@
             background: #f8f9fa;
         }
 
+        .seed-type-details {
+            background: #f8f9fa !important;
+        }
+
+        .seed-type-details:hover {
+            background: #f8f9fa !important;
+        }
+
+        .seed-type-details td {
+            border-bottom: 2px solid #667eea !important;
+        }
+
         .no-data {
             text-align: center;
             padding: 40px;
@@ -420,19 +432,20 @@
 
         <!-- Top Common Names -->
         <div class="section">
-            <h2>🌟 Top 20 Popular Seeds</h2>
+            <h2>🌟 Top 20 Seed Types</h2>
             <% if (commonNameStats.length> 0) { %>
                 <table class="summary-table">
                     <thead>
                         <tr>
-                            <th>Seed Name</th>
+                            <th>Seed Type</th>
                             <th>Available from Vendors</th>
                             <th>Total Varieties</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <% commonNameStats.forEach(seed=> { %>
-                            <tr>
+                        <% commonNameStats.forEach((seed, seedIndex)=> {
+                            %>
                                 <td><strong>
                                         <%= seed.name %>
                                     </strong></td>
@@ -441,6 +454,51 @@
                                 </td>
                                 <td>
                                     <%= seed.varietyCount %>
+                                </td>
+                                <td>
+                                    <button class="toggle-btn" onclick="toggleSeedType('<%= seedIndex %>')">View Varieties</button>
+                                </td>
+                            </tr>
+                            <tr id="seed-type-details-<%= seedIndex %>" class="seed-type-details" style="display: none;">
+                                <td colspan="4" style="padding: 0;">
+                                    <div style="padding: 20px; background: #f8f9fa;">
+                                        <h3 style="color: #667eea; margin-bottom: 15px;">Varieties of <%= seed.name %> by Vendor</h3>
+                                        <% Object.entries(seed.vendorBreakdown).forEach(([vendorName, varieties]) => { %>
+                                            <div style="margin-bottom: 20px; background: white; padding: 15px; border-radius: 8px; border: 2px solid #dee2e6;">
+                                                <h4 style="color: #333; margin-bottom: 10px; font-size: 1.1em;">
+                                                    🏪 <%= vendorName %> 
+                                                    <span style="color: #667eea; font-weight: normal; font-size: 0.9em;">
+                                                        (<%= varieties.length %> <%= varieties.length === 1 ? 'variety' : 'varieties' %>)
+                                                    </span>
+                                                </h4>
+                                                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px;">
+                                                    <% varieties.forEach(variety => { %>
+                                                        <div class="variety-item">
+                                                            <div>
+                                                                <div class="variety-name"><%= variety.varietyName %></div>
+                                                                <div class="variety-details">
+                                                                    <% if (variety.subcategory) { %>
+                                                                        <%= variety.subcategory %>
+                                                                    <% } %>
+                                                                    <% if (variety.category) { %>
+                                                                        • <%= variety.category %>
+                                                                    <% } %>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <% if (variety.seedType) { %>
+                                                                    <span class="variety-badge"><%= variety.seedType %></span>
+                                                                <% } %>
+                                                                <% if (variety.organic) { %>
+                                                                    <span class="variety-badge" style="background: #28a745;">🌿 Organic</span>
+                                                                <% } %>
+                                                            </div>
+                                                        </div>
+                                                    <% }); %>
+                                                </div>
+                                            </div>
+                                        <% }); %>
+                                    </div>
                                 </td>
                             </tr>
                             <% }); %>
@@ -577,6 +635,19 @@
             } else {
                 element.classList.add('show');
                 btn.textContent = 'Hide Varieties';
+            }
+        }
+
+        function toggleSeedType(index) {
+            const element = document.getElementById('seed-type-details-' + index);
+            const btn = event.target;
+            
+            if (element.style.display === 'none') {
+                element.style.display = 'table-row';
+                btn.textContent = 'Hide Varieties';
+            } else {
+                element.style.display = 'none';
+                btn.textContent = 'View Varieties';
             }
         }
 

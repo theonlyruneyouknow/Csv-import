@@ -55,6 +55,8 @@ router.get('/summary', async (req, res) => {
         // Calculate global statistics
         const allCategories = {};
         const allCommonNames = {};
+        const seedTypeDetails = {}; // New: Track detailed variety info per seed type
+        
         seeds.forEach(seed => {
             const cat = seed.category || 'Uncategorized';
             const common = seed.commonName || seed.varietyName;
@@ -66,10 +68,26 @@ router.get('/summary', async (req, res) => {
             allCategories[cat].count++;
 
             if (!allCommonNames[common]) {
-                allCommonNames[common] = { vendors: new Set(), varieties: 0 };
+                allCommonNames[common] = { 
+                    vendors: new Set(), 
+                    varieties: 0,
+                    vendorBreakdown: {} // Track varieties by vendor
+                };
             }
             allCommonNames[common].vendors.add(seed.vendor);
             allCommonNames[common].varieties++;
+            
+            // Add to vendor breakdown
+            if (!allCommonNames[common].vendorBreakdown[seed.vendor]) {
+                allCommonNames[common].vendorBreakdown[seed.vendor] = [];
+            }
+            allCommonNames[common].vendorBreakdown[seed.vendor].push({
+                varietyName: seed.varietyName,
+                category: seed.category,
+                subcategory: seed.subcategory,
+                seedType: seed.seedType,
+                organic: seed.organic
+            });
         });
 
         const categoryStats = Object.entries(allCategories)
@@ -84,7 +102,8 @@ router.get('/summary', async (req, res) => {
             .map(([name, data]) => ({
                 name,
                 vendorCount: data.vendors.size,
-                varietyCount: data.varieties
+                varietyCount: data.varieties,
+                vendorBreakdown: data.vendorBreakdown
             }))
             .sort((a, b) => b.varietyCount - a.varietyCount)
             .slice(0, 20); // Top 20
