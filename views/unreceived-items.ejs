@@ -1027,6 +1027,17 @@
                 <button class="close-btn" onclick="closeColumnModal()">&times;</button>
             </div>
             <div class="modal-body">
+                <!-- Quick Export Button at Top -->
+                <div style="margin-bottom: 20px; padding: 15px; background: #d4edda; border: 2px solid #28a745; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="color: #155724; font-size: 1.1em;">✓ Ready to Export</strong>
+                        <p style="margin: 5px 0 0 0; color: #155724; font-size: 0.9em;">Load a favorite or customize columns below, then click to export</p>
+                    </div>
+                    <button class="btn btn-success" onclick="performExport()" style="font-size: 1.1em; padding: 10px 20px; white-space: nowrap;">
+                        📥 Export Selected
+                    </button>
+                </div>
+                
                 <!-- Favorites Section -->
                 <div class="favorites-section">
                     <div class="favorites-header">
