@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,7 +28,7 @@
             background: white;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
             text-align: center;
         }
@@ -42,7 +43,7 @@
             background: white;
             padding: 20px;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
             display: flex;
             gap: 15px;
@@ -76,13 +77,13 @@
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .vendors-table {
             background: white;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
 
@@ -136,7 +137,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
             align-items: center;
             justify-content: center;
@@ -157,8 +158,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .form-group {
@@ -193,6 +199,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -202,7 +209,8 @@
 
         <div class="actions">
             <button class="btn btn-success" onclick="showAddModal()">+ Add New Vendor</button>
-            <button class="btn btn-secondary" onclick="window.location.href='/seed-catalog/search'">← Back to Search</button>
+            <button class="btn btn-secondary" onclick="window.location.href='/seed-catalog/search'">← Back to
+                Search</button>
         </div>
 
         <div class="vendors-table">
@@ -218,61 +226,82 @@
                     </tr>
                 </thead>
                 <tbody id="vendorsTableBody">
-                    <% if (vendors.length === 0) { %>
-                    <tr>
-                        <td colspan="6" style="text-align: center; padding: 40px; color: #95a5a6;">
-                            No vendors added yet. Click "Add New Vendor" to get started!
-                        </td>
-                    </tr>
-                    <% } else { %>
-                        <% vendors.forEach(vendor => { %>
+                    <% if (vendors.length===0) { %>
                         <tr>
-                            <td>
-                                <strong><%= vendor.vendorName %></strong>
-                                <% if (vendor.lastIncrementalUpdate || vendor.lastFullRefresh) { %>
-                                    <div style="font-size: 11px; color: #666; margin-top: 4px;">
-                                        <% if (vendor.lastIncrementalUpdate) { %>
-                                            <div>🔄 Updated: <%= new Date(vendor.lastIncrementalUpdate).toLocaleDateString() %></div>
-                                        <% } %>
-                                        <% if (vendor.lastFullRefresh) { %>
-                                            <div>♻️ Refreshed: <%= new Date(vendor.lastFullRefresh).toLocaleDateString() %></div>
-                                        <% } %>
-                                    </div>
-                                <% } %>
-                            </td>
-                            <td><a href="<%= vendor.baseUrl %>" target="_blank" style="color: #667eea;"><%= vendor.baseUrl %></a></td>
-                            <td><%= vendor.discoveredCategories?.length || 0 %></td>
-                            <td><%= vendor.discoveredCategories?.reduce((sum, cat) => sum + (cat.seedCount || 0), 0) || 0 %></td>
-                            <td>
-                                <span class="status-badge <%= vendor.active ? 'status-active' : 'status-inactive' %>">
-                                    <%= vendor.active ? 'Active' : 'Inactive' %>
-                                </span>
-                            </td>
-                            <td style="min-width: 200px;">
-                                <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; margin-bottom: 4px; width: 100%;" onclick="discoverCategories('<%= vendor._id %>')">
-                                    🔍 Discover Categories
-                                </button>
-                                <% if (vendor.discoveredCategories && vendor.discoveredCategories.length > 0) { %>
-                                    <div style="display: flex; gap: 4px; margin-bottom: 4px;">
-                                        <button class="btn btn-success" style="padding: 6px 8px; font-size: 11px; flex: 1;" 
-                                                onclick="searchVendorSeeds('<%= vendor.vendorName %>', '<%= vendor._id %>', 'incremental')" 
-                                                title="Search for new products only">
-                                            ➕ New Only
-                                        </button>
-                                        <button class="btn btn-success" style="padding: 6px 8px; font-size: 11px; flex: 1;" 
-                                                onclick="searchVendorSeeds('<%= vendor.vendorName %>', '<%= vendor._id %>', 'full')" 
-                                                title="Re-scan all products for updates">
-                                            ♻️ Full Refresh
-                                        </button>
-                                    </div>
-                                <% } %>
-                                <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px; width: 100%;" onclick="editVendor('<%= vendor._id %>')">
-                                    ✏️ Edit
-                                </button>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: #95a5a6;">
+                                No vendors added yet. Click "Add New Vendor" to get started!
                             </td>
                         </tr>
-                        <% }); %>
-                    <% } %>
+                        <% } else { %>
+                            <% vendors.forEach(vendor=> { %>
+                                <tr>
+                                    <td>
+                                        <strong>
+                                            <%= vendor.vendorName %>
+                                        </strong>
+                                        <% if (vendor.lastIncrementalUpdate || vendor.lastFullRefresh) { %>
+                                            <div style="font-size: 11px; color: #666; margin-top: 4px;">
+                                                <% if (vendor.lastIncrementalUpdate) { %>
+                                                    <div>🔄 Updated: <%= new
+                                                            Date(vendor.lastIncrementalUpdate).toLocaleDateString() %>
+                                                    </div>
+                                                    <% } %>
+                                                        <% if (vendor.lastFullRefresh) { %>
+                                                            <div>♻️ Refreshed: <%= new
+                                                                    Date(vendor.lastFullRefresh).toLocaleDateString() %>
+                                                            </div>
+                                                            <% } %>
+                                            </div>
+                                            <% } %>
+                                    </td>
+                                    <td><a href="<%= vendor.baseUrl %>" target="_blank" style="color: #667eea;">
+                                            <%= vendor.baseUrl %>
+                                        </a></td>
+                                    <td>
+                                        <%= vendor.discoveredCategories?.length || 0 %>
+                                    </td>
+                                    <td>
+                                        <%= vendor.discoveredCategories?.reduce((sum, cat)=> sum + (cat.seedCount || 0),
+                                            0) || 0 %>
+                                    </td>
+                                    <td>
+                                        <span
+                                            class="status-badge <%= vendor.active ? 'status-active' : 'status-inactive' %>">
+                                            <%= vendor.active ? 'Active' : 'Inactive' %>
+                                        </span>
+                                    </td>
+                                    <td style="min-width: 200px;">
+                                        <button class="btn btn-primary"
+                                            style="padding: 6px 12px; font-size: 12px; margin-bottom: 4px; width: 100%;"
+                                            onclick="discoverCategories('<%= vendor._id %>')">
+                                            🔍 Discover Categories
+                                        </button>
+                                        <% if (vendor.discoveredCategories && vendor.discoveredCategories.length> 0) {
+                                            %>
+                                            <div style="display: flex; gap: 4px; margin-bottom: 4px;">
+                                                <button class="btn btn-success"
+                                                    style="padding: 6px 8px; font-size: 11px; flex: 1;"
+                                                    onclick="searchVendorSeeds('<%= vendor.vendorName %>', '<%= vendor._id %>', 'incremental')"
+                                                    title="Search for new products only">
+                                                    ➕ New Only
+                                                </button>
+                                                <button class="btn btn-success"
+                                                    style="padding: 6px 8px; font-size: 11px; flex: 1;"
+                                                    onclick="searchVendorSeeds('<%= vendor.vendorName %>', '<%= vendor._id %>', 'full')"
+                                                    title="Re-scan all products for updates">
+                                                    ♻️ Full Refresh
+                                                </button>
+                                            </div>
+                                            <% } %>
+                                                <button class="btn btn-secondary"
+                                                    style="padding: 6px 12px; font-size: 12px; width: 100%;"
+                                                    onclick="editVendor('<%= vendor._id %>')">
+                                                    ✏️ Edit
+                                                </button>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                                    <% } %>
                 </tbody>
             </table>
         </div>
@@ -284,16 +313,19 @@
             <h2 id="modalTitle">Add New Vendor</h2>
             <form id="vendorForm">
                 <input type="hidden" id="vendorId">
-                
+
                 <!-- AI-Powered URL Analysis -->
-                <div class="form-group" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <label for="analyzeUrl" style="color: white; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <div class="form-group"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <label for="analyzeUrl"
+                        style="color: white; font-weight: 600; display: flex; align-items: center; gap: 8px;">
                         <span>🤖 AI-Powered Vendor Discovery</span>
                     </label>
-                    <input type="text" id="analyzeUrl" placeholder="Enter vendor name or URL (e.g., 'Johnny's Seeds' or 'highmowingseeds.com')..." 
-                           style="margin-top: 8px; margin-bottom: 10px;">
-                    <button type="button" class="btn" onclick="analyzeVendorUrl()" 
-                            style="background: white; color: #667eea; font-weight: 600; width: 100%;">
+                    <input type="text" id="analyzeUrl"
+                        placeholder="Enter vendor name or URL (e.g., 'Johnny's Seeds' or 'highmowingseeds.com')..."
+                        style="margin-top: 8px; margin-bottom: 10px;">
+                    <button type="button" class="btn" onclick="analyzeVendorUrl()"
+                        style="background: white; color: #667eea; font-weight: 600; width: 100%;">
                         ✨ Find & Auto-Fill Vendor
                     </button>
                     <small style="color: white; font-size: 11px; display: block; margin-top: 8px;">
@@ -301,8 +333,11 @@
                     </small>
                 </div>
 
-                <div id="aiLoadingIndicator" style="display: none; text-align: center; padding: 20px; background: #f0f4ff; border-radius: 8px; margin-bottom: 15px;">
-                    <div style="display: inline-block; width: 30px; height: 30px; border: 3px solid #667eea; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <div id="aiLoadingIndicator"
+                    style="display: none; text-align: center; padding: 20px; background: #f0f4ff; border-radius: 8px; margin-bottom: 15px;">
+                    <div
+                        style="display: inline-block; width: 30px; height: 30px; border: 3px solid #667eea; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;">
+                    </div>
                     <p style="margin-top: 10px; color: #667eea; font-weight: 600;">🤖 AI analyzing vendor website...</p>
                 </div>
 
@@ -314,13 +349,15 @@
                 <div class="form-group">
                     <label for="baseUrl">Base URL *</label>
                     <input type="text" id="baseUrl" required placeholder="johnnyseeds.com">
-                    <small style="color: #666; font-size: 12px;">Enter without https:// - we'll add it automatically</small>
+                    <small style="color: #666; font-size: 12px;">Enter without https:// - we'll add it
+                        automatically</small>
                 </div>
 
                 <div class="form-group">
                     <label for="seedCategoriesUrl">Seed Categories Page (Optional)</label>
                     <input type="text" id="seedCategoriesUrl" placeholder="johnnyseeds.com/vegetables">
-                    <small style="color: #666; font-size: 12px;">Direct link to their seeds/catalog page if known</small>
+                    <small style="color: #666; font-size: 12px;">Direct link to their seeds/catalog page if
+                        known</small>
                 </div>
 
                 <div class="form-group">
@@ -351,7 +388,7 @@
 
         async function analyzeVendorUrl() {
             const input = document.getElementById('analyzeUrl').value.trim();
-            
+
             if (!input) {
                 alert('Please enter a vendor name or URL');
                 return;
@@ -380,10 +417,10 @@
                             message += `${idx + 1}. ${sugg.vendorName} (${sugg.baseUrl})\n`;
                         });
                         message += '\nEnter the number of your choice:';
-                        
+
                         const choice = prompt(message);
                         const selectedIndex = parseInt(choice) - 1;
-                        
+
                         if (selectedIndex >= 0 && selectedIndex < result.suggestions.length) {
                             fillVendorForm(result.suggestions[selectedIndex]);
                         } else {
@@ -422,37 +459,37 @@
             document.getElementById('vendorName').value = vendorInfo.vendorName || '';
             document.getElementById('baseUrl').value = vendorInfo.baseUrl || '';
             document.getElementById('seedCategoriesUrl').value = vendorInfo.seedCategoriesUrl || '';
-            
+
             if (vendorInfo.notes) {
                 document.getElementById('notes').value = vendorInfo.notes;
             }
 
             // Show success message
             const confidence = vendorInfo.confidence ? ` (${vendorInfo.confidence}% confidence)` : '';
-            alert('✅ Vendor information found' + confidence + '!\n\n' + 
-                  'Vendor: ' + vendorInfo.vendorName + '\n' +
-                  'URL: ' + vendorInfo.baseUrl + '\n\n' +
-                  'Please review and adjust if needed.');
+            alert('✅ Vendor information found' + confidence + '!\n\n' +
+                'Vendor: ' + vendorInfo.vendorName + '\n' +
+                'URL: ' + vendorInfo.baseUrl + '\n\n' +
+                'Please review and adjust if needed.');
         }
 
         async function editVendor(id) {
             try {
                 const response = await fetch(`/seed-catalog/vendors/${id}`);
                 const data = await response.json();
-                
+
                 if (!data.success) {
                     throw new Error(data.message || 'Failed to load vendor');
                 }
-                
+
                 const vendor = data.vendor;
-                
+
                 document.getElementById('modalTitle').textContent = 'Edit Vendor';
                 document.getElementById('vendorId').value = vendor._id;
                 document.getElementById('vendorName').value = vendor.vendorName;
                 document.getElementById('baseUrl').value = vendor.baseUrl;
                 document.getElementById('seedCategoriesUrl').value = vendor.seedCategoriesUrl || '';
                 document.getElementById('notes').value = vendor.notes || '';
-                
+
                 document.getElementById('vendorModal').classList.add('active');
             } catch (error) {
                 alert('Error loading vendor: ' + error.message);
@@ -461,7 +498,7 @@
 
         document.getElementById('vendorForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const vendorId = document.getElementById('vendorId').value;
             const data = {
                 vendorName: document.getElementById('vendorName').value,
@@ -473,7 +510,7 @@
             try {
                 const url = vendorId ? `/seed-catalog/vendors/${vendorId}` : '/seed-catalog/vendors';
                 const method = vendorId ? 'PUT' : 'POST';
-                
+
                 const response = await fetch(url, {
                     method,
                     headers: { 'Content-Type': 'application/json' },
@@ -509,7 +546,7 @@
                 });
 
                 const data = await response.json();
-                
+
                 if (data.success) {
                     alert(`✅ Discovery complete!\n\nFound ${data.categories.length} seed categories.\n\nClick "🌱 Search Seeds" to find varieties with packet sizes and prices.`);
                     window.location.reload();
@@ -522,4 +559,5 @@
         }
     </script>
 </body>
+
 </html>

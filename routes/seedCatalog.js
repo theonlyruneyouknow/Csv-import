@@ -11,12 +11,12 @@ const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GE
 router.get('/search', async (req, res) => {
     try {
         console.log('📋 Loading seed catalog search page...');
-        
+
         // Load active vendors from database
         const vendors = await SeedVendor.find({ active: true })
             .sort({ vendorName: 1 })
             .select('vendorName baseUrl discoveredCategories');
-        
+
         res.render('seed-catalog-search', {
             title: 'AI Seed Catalog Search',
             user: req.user || { name: 'Admin' },
@@ -44,7 +44,7 @@ router.post('/ai-search', async (req, res) => {
         // Find vendor in database to check update timestamps
         const vendorDoc = await SeedVendor.findOne({ vendorName: vendor });
         let updateInstruction = '';
-        
+
         if (mode === 'incremental' && vendorDoc && vendorDoc.lastIncrementalUpdate) {
             const lastUpdate = vendorDoc.lastIncrementalUpdate.toLocaleDateString();
             updateInstruction = `\n⚠️ INCREMENTAL UPDATE MODE: Only find products that are NEW or were added AFTER ${lastUpdate}. Do not include products you already extracted in previous searches.`;
@@ -194,7 +194,7 @@ IMPORTANT: Return ONLY the JSON array, nothing else.
         // Update vendor timestamps based on mode
         if (vendorDoc && (savedCount > 0 || updatedCount > 0)) {
             const now = new Date();
-            
+
             if (mode === 'incremental') {
                 vendorDoc.lastIncrementalUpdate = now;
                 console.log(`⏱️ Updated vendor lastIncrementalUpdate timestamp`);
@@ -202,21 +202,21 @@ IMPORTANT: Return ONLY the JSON array, nothing else.
                 vendorDoc.lastFullRefresh = now;
                 console.log(`⏱️ Updated vendor lastFullRefresh timestamp`);
             }
-            
+
             // Update category-level timestamp if category specified
             if (category && vendorDoc.discoveredCategories) {
                 const categoryIndex = vendorDoc.discoveredCategories.findIndex(c => c.name === category);
                 if (categoryIndex !== -1) {
                     vendorDoc.discoveredCategories[categoryIndex].lastScanned = now;
-                    vendorDoc.discoveredCategories[categoryIndex].seedCount = 
+                    vendorDoc.discoveredCategories[categoryIndex].seedCount =
                         (vendorDoc.discoveredCategories[categoryIndex].seedCount || 0) + savedCount;
-                    
+
                     if (mode === 'full') {
                         vendorDoc.discoveredCategories[categoryIndex].lastFullRefresh = now;
                     }
                 }
             }
-            
+
             vendorDoc.updatedBy = req.user ? req.user.username : 'system';
             await vendorDoc.save();
             console.log(`✅ Updated vendor ${vendor} with new timestamps`);
@@ -287,7 +287,7 @@ router.get('/browse', async (req, res) => {
 router.get('/vendors', async (req, res) => {
     try {
         const vendors = await SeedVendor.find({}).sort({ vendorName: 1 });
-        
+
         // Calculate seed counts for each vendor
         const vendorsWithCounts = await Promise.all(vendors.map(async (vendor) => {
             const seedCount = await SeedCatalog.countDocuments({ vendor: vendor.vendorName });
@@ -296,7 +296,7 @@ router.get('/vendors', async (req, res) => {
                 seedCount
             };
         }));
-        
+
         res.render('seed-vendors', { vendors: vendorsWithCounts });
     } catch (error) {
         console.error('❌ Error loading vendors:', error);
@@ -308,11 +308,11 @@ router.get('/vendors', async (req, res) => {
 router.get('/vendors/:id', async (req, res) => {
     try {
         const vendor = await SeedVendor.findById(req.params.id);
-        
+
         if (!vendor) {
             return res.status(404).json({ success: false, message: 'Vendor not found' });
         }
-        
+
         res.json({ success: true, vendor });
     } catch (error) {
         console.error('❌ Error getting vendor:', error);
@@ -324,9 +324,9 @@ router.get('/vendors/:id', async (req, res) => {
 router.post('/vendors/analyze-url', async (req, res) => {
     try {
         if (!genAI) {
-            return res.status(503).json({ 
-                success: false, 
-                message: 'Gemini AI is not configured. Please set GEMINI_API_KEY in environment.' 
+            return res.status(503).json({
+                success: false,
+                message: 'Gemini AI is not configured. Please set GEMINI_API_KEY in environment.'
             });
         }
 
@@ -347,9 +347,9 @@ router.post('/vendors/analyze-url', async (req, res) => {
 
 Your task is to identify this seed vendor and provide complete information:
 
-${isUrl ? 
-`This appears to be a URL or domain. Extract and provide:` : 
-`This appears to be a vendor name. Search your knowledge base for seed companies matching this name and provide:`}
+${isUrl ?
+                `This appears to be a URL or domain. Extract and provide:` :
+                `This appears to be a vendor name. Search your knowledge base for seed companies matching this name and provide:`}
 
 1. vendorName - The official full company name (e.g., "Johnny's Selected Seeds", "Baker Creek Heirloom Seeds")
 2. baseUrl - The main website domain without https:// or paths (e.g., "johnnyseeds.com", "rareseeds.com")
@@ -411,20 +411,20 @@ Focus on well-known seed vendors. If you cannot find a match with reasonable con
         const result = await model.generateContent(prompt);
         const response = await result.response;
         let text = response.text();
-        
+
         console.log('📝 AI Response (first 300 chars):', text.substring(0, 300) + '...');
-        
+
         // Clean up markdown formatting if present
         text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-        
+
         // Parse JSON response
         let vendorData;
         try {
             vendorData = JSON.parse(text);
         } catch (parseError) {
             console.error('❌ Failed to parse AI response:', text);
-            return res.status(500).json({ 
-                success: false, 
+            return res.status(500).json({
+                success: false,
                 message: 'AI returned invalid format. Please try a more specific search.',
                 rawResponse: text.substring(0, 500)
             });
@@ -433,7 +433,7 @@ Focus on well-known seed vendors. If you cannot find a match with reasonable con
         // Check if we have suggestions (multiple matches)
         if (vendorData.suggestions && Array.isArray(vendorData.suggestions)) {
             console.log(`✅ Found ${vendorData.suggestions.length} vendor matches`);
-            
+
             // Convert description to notes for each suggestion
             vendorData.suggestions.forEach(sugg => {
                 if (sugg.description) {
@@ -441,9 +441,9 @@ Focus on well-known seed vendors. If you cannot find a match with reasonable con
                     delete sugg.description;
                 }
             });
-            
-            return res.json({ 
-                success: true, 
+
+            return res.json({
+                success: true,
                 message: `Found ${vendorData.suggestions.length} potential matches`,
                 suggestions: vendorData.suggestions
             });
@@ -451,16 +451,16 @@ Focus on well-known seed vendors. If you cannot find a match with reasonable con
 
         // Single result
         if (!vendorData.vendorName || !vendorData.baseUrl) {
-            return res.status(404).json({ 
-                success: false, 
+            return res.status(404).json({
+                success: false,
                 message: `Could not find vendor information for "${input}". Try including more details or the website domain.`
             });
         }
 
         // Check confidence level
         if (vendorData.confidence && vendorData.confidence < 60) {
-            return res.status(404).json({ 
-                success: false, 
+            return res.status(404).json({
+                success: false,
                 message: `Low confidence match (${vendorData.confidence}%). Please provide more specific information.`
             });
         }
@@ -472,29 +472,29 @@ Focus on well-known seed vendors. If you cannot find a match with reasonable con
         }
 
         console.log(`✅ Found vendor: ${vendorData.vendorName} (${vendorData.baseUrl}) - ${vendorData.confidence}% confidence`);
-        
-        res.json({ 
-            success: true, 
+
+        res.json({
+            success: true,
             message: 'Vendor information found successfully',
             vendorInfo: vendorData
         });
-        
+
     } catch (error) {
         console.error('❌ Error finding vendor:', error);
-        
+
         // Check if it's a quota/rate limit error
         if (error.status === 429 || error.message?.includes('quota') || error.message?.includes('rate limit')) {
-            return res.status(429).json({ 
-                success: false, 
+            return res.status(429).json({
+                success: false,
                 message: 'AI service is temporarily at capacity. Please wait a moment and try again.',
                 error: 'Rate limit exceeded'
             });
         }
-        
-        res.status(500).json({ 
-            success: false, 
+
+        res.status(500).json({
+            success: false,
             message: 'Unable to analyze vendor. Please try again or enter details manually.',
-            error: error.message 
+            error: error.message
         });
     }
 });
@@ -503,19 +503,19 @@ Focus on well-known seed vendors. If you cannot find a match with reasonable con
 router.post('/vendors', async (req, res) => {
     try {
         const { vendorName, baseUrl, seedCategoriesUrl, notes } = req.body;
-        
+
         // Check if vendor already exists
         const existing = await SeedVendor.findOne({ vendorName });
         if (existing) {
             return res.status(400).json({ success: false, message: 'Vendor with this name already exists' });
         }
-        
+
         // Normalize URLs
         const normalizedBaseUrl = baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`;
-        const normalizedCategoriesUrl = seedCategoriesUrl && !seedCategoriesUrl.startsWith('http') 
-            ? `https://${seedCategoriesUrl}` 
+        const normalizedCategoriesUrl = seedCategoriesUrl && !seedCategoriesUrl.startsWith('http')
+            ? `https://${seedCategoriesUrl}`
             : seedCategoriesUrl;
-        
+
         const vendor = new SeedVendor({
             vendorName,
             baseUrl: normalizedBaseUrl,
@@ -523,9 +523,9 @@ router.post('/vendors', async (req, res) => {
             notes,
             addedBy: req.session.username || 'system'
         });
-        
+
         await vendor.save();
-        
+
         console.log(`✅ Created vendor: ${vendorName}`);
         res.json({ success: true, message: 'Vendor created successfully', vendor });
     } catch (error) {
@@ -538,13 +538,13 @@ router.post('/vendors', async (req, res) => {
 router.put('/vendors/:id', async (req, res) => {
     try {
         const { vendorName, baseUrl, seedCategoriesUrl, notes, active } = req.body;
-        
+
         // Normalize URLs
         const normalizedBaseUrl = baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`;
-        const normalizedCategoriesUrl = seedCategoriesUrl && !seedCategoriesUrl.startsWith('http') 
-            ? `https://${seedCategoriesUrl}` 
+        const normalizedCategoriesUrl = seedCategoriesUrl && !seedCategoriesUrl.startsWith('http')
+            ? `https://${seedCategoriesUrl}`
             : seedCategoriesUrl;
-        
+
         const vendor = await SeedVendor.findByIdAndUpdate(
             req.params.id,
             {
@@ -557,11 +557,11 @@ router.put('/vendors/:id', async (req, res) => {
             },
             { new: true }
         );
-        
+
         if (!vendor) {
             return res.status(404).json({ success: false, message: 'Vendor not found' });
         }
-        
+
         console.log(`✅ Updated vendor: ${vendorName}`);
         res.json({ success: true, message: 'Vendor updated successfully', vendor });
     } catch (error) {
@@ -574,11 +574,11 @@ router.put('/vendors/:id', async (req, res) => {
 router.delete('/vendors/:id', async (req, res) => {
     try {
         const vendor = await SeedVendor.findByIdAndDelete(req.params.id);
-        
+
         if (!vendor) {
             return res.status(404).json({ success: false, message: 'Vendor not found' });
         }
-        
+
         console.log(`✅ Deleted vendor: ${vendor.vendorName}`);
         res.json({ success: true, message: 'Vendor deleted successfully' });
     } catch (error) {
@@ -591,23 +591,23 @@ router.delete('/vendors/:id', async (req, res) => {
 router.post('/vendors/:id/discover', async (req, res) => {
     try {
         if (!genAI) {
-            return res.status(503).json({ 
-                success: false, 
-                message: 'Gemini AI is not configured. Please set GEMINI_API_KEY in environment.' 
+            return res.status(503).json({
+                success: false,
+                message: 'Gemini AI is not configured. Please set GEMINI_API_KEY in environment.'
             });
         }
-        
+
         const vendor = await SeedVendor.findById(req.params.id);
-        
+
         if (!vendor) {
             return res.status(404).json({ success: false, message: 'Vendor not found' });
         }
-        
+
         // Use seedCategoriesUrl if available, otherwise baseUrl
         const urlToAnalyze = vendor.seedCategoriesUrl || vendor.baseUrl;
-        
+
         console.log(`🔍 Discovering categories for ${vendor.vendorName} from ${urlToAnalyze}...`);
-        
+
         // AI prompt for discovering seed categories
         const prompt = `You are analyzing the website "${urlToAnalyze}" for ${vendor.vendorName}, a seed company.
 
@@ -637,32 +637,32 @@ Focus on common vegetable and herb seed categories. Be realistic about what cate
         const result = await model.generateContent(prompt);
         const response = await result.response;
         let text = response.text();
-        
+
         console.log('📝 AI Response:', text.substring(0, 200) + '...');
-        
+
         // Clean up markdown formatting if present
         text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-        
+
         // Parse JSON response
         let categories;
         try {
             categories = JSON.parse(text);
         } catch (parseError) {
             console.error('❌ Failed to parse AI response:', text);
-            return res.status(500).json({ 
-                success: false, 
+            return res.status(500).json({
+                success: false,
                 message: 'AI returned invalid JSON format',
                 rawResponse: text.substring(0, 500)
             });
         }
-        
+
         if (!Array.isArray(categories)) {
-            return res.status(500).json({ 
-                success: false, 
+            return res.status(500).json({
+                success: false,
                 message: 'AI did not return an array of categories'
             });
         }
-        
+
         // Transform to discoveredCategories format
         const discoveredCategories = categories.map(cat => ({
             name: cat.name,
@@ -670,36 +670,36 @@ Focus on common vegetable and herb seed categories. Be realistic about what cate
             lastScanned: new Date(),
             seedCount: 0 // Will be updated when actual searches are performed
         }));
-        
+
         // Update vendor with discovered categories
         vendor.discoveredCategories = discoveredCategories;
         vendor.updatedBy = req.session.username || 'system';
         await vendor.save();
-        
+
         console.log(`✅ Discovered ${discoveredCategories.length} categories for ${vendor.vendorName}`);
-        
-        res.json({ 
-            success: true, 
+
+        res.json({
+            success: true,
             message: `Discovered ${discoveredCategories.length} seed categories`,
-            categories: discoveredCategories 
+            categories: discoveredCategories
         });
-        
+
     } catch (error) {
         console.error('❌ Error discovering categories:', error);
-        
+
         // Check if it's a quota/rate limit error
         if (error.status === 429 || error.message?.includes('quota') || error.message?.includes('rate limit')) {
-            return res.status(429).json({ 
-                success: false, 
+            return res.status(429).json({
+                success: false,
                 message: 'AI service is temporarily at capacity. Please wait a moment and try again.',
                 error: 'Rate limit exceeded'
             });
         }
-        
-        res.status(500).json({ 
-            success: false, 
+
+        res.status(500).json({
+            success: false,
             message: 'Unable to discover categories. You can add them manually after saving the vendor.',
-            error: error.message 
+            error: error.message
         });
     }
 });

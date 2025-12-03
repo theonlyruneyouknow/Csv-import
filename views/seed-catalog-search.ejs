@@ -342,13 +342,19 @@
                     </div>
                     <% } %>
 
-                        <div class="info-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                        <div class="info-box"
+                            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
                             <h4 style="color: white; font-size: 16px; margin-bottom: 12px;">🌱 Complete Workflow:</h4>
                             <div style="color: white; font-size: 14px; line-height: 1.8;">
-                                <p><strong>Step 1:</strong> <a href="/seed-catalog/vendors" style="color: #ffd700; text-decoration: underline;">Manage Vendors</a> → Add vendors (AI auto-fills details)</p>
-                                <p><strong>Step 2:</strong> Click "🔍 Discover Categories" → AI finds seed types (corn, tomatoes, etc.)</p>
-                                <p><strong>Step 3:</strong> Click "🌱 Search Seeds" → AI extracts varieties with packets & prices (you're here!)</p>
-                                <p style="margin-top: 8px; font-size: 12px; opacity: 0.9;">💡 Each step builds on the previous - vendors → categories → detailed varieties</p>
+                                <p><strong>Step 1:</strong> <a href="/seed-catalog/vendors"
+                                        style="color: #ffd700; text-decoration: underline;">Manage Vendors</a> → Add
+                                    vendors (AI auto-fills details)</p>
+                                <p><strong>Step 2:</strong> Click "🔍 Discover Categories" → AI finds seed types (corn,
+                                    tomatoes, etc.)</p>
+                                <p><strong>Step 3:</strong> Click "🌱 Search Seeds" → AI extracts varieties with packets
+                                    & prices (you're here!)</p>
+                                <p style="margin-top: 8px; font-size: 12px; opacity: 0.9;">💡 Each step builds on the
+                                    previous - vendors → categories → detailed varieties</p>
                             </div>
                         </div>
 
@@ -364,37 +370,49 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="vendors">Select Vendors *</label>
-                                    <% if (vendors && vendors.length > 0) { %>
-                                        <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: #f8f9fa; border-radius: 8px; max-height: 200px; overflow-y: auto;">
-                                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; border-bottom: 1px solid #ddd; padding-bottom: 8px;">
-                                                <input type="checkbox" id="selectAllVendors" onchange="toggleAllVendors()">
+                                    <% if (vendors && vendors.length> 0) { %>
+                                        <div
+                                            style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: #f8f9fa; border-radius: 8px; max-height: 200px; overflow-y: auto;">
+                                            <label
+                                                style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; border-bottom: 1px solid #ddd; padding-bottom: 8px;">
+                                                <input type="checkbox" id="selectAllVendors"
+                                                    onchange="toggleAllVendors()">
                                                 Select All Vendors
                                             </label>
-                                            <% vendors.forEach(vendor => { %>
-                                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                                    <input type="checkbox" name="vendors" value="<%= vendor.vendorName %>" data-base-url="<%= vendor.baseUrl %>" class="vendor-checkbox" checked>
-                                                    <%= vendor.vendorName %> 
-                                                    <% if (vendor.discoveredCategories && vendor.discoveredCategories.length > 0) { %>
-                                                        <span style="font-size: 11px; color: #28a745; background: #d4edda; padding: 2px 6px; border-radius: 4px;">
-                                                            <%= vendor.discoveredCategories.length %> categories
-                                                        </span>
-                                                    <% } %>
+                                            <% vendors.forEach(vendor=> { %>
+                                                <label
+                                                    style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                                    <input type="checkbox" name="vendors"
+                                                        value="<%= vendor.vendorName %>"
+                                                        data-base-url="<%= vendor.baseUrl %>" class="vendor-checkbox"
+                                                        checked>
+                                                    <%= vendor.vendorName %>
+                                                        <% if (vendor.discoveredCategories &&
+                                                            vendor.discoveredCategories.length> 0) { %>
+                                                            <span
+                                                                style="font-size: 11px; color: #28a745; background: #d4edda; padding: 2px 6px; border-radius: 4px;">
+                                                                <%= vendor.discoveredCategories.length %> categories
+                                                            </span>
+                                                            <% } %>
                                                 </label>
-                                            <% }); %>
+                                                <% }); %>
                                         </div>
                                         <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
-                                            💡 Select vendors to search. Categories will be loaded from discovered catalog data.
+                                            💡 Select vendors to search. Categories will be loaded from discovered
+                                            catalog data.
                                         </small>
-                                    <% } else { %>
-                                        <div style="padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px;">
-                                            <p style="margin: 0; color: #856404;">
-                                                ⚠️ No vendors configured yet. 
-                                                <a href="/seed-catalog/vendors" style="color: #0066cc; text-decoration: underline;">
-                                                    Add vendors
-                                                </a> to get started.
-                                            </p>
-                                        </div>
-                                    <% } %>
+                                        <% } else { %>
+                                            <div
+                                                style="padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px;">
+                                                <p style="margin: 0; color: #856404;">
+                                                    ⚠️ No vendors configured yet.
+                                                    <a href="/seed-catalog/vendors"
+                                                        style="color: #0066cc; text-decoration: underline;">
+                                                        Add vendors
+                                                    </a> to get started.
+                                                </p>
+                                            </div>
+                                            <% } %>
                                 </div>
                                 <div class="form-group">
                                     <label for="categories">Categories</label>
@@ -434,11 +452,14 @@
                                     <label for="catalogUrl">Vendor Catalog URL (Strongly Recommended) ⭐</label>
                                     <input type="text" id="catalogUrl"
                                         placeholder="highmowingseeds.com/corn-seeds.html">
-                                    <small style="color: #e74c3c; font-size: 12px; display: block; margin-top: 5px; font-weight: 600;">
-                                        ⚠️ IMPORTANT: Without a URL, AI cannot access vendor websites and may return no results
+                                    <small
+                                        style="color: #e74c3c; font-size: 12px; display: block; margin-top: 5px; font-weight: 600;">
+                                        ⚠️ IMPORTANT: Without a URL, AI cannot access vendor websites and may return no
+                                        results
                                     </small>
                                     <small style="color: #666; font-size: 12px; display: block; margin-top: 3px;">
-                                        💡 Examples: highmowingseeds.com/corn-seeds.html, johnnyseeds.com/vegetables/tomatoes
+                                        💡 Examples: highmowingseeds.com/corn-seeds.html,
+                                        johnnyseeds.com/vegetables/tomatoes
                                     </small>
                                 </div>
                                 <div class="form-group">
@@ -487,12 +508,12 @@
             const urlParams = new URLSearchParams(window.location.search);
             const preSelectVendor = urlParams.get('vendor');
             const updateMode = urlParams.get('mode'); // 'incremental' or 'full'
-            
+
             if (preSelectVendor) {
                 // Uncheck all vendors first
                 document.querySelectorAll('.vendor-checkbox').forEach(cb => cb.checked = false);
                 document.getElementById('selectAllVendors').checked = false;
-                
+
                 // Check only the specified vendor
                 document.querySelectorAll('.vendor-checkbox').forEach(cb => {
                     if (cb.value === preSelectVendor) {
@@ -501,11 +522,11 @@
                         cb.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }
                 });
-                
+
                 // Show appropriate message based on update mode
                 const infoBox = document.createElement('div');
                 infoBox.style.cssText = 'background: #fff3cd; border: 2px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 20px; color: #856404;';
-                
+
                 if (updateMode === 'incremental') {
                     infoBox.innerHTML = `<strong>➕ Incremental Update - ${preSelectVendor}</strong><br>
                         AI will search for <strong>new products only</strong> that weren't found in previous scans.<br>
@@ -518,9 +539,9 @@
                     infoBox.innerHTML = `<strong>🌱 Ready to search ${preSelectVendor} seeds!</strong><br>
                         Select categories below and click "🔍 Search with AI" to find varieties with packets & prices.`;
                 }
-                
+
                 document.querySelector('.search-section form').insertBefore(infoBox, document.querySelector('.form-row'));
-                
+
                 // Store update mode for use during search
                 if (updateMode) {
                     document.getElementById('searchForm').dataset.updateMode = updateMode;
@@ -623,7 +644,7 @@
             }
 
             document.getElementById('loadingContainer').style.display = 'none';
-            
+
             // Check if no results found at all
             if (totalStats.found === 0 && searchResults.length > 0) {
                 const noResultsMsg = `
@@ -640,7 +661,7 @@
                 `;
                 document.getElementById('resultsContainer').innerHTML = noResultsMsg;
             }
-            
+
             displayBulkResults(searchResults, totalStats, allSeeds);
         });
 
