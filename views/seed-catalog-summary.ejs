@@ -446,58 +446,71 @@
                     <tbody>
                         <% commonNameStats.forEach((seed, seedIndex)=> {
                             %>
-                                <td><strong>
-                                        <%= seed.name %>
-                                    </strong></td>
-                                <td>
-                                    <%= seed.vendorCount %>
-                                </td>
-                                <td>
-                                    <%= seed.varietyCount %>
-                                </td>
-                                <td>
-                                    <button class="toggle-btn" onclick="toggleSeedType('<%= seedIndex %>')">View Varieties</button>
-                                </td>
+                            <td><strong>
+                                    <%= seed.name %>
+                                </strong></td>
+                            <td>
+                                <%= seed.vendorCount %>
+                            </td>
+                            <td>
+                                <%= seed.varietyCount %>
+                            </td>
+                            <td>
+                                <button class="toggle-btn" onclick="toggleSeedType('<%= seedIndex %>')">View
+                                    Varieties</button>
+                            </td>
                             </tr>
-                            <tr id="seed-type-details-<%= seedIndex %>" class="seed-type-details" style="display: none;">
+                            <tr id="seed-type-details-<%= seedIndex %>" class="seed-type-details"
+                                style="display: none;">
                                 <td colspan="4" style="padding: 0;">
                                     <div style="padding: 20px; background: #f8f9fa;">
-                                        <h3 style="color: #667eea; margin-bottom: 15px;">Varieties of <%= seed.name %> by Vendor</h3>
-                                        <% Object.entries(seed.vendorBreakdown).forEach(([vendorName, varieties]) => { %>
-                                            <div style="margin-bottom: 20px; background: white; padding: 15px; border-radius: 8px; border: 2px solid #dee2e6;">
+                                        <h3 style="color: #667eea; margin-bottom: 15px;">Varieties of <%= seed.name %>
+                                                by Vendor</h3>
+                                        <% Object.entries(seed.vendorBreakdown).forEach(([vendorName, varieties])=> { %>
+                                            <div
+                                                style="margin-bottom: 20px; background: white; padding: 15px; border-radius: 8px; border: 2px solid #dee2e6;">
                                                 <h4 style="color: #333; margin-bottom: 10px; font-size: 1.1em;">
-                                                    🏪 <%= vendorName %> 
-                                                    <span style="color: #667eea; font-weight: normal; font-size: 0.9em;">
-                                                        (<%= varieties.length %> <%= varieties.length === 1 ? 'variety' : 'varieties' %>)
-                                                    </span>
+                                                    🏪 <%= vendorName %>
+                                                        <span
+                                                            style="color: #667eea; font-weight: normal; font-size: 0.9em;">
+                                                            (<%= varieties.length %>
+                                                                <%= varieties.length===1 ? 'variety' : 'varieties' %>)
+                                                        </span>
                                                 </h4>
-                                                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px;">
-                                                    <% varieties.forEach(variety => { %>
+                                                <div
+                                                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px;">
+                                                    <% varieties.forEach(variety=> { %>
                                                         <div class="variety-item">
                                                             <div>
-                                                                <div class="variety-name"><%= variety.varietyName %></div>
+                                                                <div class="variety-name">
+                                                                    <%= variety.varietyName %>
+                                                                </div>
                                                                 <div class="variety-details">
                                                                     <% if (variety.subcategory) { %>
                                                                         <%= variety.subcategory %>
-                                                                    <% } %>
-                                                                    <% if (variety.category) { %>
-                                                                        • <%= variety.category %>
-                                                                    <% } %>
+                                                                            <% } %>
+                                                                                <% if (variety.category) { %>
+                                                                                    • <%= variety.category %>
+                                                                                        <% } %>
                                                                 </div>
                                                             </div>
                                                             <div>
                                                                 <% if (variety.seedType) { %>
-                                                                    <span class="variety-badge"><%= variety.seedType %></span>
-                                                                <% } %>
-                                                                <% if (variety.organic) { %>
-                                                                    <span class="variety-badge" style="background: #28a745;">🌿 Organic</span>
-                                                                <% } %>
+                                                                    <span class="variety-badge">
+                                                                        <%= variety.seedType %>
+                                                                    </span>
+                                                                    <% } %>
+                                                                        <% if (variety.organic) { %>
+                                                                            <span class="variety-badge"
+                                                                                style="background: #28a745;">🌿
+                                                                                Organic</span>
+                                                                            <% } %>
                                                             </div>
                                                         </div>
-                                                    <% }); %>
+                                                        <% }); %>
                                                 </div>
                                             </div>
-                                        <% }); %>
+                                            <% }); %>
                                     </div>
                                 </td>
                             </tr>
@@ -641,7 +654,7 @@
         function toggleSeedType(index) {
             const element = document.getElementById('seed-type-details-' + index);
             const btn = event.target;
-            
+
             if (element.style.display === 'none') {
                 element.style.display = 'table-row';
                 btn.textContent = 'Hide Varieties';
