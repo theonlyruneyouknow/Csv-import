@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const SeedCatalog = require('../models/SeedCatalog');
+const SeedVendor = require('../models/SeedVendor');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // Initialize Google Gemini AI
@@ -10,10 +11,17 @@ const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GE
 router.get('/search', async (req, res) => {
     try {
         console.log('📋 Loading seed catalog search page...');
+        
+        // Load active vendors from database
+        const vendors = await SeedVendor.find({ active: true })
+            .sort({ vendorName: 1 })
+            .select('vendorName baseUrl discoveredCategories');
+        
         res.render('seed-catalog-search', {
             title: 'AI Seed Catalog Search',
             user: req.user || { name: 'Admin' },
-            apiKeyConfigured: !!process.env.GEMINI_API_KEY
+            apiKeyConfigured: !!process.env.GEMINI_API_KEY,
+            vendors
         });
     } catch (error) {
         console.error('❌ Error loading search page:', error);
@@ -25,12 +33,25 @@ router.get('/search', async (req, res) => {
 router.post('/ai-search', async (req, res) => {
     try {
         console.log('🔍 AI seed search initiated...');
-        let { vendor, category, searchQuery, catalogUrl, maxResults } = req.body;
+        let { vendor, category, searchQuery, catalogUrl, maxResults, mode } = req.body;
 
         // Normalize catalog URL - add https:// if missing
         if (catalogUrl && !catalogUrl.match(/^https?:\/\//i)) {
             catalogUrl = 'https://' + catalogUrl;
             console.log('📎 Normalized URL to:', catalogUrl);
+        }
+
+        // Find vendor in database to check update timestamps
+        const vendorDoc = await SeedVendor.findOne({ vendorName: vendor });
+        let updateInstruction = '';
+        
+        if (mode === 'incremental' && vendorDoc && vendorDoc.lastIncrementalUpdate) {
+            const lastUpdate = vendorDoc.lastIncrementalUpdate.toLocaleDateString();
+            updateInstruction = `\n⚠️ INCREMENTAL UPDATE MODE: Only find products that are NEW or were added AFTER ${lastUpdate}. Do not include products you already extracted in previous searches.`;
+            console.log(`➕ Incremental mode: Looking for products added after ${lastUpdate}`);
+        } else if (mode === 'full') {
+            updateInstruction = `\n⚠️ FULL REFRESH MODE: Extract ALL products including previously scanned ones. This is a complete catalog refresh.`;
+            console.log(`♻️ Full refresh mode: Re-scanning all products`);
         }
 
         // Check if Gemini API is configured
@@ -48,6 +69,7 @@ You are a seed catalog data extraction expert. Search for seed products from ven
 ${category ? `Focus on category: ${category}` : ''}
 ${searchQuery ? `Additional search criteria: ${searchQuery}` : ''}
 ${catalogUrl ? `Use this catalog URL to search: ${catalogUrl}` : ''}
+${updateInstruction}
 
 Your task:
 1. If a catalog URL is provided, analyze that specific page for seed products
@@ -169,6 +191,37 @@ IMPORTANT: Return ONLY the JSON array, nothing else.
             }
         }
 
+        // Update vendor timestamps based on mode
+        if (vendorDoc && (savedCount > 0 || updatedCount > 0)) {
+            const now = new Date();
+            
+            if (mode === 'incremental') {
+                vendorDoc.lastIncrementalUpdate = now;
+                console.log(`⏱️ Updated vendor lastIncrementalUpdate timestamp`);
+            } else if (mode === 'full') {
+                vendorDoc.lastFullRefresh = now;
+                console.log(`⏱️ Updated vendor lastFullRefresh timestamp`);
+            }
+            
+            // Update category-level timestamp if category specified
+            if (category && vendorDoc.discoveredCategories) {
+                const categoryIndex = vendorDoc.discoveredCategories.findIndex(c => c.name === category);
+                if (categoryIndex !== -1) {
+                    vendorDoc.discoveredCategories[categoryIndex].lastScanned = now;
+                    vendorDoc.discoveredCategories[categoryIndex].seedCount = 
+                        (vendorDoc.discoveredCategories[categoryIndex].seedCount || 0) + savedCount;
+                    
+                    if (mode === 'full') {
+                        vendorDoc.discoveredCategories[categoryIndex].lastFullRefresh = now;
+                    }
+                }
+            }
+            
+            vendorDoc.updatedBy = req.user ? req.user.username : 'system';
+            await vendorDoc.save();
+            console.log(`✅ Updated vendor ${vendor} with new timestamps`);
+        }
+
         res.json({
             success: true,
             seeds: savedSeeds,
@@ -177,6 +230,7 @@ IMPORTANT: Return ONLY the JSON array, nothing else.
                 saved: savedCount,
                 updated: updatedCount
             },
+            mode: mode || 'standard',
             message: `Successfully processed ${extractedSeeds.length} seeds using Gemini AI`
         });
 
@@ -226,6 +280,431 @@ router.get('/browse', async (req, res) => {
         res.status(500).send('Error loading browse page');
     }
 });
+
+// ========== VENDOR MANAGEMENT ROUTES (Must come before parameterized routes) ==========
+
+// GET - Vendor management page
+router.get('/vendors', async (req, res) => {
+    try {
+        const vendors = await SeedVendor.find({}).sort({ vendorName: 1 });
+        
+        // Calculate seed counts for each vendor
+        const vendorsWithCounts = await Promise.all(vendors.map(async (vendor) => {
+            const seedCount = await SeedCatalog.countDocuments({ vendor: vendor.vendorName });
+            return {
+                ...vendor.toObject(),
+                seedCount
+            };
+        }));
+        
+        res.render('seed-vendors', { vendors: vendorsWithCounts });
+    } catch (error) {
+        console.error('❌ Error loading vendors:', error);
+        res.status(500).send('Error loading vendor management page');
+    }
+});
+
+// GET - Single vendor (for editing)
+router.get('/vendors/:id', async (req, res) => {
+    try {
+        const vendor = await SeedVendor.findById(req.params.id);
+        
+        if (!vendor) {
+            return res.status(404).json({ success: false, message: 'Vendor not found' });
+        }
+        
+        res.json({ success: true, vendor });
+    } catch (error) {
+        console.error('❌ Error getting vendor:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// POST - Analyze vendor URL with AI
+router.post('/vendors/analyze-url', async (req, res) => {
+    try {
+        if (!genAI) {
+            return res.status(503).json({ 
+                success: false, 
+                message: 'Gemini AI is not configured. Please set GEMINI_API_KEY in environment.' 
+            });
+        }
+
+        const { input } = req.body;
+
+        if (!input) {
+            return res.status(400).json({ success: false, message: 'Vendor name or URL is required' });
+        }
+
+        console.log(`🤖 AI searching for vendor: "${input}"...`);
+
+        // Determine if input is a URL or just a name
+        const isUrl = input.includes('.') || input.startsWith('http');
+        const searchType = isUrl ? 'URL' : 'name';
+
+        // AI prompt for finding and extracting vendor information
+        const prompt = `You are helping find information about a seed company. The user provided: "${input}"
+
+Your task is to identify this seed vendor and provide complete information:
+
+${isUrl ? 
+`This appears to be a URL or domain. Extract and provide:` : 
+`This appears to be a vendor name. Search your knowledge base for seed companies matching this name and provide:`}
+
+1. vendorName - The official full company name (e.g., "Johnny's Selected Seeds", "Baker Creek Heirloom Seeds")
+2. baseUrl - The main website domain without https:// or paths (e.g., "johnnyseeds.com", "rareseeds.com")
+3. seedCategoriesUrl - The likely URL to their seed catalog or vegetable seeds section (make an educated guess based on common patterns)
+4. description - A brief 1-sentence description of what makes this vendor notable (specialties, organic, heirloom, etc.)
+5. confidence - Your confidence level as a percentage (0-100) that this is the correct vendor
+
+${!isUrl ? `
+If multiple seed vendors could match this name, provide up to 3 suggestions as an array called "suggestions".
+For example, if searching "High Mowing", you might find "High Mowing Organic Seeds" as the primary match.
+
+Common seed vendors to consider:
+- Johnny's Selected Seeds (johnnyseeds.com)
+- Baker Creek Heirloom Seeds (rareseeds.com) 
+- High Mowing Organic Seeds (highmowingseeds.com)
+- Seed Savers Exchange (seedsavers.org)
+- Territorial Seed Company (territorialseed.com)
+- Fedco Seeds (fedcoseeds.com)
+- Burpee (burpee.com)
+- Park Seed (parkseed.com)
+- Southern Exposure Seed Exchange (southernexposure.com)
+- Peaceful Valley (groworganic.com)
+` : ''}
+
+Return ONLY valid JSON with no markdown formatting or extra text:
+
+For single result:
+{
+  "vendorName": "Johnny's Selected Seeds",
+  "baseUrl": "johnnyseeds.com",
+  "seedCategoriesUrl": "johnnyseeds.com/vegetables",
+  "description": "Employee-owned seed company specializing in organic and regionally adapted varieties",
+  "confidence": 95
+}
+
+For multiple matches:
+{
+  "suggestions": [
+    {
+      "vendorName": "Primary Match Name",
+      "baseUrl": "example.com",
+      "seedCategoriesUrl": "example.com/seeds",
+      "description": "Description",
+      "confidence": 90
+    },
+    {
+      "vendorName": "Alternative Match",
+      "baseUrl": "alternative.com",
+      "seedCategoriesUrl": "alternative.com/catalog",
+      "description": "Description",
+      "confidence": 70
+    }
+  ]
+}
+
+Focus on well-known seed vendors. If you cannot find a match with reasonable confidence (>60%), return an error message.`;
+
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        let text = response.text();
+        
+        console.log('📝 AI Response (first 300 chars):', text.substring(0, 300) + '...');
+        
+        // Clean up markdown formatting if present
+        text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        
+        // Parse JSON response
+        let vendorData;
+        try {
+            vendorData = JSON.parse(text);
+        } catch (parseError) {
+            console.error('❌ Failed to parse AI response:', text);
+            return res.status(500).json({ 
+                success: false, 
+                message: 'AI returned invalid format. Please try a more specific search.',
+                rawResponse: text.substring(0, 500)
+            });
+        }
+
+        // Check if we have suggestions (multiple matches)
+        if (vendorData.suggestions && Array.isArray(vendorData.suggestions)) {
+            console.log(`✅ Found ${vendorData.suggestions.length} vendor matches`);
+            
+            // Convert description to notes for each suggestion
+            vendorData.suggestions.forEach(sugg => {
+                if (sugg.description) {
+                    sugg.notes = sugg.description;
+                    delete sugg.description;
+                }
+            });
+            
+            return res.json({ 
+                success: true, 
+                message: `Found ${vendorData.suggestions.length} potential matches`,
+                suggestions: vendorData.suggestions
+            });
+        }
+
+        // Single result
+        if (!vendorData.vendorName || !vendorData.baseUrl) {
+            return res.status(404).json({ 
+                success: false, 
+                message: `Could not find vendor information for "${input}". Try including more details or the website domain.`
+            });
+        }
+
+        // Check confidence level
+        if (vendorData.confidence && vendorData.confidence < 60) {
+            return res.status(404).json({ 
+                success: false, 
+                message: `Low confidence match (${vendorData.confidence}%). Please provide more specific information.`
+            });
+        }
+
+        // Store description as notes
+        if (vendorData.description) {
+            vendorData.notes = vendorData.description;
+            delete vendorData.description;
+        }
+
+        console.log(`✅ Found vendor: ${vendorData.vendorName} (${vendorData.baseUrl}) - ${vendorData.confidence}% confidence`);
+        
+        res.json({ 
+            success: true, 
+            message: 'Vendor information found successfully',
+            vendorInfo: vendorData
+        });
+        
+    } catch (error) {
+        console.error('❌ Error finding vendor:', error);
+        
+        // Check if it's a quota/rate limit error
+        if (error.status === 429 || error.message?.includes('quota') || error.message?.includes('rate limit')) {
+            return res.status(429).json({ 
+                success: false, 
+                message: 'AI service is temporarily at capacity. Please wait a moment and try again.',
+                error: 'Rate limit exceeded'
+            });
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: 'Unable to analyze vendor. Please try again or enter details manually.',
+            error: error.message 
+        });
+    }
+});
+
+// POST - Create new vendor
+router.post('/vendors', async (req, res) => {
+    try {
+        const { vendorName, baseUrl, seedCategoriesUrl, notes } = req.body;
+        
+        // Check if vendor already exists
+        const existing = await SeedVendor.findOne({ vendorName });
+        if (existing) {
+            return res.status(400).json({ success: false, message: 'Vendor with this name already exists' });
+        }
+        
+        // Normalize URLs
+        const normalizedBaseUrl = baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`;
+        const normalizedCategoriesUrl = seedCategoriesUrl && !seedCategoriesUrl.startsWith('http') 
+            ? `https://${seedCategoriesUrl}` 
+            : seedCategoriesUrl;
+        
+        const vendor = new SeedVendor({
+            vendorName,
+            baseUrl: normalizedBaseUrl,
+            seedCategoriesUrl: normalizedCategoriesUrl,
+            notes,
+            addedBy: req.session.username || 'system'
+        });
+        
+        await vendor.save();
+        
+        console.log(`✅ Created vendor: ${vendorName}`);
+        res.json({ success: true, message: 'Vendor created successfully', vendor });
+    } catch (error) {
+        console.error('❌ Error creating vendor:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// PUT - Update vendor
+router.put('/vendors/:id', async (req, res) => {
+    try {
+        const { vendorName, baseUrl, seedCategoriesUrl, notes, active } = req.body;
+        
+        // Normalize URLs
+        const normalizedBaseUrl = baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`;
+        const normalizedCategoriesUrl = seedCategoriesUrl && !seedCategoriesUrl.startsWith('http') 
+            ? `https://${seedCategoriesUrl}` 
+            : seedCategoriesUrl;
+        
+        const vendor = await SeedVendor.findByIdAndUpdate(
+            req.params.id,
+            {
+                vendorName,
+                baseUrl: normalizedBaseUrl,
+                seedCategoriesUrl: normalizedCategoriesUrl,
+                notes,
+                active,
+                updatedBy: req.session.username || 'system'
+            },
+            { new: true }
+        );
+        
+        if (!vendor) {
+            return res.status(404).json({ success: false, message: 'Vendor not found' });
+        }
+        
+        console.log(`✅ Updated vendor: ${vendorName}`);
+        res.json({ success: true, message: 'Vendor updated successfully', vendor });
+    } catch (error) {
+        console.error('❌ Error updating vendor:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// DELETE - Delete vendor
+router.delete('/vendors/:id', async (req, res) => {
+    try {
+        const vendor = await SeedVendor.findByIdAndDelete(req.params.id);
+        
+        if (!vendor) {
+            return res.status(404).json({ success: false, message: 'Vendor not found' });
+        }
+        
+        console.log(`✅ Deleted vendor: ${vendor.vendorName}`);
+        res.json({ success: true, message: 'Vendor deleted successfully' });
+    } catch (error) {
+        console.error('❌ Error deleting vendor:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// POST - Discover seed categories using AI
+router.post('/vendors/:id/discover', async (req, res) => {
+    try {
+        if (!genAI) {
+            return res.status(503).json({ 
+                success: false, 
+                message: 'Gemini AI is not configured. Please set GEMINI_API_KEY in environment.' 
+            });
+        }
+        
+        const vendor = await SeedVendor.findById(req.params.id);
+        
+        if (!vendor) {
+            return res.status(404).json({ success: false, message: 'Vendor not found' });
+        }
+        
+        // Use seedCategoriesUrl if available, otherwise baseUrl
+        const urlToAnalyze = vendor.seedCategoriesUrl || vendor.baseUrl;
+        
+        console.log(`🔍 Discovering categories for ${vendor.vendorName} from ${urlToAnalyze}...`);
+        
+        // AI prompt for discovering seed categories
+        const prompt = `You are analyzing the website "${urlToAnalyze}" for ${vendor.vendorName}, a seed company.
+
+Your task is to identify all seed categories they offer (like "Tomatoes", "Peppers", "Corn", "Lettuce", etc.).
+
+Based on common seed vendor website structures and the URL provided, list the likely seed categories this vendor would offer.
+
+For each category, provide:
+1. name - The seed category name (e.g., "Tomatoes", "Corn")
+2. estimatedUrl - A likely URL path for that category based on the base URL structure
+
+Return your response as a JSON array ONLY, with no additional text or markdown formatting:
+[
+  {
+    "name": "Tomatoes",
+    "estimatedUrl": "https://example.com/tomato-seeds"
+  },
+  {
+    "name": "Peppers",
+    "estimatedUrl": "https://example.com/pepper-seeds"
+  }
+]
+
+Focus on common vegetable and herb seed categories. Be realistic about what categories would exist.`;
+
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        let text = response.text();
+        
+        console.log('📝 AI Response:', text.substring(0, 200) + '...');
+        
+        // Clean up markdown formatting if present
+        text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        
+        // Parse JSON response
+        let categories;
+        try {
+            categories = JSON.parse(text);
+        } catch (parseError) {
+            console.error('❌ Failed to parse AI response:', text);
+            return res.status(500).json({ 
+                success: false, 
+                message: 'AI returned invalid JSON format',
+                rawResponse: text.substring(0, 500)
+            });
+        }
+        
+        if (!Array.isArray(categories)) {
+            return res.status(500).json({ 
+                success: false, 
+                message: 'AI did not return an array of categories'
+            });
+        }
+        
+        // Transform to discoveredCategories format
+        const discoveredCategories = categories.map(cat => ({
+            name: cat.name,
+            url: cat.estimatedUrl || cat.url || '',
+            lastScanned: new Date(),
+            seedCount: 0 // Will be updated when actual searches are performed
+        }));
+        
+        // Update vendor with discovered categories
+        vendor.discoveredCategories = discoveredCategories;
+        vendor.updatedBy = req.session.username || 'system';
+        await vendor.save();
+        
+        console.log(`✅ Discovered ${discoveredCategories.length} categories for ${vendor.vendorName}`);
+        
+        res.json({ 
+            success: true, 
+            message: `Discovered ${discoveredCategories.length} seed categories`,
+            categories: discoveredCategories 
+        });
+        
+    } catch (error) {
+        console.error('❌ Error discovering categories:', error);
+        
+        // Check if it's a quota/rate limit error
+        if (error.status === 429 || error.message?.includes('quota') || error.message?.includes('rate limit')) {
+            return res.status(429).json({ 
+                success: false, 
+                message: 'AI service is temporarily at capacity. Please wait a moment and try again.',
+                error: 'Rate limit exceeded'
+            });
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: 'Unable to discover categories. You can add them manually after saving the vendor.',
+            error: error.message 
+        });
+    }
+});
+
+// ========== SEED CATALOG ROUTES (Parameterized routes come AFTER specific routes) ==========
 
 // GET - View single seed
 router.get('/view/:id', async (req, res) => {
@@ -347,3 +826,4 @@ router.get('/stats', async (req, res) => {
 });
 
 module.exports = router;
+

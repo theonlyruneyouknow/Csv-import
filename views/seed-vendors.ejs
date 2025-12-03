@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Seed Vendors</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .actions {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .vendors-table {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌱 Manage Seed Vendors</h1>
+            <p>Add and manage your seed vendor list</p>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-success" onclick="showAddModal()">+ Add New Vendor</button>
+            <button class="btn btn-secondary" onclick="window.location.href='/seed-catalog/search'">← Back to Search</button>
+        </div>
+
+        <div class="vendors-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vendor Name</th>
+                        <th>Base URL</th>
+                        <th>Categories</th>
+                        <th>Seeds in Catalog</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="vendorsTableBody">
+                    <% if (vendors.length === 0) { %>
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #95a5a6;">
+                            No vendors added yet. Click "Add New Vendor" to get started!
+                        </td>
+                    </tr>
+                    <% } else { %>
+                        <% vendors.forEach(vendor => { %>
+                        <tr>
+                            <td>
+                                <strong><%= vendor.vendorName %></strong>
+                                <% if (vendor.lastIncrementalUpdate || vendor.lastFullRefresh) { %>
+                                    <div style="font-size: 11px; color: #666; margin-top: 4px;">
+                                        <% if (vendor.lastIncrementalUpdate) { %>
+                                            <div>🔄 Updated: <%= new Date(vendor.lastIncrementalUpdate).toLocaleDateString() %></div>
+                                        <% } %>
+                                        <% if (vendor.lastFullRefresh) { %>
+                                            <div>♻️ Refreshed: <%= new Date(vendor.lastFullRefresh).toLocaleDateString() %></div>
+                                        <% } %>
+                                    </div>
+                                <% } %>
+                            </td>
+                            <td><a href="<%= vendor.baseUrl %>" target="_blank" style="color: #667eea;"><%= vendor.baseUrl %></a></td>
+                            <td><%= vendor.discoveredCategories?.length || 0 %></td>
+                            <td><%= vendor.discoveredCategories?.reduce((sum, cat) => sum + (cat.seedCount || 0), 0) || 0 %></td>
+                            <td>
+                                <span class="status-badge <%= vendor.active ? 'status-active' : 'status-inactive' %>">
+                                    <%= vendor.active ? 'Active' : 'Inactive' %>
+                                </span>
+                            </td>
+                            <td style="min-width: 200px;">
+                                <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; margin-bottom: 4px; width: 100%;" onclick="discoverCategories('<%= vendor._id %>')">
+                                    🔍 Discover Categories
+                                </button>
+                                <% if (vendor.discoveredCategories && vendor.discoveredCategories.length > 0) { %>
+                                    <div style="display: flex; gap: 4px; margin-bottom: 4px;">
+                                        <button class="btn btn-success" style="padding: 6px 8px; font-size: 11px; flex: 1;" 
+                                                onclick="searchVendorSeeds('<%= vendor.vendorName %>', '<%= vendor._id %>', 'incremental')" 
+                                                title="Search for new products only">
+                                            ➕ New Only
+                                        </button>
+                                        <button class="btn btn-success" style="padding: 6px 8px; font-size: 11px; flex: 1;" 
+                                                onclick="searchVendorSeeds('<%= vendor.vendorName %>', '<%= vendor._id %>', 'full')" 
+                                                title="Re-scan all products for updates">
+                                            ♻️ Full Refresh
+                                        </button>
+                                    </div>
+                                <% } %>
+                                <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px; width: 100%;" onclick="editVendor('<%= vendor._id %>')">
+                                    ✏️ Edit
+                                </button>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Vendor Modal -->
+    <div id="vendorModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Add New Vendor</h2>
+            <form id="vendorForm">
+                <input type="hidden" id="vendorId">
+                
+                <!-- AI-Powered URL Analysis -->
+                <div class="form-group" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <label for="analyzeUrl" style="color: white; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                        <span>🤖 AI-Powered Vendor Discovery</span>
+                    </label>
+                    <input type="text" id="analyzeUrl" placeholder="Enter vendor name or URL (e.g., 'Johnny's Seeds' or 'highmowingseeds.com')..." 
+                           style="margin-top: 8px; margin-bottom: 10px;">
+                    <button type="button" class="btn" onclick="analyzeVendorUrl()" 
+                            style="background: white; color: #667eea; font-weight: 600; width: 100%;">
+                        ✨ Find & Auto-Fill Vendor
+                    </button>
+                    <small style="color: white; font-size: 11px; display: block; margin-top: 8px;">
+                        💡 Enter a vendor name, partial URL, or full website - AI will find the complete information
+                    </small>
+                </div>
+
+                <div id="aiLoadingIndicator" style="display: none; text-align: center; padding: 20px; background: #f0f4ff; border-radius: 8px; margin-bottom: 15px;">
+                    <div style="display: inline-block; width: 30px; height: 30px; border: 3px solid #667eea; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <p style="margin-top: 10px; color: #667eea; font-weight: 600;">🤖 AI analyzing vendor website...</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="vendorName">Vendor Name *</label>
+                    <input type="text" id="vendorName" required placeholder="Johnny's Selected Seeds">
+                </div>
+
+                <div class="form-group">
+                    <label for="baseUrl">Base URL *</label>
+                    <input type="text" id="baseUrl" required placeholder="johnnyseeds.com">
+                    <small style="color: #666; font-size: 12px;">Enter without https:// - we'll add it automatically</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="seedCategoriesUrl">Seed Categories Page (Optional)</label>
+                    <input type="text" id="seedCategoriesUrl" placeholder="johnnyseeds.com/vegetables">
+                    <small style="color: #666; font-size: 12px;">Direct link to their seeds/catalog page if known</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Notes (Optional)</label>
+                    <textarea id="notes" placeholder="Any notes about this vendor..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">Save Vendor</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showAddModal() {
+            document.getElementById('modalTitle').textContent = 'Add New Vendor';
+            document.getElementById('vendorForm').reset();
+            document.getElementById('vendorId').value = '';
+            document.getElementById('analyzeUrl').value = '';
+            document.getElementById('vendorModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('vendorModal').classList.remove('active');
+        }
+
+        async function analyzeVendorUrl() {
+            const input = document.getElementById('analyzeUrl').value.trim();
+            
+            if (!input) {
+                alert('Please enter a vendor name or URL');
+                return;
+            }
+
+            // Show loading indicator
+            document.getElementById('aiLoadingIndicator').style.display = 'block';
+
+            try {
+                const response = await fetch('/seed-catalog/vendors/analyze-url', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ input })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Check if multiple suggestions returned
+                    if (result.suggestions && result.suggestions.length > 1) {
+                        // Show selection dialog
+                        let message = '🔍 Multiple vendors found! Please select one:\n\n';
+                        result.suggestions.forEach((sugg, idx) => {
+                            message += `${idx + 1}. ${sugg.vendorName} (${sugg.baseUrl})\n`;
+                        });
+                        message += '\nEnter the number of your choice:';
+                        
+                        const choice = prompt(message);
+                        const selectedIndex = parseInt(choice) - 1;
+                        
+                        if (selectedIndex >= 0 && selectedIndex < result.suggestions.length) {
+                            fillVendorForm(result.suggestions[selectedIndex]);
+                        } else {
+                            alert('Invalid selection. Please try again.');
+                        }
+                    } else {
+                        // Single result or primary suggestion
+                        const vendorInfo = result.vendorInfo || result.suggestions[0];
+                        fillVendorForm(vendorInfo);
+                    }
+                } else {
+                    // Show appropriate error message
+                    let errorMsg = '❌ ';
+                    if (response.status === 429) {
+                        errorMsg += 'AI service is busy. Please wait 10 seconds and try again.\n\n';
+                        errorMsg += 'Tip: You can also enter vendor details manually below.';
+                    } else if (result.message) {
+                        errorMsg += result.message;
+                    } else {
+                        errorMsg += 'Unable to find vendor. Try:\n';
+                        errorMsg += '• Adding ".com" to the name\n';
+                        errorMsg += '• Using the full website URL\n';
+                        errorMsg += '• Or enter details manually below';
+                    }
+                    alert(errorMsg);
+                }
+            } catch (error) {
+                alert('❌ Error finding vendor: ' + error.message);
+            } finally {
+                document.getElementById('aiLoadingIndicator').style.display = 'none';
+            }
+        }
+
+        function fillVendorForm(vendorInfo) {
+            // Auto-fill the form with AI-extracted data
+            document.getElementById('vendorName').value = vendorInfo.vendorName || '';
+            document.getElementById('baseUrl').value = vendorInfo.baseUrl || '';
+            document.getElementById('seedCategoriesUrl').value = vendorInfo.seedCategoriesUrl || '';
+            
+            if (vendorInfo.notes) {
+                document.getElementById('notes').value = vendorInfo.notes;
+            }
+
+            // Show success message
+            const confidence = vendorInfo.confidence ? ` (${vendorInfo.confidence}% confidence)` : '';
+            alert('✅ Vendor information found' + confidence + '!\n\n' + 
+                  'Vendor: ' + vendorInfo.vendorName + '\n' +
+                  'URL: ' + vendorInfo.baseUrl + '\n\n' +
+                  'Please review and adjust if needed.');
+        }
+
+        async function editVendor(id) {
+            try {
+                const response = await fetch(`/seed-catalog/vendors/${id}`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to load vendor');
+                }
+                
+                const vendor = data.vendor;
+                
+                document.getElementById('modalTitle').textContent = 'Edit Vendor';
+                document.getElementById('vendorId').value = vendor._id;
+                document.getElementById('vendorName').value = vendor.vendorName;
+                document.getElementById('baseUrl').value = vendor.baseUrl;
+                document.getElementById('seedCategoriesUrl').value = vendor.seedCategoriesUrl || '';
+                document.getElementById('notes').value = vendor.notes || '';
+                
+                document.getElementById('vendorModal').classList.add('active');
+            } catch (error) {
+                alert('Error loading vendor: ' + error.message);
+            }
+        }
+
+        document.getElementById('vendorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const vendorId = document.getElementById('vendorId').value;
+            const data = {
+                vendorName: document.getElementById('vendorName').value,
+                baseUrl: document.getElementById('baseUrl').value,
+                seedCategoriesUrl: document.getElementById('seedCategoriesUrl').value,
+                notes: document.getElementById('notes').value
+            };
+
+            try {
+                const url = vendorId ? `/seed-catalog/vendors/${vendorId}` : '/seed-catalog/vendors';
+                const method = vendorId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('Vendor saved successfully!');
+                    window.location.reload();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.message || 'Failed to save vendor'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+
+        function searchVendorSeeds(vendorName, vendorId, mode) {
+            // Navigate to search page with vendor pre-selected and update mode
+            const modeParam = mode ? `&mode=${mode}` : '';
+            window.location.href = `/seed-catalog/search?vendor=${encodeURIComponent(vendorName)}${modeParam}`;
+        }
+
+        async function discoverCategories(vendorId) {
+            if (!confirm('This will use AI to discover seed categories on the vendor website. Continue?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/seed-catalog/vendors/${vendorId}/discover`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`✅ Discovery complete!\n\nFound ${data.categories.length} seed categories.\n\nClick "🌱 Search Seeds" to find varieties with packet sizes and prices.`);
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + (data.message || data.error || 'Discovery failed'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

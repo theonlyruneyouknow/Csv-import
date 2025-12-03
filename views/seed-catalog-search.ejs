@@ -342,25 +342,59 @@
                     </div>
                     <% } %>
 
+                        <div class="info-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                            <h4 style="color: white; font-size: 16px; margin-bottom: 12px;">🌱 Complete Workflow:</h4>
+                            <div style="color: white; font-size: 14px; line-height: 1.8;">
+                                <p><strong>Step 1:</strong> <a href="/seed-catalog/vendors" style="color: #ffd700; text-decoration: underline;">Manage Vendors</a> → Add vendors (AI auto-fills details)</p>
+                                <p><strong>Step 2:</strong> Click "🔍 Discover Categories" → AI finds seed types (corn, tomatoes, etc.)</p>
+                                <p><strong>Step 3:</strong> Click "🌱 Search Seeds" → AI extracts varieties with packets & prices (you're here!)</p>
+                                <p style="margin-top: 8px; font-size: 12px; opacity: 0.9;">💡 Each step builds on the previous - vendors → categories → detailed varieties</p>
+                            </div>
+                        </div>
+
                         <div class="info-box">
-                            <h4>How it works:</h4>
-                            <p>1. Enter a vendor name and optional search criteria (e.g., "tomatoes", "organic lettuce")
-                            </p>
-                            <p>2. AI will search for seed information from that vendor's catalog</p>
-                            <p>3. Found seeds will be parsed and stored in your database</p>
+                            <h4>How this search works:</h4>
+                            <p>1. Select vendors and seed categories below</p>
+                            <p>2. AI searches each vendor's catalog for those seed types</p>
+                            <p>3. Extracts varieties, packet sizes, and pricing information</p>
                             <p>4. You can review, edit, and manage the seed catalog</p>
                         </div>
 
                         <form id="searchForm">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="vendors">Vendor Names *</label>
-                                    <textarea id="vendors" required
-                                        placeholder="Enter one vendor per line:&#10;Johnny's Seeds&#10;Baker Creek&#10;High Mowing Seeds"
-                                        style="min-height: 80px;"></textarea>
-                                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
-                                        💡 Enter multiple vendors (one per line) to search them all at once
-                                    </small>
+                                    <label for="vendors">Select Vendors *</label>
+                                    <% if (vendors && vendors.length > 0) { %>
+                                        <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: #f8f9fa; border-radius: 8px; max-height: 200px; overflow-y: auto;">
+                                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; border-bottom: 1px solid #ddd; padding-bottom: 8px;">
+                                                <input type="checkbox" id="selectAllVendors" onchange="toggleAllVendors()">
+                                                Select All Vendors
+                                            </label>
+                                            <% vendors.forEach(vendor => { %>
+                                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                                    <input type="checkbox" name="vendors" value="<%= vendor.vendorName %>" data-base-url="<%= vendor.baseUrl %>" class="vendor-checkbox" checked>
+                                                    <%= vendor.vendorName %> 
+                                                    <% if (vendor.discoveredCategories && vendor.discoveredCategories.length > 0) { %>
+                                                        <span style="font-size: 11px; color: #28a745; background: #d4edda; padding: 2px 6px; border-radius: 4px;">
+                                                            <%= vendor.discoveredCategories.length %> categories
+                                                        </span>
+                                                    <% } %>
+                                                </label>
+                                            <% }); %>
+                                        </div>
+                                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                                            💡 Select vendors to search. Categories will be loaded from discovered catalog data.
+                                        </small>
+                                    <% } else { %>
+                                        <div style="padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px;">
+                                            <p style="margin: 0; color: #856404;">
+                                                ⚠️ No vendors configured yet. 
+                                                <a href="/seed-catalog/vendors" style="color: #0066cc; text-decoration: underline;">
+                                                    Add vendors
+                                                </a> to get started.
+                                            </p>
+                                        </div>
+                                    <% } %>
                                 </div>
                                 <div class="form-group">
                                     <label for="categories">Categories</label>
@@ -397,16 +431,18 @@
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="catalogUrl">Vendor Catalog URL (Recommended)</label>
+                                    <label for="catalogUrl">Vendor Catalog URL (Strongly Recommended) ⭐</label>
                                     <input type="text" id="catalogUrl"
-                                        placeholder="vendor.com/seeds or https://vendor.com/seeds">
-                                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
-                                        💡 Tip: Enter URL with or without https:// - we'll add it automatically (e.g.,
-                                        "johnnyseeds.com/vegetables")
+                                        placeholder="highmowingseeds.com/corn-seeds.html">
+                                    <small style="color: #e74c3c; font-size: 12px; display: block; margin-top: 5px; font-weight: 600;">
+                                        ⚠️ IMPORTANT: Without a URL, AI cannot access vendor websites and may return no results
+                                    </small>
+                                    <small style="color: #666; font-size: 12px; display: block; margin-top: 3px;">
+                                        💡 Examples: highmowingseeds.com/corn-seeds.html, johnnyseeds.com/vegetables/tomatoes
                                     </small>
                                 </div>
                                 <div class="form-group">
-                                    <label for="maxResults">Max Results</label>
+                                    <label for="maxResults">Max Results Per Search</label>
                                     <input type="number" id="maxResults" value="20" min="1" max="100">
                                 </div>
                             </div>
@@ -415,8 +451,8 @@
                                 <button type="submit" class="btn btn-primary">🔍 Search with AI</button>
                                 <button type="button" class="btn btn-secondary"
                                     onclick="window.location.href='/seed-catalog/browse'">📚 Browse Catalog</button>
-                                <button type="button" class="btn btn-success"
-                                    onclick="window.location.href='/seed-catalog/manage'">⚙️ Manage Seeds</button>
+                                <button type="button" class="btn btn-secondary"
+                                    onclick="window.location.href='/seed-catalog/vendors'">🏪 Manage Vendors</button>
                             </div>
                         </form>
         </div>
@@ -439,11 +475,68 @@
     </div>
 
     <script>
+        // Toggle all vendor checkboxes
+        function toggleAllVendors() {
+            const selectAll = document.getElementById('selectAllVendors');
+            const checkboxes = document.querySelectorAll('.vendor-checkbox');
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+        }
+
+        // Pre-select vendor from URL parameter (when coming from vendor management)
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const preSelectVendor = urlParams.get('vendor');
+            const updateMode = urlParams.get('mode'); // 'incremental' or 'full'
+            
+            if (preSelectVendor) {
+                // Uncheck all vendors first
+                document.querySelectorAll('.vendor-checkbox').forEach(cb => cb.checked = false);
+                document.getElementById('selectAllVendors').checked = false;
+                
+                // Check only the specified vendor
+                document.querySelectorAll('.vendor-checkbox').forEach(cb => {
+                    if (cb.value === preSelectVendor) {
+                        cb.checked = true;
+                        // Scroll to make it visible
+                        cb.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+                
+                // Show appropriate message based on update mode
+                const infoBox = document.createElement('div');
+                infoBox.style.cssText = 'background: #fff3cd; border: 2px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 20px; color: #856404;';
+                
+                if (updateMode === 'incremental') {
+                    infoBox.innerHTML = `<strong>➕ Incremental Update - ${preSelectVendor}</strong><br>
+                        AI will search for <strong>new products only</strong> that weren't found in previous scans.<br>
+                        <small>💡 Faster and more efficient for regular updates</small>`;
+                } else if (updateMode === 'full') {
+                    infoBox.innerHTML = `<strong>♻️ Full Refresh - ${preSelectVendor}</strong><br>
+                        AI will <strong>re-scan all products</strong> to catch price changes, discontinued items, and updates.<br>
+                        <small>💡 Use this monthly or when you notice catalog changes</small>`;
+                } else {
+                    infoBox.innerHTML = `<strong>🌱 Ready to search ${preSelectVendor} seeds!</strong><br>
+                        Select categories below and click "🔍 Search with AI" to find varieties with packets & prices.`;
+                }
+                
+                document.querySelector('.search-section form').insertBefore(infoBox, document.querySelector('.form-row'));
+                
+                // Store update mode for use during search
+                if (updateMode) {
+                    document.getElementById('searchForm').dataset.updateMode = updateMode;
+                }
+            }
+        });
+
         document.getElementById('searchForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const vendorsText = document.getElementById('vendors').value;
-            const vendors = vendorsText.split('\n').map(v => v.trim()).filter(v => v);
+            // Get selected vendors from checkboxes
+            const vendorCheckboxes = document.querySelectorAll('input[name="vendors"]:checked');
+            const vendors = Array.from(vendorCheckboxes).map(cb => ({
+                name: cb.value,
+                baseUrl: cb.dataset.baseUrl
+            }));
 
             const categoryCheckboxes = document.querySelectorAll('input[name="categories"]:checked');
             const categories = Array.from(categoryCheckboxes).map(cb => cb.value);
@@ -451,9 +544,10 @@
             const searchQuery = document.getElementById('searchQuery').value;
             const catalogUrl = document.getElementById('catalogUrl').value;
             const maxResults = document.getElementById('maxResults').value;
+            const updateMode = document.getElementById('searchForm').dataset.updateMode; // Get mode from pre-selection
 
             if (vendors.length === 0) {
-                alert('Please enter at least one vendor name');
+                alert('Please select at least one vendor');
                 return;
             }
 
@@ -469,15 +563,16 @@
             let searchResults = [];
 
             // Search each vendor
-            for (const vendor of vendors) {
+            for (const vendorObj of vendors) {
                 // If categories selected, search each category, otherwise search all
                 const categoriesToSearch = categories.length > 0 ? categories : [''];
 
                 for (const category of categoriesToSearch) {
                     try {
+                        const modeText = updateMode === 'incremental' ? ' (➕ New Only)' : updateMode === 'full' ? ' (♻️ Full Refresh)' : '';
                         document.getElementById('loadingContainer').innerHTML = `
                             <div class="loading-spinner"></div>
-                            <p>Searching ${vendor}${category ? ` - ${category}` : ''}...</p>
+                            <p>Searching ${vendorObj.name}${category ? ` - ${category}` : ''}${modeText}...</p>
                             <small>${searchResults.length} searches completed, ${vendors.length * Math.max(categories.length, 1) - searchResults.length - 1} remaining</small>
                         `;
 
@@ -487,11 +582,12 @@
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({
-                                vendor,
+                                vendor: vendorObj.name,
                                 category,
                                 searchQuery,
-                                catalogUrl,
-                                maxResults: parseInt(maxResults)
+                                catalogUrl: catalogUrl || vendorObj.baseUrl,
+                                maxResults: parseInt(maxResults),
+                                mode: updateMode // Pass update mode to backend
                             })
                         });
 
@@ -504,7 +600,7 @@
                             totalStats.updated += data.stats.updated;
 
                             searchResults.push({
-                                vendor,
+                                vendor: vendorObj.name,
                                 category: category || 'All',
                                 found: data.stats.found,
                                 saved: data.stats.saved,
@@ -516,9 +612,9 @@
                         await new Promise(resolve => setTimeout(resolve, 1000));
 
                     } catch (error) {
-                        console.error(`Error searching ${vendor} - ${category}:`, error);
+                        console.error(`Error searching ${vendorObj.name} - ${category}:`, error);
                         searchResults.push({
-                            vendor,
+                            vendor: vendorObj.name,
                             category: category || 'All',
                             error: error.message
                         });
@@ -527,6 +623,24 @@
             }
 
             document.getElementById('loadingContainer').style.display = 'none';
+            
+            // Check if no results found at all
+            if (totalStats.found === 0 && searchResults.length > 0) {
+                const noResultsMsg = `
+                    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <h3 style="color: #856404; margin-bottom: 10px;">⚠️ No Seeds Found</h3>
+                        <p style="color: #856404; margin-bottom: 10px;">The AI couldn't find any seeds matching your search criteria.</p>
+                        <p style="color: #856404; margin-bottom: 10px;"><strong>Tip:</strong> For best results, provide specific catalog URLs:</p>
+                        <ul style="color: #856404; margin-left: 20px;">
+                            <li>High Mowing Seeds Corn: <code>highmowingseeds.com/corn-seeds.html</code></li>
+                            <li>Osborne Seeds Corn: <code>osborneseed.com/corn</code></li>
+                        </ul>
+                        <p style="color: #856404; margin-top: 10px;"><em>Without URLs, the AI cannot access actual vendor websites and may return no results.</em></p>
+                    </div>
+                `;
+                document.getElementById('resultsContainer').innerHTML = noResultsMsg;
+            }
+            
             displayBulkResults(searchResults, totalStats, allSeeds);
         });
 
@@ -564,16 +678,20 @@
                     </thead>
                     <tbody>
                         ${searchResults.map((result, index) => `
-                            <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <tr style="border-bottom: 1px solid #e0e0e0; ${result.found === 0 ? 'background: #fff3cd;' : ''}">
                                 <td style="padding: 12px;">${result.vendor}</td>
                                 <td style="padding: 12px;">${result.category}</td>
                                 <td style="padding: 12px; text-align: center;">${result.found || 0}</td>
                                 <td style="padding: 12px; text-align: center; color: #27ae60; font-weight: 600;">${result.saved || 0}</td>
                                 <td style="padding: 12px; text-align: center; color: #f39c12; font-weight: 600;">${result.updated || 0}</td>
                                 <td style="padding: 12px; text-align: center;">
-                                    <button class="btn btn-secondary" style="padding: 5px 15px; font-size: 12px;" onclick="viewVendorCategory('${result.vendor}', '${result.category}')">
-                                        View Details
-                                    </button>
+                                    ${result.found > 0 ? `
+                                        <button class="btn btn-secondary" style="padding: 5px 15px; font-size: 12px;" onclick="viewVendorCategory('${result.vendor}', '${result.category}')">
+                                            View Details
+                                        </button>
+                                    ` : `
+                                        <span style="color: #95a5a6; font-size: 12px;">No results</span>
+                                    `}
                                 </td>
                             </tr>
                         `).join('')}
