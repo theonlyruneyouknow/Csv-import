@@ -7,6 +7,104 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 // Initialize Google Gemini AI
 const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
 
+// GET - Vendor summary with categories and varieties
+router.get('/summary', async (req, res) => {
+    try {
+        console.log('📊 Loading vendor summary page...');
+
+        // Get all vendors with their categories
+        const vendors = await SeedVendor.find({ active: true })
+            .sort({ vendorName: 1 })
+            .select('vendorName baseUrl discoveredCategories lastIncrementalUpdate lastFullRefresh');
+
+        // Get all seeds grouped by vendor and category
+        const seeds = await SeedCatalog.find({})
+            .sort({ vendor: 1, category: 1, varietyName: 1 })
+            .select('vendor category subcategory varietyName commonName seedType organic packets');
+
+        // Build vendor summary with statistics
+        const vendorSummary = vendors.map(vendor => {
+            const vendorSeeds = seeds.filter(s => s.vendor === vendor.vendorName);
+            
+            // Group by category
+            const categoryGroups = {};
+            vendorSeeds.forEach(seed => {
+                const cat = seed.category || 'Uncategorized';
+                if (!categoryGroups[cat]) {
+                    categoryGroups[cat] = {
+                        name: cat,
+                        varieties: [],
+                        count: 0
+                    };
+                }
+                categoryGroups[cat].varieties.push(seed);
+                categoryGroups[cat].count++;
+            });
+
+            return {
+                vendorName: vendor.vendorName,
+                baseUrl: vendor.baseUrl,
+                discoveredCategories: vendor.discoveredCategories || [],
+                lastIncrementalUpdate: vendor.lastIncrementalUpdate,
+                lastFullRefresh: vendor.lastFullRefresh,
+                totalVarieties: vendorSeeds.length,
+                categories: Object.values(categoryGroups).sort((a, b) => b.count - a.count)
+            };
+        });
+
+        // Calculate global statistics
+        const allCategories = {};
+        const allCommonNames = {};
+        seeds.forEach(seed => {
+            const cat = seed.category || 'Uncategorized';
+            const common = seed.commonName || seed.varietyName;
+            
+            if (!allCategories[cat]) {
+                allCategories[cat] = { vendors: new Set(), count: 0 };
+            }
+            allCategories[cat].vendors.add(seed.vendor);
+            allCategories[cat].count++;
+
+            if (!allCommonNames[common]) {
+                allCommonNames[common] = { vendors: new Set(), varieties: 0 };
+            }
+            allCommonNames[common].vendors.add(seed.vendor);
+            allCommonNames[common].varieties++;
+        });
+
+        const categoryStats = Object.entries(allCategories)
+            .map(([name, data]) => ({
+                name,
+                vendorCount: data.vendors.size,
+                varietyCount: data.count
+            }))
+            .sort((a, b) => b.varietyCount - a.varietyCount);
+
+        const commonNameStats = Object.entries(allCommonNames)
+            .map(([name, data]) => ({
+                name,
+                vendorCount: data.vendors.size,
+                varietyCount: data.varieties
+            }))
+            .sort((a, b) => b.varietyCount - a.varietyCount)
+            .slice(0, 20); // Top 20
+
+        res.render('seed-catalog-summary', {
+            title: 'Seed Catalog Summary',
+            user: req.user || { name: 'Admin' },
+            vendorSummary,
+            categoryStats,
+            commonNameStats,
+            totalVendors: vendors.length,
+            totalVarieties: seeds.length,
+            totalCategories: Object.keys(allCategories).length
+        });
+    } catch (error) {
+        console.error('❌ Error loading summary page:', error);
+        res.status(500).send('Error loading summary page');
+    }
+});
+
 // GET - Seed catalog search page
 router.get('/search', async (req, res) => {
     try {

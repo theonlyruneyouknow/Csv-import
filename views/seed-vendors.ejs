@@ -50,6 +50,10 @@
             flex-wrap: wrap;
         }
 
+        .actions a {
+            text-decoration: none;
+        }
+
         .btn {
             padding: 12px 25px;
             border: none;
@@ -209,8 +213,10 @@
 
         <div class="actions">
             <button class="btn btn-success" onclick="showAddModal()">+ Add New Vendor</button>
-            <button class="btn btn-secondary" onclick="window.location.href='/seed-catalog/search'">← Back to
-                Search</button>
+            <a href="/seed-catalog/summary"><button class="btn btn-primary">📊 View Summary</button></a>
+            <a href="/seed-catalog/search"><button class="btn btn-secondary">🔍 AI Search</button></a>
+            <a href="/seed-catalog/browse"><button class="btn btn-secondary">📚 Browse Seeds</button></a>
+            <button class="btn btn-secondary" onclick="window.location.href='/dashboard'">🏠 Dashboard</button>
         </div>
 
         <div class="vendors-table">

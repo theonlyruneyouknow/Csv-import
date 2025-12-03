@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .nav-links {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .nav-links a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 3em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card .label {
+            color: #666;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .vendor-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .vendor-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .vendor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .vendor-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .vendor-stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .vendor-stat {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .vendor-stat .number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .vendor-timestamps {
+            display: flex;
+            gap: 15px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .timestamp-badge {
+            background: white;
+            padding: 5px 12px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .category-box {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .category-box:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .category-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .category-count {
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .varieties-list {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #e9ecef;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .varieties-list.show {
+            display: block;
+        }
+
+        .variety-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .variety-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .variety-details {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .variety-badge {
+            background: #667eea;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+        }
+
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .summary-table th,
+        .summary-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .summary-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .summary-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+
+        .toggle-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.2s;
+        }
+
+        .toggle-btn:hover {
+            background: #5568d3;
+        }
+
+        .filter-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.2s;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .vendor-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .categories-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🌱 Seed Catalog Summary</h1>
+            <p>Complete overview of vendors, categories, and varieties</p>
+            <div class="nav-links">
+                <a href="/seed-catalog/search">🔍 AI Search</a>
+                <a href="/seed-catalog/browse">📚 Browse Seeds</a>
+                <a href="/seed-catalog/vendors">🏪 Manage Vendors</a>
+                <a href="/dashboard">🏠 Dashboard</a>
+            </div>
+        </div>
+
+        <!-- Global Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="number"><%= totalVendors %></div>
+                <div class="label">Active Vendors</div>
+            </div>
+            <div class="stat-card">
+                <div class="number"><%= totalCategories %></div>
+                <div class="label">Seed Categories</div>
+            </div>
+            <div class="stat-card">
+                <div class="number"><%= totalVarieties %></div>
+                <div class="label">Total Varieties</div>
+            </div>
+            <div class="stat-card">
+                <div class="number"><%= Math.round(totalVarieties / totalVendors) %></div>
+                <div class="label">Avg per Vendor</div>
+            </div>
+        </div>
+
+        <!-- Category Statistics -->
+        <div class="section">
+            <h2>📊 Category Distribution</h2>
+            <% if (categoryStats.length > 0) { %>
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Vendors</th>
+                            <th>Total Varieties</th>
+                            <th>Avg per Vendor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% categoryStats.forEach(cat => { %>
+                            <tr>
+                                <td><strong><%= cat.name %></strong></td>
+                                <td><%= cat.vendorCount %></td>
+                                <td><%= cat.varietyCount %></td>
+                                <td><%= Math.round(cat.varietyCount / cat.vendorCount) %></td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <div class="no-data">No category data available</div>
+            <% } %>
+        </div>
+
+        <!-- Top Common Names -->
+        <div class="section">
+            <h2>🌟 Top 20 Popular Seeds</h2>
+            <% if (commonNameStats.length > 0) { %>
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th>Seed Name</th>
+                            <th>Available from Vendors</th>
+                            <th>Total Varieties</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% commonNameStats.forEach(seed => { %>
+                            <tr>
+                                <td><strong><%= seed.name %></strong></td>
+                                <td><%= seed.vendorCount %></td>
+                                <td><%= seed.varietyCount %></td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <div class="no-data">No seed data available</div>
+            <% } %>
+        </div>
+
+        <!-- Vendor Details -->
+        <div class="section">
+            <h2>🏪 Vendors by Category & Variety</h2>
+            
+            <div class="filter-section">
+                <input type="text" class="filter-input" id="vendorFilter" placeholder="🔍 Filter vendors by name...">
+            </div>
+
+            <% if (vendorSummary.length > 0) { %>
+                <% vendorSummary.forEach((vendor, vendorIndex) => { %>
+                    <div class="vendor-card" data-vendor-name="<%= vendor.vendorName.toLowerCase() %>">
+                        <div class="vendor-header">
+                            <div class="vendor-name"><%= vendor.vendorName %></div>
+                            <div class="vendor-stats">
+                                <div class="vendor-stat">
+                                    <span class="number"><%= vendor.categories.length %></span> categories
+                                </div>
+                                <div class="vendor-stat">
+                                    <span class="number"><%= vendor.totalVarieties %></span> varieties
+                                </div>
+                            </div>
+                        </div>
+
+                        <% if (vendor.baseUrl) { %>
+                            <div style="margin-bottom: 10px;">
+                                <a href="<%= vendor.baseUrl %>" target="_blank" style="color: #667eea; text-decoration: none;">
+                                    🔗 <%= vendor.baseUrl %>
+                                </a>
+                            </div>
+                        <% } %>
+
+                        <div class="vendor-timestamps">
+                            <% if (vendor.lastIncrementalUpdate) { %>
+                                <div class="timestamp-badge">
+                                    🔄 Updated: <%= new Date(vendor.lastIncrementalUpdate).toLocaleDateString() %>
+                                </div>
+                            <% } %>
+                            <% if (vendor.lastFullRefresh) { %>
+                                <div class="timestamp-badge">
+                                    ♻️ Refreshed: <%= new Date(vendor.lastFullRefresh).toLocaleDateString() %>
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <% if (vendor.categories.length > 0) { %>
+                            <div class="categories-grid">
+                                <% vendor.categories.forEach((category, catIndex) => { %>
+                                    <div class="category-box" onclick="toggleVarieties('<%= vendorIndex %>-<%= catIndex %>')">
+                                        <div class="category-name"><%= category.name %></div>
+                                        <div class="category-count"><%= category.count %> varieties</div>
+                                        <button class="toggle-btn" style="margin-top: 10px;">View Varieties</button>
+                                        
+                                        <div id="varieties-<%= vendorIndex %>-<%= catIndex %>" class="varieties-list">
+                                            <% category.varieties.forEach(variety => { %>
+                                                <div class="variety-item">
+                                                    <div>
+                                                        <div class="variety-name"><%= variety.varietyName %></div>
+                                                        <div class="variety-details">
+                                                            <% if (variety.commonName) { %>
+                                                                <%= variety.commonName %>
+                                                            <% } %>
+                                                            <% if (variety.subcategory) { %>
+                                                                • <%= variety.subcategory %>
+                                                            <% } %>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <% if (variety.seedType) { %>
+                                                            <span class="variety-badge"><%= variety.seedType %></span>
+                                                        <% } %>
+                                                        <% if (variety.organic) { %>
+                                                            <span class="variety-badge" style="background: #28a745;">🌿 Organic</span>
+                                                        <% } %>
+                                                    </div>
+                                                </div>
+                                            <% }); %>
+                                        </div>
+                                    </div>
+                                <% }); %>
+                            </div>
+                        <% } else { %>
+                            <div class="no-data" style="padding: 20px;">No varieties found for this vendor</div>
+                        <% } %>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="no-data">No vendors found. Add vendors and run AI searches to populate the catalog.</div>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        function toggleVarieties(id) {
+            const element = document.getElementById('varieties-' + id);
+            const btn = element.previousElementSibling;
+            
+            if (element.classList.contains('show')) {
+                element.classList.remove('show');
+                btn.textContent = 'View Varieties';
+            } else {
+                element.classList.add('show');
+                btn.textContent = 'Hide Varieties';
+            }
+        }
+
+        // Vendor filter
+        document.getElementById('vendorFilter').addEventListener('input', function(e) {
+            const filter = e.target.value.toLowerCase();
+            const vendorCards = document.querySelectorAll('.vendor-card');
+            
+            vendorCards.forEach(card => {
+                const vendorName = card.getAttribute('data-vendor-name');
+                if (vendorName.includes(filter)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
