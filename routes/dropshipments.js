@@ -122,17 +122,17 @@ router.put('/api/dropshipments/:id', async (req, res) => {
 
         // If updating poUrl, trackingNumber, or carrier, update the Purchase Order instead
         let poUpdates = {};
-        
+
         if (req.body.poUrl !== undefined) {
             poUpdates.poUrl = req.body.poUrl;
             delete req.body.poUrl;
         }
-        
+
         if (req.body.trackingNumber !== undefined) {
             poUpdates.shippingTracking = req.body.trackingNumber;
             delete req.body.trackingNumber;
         }
-        
+
         if (req.body.carrier !== undefined) {
             poUpdates.shippingCarrier = req.body.carrier;
             delete req.body.carrier;
@@ -142,7 +142,7 @@ router.put('/api/dropshipments/:id', async (req, res) => {
         if (dropshipment.poId && Object.keys(poUpdates).length > 0) {
             await PurchaseOrder.findByIdAndUpdate(dropshipment.poId, poUpdates);
             console.log(`✅ Updated PO fields for: ${dropshipment.poNumber}`, poUpdates);
-            
+
             // If only updating PO fields, return the updated dropshipment with populated poId
             if (Object.keys(req.body).length === 0) {
                 const updated = await Dropshipment.findById(req.params.id)
@@ -151,7 +151,7 @@ router.put('/api/dropshipments/:id', async (req, res) => {
             }
         } else if (Object.keys(poUpdates).length > 0) {
             console.log(`⚠️ Warning: Dropshipment ${dropshipment.poNumber} has no linked PO (poId is null)`);
-        }        const updateData = {
+        } const updateData = {
             ...req.body,
             updatedBy: req.user?.username || req.session?.username || 'system'
         };
