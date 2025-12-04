@@ -707,7 +707,8 @@
             <div style="padding: 20px;">
                 <div class="form-group">
                     <label>URL</label>
-                    <input type="url" id="urlInput" placeholder="https://" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                    <input type="url" id="urlInput" placeholder="https://"
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
                 </div>
                 <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
                     <button type="button" class="btn btn-secondary" onclick="closeUrlModal()">Cancel</button>
@@ -759,13 +760,13 @@
                     <tr>
                         <td>
                             <div class="po-container">
-                                ${ds.poNumber ? 
-                                    (poUrl ? 
-                                        `<a href="${poUrl}" target="_blank" class="po-link" title="Open ${ds.poNumber} link">${ds.poNumber}</a>` : 
-                                        `<span class="po-text">${ds.poNumber}</span>`
-                                    ) : 
-                                    '<span class="po-text">-</span>'
-                                }
+                                ${ds.poNumber ?
+                        (poUrl ?
+                            `<a href="${poUrl}" target="_blank" class="po-link" title="Open ${ds.poNumber} link">${ds.poNumber}</a>` :
+                            `<span class="po-text">${ds.poNumber}</span>`
+                        ) :
+                        '<span class="po-text">-</span>'
+                    }
                                 ${ds.poNumber ? `
                                     <button class="url-btn ${poUrl ? 'has-url' : ''}" 
                                         data-id="${ds._id}" 
@@ -1049,12 +1050,12 @@
         function copyPONumber(poNumber, event) {
             event.stopPropagation();
             const btn = event.target.closest('.copy-po-btn');
-            
+
             navigator.clipboard.writeText(poNumber).then(() => {
                 btn.classList.add('copied');
                 const originalTitle = btn.title;
                 btn.title = 'Copied!';
-                
+
                 setTimeout(() => {
                     btn.classList.remove('copied');
                     btn.title = originalTitle;
@@ -1071,7 +1072,7 @@
         function openUrlModal(id, poNumber, url) {
             event.stopPropagation();
             currentUrlData = { id, poNumber, url };
-            
+
             document.getElementById('urlModalTitle').textContent = `Set URL for ${poNumber}`;
             document.getElementById('urlInput').value = url || '';
             document.getElementById('urlModal').classList.add('show');
