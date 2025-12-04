@@ -105,9 +105,9 @@ dropshipmentSchema.index({ shippingStatus: 1, orderDate: -1 });
 dropshipmentSchema.index({ carrier: 1, shippingStatus: 1 });
 
 // Virtual for tracking URL generation
-dropshipmentSchema.virtual('autoTrackingUrl').get(function() {
+dropshipmentSchema.virtual('autoTrackingUrl').get(function () {
     if (!this.trackingNumber) return null;
-    
+
     const trackingUrls = {
         'USPS': `https://tools.usps.com/go/TrackConfirmAction?tLabels=${this.trackingNumber}`,
         'FedEx': `https://www.fedex.com/fedextrack/?trknbr=${this.trackingNumber}`,
@@ -115,12 +115,12 @@ dropshipmentSchema.virtual('autoTrackingUrl').get(function() {
         'DHL': `https://www.dhl.com/en/express/tracking.html?AWB=${this.trackingNumber}`,
         'Other': this.trackingUrl || null
     };
-    
+
     return this.trackingUrl || trackingUrls[this.carrier] || null;
 });
 
 // Method to update tracking status
-dropshipmentSchema.methods.updateTrackingStatus = function(status, location, description) {
+dropshipmentSchema.methods.updateTrackingStatus = function (status, location, description) {
     this.trackingHistory.push({
         status,
         location,
@@ -128,14 +128,14 @@ dropshipmentSchema.methods.updateTrackingStatus = function(status, location, des
         timestamp: new Date(),
         checkedAt: new Date()
     });
-    
+
     this.shippingStatus = status;
     this.lastTrackingUpdate = new Date();
-    
+
     if (status === 'Delivered' && !this.actualDelivery) {
         this.actualDelivery = new Date();
     }
-    
+
     return this.save();
 };
 

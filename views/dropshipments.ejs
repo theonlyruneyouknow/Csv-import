@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <title>
+        <%= title %>
+    </title>
     <style>
         * {
             margin: 0;
@@ -227,14 +230,45 @@
             display: inline-block;
         }
 
-        .status-pending { background: #ffeaa7; color: #d63031; }
-        .status-awaiting { background: #fab1a0; color: #d63031; }
-        .status-shipped { background: #74b9ff; color: #0984e3; }
-        .status-transit { background: #a29bfe; color: #6c5ce7; }
-        .status-delivery { background: #fd79a8; color: #e84393; }
-        .status-delivered { background: #55efc4; color: #00b894; }
-        .status-exception { background: #ff7675; color: #d63031; }
-        .status-cancelled { background: #dfe6e9; color: #636e72; }
+        .status-pending {
+            background: #ffeaa7;
+            color: #d63031;
+        }
+
+        .status-awaiting {
+            background: #fab1a0;
+            color: #d63031;
+        }
+
+        .status-shipped {
+            background: #74b9ff;
+            color: #0984e3;
+        }
+
+        .status-transit {
+            background: #a29bfe;
+            color: #6c5ce7;
+        }
+
+        .status-delivery {
+            background: #fd79a8;
+            color: #e84393;
+        }
+
+        .status-delivered {
+            background: #55efc4;
+            color: #00b894;
+        }
+
+        .status-exception {
+            background: #ff7675;
+            color: #d63031;
+        }
+
+        .status-cancelled {
+            background: #dfe6e9;
+            color: #636e72;
+        }
 
         .tracking-link {
             color: #667eea;
@@ -351,8 +385,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         @media (max-width: 768px) {
@@ -372,12 +411,14 @@
                 font-size: 12px;
             }
 
-            th, td {
+            th,
+            td {
                 padding: 8px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -491,7 +532,7 @@
             </div>
             <form id="dropshipmentForm" onsubmit="saveDropshipment(event)">
                 <input type="hidden" id="dropshipmentId">
-                
+
                 <div class="form-row">
                     <div class="form-group">
                         <label>PO Number *</label>
@@ -609,7 +650,7 @@
             tbody.innerHTML = data.map(ds => {
                 const statusClass = 'status-' + ds.shippingStatus.toLowerCase().replace(/\s/g, '-');
                 const trackingUrl = ds.trackingUrl || generateTrackingUrl(ds.carrier, ds.trackingNumber);
-                
+
                 return `
                     <tr>
                         <td><strong>${ds.poNumber || '-'}</strong></td>
@@ -617,9 +658,9 @@
                         <td>${ds.customerName || '-'}</td>
                         <td>${ds.orderDate ? new Date(ds.orderDate).toLocaleDateString() : '-'}</td>
                         <td>
-                            ${ds.trackingNumber ? 
-                                `<a href="${trackingUrl}" target="_blank" class="tracking-link">${ds.trackingNumber}</a>` 
-                                : '<span style="color: #999;">Not available</span>'}
+                            ${ds.trackingNumber ?
+                        `<a href="${trackingUrl}" target="_blank" class="tracking-link">${ds.trackingNumber}</a>`
+                        : '<span style="color: #999;">Not available</span>'}
                         </td>
                         <td>${ds.carrier || '-'}</td>
                         <td><span class="status-badge ${statusClass}">${ds.shippingStatus}</span></td>
@@ -627,9 +668,9 @@
                         <td>
                             <div class="action-btns">
                                 <button class="btn btn-info btn-small" onclick="editDropshipment('${ds._id}')">✏️ Edit</button>
-                                ${ds.trackingNumber ? 
-                                    `<button class="btn btn-warning btn-small" onclick="checkWithAI('${ds._id}')">🤖 AI Check</button>` 
-                                    : ''}
+                                ${ds.trackingNumber ?
+                        `<button class="btn btn-warning btn-small" onclick="checkWithAI('${ds._id}')">🤖 AI Check</button>`
+                        : ''}
                                 <button class="btn btn-secondary btn-small" onclick="deleteDropshipment('${ds._id}')">🗑️</button>
                             </div>
                         </td>
@@ -647,14 +688,14 @@
 
         function generateTrackingUrl(carrier, trackingNumber) {
             if (!trackingNumber) return '#';
-            
+
             const urls = {
                 'USPS': `https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}`,
                 'FedEx': `https://www.fedex.com/fedextrack/?trknbr=${trackingNumber}`,
                 'UPS': `https://www.ups.com/track?loc=en_US&tracknum=${trackingNumber}`,
                 'DHL': `https://www.dhl.com/en/express/tracking.html?AWB=${trackingNumber}`
             };
-            
+
             return urls[carrier] || '#';
         }
 
@@ -720,7 +761,7 @@
 
                 if (data.success) {
                     const ds = data.dropshipment;
-                    
+
                     document.getElementById('modalTitle').textContent = 'Edit Dropshipment';
                     document.getElementById('dropshipmentId').value = ds._id;
                     document.getElementById('poNumber').value = ds.poNumber || '';
@@ -734,7 +775,7 @@
                     document.getElementById('shippingStatus').value = ds.shippingStatus || 'Awaiting Tracking';
                     document.getElementById('notes').value = ds.notes || '';
                     document.getElementById('internalNotes').value = ds.internalNotes || '';
-                    
+
                     document.getElementById('dropshipmentModal').classList.add('show');
                 }
             } catch (error) {
@@ -875,4 +916,5 @@
         }
     </script>
 </body>
+
 </html>
