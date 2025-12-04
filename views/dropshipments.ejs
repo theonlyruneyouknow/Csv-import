@@ -752,7 +752,10 @@
 
             tbody.innerHTML = data.map(ds => {
                 const statusClass = 'status-' + ds.shippingStatus.toLowerCase().replace(/\s/g, '-');
-                const trackingUrl = ds.trackingUrl || generateTrackingUrl(ds.carrier, ds.trackingNumber);
+                // Use tracking from PO if available, fallback to dropshipment fields
+                const trackingNumber = (ds.poId && ds.poId.shippingTracking) ? ds.poId.shippingTracking : (ds.trackingNumber || '');
+                const carrier = (ds.poId && ds.poId.shippingCarrier) ? ds.poId.shippingCarrier : (ds.carrier || '');
+                const trackingUrl = ds.trackingUrl || generateTrackingUrl(carrier, trackingNumber);
                 const poLink = ds.poNumber ? `/purchase-orders?poNumber=${encodeURIComponent(ds.poNumber)}&includeHidden=true` : '#';
                 const poUrl = (ds.poId && ds.poId.poUrl) ? ds.poId.poUrl : '';
 
@@ -789,11 +792,11 @@
                         <td>${ds.customerName || '-'}</td>
                         <td>${ds.orderDate ? new Date(ds.orderDate).toLocaleDateString() : '-'}</td>
                         <td>
-                            ${ds.trackingNumber ?
-                        `<a href="${trackingUrl}" target="_blank" class="tracking-link">${ds.trackingNumber}</a>`
+                            ${trackingNumber ?
+                        `<a href="${trackingUrl}" target="_blank" class="tracking-link">${trackingNumber}</a>`
                         : '<span style="color: #999;">Not available</span>'}
                         </td>
-                        <td>${ds.carrier || '-'}</td>
+                        <td>${carrier || '-'}</td>
                         <td><span class="status-badge ${statusClass}">${ds.shippingStatus}</span></td>
                         <td>${ds.lastTrackingUpdate ? new Date(ds.lastTrackingUpdate).toLocaleString() : '-'}</td>
                         <td>
@@ -892,6 +895,9 @@
 
                 if (data.success) {
                     const ds = data.dropshipment;
+                    // Use tracking from PO if available, fallback to dropshipment fields
+                    const trackingNumber = (ds.poId && ds.poId.shippingTracking) ? ds.poId.shippingTracking : (ds.trackingNumber || '');
+                    const carrier = (ds.poId && ds.poId.shippingCarrier) ? ds.poId.shippingCarrier : (ds.carrier || 'USPS');
 
                     document.getElementById('modalTitle').textContent = 'Edit Dropshipment';
                     document.getElementById('dropshipmentId').value = ds._id;
@@ -900,8 +906,8 @@
                     document.getElementById('customerName').value = ds.customerName || '';
                     document.getElementById('customerEmail').value = ds.customerEmail || '';
                     document.getElementById('orderDate').value = ds.orderDate ? new Date(ds.orderDate).toISOString().split('T')[0] : '';
-                    document.getElementById('trackingNumber').value = ds.trackingNumber || '';
-                    document.getElementById('carrier').value = ds.carrier || 'USPS';
+                    document.getElementById('trackingNumber').value = trackingNumber;
+                    document.getElementById('carrier').value = carrier;
                     document.getElementById('trackingUrl').value = ds.trackingUrl || '';
                     document.getElementById('shippingStatus').value = ds.shippingStatus || 'Awaiting Tracking';
                     document.getElementById('notes').value = ds.notes || '';

@@ -55,7 +55,7 @@ router.get('/api/dropshipments', async (req, res) => {
         }
 
         const dropshipments = await Dropshipment.find(query)
-            .populate('poId', 'poUrl poNumber')
+            .populate('poId', 'poUrl poNumber shippingTracking shippingCarrier')
             .sort({ orderDate: -1 })
             .lean();
 
@@ -70,7 +70,7 @@ router.get('/api/dropshipments', async (req, res) => {
 router.get('/api/dropshipments/:id', async (req, res) => {
     try {
         const dropshipment = await Dropshipment.findById(req.params.id)
-            .populate('poId', 'poUrl poNumber')
+            .populate('poId', 'poUrl poNumber shippingTracking shippingCarrier')
             .lean();
 
         if (!dropshipment) {
@@ -115,41 +115,52 @@ router.post('/api/dropshipments', async (req, res) => {
 // PUT - Update dropshipment
 router.put('/api/dropshipments/:id', async (req, res) => {
     try {
-        // If updating poUrl, update the Purchase Order instead
-        if (req.body.poUrl !== undefined) {
-            const dropshipment = await Dropshipment.findById(req.params.id);
-            if (!dropshipment) {
-                return res.status(404).json({ success: false, error: 'Dropshipment not found' });
-            }
-
-            if (dropshipment.poId) {
-                await PurchaseOrder.findByIdAndUpdate(dropshipment.poId, { poUrl: req.body.poUrl });
-                console.log(`✅ Updated PO URL for: ${dropshipment.poNumber}`);
-
-                // If only updating URL, return the updated dropshipment with populated poId
-                if (Object.keys(req.body).length === 1) {
-                    const updated = await Dropshipment.findById(req.params.id)
-                        .populate('poId', 'poUrl poNumber');
-                    return res.json({ success: true, dropshipment: updated });
-                }
-            } else {
-                console.log(`⚠️ Warning: Dropshipment ${dropshipment.poNumber} has no linked PO (poId is null)`);
-            }
-
-            // Remove poUrl from update data since it's stored in PO
-            delete req.body.poUrl;
+        const dropshipment = await Dropshipment.findById(req.params.id);
+        if (!dropshipment) {
+            return res.status(404).json({ success: false, error: 'Dropshipment not found' });
         }
 
-        const updateData = {
+        // If updating poUrl, trackingNumber, or carrier, update the Purchase Order instead
+        let poUpdates = {};
+        
+        if (req.body.poUrl !== undefined) {
+            poUpdates.poUrl = req.body.poUrl;
+            delete req.body.poUrl;
+        }
+        
+        if (req.body.trackingNumber !== undefined) {
+            poUpdates.shippingTracking = req.body.trackingNumber;
+            delete req.body.trackingNumber;
+        }
+        
+        if (req.body.carrier !== undefined) {
+            poUpdates.shippingCarrier = req.body.carrier;
+            delete req.body.carrier;
+        }
+
+        // Update the PO if there are any PO-related fields
+        if (dropshipment.poId && Object.keys(poUpdates).length > 0) {
+            await PurchaseOrder.findByIdAndUpdate(dropshipment.poId, poUpdates);
+            console.log(`✅ Updated PO fields for: ${dropshipment.poNumber}`, poUpdates);
+            
+            // If only updating PO fields, return the updated dropshipment with populated poId
+            if (Object.keys(req.body).length === 0) {
+                const updated = await Dropshipment.findById(req.params.id)
+                    .populate('poId', 'poUrl poNumber shippingTracking shippingCarrier');
+                return res.json({ success: true, dropshipment: updated });
+            }
+        } else if (Object.keys(poUpdates).length > 0) {
+            console.log(`⚠️ Warning: Dropshipment ${dropshipment.poNumber} has no linked PO (poId is null)`);
+        }        const updateData = {
             ...req.body,
             updatedBy: req.user?.username || req.session?.username || 'system'
         };
 
-        const dropshipment = await Dropshipment.findByIdAndUpdate(
+        const dropshipmentUpdate = await Dropshipment.findByIdAndUpdate(
             req.params.id,
             updateData,
             { new: true, runValidators: true }
-        ).populate('poId', 'poUrl poNumber');
+        ).populate('poId', 'poUrl poNumber shippingTracking shippingCarrier');
 
         if (!dropshipment) {
             return res.status(404).json({ success: false, error: 'Dropshipment not found' });
@@ -440,27 +451,18 @@ router.post('/api/sync-from-pos', async (req, res) => {
             const existing = await Dropshipment.findOne({ poNumber: po.poNumber });
 
             if (existing) {
-                // Update poId if not set (to link to PO for URL access)
+                // Update poId if not set (to link to PO for URL and tracking access)
                 let needsUpdate = false;
 
                 if (!existing.poId) {
                     existing.poId = po._id;
                     needsUpdate = true;
-                }
-
-                // Update if PO has new information
-                if (po.shippingTracking && !existing.trackingNumber) {
-                    existing.trackingNumber = po.shippingTracking;
-                    existing.carrier = po.shippingCarrier || 'USPS';
-                    existing.shippingStatus = 'Shipped';
-                    existing.lastTrackingUpdate = new Date();
-                    needsUpdate = true;
+                    console.log(`✅ Linked ${po.poNumber} to PO`);
                 }
 
                 if (needsUpdate) {
                     await existing.save();
                     updated++;
-                    console.log(`✅ Updated ${po.poNumber}`);
                 } else {
                     skipped++;
                 }
@@ -488,8 +490,7 @@ router.post('/api/sync-from-pos', async (req, res) => {
                     quantity: item.netsuiteQuantity || 0,
                     price: 0
                 })),
-                trackingNumber: po.shippingTracking || '',
-                carrier: po.shippingCarrier || 'USPS',
+                // Tracking fields will be read from PO via poId
                 shippingStatus: po.shippingTracking ? 'Shipped' : 'Awaiting Tracking',
                 notes: po.memo || '',
                 createdBy: 'system-sync'
