@@ -67,15 +67,26 @@
         .form-container {
             background: white;
             border-radius: 8px;
-            padding: 30px;
+            padding: 0;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            min-height: 600px;
+            overflow: hidden;
         }
 
         .form-embed {
             width: 100%;
-            min-height: 600px;
+            min-height: 800px;
+            height: calc(100vh - 200px);
             border: none;
+            display: block;
+        }
+
+        /* Microsoft Forms specific styling */
+        .form-container iframe {
+            width: 100%;
+            min-height: 800px;
+            height: calc(100vh - 200px);
+            border: none;
+            display: block;
         }
 
         @media (max-width: 768px) {
@@ -88,7 +99,13 @@
             }
 
             .form-container {
-                padding: 20px;
+                padding: 0;
+            }
+
+            .form-embed,
+            .form-container iframe {
+                min-height: 700px;
+                height: calc(100vh - 180px);
             }
         }
     </style>
