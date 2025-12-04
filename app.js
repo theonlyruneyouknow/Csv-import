@@ -42,6 +42,10 @@ console.log('🔄 Loading seed catalog routes...');
 const seedCatalogRoutes = require('./routes/seedCatalog');
 console.log('✅ Seed catalog routes loaded successfully');
 
+console.log('🔄 Loading dropshipment tracking routes...');
+const dropshipmentRoutes = require('./routes/dropshipments');
+console.log('✅ Dropshipment tracking routes loaded successfully');
+
 const app = express();
 
 // URGENT DEBUG: Add test routes IMMEDIATELY after Express app creation
@@ -562,6 +566,7 @@ app.use('/receiving', ensureAuthenticated, ensureApproved, receivingRoutes);
 app.use('/email-templates', ensureAuthenticated, ensureApproved, emailTemplateRoutes);
 app.use('/forms', ensureAuthenticated, ensureApproved, formRoutes); // NEW: Forms management
 app.use('/seed-catalog', ensureAuthenticated, ensureApproved, seedCatalogRoutes); // NEW: AI Seed Catalog
+app.use('/dropshipments', ensureAuthenticated, ensureApproved, dropshipmentRoutes); // NEW: Dropshipment Tracking
 app.use('/dropship', ensureAuthenticated, ensureApproved, dropshipRoutes);
 app.use('/dropship-test', ensureAuthenticated, ensureApproved, dropshipTestRoutes);
 // Quick Office 365 test route (unprotected for debugging)
