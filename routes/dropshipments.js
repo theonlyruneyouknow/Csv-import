@@ -430,6 +430,7 @@ router.post('/api/sync-from-pos', async (req, res) => {
             // Create new dropshipment entry
             const dropshipment = new Dropshipment({
                 poNumber: po.poNumber,
+                poUrl: po.poUrl || '',
                 poId: po._id,
                 vendor: po.vendor,
                 customerName: po.customerName || po.shipToName || 'Unknown Customer',

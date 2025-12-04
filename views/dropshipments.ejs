@@ -222,6 +222,88 @@
             background: #f8f9fa;
         }
 
+        .po-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .po-link {
+            color: #007bff;
+            text-decoration: none;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .po-link:hover {
+            text-decoration: underline;
+            color: #0056b3;
+        }
+
+        .po-text {
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .url-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
+            transition: all 0.2s ease;
+        }
+
+        .url-btn:hover {
+            opacity: 1;
+            background: #5a6268;
+        }
+
+        .url-btn.has-url {
+            background: #28a745;
+        }
+
+        .url-btn.has-url:hover {
+            background: #218838;
+        }
+
+        .copy-po-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
+            transition: all 0.2s ease;
+            margin-left: 2px;
+        }
+
+        .copy-po-btn:hover {
+            opacity: 1;
+            background: #0056b3;
+        }
+
+        .copy-po-btn.copied {
+            background: #28a745;
+        }
+
         .status-badge {
             padding: 5px 12px;
             border-radius: 12px;
@@ -615,6 +697,26 @@
         </div>
     </div>
 
+    <!-- URL Modal -->
+    <div class="modal" id="urlModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 id="urlModalTitle">Set PO URL</h2>
+                <button class="close-btn" onclick="closeUrlModal()">&times;</button>
+            </div>
+            <div style="padding: 20px;">
+                <div class="form-group">
+                    <label>URL</label>
+                    <input type="url" id="urlInput" placeholder="https://" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeUrlModal()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUrl()">Save URL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let dropshipments = [];
 
@@ -650,10 +752,38 @@
             tbody.innerHTML = data.map(ds => {
                 const statusClass = 'status-' + ds.shippingStatus.toLowerCase().replace(/\s/g, '-');
                 const trackingUrl = ds.trackingUrl || generateTrackingUrl(ds.carrier, ds.trackingNumber);
+                const poLink = ds.poNumber ? `/purchase-orders?poNumber=${encodeURIComponent(ds.poNumber)}&includeHidden=true` : '#';
+                const poUrl = ds.poUrl || '';
 
                 return `
                     <tr>
-                        <td><strong>${ds.poNumber || '-'}</strong></td>
+                        <td>
+                            <div class="po-container">
+                                ${ds.poNumber ? 
+                                    (poUrl ? 
+                                        `<a href="${poUrl}" target="_blank" class="po-link" title="Open ${ds.poNumber} link">${ds.poNumber}</a>` : 
+                                        `<span class="po-text">${ds.poNumber}</span>`
+                                    ) : 
+                                    '<span class="po-text">-</span>'
+                                }
+                                ${ds.poNumber ? `
+                                    <button class="url-btn ${poUrl ? 'has-url' : ''}" 
+                                        data-id="${ds._id}" 
+                                        data-po="${ds.poNumber}" 
+                                        data-url="${poUrl}"
+                                        onclick="openUrlModal('${ds._id}', '${ds.poNumber}', '${poUrl}')"
+                                        title="${poUrl ? 'Edit URL' : 'Add URL'}">
+                                        🔗
+                                    </button>
+                                    <button class="copy-po-btn" 
+                                        data-po="${ds.poNumber}"
+                                        onclick="copyPONumber('${ds.poNumber}', event)"
+                                        title="Copy PO Number">
+                                        📋
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
                         <td>${ds.vendor || '-'}</td>
                         <td>${ds.customerName || '-'}</td>
                         <td>${ds.orderDate ? new Date(ds.orderDate).toLocaleDateString() : '-'}</td>
@@ -912,6 +1042,69 @@
             } finally {
                 btn.disabled = false;
                 btn.textContent = '🔄 Sync from POs';
+            }
+        }
+
+        // Copy PO Number to clipboard
+        function copyPONumber(poNumber, event) {
+            event.stopPropagation();
+            const btn = event.target.closest('.copy-po-btn');
+            
+            navigator.clipboard.writeText(poNumber).then(() => {
+                btn.classList.add('copied');
+                const originalTitle = btn.title;
+                btn.title = 'Copied!';
+                
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.title = originalTitle;
+                }, 2000);
+            }).catch(error => {
+                console.error('Failed to copy:', error);
+                alert('Failed to copy PO number');
+            });
+        }
+
+        // URL Modal functionality
+        let currentUrlData = null;
+
+        function openUrlModal(id, poNumber, url) {
+            event.stopPropagation();
+            currentUrlData = { id, poNumber, url };
+            
+            document.getElementById('urlModalTitle').textContent = `Set URL for ${poNumber}`;
+            document.getElementById('urlInput').value = url || '';
+            document.getElementById('urlModal').classList.add('show');
+        }
+
+        function closeUrlModal() {
+            document.getElementById('urlModal').classList.remove('show');
+            currentUrlData = null;
+        }
+
+        async function saveUrl() {
+            if (!currentUrlData) return;
+
+            const url = document.getElementById('urlInput').value.trim();
+
+            try {
+                const response = await fetch(`/dropshipments/api/dropshipments/${currentUrlData.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ poUrl: url })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    closeUrlModal();
+                    loadDropshipments();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error saving URL:', error);
+                alert('Error saving URL');
             }
         }
     </script>

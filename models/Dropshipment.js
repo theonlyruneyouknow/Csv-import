@@ -6,6 +6,9 @@ const dropshipmentSchema = new mongoose.Schema({
         required: true,
         index: true
     },
+    poUrl: {
+        type: String
+    },
     poId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'PurchaseOrder'
