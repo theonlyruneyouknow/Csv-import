@@ -754,7 +754,7 @@
                 const statusClass = 'status-' + ds.shippingStatus.toLowerCase().replace(/\s/g, '-');
                 const trackingUrl = ds.trackingUrl || generateTrackingUrl(ds.carrier, ds.trackingNumber);
                 const poLink = ds.poNumber ? `/purchase-orders?poNumber=${encodeURIComponent(ds.poNumber)}&includeHidden=true` : '#';
-                const poUrl = ds.poUrl || '';
+                const poUrl = (ds.poId && ds.poId.poUrl) ? ds.poId.poUrl : '';
 
                 return `
                     <tr>

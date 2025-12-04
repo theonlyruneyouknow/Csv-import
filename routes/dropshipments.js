@@ -55,6 +55,7 @@ router.get('/api/dropshipments', async (req, res) => {
         }
 
         const dropshipments = await Dropshipment.find(query)
+            .populate('poId', 'poUrl poNumber')
             .sort({ orderDate: -1 })
             .lean();
 
@@ -68,7 +69,9 @@ router.get('/api/dropshipments', async (req, res) => {
 // GET - Single dropshipment
 router.get('/api/dropshipments/:id', async (req, res) => {
     try {
-        const dropshipment = await Dropshipment.findById(req.params.id).lean();
+        const dropshipment = await Dropshipment.findById(req.params.id)
+            .populate('poId', 'poUrl poNumber')
+            .lean();
 
         if (!dropshipment) {
             return res.status(404).json({ success: false, error: 'Dropshipment not found' });
@@ -112,6 +115,31 @@ router.post('/api/dropshipments', async (req, res) => {
 // PUT - Update dropshipment
 router.put('/api/dropshipments/:id', async (req, res) => {
     try {
+        // If updating poUrl, update the Purchase Order instead
+        if (req.body.poUrl !== undefined) {
+            const dropshipment = await Dropshipment.findById(req.params.id);
+            if (!dropshipment) {
+                return res.status(404).json({ success: false, error: 'Dropshipment not found' });
+            }
+
+            if (dropshipment.poId) {
+                await PurchaseOrder.findByIdAndUpdate(dropshipment.poId, { poUrl: req.body.poUrl });
+                console.log(`✅ Updated PO URL for: ${dropshipment.poNumber}`);
+                
+                // If only updating URL, return the updated dropshipment with populated poId
+                if (Object.keys(req.body).length === 1) {
+                    const updated = await Dropshipment.findById(req.params.id)
+                        .populate('poId', 'poUrl poNumber');
+                    return res.json({ success: true, dropshipment: updated });
+                }
+            } else {
+                console.log(`⚠️ Warning: Dropshipment ${dropshipment.poNumber} has no linked PO (poId is null)`);
+            }
+            
+            // Remove poUrl from update data since it's stored in PO
+            delete req.body.poUrl;
+        }
+
         const updateData = {
             ...req.body,
             updatedBy: req.user?.username || req.session?.username || 'system'
@@ -121,7 +149,7 @@ router.put('/api/dropshipments/:id', async (req, res) => {
             req.params.id,
             updateData,
             { new: true, runValidators: true }
-        );
+        ).populate('poId', 'poUrl poNumber');
 
         if (!dropshipment) {
             return res.status(404).json({ success: false, error: 'Dropshipment not found' });
@@ -412,15 +440,27 @@ router.post('/api/sync-from-pos', async (req, res) => {
             const existing = await Dropshipment.findOne({ poNumber: po.poNumber });
 
             if (existing) {
+                // Update poId if not set (to link to PO for URL access)
+                let needsUpdate = false;
+                
+                if (!existing.poId) {
+                    existing.poId = po._id;
+                    needsUpdate = true;
+                }
+                
                 // Update if PO has new information
                 if (po.shippingTracking && !existing.trackingNumber) {
                     existing.trackingNumber = po.shippingTracking;
                     existing.carrier = po.shippingCarrier || 'USPS';
                     existing.shippingStatus = 'Shipped';
                     existing.lastTrackingUpdate = new Date();
+                    needsUpdate = true;
+                }
+                
+                if (needsUpdate) {
                     await existing.save();
                     updated++;
-                    console.log(`✅ Updated ${po.poNumber} with tracking`);
+                    console.log(`✅ Updated ${po.poNumber}`);
                 } else {
                     skipped++;
                 }
@@ -430,7 +470,6 @@ router.post('/api/sync-from-pos', async (req, res) => {
             // Create new dropshipment entry
             const dropshipment = new Dropshipment({
                 poNumber: po.poNumber,
-                poUrl: po.poUrl || '',
                 poId: po._id,
                 vendor: po.vendor,
                 customerName: po.customerName || po.shipToName || 'Unknown Customer',
