@@ -125,7 +125,7 @@ router.put('/api/dropshipments/:id', async (req, res) => {
             if (dropshipment.poId) {
                 await PurchaseOrder.findByIdAndUpdate(dropshipment.poId, { poUrl: req.body.poUrl });
                 console.log(`✅ Updated PO URL for: ${dropshipment.poNumber}`);
-                
+
                 // If only updating URL, return the updated dropshipment with populated poId
                 if (Object.keys(req.body).length === 1) {
                     const updated = await Dropshipment.findById(req.params.id)
@@ -135,7 +135,7 @@ router.put('/api/dropshipments/:id', async (req, res) => {
             } else {
                 console.log(`⚠️ Warning: Dropshipment ${dropshipment.poNumber} has no linked PO (poId is null)`);
             }
-            
+
             // Remove poUrl from update data since it's stored in PO
             delete req.body.poUrl;
         }
@@ -442,12 +442,12 @@ router.post('/api/sync-from-pos', async (req, res) => {
             if (existing) {
                 // Update poId if not set (to link to PO for URL access)
                 let needsUpdate = false;
-                
+
                 if (!existing.poId) {
                     existing.poId = po._id;
                     needsUpdate = true;
                 }
-                
+
                 // Update if PO has new information
                 if (po.shippingTracking && !existing.trackingNumber) {
                     existing.trackingNumber = po.shippingTracking;
@@ -456,7 +456,7 @@ router.post('/api/sync-from-pos', async (req, res) => {
                     existing.lastTrackingUpdate = new Date();
                     needsUpdate = true;
                 }
-                
+
                 if (needsUpdate) {
                     await existing.save();
                     updated++;
