@@ -19,7 +19,7 @@
             display: inline-block;
             width: 16px;
             height: 16px;
-            border: 2px solid rgba(255,255,255,.3);
+            border: 2px solid rgba(255, 255, 255, .3);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 0.6s linear infinite;
@@ -28,12 +28,14 @@
         }
 
         .spinner-dark {
-            border: 2px solid rgba(0,0,0,.1);
+            border: 2px solid rgba(0, 0, 0, .1);
             border-top-color: #f5576c;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .btn:disabled {
@@ -47,7 +49,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -59,13 +61,13 @@
             padding: 30px 40px;
             border-radius: 12px;
             text-align: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
 
         .loading-spinner {
             width: 50px;
             height: 50px;
-            border: 4px solid rgba(245,87,108,.2);
+            border: 4px solid rgba(245, 87, 108, .2);
             border-top-color: #f5576c;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
@@ -587,7 +589,7 @@
             <button class="btn btn-success" onclick="exportToCSV()">📥 Export to CSV</button>
             <button class="btn btn-info" onclick="refreshData()">🔄 Refresh</button>
         </div>
-        
+
         <!-- Bulk Tracking by Carrier Section -->
         <div class="actions-bar" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
             <div style="flex: 1;">
@@ -815,10 +817,10 @@
                 <p style="margin-bottom: 15px; color: #666;">
                     After checking tracking on the carrier website, paste the tracking data below or upload a file.
                 </p>
-                
+
                 <!-- Tab Selection -->
                 <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd;">
-                    <button class="tab-btn active" onclick="switchTab('paste')" id="pasteTab" 
+                    <button class="tab-btn active" onclick="switchTab('paste')" id="pasteTab"
                         style="padding: 10px 20px; border: none; background: none; cursor: pointer; font-weight: 600; border-bottom: 3px solid #667eea;">
                         📋 Paste Data
                     </button>
@@ -832,19 +834,22 @@
                 <div id="pasteContent" class="tab-content">
                     <div class="form-group">
                         <label>Paste Tracking Data</label>
-                        <textarea id="bulkTrackingData" rows="10" placeholder="Paste tracking data here...&#10;&#10;✅ FedEx Format (copy directly from FedEx tracking page):&#10;Tracking ID    Ship date    Status    Delivered date&#10;396172492101   12/3/25      On the way    12/9/25&#10;&#10;✅ CSV Format:&#10;Tracking Number, Status, Location&#10;9400111899562858956847, Delivered, New York NY&#10;&#10;✅ Just tracking numbers (one per line):&#10;9400111899562858956847&#10;9400111899562858956848"
+                        <textarea id="bulkTrackingData" rows="10"
+                            placeholder="Paste tracking data here...&#10;&#10;✅ FedEx Format (copy directly from FedEx tracking page):&#10;Tracking ID    Ship date    Status    Delivered date&#10;396172492101   12/3/25      On the way    12/9/25&#10;&#10;✅ CSV Format:&#10;Tracking Number, Status, Location&#10;9400111899562858956847, Delivered, New York NY&#10;&#10;✅ Just tracking numbers (one per line):&#10;9400111899562858956847&#10;9400111899562858956848"
                             style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: monospace; font-size: 0.9em;"></textarea>
                     </div>
                     <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <button type="button" class="btn btn-primary preview-btn" onclick="parseTrackingData()" 
+                        <button type="button" class="btn btn-primary preview-btn" onclick="parseTrackingData()"
                             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-weight: 600;">
                             📊 Preview Parse
                         </button>
                         <button type="button" class="btn btn-info" onclick="clearPasteData()">🗑️ Clear</button>
                     </div>
-                    <div style="background: #e3f2fd; padding: 12px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #2196f3;">
+                    <div
+                        style="background: #e3f2fd; padding: 12px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #2196f3;">
                         <p style="margin: 0; font-size: 0.9em; color: #1976d2;">
-                            💡 <strong>How to use:</strong> Paste data above → Click "📊 Preview Parse" → Review preview → Click "✅ Apply Updates"
+                            💡 <strong>How to use:</strong> Paste data above → Click "📊 Preview Parse" → Review preview
+                            → Click "✅ Apply Updates"
                         </p>
                     </div>
                 </div>
@@ -853,7 +858,7 @@
                 <div id="fileContent" class="tab-content" style="display: none;">
                     <div class="form-group">
                         <label>Upload CSV or Excel File</label>
-                        <input type="file" id="bulkTrackingFile" accept=".csv,.xlsx,.xls" 
+                        <input type="file" id="bulkTrackingFile" accept=".csv,.xlsx,.xls"
                             style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"
                             onchange="handleFileUpload(event)">
                     </div>
@@ -861,7 +866,8 @@
                         <p style="margin: 0 0 10px 0; font-weight: 600;">Expected Format:</p>
                         <ul style="margin: 0; padding-left: 20px; color: #666;">
                             <li>Column 1: Tracking Number (required)</li>
-                            <li>Column 2: Status (optional: Shipped, In Transit, Out for Delivery, Delivered, Exception)</li>
+                            <li>Column 2: Status (optional: Shipped, In Transit, Out for Delivery, Delivered, Exception)
+                            </li>
                             <li>Column 3: Location (optional)</li>
                             <li>Column 4: Notes (optional)</li>
                         </ul>
@@ -869,15 +875,18 @@
                 </div>
 
                 <!-- Preview Section -->
-                <div id="previewSection" style="display: none; margin-top: 20px; border-top: 2px solid #ddd; padding-top: 20px;">
-                    <h3 style="color: #667eea; margin-bottom: 10px;">📋 Preview (<span id="previewCount">0</span> records)</h3>
-                    <div id="previewTable" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px;"></div>
+                <div id="previewSection"
+                    style="display: none; margin-top: 20px; border-top: 2px solid #ddd; padding-top: 20px;">
+                    <h3 style="color: #667eea; margin-bottom: 10px;">📋 Preview (<span id="previewCount">0</span>
+                        records)</h3>
+                    <div id="previewTable"
+                        style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px;"></div>
                 </div>
 
                 <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
                     <button type="button" class="btn btn-secondary" onclick="closeBulkUpdateModal()">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="applyBulkUpdates()" id="applyBulkBtn" disabled
-                        title="First paste data and click Preview Parse to enable this button">
+                    <button type="button" class="btn btn-primary" onclick="applyBulkUpdates()" id="applyBulkBtn"
+                        disabled title="First paste data and click Preview Parse to enable this button">
                         ✅ Apply Updates
                     </button>
                 </div>
@@ -916,7 +925,7 @@
                 document.getElementById('uspsCount').innerHTML = '<span class="spinner spinner-dark" style="width:12px;height:12px;border-width:2px;margin:0"></span>';
                 document.getElementById('fedexCount').innerHTML = '<span class="spinner spinner-dark" style="width:12px;height:12px;border-width:2px;margin:0"></span>';
                 document.getElementById('upsCount').innerHTML = '<span class="spinner spinner-dark" style="width:12px;height:12px;border-width:2px;margin:0"></span>';
-                
+
                 const response = await fetch('/dropshipments/api/dropshipments/group/by-carrier');
                 const data = await response.json();
 
@@ -924,7 +933,7 @@
                     document.getElementById('uspsCount').textContent = data.counts.USPS;
                     document.getElementById('fedexCount').textContent = data.counts.FedEx;
                     document.getElementById('upsCount').textContent = data.counts.UPS;
-                    
+
                     // Store for bulk tracking functions
                     window.bulkTrackingData = data;
                 }
@@ -945,19 +954,19 @@
                     alert('No USPS shipments to track');
                     return;
                 }
-                
+
                 const url = window.bulkTrackingData.trackingUrls.USPS;
                 const count = window.bulkTrackingData.counts.USPS;
-                
+
                 // Open tracking URL
                 window.open(url, '_blank');
-                
+
                 // Open bulk update modal
                 window.currentCarrier = 'USPS';
                 window.currentShipments = window.bulkTrackingData.grouped.USPS;
                 document.getElementById('bulkUpdateTitle').textContent = `Update USPS Tracking (${count} shipment${count !== 1 ? 's' : ''})`;
                 document.getElementById('bulkUpdateModal').style.display = 'flex';
-                
+
                 hideLoading(loadingDiv);
             } catch (error) {
                 hideLoading(loadingDiv);
@@ -974,19 +983,19 @@
                     alert('No FedEx shipments to track');
                     return;
                 }
-                
+
                 const url = window.bulkTrackingData.trackingUrls.FedEx;
                 const count = window.bulkTrackingData.counts.FedEx;
-                
+
                 // Open tracking URL (FedEx supports multiple tracking numbers in one URL)
                 window.open(url, '_blank');
-                
+
                 // Open bulk update modal
                 window.currentCarrier = 'FedEx';
                 window.currentShipments = window.bulkTrackingData.grouped.FedEx;
                 document.getElementById('bulkUpdateTitle').textContent = `Update FedEx Tracking (${count} shipment${count !== 1 ? 's' : ''})`;
                 document.getElementById('bulkUpdateModal').style.display = 'flex';
-                
+
                 hideLoading(loadingDiv);
             } catch (error) {
                 hideLoading(loadingDiv);
@@ -1003,19 +1012,19 @@
                     alert('No UPS shipments to track');
                     return;
                 }
-                
+
                 const url = window.bulkTrackingData.trackingUrls.UPS;
                 const count = window.bulkTrackingData.grouped.UPS.length;
-                
+
                 // Open single UPS page with all tracking numbers
                 window.open(url, '_blank');
-                
+
                 // Open bulk update modal immediately
                 window.currentCarrier = 'UPS';
                 window.currentShipments = window.bulkTrackingData.grouped.UPS;
                 document.getElementById('bulkUpdateTitle').textContent = `Update UPS Tracking (${count} shipment${count !== 1 ? 's' : ''})`;
                 document.getElementById('bulkUpdateModal').style.display = 'flex';
-                
+
                 hideLoading(loadingDiv);
             } catch (error) {
                 hideLoading(loadingDiv);
@@ -1236,7 +1245,7 @@
 
                 if (result.success && result.trackingInfo) {
                     const info = result.trackingInfo;
-                    
+
                     // Show AI tracking results
                     const message = `
 🤖 AI Tracking Check Complete!
@@ -1247,13 +1256,13 @@ ${info.estimatedDelivery ? '📅 Est. Delivery: ' + new Date(info.estimatedDeliv
 
 ${info.description}
 
-${info.events && info.events.length > 0 ? '\n📋 Recent Events:\n' + info.events.slice(0, 5).map(e => 
-    `• ${new Date(e.timestamp).toLocaleDateString()}: ${e.status} - ${e.location || ''}`
-).join('\n') : ''}
+${info.events && info.events.length > 0 ? '\n📋 Recent Events:\n' + info.events.slice(0, 5).map(e =>
+                        `• ${new Date(e.timestamp).toLocaleDateString()}: ${e.status} - ${e.location || ''}`
+                    ).join('\n') : ''}
 
 The dropshipment has been automatically updated.
                     `.trim();
-                    
+
                     alert(message);
                     loadDropshipments();
                 } else {
@@ -1440,18 +1449,18 @@ The dropshipment has been automatically updated.
             const firstLine = lines[0] ? lines[0].toUpperCase() : '';
             const isFedExCSV = firstLine.includes('TRACKING ID');
             const isUPSCSV = firstLine.includes('TRACKING NUMBER') || firstLine.includes('TRACKING#');
-            
+
             if (isFedExCSV) {
                 console.log('Detected FedEx CSV format');
-                
+
                 // Parse CSV properly (handle quoted fields with commas)
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i].trim();
                     if (!line) continue;
-                    
+
                     // Parse CSV line respecting quotes
                     const parts = parseCSVLine(line);
-                    
+
                     if (parts.length >= 5) {
                         const trackingNumber = parts[0];
                         const shipDate = parts[1];
@@ -1461,7 +1470,7 @@ The dropshipment has been automatically updated.
                         const deliveredDate = parts[5] || '';
                         const scheduledDate = parts[6] || '';
                         const service = parts[7] || 'FedEx';
-                        
+
                         if (trackingNumber && /^\d{12,}$/.test(trackingNumber)) {
                             // Determine status
                             let status = 'In Transit';
@@ -1476,7 +1485,7 @@ The dropshipment has been automatically updated.
                             } else if (statusText.toLowerCase().includes('picked up') || statusText.toLowerCase().includes('shipped')) {
                                 status = 'Shipped';
                             }
-                            
+
                             // Build notes
                             let notes = service;
                             if (deliveredDate) {
@@ -1484,7 +1493,7 @@ The dropshipment has been automatically updated.
                             } else if (scheduledDate) {
                                 notes += ` - Scheduled: ${scheduledDate}`;
                             }
-                            
+
                             parsed.push({
                                 trackingNumber: trackingNumber,
                                 status: status,
@@ -1496,21 +1505,21 @@ The dropshipment has been automatically updated.
                 }
             } else if (isUPSCSV) {
                 console.log('Detected UPS CSV format');
-                
+
                 // Parse UPS CSV
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i].trim();
                     if (!line) continue;
-                    
+
                     // Parse CSV line respecting quotes
                     const parts = parseCSVLine(line);
-                    
+
                     if (parts.length >= 2) {
                         const trackingNumber = parts[0];
                         const statusText = parts[1];
                         const location = parts[2] || '';
                         const lastUpdate = parts[3] || '';
-                        
+
                         if (trackingNumber && /^1Z[A-Z0-9]{16}$/.test(trackingNumber)) {
                             // Determine status
                             let status = 'In Transit';
@@ -1525,7 +1534,7 @@ The dropshipment has been automatically updated.
                             } else if (statusText.toLowerCase().includes('picked up') || statusText.toLowerCase().includes('origin scan')) {
                                 status = 'Shipped';
                             }
-                            
+
                             parsed.push({
                                 trackingNumber: trackingNumber,
                                 status: status,
@@ -1543,12 +1552,12 @@ The dropshipment has been automatically updated.
                         // Remove quotes, trim whitespace
                         return p.trim().replace(/^["']|["']$/g, '');
                     });
-                    
+
                     // Skip header rows
                     if (parts[0] && parts[0].toLowerCase().includes('tracking')) {
                         return;
                     }
-                    
+
                     // Must have a tracking number (at least 10 characters after cleaning)
                     if (parts[0] && parts[0].length >= 10) {
                         parsed.push({
@@ -1571,7 +1580,7 @@ The dropshipment has been automatically updated.
             console.log('Parsed tracking data:', parsed);
             window.parsedBulkData = parsed;
             showPreview(parsed);
-            
+
             // Restore button
             previewBtn.innerHTML = originalBtnText;
             previewBtn.disabled = false;
@@ -1603,10 +1612,10 @@ The dropshipment has been automatically updated.
             const result = [];
             let current = '';
             let inQuotes = false;
-            
+
             for (let i = 0; i < line.length; i++) {
                 const char = line[i];
-                
+
                 if (char === '"') {
                     inQuotes = !inQuotes;
                 } else if (char === ',' && !inQuotes) {
@@ -1616,10 +1625,10 @@ The dropshipment has been automatically updated.
                     current += char;
                 }
             }
-            
+
             // Push the last field
             result.push(current.trim());
-            
+
             return result;
         }
 
@@ -1628,10 +1637,10 @@ The dropshipment has been automatically updated.
             if (!file) return;
 
             const reader = new FileReader();
-            
-            reader.onload = function(e) {
+
+            reader.onload = function (e) {
                 const data = e.target.result;
-                
+
                 if (file.name.endsWith('.csv')) {
                     parseCSV(data);
                 } else {
@@ -1655,7 +1664,7 @@ The dropshipment has been automatically updated.
                 const parts = lines[i].split(',').map(p => {
                     return p.trim().replace(/^["']|["']$/g, '');
                 });
-                
+
                 // Must have a tracking number (at least 10 characters)
                 if (parts[0] && parts[0].length >= 10) {
                     parsed.push({
@@ -1679,7 +1688,7 @@ The dropshipment has been automatically updated.
 
         function showPreview(data) {
             document.getElementById('previewCount').textContent = data.length;
-            
+
             const table = `
                 <table style="width: 100%; border-collapse: collapse;">
                     <thead>
@@ -1702,7 +1711,7 @@ The dropshipment has been automatically updated.
                     </tbody>
                 </table>
             `;
-            
+
             document.getElementById('previewTable').innerHTML = table;
             document.getElementById('previewSection').style.display = 'block';
             document.getElementById('applyBulkBtn').disabled = false;
@@ -1731,7 +1740,7 @@ The dropshipment has been automatically updated.
             window.parsedBulkData.forEach(parsed => {
                 // Normalize tracking number for matching (trim, uppercase)
                 const normalizedParsed = parsed.trackingNumber.trim().toUpperCase();
-                
+
                 const shipment = window.currentShipments.find(s => {
                     const normalizedShipment = s.trackingNumber.trim().toUpperCase();
                     return normalizedShipment === normalizedParsed;
@@ -1776,10 +1785,10 @@ The dropshipment has been automatically updated.
 
             for (let i = 0; i < updates.length; i++) {
                 const update = updates[i];
-                
+
                 // Update progress
                 applyBtn.innerHTML = `⏳ Updating ${i + 1}/${totalUpdates}...`;
-                
+
                 try {
                     const response = await fetch(`/dropshipments/api/dropshipments/${update.id}/update-status`, {
                         method: 'POST',
@@ -1808,7 +1817,7 @@ The dropshipment has been automatically updated.
             applyBtn.disabled = false;
 
             alert(`✅ Bulk update complete!\n\nSuccessfully updated: ${successCount}\nErrors: ${errorCount}`);
-            
+
             closeBulkUpdateModal();
             loadDropshipments(); // Refresh the table
         }

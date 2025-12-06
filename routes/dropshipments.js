@@ -70,20 +70,20 @@ router.get('/api/dropshipments', async (req, res) => {
 router.get('/api/dropshipments/group/by-carrier', async (req, res) => {
     try {
         const { status } = req.query;
-        
+
         // Build query - only get shipments that aren't delivered
         let query = {
             shippingStatus: { $nin: ['Delivered', 'Cancelled'] }
         };
-        
+
         if (status) {
             query.shippingStatus = status;
         }
-        
+
         const dropshipments = await Dropshipment.find(query)
             .populate('poId', 'shippingTracking shippingCarrier poNumber')
             .lean();
-        
+
         // Group by carrier
         const grouped = {
             USPS: [],
@@ -91,17 +91,17 @@ router.get('/api/dropshipments/group/by-carrier', async (req, res) => {
             UPS: [],
             Other: []
         };
-        
+
         dropshipments.forEach(ds => {
             // Get tracking from PO if available
-            const trackingNumber = (ds.poId && ds.poId.shippingTracking) 
-                ? ds.poId.shippingTracking 
+            const trackingNumber = (ds.poId && ds.poId.shippingTracking)
+                ? ds.poId.shippingTracking
                 : ds.trackingNumber;
-            
-            const carrier = (ds.poId && ds.poId.shippingCarrier) 
-                ? ds.poId.shippingCarrier 
+
+            const carrier = (ds.poId && ds.poId.shippingCarrier)
+                ? ds.poId.shippingCarrier
                 : (ds.carrier || 'USPS');
-            
+
             if (trackingNumber) {
                 const entry = {
                     id: ds._id,
@@ -110,7 +110,7 @@ router.get('/api/dropshipments/group/by-carrier', async (req, res) => {
                     customerName: ds.customerName,
                     status: ds.shippingStatus
                 };
-                
+
                 if (grouped[carrier]) {
                     grouped[carrier].push(entry);
                 } else {
@@ -118,30 +118,30 @@ router.get('/api/dropshipments/group/by-carrier', async (req, res) => {
                 }
             }
         });
-        
+
         // Generate bulk tracking URLs
         const trackingUrls = {};
-        
+
         // USPS supports multiple tracking numbers
         if (grouped.USPS.length > 0) {
             const trackingNumbers = grouped.USPS.map(item => item.trackingNumber).join(',');
             trackingUrls.USPS = `https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumbers}`;
         }
-        
+
         // FedEx - supports multiple tracking numbers in URL
         if (grouped.FedEx.length > 0) {
             const trackingNumbers = grouped.FedEx.map(item => item.trackingNumber).join(',');
             trackingUrls.FedEx = `https://www.fedex.com/fedextrack/?trknbr=${trackingNumbers}`;
         }
-        
+
         // UPS - bulk tracking with comma-separated numbers
         if (grouped.UPS.length > 0) {
             const trackingNumbers = grouped.UPS.map(item => item.trackingNumber).join(',');
             trackingUrls.UPS = `https://www.ups.com/track?loc=en_US&requester=ST/&tracknum=${trackingNumbers}`;
         }
-        
-        res.json({ 
-            success: true, 
+
+        res.json({
+            success: true,
             grouped: grouped,
             trackingUrls: trackingUrls,
             counts: {
@@ -152,7 +152,7 @@ router.get('/api/dropshipments/group/by-carrier', async (req, res) => {
                 total: grouped.USPS.length + grouped.FedEx.length + grouped.UPS.length + grouped.Other.length
             }
         });
-        
+
     } catch (error) {
         console.error('❌ Error grouping by carrier:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -338,12 +338,12 @@ router.post('/api/dropshipments/:id/ai-check', async (req, res) => {
         });
 
         // Get tracking from PO if available
-        const trackingNumber = (dropshipment.poId && dropshipment.poId.shippingTracking) 
-            ? dropshipment.poId.shippingTracking 
+        const trackingNumber = (dropshipment.poId && dropshipment.poId.shippingTracking)
+            ? dropshipment.poId.shippingTracking
             : dropshipment.trackingNumber;
-        
-        const carrier = (dropshipment.poId && dropshipment.poId.shippingCarrier) 
-            ? dropshipment.poId.shippingCarrier 
+
+        const carrier = (dropshipment.poId && dropshipment.poId.shippingCarrier)
+            ? dropshipment.poId.shippingCarrier
             : (dropshipment.carrier || 'USPS');
 
         if (!trackingNumber) {
@@ -480,9 +480,9 @@ Return ONLY valid JSON, no markdown formatting or extra text.`;
 router.post('/api/dropshipments/:id/update-status', async (req, res) => {
     try {
         const { status, location, notes } = req.body;
-        
+
         const dropshipment = await Dropshipment.findById(req.params.id);
-        
+
         if (!dropshipment) {
             return res.status(404).json({ success: false, error: 'Dropshipment not found' });
         }
@@ -490,7 +490,7 @@ router.post('/api/dropshipments/:id/update-status', async (req, res) => {
         // Update status
         dropshipment.shippingStatus = status;
         dropshipment.lastTrackingUpdate = new Date();
-        
+
         // Add to tracking history
         if (status || location || notes) {
             dropshipment.trackingHistory.push({
@@ -501,18 +501,18 @@ router.post('/api/dropshipments/:id/update-status', async (req, res) => {
                 checkedAt: new Date()
             });
         }
-        
+
         // If delivered, set actual delivery date
         if (status === 'Delivered' && !dropshipment.actualDelivery) {
             dropshipment.actualDelivery = new Date();
         }
-        
+
         await dropshipment.save();
-        
+
         console.log(`✅ Updated tracking status for ${dropshipment.poNumber}: ${status}`);
-        
+
         res.json({ success: true, dropshipment });
-        
+
     } catch (error) {
         console.error('❌ Error updating status:', error);
         res.status(500).json({ success: false, error: error.message });
