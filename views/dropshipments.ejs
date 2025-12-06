@@ -14,6 +14,75 @@
             box-sizing: border-box;
         }
 
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .spinner-dark {
+            border: 2px solid rgba(0,0,0,.1);
+            border-top-color: #f5576c;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(245,87,108,.2);
+            border-top-color: #f5576c;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        .loading-text {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .loading-subtext {
+            font-size: 14px;
+            color: #666;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -518,6 +587,23 @@
             <button class="btn btn-success" onclick="exportToCSV()">📥 Export to CSV</button>
             <button class="btn btn-info" onclick="refreshData()">🔄 Refresh</button>
         </div>
+        
+        <!-- Bulk Tracking by Carrier Section -->
+        <div class="actions-bar" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+            <div style="flex: 1;">
+                <h3 style="margin: 0 0 5px 0;">📦 Bulk Tracking Check</h3>
+                <p style="margin: 0; opacity: 0.9; font-size: 0.9em;">Check all active shipments by carrier</p>
+            </div>
+            <button class="btn" style="background: white; color: #f5576c;" onclick="bulkTrackUSPS()">
+                📬 USPS (<span id="uspsCount">0</span>)
+            </button>
+            <button class="btn" style="background: white; color: #f5576c;" onclick="bulkTrackFedEx()">
+                📦 FedEx (<span id="fedexCount">0</span>)
+            </button>
+            <button class="btn" style="background: white; color: #f5576c;" onclick="bulkTrackUPS()">
+                📦 UPS (<span id="upsCount">0</span>)
+            </button>
+        </div>
 
         <div class="stats-grid">
             <div class="stat-card">
@@ -718,6 +804,87 @@
         </div>
     </div>
 
+    <!-- Bulk Update Modal -->
+    <div class="modal" id="bulkUpdateModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 id="bulkUpdateTitle">Update Tracking Status</h2>
+                <button class="close-btn" onclick="closeBulkUpdateModal()">&times;</button>
+            </div>
+            <div style="padding: 20px;">
+                <p style="margin-bottom: 15px; color: #666;">
+                    After checking tracking on the carrier website, paste the tracking data below or upload a file.
+                </p>
+                
+                <!-- Tab Selection -->
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd;">
+                    <button class="tab-btn active" onclick="switchTab('paste')" id="pasteTab" 
+                        style="padding: 10px 20px; border: none; background: none; cursor: pointer; font-weight: 600; border-bottom: 3px solid #667eea;">
+                        📋 Paste Data
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('file')" id="fileTab"
+                        style="padding: 10px 20px; border: none; background: none; cursor: pointer; font-weight: 600; border-bottom: 3px solid transparent;">
+                        📁 Upload File
+                    </button>
+                </div>
+
+                <!-- Paste Tab -->
+                <div id="pasteContent" class="tab-content">
+                    <div class="form-group">
+                        <label>Paste Tracking Data</label>
+                        <textarea id="bulkTrackingData" rows="10" placeholder="Paste tracking data here...&#10;&#10;✅ FedEx Format (copy directly from FedEx tracking page):&#10;Tracking ID    Ship date    Status    Delivered date&#10;396172492101   12/3/25      On the way    12/9/25&#10;&#10;✅ CSV Format:&#10;Tracking Number, Status, Location&#10;9400111899562858956847, Delivered, New York NY&#10;&#10;✅ Just tracking numbers (one per line):&#10;9400111899562858956847&#10;9400111899562858956848"
+                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: monospace; font-size: 0.9em;"></textarea>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button type="button" class="btn btn-primary preview-btn" onclick="parseTrackingData()" 
+                            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-weight: 600;">
+                            📊 Preview Parse
+                        </button>
+                        <button type="button" class="btn btn-info" onclick="clearPasteData()">🗑️ Clear</button>
+                    </div>
+                    <div style="background: #e3f2fd; padding: 12px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #2196f3;">
+                        <p style="margin: 0; font-size: 0.9em; color: #1976d2;">
+                            💡 <strong>How to use:</strong> Paste data above → Click "📊 Preview Parse" → Review preview → Click "✅ Apply Updates"
+                        </p>
+                    </div>
+                </div>
+
+                <!-- File Upload Tab -->
+                <div id="fileContent" class="tab-content" style="display: none;">
+                    <div class="form-group">
+                        <label>Upload CSV or Excel File</label>
+                        <input type="file" id="bulkTrackingFile" accept=".csv,.xlsx,.xls" 
+                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"
+                            onchange="handleFileUpload(event)">
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                        <p style="margin: 0 0 10px 0; font-weight: 600;">Expected Format:</p>
+                        <ul style="margin: 0; padding-left: 20px; color: #666;">
+                            <li>Column 1: Tracking Number (required)</li>
+                            <li>Column 2: Status (optional: Shipped, In Transit, Out for Delivery, Delivered, Exception)</li>
+                            <li>Column 3: Location (optional)</li>
+                            <li>Column 4: Notes (optional)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Preview Section -->
+                <div id="previewSection" style="display: none; margin-top: 20px; border-top: 2px solid #ddd; padding-top: 20px;">
+                    <h3 style="color: #667eea; margin-bottom: 10px;">📋 Preview (<span id="previewCount">0</span> records)</h3>
+                    <div id="previewTable" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px;"></div>
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeBulkUpdateModal()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="applyBulkUpdates()" id="applyBulkBtn" disabled
+                        title="First paste data and click Preview Parse to enable this button">
+                        ✅ Apply Updates
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let dropshipments = [];
 
@@ -735,10 +902,125 @@
                     dropshipments = data.dropshipments;
                     renderDropshipments(dropshipments);
                     updateStats(dropshipments);
+                    loadBulkTrackingCounts(); // Load carrier counts
                 }
             } catch (error) {
                 console.error('Error loading dropshipments:', error);
                 document.getElementById('dropshipmentsTable').innerHTML = '<tr><td colspan="9" style="text-align: center; color: red;">Error loading dropshipments</td></tr>';
+            }
+        }
+
+        async function loadBulkTrackingCounts() {
+            try {
+                // Show loading in count badges
+                document.getElementById('uspsCount').innerHTML = '<span class="spinner spinner-dark" style="width:12px;height:12px;border-width:2px;margin:0"></span>';
+                document.getElementById('fedexCount').innerHTML = '<span class="spinner spinner-dark" style="width:12px;height:12px;border-width:2px;margin:0"></span>';
+                document.getElementById('upsCount').innerHTML = '<span class="spinner spinner-dark" style="width:12px;height:12px;border-width:2px;margin:0"></span>';
+                
+                const response = await fetch('/dropshipments/api/dropshipments/group/by-carrier');
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('uspsCount').textContent = data.counts.USPS;
+                    document.getElementById('fedexCount').textContent = data.counts.FedEx;
+                    document.getElementById('upsCount').textContent = data.counts.UPS;
+                    
+                    // Store for bulk tracking functions
+                    window.bulkTrackingData = data;
+                }
+            } catch (error) {
+                console.error('Error loading bulk tracking counts:', error);
+                // Reset to 0 on error
+                document.getElementById('uspsCount').textContent = '0';
+                document.getElementById('fedexCount').textContent = '0';
+                document.getElementById('upsCount').textContent = '0';
+            }
+        }
+
+        async function bulkTrackUSPS() {
+            const loadingDiv = showLoading('Opening USPS Tracking', 'Loading tracking numbers...');
+            try {
+                if (!window.bulkTrackingData || !window.bulkTrackingData.trackingUrls.USPS) {
+                    hideLoading(loadingDiv);
+                    alert('No USPS shipments to track');
+                    return;
+                }
+                
+                const url = window.bulkTrackingData.trackingUrls.USPS;
+                const count = window.bulkTrackingData.counts.USPS;
+                
+                // Open tracking URL
+                window.open(url, '_blank');
+                
+                // Open bulk update modal
+                window.currentCarrier = 'USPS';
+                window.currentShipments = window.bulkTrackingData.grouped.USPS;
+                document.getElementById('bulkUpdateTitle').textContent = `Update USPS Tracking (${count} shipment${count !== 1 ? 's' : ''})`;
+                document.getElementById('bulkUpdateModal').style.display = 'flex';
+                
+                hideLoading(loadingDiv);
+            } catch (error) {
+                hideLoading(loadingDiv);
+                console.error('Error opening USPS tracking:', error);
+                alert('Error opening USPS tracking: ' + error.message);
+            }
+        }
+
+        async function bulkTrackFedEx() {
+            const loadingDiv = showLoading('Opening FedEx Tracking', 'Loading tracking numbers...');
+            try {
+                if (!window.bulkTrackingData || !window.bulkTrackingData.trackingUrls.FedEx) {
+                    hideLoading(loadingDiv);
+                    alert('No FedEx shipments to track');
+                    return;
+                }
+                
+                const url = window.bulkTrackingData.trackingUrls.FedEx;
+                const count = window.bulkTrackingData.counts.FedEx;
+                
+                // Open tracking URL (FedEx supports multiple tracking numbers in one URL)
+                window.open(url, '_blank');
+                
+                // Open bulk update modal
+                window.currentCarrier = 'FedEx';
+                window.currentShipments = window.bulkTrackingData.grouped.FedEx;
+                document.getElementById('bulkUpdateTitle').textContent = `Update FedEx Tracking (${count} shipment${count !== 1 ? 's' : ''})`;
+                document.getElementById('bulkUpdateModal').style.display = 'flex';
+                
+                hideLoading(loadingDiv);
+            } catch (error) {
+                hideLoading(loadingDiv);
+                console.error('Error opening FedEx tracking:', error);
+                alert('Error opening FedEx tracking: ' + error.message);
+            }
+        }
+
+        async function bulkTrackUPS() {
+            const loadingDiv = showLoading('Opening UPS Tracking', 'Loading tracking numbers...');
+            try {
+                if (!window.bulkTrackingData || !window.bulkTrackingData.trackingUrls.UPS) {
+                    hideLoading(loadingDiv);
+                    alert('No UPS shipments to track');
+                    return;
+                }
+                
+                const url = window.bulkTrackingData.trackingUrls.UPS;
+                const count = window.bulkTrackingData.grouped.UPS.length;
+                
+                // Open single UPS page with all tracking numbers
+                window.open(url, '_blank');
+                
+                // Open bulk update modal immediately
+                window.currentCarrier = 'UPS';
+                window.currentShipments = window.bulkTrackingData.grouped.UPS;
+                document.getElementById('bulkUpdateTitle').textContent = `Update UPS Tracking (${count} shipment${count !== 1 ? 's' : ''})`;
+                document.getElementById('bulkUpdateModal').style.display = 'flex';
+                
+                hideLoading(loadingDiv);
+            } catch (error) {
+                hideLoading(loadingDiv);
+                console.error('Error opening UPS tracking:', error);
+                alert('Error opening UPS tracking: ' + error.message);
             }
         }
 
@@ -802,9 +1084,6 @@
                         <td>
                             <div class="action-btns">
                                 <button class="btn btn-info btn-small" onclick="editDropshipment('${ds._id}')">✏️ Edit</button>
-                                ${trackingNumber ?
-                        `<button class="btn btn-warning btn-small" onclick="checkWithAI('${ds._id}')">🤖 AI Check</button>`
-                        : ''}
                                 <button class="btn btn-secondary btn-small" onclick="deleteDropshipment('${ds._id}')">🗑️</button>
                             </div>
                         </td>
@@ -944,8 +1223,6 @@
         }
 
         async function checkWithAI(id) {
-            if (!confirm('Use AI to check tracking status? This will query the carrier website.')) return;
-
             const btn = event.target;
             btn.disabled = true;
             btn.textContent = '⏳ Checking...';
@@ -957,15 +1234,34 @@
 
                 const result = await response.json();
 
-                if (result.success) {
-                    alert(`✅ AI Check Complete!\n\nStatus: ${result.trackingInfo.status}\nLocation: ${result.trackingInfo.location}\nDescription: ${result.trackingInfo.description}`);
+                if (result.success && result.trackingInfo) {
+                    const info = result.trackingInfo;
+                    
+                    // Show AI tracking results
+                    const message = `
+🤖 AI Tracking Check Complete!
+
+📦 Status: ${info.status}
+📍 Location: ${info.location || 'Unknown'}
+${info.estimatedDelivery ? '📅 Est. Delivery: ' + new Date(info.estimatedDelivery).toLocaleDateString() : ''}
+
+${info.description}
+
+${info.events && info.events.length > 0 ? '\n📋 Recent Events:\n' + info.events.slice(0, 5).map(e => 
+    `• ${new Date(e.timestamp).toLocaleDateString()}: ${e.status} - ${e.location || ''}`
+).join('\n') : ''}
+
+The dropshipment has been automatically updated.
+                    `.trim();
+                    
+                    alert(message);
                     loadDropshipments();
                 } else {
-                    alert('AI Check Failed: ' + (result.error || result.message));
+                    alert('Unable to retrieve tracking: ' + (result.error || result.message || 'Unknown error'));
                 }
             } catch (error) {
                 console.error('Error in AI check:', error);
-                alert('Error checking tracking with AI');
+                alert('Error checking tracking: ' + error.message);
             } finally {
                 btn.disabled = false;
                 btn.textContent = '🤖 AI Check';
@@ -1087,6 +1383,434 @@
         function closeUrlModal() {
             document.getElementById('urlModal').classList.remove('show');
             currentUrlData = null;
+        }
+
+        function closeBulkUpdateModal() {
+            document.getElementById('bulkUpdateModal').style.display = 'none';
+            document.getElementById('bulkTrackingData').value = '';
+            document.getElementById('bulkTrackingFile').value = '';
+            document.getElementById('previewSection').style.display = 'none';
+            document.getElementById('applyBulkBtn').disabled = true;
+            window.parsedBulkData = null;
+        }
+
+        function switchTab(tab) {
+            const pasteTab = document.getElementById('pasteTab');
+            const fileTab = document.getElementById('fileTab');
+            const pasteContent = document.getElementById('pasteContent');
+            const fileContent = document.getElementById('fileContent');
+
+            if (tab === 'paste') {
+                pasteTab.style.borderBottom = '3px solid #667eea';
+                fileTab.style.borderBottom = '3px solid transparent';
+                pasteContent.style.display = 'block';
+                fileContent.style.display = 'none';
+            } else {
+                pasteTab.style.borderBottom = '3px solid transparent';
+                fileTab.style.borderBottom = '3px solid #667eea';
+                pasteContent.style.display = 'none';
+                fileContent.style.display = 'block';
+            }
+        }
+
+        function clearPasteData() {
+            document.getElementById('bulkTrackingData').value = '';
+            document.getElementById('previewSection').style.display = 'none';
+            document.getElementById('applyBulkBtn').disabled = true;
+            window.parsedBulkData = null;
+        }
+
+        function parseTrackingData() {
+            const data = document.getElementById('bulkTrackingData').value.trim();
+            if (!data) {
+                alert('Please paste tracking data first');
+                return;
+            }
+
+            // Show parsing indicator
+            const previewBtn = document.querySelector('.preview-btn');
+            const originalBtnText = previewBtn.innerHTML;
+            previewBtn.innerHTML = '⏳ Parsing...';
+            previewBtn.disabled = true;
+
+            const lines = data.split('\n').filter(line => line.trim());
+            const parsed = [];
+
+            // Detect CSV format (FedEx or UPS)
+            const firstLine = lines[0] ? lines[0].toUpperCase() : '';
+            const isFedExCSV = firstLine.includes('TRACKING ID');
+            const isUPSCSV = firstLine.includes('TRACKING NUMBER') || firstLine.includes('TRACKING#');
+            
+            if (isFedExCSV) {
+                console.log('Detected FedEx CSV format');
+                
+                // Parse CSV properly (handle quoted fields with commas)
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    
+                    // Parse CSV line respecting quotes
+                    const parts = parseCSVLine(line);
+                    
+                    if (parts.length >= 5) {
+                        const trackingNumber = parts[0];
+                        const shipDate = parts[1];
+                        const shipper = parts[2];
+                        const recipient = parts[3];
+                        const statusText = parts[4];
+                        const deliveredDate = parts[5] || '';
+                        const scheduledDate = parts[6] || '';
+                        const service = parts[7] || 'FedEx';
+                        
+                        if (trackingNumber && /^\d{12,}$/.test(trackingNumber)) {
+                            // Determine status
+                            let status = 'In Transit';
+                            if (statusText.toLowerCase().includes('delivered')) {
+                                status = 'Delivered';
+                            } else if (statusText.toLowerCase().includes('on the way') || statusText.toLowerCase().includes('in transit')) {
+                                status = 'In Transit';
+                            } else if (statusText.toLowerCase().includes('out for delivery')) {
+                                status = 'Out for Delivery';
+                            } else if (statusText.toLowerCase().includes('exception')) {
+                                status = 'Exception';
+                            } else if (statusText.toLowerCase().includes('picked up') || statusText.toLowerCase().includes('shipped')) {
+                                status = 'Shipped';
+                            }
+                            
+                            // Build notes
+                            let notes = service;
+                            if (deliveredDate) {
+                                notes += ` - Delivered: ${deliveredDate}`;
+                            } else if (scheduledDate) {
+                                notes += ` - Scheduled: ${scheduledDate}`;
+                            }
+                            
+                            parsed.push({
+                                trackingNumber: trackingNumber,
+                                status: status,
+                                location: recipient,
+                                notes: notes.trim()
+                            });
+                        }
+                    }
+                }
+            } else if (isUPSCSV) {
+                console.log('Detected UPS CSV format');
+                
+                // Parse UPS CSV
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    
+                    // Parse CSV line respecting quotes
+                    const parts = parseCSVLine(line);
+                    
+                    if (parts.length >= 2) {
+                        const trackingNumber = parts[0];
+                        const statusText = parts[1];
+                        const location = parts[2] || '';
+                        const lastUpdate = parts[3] || '';
+                        
+                        if (trackingNumber && /^1Z[A-Z0-9]{16}$/.test(trackingNumber)) {
+                            // Determine status
+                            let status = 'In Transit';
+                            if (statusText.toLowerCase().includes('delivered')) {
+                                status = 'Delivered';
+                            } else if (statusText.toLowerCase().includes('in transit') || statusText.toLowerCase().includes('on the way')) {
+                                status = 'In Transit';
+                            } else if (statusText.toLowerCase().includes('out for delivery')) {
+                                status = 'Out for Delivery';
+                            } else if (statusText.toLowerCase().includes('exception') || statusText.toLowerCase().includes('held')) {
+                                status = 'Exception';
+                            } else if (statusText.toLowerCase().includes('picked up') || statusText.toLowerCase().includes('origin scan')) {
+                                status = 'Shipped';
+                            }
+                            
+                            parsed.push({
+                                trackingNumber: trackingNumber,
+                                status: status,
+                                location: location,
+                                notes: lastUpdate ? `UPS - ${lastUpdate}` : 'UPS'
+                            });
+                        }
+                    }
+                }
+            } else {
+                // Original parsing for generic format
+                lines.forEach((line, index) => {
+                    // Split by comma or tab and clean up each part
+                    const parts = line.split(/[,\t]/).map(p => {
+                        // Remove quotes, trim whitespace
+                        return p.trim().replace(/^["']|["']$/g, '');
+                    });
+                    
+                    // Skip header rows
+                    if (parts[0] && parts[0].toLowerCase().includes('tracking')) {
+                        return;
+                    }
+                    
+                    // Must have a tracking number (at least 10 characters after cleaning)
+                    if (parts[0] && parts[0].length >= 10) {
+                        parsed.push({
+                            trackingNumber: parts[0],
+                            status: parts[1] || 'In Transit',
+                            location: parts[2] || '',
+                            notes: parts[3] || ''
+                        });
+                    }
+                });
+            }
+
+            if (parsed.length === 0) {
+                previewBtn.innerHTML = originalBtnText;
+                previewBtn.disabled = false;
+                alert('No valid tracking data found. Make sure the data includes tracking numbers.\n\nFor FedEx: Copy the CSV export or table.\nFor others: Use CSV format or one tracking number per line.');
+                return;
+            }
+
+            console.log('Parsed tracking data:', parsed);
+            window.parsedBulkData = parsed;
+            showPreview(parsed);
+            
+            // Restore button
+            previewBtn.innerHTML = originalBtnText;
+            previewBtn.disabled = false;
+        }
+
+        // Loading overlay helpers
+        function showLoading(title, subtitle) {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading-overlay';
+            loadingDiv.innerHTML = `
+                <div class="loading-content">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">${title}</div>
+                    <div class="loading-subtext">${subtitle}</div>
+                </div>
+            `;
+            document.body.appendChild(loadingDiv);
+            return loadingDiv;
+        }
+
+        function hideLoading(loadingDiv) {
+            if (loadingDiv && loadingDiv.parentNode) {
+                loadingDiv.parentNode.removeChild(loadingDiv);
+            }
+        }
+
+        // Helper function to parse CSV line with quoted fields
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            // Push the last field
+            result.push(current.trim());
+            
+            return result;
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const data = e.target.result;
+                
+                if (file.name.endsWith('.csv')) {
+                    parseCSV(data);
+                } else {
+                    // For Excel files, we'd need a library like xlsx
+                    alert('Excel file support coming soon. Please use CSV for now or paste data directly.');
+                }
+            };
+
+            reader.readAsText(file);
+        }
+
+        function parseCSV(csvData) {
+            const lines = csvData.split('\n').filter(line => line.trim());
+            const parsed = [];
+
+            // Skip header if it exists
+            const startIndex = lines[0].toLowerCase().includes('tracking') ? 1 : 0;
+
+            for (let i = startIndex; i < lines.length; i++) {
+                // Split by comma and remove quotes from start/end of each field
+                const parts = lines[i].split(',').map(p => {
+                    return p.trim().replace(/^["']|["']$/g, '');
+                });
+                
+                // Must have a tracking number (at least 10 characters)
+                if (parts[0] && parts[0].length >= 10) {
+                    parsed.push({
+                        trackingNumber: parts[0],
+                        status: parts[1] || 'In Transit',
+                        location: parts[2] || '',
+                        notes: parts[3] || ''
+                    });
+                }
+            }
+
+            if (parsed.length === 0) {
+                alert('No valid tracking data found in file.');
+                return;
+            }
+
+            console.log('Parsed CSV data:', parsed);
+            window.parsedBulkData = parsed;
+            showPreview(parsed);
+        }
+
+        function showPreview(data) {
+            document.getElementById('previewCount').textContent = data.length;
+            
+            const table = `
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f8f9fa; text-align: left;">
+                            <th style="padding: 8px; border-bottom: 2px solid #ddd;">Tracking Number</th>
+                            <th style="padding: 8px; border-bottom: 2px solid #ddd;">Status</th>
+                            <th style="padding: 8px; border-bottom: 2px solid #ddd;">Location</th>
+                            <th style="padding: 8px; border-bottom: 2px solid #ddd;">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(item => `
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 8px; font-family: monospace;">${item.trackingNumber}</td>
+                                <td style="padding: 8px;">${item.status}</td>
+                                <td style="padding: 8px;">${item.location}</td>
+                                <td style="padding: 8px; font-size: 0.85em;">${item.notes}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('previewTable').innerHTML = table;
+            document.getElementById('previewSection').style.display = 'block';
+            document.getElementById('applyBulkBtn').disabled = false;
+        }
+
+        async function applyBulkUpdates() {
+            if (!window.parsedBulkData || !window.currentShipments) {
+                alert('No data to apply');
+                return;
+            }
+
+            // Show loading on button
+            const applyBtn = document.getElementById('applyBulkBtn');
+            const originalBtnText = applyBtn.innerHTML;
+            applyBtn.innerHTML = '⏳ Processing...';
+            applyBtn.disabled = true;
+
+            const updates = [];
+            let matched = 0;
+            let notFound = [];
+
+            console.log('Current shipments:', window.currentShipments);
+            console.log('Parsed data:', window.parsedBulkData);
+
+            // Match parsed data with current shipments
+            window.parsedBulkData.forEach(parsed => {
+                // Normalize tracking number for matching (trim, uppercase)
+                const normalizedParsed = parsed.trackingNumber.trim().toUpperCase();
+                
+                const shipment = window.currentShipments.find(s => {
+                    const normalizedShipment = s.trackingNumber.trim().toUpperCase();
+                    return normalizedShipment === normalizedParsed;
+                });
+
+                if (shipment) {
+                    updates.push({
+                        id: shipment.id,
+                        trackingNumber: shipment.trackingNumber,
+                        status: parsed.status,
+                        location: parsed.location,
+                        notes: parsed.notes
+                    });
+                    matched++;
+                } else {
+                    notFound.push(parsed.trackingNumber);
+                }
+            });
+
+            console.log('Matches found:', matched);
+            console.log('Not found:', notFound);
+
+            if (updates.length === 0) {
+                applyBtn.innerHTML = originalBtnText;
+                applyBtn.disabled = false;
+                alert(`No matching tracking numbers found in current shipments.\n\nSearching for:\n${window.parsedBulkData.map(p => p.trackingNumber).join(', ')}\n\nAvailable tracking numbers:\n${window.currentShipments.map(s => s.trackingNumber).join(', ')}`);
+                return;
+            }
+
+            if (notFound.length > 0) {
+                if (!confirm(`Found ${matched} matching shipment(s). ${notFound.length} tracking number(s) not found:\n${notFound.join(', ')}\n\nContinue with updates?`)) {
+                    applyBtn.innerHTML = originalBtnText;
+                    applyBtn.disabled = false;
+                    return;
+                }
+            }
+
+            // Apply updates with progress indicator
+            let successCount = 0;
+            let errorCount = 0;
+            const totalUpdates = updates.length;
+
+            for (let i = 0; i < updates.length; i++) {
+                const update = updates[i];
+                
+                // Update progress
+                applyBtn.innerHTML = `⏳ Updating ${i + 1}/${totalUpdates}...`;
+                
+                try {
+                    const response = await fetch(`/dropshipments/api/dropshipments/${update.id}/update-status`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            status: update.status,
+                            location: update.location,
+                            notes: update.notes || `Bulk update from ${window.currentCarrier} tracking check`
+                        })
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        successCount++;
+                    } else {
+                        errorCount++;
+                    }
+                } catch (error) {
+                    console.error('Error updating shipment:', error);
+                    errorCount++;
+                }
+            }
+
+            // Restore button
+            applyBtn.innerHTML = originalBtnText;
+            applyBtn.disabled = false;
+
+            alert(`✅ Bulk update complete!\n\nSuccessfully updated: ${successCount}\nErrors: ${errorCount}`);
+            
+            closeBulkUpdateModal();
+            loadDropshipments(); // Refresh the table
         }
 
         async function saveUrl() {

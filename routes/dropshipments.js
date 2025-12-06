@@ -66,6 +66,99 @@ router.get('/api/dropshipments', async (req, res) => {
     }
 });
 
+// GET - Group tracking numbers by carrier (MUST be before :id route)
+router.get('/api/dropshipments/group/by-carrier', async (req, res) => {
+    try {
+        const { status } = req.query;
+        
+        // Build query - only get shipments that aren't delivered
+        let query = {
+            shippingStatus: { $nin: ['Delivered', 'Cancelled'] }
+        };
+        
+        if (status) {
+            query.shippingStatus = status;
+        }
+        
+        const dropshipments = await Dropshipment.find(query)
+            .populate('poId', 'shippingTracking shippingCarrier poNumber')
+            .lean();
+        
+        // Group by carrier
+        const grouped = {
+            USPS: [],
+            FedEx: [],
+            UPS: [],
+            Other: []
+        };
+        
+        dropshipments.forEach(ds => {
+            // Get tracking from PO if available
+            const trackingNumber = (ds.poId && ds.poId.shippingTracking) 
+                ? ds.poId.shippingTracking 
+                : ds.trackingNumber;
+            
+            const carrier = (ds.poId && ds.poId.shippingCarrier) 
+                ? ds.poId.shippingCarrier 
+                : (ds.carrier || 'USPS');
+            
+            if (trackingNumber) {
+                const entry = {
+                    id: ds._id,
+                    trackingNumber: trackingNumber,
+                    poNumber: ds.poNumber,
+                    customerName: ds.customerName,
+                    status: ds.shippingStatus
+                };
+                
+                if (grouped[carrier]) {
+                    grouped[carrier].push(entry);
+                } else {
+                    grouped.Other.push(entry);
+                }
+            }
+        });
+        
+        // Generate bulk tracking URLs
+        const trackingUrls = {};
+        
+        // USPS supports multiple tracking numbers
+        if (grouped.USPS.length > 0) {
+            const trackingNumbers = grouped.USPS.map(item => item.trackingNumber).join(',');
+            trackingUrls.USPS = `https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumbers}`;
+        }
+        
+        // FedEx - supports multiple tracking numbers in URL
+        if (grouped.FedEx.length > 0) {
+            const trackingNumbers = grouped.FedEx.map(item => item.trackingNumber).join(',');
+            trackingUrls.FedEx = `https://www.fedex.com/fedextrack/?trknbr=${trackingNumbers}`;
+        }
+        
+        // UPS - bulk tracking with comma-separated numbers
+        if (grouped.UPS.length > 0) {
+            const trackingNumbers = grouped.UPS.map(item => item.trackingNumber).join(',');
+            trackingUrls.UPS = `https://www.ups.com/track?loc=en_US&requester=ST/&tracknum=${trackingNumbers}`;
+        }
+        
+        res.json({ 
+            success: true, 
+            grouped: grouped,
+            trackingUrls: trackingUrls,
+            counts: {
+                USPS: grouped.USPS.length,
+                FedEx: grouped.FedEx.length,
+                UPS: grouped.UPS.length,
+                Other: grouped.Other.length,
+                total: grouped.USPS.length + grouped.FedEx.length + grouped.UPS.length + grouped.Other.length
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ Error grouping by carrier:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // GET - Single dropshipment
 router.get('/api/dropshipments/:id', async (req, res) => {
     try {
@@ -229,40 +322,62 @@ router.post('/api/dropshipments/:id/ai-check', async (req, res) => {
             });
         }
 
-        const dropshipment = await Dropshipment.findById(req.params.id);
+        const dropshipment = await Dropshipment.findById(req.params.id)
+            .populate('poId', 'poUrl poNumber shippingTracking shippingCarrier');
 
         if (!dropshipment) {
             return res.status(404).json({ success: false, error: 'Dropshipment not found' });
         }
 
-        if (!dropshipment.trackingNumber) {
-            return res.status(400).json({ success: false, error: 'No tracking number available' });
+        console.log(`🔍 Checking dropshipment ${dropshipment.poNumber}:`, {
+            hasPoId: !!dropshipment.poId,
+            poTracking: dropshipment.poId?.shippingTracking,
+            dropshipTracking: dropshipment.trackingNumber,
+            poCarrier: dropshipment.poId?.shippingCarrier,
+            dropshipCarrier: dropshipment.carrier
+        });
+
+        // Get tracking from PO if available
+        const trackingNumber = (dropshipment.poId && dropshipment.poId.shippingTracking) 
+            ? dropshipment.poId.shippingTracking 
+            : dropshipment.trackingNumber;
+        
+        const carrier = (dropshipment.poId && dropshipment.poId.shippingCarrier) 
+            ? dropshipment.poId.shippingCarrier 
+            : (dropshipment.carrier || 'USPS');
+
+        if (!trackingNumber) {
+            let errorMsg = 'No tracking number available';
+            if (!dropshipment.poId) {
+                errorMsg += ' - Dropshipment not linked to a PO. Try syncing from POs.';
+            } else if (!dropshipment.poId.shippingTracking && !dropshipment.trackingNumber) {
+                errorMsg += ' - Please add a tracking number to the PO or dropshipment first.';
+            }
+            return res.status(400).json({ success: false, error: errorMsg });
         }
 
-        const trackingUrl = dropshipment.autoTrackingUrl || dropshipment.trackingUrl;
+        // Generate tracking URL
+        const trackingUrl = generateTrackingUrl(carrier, trackingNumber);
 
-        if (!trackingUrl) {
-            return res.status(400).json({ success: false, error: 'No tracking URL available' });
-        }
+        console.log(`🤖 AI checking tracking for ${trackingNumber} (${carrier})...`);
+        console.log(`🔗 URL: ${trackingUrl}`);
 
-        console.log(`🤖 AI checking tracking for ${dropshipment.trackingNumber}...`);
+        const prompt = `You are a shipping tracking assistant. I need you to check the shipping status for this package:
 
-        const prompt = `
-Check the shipping status for this tracking information:
-- Tracking Number: ${dropshipment.trackingNumber}
-- Carrier: ${dropshipment.carrier}
-- Tracking URL: ${trackingUrl}
+Tracking Number: ${trackingNumber}
+Carrier: ${carrier}
+Tracking URL: ${trackingUrl}
 
-Please provide the following information in JSON format:
+Please visit the tracking page and extract the current shipping information. Return ONLY a valid JSON object with this structure:
 {
-  "status": "current shipping status (Shipped, In Transit, Out for Delivery, Delivered, Exception)",
-  "location": "current location or last known location",
+  "status": "current status (must be one of: Shipped, In Transit, Out for Delivery, Delivered, Exception)",
+  "location": "current location or last scan location",
   "lastUpdate": "timestamp of last update",
   "description": "brief description of current status",
-  "estimatedDelivery": "estimated delivery date if available",
+  "estimatedDelivery": "estimated delivery date if available (or null)",
   "events": [
     {
-      "timestamp": "event timestamp",
+      "timestamp": "event date/time",
       "status": "event status",
       "location": "event location",
       "description": "event description"
@@ -270,21 +385,23 @@ Please provide the following information in JSON format:
   ]
 }
 
-If you cannot access the tracking information, return:
+If you cannot access or parse the tracking information, return:
 {
   "error": "Unable to retrieve tracking information",
-  "message": "Explanation of why"
+  "message": "detailed explanation"
 }
 
-Return ONLY valid JSON, no markdown or extra text.`;
+Return ONLY valid JSON, no markdown formatting or extra text.`;
 
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
         const result = await model.generateContent(prompt);
         const response = await result.response;
         let text = response.text();
 
         // Clean up response
         text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+        console.log('📄 AI Response:', text.substring(0, 200) + '...');
 
         let trackingInfo;
         try {
@@ -293,7 +410,7 @@ Return ONLY valid JSON, no markdown or extra text.`;
             console.error('❌ Failed to parse AI response:', text);
             return res.status(500).json({
                 success: false,
-                error: 'Failed to parse tracking information',
+                error: 'Failed to parse AI response. The AI may not have been able to access the tracking page.',
                 rawResponse: text.substring(0, 500)
             });
         }
@@ -306,7 +423,7 @@ Return ONLY valid JSON, no markdown or extra text.`;
             return res.json({
                 success: false,
                 error: trackingInfo.error,
-                message: trackingInfo.message
+                message: trackingInfo.message || 'AI could not retrieve tracking information'
             });
         }
 
@@ -317,34 +434,87 @@ Return ONLY valid JSON, no markdown or extra text.`;
         dropshipment.aiCheckStatus = 'Success';
 
         if (trackingInfo.estimatedDelivery && !dropshipment.estimatedDelivery) {
-            dropshipment.estimatedDelivery = new Date(trackingInfo.estimatedDelivery);
+            try {
+                dropshipment.estimatedDelivery = new Date(trackingInfo.estimatedDelivery);
+            } catch (e) {
+                console.log('⚠️ Could not parse estimated delivery date');
+            }
         }
 
         // Add tracking events to history
         if (trackingInfo.events && Array.isArray(trackingInfo.events)) {
-            trackingInfo.events.forEach(event => {
+            trackingInfo.events.slice(0, 10).forEach(event => {
                 dropshipment.trackingHistory.push({
                     status: event.status,
                     location: event.location,
                     description: event.description,
-                    timestamp: new Date(event.timestamp),
+                    timestamp: new Date(event.timestamp || Date.now()),
                     checkedAt: new Date()
                 });
             });
         }
 
+        // Set delivered date if status is Delivered
+        if (trackingInfo.status === 'Delivered' && !dropshipment.actualDelivery) {
+            dropshipment.actualDelivery = new Date();
+        }
+
         await dropshipment.save();
 
-        console.log(`✅ AI updated tracking for ${dropshipment.trackingNumber}`);
+        console.log(`✅ AI updated tracking for ${trackingNumber}: ${trackingInfo.status}`);
 
         res.json({
             success: true,
-            trackingInfo,
-            dropshipment
+            message: 'AI successfully checked tracking',
+            trackingInfo: trackingInfo,
+            dropshipment: dropshipment
         });
 
     } catch (error) {
-        console.error('❌ Error in AI tracking check:', error);
+        console.error('❌ Error in AI check:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// POST - Update tracking status manually
+router.post('/api/dropshipments/:id/update-status', async (req, res) => {
+    try {
+        const { status, location, notes } = req.body;
+        
+        const dropshipment = await Dropshipment.findById(req.params.id);
+        
+        if (!dropshipment) {
+            return res.status(404).json({ success: false, error: 'Dropshipment not found' });
+        }
+
+        // Update status
+        dropshipment.shippingStatus = status;
+        dropshipment.lastTrackingUpdate = new Date();
+        
+        // Add to tracking history
+        if (status || location || notes) {
+            dropshipment.trackingHistory.push({
+                status: status || dropshipment.shippingStatus,
+                location: location || '',
+                description: notes || 'Manual status update',
+                timestamp: new Date(),
+                checkedAt: new Date()
+            });
+        }
+        
+        // If delivered, set actual delivery date
+        if (status === 'Delivered' && !dropshipment.actualDelivery) {
+            dropshipment.actualDelivery = new Date();
+        }
+        
+        await dropshipment.save();
+        
+        console.log(`✅ Updated tracking status for ${dropshipment.poNumber}: ${status}`);
+        
+        res.json({ success: true, dropshipment });
+        
+    } catch (error) {
+        console.error('❌ Error updating status:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
