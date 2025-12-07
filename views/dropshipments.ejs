@@ -1445,10 +1445,15 @@ The dropshipment has been automatically updated.
             const lines = data.split('\n').filter(line => line.trim());
             const parsed = [];
 
-            // Detect CSV format (FedEx or UPS)
+            // Detect CSV format (FedEx, UPS, or USPS)
+            // Check USPS first since it has more specific column names
             const firstLine = lines[0] ? lines[0].toUpperCase() : '';
             const isFedExCSV = firstLine.includes('TRACKING ID');
-            const isUPSCSV = firstLine.includes('TRACKING NUMBER') || firstLine.includes('TRACKING#');
+            const isUSPSCSV = firstLine.includes('LATEST UPDATE') || firstLine.includes('EXPECTED DELIVERY');
+            const isUPSCSV = !isUSPSCSV && (firstLine.includes('TRACKING NUMBER') || firstLine.includes('TRACKING#'));
+            
+            console.log('First line:', firstLine);
+            console.log('Format detection:', { isFedExCSV, isUPSCSV, isUSPSCSV });
 
             if (isFedExCSV) {
                 console.log('Detected FedEx CSV format');
@@ -1544,27 +1549,97 @@ The dropshipment has been automatically updated.
                         }
                     }
                 }
+            } else if (isUSPSCSV) {
+                console.log('Detected USPS CSV format');
+                
+                // USPS format: Tracking Number, Status, Latest Update, Expected Delivery Date
+                // Need to properly parse CSV with multi-line quoted fields
+                const csvRows = parseCSVRows(data);
+                console.log('Parsed CSV rows:', csvRows.length);
+                
+                for (let i = 1; i < csvRows.length; i++) { // Skip header
+                    const parts = csvRows[i];
+                    
+                    if (parts.length >= 2) {
+                        const trackingNumber = parts[0] ? parts[0].trim() : '';
+                        const statusText = parts[1] ? parts[1].trim() : '';
+                        const latestUpdate = parts[2] ? parts[2].trim() : '';
+                        const expectedDelivery = parts[3] ? parts[3].trim() : '';
+                        
+                        if (trackingNumber && /^\d{10,}$/.test(trackingNumber)) {
+                            // Map USPS status to system status
+                            let status = 'In Transit';
+                            
+                            if (statusText.toLowerCase().includes('delivered')) {
+                                status = 'Delivered';
+                            } else if (statusText.toLowerCase().includes('in transit') || statusText.toLowerCase().includes('moving through')) {
+                                status = 'In Transit';
+                            } else if (statusText.toLowerCase().includes('out for delivery')) {
+                                status = 'Out for Delivery';
+                            } else if (statusText.toLowerCase().includes('not available') || statusText.toLowerCase().includes('exception')) {
+                                status = 'Exception';
+                            } else if (statusText.toLowerCase().includes('acceptance') || statusText.toLowerCase().includes('picked up')) {
+                                status = 'Shipped';
+                            }
+                            
+                            // Extract location from latest update if available
+                            let location = '';
+                            if (latestUpdate && latestUpdate !== 'N/A') {
+                                const locationMatch = latestUpdate.match(/in ([A-Z\s,]+?)(?:\.|$|on)/i);
+                                if (locationMatch) {
+                                    location = locationMatch[1].trim();
+                                }
+                            }
+                            
+                            parsed.push({
+                                trackingNumber: trackingNumber,
+                                status: status,
+                                location: location,
+                                notes: latestUpdate && latestUpdate !== 'N/A' ? `USPS - ${latestUpdate}` : 'USPS'
+                            });
+                        }
+                    }
+                }
             } else {
-                // Original parsing for generic format
+                // Generic CSV parsing - use proper CSV parser for quoted fields
                 lines.forEach((line, index) => {
-                    // Split by comma or tab and clean up each part
-                    const parts = line.split(/[,\t]/).map(p => {
-                        // Remove quotes, trim whitespace
-                        return p.trim().replace(/^["']|["']$/g, '');
-                    });
-
                     // Skip header rows
-                    if (parts[0] && parts[0].toLowerCase().includes('tracking')) {
+                    if (index === 0 && line.toLowerCase().includes('tracking')) {
                         return;
                     }
 
-                    // Must have a tracking number (at least 10 characters after cleaning)
-                    if (parts[0] && parts[0].length >= 10) {
+                    // Parse CSV line respecting quotes
+                    const parts = parseCSVLine(line);
+
+                    // Skip if no tracking number
+                    if (!parts[0] || parts[0].toLowerCase().includes('tracking')) {
+                        return;
+                    }
+
+                    // Must have a tracking number (at least 10 characters)
+                    const trackingNumber = parts[0].trim();
+                    if (trackingNumber.length >= 10) {
+                        // Map status from common carrier formats
+                        let statusText = (parts[1] || 'In Transit').trim();
+                        let status = 'In Transit';
+                        
+                        if (statusText.toLowerCase().includes('delivered')) {
+                            status = 'Delivered';
+                        } else if (statusText.toLowerCase().includes('in transit') || statusText.toLowerCase().includes('moving through')) {
+                            status = 'In Transit';
+                        } else if (statusText.toLowerCase().includes('out for delivery')) {
+                            status = 'Out for Delivery';
+                        } else if (statusText.toLowerCase().includes('exception') || statusText.toLowerCase().includes('not available')) {
+                            status = 'Exception';
+                        } else if (statusText.toLowerCase().includes('picked up') || statusText.toLowerCase().includes('shipped') || statusText.toLowerCase().includes('acceptance')) {
+                            status = 'Shipped';
+                        }
+
                         parsed.push({
-                            trackingNumber: parts[0],
-                            status: parts[1] || 'In Transit',
-                            location: parts[2] || '',
-                            notes: parts[3] || ''
+                            trackingNumber: trackingNumber,
+                            status: status,
+                            location: parts[2] ? parts[2].trim() : '',
+                            notes: parts[3] ? parts[3].trim() : statusText
                         });
                     }
                 });
@@ -1630,6 +1705,60 @@ The dropshipment has been automatically updated.
             result.push(current.trim());
 
             return result;
+        }
+
+        // Helper function to parse entire CSV text into rows (handles multi-line quoted fields)
+        function parseCSVRows(csvText) {
+            const rows = [];
+            let currentRow = [];
+            let currentField = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < csvText.length; i++) {
+                const char = csvText[i];
+                const nextChar = csvText[i + 1];
+
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        // Escaped quote
+                        currentField += '"';
+                        i++; // Skip next quote
+                    } else {
+                        // Toggle quote state
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    // End of field
+                    currentRow.push(currentField.trim());
+                    currentField = '';
+                } else if ((char === '\n' || char === '\r') && !inQuotes) {
+                    // End of row
+                    if (currentField || currentRow.length > 0) {
+                        currentRow.push(currentField.trim());
+                        if (currentRow.some(field => field.length > 0)) {
+                            rows.push(currentRow);
+                        }
+                        currentRow = [];
+                        currentField = '';
+                    }
+                    // Skip \r\n together
+                    if (char === '\r' && nextChar === '\n') {
+                        i++;
+                    }
+                } else {
+                    currentField += char;
+                }
+            }
+
+            // Push last field and row
+            if (currentField || currentRow.length > 0) {
+                currentRow.push(currentField.trim());
+                if (currentRow.some(field => field.length > 0)) {
+                    rows.push(currentRow);
+                }
+            }
+
+            return rows;
         }
 
         function handleFileUpload(event) {
