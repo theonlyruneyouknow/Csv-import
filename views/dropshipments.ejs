@@ -1451,7 +1451,7 @@ The dropshipment has been automatically updated.
             const isFedExCSV = firstLine.includes('TRACKING ID');
             const isUSPSCSV = firstLine.includes('LATEST UPDATE') || firstLine.includes('EXPECTED DELIVERY');
             const isUPSCSV = !isUSPSCSV && (firstLine.includes('TRACKING NUMBER') || firstLine.includes('TRACKING#'));
-            
+
             console.log('First line:', firstLine);
             console.log('Format detection:', { isFedExCSV, isUPSCSV, isUSPSCSV });
 
@@ -1551,25 +1551,25 @@ The dropshipment has been automatically updated.
                 }
             } else if (isUSPSCSV) {
                 console.log('Detected USPS CSV format');
-                
+
                 // USPS format: Tracking Number, Status, Latest Update, Expected Delivery Date
                 // Need to properly parse CSV with multi-line quoted fields
                 const csvRows = parseCSVRows(data);
                 console.log('Parsed CSV rows:', csvRows.length);
-                
+
                 for (let i = 1; i < csvRows.length; i++) { // Skip header
                     const parts = csvRows[i];
-                    
+
                     if (parts.length >= 2) {
                         const trackingNumber = parts[0] ? parts[0].trim() : '';
                         const statusText = parts[1] ? parts[1].trim() : '';
                         const latestUpdate = parts[2] ? parts[2].trim() : '';
                         const expectedDelivery = parts[3] ? parts[3].trim() : '';
-                        
+
                         if (trackingNumber && /^\d{10,}$/.test(trackingNumber)) {
                             // Map USPS status to system status
                             let status = 'In Transit';
-                            
+
                             if (statusText.toLowerCase().includes('delivered')) {
                                 status = 'Delivered';
                             } else if (statusText.toLowerCase().includes('in transit') || statusText.toLowerCase().includes('moving through')) {
@@ -1581,7 +1581,7 @@ The dropshipment has been automatically updated.
                             } else if (statusText.toLowerCase().includes('acceptance') || statusText.toLowerCase().includes('picked up')) {
                                 status = 'Shipped';
                             }
-                            
+
                             // Extract location from latest update if available
                             let location = '';
                             if (latestUpdate && latestUpdate !== 'N/A') {
@@ -1590,7 +1590,7 @@ The dropshipment has been automatically updated.
                                     location = locationMatch[1].trim();
                                 }
                             }
-                            
+
                             parsed.push({
                                 trackingNumber: trackingNumber,
                                 status: status,
@@ -1622,7 +1622,7 @@ The dropshipment has been automatically updated.
                         // Map status from common carrier formats
                         let statusText = (parts[1] || 'In Transit').trim();
                         let status = 'In Transit';
-                        
+
                         if (statusText.toLowerCase().includes('delivered')) {
                             status = 'Delivered';
                         } else if (statusText.toLowerCase().includes('in transit') || statusText.toLowerCase().includes('moving through')) {
