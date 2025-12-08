@@ -1,20 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">            border-bottom: 1px solid #ccc;
-        }
-        
-        .welcome-section {
-            text-align: center;
-            font-style: italic;
-            margin: 1.5rem 0;
-            padding: 1rem;
-            border: 1px solid #ddd;
-            background: #f9f9f9;
-            font-size: 1.1rem;
-            font-weight: 500;
-        }    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <meta charset="UTF-8"> border-bottom: 1px solid #ccc;
+    }
+
+    .welcome-section {
+    text-align: center;
+    font-style: italic;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+    font-size: 1.1rem;
+    font-weight: 500;
+    }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -32,7 +36,7 @@
             border-bottom: 1px solid #dee2e6;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .navigation-container {
             display: flex;
             gap: 15px;
@@ -181,50 +185,51 @@
             background: linear-gradient(135deg, #6f42c1 0%, #007bff 100%);
             color: white;
             padding: 0.75rem 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .nav-brand {
             font-size: 1.25rem;
             font-weight: 600;
             text-decoration: none;
             color: white;
         }
-        
+
         .nav-brand:hover {
-            color: rgba(255,255,255,0.9);
+            color: rgba(255, 255, 255, 0.9);
         }
-        
+
         .nav-actions {
             display: flex;
             gap: 0.5rem;
             align-items: center;
         }
-        
+
         .btn-nav {
             color: white;
-            border-color: rgba(255,255,255,0.3);
+            border-color: rgba(255, 255, 255, 0.3);
             font-size: 0.875rem;
             padding: 0.375rem 0.75rem;
         }
-        
+
         .btn-nav:hover {
-            background-color: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.5);
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
             color: white;
         }
-        
+
         @media print {
             .nav-header {
                 display: none !important;
             }
         }
+
         body {
             background-color: #f8f9fa;
             font-family: 'Times New Roman', serif;
             line-height: 1.4;
         }
-        
+
         .bulletin-container {
             max-width: 600px;
             margin: 2rem auto;
@@ -233,13 +238,13 @@
             border: 1px solid #dee2e6;
             font-family: 'Times New Roman', Times, serif;
         }
-        
+
         .bulletin-header {
             text-align: center;
             padding: 2rem 2rem 1rem;
             border-bottom: 2px solid #000;
         }
-        
+
         .church-logo {
             width: 80px;
             height: 80px;
@@ -253,7 +258,7 @@
             font-size: 0.8rem;
             color: #666;
         }
-        
+
         .ward-name {
             font-size: 1.8rem;
             font-weight: bold;
@@ -262,21 +267,21 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
+
         .ward-location {
             font-size: 1.1rem;
             color: #555;
             margin-bottom: 1.5rem;
             font-style: italic;
         }
-        
+
         .selected-image {
             width: 100%;
             max-height: 200px;
             object-fit: cover;
             margin-bottom: 1rem;
         }
-        
+
         .quote-section {
             font-style: italic;
             text-align: center;
@@ -285,31 +290,31 @@
             background-color: #f8f9fa;
             border-left: 4px solid #007bff;
         }
-        
+
         .quote-text {
             font-size: 1.1rem;
             margin-bottom: 0.5rem;
         }
-        
+
         .quote-reference {
             font-size: 0.9rem;
             color: #666;
             font-weight: bold;
         }
-        
+
         .bulletin-content {
             padding: 2rem;
             line-height: 1.8;
             color: #000;
         }
-        
+
         .meeting-info {
             text-align: center;
             margin-bottom: 2rem;
             padding-bottom: 1rem;
             border-bottom: 2px solid #333;
         }
-        
+
         .meeting-date {
             font-size: 1.4rem;
             font-weight: bold;
@@ -317,36 +322,36 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        
+
         .meeting-type {
             font-size: 1.5rem;
             font-weight: bold;
             margin-bottom: 0.25rem;
         }
-        
+
         .meeting-time {
             font-size: 1.1rem;
             color: #666;
         }
-        
+
         .roles-section {
             margin-bottom: 2rem;
             padding-bottom: 1rem;
             border-bottom: 1px solid #dee2e6;
         }
-        
+
         .role-line {
             display: flex;
             align-items: center;
             margin-bottom: 0.5rem;
             font-size: 1rem;
         }
-        
+
         .role-title {
             font-weight: bold;
             margin-right: 0.5rem;
         }
-        
+
         .dots {
             flex: 1;
             border-bottom: 1px dotted #000;
@@ -356,44 +361,44 @@
             position: relative;
             top: -3px;
         }
-        
+
         .role-name {
             font-weight: normal;
         }
-        
+
         .program-section {
             margin-bottom: 2rem;
         }
-        
+
         .program-item {
             margin-bottom: 1.2rem;
         }
-        
+
         .program-line {
             display: flex;
             align-items: baseline;
             margin-bottom: 0.25rem;
             font-size: 0.9rem;
         }
-        
+
         .program-title {
             font-weight: bold;
             margin-right: 0.5rem;
             min-width: fit-content;
             font-size: 1rem;
         }
-        
+
         .scripture-reference {
             font-size: 0.8rem;
             font-weight: normal;
             margin-right: 0.3rem;
         }
-        
+
         .scripture-title {
             font-size: 0.8rem;
             font-style: italic;
         }
-        
+
         .program-detail {
             margin-left: 2rem;
             font-style: italic;
@@ -401,7 +406,7 @@
             font-size: 1rem;
             margin-bottom: 0.5rem;
         }
-        
+
         .centered-item {
             text-align: center;
             font-style: italic;
@@ -413,7 +418,7 @@
             border-bottom: 1px solid #ccc;
             font-size: 1.1rem;
         }
-        
+
         .welcome-section {
             text-align: center;
             font-size: 1.2rem;
@@ -423,7 +428,7 @@
             background-color: #e9ecef;
             border-radius: 5px;
         }
-        
+
         .ward-business {
             background-color: #fff3cd;
             border: 1px solid #ffeaa7;
@@ -431,43 +436,43 @@
             padding: 1rem;
             margin: 1rem 0;
         }
-        
+
         .ward-business-header {
             font-weight: bold;
             margin-bottom: 0.5rem;
         }
-        
+
         .edit-controls {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 1000;
         }
-        
+
         .editable-field {
             cursor: pointer;
             padding: 2px 4px;
             border-radius: 3px;
             transition: background-color 0.2s;
         }
-        
+
         .editable-field:hover {
             background-color: #fff3cd;
         }
-        
+
         .floating-nav {
             position: fixed;
             bottom: 20px;
             right: 20px;
             z-index: 1000;
         }
-        
+
         .fab {
             width: 56px;
             height: 56px;
             border-radius: 50%;
             border: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             margin-bottom: 10px;
             display: flex;
             align-items: center;
@@ -475,31 +480,31 @@
             font-size: 1.2rem;
             transition: all 0.3s ease;
         }
-        
+
         .fab:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
         }
-        
+
         .fab-primary {
             background: linear-gradient(135deg, #6f42c1 0%, #007bff 100%);
             color: white;
         }
-        
+
         .fab-secondary {
             background: #6c757d;
             color: white;
         }
-        
+
         @media print {
             body {
                 background: white;
             }
-            
+
             .edit-controls {
                 display: none;
             }
-            
+
             .bulletin-container {
                 box-shadow: none;
                 border: none;
@@ -507,7 +512,7 @@
                 max-width: none;
             }
         }
-        
+
         /* Responsive contact grid */
         .contact-content {
             display: grid;
@@ -517,13 +522,13 @@
             font-size: 14px;
             line-height: 1.6;
         }
-        
+
         /* Contact table layout */
         .contact-table {
             width: 100%;
             border-collapse: collapse;
         }
-        
+
         .contact-header {
             display: grid;
             grid-template-columns: 1.8fr 1.8fr 2fr;
@@ -534,7 +539,7 @@
             font-weight: bold;
             border-radius: 8px 8px 0 0;
         }
-        
+
         .contact-row {
             display: grid;
             grid-template-columns: 1.8fr 1.8fr 2fr;
@@ -543,59 +548,59 @@
             border-bottom: 1px solid #eee;
             align-items: center;
         }
-        
+
         .contact-row:nth-child(even) {
             background-color: #f8f9fa;
         }
-        
+
         .contact-row:hover {
             background-color: #e9ecef;
         }
-        
+
         .contact-col-title {
             font-weight: 600;
             color: #333;
         }
-        
+
         .contact-col-name {
             color: #555;
         }
-        
+
         .contact-col-phone {
             color: #666;
             font-family: 'Courier New', monospace;
             font-size: 14px;
         }
-        
+
         @media (max-width: 768px) {
             .contact-content {
                 grid-template-columns: 1fr;
                 gap: 15px;
                 padding: 0 10px;
             }
-            
+
             .contact-header,
             .contact-row {
                 grid-template-columns: 1fr;
                 gap: 5px;
                 text-align: left;
             }
-            
+
             .contact-header {
                 padding: 10px;
             }
-            
+
             .contact-row {
                 padding: 8px 10px;
                 border-left: 3px solid #6f42c1;
                 margin-bottom: 5px;
             }
-            
+
             .contact-col-title::after {
                 content: ":";
             }
         }
-        
+
         @media (max-width: 480px) {
             .contact-content {
                 grid-template-columns: 1fr;
@@ -606,12 +611,13 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation Header -->
     <div class="container">
         <div class="header">
             <h1 style="margin: 0; font-size: 1.5rem;">📌 Bulletin</h1>
-            
+
             <div class="d-flex align-items-center justify-content-between flex-grow-1">
                 <!-- Navigation Container -->
                 <div class="navigation-container">
@@ -637,55 +643,61 @@
                     </div>
 
                     <!-- Bulletin Options Dropdown -->
-                    <% if (user && ((user.permissions && user.permissions.accessBulletinManagement) || user.role === 'admin' || user.role === 'manager')) { %>
-                    <div class="nav-section">
-                        <button class="nav-options-btn" onclick="toggleAccordion('bulletinOptionsAccordion')">
-                            ⚙️ Bulletin <span class="accordion-icon">▼</span>
-                        </button>
-                        <div id="bulletinOptionsAccordion" class="nav-accordion-content">
-                            <a href="/bulletin/admin" class="nav-accordion-item">
-                                <i class="fas fa-cog me-2"></i>Admin
-                            </a>
-                            <a href="/bulletin/<%= bulletin._id %>/edit" class="nav-accordion-item">
-                                <i class="fas fa-edit me-2"></i>Edit Bulletin
-                            </a>
-                            <button class="nav-accordion-item" onclick="window.print()" style="border: none; background: none; width: 100%; text-align: left;">
-                                <i class="fas fa-print me-2"></i>Print Bulletin
+                    <% if (user && ((user.permissions && user.permissions.accessBulletinManagement) ||
+                        user.role==='admin' || user.role==='manager' )) { %>
+                        <div class="nav-section">
+                            <button class="nav-options-btn" onclick="toggleAccordion('bulletinOptionsAccordion')">
+                                ⚙️ Bulletin <span class="accordion-icon">▼</span>
                             </button>
+                            <div id="bulletinOptionsAccordion" class="nav-accordion-content">
+                                <a href="/bulletin/admin" class="nav-accordion-item">
+                                    <i class="fas fa-cog me-2"></i>Admin
+                                </a>
+                                <a href="/bulletin/<%= bulletin._id %>/edit" class="nav-accordion-item">
+                                    <i class="fas fa-edit me-2"></i>Edit Bulletin
+                                </a>
+                                <button class="nav-accordion-item" onclick="window.print()"
+                                    style="border: none; background: none; width: 100%; text-align: left;">
+                                    <i class="fas fa-print me-2"></i>Print Bulletin
+                                </button>
+                            </div>
+                        </div>
+                        <% } else { %>
+                            <div class="nav-section">
+                                <button class="nav-accordion-btn" onclick="window.print()">
+                                    <i class="fas fa-print me-1"></i>Print
+                                </button>
+                            </div>
+                            <% } %>
+                </div>
+
+                <!-- User Info -->
+                <% if (typeof user !=='undefined' && user) { %>
+                    <div class="user-info"
+                        title="<%= user.firstName %> <%= user.lastName %> (<%= user.role %>) - Online">
+                        <div class="user-avatar">
+                            <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %>
+                                <%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                                    <div class="user-status-indicator" title="Online"></div>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <form action="/auth/logout" method="POST" style="margin: 0;">
+                                        <button type="submit" class="dropdown-item"
+                                            style="border: none; background: none; width: 100%; text-align: left;">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
                         </div>
                     </div>
-                    <% } else { %>
-                    <div class="nav-section">
-                        <button class="nav-accordion-btn" onclick="window.print()">
-                            <i class="fas fa-print me-1"></i>Print
-                        </button>
-                    </div>
                     <% } %>
-                </div>
-                
-                <!-- User Info -->
-                <% if (typeof user !== 'undefined' && user) { %>
-                <div class="user-info" title="<%= user.firstName %> <%= user.lastName %> (<%= user.role %>) - Online">
-                    <div class="user-avatar">
-                        <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
-                        <div class="user-status-indicator" title="Online"></div>
-                    </div>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <form action="/auth/logout" method="POST" style="margin: 0;">
-                                    <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
-                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <% } %>
             </div>
         </div>
     </div>
@@ -705,512 +717,593 @@
                 </button>
             </div>
         </div>
-    <% } %>
-
-    <div class="bulletin-container">
-        <!-- Header Section -->
-        <div class="bulletin-header">
-            <!-- Church Logo -->
-            <div class="text-center">
-                <img src="/images/church-logo.png" alt="Church Logo" class="church-logo" onerror="this.style.display='none'">
-            </div>
-            
-            <!-- Ward Information -->
-            <div class="ward-name" data-field="wardName">
-                <%= bulletin.wardName %>
-            </div>
-            <div class="ward-location" data-field="wardLocation">
-                <%= bulletin.wardLocation %>
-            </div>
-            
-            <!-- Selected Image -->
-            <% if (bulletin.selectedImage && bulletin.selectedImage.url) { %>
-                <img src="<%= bulletin.selectedImage.url %>" alt="<%= bulletin.selectedImage.caption || 'Selected Image' %>" class="selected-image">
-            <% } %>
-            
-            <!-- Quote Section -->
-            <% if (bulletin.quote && bulletin.quote.text) { %>
-                <div class="quote-section">
-                    <div class="quote-text" data-field="quote.text">
-                        "<%= bulletin.quote.text %>"
-                    </div>
-                    <div class="quote-reference" data-field="quote.reference">
-                        <%= bulletin.quote.reference %>
-                    </div>
-                </div>
-            <% } %>
-        </div>
-
-        <!-- Content Section -->
-        <div class="bulletin-content">
-            <!-- Meeting Information -->
-            <div class="meeting-info">
-                <div class="meeting-date">
-                    <%= bulletin.formattedDate %>
-                </div>
-                <div class="meeting-type" data-field="meetingType">
-                    <%= bulletin.meetingType %>
-                </div>
-                <div class="meeting-time" data-field="meetingTime">
-                    <%= bulletin.meetingTime %>
-                </div>
-            </div>
-
-            <!-- Roles Section -->
-            <div class="roles-section">
-                <div class="role-line">
-                    <span class="role-title">Presiding</span>
-                    <span class="dots"></span>
-                    <span class="role-name editable-field" data-field="presiding"><%= bulletin.presiding %></span>
-                </div>
-                <div class="role-line">
-                    <span class="role-title">Conducting</span>
-                    <span class="dots"></span>
-                    <span class="role-name editable-field" data-field="conducting"><%= bulletin.conducting %></span>
-                </div>
-                <div class="role-line">
-                    <span class="role-title">Organist</span>
-                    <span class="dots"></span>
-                    <span class="role-name editable-field" data-field="organist"><%= bulletin.organist %></span>
-                </div>
-                <div class="role-line">
-                    <span class="role-title">Chorister</span>
-                    <span class="dots"></span>
-                    <span class="role-name editable-field" data-field="chorister"><%= bulletin.chorister %></span>
-                </div>
-            </div>
-
-            <!-- Welcome Section -->
-            <div class="welcome-section">
-                <strong>Welcome to our visitors!</strong><br>
-                We are delighted to have you worship with us today.
-            </div>
-
-            <div class="program-section">
-                <!-- Opening Hymn -->
-                <div class="program-item">
-                    <div class="program-line">
-                        <span class="program-title">Opening Hymn</span>
-                        <span class="dots"></span>
-                        <span class="editable-field" data-field="openingHymn.number"><%= bulletin.openingHymn.number %></span>
-                    </div>
-                    <div class="program-detail editable-field" data-field="openingHymn.title">
-                        <%= bulletin.openingHymn.title %>
-                    </div>
-                </div>
-
-                <!-- Invocation -->
-                <div class="program-item">
-                    <div class="program-line">
-                        <span class="program-title">Invocation</span>
-                        <span class="dots"></span>
-                        <span class="editable-field" data-field="invocation"><%= bulletin.invocation %></span>
-                    </div>
-                </div>
-
-                <!-- Ward Business -->
-                <div class="program-item">
-                    <div class="program-line">
-                        <span class="program-title">Ward Business</span>
-                    </div>
-                    <% if (bulletin.wardBusiness && bulletin.wardBusiness.display && bulletin.wardBusiness.items && bulletin.wardBusiness.items.length > 0) { %>
-                        <div class="ward-business">
-                            <div class="ward-business-header">Business Items:</div>
-                            <% bulletin.wardBusiness.items.forEach(item => { %>
-                                <div>• <%= item %></div>
-                            <% }); %>
-                        </div>
-                    <% } %>
-                </div>
-
-                <!-- Sacrament Hymn -->
-                <div class="program-item">
-                    <div class="program-line">
-                        <span class="program-title">Sacrament Hymn</span>
-                        <span class="dots"></span>
-                        <span class="editable-field" data-field="sacramentHymn.number"><%= bulletin.sacramentHymn.number %></span>
-                    </div>
-                    <div class="program-detail editable-field" data-field="sacramentHymn.title">
-                        <%= bulletin.sacramentHymn.title %>
-                    </div>
-                </div>
-
-                <!-- Administration of the Sacrament -->
-                <div class="centered-item">
-                    Administration of the Sacrament
-                </div>
-
-                <!-- Speakers -->
-                <div class="program-item">
-                    <div class="program-line">
-                        <span class="program-title">1st Speaker</span>
-                        <span class="dots"></span>
-                        <span class="editable-field" data-field="speakers.first.name"><%= bulletin.speakers.first.name %></span>
-                    </div>
-                    <% if (bulletin.speakers.first.topic) { %>
-                        <div class="program-detail editable-field" data-field="speakers.first.topic">
-                            Topic: <%= bulletin.speakers.first.topic %>
-                        </div>
-                    <% } %>
-                </div>
-
-                <!-- Special Music -->
-                <div class="program-item">
-                    <div class="program-line">
-                        <span class="program-title">Special Music</span>
-                        <span class="dots"></span>
-                        <span class="editable-field" data-field="specialMusic.performer"><%= bulletin.specialMusic.performer %></span>
-                    </div>
-                    <% if (bulletin.specialMusic.selection) { %>
-                        <div class="program-detail editable-field" data-field="specialMusic.selection">
-                            <%= bulletin.specialMusic.selection %>
-                        </div>
-                    <% } %>
-                </div>
-
-                <div class="program-item">
-                    <div class="program-line">
-                        <span class="program-title">2nd Speaker</span>
-                        <span class="dots"></span>
-                        <span class="editable-field" data-field="speakers.second.name"><%= bulletin.speakers.second.name %></span>
-                    </div>
-                    <% if (bulletin.speakers.second.topic) { %>
-                        <div class="program-detail editable-field" data-field="speakers.second.topic">
-                            Topic: <%= bulletin.speakers.second.topic %>
-                        </div>
-                    <% } %>
-                </div>
-
-                <!-- Closing Hymn -->
-                <div class="program-item">
-                    <div class="program-line">
-                        <span class="program-title">Closing Hymn</span>
-                        <span class="dots"></span>
-                        <span class="editable-field" data-field="closingHymn.number"><%= bulletin.closingHymn.number %></span>
-                    </div>
-                    <div class="program-detail editable-field" data-field="closingHymn.title">
-                        <%= bulletin.closingHymn.title %>
-                    </div>
-                </div>
-
-                <!-- Benediction -->
-                <div class="program-item">
-                    <div class="program-line">
-                        <span class="program-title">Benediction</span>
-                        <span class="dots"></span>
-                        <span class="editable-field" data-field="benediction"><%= bulletin.benediction %></span>
-                    </div>
-                </div>
-                
-                <!-- Come, Follow Me Section -->
-                <div class="program-section mt-4">
-                    <h4 class="section-header text-center mb-3" style="border-bottom: 1px solid #333; padding-bottom: 8px;">Come, Follow Me</h4>
-                    
-                    <div class="program-item">
-                        <div class="program-line">
-                            <span class="program-title"><%= (bulletin.comeFollowMe && bulletin.comeFollowMe.currentWeek && bulletin.comeFollowMe.currentWeek.date) ? bulletin.comeFollowMe.currentWeek.date : 'September 14' %></span>
-                            <span class="dots"></span>
-                            <span class="scripture-reference"><%= (bulletin.comeFollowMe && bulletin.comeFollowMe.currentWeek && bulletin.comeFollowMe.currentWeek.scripture) ? bulletin.comeFollowMe.currentWeek.scripture : 'D&C 98-101' %></span>
-                            <span class="scripture-title"><%= (bulletin.comeFollowMe && bulletin.comeFollowMe.currentWeek && bulletin.comeFollowMe.currentWeek.title) ? bulletin.comeFollowMe.currentWeek.title : '"Be Still and Know that I Am God"' %></span>
-                        </div>
-                    </div>
-                    
-                    <div class="program-item">
-                        <div class="program-line">
-                            <span class="program-title"><%= (bulletin.comeFollowMe && bulletin.comeFollowMe.nextWeek && bulletin.comeFollowMe.nextWeek.date) ? bulletin.comeFollowMe.nextWeek.date : 'September 21' %></span>
-                            <span class="dots"></span>
-                            <span class="scripture-reference"><%= (bulletin.comeFollowMe && bulletin.comeFollowMe.nextWeek && bulletin.comeFollowMe.nextWeek.scripture) ? bulletin.comeFollowMe.nextWeek.scripture : 'D&C 102-105' %></span>
-                            <span class="scripture-title"><%= (bulletin.comeFollowMe && bulletin.comeFollowMe.nextWeek && bulletin.comeFollowMe.nextWeek.title) ? bulletin.comeFollowMe.nextWeek.title : '"After Much Tribulation Cometh the Blessing"' %></span>
-                        </div>
-                    </div>
-                    
-                    <div class="program-item">
-                        <div class="program-line">
-                            <span class="program-title"><%= (bulletin.comeFollowMe && bulletin.comeFollowMe.thirdWeek && bulletin.comeFollowMe.thirdWeek.date) ? bulletin.comeFollowMe.thirdWeek.date : 'September 28' %></span>
-                            <span class="dots"></span>
-                            <span class="scripture-reference"><%= (bulletin.comeFollowMe && bulletin.comeFollowMe.thirdWeek && bulletin.comeFollowMe.thirdWeek.scripture) ? bulletin.comeFollowMe.thirdWeek.scripture : 'D&C 106-108' %></span>
-                            <span class="scripture-title"><%= (bulletin.comeFollowMe && bulletin.comeFollowMe.thirdWeek && bulletin.comeFollowMe.thirdWeek.title) ? bulletin.comeFollowMe.thirdWeek.title : '"The Order of the Son of God"' %></span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Announcements Section -->
-                <div class="program-section mt-4">
-                    <h4 class="section-header text-center mb-3" style="border-bottom: 1px solid #333; padding-bottom: 8px;">Announcements</h4>
-                    <div class="announcements-content" style="white-space: pre-line; line-height: 1.6; font-size: 14px; text-align: left; padding: 0 20px;">
-                        <%- bulletin.getFinalAnnouncementsText() || `September 14th: Family Heritage Follow-up Training! 7:00 in the Relief Society room.
-
-September 27th: Western Night at Rod and Lisa Petersen's Barn.
-
-Faith-based Addiction Recovery Program in person or on Zoom every Wednesday evening at 7:00 p.m. If you have questions, please call or text Sister Hawes (541) 510-4863 or email to: oregonfour@q.com.
-
-Please follow these missionary pages for daily enlightenment and a way to share the gospel of Jesus Christ with your friends: Facebook-Followers of Christ in Southern Oregon | Instagram-hopeinhim.Southernoregon
-
-Please help keep our Sister Missionaries fed! Sign up via the new digital calendar at missmeal.onrender.com to secure your spot!
-
-General Conference Tickets! If you are interested in attending the October 2025 General Conference, please contact Ardel Wicks at ardelwicks@gmail.com or (541) 228-4136 to get tickets.
-
-The Home Storage Center hours have changed! The update hours are on Thursdays from 12:00-5:00 and Saturdays from 10:00-1:00.
-
-Got an announcement? Text Elise Luke at (541) 373-7908
-
-Temple Prep Class: Those planning to attend the temple for the first time, please contact Whaanga (Fonga) Kewene at (541) 914-4104 or rwwkewene@gmail.com.
-
-To Dine with the Missionaries: Contact Kelly Reynolds at (541) 514-8252 to set up an appointment.` %>
-                    </div>
-                </div>
-                
-                <!-- Contact Information Section -->
-                <div class="program-section mt-4">
-                    <h4 class="section-header text-center mb-3" style="border-bottom: 1px solid #333; padding-bottom: 8px;">Contact Information</h4>
-                    <div class="contact-table">
-                        <div class="contact-header">
-                            <div class="contact-col-title">Title</div>
-                            <div class="contact-col-name">Name</div>
-                            <div class="contact-col-phone">Phone Number</div>
-                        </div>
-                        <div class="contact-row">
-                            <div class="contact-col-title">Bishop</div>
-                            <div class="contact-col-name">Ivan Walker</div>
-                            <div class="contact-col-phone">(541) 579-4436</div>
-                        </div>
-                        <div class="contact-row">
-                            <div class="contact-col-title">1st Counselor</div>
-                            <div class="contact-col-name">Jeff Krebs</div>
-                            <div class="contact-col-phone">(541) 817-4150</div>
-                        </div>
-                        <div class="contact-row">
-                            <div class="contact-col-title">2nd Counselor</div>
-                            <div class="contact-col-name">Jason Ryan</div>
-                            <div class="contact-col-phone">(541) 373-1891</div>
-                        </div>
-                        <div class="contact-row">
-                            <div class="contact-col-title">Executive Secretary</div>
-                            <div class="contact-col-name">Jesse Nelson</div>
-                            <div class="contact-col-phone">(509) 607-4929</div>
-                        </div>
-                        <div class="contact-row">
-                            <div class="contact-col-title">Ward Clerk</div>
-                            <div class="contact-col-name">Lowden Hansen</div>
-                            <div class="contact-col-phone">(541) 514-7879</div>
-                        </div>
-                        <div class="contact-row">
-                            <div class="contact-col-title">Financial Clerk</div>
-                            <div class="contact-col-name">Moroni Luke</div>
-                            <div class="contact-col-phone">(541) 232-0324</div>
-                        </div>
-                        <div class="contact-row">
-                            <div class="contact-col-title">Elders Quorum President</div>
-                            <div class="contact-col-name">Tony Moe</div>
-                            <div class="contact-col-phone">(541) 321-2286</div>
-                        </div>
-                        <div class="contact-row">
-                            <div class="contact-col-title">Relief Society President</div>
-                            <div class="contact-col-name">Marie Aylworth</div>
-                            <div class="contact-col-phone">(541) 954-2327</div>
-                        </div>
-                        <div class="contact-row">
-                            <div class="contact-col-title">Young Women President</div>
-                            <div class="contact-col-name">Kristan Johnston</div>
-                            <div class="contact-col-phone">(801) 319-9993</div>
-                        </div>
-                        <div class="contact-row">
-                            <div class="contact-col-title">Primary President</div>
-                            <div class="contact-col-name">Amy Poeschl</div>
-                            <div class="contact-col-phone">(541) 852-3191</div>
-                        </div>
-                        <div class="contact-row">
-                            <div class="contact-col-title">Temple & Family History</div>
-                            <div class="contact-col-name">David Freeman</div>
-                            <div class="contact-col-phone">(541) 600-7803</div>
-                        </div>
-                        <div class="contact-row">
-                            <div class="contact-col-title">Ward Building Rep</div>
-                            <div class="contact-col-name">Tim Heise</div>
-                            <div class="contact-col-phone">(385) 239-9524</div>
-                        </div>
-                        <div class="contact-row">
-                            <div class="contact-col-title">Music Chairman</div>
-                            <div class="contact-col-name">Patricia Skeen</div>
-                            <div class="contact-col-phone">(541) 689-2190</div>
-                        </div>
-                        <div class="contact-row">
-                            <div class="contact-col-title">Ward Mission Leader</div>
-                            <div class="contact-col-name">John Lancaster</div>
-                            <div class="contact-col-phone">(208) 421-3179</div>
-                        </div>
-                        <div class="contact-row">
-                            <div class="contact-col-title">Sister Missionaries</div>
-                            <div class="contact-col-name">Sisters</div>
-                            <div class="contact-col-phone">(541) 232-1081</div>
-                        </div>
-                        <div class="contact-row">
-                            <div class="contact-col-title">Elders</div>
-                            <div class="contact-col-name">Elders</div>
-                            <div class="contact-col-phone">(541) 285-5017</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Additional Information Section -->
-                <div class="program-section mt-4">
-                    <h4 class="section-header text-center mb-3" style="border-bottom: 1px solid #333; padding-bottom: 8px;">Additional Information</h4>
-                    <div style="padding: 0 20px; font-size: 14px; line-height: 1.8;">
-                        
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #6f42c1;">Appointments with the Bishop:</strong><br>
-                            To schedule appointments, please contact Jesse Nelson, Executive Secretary for the Bishop: 509.607.4929
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #6f42c1;">Ward Temple Recommends:</strong><br>
-                            Interviews are held on the 2nd Tuesday of each month from 6:00 pm to 7:00 pm in the bishop's office, on a first-come, first-serve basis. Sunday dress if possible.
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #6f42c1;">Stake Temple Recommends:</strong><br>
-                            The Stake Presidency is available for interviews on the 2nd & 3rd Tuesdays 6:00 pm to 7:00 pm at the Danebo building. Sunday Dress. If you need to meet specifically with the Stake President, schedule the appt with Ardel Wicks at 541-228-4136.
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #6f42c1;">Eugene Family Search Center:</strong><br>
-                            768 East 16th Avenue. Open Tue, Wed, & Thurs. 9a-3p and 6p-9p. 2nd and 3rd Sat 10a-2p. Ancestry.com is free. More info? Call Brother Finn at 541-461-5506.
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #6f42c1;">Family Search Center:</strong><br>
-                            Rose Turtura (541)683-4752 and Bob Baker (541)689-2455.<br>
-                            <a href="http://www.eugenefamilyhistory.org/" target="_blank" style="color: #007bff;">www.eugenefamilyhistory.org/</a>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #6f42c1;">Room Scheduling:</strong><br>
-                            To schedule specific rooms for an auxiliary activity in the Danebo building or pavilion, contact Margaret Hansen at 541.556.3296 or <a href="mailto:gregnmeg@gmail.com" style="color: #007bff;">gregnmeg@gmail.com</a>.
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #6f42c1;">LDS Employment:</strong><br>
-                            Located at the LDS Institute Building 768 E.16th, 541-747-1524
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #6f42c1;">Healing Through Christ:</strong><br>
-                            The LDS Addiction Recovery Support Group every Wednesday, 7:00 pm at the River Road Building, Room 24 (3132 River Rd., Eugene). These are confidential meetings. Anyone 18 or older is invited.
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #6f42c1;">Portland Temple Visitors Center:</strong><br>
-                            Open 365 days a year from 9 am-9 pm. All invited.
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #6f42c1;">Portland Temple Baptistry:</strong><br>
-                            The "open period" for family file ordinances are: Sat. 9 am-10:30 am and Tues-Fri. 4pm-5pm. Schedule by calling the temple office at 503.639.7066.
-                        </div>
-                        
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Navigation Functions
-        function toggleAccordion(accordionId) {
-            const content = document.getElementById(accordionId);
-            if (!content) return;
-            
-            const button = content.previousElementSibling;
-            const icon = button ? button.querySelector('.accordion-icon') : null;
-
-            content.classList.toggle('show');
-            if (icon) {
-                icon.classList.toggle('rotated');
-            }
-        }
-    </script>
-
-    <% if (user && user.permissions && user.permissions.accessBulletinManagement) { %>
-    <script>
-        // Quick edit functionality
-        document.querySelectorAll('.editable-field').forEach(field => {
-            field.addEventListener('click', function() {
-                const fieldName = this.dataset.field;
-                const currentValue = this.textContent.trim();
-                
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.value = currentValue;
-                input.className = 'form-control form-control-sm';
-                input.style.fontSize = window.getComputedStyle(this).fontSize;
-                
-                const parent = this.parentNode;
-                parent.replaceChild(input, this);
-                input.focus();
-                input.select();
-                
-                const saveChanges = () => {
-                    const newValue = input.value.trim();
-                    
-                    fetch(`/bulletin/<%= bulletin._id %>/quick-update`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            field: fieldName,
-                            value: newValue
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            field.textContent = newValue;
-                            parent.replaceChild(field, input);
-                        } else {
-                            alert('Error updating field: ' + data.message);
-                            parent.replaceChild(field, input);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Error updating field');
-                        parent.replaceChild(field, input);
-                    });
-                };
-                
-                input.addEventListener('blur', saveChanges);
-                input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        saveChanges();
-                    } else if (e.key === 'Escape') {
-                        parent.replaceChild(field, input);
-                    }
-                });
-            });
-        });
-    </script>
-    <% } %>
-
-    <!-- Floating Navigation -->
-    <div class="floating-nav">
-        <% if (user && ((user.permissions && user.permissions.accessBulletinManagement) || user.role === 'admin' || user.role === 'manager')) { %>
-            <a href="/bulletin/<%= bulletin._id %>/edit" class="fab fab-primary" title="Edit Bulletin">
-                <i class="fas fa-edit"></i>
-            </a>
-            <a href="/bulletin/admin" class="fab fab-primary" title="Admin Dashboard">
-                <i class="fas fa-cog"></i>
-            </a>
         <% } %>
-        <button onclick="window.print()" class="fab fab-secondary" title="Print Bulletin">
-            <i class="fas fa-print"></i>
-        </button>
-        <a href="/" class="fab fab-secondary" title="Main Dashboard">
-            <i class="fas fa-home"></i>
-        </a>
-    </div>
+
+            <div class="bulletin-container">
+                <!-- Header Section -->
+                <div class="bulletin-header">
+                    <!-- Church Logo -->
+                    <div class="text-center">
+                        <img src="/images/church-logo.png" alt="Church Logo" class="church-logo"
+                            onerror="this.style.display='none'">
+                    </div>
+
+                    <!-- Ward Information -->
+                    <div class="ward-name" data-field="wardName">
+                        <%= bulletin.wardName %>
+                    </div>
+                    <div class="ward-location" data-field="wardLocation">
+                        <%= bulletin.wardLocation %>
+                    </div>
+
+                    <!-- Selected Image -->
+                    <% if (bulletin.selectedImage && bulletin.selectedImage.url) { %>
+                        <img src="<%= bulletin.selectedImage.url %>"
+                            alt="<%= bulletin.selectedImage.caption || 'Selected Image' %>" class="selected-image">
+                        <% } %>
+
+                            <!-- Quote Section -->
+                            <% if (bulletin.quote && bulletin.quote.text) { %>
+                                <div class="quote-section">
+                                    <div class="quote-text" data-field="quote.text">
+                                        "<%= bulletin.quote.text %>"
+                                    </div>
+                                    <div class="quote-reference" data-field="quote.reference">
+                                        <%= bulletin.quote.reference %>
+                                    </div>
+                                </div>
+                                <% } %>
+                </div>
+
+                <!-- Content Section -->
+                <div class="bulletin-content">
+                    <!-- Meeting Information -->
+                    <div class="meeting-info">
+                        <div class="meeting-date">
+                            <%= bulletin.formattedDate %>
+                        </div>
+                        <div class="meeting-type" data-field="meetingType">
+                            <%= bulletin.meetingType %>
+                        </div>
+                        <div class="meeting-time" data-field="meetingTime">
+                            <%= bulletin.meetingTime %>
+                        </div>
+                    </div>
+
+                    <!-- Roles Section -->
+                    <div class="roles-section">
+                        <div class="role-line">
+                            <span class="role-title">Presiding</span>
+                            <span class="dots"></span>
+                            <span class="role-name editable-field" data-field="presiding">
+                                <%= bulletin.presiding %>
+                            </span>
+                        </div>
+                        <div class="role-line">
+                            <span class="role-title">Conducting</span>
+                            <span class="dots"></span>
+                            <span class="role-name editable-field" data-field="conducting">
+                                <%= bulletin.conducting %>
+                            </span>
+                        </div>
+                        <div class="role-line">
+                            <span class="role-title">Organist</span>
+                            <span class="dots"></span>
+                            <span class="role-name editable-field" data-field="organist">
+                                <%= bulletin.organist %>
+                            </span>
+                        </div>
+                        <div class="role-line">
+                            <span class="role-title">Chorister</span>
+                            <span class="dots"></span>
+                            <span class="role-name editable-field" data-field="chorister">
+                                <%= bulletin.chorister %>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Welcome Section -->
+                    <div class="welcome-section">
+                        <strong>Welcome to our visitors!</strong><br>
+                        We are delighted to have you worship with us today.
+                    </div>
+
+                    <div class="program-section">
+                        <!-- Opening Hymn -->
+                        <div class="program-item">
+                            <div class="program-line">
+                                <span class="program-title">Opening Hymn</span>
+                                <span class="dots"></span>
+                                <span class="editable-field" data-field="openingHymn.number">
+                                    <%= bulletin.openingHymn.number %>
+                                </span>
+                            </div>
+                            <div class="program-detail editable-field" data-field="openingHymn.title">
+                                <%= bulletin.openingHymn.title %>
+                            </div>
+                        </div>
+
+                        <!-- Invocation -->
+                        <div class="program-item">
+                            <div class="program-line">
+                                <span class="program-title">Invocation</span>
+                                <span class="dots"></span>
+                                <span class="editable-field" data-field="invocation">
+                                    <%= bulletin.invocation %>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Ward Business -->
+                        <div class="program-item">
+                            <div class="program-line">
+                                <span class="program-title">Ward Business</span>
+                            </div>
+                            <% if (bulletin.wardBusiness && bulletin.wardBusiness.display && bulletin.wardBusiness.items
+                                && bulletin.wardBusiness.items.length> 0) { %>
+                                <div class="ward-business">
+                                    <div class="ward-business-header">Business Items:</div>
+                                    <% bulletin.wardBusiness.items.forEach(item=> { %>
+                                        <div>• <%= item %>
+                                        </div>
+                                        <% }); %>
+                                </div>
+                                <% } %>
+                        </div>
+
+                        <!-- Sacrament Hymn -->
+                        <div class="program-item">
+                            <div class="program-line">
+                                <span class="program-title">Sacrament Hymn</span>
+                                <span class="dots"></span>
+                                <span class="editable-field" data-field="sacramentHymn.number">
+                                    <%= bulletin.sacramentHymn.number %>
+                                </span>
+                            </div>
+                            <div class="program-detail editable-field" data-field="sacramentHymn.title">
+                                <%= bulletin.sacramentHymn.title %>
+                            </div>
+                        </div>
+
+                        <!-- Administration of the Sacrament -->
+                        <div class="centered-item">
+                            Administration of the Sacrament
+                        </div>
+
+                        <!-- Speakers -->
+                        <div class="program-item">
+                            <div class="program-line">
+                                <span class="program-title">1st Speaker</span>
+                                <span class="dots"></span>
+                                <span class="editable-field" data-field="speakers.first.name">
+                                    <%= bulletin.speakers.first.name %>
+                                </span>
+                            </div>
+                            <% if (bulletin.speakers.first.topic) { %>
+                                <div class="program-detail editable-field" data-field="speakers.first.topic">
+                                    Topic: <%= bulletin.speakers.first.topic %>
+                                </div>
+                                <% } %>
+                        </div>
+
+                        <!-- Special Music -->
+                        <div class="program-item">
+                            <div class="program-line">
+                                <span class="program-title">Special Music</span>
+                                <span class="dots"></span>
+                                <span class="editable-field" data-field="specialMusic.performer">
+                                    <%= bulletin.specialMusic.performer %>
+                                </span>
+                            </div>
+                            <% if (bulletin.specialMusic.selection) { %>
+                                <div class="program-detail editable-field" data-field="specialMusic.selection">
+                                    <%= bulletin.specialMusic.selection %>
+                                </div>
+                                <% } %>
+                        </div>
+
+                        <div class="program-item">
+                            <div class="program-line">
+                                <span class="program-title">2nd Speaker</span>
+                                <span class="dots"></span>
+                                <span class="editable-field" data-field="speakers.second.name">
+                                    <%= bulletin.speakers.second.name %>
+                                </span>
+                            </div>
+                            <% if (bulletin.speakers.second.topic) { %>
+                                <div class="program-detail editable-field" data-field="speakers.second.topic">
+                                    Topic: <%= bulletin.speakers.second.topic %>
+                                </div>
+                                <% } %>
+                        </div>
+
+                        <!-- Closing Hymn -->
+                        <div class="program-item">
+                            <div class="program-line">
+                                <span class="program-title">Closing Hymn</span>
+                                <span class="dots"></span>
+                                <span class="editable-field" data-field="closingHymn.number">
+                                    <%= bulletin.closingHymn.number %>
+                                </span>
+                            </div>
+                            <div class="program-detail editable-field" data-field="closingHymn.title">
+                                <%= bulletin.closingHymn.title %>
+                            </div>
+                        </div>
+
+                        <!-- Benediction -->
+                        <div class="program-item">
+                            <div class="program-line">
+                                <span class="program-title">Benediction</span>
+                                <span class="dots"></span>
+                                <span class="editable-field" data-field="benediction">
+                                    <%= bulletin.benediction %>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Come, Follow Me Section -->
+                        <div class="program-section mt-4">
+                            <h4 class="section-header text-center mb-3"
+                                style="border-bottom: 1px solid #333; padding-bottom: 8px;">Come, Follow Me</h4>
+
+                            <div class="program-item">
+                                <div class="program-line">
+                                    <span class="program-title">
+                                        <%= (bulletin.comeFollowMe && bulletin.comeFollowMe.currentWeek &&
+                                            bulletin.comeFollowMe.currentWeek.date) ?
+                                            bulletin.comeFollowMe.currentWeek.date : 'September 14' %>
+                                    </span>
+                                    <span class="dots"></span>
+                                    <span class="scripture-reference">
+                                        <%= (bulletin.comeFollowMe && bulletin.comeFollowMe.currentWeek &&
+                                            bulletin.comeFollowMe.currentWeek.scripture) ?
+                                            bulletin.comeFollowMe.currentWeek.scripture : 'D&C 98-101' %>
+                                    </span>
+                                    <span class="scripture-title">
+                                        <%= (bulletin.comeFollowMe && bulletin.comeFollowMe.currentWeek &&
+                                            bulletin.comeFollowMe.currentWeek.title) ?
+                                            bulletin.comeFollowMe.currentWeek.title
+                                            : '"Be Still and Know that I Am God"' %>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="program-item">
+                                <div class="program-line">
+                                    <span class="program-title">
+                                        <%= (bulletin.comeFollowMe && bulletin.comeFollowMe.nextWeek &&
+                                            bulletin.comeFollowMe.nextWeek.date) ? bulletin.comeFollowMe.nextWeek.date
+                                            : 'September 21' %>
+                                    </span>
+                                    <span class="dots"></span>
+                                    <span class="scripture-reference">
+                                        <%= (bulletin.comeFollowMe && bulletin.comeFollowMe.nextWeek &&
+                                            bulletin.comeFollowMe.nextWeek.scripture) ?
+                                            bulletin.comeFollowMe.nextWeek.scripture : 'D&C 102-105' %>
+                                    </span>
+                                    <span class="scripture-title">
+                                        <%= (bulletin.comeFollowMe && bulletin.comeFollowMe.nextWeek &&
+                                            bulletin.comeFollowMe.nextWeek.title) ? bulletin.comeFollowMe.nextWeek.title
+                                            : '"After Much Tribulation Cometh the Blessing"' %>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="program-item">
+                                <div class="program-line">
+                                    <span class="program-title">
+                                        <%= (bulletin.comeFollowMe && bulletin.comeFollowMe.thirdWeek &&
+                                            bulletin.comeFollowMe.thirdWeek.date) ? bulletin.comeFollowMe.thirdWeek.date
+                                            : 'September 28' %>
+                                    </span>
+                                    <span class="dots"></span>
+                                    <span class="scripture-reference">
+                                        <%= (bulletin.comeFollowMe && bulletin.comeFollowMe.thirdWeek &&
+                                            bulletin.comeFollowMe.thirdWeek.scripture) ?
+                                            bulletin.comeFollowMe.thirdWeek.scripture : 'D&C 106-108' %>
+                                    </span>
+                                    <span class="scripture-title">
+                                        <%= (bulletin.comeFollowMe && bulletin.comeFollowMe.thirdWeek &&
+                                            bulletin.comeFollowMe.thirdWeek.title) ?
+                                            bulletin.comeFollowMe.thirdWeek.title : '"The Order of the Son of God"' %>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Announcements Section -->
+                        <div class="program-section mt-4">
+                            <h4 class="section-header text-center mb-3"
+                                style="border-bottom: 1px solid #333; padding-bottom: 8px;">Announcements</h4>
+                            <div class="announcements-content"
+                                style="white-space: pre-line; line-height: 1.6; font-size: 14px; text-align: left; padding: 0 20px;">
+                                <%- bulletin.getFinalAnnouncementsText() || `September 14th: Family Heritage Follow-up
+                                    Training! 7:00 in the Relief Society room. September 27th: Western Night at Rod and
+                                    Lisa Petersen's Barn. Faith-based Addiction Recovery Program in person or on Zoom
+                                    every Wednesday evening at 7:00 p.m. If you have questions, please call or text
+                                    Sister Hawes (541) 510-4863 or email to: oregonfour@q.com. Please follow these
+                                    missionary pages for daily enlightenment and a way to share the gospel of Jesus
+                                    Christ with your friends: Facebook-Followers of Christ in Southern Oregon |
+                                    Instagram-hopeinhim.Southernoregon Please help keep our Sister Missionaries fed!
+                                    Sign up via the new digital calendar at missmeal.onrender.com to secure your spot!
+                                    General Conference Tickets! If you are interested in attending the October 2025
+                                    General Conference, please contact Ardel Wicks at ardelwicks@gmail.com or (541)
+                                    228-4136 to get tickets. The Home Storage Center hours have changed! The update
+                                    hours are on Thursdays from 12:00-5:00 and Saturdays from 10:00-1:00. Got an
+                                    announcement? Text Elise Luke at (541) 373-7908 Temple Prep Class: Those planning to
+                                    attend the temple for the first time, please contact Whaanga (Fonga) Kewene at (541)
+                                    914-4104 or rwwkewene@gmail.com. To Dine with the Missionaries: Contact Kelly
+                                    Reynolds at (541) 514-8252 to set up an appointment.` %>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information Section -->
+                        <div class="program-section mt-4">
+                            <h4 class="section-header text-center mb-3"
+                                style="border-bottom: 1px solid #333; padding-bottom: 8px;">Contact Information</h4>
+                            <div class="contact-table">
+                                <div class="contact-header">
+                                    <div class="contact-col-title">Title</div>
+                                    <div class="contact-col-name">Name</div>
+                                    <div class="contact-col-phone">Phone Number</div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-col-title">Bishop</div>
+                                    <div class="contact-col-name">Ivan Walker</div>
+                                    <div class="contact-col-phone">(541) 579-4436</div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-col-title">1st Counselor</div>
+                                    <div class="contact-col-name">Jeff Krebs</div>
+                                    <div class="contact-col-phone">(541) 817-4150</div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-col-title">2nd Counselor</div>
+                                    <div class="contact-col-name">Jason Ryan</div>
+                                    <div class="contact-col-phone">(541) 373-1891</div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-col-title">Executive Secretary</div>
+                                    <div class="contact-col-name">Jesse Nelson</div>
+                                    <div class="contact-col-phone">(509) 607-4929</div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-col-title">Ward Clerk</div>
+                                    <div class="contact-col-name">Lowden Hansen</div>
+                                    <div class="contact-col-phone">(541) 514-7879</div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-col-title">Financial Clerk</div>
+                                    <div class="contact-col-name">Moroni Luke</div>
+                                    <div class="contact-col-phone">(541) 232-0324</div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-col-title">Elders Quorum President</div>
+                                    <div class="contact-col-name">Tony Moe</div>
+                                    <div class="contact-col-phone">(541) 321-2286</div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-col-title">Relief Society President</div>
+                                    <div class="contact-col-name">Marie Aylworth</div>
+                                    <div class="contact-col-phone">(541) 954-2327</div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-col-title">Young Women President</div>
+                                    <div class="contact-col-name">Kristan Johnston</div>
+                                    <div class="contact-col-phone">(801) 319-9993</div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-col-title">Primary President</div>
+                                    <div class="contact-col-name">Amy Poeschl</div>
+                                    <div class="contact-col-phone">(541) 852-3191</div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-col-title">Temple & Family History</div>
+                                    <div class="contact-col-name">David Freeman</div>
+                                    <div class="contact-col-phone">(541) 600-7803</div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-col-title">Ward Building Rep</div>
+                                    <div class="contact-col-name">Tim Heise</div>
+                                    <div class="contact-col-phone">(385) 239-9524</div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-col-title">Music Chairman</div>
+                                    <div class="contact-col-name">Patricia Skeen</div>
+                                    <div class="contact-col-phone">(541) 689-2190</div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-col-title">Ward Mission Leader</div>
+                                    <div class="contact-col-name">John Lancaster</div>
+                                    <div class="contact-col-phone">(208) 421-3179</div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-col-title">Sister Missionaries</div>
+                                    <div class="contact-col-name">Sisters</div>
+                                    <div class="contact-col-phone">(541) 232-1081</div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-col-title">Elders</div>
+                                    <div class="contact-col-name">Elders</div>
+                                    <div class="contact-col-phone">(541) 285-5017</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information Section -->
+                        <div class="program-section mt-4">
+                            <h4 class="section-header text-center mb-3"
+                                style="border-bottom: 1px solid #333; padding-bottom: 8px;">Additional Information</h4>
+                            <div style="padding: 0 20px; font-size: 14px; line-height: 1.8;">
+
+                                <div style="margin-bottom: 15px;">
+                                    <strong style="color: #6f42c1;">Appointments with the Bishop:</strong><br>
+                                    To schedule appointments, please contact Jesse Nelson, Executive Secretary for the
+                                    Bishop: 509.607.4929
+                                </div>
+
+                                <div style="margin-bottom: 15px;">
+                                    <strong style="color: #6f42c1;">Ward Temple Recommends:</strong><br>
+                                    Interviews are held on the 2nd Tuesday of each month from 6:00 pm to 7:00 pm in the
+                                    bishop's office, on a first-come, first-serve basis. Sunday dress if possible.
+                                </div>
+
+                                <div style="margin-bottom: 15px;">
+                                    <strong style="color: #6f42c1;">Stake Temple Recommends:</strong><br>
+                                    The Stake Presidency is available for interviews on the 2nd & 3rd Tuesdays 6:00 pm
+                                    to 7:00 pm at the Danebo building. Sunday Dress. If you need to meet specifically
+                                    with the Stake President, schedule the appt with Ardel Wicks at 541-228-4136.
+                                </div>
+
+                                <div style="margin-bottom: 15px;">
+                                    <strong style="color: #6f42c1;">Eugene Family Search Center:</strong><br>
+                                    768 East 16th Avenue. Open Tue, Wed, & Thurs. 9a-3p and 6p-9p. 2nd and 3rd Sat
+                                    10a-2p. Ancestry.com is free. More info? Call Brother Finn at 541-461-5506.
+                                </div>
+
+                                <div style="margin-bottom: 15px;">
+                                    <strong style="color: #6f42c1;">Family Search Center:</strong><br>
+                                    Rose Turtura (541)683-4752 and Bob Baker (541)689-2455.<br>
+                                    <a href="http://www.eugenefamilyhistory.org/" target="_blank"
+                                        style="color: #007bff;">www.eugenefamilyhistory.org/</a>
+                                </div>
+
+                                <div style="margin-bottom: 15px;">
+                                    <strong style="color: #6f42c1;">Room Scheduling:</strong><br>
+                                    To schedule specific rooms for an auxiliary activity in the Danebo building or
+                                    pavilion, contact Margaret Hansen at 541.556.3296 or <a
+                                        href="mailto:gregnmeg@gmail.com" style="color: #007bff;">gregnmeg@gmail.com</a>.
+                                </div>
+
+                                <div style="margin-bottom: 15px;">
+                                    <strong style="color: #6f42c1;">LDS Employment:</strong><br>
+                                    Located at the LDS Institute Building 768 E.16th, 541-747-1524
+                                </div>
+
+                                <div style="margin-bottom: 15px;">
+                                    <strong style="color: #6f42c1;">Healing Through Christ:</strong><br>
+                                    The LDS Addiction Recovery Support Group every Wednesday, 7:00 pm at the River Road
+                                    Building, Room 24 (3132 River Rd., Eugene). These are confidential meetings. Anyone
+                                    18 or older is invited.
+                                </div>
+
+                                <div style="margin-bottom: 15px;">
+                                    <strong style="color: #6f42c1;">Portland Temple Visitors Center:</strong><br>
+                                    Open 365 days a year from 9 am-9 pm. All invited.
+                                </div>
+
+                                <div style="margin-bottom: 15px;">
+                                    <strong style="color: #6f42c1;">Portland Temple Baptistry:</strong><br>
+                                    The "open period" for family file ordinances are: Sat. 9 am-10:30 am and Tues-Fri.
+                                    4pm-5pm. Schedule by calling the temple office at 503.639.7066.
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+            <script>
+                // Navigation Functions
+                function toggleAccordion(accordionId) {
+                    const content = document.getElementById(accordionId);
+                    if (!content) return;
+
+                    const button = content.previousElementSibling;
+                    const icon = button ? button.querySelector('.accordion-icon') : null;
+
+                    content.classList.toggle('show');
+                    if (icon) {
+                        icon.classList.toggle('rotated');
+                    }
+                }
+            </script>
+
+            <% if (user && user.permissions && user.permissions.accessBulletinManagement) { %>
+                <script>
+                    // Quick edit functionality
+                    document.querySelectorAll('.editable-field').forEach(field => {
+                        field.addEventListener('click', function () {
+                            const fieldName = this.dataset.field;
+                            const currentValue = this.textContent.trim();
+
+                            const input = document.createElement('input');
+                            input.type = 'text';
+                            input.value = currentValue;
+                            input.className = 'form-control form-control-sm';
+                            input.style.fontSize = window.getComputedStyle(this).fontSize;
+
+                            const parent = this.parentNode;
+                            parent.replaceChild(input, this);
+                            input.focus();
+                            input.select();
+
+                            const saveChanges = () => {
+                                const newValue = input.value.trim();
+
+                                fetch(`/bulletin/<%= bulletin._id %>/quick-update`, {
+                                    method: 'PATCH',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        field: fieldName,
+                                        value: newValue
+                                    })
+                                })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            field.textContent = newValue;
+                                            parent.replaceChild(field, input);
+                                        } else {
+                                            alert('Error updating field: ' + data.message);
+                                            parent.replaceChild(field, input);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error:', error);
+                                        alert('Error updating field');
+                                        parent.replaceChild(field, input);
+                                    });
+                            };
+
+                            input.addEventListener('blur', saveChanges);
+                            input.addEventListener('keypress', function (e) {
+                                if (e.key === 'Enter') {
+                                    saveChanges();
+                                } else if (e.key === 'Escape') {
+                                    parent.replaceChild(field, input);
+                                }
+                            });
+                        });
+                    });
+                </script>
+                <% } %>
+
+                    <!-- Floating Navigation -->
+                    <div class="floating-nav">
+                        <% if (user && ((user.permissions && user.permissions.accessBulletinManagement) ||
+                            user.role==='admin' || user.role==='manager' )) { %>
+                            <a href="/bulletin/<%= bulletin._id %>/edit" class="fab fab-primary" title="Edit Bulletin">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="/bulletin/admin" class="fab fab-primary" title="Admin Dashboard">
+                                <i class="fas fa-cog"></i>
+                            </a>
+                            <% } %>
+                                <button onclick="window.print()" class="fab fab-secondary" title="Print Bulletin">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                                <a href="/" class="fab fab-secondary" title="Main Dashboard">
+                                    <i class="fas fa-home"></i>
+                                </a>
+                    </div>
 </body>
+
 </html>
