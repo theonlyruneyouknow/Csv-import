@@ -1,20 +1,36 @@
 <!-- Navigation Container -->
 <div class="navigation-container">
+    <!-- Dashboard Button -->
+    <div class="nav-section">
+        <a href="/purchase-orders" class="nav-accordion-btn <%= currentPage === 'purchase-orders' ? 'active' : '' %>" style="text-decoration: none;">
+            🏠 Dashboard
+        </a>
+    </div>
+
     <!-- Dashboards Accordion -->
     <div class="nav-section">
         <button class="nav-accordion-btn" onclick="toggleAccordion('dashboardsAccordion')">
             📊 Dashboards <span class="accordion-icon">▼</span>
         </button>
         <div id="dashboardsAccordion" class="nav-accordion-content">
-            <a href="/purchase-orders" class="nav-accordion-item <%= currentPage === 'purchase-orders' ? 'active' : '' %>">🏠 PO Dashboard</a>
-            <a href="/receiving" class="nav-accordion-item <%= currentPage === 'receiving' ? 'active' : '' %>">🚚 Receiving Dashboard</a>
-            <a href="/dropship" class="nav-accordion-item <%= currentPage === 'dropship' ? 'active' : '' %>">🚢 Dropship Dashboard</a>
-            <a href="/vendors" class="nav-accordion-item <%= currentPage === 'vendors' ? 'active' : '' %>">🏢 Vendors Dashboard</a>
-            <a href="/tasks" class="nav-accordion-item <%= currentPage === 'tasks' ? 'active' : '' %>">📋 Tasks Dashboard</a>
+            <a href="/purchase-orders"
+                class="nav-accordion-item <%= currentPage === 'purchase-orders' ? 'active' : '' %>">🏠 PO Dashboard</a>
+            <a href="/receiving" class="nav-accordion-item <%= currentPage === 'receiving' ? 'active' : '' %>">🚚
+                Receiving Dashboard</a>
+            <a href="/dropship" class="nav-accordion-item <%= currentPage === 'dropship' ? 'active' : '' %>">🚢 Dropship
+                Dashboard</a>
+            <a href="/vendors" class="nav-accordion-item <%= currentPage === 'vendors' ? 'active' : '' %>">🏢 Vendors
+                Dashboard</a>
+            <a href="/tasks" class="nav-accordion-item <%= currentPage === 'tasks' ? 'active' : '' %>">📋 Tasks
+                Dashboard</a>
             <div class="nav-accordion-divider"></div>
-            <a href="/purchase-orders/line-items-manager" class="nav-accordion-item <%= currentPage === 'line-items-manager' ? 'active' : '' %>">📦 Line Items Manager</a>
-            <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item <%= currentPage === 'tracking' ? 'active' : '' %>">🚚 Tracking Dashboard</a>
-            <a href="/purchase-orders/notes-manager" class="nav-accordion-item <%= currentPage === 'notes-manager' ? 'active' : '' %>">📝 Notes Manager</a>
+            <a href="/purchase-orders/line-items-manager"
+                class="nav-accordion-item <%= currentPage === 'line-items-manager' ? 'active' : '' %>">📦 Line Items
+                Manager</a>
+            <a href="/purchase-orders/tracking-dashboard"
+                class="nav-accordion-item <%= currentPage === 'tracking' ? 'active' : '' %>">🚚 Tracking Dashboard</a>
+            <a href="/purchase-orders/notes-manager"
+                class="nav-accordion-item <%= currentPage === 'notes-manager' ? 'active' : '' %>">📝 Notes Manager</a>
         </div>
     </div>
 
@@ -24,20 +40,26 @@
             ⚙️ Options <span class="accordion-icon">▼</span>
         </button>
         <div id="optionsAccordion" class="nav-accordion-content">
-            <a href="/upload" class="nav-accordion-item <%= currentPage === 'upload' ? 'active' : '' %>">📤 Upload CSV</a>
-            <a href="/organic-vendors" class="nav-accordion-item <%= currentPage === 'organic-vendors' ? 'active' : '' %>">🌱 Organic Vendors</a>
-            <a href="/purchase-orders/trouble-seed" class="nav-accordion-item <%= currentPage === 'trouble-seed' ? 'active' : '' %>">⚠️ Trouble Seed</a>
-            <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item <%= currentPage === 'orphaned-items' ? 'active' : '' %>">🧹 Orphaned Items</a>
-            <a href="/email-client" class="nav-accordion-item <%= currentPage === 'email-client' ? 'active' : '' %>">📧 Email Client</a>
-            
-            <% if (typeof user !== 'undefined' && user && (user.role === 'admin' || user.role === 'manager')) { %>
-            <div class="nav-accordion-divider"></div>
-            <a href="/auth/admin/users" class="nav-accordion-item">👥 User Management</a>
-            <a href="/auth/admin/audit-logs" class="nav-accordion-item">📊 Audit Logs</a>
-            <% if (user.role === 'admin' || user.role === 'manager') { %>
-            <a href="/auth/admin/test-email" class="nav-accordion-item">📧 Test Email</a>
-            <% } %>
-            <% } %>
+            <a href="/upload" class="nav-accordion-item <%= currentPage === 'upload' ? 'active' : '' %>">📤 Upload
+                CSV</a>
+            <a href="/organic-vendors"
+                class="nav-accordion-item <%= currentPage === 'organic-vendors' ? 'active' : '' %>">🌱 Organic
+                Vendors</a>
+            <a href="/purchase-orders/trouble-seed"
+                class="nav-accordion-item <%= currentPage === 'trouble-seed' ? 'active' : '' %>">⚠️ Trouble Seed</a>
+            <a href="/purchase-orders/orphaned-line-items"
+                class="nav-accordion-item <%= currentPage === 'orphaned-items' ? 'active' : '' %>">🧹 Orphaned Items</a>
+            <a href="/email-client" class="nav-accordion-item <%= currentPage === 'email-client' ? 'active' : '' %>">📧
+                Email Client</a>
+
+            <% if (typeof user !=='undefined' && user && (user.role==='admin' || user.role==='manager' )) { %>
+                <div class="nav-accordion-divider"></div>
+                <a href="/auth/admin/users" class="nav-accordion-item">👥 User Management</a>
+                <a href="/auth/admin/audit-logs" class="nav-accordion-item">📊 Audit Logs</a>
+                <% if (user.role==='admin' || user.role==='manager' ) { %>
+                    <a href="/auth/admin/test-email" class="nav-accordion-item">📧 Test Email</a>
+                    <% } %>
+                        <% } %>
         </div>
     </div>
 
@@ -52,6 +74,18 @@
             <button class="nav-dropdown-item" onclick="openNetSuiteImportModal()">🏢 NetSuite PO Form</button>
         </div>
     </div>
+
+    <!-- Rune Accordion -->
+    <div class="nav-section">
+        <button class="nav-accordion-btn" onclick="toggleAccordion('runeAccordion')">
+            ᚱ Rune <span class="accordion-icon">▼</span>
+        </button>
+        <div id="runeAccordion" class="nav-accordion-content">
+            <a href="/story/dashboard" class="nav-accordion-item <%= currentPage === 'story' ? 'active' : '' %>">📖 Story</a>
+            <a href="/medicine/dashboard" class="nav-accordion-item <%= currentPage === 'medicine' ? 'active' : '' %>">💊 Medicine</a>
+            <a href="/bulletin" class="nav-accordion-item <%= currentPage === 'bulletin' ? 'active' : '' %>">📌 Bulletin</a>
+        </div>
+    </div>
 </div>
 
 <!-- User Info and Controls -->
@@ -60,51 +94,63 @@
         <i class="fas fa-sync-alt"></i>
         Refresh
     </button>
-    
+
     <!-- User Info -->
-    <% if (typeof user !== 'undefined' && user) { %>
-    <div class="user-info" title="<%= user.firstName %> <%= user.lastName %> (<%= user.role %>) - Online">
-        <div class="user-avatar">
-            <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
-            <div class="user-status-indicator" title="Online"></div>
+    <% if (typeof user !=='undefined' && user) { %>
+        <div class="user-info" title="<%= user.firstName %> <%= user.lastName %> (<%= user.role %>) - Online">
+            <div class="user-avatar">
+                <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %>
+                    <%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                        <div class="user-status-indicator" title="Online"></div>
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    <i class="fas fa-user"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <!-- User Info Header -->
+                    <li class="dropdown-user-info">
+                        <div class="dropdown-user-avatar">
+                            <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %>
+                                <%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                        </div>
+                        <div class="dropdown-user-details">
+                            <div class="dropdown-user-name">
+                                <%= user.firstName %>
+                                    <%= user.lastName %>
+                            </div>
+                            <div class="dropdown-user-role">
+                                <%= user.role %>
+                            </div>
+                            <div class="dropdown-user-status">Online</div>
+                        </div>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider" style="margin: 0;">
+                    </li>
+
+                    <% if (user.permissions && user.permissions.manageUsers) { %>
+                        <li><a class="dropdown-item" href="/auth/admin/users">
+                                <i class="fas fa-users me-2"></i>User Management
+                            </a></li>
+                        <li><a class="dropdown-item" href="/auth/admin/audit-logs">
+                                <i class="fas fa-history me-2"></i>Audit Logs
+                            </a></li>
+                        <% } %>
+                            <% if (user.role==='admin' || user.role==='manager' ) { %>
+                                <li><a class="dropdown-item" href="/auth/admin/test-email">
+                                        <i class="fas fa-envelope me-2"></i>Test Email
+                                    </a></li>
+                                <% } %>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item" href="/auth/logout">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                        </a></li>
+                </ul>
+            </div>
         </div>
-        <div class="dropdown">
-            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-user"></i>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <!-- User Info Header -->
-                <li class="dropdown-user-info">
-                    <div class="dropdown-user-avatar">
-                        <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
-                    </div>
-                    <div class="dropdown-user-details">
-                        <div class="dropdown-user-name"><%= user.firstName %> <%= user.lastName %></div>
-                        <div class="dropdown-user-role"><%= user.role %></div>
-                        <div class="dropdown-user-status">Online</div>
-                    </div>
-                </li>
-                <li><hr class="dropdown-divider" style="margin: 0;"></li>
-                
-                <% if (user.permissions && user.permissions.manageUsers) { %>
-                <li><a class="dropdown-item" href="/auth/admin/users">
-                    <i class="fas fa-users me-2"></i>User Management
-                </a></li>
-                <li><a class="dropdown-item" href="/auth/admin/audit-logs">
-                    <i class="fas fa-history me-2"></i>Audit Logs
-                </a></li>
-                <% } %>
-                <% if (user.role === 'admin' || user.role === 'manager') { %>
-                <li><a class="dropdown-item" href="/auth/admin/test-email">
-                    <i class="fas fa-envelope me-2"></i>Test Email
-                </a></li>
-                <% } %>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="/auth/logout">
-                    <i class="fas fa-sign-out-alt me-2"></i>Logout
-                </a></li>
-            </ul>
-        </div>
-    </div>
-    <% } %>
+        <% } %>
 </div>

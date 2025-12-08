@@ -586,7 +586,7 @@
         <div class="actions-bar">
             <button class="btn btn-primary" onclick="showAddModal()">+ Add Dropshipment</button>
             <button class="btn btn-warning" onclick="syncFromPOs()">🔄 Sync from POs</button>
-            <button class="btn btn-success" onclick="exportToCSV()">📥 Export to CSV</button>
+            <button class="btn btn-success" onclick="exportToExcel()">📥 Export to Excel</button>
             <button class="btn btn-info" onclick="refreshData()">🔄 Refresh</button>
         </div>
 
@@ -678,12 +678,13 @@
                         <th>Carrier</th>
                         <th>Status</th>
                         <th>Last Update</th>
+                        <th>Notes</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="dropshipmentsTable">
                     <tr>
-                        <td colspan="9" class="loading">
+                        <td colspan="10" class="loading">
                             <div class="loading-spinner"></div>
                             <p>Loading dropshipments...</p>
                         </td>
@@ -1091,6 +1092,14 @@
                         <td><span class="status-badge ${statusClass}">${ds.shippingStatus}</span></td>
                         <td>${ds.lastTrackingUpdate ? new Date(ds.lastTrackingUpdate).toLocaleString() : '-'}</td>
                         <td>
+                            <input type="text" 
+                                class="notes-input" 
+                                value="${(ds.notes || '').replace(/"/g, '&quot;')}" 
+                                placeholder="Add notes..." 
+                                onblur="updateDropshipmentNotes('${ds._id}', this.value)" 
+                                data-dropship-id="${ds._id}">
+                        </td>
+                        <td>
                             <div class="action-btns">
                                 <button class="btn btn-info btn-small" onclick="editDropshipment('${ds._id}')">✏️ Edit</button>
                                 <button class="btn btn-secondary btn-small" onclick="deleteDropshipment('${ds._id}')">🗑️</button>
@@ -1231,6 +1240,65 @@
             }
         }
 
+        async function updateDropshipmentNotes(dropshipmentId, notes) {
+            const input = document.querySelector(`.notes-input[data-dropship-id="${dropshipmentId}"]`);
+            if (!input) {
+                console.error('❌ Could not find input element for dropshipment', dropshipmentId);
+                return;
+            }
+
+            // Find the dropshipment in dropshipments and check if notes actually changed
+            const dropshipment = dropshipments.find(d => d._id === dropshipmentId);
+            if (dropshipment && dropshipment.notes === notes) {
+                return; // No change, don't save
+            }
+
+            try {
+                input.classList.add('saving');
+                console.log('💾 Saving notes for dropshipment', dropshipmentId, ':', notes);
+
+                const response = await fetch(`/dropshipments/api/dropshipments/${dropshipmentId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ notes: notes })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('❌ Server response not OK:', response.status, errorText);
+                    throw new Error(`Server error: ${response.status} - ${errorText}`);
+                }
+
+                const result = await response.json();
+                console.log('📥 Server response:', result);
+
+                if (result.success) {
+                    // Update the dropshipment in our local data
+                    if (dropshipment) {
+                        dropshipment.notes = notes;
+                    }
+
+                    // Show success feedback
+                    input.classList.remove('saving');
+                    input.classList.add('saved');
+                    setTimeout(() => {
+                        input.classList.remove('saved');
+                    }, 1500);
+
+                    console.log('✅ Notes updated for dropshipment', dropshipmentId);
+                } else {
+                    throw new Error(result.error || 'Failed to update notes');
+                }
+            } catch (error) {
+                console.error('❌ Error updating notes:', error);
+                input.classList.remove('saving');
+                alert(`Error updating notes: ${error.message}`);
+            }
+        }
+
         async function checkWithAI(id) {
             const btn = event.target;
             btn.disabled = true;
@@ -1314,7 +1382,7 @@ The dropshipment has been automatically updated.
             loadDropshipments();
         }
 
-        function exportToCSV() {
+        function exportToExcel() {
             const status = document.getElementById('statusFilter').value;
             const carrier = document.getElementById('carrierFilter').value;
             const vendor = document.getElementById('vendorFilter').value;
@@ -1324,7 +1392,7 @@ The dropshipment has been automatically updated.
             if (carrier) params.append('carrier', carrier);
             if (vendor) params.append('vendor', vendor);
 
-            window.location.href = `/dropshipments/export/csv?${params.toString()}`;
+            window.location.href = `/dropshipments/export/xlsx?${params.toString()}`;
         }
 
         async function syncFromPOs() {

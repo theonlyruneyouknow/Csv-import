@@ -3703,6 +3703,13 @@
         <div class="header">
             <h1>Purchase Orders Dashboard</h1>
             <div class="navigation-container">
+                <!-- Dashboard Button -->
+                <div class="nav-section">
+                    <a href="/purchase-orders" class="nav-accordion-btn active" style="text-decoration: none;">
+                        🏠 Dashboard
+                    </a>
+                </div>
+
                 <!-- Managers Accordion -->
                 <div class="nav-section">
                     <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion')">
@@ -3798,6 +3805,18 @@
                     </button>
                     <div id="formsDropdown" class="nav-dropdown-content">
                         <!-- Dynamic forms will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Rune Accordion -->
+                <div class="nav-section">
+                    <button class="nav-accordion-btn" onclick="toggleAccordion('runeAccordion')">
+                        ᚱ Rune <span class="accordion-icon">▼</span>
+                    </button>
+                    <div id="runeAccordion" class="nav-accordion-content">
+                        <a href="/story/dashboard" class="nav-accordion-item">📖 Story</a>
+                        <a href="/medicine/dashboard" class="nav-accordion-item">💊 Medicine</a>
+                        <a href="/bulletin" class="nav-accordion-item">📌 Bulletin</a>
                     </div>
                 </div>
 
@@ -4948,12 +4967,17 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
     <script>
         // Navigation Functions
-        function toggleAccordion() {
-            const content = document.getElementById('managersAccordion');
-            const icon = document.querySelector('.accordion-icon');
+        function toggleAccordion(accordionId) {
+            const content = document.getElementById(accordionId);
+            if (!content) return;
+            
+            const button = content.previousElementSibling;
+            const icon = button ? button.querySelector('.accordion-icon') : null;
 
             content.classList.toggle('show');
-            icon.classList.toggle('rotated');
+            if (icon) {
+                icon.classList.toggle('rotated');
+            }
         }
 
         function toggleOptionsDropdown() {

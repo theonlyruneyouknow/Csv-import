@@ -284,77 +284,25 @@
             <div class="d-flex align-items-center justify-content-between flex-grow-1">
                 <!-- Navigation Container -->
                 <div class="navigation-container">
-                    <!-- Dashboards Accordion -->
+                    <!-- Story Button -->
                     <div class="nav-section">
-                        <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion')">
-                            📊 Dashboards <span class="accordion-icon">▼</span>
-                        </button>
-                        <div id="managersAccordion" class="nav-accordion-content">
-                            <% if (typeof user !== 'undefined' && user && user.permissions) { %>
-                                <a href="/dashboard" class="nav-accordion-item">🏠 Main Dashboard</a>
-                                <% if (user.permissions.accessReceiving) { %>
-                                    <a href="/receiving" class="nav-accordion-item">🚚 Receiving Dashboard</a>
-                                <% } %>
-                                <% if (user.permissions.accessTasks) { %>
-                                    <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
-                                <% } %>
-                                <% if (user.permissions.accessDropship) { %>
-                                    <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
-                                <% } %>
-                                <% if (user.permissions.accessFoodManagement) { %>
-                                    <a href="/food-dashboard" class="nav-accordion-item">🍽️ Food Management</a>
-                                <% } %>
-                                <% if (user.permissions.accessStoryManagement) { %>
-                                    <a href="/story/dashboard" class="nav-accordion-item">📚 Story Management</a>
-                                <% } %>
-                                <% if (user.permissions.accessMedicineManagement) { %>
-                                    <a href="/medicine/dashboard" class="nav-accordion-item">💊 Medicine Management</a>
-                                <% } %>
-                            <% } else { %>
-                                <!-- Fallback for users without defined permissions -->
-                                <a href="/dashboard" class="nav-accordion-item">🏠 Main Dashboard</a>
-                                <% if (user && (user.role === 'admin' || user.role === 'manager')) { %>
-                                    <a href="/receiving" class="nav-accordion-item">🚚 Receiving Dashboard</a>
-                                    <a href="/tasks" class="nav-accordion-item">📋 Tasks Dashboard</a>
-                                    <a href="/dropship" class="nav-accordion-item">🚢 Dropship Dashboard</a>
-                                    <a href="/food-dashboard" class="nav-accordion-item">🍽️ Food Management</a>
-                                    <a href="/story/dashboard" class="nav-accordion-item">📚 Story Management</a>
-                                    <a href="/medicine/dashboard" class="nav-accordion-item">💊 Medicine Management</a>
-                                <% } %>
-                            <% } %>
-                        </div>
+                        <a href="/story/dashboard" class="nav-accordion-btn" style="text-decoration: none;">
+                            📖 Story
+                        </a>
                     </div>
 
-                    <!-- Options Button -->
+                    <!-- Medicine Button -->
                     <div class="nav-section">
-                        <button class="nav-options-btn" onclick="toggleAccordion('optionsAccordion')">
-                            ⚙️ Options <span class="accordion-icon">▼</span>
-                        </button>
-                        <div id="optionsAccordion" class="nav-accordion-content">
-                            <% if (typeof user !== 'undefined' && user && user.permissions) { %>
-                                <% if (user.permissions.accessMedicineManagement) { %>
-                                    <a href="/medicine/import" class="nav-accordion-item">📥 Import Pharmacy Records</a>
-                                <% } %>
-                                <% if (user.permissions.accessFileUpload) { %>
-                                    <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
-                                <% } %>
-                                <% if (user.permissions.accessOrganicVendors) { %>
-                                    <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
-                                <% } %>
-                            <% } else { %>
-                                <!-- Fallback for users without defined permissions -->
-                                <% if (user && (user.role === 'admin' || user.role === 'manager')) { %>
-                                    <a href="/upload" class="nav-accordion-item">📤 Upload CSV</a>
-                                    <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
-                                <% } %>
-                            <% } %>
-                            
-                            <!-- Admin Options -->
-                            <% if (typeof user !== 'undefined' && user && (user.role === 'admin' || user.role === 'manager')) { %>
-                            <div class="nav-accordion-divider"></div>
-                            <a href="/auth/admin/users" class="nav-accordion-item">👥 User Management</a>
-                            <% } %>
-                        </div>
+                        <a href="/medicine/dashboard" class="nav-accordion-btn active" style="text-decoration: none;">
+                            💊 Medicine
+                        </a>
+                    </div>
+
+                    <!-- Bulletin Button -->
+                    <div class="nav-section">
+                        <a href="/bulletin" class="nav-accordion-btn" style="text-decoration: none;">
+                            📌 Bulletin
+                        </a>
                     </div>
                 </div>
                 

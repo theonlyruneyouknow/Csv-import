@@ -18,6 +18,165 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        /* Navigation Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1000;
+            padding: 15px 0;
+            border-bottom: 1px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navigation-container {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .nav-section {
+            position: relative;
+        }
+
+        .nav-accordion-btn {
+            background: #6f42c1;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .nav-accordion-btn:hover {
+            background: #5a32a3;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-accordion-btn.active {
+            background: #007bff;
+            font-weight: 600;
+        }
+
+        .nav-accordion-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            min-width: 220px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 5px;
+        }
+
+        .nav-accordion-content.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .nav-accordion-item {
+            display: block;
+            padding: 12px 16px;
+            color: #495057;
+            text-decoration: none;
+            border-bottom: 1px solid #f1f3f4;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .nav-accordion-item:hover {
+            background: #f8f9fa;
+            color: #6f42c1;
+            text-decoration: none;
+            padding-left: 20px;
+        }
+
+        .nav-accordion-item:last-child {
+            border-bottom: none;
+        }
+
+        .nav-options-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            justify-content: space-between;
+        }
+
+        .nav-options-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .accordion-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #6f42c1;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .user-status-indicator {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            background: #28a745;
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+
         .nav-header {
             background: linear-gradient(135deg, #6f42c1 0%, #007bff 100%);
             color: white;
@@ -449,54 +608,90 @@
 </head>
 <body>
     <!-- Navigation Header -->
-    <div class="nav-header">
-        <div class="container-fluid">
-            <div class="d-flex justify-content-between align-items-center">
-                <a href="/" class="nav-brand">
-                    <i class="fas fa-home me-2"></i>Dashboard
-                </a>
-                
-                <div class="d-flex align-items-center gap-3">
-                    <a href="/bulletin" class="nav-brand">
-                        <i class="fas fa-scroll me-2"></i>Church Bulletin
-                    </a>
-                    
-                    <div class="nav-actions">
-                        <% if (user && ((user.permissions && user.permissions.accessBulletinManagement) || user.role === 'admin' || user.role === 'manager')) { %>
-                            <a href="/bulletin/admin" class="btn btn-outline-light btn-nav">
-                                <i class="fas fa-cog me-1"></i>Admin
+    <div class="container">
+        <div class="header">
+            <h1 style="margin: 0; font-size: 1.5rem;">📌 Bulletin</h1>
+            
+            <div class="d-flex align-items-center justify-content-between flex-grow-1">
+                <!-- Navigation Container -->
+                <div class="navigation-container">
+                    <!-- Story Button -->
+                    <div class="nav-section">
+                        <a href="/story/dashboard" class="nav-accordion-btn" style="text-decoration: none;">
+                            📖 Story
+                        </a>
+                    </div>
+
+                    <!-- Medicine Button -->
+                    <div class="nav-section">
+                        <a href="/medicine/dashboard" class="nav-accordion-btn" style="text-decoration: none;">
+                            💊 Medicine
+                        </a>
+                    </div>
+
+                    <!-- Bulletin Button -->
+                    <div class="nav-section">
+                        <a href="/bulletin" class="nav-accordion-btn active" style="text-decoration: none;">
+                            📌 Bulletin
+                        </a>
+                    </div>
+
+                    <!-- Bulletin Options Dropdown -->
+                    <% if (user && ((user.permissions && user.permissions.accessBulletinManagement) || user.role === 'admin' || user.role === 'manager')) { %>
+                    <div class="nav-section">
+                        <button class="nav-options-btn" onclick="toggleAccordion('bulletinOptionsAccordion')">
+                            ⚙️ Bulletin <span class="accordion-icon">▼</span>
+                        </button>
+                        <div id="bulletinOptionsAccordion" class="nav-accordion-content">
+                            <a href="/bulletin/admin" class="nav-accordion-item">
+                                <i class="fas fa-cog me-2"></i>Admin
                             </a>
-                            <a href="/bulletin/<%= bulletin._id %>/edit" class="btn btn-outline-light btn-nav">
-                                <i class="fas fa-edit me-1"></i>Edit
+                            <a href="/bulletin/<%= bulletin._id %>/edit" class="nav-accordion-item">
+                                <i class="fas fa-edit me-2"></i>Edit Bulletin
                             </a>
-                        <% } %>
-                        <button onclick="window.print()" class="btn btn-outline-light btn-nav">
+                            <button class="nav-accordion-item" onclick="window.print()" style="border: none; background: none; width: 100%; text-align: left;">
+                                <i class="fas fa-print me-2"></i>Print Bulletin
+                            </button>
+                        </div>
+                    </div>
+                    <% } else { %>
+                    <div class="nav-section">
+                        <button class="nav-accordion-btn" onclick="window.print()">
                             <i class="fas fa-print me-1"></i>Print
                         </button>
                     </div>
+                    <% } %>
                 </div>
+                
+                <!-- User Info -->
+                <% if (typeof user !== 'undefined' && user) { %>
+                <div class="user-info" title="<%= user.firstName %> <%= user.lastName %> (<%= user.role %>) - Online">
+                    <div class="user-avatar">
+                        <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %><%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                        <div class="user-status-indicator" title="Online"></div>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <form action="/auth/logout" method="POST" style="margin: 0;">
+                                    <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <% } %>
             </div>
         </div>
     </div>
 
-    <!-- Breadcrumb Navigation -->
-    <div class="container-fluid py-2 bg-light border-bottom">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item">
-                    <a href="/" class="text-decoration-none">
-                        <i class="fas fa-home me-1"></i>Dashboard
-                    </a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">
-                    <i class="fas fa-scroll me-1"></i>Church Bulletin
-                </li>
-            </ol>
-        </nav>
-    </div>
-
     <!-- Edit Controls (only visible to authorized users) -->
-    <% if (user && ((user.permissions && user.permissions.accessBulletinManagement) || user.role === 'admin' || user.role === 'manager')) { %>
+    <% if (false) { %>
         <div class="edit-controls">
             <div class="btn-group">
                 <a href="/bulletin/admin" class="btn btn-primary btn-sm">
@@ -921,6 +1116,23 @@ To Dine with the Missionaries: Contact Kelly Reynolds at (541) 514-8252 to set u
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Navigation Functions
+        function toggleAccordion(accordionId) {
+            const content = document.getElementById(accordionId);
+            if (!content) return;
+            
+            const button = content.previousElementSibling;
+            const icon = button ? button.querySelector('.accordion-icon') : null;
+
+            content.classList.toggle('show');
+            if (icon) {
+                icon.classList.toggle('rotated');
+            }
+        }
+    </script>
+
     <% if (user && user.permissions && user.permissions.accessBulletinManagement) { %>
     <script>
         // Quick edit functionality

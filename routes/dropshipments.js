@@ -159,6 +159,153 @@ router.get('/api/dropshipments/group/by-carrier', async (req, res) => {
     }
 });
 
+// GET - Export to XLSX
+router.get('/export/xlsx', async (req, res) => {
+    try {
+        const XLSX = require('xlsx');
+        const { status, vendor, carrier, startDate, endDate } = req.query;
+
+        let query = {};
+
+        if (status) query.shippingStatus = status;
+        if (vendor) query.vendor = new RegExp(vendor, 'i');
+        if (carrier) query.carrier = carrier;
+
+        if (startDate || endDate) {
+            query.orderDate = {};
+            if (startDate) query.orderDate.$gte = new Date(startDate);
+            if (endDate) query.orderDate.$lte = new Date(endDate);
+        }
+
+        const dropshipments = await Dropshipment.find(query)
+            .populate('poId', 'poUrl poNumber shippingTracking shippingCarrier')
+            .sort({ orderDate: -1 })
+            .lean();
+
+        // Build data array for XLSX
+        const data = [];
+        
+        // Add header row
+        data.push([
+            'PO Number',
+            'Vendor',
+            'Customer Name',
+            'Customer Email',
+            'Order Date',
+            'Tracking Number',
+            'Carrier',
+            'Status',
+            'Last Update',
+            'Estimated Delivery',
+            'Actual Delivery',
+            'Notes'
+        ]);
+
+        // Add data rows
+        dropshipments.forEach(ds => {
+            // Get tracking from PO if available, otherwise from dropshipment
+            const trackingNumber = (ds.poId && ds.poId.shippingTracking) 
+                ? ds.poId.shippingTracking 
+                : ds.trackingNumber;
+            
+            const carrier = (ds.poId && ds.poId.shippingCarrier) 
+                ? ds.poId.shippingCarrier 
+                : (ds.carrier || '');
+
+            const poUrl = (ds.poId && ds.poId.poUrl) ? ds.poId.poUrl : '';
+
+            data.push([
+                ds.poNumber || '',
+                ds.vendor || '',
+                ds.customerName || '',
+                ds.customerEmail || '',
+                ds.orderDate ? new Date(ds.orderDate).toLocaleDateString() : '',
+                trackingNumber || '',
+                carrier || '',
+                ds.shippingStatus || '',
+                ds.lastTrackingUpdate ? new Date(ds.lastTrackingUpdate).toLocaleString() : '',
+                ds.estimatedDelivery ? new Date(ds.estimatedDelivery).toLocaleDateString() : '',
+                ds.actualDelivery ? new Date(ds.actualDelivery).toLocaleDateString() : '',
+                ds.notes || ''
+            ]);
+        });
+
+        // Create workbook and worksheet
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(data);
+
+        // Set column widths
+        ws['!cols'] = [
+            { wch: 12 },  // PO Number
+            { wch: 20 },  // Vendor
+            { wch: 20 },  // Customer Name
+            { wch: 25 },  // Customer Email
+            { wch: 12 },  // Order Date
+            { wch: 22 },  // Tracking Number
+            { wch: 10 },  // Carrier
+            { wch: 18 },  // Status
+            { wch: 20 },  // Last Update
+            { wch: 16 },  // Estimated Delivery
+            { wch: 14 },  // Actual Delivery
+            { wch: 40 }   // Notes
+        ];
+
+        // Add hyperlinks
+        dropshipments.forEach((ds, index) => {
+            const rowNum = index + 2; // +2 because Excel is 1-indexed and we have a header row
+
+            // PO Number hyperlink (column A)
+            const poUrl = (ds.poId && ds.poId.poUrl) ? ds.poId.poUrl : '';
+            if (poUrl && ds.poNumber) {
+                const cellRef = XLSX.utils.encode_cell({ r: rowNum - 1, c: 0 });
+                ws[cellRef] = {
+                    t: 's',
+                    v: ds.poNumber,
+                    l: { Target: poUrl, Tooltip: `Open ${ds.poNumber}` }
+                };
+            }
+
+            // Tracking Number hyperlink (column F)
+            const trackingNumber = (ds.poId && ds.poId.shippingTracking) 
+                ? ds.poId.shippingTracking 
+                : ds.trackingNumber;
+            
+            const carrier = (ds.poId && ds.poId.shippingCarrier) 
+                ? ds.poId.shippingCarrier 
+                : (ds.carrier || '');
+
+            if (trackingNumber) {
+                const trackingUrl = generateTrackingUrl(carrier, trackingNumber);
+                if (trackingUrl) {
+                    const cellRef = XLSX.utils.encode_cell({ r: rowNum - 1, c: 5 });
+                    ws[cellRef] = {
+                        t: 's',
+                        v: trackingNumber,
+                        l: { Target: trackingUrl, Tooltip: `Track ${trackingNumber}` }
+                    };
+                }
+            }
+        });
+
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, ws, 'Dropshipments');
+
+        // Generate buffer
+        const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+        // Send file
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=dropshipments_${Date.now()}.xlsx`);
+        res.send(buffer);
+
+        console.log(`✅ Exported ${dropshipments.length} dropshipments to XLSX`);
+
+    } catch (error) {
+        console.error('❌ Error exporting XLSX:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // GET - Single dropshipment
 router.get('/api/dropshipments/:id', async (req, res) => {
     try {
@@ -515,84 +662,6 @@ router.post('/api/dropshipments/:id/update-status', async (req, res) => {
         
     } catch (error) {
         console.error('❌ Error updating status:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// GET - Export to CSV
-router.get('/export/csv', async (req, res) => {
-    try {
-        const { status, vendor, carrier, startDate, endDate } = req.query;
-
-        let query = {};
-
-        if (status) query.shippingStatus = status;
-        if (vendor) query.vendor = new RegExp(vendor, 'i');
-        if (carrier) query.carrier = carrier;
-
-        if (startDate || endDate) {
-            query.orderDate = {};
-            if (startDate) query.orderDate.$gte = new Date(startDate);
-            if (endDate) query.orderDate.$lte = new Date(endDate);
-        }
-
-        const dropshipments = await Dropshipment.find(query)
-            .sort({ orderDate: -1 })
-            .lean();
-
-        // Build CSV
-        const csvRows = [];
-        csvRows.push([
-            'PO Number',
-            'Vendor',
-            'Customer Name',
-            'Customer Email',
-            'Order Date',
-            'Tracking Number',
-            'Carrier',
-            'Tracking URL',
-            'Status',
-            'Last Update',
-            'Estimated Delivery',
-            'Actual Delivery',
-            'Shipping Address',
-            'Notes'
-        ].join(','));
-
-        dropshipments.forEach(ds => {
-            const trackingUrl = ds.trackingUrl || generateTrackingUrl(ds.carrier, ds.trackingNumber);
-            const address = ds.shippingAddress
-                ? `"${ds.shippingAddress.street}, ${ds.shippingAddress.city}, ${ds.shippingAddress.state} ${ds.shippingAddress.zip}"`
-                : '';
-
-            csvRows.push([
-                ds.poNumber || '',
-                ds.vendor || '',
-                ds.customerName || '',
-                ds.customerEmail || '',
-                ds.orderDate ? new Date(ds.orderDate).toLocaleDateString() : '',
-                ds.trackingNumber || '',
-                ds.carrier || '',
-                trackingUrl || '',
-                ds.shippingStatus || '',
-                ds.lastTrackingUpdate ? new Date(ds.lastTrackingUpdate).toLocaleString() : '',
-                ds.estimatedDelivery ? new Date(ds.estimatedDelivery).toLocaleDateString() : '',
-                ds.actualDelivery ? new Date(ds.actualDelivery).toLocaleDateString() : '',
-                address,
-                `"${(ds.notes || '').replace(/"/g, '""')}"`
-            ].join(','));
-        });
-
-        const csv = csvRows.join('\n');
-
-        res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', `attachment; filename=dropshipments_${Date.now()}.csv`);
-        res.send(csv);
-
-        console.log(`✅ Exported ${dropshipments.length} dropshipments to CSV`);
-
-    } catch (error) {
-        console.error('❌ Error exporting CSV:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
