@@ -240,7 +240,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border-radius: 6px;
             border: 1px solid #dee2e6;
-            z-index: 1000;
+            z-index: 1001;
             opacity: 0;
             visibility: hidden;
             transform: translateY(-10px);
@@ -5082,26 +5082,65 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         // Close dropdowns when clicking outside
         document.addEventListener('click', function (event) {
-            const managersSection = document.querySelector('.nav-section:first-child');
-            const optionsSection = document.querySelector('.nav-section:nth-child(2)');
-            const importsSection = document.querySelector('.nav-section:nth-child(3)');
+            // Find sections by their button content
+            const managersAccordion = document.getElementById('managersAccordion');
+            const optionsDropdown = document.getElementById('optionsDropdown');
+            const importsDropdown = document.getElementById('importsDropdown');
+            const formsDropdown = document.getElementById('formsDropdown');
+            const runeAccordion = document.getElementById('runeAccordion');
             const userSection = document.querySelector('.user-dropdown');
 
-            if (!managersSection.contains(event.target)) {
-                document.getElementById('managersAccordion').classList.remove('show');
-                document.querySelector('.accordion-icon').classList.remove('rotated');
+            // Close Managers accordion if clicking outside
+            if (managersAccordion) {
+                const managersSection = managersAccordion.closest('.nav-section');
+                if (managersSection && !managersSection.contains(event.target)) {
+                    managersAccordion.classList.remove('show');
+                    const managersIcon = managersSection.querySelector('.accordion-icon');
+                    if (managersIcon) managersIcon.classList.remove('rotated');
+                }
             }
 
-            if (!optionsSection.contains(event.target)) {
-                document.getElementById('optionsDropdown').classList.remove('show');
-                document.querySelector('.nav-options-btn .dropdown-icon').classList.remove('rotated');
+            // Close Options dropdown if clicking outside
+            if (optionsDropdown) {
+                const optionsSection = optionsDropdown.closest('.nav-section');
+                if (optionsSection && !optionsSection.contains(event.target)) {
+                    optionsDropdown.classList.remove('show');
+                    const optionsIcon = optionsSection.querySelector('.dropdown-icon');
+                    if (optionsIcon) optionsIcon.classList.remove('rotated');
+                }
             }
 
-            if (!importsSection.contains(event.target)) {
-                document.getElementById('importsDropdown').classList.remove('show');
-                document.querySelector('.nav-imports-btn .dropdown-icon').classList.remove('rotated');
+            // Close Imports dropdown if clicking outside
+            if (importsDropdown) {
+                const importsSection = importsDropdown.closest('.nav-section');
+                if (importsSection && !importsSection.contains(event.target)) {
+                    importsDropdown.classList.remove('show');
+                    const importsIcon = importsSection.querySelector('.dropdown-icon');
+                    if (importsIcon) importsIcon.classList.remove('rotated');
+                }
             }
 
+            // Close Forms dropdown if clicking outside
+            if (formsDropdown) {
+                const formsSection = formsDropdown.closest('.nav-section');
+                if (formsSection && !formsSection.contains(event.target)) {
+                    formsDropdown.classList.remove('show');
+                    const formsIcon = formsSection.querySelector('.dropdown-icon');
+                    if (formsIcon) formsIcon.classList.remove('rotated');
+                }
+            }
+
+            // Close Rune accordion if clicking outside
+            if (runeAccordion) {
+                const runeSection = runeAccordion.closest('.nav-section');
+                if (runeSection && !runeSection.contains(event.target)) {
+                    runeAccordion.classList.remove('show');
+                    const runeIcon = runeSection.querySelector('.accordion-icon');
+                    if (runeIcon) runeIcon.classList.remove('rotated');
+                }
+            }
+
+            // Close user dropdown if clicking outside
             if (userSection && !userSection.contains(event.target)) {
                 document.getElementById('userDropdown').classList.remove('show');
             }
