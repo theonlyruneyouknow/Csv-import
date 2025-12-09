@@ -1906,7 +1906,7 @@
             // Attach event listeners to urgency dropdowns after rendering
             setTimeout(() => {
                 document.querySelectorAll('.urgency-select').forEach(select => {
-                    select.addEventListener('change', function() {
+                    select.addEventListener('change', function () {
                         const itemId = this.getAttribute('data-item-id');
                         const urgency = this.value;
                         updateItemUrgency(itemId, urgency);
