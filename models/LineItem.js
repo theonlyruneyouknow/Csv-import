@@ -48,6 +48,11 @@ const lineItemSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    urgency: {                  // Urgency level for unreceived items (High, Medium, Low)
+        type: String,
+        enum: ['High', 'Medium', 'Low', ''],
+        default: ''
+    },
     quantityExpected: {         // Expected quantity from PO
         type: Number,
         default: null

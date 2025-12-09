@@ -3143,6 +3143,43 @@ router.patch('/line-item/:itemId/notes', async (req, res) => {
   }
 });
 
+// Update item urgency for unreceived items (MUST be before /:id/ routes)
+router.patch('/line-item/:itemId/urgency', async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const { urgency } = req.body;
+
+    console.log(`⚡ Updating urgency for item ${itemId} to ${urgency}`);
+
+    const lineItem = await LineItem.findByIdAndUpdate(
+      itemId,
+      { urgency },
+      { new: true }
+    );
+
+    if (!lineItem) {
+      return res.status(404).json({
+        success: false,
+        error: 'Line item not found'
+      });
+    }
+
+    console.log(`✅ Urgency updated for item ${itemId}`);
+
+    res.json({
+      success: true,
+      urgency: lineItem.urgency
+    });
+
+  } catch (error) {
+    console.error('❌ Error updating item urgency:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Preview inventory data import (MUST be before /:id/ routes)
 router.post('/preview-inventory-import', async (req, res) => {
   try {
