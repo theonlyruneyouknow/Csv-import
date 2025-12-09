@@ -1880,7 +1880,7 @@
                             return `<td>${item.poType ? `<span class="badge badge-secondary">${item.poType}</span>` : 'N/A'}</td>`;
                         case 'urgency':
                             const urgencyClass = item.urgency === 'High' ? 'urgency-high' : item.urgency === 'Medium' ? 'urgency-medium' : item.urgency === 'Low' ? 'urgency-low' : '';
-                            return `<td><select class="urgency-select ${urgencyClass}" onchange="updateItemUrgency('${item.itemId}', this.value)" data-item-id="${item.itemId}"><option value="" ${!item.urgency ? 'selected' : ''}>-</option><option value="High" ${item.urgency === 'High' ? 'selected' : ''}>High</option><option value="Medium" ${item.urgency === 'Medium' ? 'selected' : ''}>Medium</option><option value="Low" ${item.urgency === 'Low' ? 'selected' : ''}>Low</option></select></td>`;
+                            return `<td><select class="urgency-select ${urgencyClass}" data-item-id="${item.itemId}"><option value="" ${!item.urgency ? 'selected' : ''}>-</option><option value="High" ${item.urgency === 'High' ? 'selected' : ''}>High</option><option value="Medium" ${item.urgency === 'Medium' ? 'selected' : ''}>Medium</option><option value="Low" ${item.urgency === 'Low' ? 'selected' : ''}>Low</option></select></td>`;
                         case 'notes':
                             return `<td><input type="text" class="item-notes-input" value="${(item.receivingNotes || '').replace(/"/g, '&quot;')}" placeholder="Add notes..." onblur="updateItemNotes('${item.itemId}', this.value)" data-item-id="${item.itemId}"></td>`;
                         case 'inventoryRawQuantity':
@@ -1902,6 +1902,17 @@
 
                 return `<tr>${cells}</tr>`;
             }).join('');
+
+            // Attach event listeners to urgency dropdowns after rendering
+            setTimeout(() => {
+                document.querySelectorAll('.urgency-select').forEach(select => {
+                    select.addEventListener('change', function() {
+                        const itemId = this.getAttribute('data-item-id');
+                        const urgency = this.value;
+                        updateItemUrgency(itemId, urgency);
+                    });
+                });
+            }, 0);
         }
 
         async function updateItemNotes(itemId, notes) {
