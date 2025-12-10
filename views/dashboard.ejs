@@ -8544,7 +8544,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             // Restore PO Type filters
             <% poTypeOptions.forEach(type => { %>
-                (function() {
+                (function () {
                     const filterId = 'filter<%= type.name %>';
                     const savedState = localStorage.getItem(`filter_${filterId}`);
                     if (savedState !== null) {
@@ -8573,10 +8573,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         // Add event listeners for PO Type filters
         <% poTypeOptions.forEach(type => { %>
-            (function() {
+            (function () {
                 const checkbox = document.getElementById('filter<%= type.name %>');
                 if (checkbox) {
-                    checkbox.addEventListener('change', function() {
+                    checkbox.addEventListener('change', function () {
                         saveFilterState('filter<%= type.name %>', this.checked);
                         console.log('💾 Saved PO Type filter <%= type.name %>:', this.checked);
                     });
@@ -8584,11 +8584,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             })();
         <% }) %>
 
-        // Apply filters after restoring state to show correct initial view
-        setTimeout(() => {
-            console.log('🔄 Applying filters with restored state');
-            applyFilters();
-        }, 100);
+            // Apply filters after restoring state to show correct initial view
+            setTimeout(() => {
+                console.log('🔄 Applying filters with restored state');
+                applyFilters();
+            }, 100);
 
         // ============ END FILTER STATE PERSISTENCE ============
 
