@@ -8541,6 +8541,21 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     }
                 }
             });
+
+            // Restore PO Type filters
+            <% poTypeOptions.forEach(type => { %>
+                (function() {
+                    const filterId = 'filter<%= type.name %>';
+                    const savedState = localStorage.getItem(`filter_${filterId}`);
+                    if (savedState !== null) {
+                        const checkbox = document.getElementById(filterId);
+                        if (checkbox) {
+                            checkbox.checked = savedState === 'true';
+                            console.log('📦 Restored PO Type filter <%= type.name %>:', savedState === 'true');
+                        }
+                    }
+                })();
+            <% }) %>
         }
 
         // Restore filter states on page load
@@ -8555,6 +8570,19 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 });
             }
         });
+
+        // Add event listeners for PO Type filters
+        <% poTypeOptions.forEach(type => { %>
+            (function() {
+                const checkbox = document.getElementById('filter<%= type.name %>');
+                if (checkbox) {
+                    checkbox.addEventListener('change', function() {
+                        saveFilterState('filter<%= type.name %>', this.checked);
+                        console.log('💾 Saved PO Type filter <%= type.name %>:', this.checked);
+                    });
+                }
+            })();
+        <% }) %>
 
         // Apply filters after restoring state to show correct initial view
         setTimeout(() => {
