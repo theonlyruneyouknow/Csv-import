@@ -1108,6 +1108,12 @@
                     </select>
                 </div>
                 <div class="filter-group">
+                    <label>PO Type</label>
+                    <select id="poTypeFilter" class="filter-input">
+                        <option value="">All Types</option>
+                    </select>
+                </div>
+                <div class="filter-group">
                     <label>Status</label>
                     <select id="statusFilter" class="filter-input">
                         <option value="">All Statuses</option>
@@ -1570,6 +1576,7 @@
 
             // Dropdown filters
             document.getElementById('vendorFilter').addEventListener('change', applyFilters);
+            document.getElementById('poTypeFilter').addEventListener('change', applyFilters);
             document.getElementById('statusFilter').addEventListener('change', applyFilters);
 
             // Sort headers
@@ -1654,6 +1661,16 @@
                 vendorSelect.appendChild(option);
             });
 
+            // Populate PO type filter
+            const poTypes = [...new Set(allItems.map(item => item.poType).filter(t => t))].sort();
+            const poTypeSelect = document.getElementById('poTypeFilter');
+            poTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                poTypeSelect.appendChild(option);
+            });
+
             // Populate status filter
             const statuses = [...new Set(allItems.map(item => item.poStatus).filter(s => s))].sort();
             const statusSelect = document.getElementById('statusFilter');
@@ -1668,6 +1685,7 @@
         function applyFilters() {
             const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
             const vendorFilter = document.getElementById('vendorFilter').value;
+            const poTypeFilter = document.getElementById('poTypeFilter').value;
             const statusFilter = document.getElementById('statusFilter').value;
 
             filteredItems = allItems.filter(item => {
@@ -1681,10 +1699,13 @@
                 // Vendor filter
                 const matchesVendor = !vendorFilter || item.vendor === vendorFilter;
 
+                // PO Type filter
+                const matchesPoType = !poTypeFilter || item.poType === poTypeFilter;
+
                 // Status filter
                 const matchesStatus = !statusFilter || item.poStatus === statusFilter;
 
-                return matchesSearch && matchesVendor && matchesStatus;
+                return matchesSearch && matchesVendor && matchesPoType && matchesStatus;
             });
 
             renderTable();
