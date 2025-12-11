@@ -1336,6 +1336,23 @@
                     </div>
                 </div>
 
+                <!-- Urgency Filter Section -->
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #dee2e6;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h4 style="margin: 0; font-size: 14px; color: #2c3e50;">🚨 Filter by Urgency</h4>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px;">
+                            <input type="checkbox" id="selectAllUrgencies" checked
+                                onchange="toggleAllUrgencies(this.checked)">
+                            <span>Select All</span>
+                        </label>
+                    </div>
+                    <div id="urgencyFilterList"
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+                        <!-- Urgency checkboxes will be dynamically generated -->
+                    </div>
+                </div>
+
                 <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
                         <input type="checkbox" id="selectAllColumns" checked onchange="toggleAllColumns(this.checked)">
@@ -1808,6 +1825,7 @@
                         { id: 'quantity', label: 'Quantity', visible: true, sortable: true },
                         { id: 'itemStatus', label: 'Item Status', visible: true, sortable: true },
                         { id: 'poStatus', label: 'PO Status', visible: true, sortable: true },
+                        { id: 'poType', label: 'PO Type', visible: true, sortable: true },
                         { id: 'urgency', label: 'Urgency', visible: true, sortable: true },
                         { id: 'notes', label: 'Notes', visible: true, sortable: false },
                         { id: 'inventoryRawQuantity', label: 'Inv Raw', visible: true, sortable: true },
@@ -2199,6 +2217,7 @@
             // Populate filters dynamically
             populateTypeFilters();
             populateStatusFilters();
+            populateUrgencyFilters();
             // Show column selection modal instead of directly exporting
             document.getElementById('columnModal').style.display = 'flex';
         }
@@ -2244,6 +2263,23 @@
 
         function toggleAllStatuses(checked) {
             const checkboxes = document.querySelectorAll('.status-filter-checkbox');
+            checkboxes.forEach(cb => cb.checked = checked);
+        }
+
+        function populateUrgencyFilters() {
+            const urgencyContainer = document.getElementById('urgencyFilterList');
+            const urgencyLevels = ['High', 'Medium', 'Low', 'No Urgency'];
+
+            urgencyContainer.innerHTML = urgencyLevels.map(level => `
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px;">
+                    <input type="checkbox" class="urgency-filter-checkbox" value="${level}" checked>
+                    <span style="font-size: 12px;">${level}</span>
+                </label>
+            `).join('');
+        }
+
+        function toggleAllUrgencies(checked) {
+            const checkboxes = document.querySelectorAll('.urgency-filter-checkbox');
             checkboxes.forEach(cb => cb.checked = checked);
         }
 
@@ -2388,7 +2424,13 @@
                 checked: cb.checked
             }));
 
-            return { columns, types, statuses };
+            // Get urgency selections
+            const urgencies = Array.from(document.querySelectorAll('.urgency-filter-checkbox')).map(cb => ({
+                value: cb.value,
+                checked: cb.checked
+            }));
+
+            return { columns, types, statuses, urgencies };
         }
 
         function loadFavorite(index) {
@@ -2447,6 +2489,23 @@
             const selectAllStatuses = document.getElementById('selectAllStatuses');
             if (selectAllStatuses) {
                 selectAllStatuses.checked = allStatusesChecked;
+            }
+
+            // Restore urgency selections (if saved)
+            if (config.urgencies) {
+                config.urgencies.forEach(urgency => {
+                    const checkbox = Array.from(document.querySelectorAll('.urgency-filter-checkbox')).find(cb => cb.value === urgency.value);
+                    if (checkbox) {
+                        checkbox.checked = urgency.checked;
+                    }
+                });
+
+                // Update select all urgencies checkbox
+                const allUrgenciesChecked = config.urgencies.every(u => u.checked);
+                const selectAllUrgencies = document.getElementById('selectAllUrgencies');
+                if (selectAllUrgencies) {
+                    selectAllUrgencies.checked = allUrgenciesChecked;
+                }
             }
 
             showToast(`✅ Loaded favorite: ${favorite.name}`);
@@ -2744,10 +2803,30 @@
                         config.statuses.filter(s => s.checked).map(s => s.value)
                     );
 
-                    // Filter items based on favorite's configuration
-                    const itemsToExport = filteredItems.filter(item =>
-                        selectedTypes.has(item.poType) && selectedStatuses.has(item.poStatus)
+                    // Get selected urgencies for this favorite (if saved, otherwise default to all)
+                    const selectedUrgencies = new Set(
+                        config.urgencies ? config.urgencies.filter(u => u.checked).map(u => u.value) : ['High', 'Medium', 'Low', 'No Urgency']
                     );
+
+                    // Filter items based on favorite's configuration
+                    // Note: filteredItems already includes page filters (Search, Vendor, PO Type, Status, Urgency)
+                    const itemsToExport = filteredItems.filter(item => {
+                        const matchesType = selectedTypes.has(item.poType);
+                        const matchesStatus = selectedStatuses.has(item.poStatus);
+                        
+                        // Handle urgency matching (including "No Urgency")
+                        let matchesUrgency = false;
+                        if (selectedUrgencies.has('No Urgency')) {
+                            matchesUrgency = !item.urgency || item.urgency === '';
+                        }
+                        if (item.urgency && selectedUrgencies.has(item.urgency)) {
+                            matchesUrgency = true;
+                        }
+                        
+                        return matchesType && matchesStatus && matchesUrgency;
+                    });
+
+                    console.log(`📋 Sheet "${customTabName}" - Items: ${itemsToExport.length} (Urgencies: ${Array.from(selectedUrgencies).join(', ')})`);
 
                     // Get selected columns in order
                     const selectedColumns = config.columns
@@ -2931,15 +3010,41 @@
                 return;
             }
 
-            // Filter items by selected types and statuses
-            const itemsToExport = filteredItems.filter(item =>
-                selectedTypes.has(item.poType) && selectedStatuses.has(item.poStatus)
-            );
+            // Get selected urgencies
+            const selectedUrgencies = new Set();
+            document.querySelectorAll('.urgency-filter-checkbox:checked').forEach(cb => {
+                selectedUrgencies.add(cb.value);
+            });
+
+            if (selectedUrgencies.size === 0) {
+                alert('Please select at least one urgency level to export');
+                return;
+            }
+
+            // Filter items by selected types, statuses, and urgencies
+            const itemsToExport = filteredItems.filter(item => {
+                const matchesType = selectedTypes.has(item.poType);
+                const matchesStatus = selectedStatuses.has(item.poStatus);
+                
+                // Handle urgency matching (including "No Urgency")
+                let matchesUrgency = false;
+                if (selectedUrgencies.has('No Urgency')) {
+                    matchesUrgency = !item.urgency || item.urgency === '';
+                }
+                if (item.urgency && selectedUrgencies.has(item.urgency)) {
+                    matchesUrgency = true;
+                }
+                
+                return matchesType && matchesStatus && matchesUrgency;
+            });
 
             console.log('📊 Export Filter Summary:');
             console.log('  - Total items in view:', filteredItems.length);
-            console.log('  - Selected PO types:', Array.from(selectedTypes));
-            console.log('  - Selected statuses:', Array.from(selectedStatuses));
+            console.log('  - Page filters applied: Search, Vendor, PO Type, Status, Urgency');
+            console.log('  - Current urgency filter:', document.getElementById('urgencyFilter').value || 'All');
+            console.log('  - Selected PO types for export:', Array.from(selectedTypes));
+            console.log('  - Selected statuses for export:', Array.from(selectedStatuses));
+            console.log('  - Selected urgencies for export:', Array.from(selectedUrgencies));
             console.log('  - Items matching filters:', itemsToExport.length);
 
             // Show what's being filtered out
