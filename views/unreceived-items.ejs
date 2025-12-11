@@ -2140,15 +2140,15 @@
                     select.addEventListener('change', function () {
                         const itemId = this.getAttribute('data-item-id');
                         const type = this.getAttribute('data-type');
-                        
+
                         console.log(`🎯 EAD dropdown changed: itemId="${itemId}", type="${type}", value="${this.value}"`);
-                        
+
                         // Find both selects for this item
                         const periodSelect = document.querySelector(`.ead-select.period[data-item-id="${itemId}"]`);
                         const monthSelect = document.querySelector(`.ead-select.month[data-item-id="${itemId}"]`);
-                        
+
                         console.log(`📊 Current values: period="${periodSelect.value}", month="${monthSelect.value}"`);
-                        
+
                         // If period is selected/changed, enable month dropdown
                         if (type === 'period') {
                             if (this.value) {
@@ -2160,7 +2160,7 @@
                                 console.log(`🚫 Month dropdown disabled and cleared`);
                             }
                         }
-                        
+
                         // Update EAD when either dropdown changes
                         const period = periodSelect.value;
                         const month = monthSelect.value;
@@ -2320,11 +2320,11 @@
 
         async function updateItemEAD(itemId, ead) {
             console.log(`🔄 updateItemEAD called: itemId="${itemId}", ead="${ead}"`);
-            
+
             // Find the item in filteredItems and check if EAD actually changed
             const item = filteredItems.find(i => i.itemId === itemId);
             console.log(`📦 Found item in filteredItems:`, item ? `current ead="${item.ead}"` : 'NOT FOUND');
-            
+
             if (item && item.ead === ead) {
                 console.log(`⏭️ No change detected, skipping save`);
                 return; // No change, don't save
