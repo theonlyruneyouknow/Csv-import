@@ -2813,7 +2813,7 @@
                     const itemsToExport = filteredItems.filter(item => {
                         const matchesType = selectedTypes.has(item.poType);
                         const matchesStatus = selectedStatuses.has(item.poStatus);
-                        
+
                         // Handle urgency matching (including "No Urgency")
                         let matchesUrgency = false;
                         if (selectedUrgencies.has('No Urgency')) {
@@ -2822,7 +2822,7 @@
                         if (item.urgency && selectedUrgencies.has(item.urgency)) {
                             matchesUrgency = true;
                         }
-                        
+
                         return matchesType && matchesStatus && matchesUrgency;
                     });
 
@@ -3025,7 +3025,7 @@
             const itemsToExport = filteredItems.filter(item => {
                 const matchesType = selectedTypes.has(item.poType);
                 const matchesStatus = selectedStatuses.has(item.poStatus);
-                
+
                 // Handle urgency matching (including "No Urgency")
                 let matchesUrgency = false;
                 if (selectedUrgencies.has('No Urgency')) {
@@ -3034,7 +3034,7 @@
                 if (item.urgency && selectedUrgencies.has(item.urgency)) {
                     matchesUrgency = true;
                 }
-                
+
                 return matchesType && matchesStatus && matchesUrgency;
             });
 
