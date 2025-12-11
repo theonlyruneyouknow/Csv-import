@@ -1119,6 +1119,16 @@
                         <option value="">All Statuses</option>
                     </select>
                 </div>
+                <div class="filter-group">
+                    <label>Urgency</label>
+                    <select id="urgencyFilter" class="filter-input">
+                        <option value="">All Urgency Levels</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                        <option value="none">No Urgency Set</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -1578,6 +1588,7 @@
             document.getElementById('vendorFilter').addEventListener('change', applyFilters);
             document.getElementById('poTypeFilter').addEventListener('change', applyFilters);
             document.getElementById('statusFilter').addEventListener('change', applyFilters);
+            document.getElementById('urgencyFilter').addEventListener('change', applyFilters);
 
             // Sort headers
             document.querySelectorAll('th.sortable').forEach(th => {
@@ -1687,6 +1698,7 @@
             const vendorFilter = document.getElementById('vendorFilter').value;
             const poTypeFilter = document.getElementById('poTypeFilter').value;
             const statusFilter = document.getElementById('statusFilter').value;
+            const urgencyFilter = document.getElementById('urgencyFilter').value;
 
             filteredItems = allItems.filter(item => {
                 // Search filter
@@ -1705,7 +1717,11 @@
                 // Status filter
                 const matchesStatus = !statusFilter || item.poStatus === statusFilter;
 
-                return matchesSearch && matchesVendor && matchesPoType && matchesStatus;
+                // Urgency filter
+                const matchesUrgency = !urgencyFilter ||
+                    (urgencyFilter === 'none' ? (!item.urgency || item.urgency === '') : item.urgency === urgencyFilter);
+
+                return matchesSearch && matchesVendor && matchesPoType && matchesStatus && matchesUrgency;
             });
 
             renderTable();
