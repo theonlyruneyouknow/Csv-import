@@ -53,6 +53,10 @@ const lineItemSchema = new mongoose.Schema({
         enum: ['High', 'Medium', 'Low', ''],
         default: ''
     },
+    ead: {                      // Expected Arrival Date (e.g., "Early January", "Late March")
+        type: String,
+        default: ''
+    },
     quantityExpected: {         // Expected quantity from PO
         type: Number,
         default: null

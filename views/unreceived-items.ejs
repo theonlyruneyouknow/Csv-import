@@ -1051,6 +1051,40 @@
             color: #0c5460;
             font-weight: 600;
         }
+
+        /* EAD Select Styles */
+        .ead-container {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .ead-select {
+            padding: 4px 6px;
+            font-size: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ead-select.period {
+            min-width: 60px;
+        }
+
+        .ead-select.month {
+            min-width: 90px;
+        }
+
+        .ead-select:hover {
+            border-color: #adb5bd;
+        }
+
+        .ead-select:disabled {
+            background: #e9ecef;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
@@ -1280,6 +1314,11 @@
                         <span class="drag-handle">⋮⋮</span>
                         <input type="checkbox" id="col_urgency" checked>
                         <label for="col_urgency">Urgency</label>
+                    </div>
+                    <div class="column-item" draggable="true" data-col="col_ead">
+                        <span class="drag-handle">⋮⋮</span>
+                        <input type="checkbox" id="col_ead" checked>
+                        <label for="col_ead">EAD</label>
                     </div>
                     <div class="column-item" draggable="true" data-col="col_notes">
                         <span class="drag-handle">⋮⋮</span>
@@ -1799,6 +1838,7 @@
             { id: 'poStatus', label: 'PO Status', visible: true, sortable: true },
             { id: 'poType', label: 'PO Type', visible: true, sortable: true },
             { id: 'urgency', label: 'Urgency', visible: true, sortable: true },
+            { id: 'ead', label: 'EAD', visible: true, sortable: true },
             { id: 'notes', label: 'Notes', visible: true, sortable: false },
             { id: 'inventoryRawQuantity', label: 'Inv Raw', visible: true, sortable: true },
             { id: 'inventoryChildQuantity', label: 'Inv Child', visible: true, sortable: true },
@@ -1827,6 +1867,7 @@
                         { id: 'poStatus', label: 'PO Status', visible: true, sortable: true },
                         { id: 'poType', label: 'PO Type', visible: true, sortable: true },
                         { id: 'urgency', label: 'Urgency', visible: true, sortable: true },
+                        { id: 'ead', label: 'EAD', visible: true, sortable: true },
                         { id: 'notes', label: 'Notes', visible: true, sortable: false },
                         { id: 'inventoryRawQuantity', label: 'Inv Raw', visible: true, sortable: true },
                         { id: 'inventoryChildQuantity', label: 'Inv Child', visible: true, sortable: true },
@@ -2034,6 +2075,34 @@
                         case 'urgency':
                             const urgencyClass = item.urgency === 'High' ? 'urgency-high' : item.urgency === 'Medium' ? 'urgency-medium' : item.urgency === 'Low' ? 'urgency-low' : '';
                             return `<td><select class="urgency-select ${urgencyClass}" data-item-id="${item.itemId}"><option value="" ${!item.urgency ? 'selected' : ''}>-</option><option value="High" ${item.urgency === 'High' ? 'selected' : ''}>High</option><option value="Medium" ${item.urgency === 'Medium' ? 'selected' : ''}>Medium</option><option value="Low" ${item.urgency === 'Low' ? 'selected' : ''}>Low</option></select></td>`;
+                        case 'ead':
+                            // Parse EAD value (e.g., "Early January" or "Late March")
+                            const eadParts = (item.ead || '').split(' ');
+                            const period = eadParts[0] || '';
+                            const month = eadParts[1] || '';
+                            console.log(`🔍 Rendering EAD for item ${item.itemId}: "${item.ead}" -> period="${period}", month="${month}"`);
+                            return `<td><div class="ead-container">
+                                <select class="ead-select period" data-item-id="${item.itemId}" data-type="period">
+                                    <option value="">-</option>
+                                    <option value="Early" ${period === 'Early' ? 'selected' : ''}>Early</option>
+                                    <option value="Late" ${period === 'Late' ? 'selected' : ''}>Late</option>
+                                </select>
+                                <select class="ead-select month" data-item-id="${item.itemId}" data-type="month" ${!period ? 'disabled' : ''}>
+                                    <option value="">-</option>
+                                    <option value="January" ${month === 'January' ? 'selected' : ''}>January</option>
+                                    <option value="February" ${month === 'February' ? 'selected' : ''}>February</option>
+                                    <option value="March" ${month === 'March' ? 'selected' : ''}>March</option>
+                                    <option value="April" ${month === 'April' ? 'selected' : ''}>April</option>
+                                    <option value="May" ${month === 'May' ? 'selected' : ''}>May</option>
+                                    <option value="June" ${month === 'June' ? 'selected' : ''}>June</option>
+                                    <option value="July" ${month === 'July' ? 'selected' : ''}>July</option>
+                                    <option value="August" ${month === 'August' ? 'selected' : ''}>August</option>
+                                    <option value="September" ${month === 'September' ? 'selected' : ''}>September</option>
+                                    <option value="October" ${month === 'October' ? 'selected' : ''}>October</option>
+                                    <option value="November" ${month === 'November' ? 'selected' : ''}>November</option>
+                                    <option value="December" ${month === 'December' ? 'selected' : ''}>December</option>
+                                </select>
+                            </div></td>`;
                         case 'notes':
                             return `<td><input type="text" class="item-notes-input" value="${(item.receivingNotes || '').replace(/"/g, '&quot;')}" placeholder="Add notes..." onblur="updateItemNotes('${item.itemId}', this.value)" data-item-id="${item.itemId}"></td>`;
                         case 'inventoryRawQuantity':
@@ -2065,6 +2134,42 @@
                         updateItemUrgency(itemId, urgency);
                     });
                 });
+
+                // Attach event listeners to EAD dropdowns
+                document.querySelectorAll('.ead-select').forEach(select => {
+                    select.addEventListener('change', function () {
+                        const itemId = this.getAttribute('data-item-id');
+                        const type = this.getAttribute('data-type');
+                        
+                        console.log(`🎯 EAD dropdown changed: itemId="${itemId}", type="${type}", value="${this.value}"`);
+                        
+                        // Find both selects for this item
+                        const periodSelect = document.querySelector(`.ead-select.period[data-item-id="${itemId}"]`);
+                        const monthSelect = document.querySelector(`.ead-select.month[data-item-id="${itemId}"]`);
+                        
+                        console.log(`📊 Current values: period="${periodSelect.value}", month="${monthSelect.value}"`);
+                        
+                        // If period is selected/changed, enable month dropdown
+                        if (type === 'period') {
+                            if (this.value) {
+                                monthSelect.disabled = false;
+                                console.log(`✅ Month dropdown enabled`);
+                            } else {
+                                monthSelect.disabled = true;
+                                monthSelect.value = '';
+                                console.log(`🚫 Month dropdown disabled and cleared`);
+                            }
+                        }
+                        
+                        // Update EAD when either dropdown changes
+                        const period = periodSelect.value;
+                        const month = monthSelect.value;
+                        const ead = (period && month) ? `${period} ${month}` : '';
+                        console.log(`💾 Calling updateItemEAD with: "${ead}"`);
+                        updateItemEAD(itemId, ead);
+                    });
+                });
+                console.log(`✅ Attached event listeners to ${document.querySelectorAll('.ead-select').length} EAD dropdowns`);
             }, 0);
         }
 
@@ -2203,6 +2308,67 @@
 
                 // Show more specific error message
                 let errorMessage = 'Failed to update urgency';
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Network error - please check your connection';
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+
+                showToast('❌ ' + errorMessage);
+            }
+        }
+
+        async function updateItemEAD(itemId, ead) {
+            console.log(`🔄 updateItemEAD called: itemId="${itemId}", ead="${ead}"`);
+            
+            // Find the item in filteredItems and check if EAD actually changed
+            const item = filteredItems.find(i => i.itemId === itemId);
+            console.log(`📦 Found item in filteredItems:`, item ? `current ead="${item.ead}"` : 'NOT FOUND');
+            
+            if (item && item.ead === ead) {
+                console.log(`⏭️ No change detected, skipping save`);
+                return; // No change, don't save
+            }
+
+            try {
+                console.log('⚡ Saving EAD for item', itemId, ':', ead);
+
+                const response = await fetch(`/purchase-orders/line-item/${itemId}/ead`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ ead })
+                });
+
+                console.log(`📡 Response status:`, response.status);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('❌ Server response not OK:', response.status, errorText);
+                    throw new Error(`Server error: ${response.status} - ${errorText}`);
+                }
+
+                const result = await response.json();
+                console.log('📥 Server response:', result);
+
+                if (result.success) {
+                    // Update the item in our local data
+                    if (item) {
+                        item.ead = ead;
+                        console.log(`✅ Local data updated: item.ead = "${item.ead}"`);
+                    }
+                    console.log('✅ EAD updated for item', itemId);
+                    showToast(`✅ EAD updated: ${ead || '(cleared)'}`);
+                } else {
+                    throw new Error(result.error || 'Failed to update EAD');
+                }
+            } catch (error) {
+                console.error('❌ Error updating EAD:', error);
+
+                // Show more specific error message
+                let errorMessage = 'Failed to update EAD';
                 if (error.message.includes('Failed to fetch')) {
                     errorMessage = 'Network error - please check your connection';
                 } else if (error.message) {
@@ -2781,6 +2947,7 @@
                     col_poStatus: { key: 'poStatus', label: 'PO Status' },
                     col_poType: { key: 'poType', label: 'PO Type' },
                     col_urgency: { key: 'urgency', label: 'Urgency' },
+                    col_ead: { key: 'ead', label: 'EAD' },
                     col_notes: { key: 'receivingNotes', label: 'Notes' },
                     col_invRaw: { key: 'inventoryRawQuantity', label: 'Inventory Raw Qty' },
                     col_invChild: { key: 'inventoryChildQuantity', label: 'Inventory Child Qty' },
@@ -2981,7 +3148,7 @@
         }
 
         function toggleAllColumns(checked) {
-            const checkboxes = ['col_poNumber', 'col_vendor', 'col_poDate', 'col_eta', 'col_sku', 'col_memo', 'col_quantity', 'col_itemStatus', 'col_poStatus', 'col_poType', 'col_urgency', 'col_notes', 'col_invRaw', 'col_invChild', 'col_invMeasure'];
+            const checkboxes = ['col_poNumber', 'col_vendor', 'col_poDate', 'col_eta', 'col_sku', 'col_memo', 'col_quantity', 'col_itemStatus', 'col_poStatus', 'col_poType', 'col_urgency', 'col_ead', 'col_notes', 'col_invRaw', 'col_invChild', 'col_invMeasure'];
             checkboxes.forEach(id => {
                 document.getElementById(id).checked = checked;
             });
@@ -3095,6 +3262,7 @@
                 col_poStatus: { key: 'poStatus', label: 'PO Status' },
                 col_poType: { key: 'poType', label: 'PO Type' },
                 col_urgency: { key: 'urgency', label: 'Urgency' },
+                col_ead: { key: 'ead', label: 'EAD' },
                 col_notes: { key: 'receivingNotes', label: 'Notes' },
                 col_invRaw: { key: 'inventoryRawQuantity', label: 'Inventory Raw Qty' },
                 col_invChild: { key: 'inventoryChildQuantity', label: 'Inventory Child Qty' },

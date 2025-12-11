@@ -3180,6 +3180,43 @@ router.patch('/line-item/:itemId/urgency', async (req, res) => {
   }
 });
 
+// PATCH /purchase-orders/line-item/:itemId/ead - Update line item EAD
+router.patch('/line-item/:itemId/ead', async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const { ead } = req.body;
+
+    console.log(`⚡ Updating EAD for item ${itemId} to ${ead}`);
+
+    const lineItem = await LineItem.findByIdAndUpdate(
+      itemId,
+      { ead },
+      { new: true }
+    );
+
+    if (!lineItem) {
+      return res.status(404).json({
+        success: false,
+        error: 'Line item not found'
+      });
+    }
+
+    console.log(`✅ EAD updated for item ${itemId}`);
+
+    res.json({
+      success: true,
+      ead: lineItem.ead
+    });
+
+  } catch (error) {
+    console.error('❌ Error updating item EAD:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Preview inventory data import (MUST be before /:id/ routes)
 router.post('/preview-inventory-import', async (req, res) => {
   try {
@@ -6176,6 +6213,7 @@ router.get('/unreceived-items', async (req, res) => {
         poType: item.poId.poType || 'N/A',
         receivingNotes: item.receivingNotes || '',
         urgency: item.urgency || '',
+        ead: item.ead || '',
         inventoryRawQuantity: item.inventoryRawQuantity !== null && item.inventoryRawQuantity !== undefined ? item.inventoryRawQuantity : null,
         inventoryChildQuantity: item.inventoryChildQuantity !== null && item.inventoryChildQuantity !== undefined ? item.inventoryChildQuantity : null,
         inventoryMeasure: item.inventoryMeasure || '',
@@ -6251,6 +6289,7 @@ router.get('/waiting-for-approval-items', async (req, res) => {
         poType: item.poId.poType || 'N/A',
         receivingNotes: item.receivingNotes || '',
         urgency: item.urgency || '',
+        ead: item.ead || '',
         inventoryRawQuantity: item.inventoryRawQuantity !== null && item.inventoryRawQuantity !== undefined ? item.inventoryRawQuantity : null,
         inventoryChildQuantity: item.inventoryChildQuantity !== null && item.inventoryChildQuantity !== undefined ? item.inventoryChildQuantity : null,
         inventoryMeasure: item.inventoryMeasure || '',
