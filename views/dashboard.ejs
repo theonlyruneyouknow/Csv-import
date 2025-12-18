@@ -4099,7 +4099,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         <label>Search Vendor, PO#, or Tracking#</label>
                         <div class="search-input-wrapper">
                             <input type="text" id="searchFilter" placeholder="Type to search..." autocomplete="off">
-                            <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearchField()" title="Clear search">✕</button>
+                            <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearchField()"
+                                title="Clear search">✕</button>
                         </div>
                         <div id="searchHistoryDropdown" class="search-history-dropdown" style="display: none;">
                             <div class="search-history-header">
@@ -4205,12 +4206,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     <div class="filter-group">
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
                             <label style="margin: 0;">PO Type Filter</label>
-                            <button class="btn btn-sm" onclick="selectAllPoTypes()" 
+                            <button class="btn btn-sm" onclick="selectAllPoTypes()"
                                 style="padding: 2px 6px; font-size: 10px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer;"
                                 title="Check all PO types">
                                 ✓ All
                             </button>
-                            <button class="btn btn-sm" onclick="clearAllPoTypes()" 
+                            <button class="btn btn-sm" onclick="clearAllPoTypes()"
                                 style="padding: 2px 6px; font-size: 10px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;"
                                 title="Uncheck all PO types">
                                 ✕ Clear
@@ -8708,10 +8709,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function selectAllPoTypes() {
             <% poTypeOptions.forEach(type => { %>
                 const checkbox<%= type.name %> = document.getElementById('filter<%= type.name %>');
-                if (checkbox<%= type.name %>) {
-                    checkbox<%= type.name %>.checked = true;
-                    localStorage.setItem('filter<%= type.name %>', 'true');
-                }
+            if (checkbox <%= type.name %>) {
+                checkbox <%= type.name %>.checked = true;
+                localStorage.setItem('filter<%= type.name %>', 'true');
+            }
             <% }); %>
             applyFilters();
         }
@@ -8719,10 +8720,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function clearAllPoTypes() {
             <% poTypeOptions.forEach(type => { %>
                 const checkbox<%= type.name %> = document.getElementById('filter<%= type.name %>');
-                if (checkbox<%= type.name %>) {
-                    checkbox<%= type.name %>.checked = false;
-                    localStorage.setItem('filter<%= type.name %>', 'false');
-                }
+            if (checkbox <%= type.name %>) {
+                checkbox <%= type.name %>.checked = false;
+                localStorage.setItem('filter<%= type.name %>', 'false');
+            }
             <% }); %>
             applyFilters();
         }
@@ -8818,7 +8819,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         if (searchFilter) searchFilter.addEventListener('input', applyFilters);
         if (searchFilter) {
-            searchFilter.addEventListener('input', function() {
+            searchFilter.addEventListener('input', function () {
                 toggleSearchClearBtn();
                 applyFilters();
             });
