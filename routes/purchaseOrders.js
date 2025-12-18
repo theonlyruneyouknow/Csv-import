@@ -1433,7 +1433,13 @@ router.put('/:poId/type', async (req, res) => {
 // Get all PO type options
 router.get('/po-type-options', async (req, res) => {
   try {
-    const poTypeOptions = await PoTypeOption.find().sort({ name: 1 });
+    const poTypeOptions = await PoTypeOption.find();
+    // Sort with Seed first, then alphabetically
+    poTypeOptions.sort((a, b) => {
+      if (a.name === 'Seed') return -1;
+      if (b.name === 'Seed') return 1;
+      return a.name.localeCompare(b.name);
+    });
     res.json(poTypeOptions);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -2399,7 +2405,13 @@ router.get('/', async (req, res) => {
     console.log('📝 Status options:', statusOptionNames);
 
     // Get PO type options from database
-    const poTypeOptions = await PoTypeOption.find().sort({ name: 1 });
+    const poTypeOptions = await PoTypeOption.find();
+    // Sort with Seed first, then alphabetically
+    poTypeOptions.sort((a, b) => {
+      if (a.name === 'Seed') return -1;
+      if (b.name === 'Seed') return 1;
+      return a.name.localeCompare(b.name);
+    });
     console.log('📦 PO type options:', poTypeOptions.map(t => t.name).join(', '));
 
     // Get assignees from database
