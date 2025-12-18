@@ -8712,8 +8712,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function selectAllPoTypes() {
             <% poTypeOptions.forEach(type => { %>
             const checkbox<%= type.name.replace(/\s+/g, '') %> = document.getElementById('filter<%= type.name %>');
-            if (checkbox<%= type.name.replace(/\s+/g, '') %>) {
-                checkbox<%= type.name.replace(/\s+/g, '') %>.checked = true;
+            if (checkbox <%= type.name.replace(/\s+/g, '') %>) {
+                checkbox <%= type.name.replace(/\s+/g, '') %>.checked = true;
                 localStorage.setItem('filter<%= type.name %>', 'true');
             }
             <% }); %>
@@ -8723,8 +8723,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function clearAllPoTypes() {
             <% poTypeOptions.forEach(type => { %>
             const checkbox<%= type.name.replace(/\s+/g, '') %> = document.getElementById('filter<%= type.name %>');
-            if (checkbox<%= type.name.replace(/\s+/g, '') %>) {
-                checkbox<%= type.name.replace(/\s+/g, '') %>.checked = false;
+            if (checkbox <%= type.name.replace(/\s+/g, '') %>) {
+                checkbox <%= type.name.replace(/\s+/g, '') %>.checked = false;
                 localStorage.setItem('filter<%= type.name %>', 'false');
             }
             <% }); %>
