@@ -880,7 +880,7 @@
             border-top: none;
             border-radius: 0 0 4px 4px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-height: 300px;
+            max-height: 250px;
             overflow-y: auto;
             z-index: 1000;
             margin-top: -1px;
@@ -8697,10 +8697,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function toggleSearchClearBtn() {
             const searchFilter = document.getElementById('searchFilter');
             const clearBtn = document.getElementById('searchClearBtn');
+            console.log('🔘 toggleSearchClearBtn called - searchFilter:', searchFilter, 'clearBtn:', clearBtn, 'value length:', searchFilter?.value.length);
             if (searchFilter && clearBtn) {
                 if (searchFilter.value.length > 0) {
+                    console.log('✅ Adding visible class to clear button');
                     clearBtn.classList.add('visible');
                 } else {
+                    console.log('❌ Removing visible class from clear button');
                     clearBtn.classList.remove('visible');
                 }
             }
@@ -8708,9 +8711,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         function selectAllPoTypes() {
             <% poTypeOptions.forEach(type => { %>
-                const checkbox<%= type.name %> = document.getElementById('filter<%= type.name %>');
-            if (checkbox <%= type.name %>) {
-                checkbox <%= type.name %>.checked = true;
+            const checkbox<%= type.name.replace(/\s+/g, '') %> = document.getElementById('filter<%= type.name %>');
+            if (checkbox<%= type.name.replace(/\s+/g, '') %>) {
+                checkbox<%= type.name.replace(/\s+/g, '') %>.checked = true;
                 localStorage.setItem('filter<%= type.name %>', 'true');
             }
             <% }); %>
@@ -8719,9 +8722,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         function clearAllPoTypes() {
             <% poTypeOptions.forEach(type => { %>
-                const checkbox<%= type.name %> = document.getElementById('filter<%= type.name %>');
-            if (checkbox <%= type.name %>) {
-                checkbox <%= type.name %>.checked = false;
+            const checkbox<%= type.name.replace(/\s+/g, '') %> = document.getElementById('filter<%= type.name %>');
+            if (checkbox<%= type.name.replace(/\s+/g, '') %>) {
+                checkbox<%= type.name.replace(/\s+/g, '') %>.checked = false;
                 localStorage.setItem('filter<%= type.name %>', 'false');
             }
             <% }); %>
@@ -8766,27 +8769,17 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             return div.innerHTML;
         }
 
-        // Search input event listeners
+        // Search input event listeners for dropdown
         const searchInput = document.getElementById('searchFilter');
 
-        searchInput.addEventListener('focus', showSearchHistoryDropdown);
+        if (searchInput) {
+            searchInput.addEventListener('focus', showSearchHistoryDropdown);
 
-        searchInput.addEventListener('blur', () => {
-            // Delay to allow clicking on dropdown items
-            setTimeout(hideSearchHistoryDropdown, 200);
-        });
-
-        // Save search when user types and pauses (debounced)
-        let searchTimeout;
-        searchInput.addEventListener('input', function () {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                const value = this.value.trim();
-                if (value.length >= 2) {  // Only save searches with 2+ characters
-                    saveSearchHistory(value);
-                }
-            }, 1000);  // Save 1 second after user stops typing
-        });
+            searchInput.addEventListener('blur', () => {
+                // Delay to allow clicking on dropdown items
+                setTimeout(hideSearchHistoryDropdown, 200);
+            });
+        }
 
         // Close dropdown when clicking outside
         document.addEventListener('click', function (event) {
@@ -8817,12 +8810,30 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         const showOnlyMissingEta = document.getElementById('showOnlyMissingEta');
         const showOnlyNoLineItems = document.getElementById('showOnlyNoLineItems');
 
-        if (searchFilter) searchFilter.addEventListener('input', applyFilters);
+        // Declare searchTimeout outside the if block so it persists
+        let searchTimeout;
+
+        console.log('🔍 Setting up search filter event listener...', searchFilter);
         if (searchFilter) {
+            // Combined input event listener for search functionality
             searchFilter.addEventListener('input', function () {
+                console.log('⌨️ Search input changed:', this.value);
+                // Toggle clear button visibility
                 toggleSearchClearBtn();
+                // Apply filters immediately
                 applyFilters();
+                // Save to search history after delay
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    const value = this.value.trim();
+                    if (value.length >= 2) {
+                        saveSearchHistory(value);
+                    }
+                }, 1000);
             });
+            console.log('✅ Search filter event listener attached');
+        } else {
+            console.error('❌ searchFilter element not found!');
         }
         if (nsStatusFilter) nsStatusFilter.addEventListener('change', applyFilters);
         if (statusFilter) statusFilter.addEventListener('change', applyFilters);
