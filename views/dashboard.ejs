@@ -3148,6 +3148,27 @@
             font-weight: 300;
         }
 
+        .export-excel-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .export-excel-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #20c997 0%, #28a745 100%);
+        }
+
         .no-results {
             text-align: center;
             padding: 40px;
@@ -4088,6 +4109,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         <%= purchaseOrders.length %>
                     </span>
                     <span class="stat-label">Showing</span>
+                </div>
+                <div class="stat-divider">|</div>
+                <div class="stat-item">
+                    <a href="/purchase-orders/export/live-excel" class="export-excel-btn" title="Download all data as Excel">
+                        📊 Export to Excel
+                    </a>
                 </div>
             </div>
 

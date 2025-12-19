@@ -5500,6 +5500,100 @@ router.get('/attachments/:poId', async (req, res) => {
 });
 
 // Download attachment
+// Real-time Excel Export API
+router.get('/export/live-excel', async (req, res) => {
+  try {
+    console.log('📊 Real-time Excel export requested');
+    
+    // Fetch all purchase orders with populated line items
+    const purchaseOrders = await PurchaseOrder.find()
+      .populate('lineItems')
+      .sort({ poNumber: -1 });
+
+    console.log(`📦 Found ${purchaseOrders.length} purchase orders to export`);
+
+    // Import XLSX
+    const XLSX = require('xlsx');
+
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Prepare data for main PO sheet
+    const poData = purchaseOrders.map(po => ({
+      'PO Number': po.poNumber || '',
+      'Vendor': po.vendor || '',
+      'PO Type': po.poType || '',
+      'Status': po.status || '',
+      'NS Status': po.nsStatus || '',
+      'Priority': po.priority || '',
+      'Location': po.location || '',
+      'Tracking Number': po.trackingNumber || '',
+      'ETA': po.eta ? new Date(po.eta).toLocaleDateString() : '',
+      'Date Ordered': po.dateOrdered ? new Date(po.dateOrdered).toLocaleDateString() : '',
+      'Notes': po.notes || '',
+      'Line Items Count': po.lineItems ? po.lineItems.length : 0,
+      'Created At': po.createdAt ? new Date(po.createdAt).toLocaleDateString() : '',
+      'Updated At': po.updatedAt ? new Date(po.updatedAt).toLocaleDateString() : ''
+    }));
+
+    // Create PO worksheet
+    const poWorksheet = XLSX.utils.json_to_sheet(poData);
+    XLSX.utils.book_append_sheet(workbook, poWorksheet, 'Purchase Orders');
+
+    // Prepare data for line items sheet
+    const lineItemsData = [];
+    purchaseOrders.forEach(po => {
+      if (po.lineItems && po.lineItems.length > 0) {
+        po.lineItems.forEach(item => {
+          lineItemsData.push({
+            'PO Number': po.poNumber || '',
+            'Vendor': po.vendor || '',
+            'Item Number': item.itemNumber || '',
+            'Variety': item.variety || '',
+            'Description': item.description || '',
+            'Location': item.locationName || '',
+            'Quantity Ordered': item.quantityOrdered || 0,
+            'Quantity Expected': item.quantityExpected || 0,
+            'Quantity Received': item.quantityReceived || 0,
+            'Unit': item.unit || '',
+            'Status': item.status || '',
+            'Urgency': item.urgency || '',
+            'EAD': item.ead || '',
+            'ETA': item.eta ? new Date(item.eta).toLocaleDateString() : '',
+            'Notes': item.notes || ''
+          });
+        });
+      }
+    });
+
+    // Create Line Items worksheet
+    const lineItemsWorksheet = XLSX.utils.json_to_sheet(lineItemsData);
+    XLSX.utils.book_append_sheet(workbook, lineItemsWorksheet, 'Line Items');
+
+    // Generate buffer
+    const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+    // Set response headers
+    const filename = `PurchaseOrders_${new Date().toISOString().split('T')[0]}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', excelBuffer.length);
+
+    console.log(`✅ Excel file generated: ${filename} (${excelBuffer.length} bytes)`);
+    
+    // Send the buffer
+    res.send(excelBuffer);
+
+  } catch (error) {
+    console.error('❌ Excel export error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to generate Excel file',
+      details: error.message 
+    });
+  }
+});
+
 router.get('/download-attachment/:attachmentId', async (req, res) => {
   try {
     const { attachmentId } = req.params;
