@@ -5505,6 +5505,22 @@ router.get('/export/live-excel', async (req, res) => {
   try {
     console.log('📊 Real-time Excel export requested');
     
+    // Check for API key in query params or headers
+    const apiKey = req.query.api_key || req.headers['x-api-key'];
+    const validApiKey = process.env.EXCEL_API_KEY;
+    
+    // Allow access if user is authenticated OR has valid API key
+    if (!req.isAuthenticated() && (!apiKey || apiKey !== validApiKey)) {
+      console.log('❌ Unauthorized access attempt to Excel export');
+      return res.status(401).json({ 
+        success: false, 
+        error: 'Unauthorized. Please provide a valid API key or log in.',
+        hint: 'Add ?api_key=YOUR_KEY to the URL or use X-API-Key header'
+      });
+    }
+    
+    console.log('✅ Access granted:', req.isAuthenticated() ? 'authenticated user' : 'valid API key');
+    
     // Fetch all purchase orders with populated line items
     const purchaseOrders = await PurchaseOrder.find()
       .populate('lineItems')
