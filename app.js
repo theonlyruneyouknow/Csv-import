@@ -555,6 +555,95 @@ app.get('/food-test-meal-plans-list', (req, res) => {
 // TEMPORARY: Test route without authentication for debugging upload
 app.use('/test-upload', purchaseOrderRoutes);
 
+// Public API endpoints (require API key but not login) - MUST be before authenticated routes
+app.get('/purchase-orders/export/csv-data', async (req, res) => {
+    const apiKey = req.query.key;
+    const validApiKey = process.env.EXCEL_API_KEY;
+    
+    if (!apiKey || apiKey !== validApiKey) {
+        return res.status(401).send('Unauthorized. Invalid API key.');
+    }
+    
+    // Forward to the route handler
+    const PurchaseOrder = require('./models/PurchaseOrder');
+    const Papa = require('papaparse');
+    
+    try {
+        const purchaseOrders = await PurchaseOrder.find()
+            .populate('lineItems')
+            .sort({ poNumber: -1 });
+
+        const csvData = [];
+        purchaseOrders.forEach(po => {
+            if (po.lineItems && po.lineItems.length > 0) {
+                po.lineItems.forEach(item => {
+                    csvData.push({
+                        'PO_Number': po.poNumber || '',
+                        'Vendor': po.vendor || '',
+                        'PO_Type': po.poType || '',
+                        'PO_Status': po.status || '',
+                        'PO_NS_Status': po.nsStatus || '',
+                        'PO_Priority': po.priority || '',
+                        'PO_Location': po.location || '',
+                        'PO_Tracking': po.trackingNumber || '',
+                        'PO_ETA': po.eta ? new Date(po.eta).toISOString().split('T')[0] : '',
+                        'PO_Date_Ordered': po.dateOrdered ? new Date(po.dateOrdered).toISOString().split('T')[0] : '',
+                        'Item_Number': item.itemNumber || '',
+                        'Variety': item.variety || '',
+                        'Description': item.description || '',
+                        'Location': item.locationName || '',
+                        'Qty_Ordered': item.quantityOrdered || 0,
+                        'Qty_Expected': item.quantityExpected || 0,
+                        'Qty_Received': item.quantityReceived || 0,
+                        'Unit': item.unit || '',
+                        'Item_Status': item.status || '',
+                        'Urgency': item.urgency || '',
+                        'EAD': item.ead || '',
+                        'Item_ETA': item.eta ? new Date(item.eta).toISOString().split('T')[0] : '',
+                        'Item_Notes': item.notes || '',
+                        'PO_Notes': po.notes || ''
+                    });
+                });
+            } else {
+                csvData.push({
+                    'PO_Number': po.poNumber || '',
+                    'Vendor': po.vendor || '',
+                    'PO_Type': po.poType || '',
+                    'PO_Status': po.status || '',
+                    'PO_NS_Status': po.nsStatus || '',
+                    'PO_Priority': po.priority || '',
+                    'PO_Location': po.location || '',
+                    'PO_Tracking': po.trackingNumber || '',
+                    'PO_ETA': po.eta ? new Date(po.eta).toISOString().split('T')[0] : '',
+                    'PO_Date_Ordered': po.dateOrdered ? new Date(po.dateOrdered).toISOString().split('T')[0] : '',
+                    'Item_Number': '',
+                    'Variety': '',
+                    'Description': '',
+                    'Location': '',
+                    'Qty_Ordered': 0,
+                    'Qty_Expected': 0,
+                    'Qty_Received': 0,
+                    'Unit': '',
+                    'Item_Status': '',
+                    'Urgency': '',
+                    'EAD': '',
+                    'Item_ETA': '',
+                    'Item_Notes': '',
+                    'PO_Notes': po.notes || ''
+                });
+            }
+        });
+
+        const csv = Papa.unparse(csvData);
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="PurchaseOrders_${new Date().toISOString().split('T')[0]}.csv"`);
+        res.send(csv);
+    } catch (error) {
+        console.error('❌ CSV export error:', error);
+        res.status(500).send('Error: ' + error.message);
+    }
+});
+
 app.use('/purchase-orders', ensureAuthenticated, ensureApproved, purchaseOrderRoutes);
 app.use('/purchase-orders', ensureAuthenticated, ensureApproved, trackingRoutes); // NEW: Tracking routes
 app.use('/shipments', ensureAuthenticated, ensureApproved, shipmentRoutes); // NEW: Shipment management
