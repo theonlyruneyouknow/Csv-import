@@ -564,25 +564,28 @@ app.use('/test-upload', purchaseOrderRoutes);
 app.get('/purchase-orders/download/latest-excel', (req, res) => {
     try {
         if (!fs.existsSync(EXCEL_CACHE_FILE)) {
-            return res.status(404).json({ 
-                error: 'Excel file not yet generated. Please try again in a few moments.' 
-            });
+            return res.status(404).send('Excel file not yet generated. Please try again in a few moments.');
         }
         
         const stats = fs.statSync(EXCEL_CACHE_FILE);
         const timestamp = new Date(stats.mtime).toLocaleString();
         
+        // Read file into buffer and send directly (better for Excel Power Query)
+        const fileBuffer = fs.readFileSync(EXCEL_CACHE_FILE);
+        
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', 'attachment; filename=purchase-orders-latest.xlsx');
+        res.setHeader('Content-Length', fileBuffer.length);
         res.setHeader('X-Generated-At', timestamp);
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Access-Control-Allow-Origin', '*');
         
-        const fileStream = fs.createReadStream(EXCEL_CACHE_FILE);
-        fileStream.pipe(res);
+        res.send(fileBuffer);
         
-        console.log(`📥 Excel file downloaded (last updated: ${timestamp})`);
+        console.log(`📥 Excel file downloaded (${Math.round(fileBuffer.length / 1024)} KB, last updated: ${timestamp})`);
     } catch (error) {
         console.error('Error serving Excel file:', error);
-        res.status(500).json({ error: 'Error serving Excel file' });
+        res.status(500).send('Error serving Excel file: ' + error.message);
     }
 });
 
