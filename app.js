@@ -1326,18 +1326,121 @@ cron.schedule('0 * * * *', () => {
     generateWaitingForApprovalReport();
 });
 
-// Manual trigger endpoint (authenticated)
+// ==============================================================
+// EXCEL REPORTS MANAGER PAGE & API
+// ==============================================================
+
+// Excel Reports Manager page
+app.get('/excel-reports', ensureAuthenticated, ensureApproved, (req, res) => {
+    const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
+    res.render('excel-reports', { 
+        user: req.user,
+        baseUrl: baseUrl
+    });
+});
+
+// API: Get status of all reports
+app.get('/api/excel-reports/status', ensureAuthenticated, ensureApproved, (req, res) => {
+    try {
+        const reports = {
+            main: getReportInfo(EXCEL_CACHE_FILE),
+            unreceived: getReportInfo(UNRECEIVED_CACHE_FILE),
+            approval: getReportInfo(WAITING_APPROVAL_CACHE_FILE)
+        };
+
+        // Find the most recent update
+        const timestamps = [
+            reports.main.exists ? reports.main.mtime : null,
+            reports.unreceived.exists ? reports.unreceived.mtime : null,
+            reports.approval.exists ? reports.approval.mtime : null
+        ].filter(t => t !== null);
+
+        const lastUpdate = timestamps.length > 0 ? new Date(Math.max(...timestamps)) : new Date();
+
+        res.json({
+            success: true,
+            lastUpdate: lastUpdate.toISOString(),
+            reports: reports
+        });
+    } catch (error) {
+        console.error('Error getting report status:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Helper function to get report file info
+function getReportInfo(filePath) {
+    try {
+        if (fs.existsSync(filePath)) {
+            const stats = fs.statSync(filePath);
+            return {
+                exists: true,
+                size: `${Math.round(stats.size / 1024)} KB`,
+                timestamp: new Date(stats.mtime).toLocaleString(),
+                mtime: stats.mtime
+            };
+        }
+    } catch (error) {
+        console.error(`Error getting info for ${filePath}:`, error);
+    }
+    return {
+        exists: false,
+        size: 'N/A',
+        timestamp: 'Not generated',
+        mtime: null
+    };
+}
+
+// API: Refresh specific report
+app.post('/api/excel-reports/refresh/:type', ensureAuthenticated, ensureApproved, async (req, res) => {
+    const { type } = req.params;
+    
+    try {
+        let reportInfo;
+        
+        switch(type) {
+            case 'main':
+                await generateExcelCache();
+                reportInfo = getReportInfo(EXCEL_CACHE_FILE);
+                break;
+            case 'unreceived':
+                await generateUnreceivedItemsReport();
+                reportInfo = getReportInfo(UNRECEIVED_CACHE_FILE);
+                break;
+            case 'approval':
+                await generateWaitingForApprovalReport();
+                reportInfo = getReportInfo(WAITING_APPROVAL_CACHE_FILE);
+                break;
+            default:
+                return res.status(400).json({ success: false, error: 'Invalid report type' });
+        }
+
+        res.json({
+            success: true,
+            message: `Report regenerated successfully`,
+            report: reportInfo,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error(`Error refreshing ${type} report:`, error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Legacy endpoint for backward compatibility
 app.post('/purchase-orders/refresh-excel-cache', ensureAuthenticated, ensureApproved, async (req, res) => {
     try {
         await generateExcelCache();
+        await generateUnreceivedItemsReport();
+        await generateWaitingForApprovalReport();
         res.json({ 
             success: true, 
-            message: 'Excel cache regenerated successfully',
+            message: 'All Excel reports regenerated successfully',
             timestamp: new Date().toISOString()
         });
     } catch (error) {
         console.error('Error refreshing Excel cache:', error);
-        res.status(500).json({ error: 'Error refreshing Excel cache' });
+        res.status(500).json({ success: false, error: 'Error refreshing Excel cache' });
     }
 });
 

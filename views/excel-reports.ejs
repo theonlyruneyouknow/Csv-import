@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Reports Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .status-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .status-label {
+            font-size: 12px;
+            color: #718096;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .status-value {
+            font-size: 18px;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .status-value.next-update {
+            color: #667eea;
+        }
+
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .report-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .report-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .report-icon {
+            font-size: 32px;
+        }
+
+        .report-title {
+            flex: 1;
+        }
+
+        .report-title h3 {
+            color: #2d3748;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .report-title p {
+            color: #718096;
+            font-size: 13px;
+        }
+
+        .report-info {
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f7fafc;
+        }
+
+        .info-label {
+            color: #718096;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #2d3748;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .url-section {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .url-label {
+            font-size: 12px;
+            color: #718096;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .url-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: #2d3748;
+        }
+
+        .btn-copy {
+            padding: 10px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-copy:hover {
+            background: #5568d3;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-refresh {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-refresh:hover {
+            background: #38a169;
+        }
+
+        .btn-download {
+            background: #4299e1;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #3182ce;
+        }
+
+        .btn-test {
+            background: #ed8936;
+            color: white;
+        }
+
+        .btn-test:hover {
+            background: #dd6b20;
+        }
+
+        .btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-ready {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-generating {
+            background: #feebc8;
+            color: #7c2d12;
+        }
+
+        .status-error {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #2d3748;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: none;
+            animation: slideIn 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">
+            ← Back to Dashboard
+        </a>
+
+        <div class="header">
+            <h1>📊 Excel Reports Manager</h1>
+            <p>Monitor, refresh, and download auto-generated Excel reports for Power Query integration</p>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="status-label">Server Time</span>
+                <span class="status-value" id="serverTime">Loading...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Last Update</span>
+                <span class="status-value" id="lastUpdate">Loading...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Next Scheduled Update</span>
+                <span class="status-value next-update" id="nextUpdate">Loading...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Update Frequency</span>
+                <span class="status-value">Every Hour (:00)</span>
+            </div>
+        </div>
+
+        <div class="reports-grid">
+            <!-- Main Purchase Orders Report -->
+            <div class="report-card">
+                <div class="report-header">
+                    <div class="report-icon">📦</div>
+                    <div class="report-title">
+                        <h3>All Purchase Orders</h3>
+                        <p>Complete database export with POs and Line Items</p>
+                    </div>
+                </div>
+
+                <div class="report-info">
+                    <div class="info-row">
+                        <span class="info-label">Status</span>
+                        <span class="info-value"><span class="status-badge status-ready" id="status-main">Ready</span></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">File Size</span>
+                        <span class="info-value" id="size-main">Loading...</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Last Generated</span>
+                        <span class="info-value" id="time-main">Loading...</span>
+                    </div>
+                </div>
+
+                <div class="url-section">
+                    <div class="url-label">Excel Power Query URL</div>
+                    <div class="url-container">
+                        <input type="text" class="url-input" id="url-main" readonly value="<%= baseUrl %>/purchase-orders/download/latest-excel">
+                        <button class="btn-copy" onclick="copyUrl('url-main')">📋 Copy</button>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-refresh" onclick="refreshReport('main')">
+                        <span>🔄</span> Refresh Now
+                    </button>
+                    <button class="btn btn-download" onclick="downloadReport('main')">
+                        <span>⬇️</span> Download
+                    </button>
+                </div>
+            </div>
+
+            <!-- Unreceived Items Report -->
+            <div class="report-card">
+                <div class="report-header">
+                    <div class="report-icon">📋</div>
+                    <div class="report-title">
+                        <h3>Unreceived Items</h3>
+                        <p>Items with quantity remaining to receive</p>
+                    </div>
+                </div>
+
+                <div class="report-info">
+                    <div class="info-row">
+                        <span class="info-label">Status</span>
+                        <span class="info-value"><span class="status-badge status-ready" id="status-unreceived">Ready</span></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">File Size</span>
+                        <span class="info-value" id="size-unreceived">Loading...</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Last Generated</span>
+                        <span class="info-value" id="time-unreceived">Loading...</span>
+                    </div>
+                </div>
+
+                <div class="url-section">
+                    <div class="url-label">Excel Power Query URL</div>
+                    <div class="url-container">
+                        <input type="text" class="url-input" id="url-unreceived" readonly value="<%= baseUrl %>/purchase-orders/reports/unreceived-items">
+                        <button class="btn-copy" onclick="copyUrl('url-unreceived')">📋 Copy</button>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-refresh" onclick="refreshReport('unreceived')">
+                        <span>🔄</span> Refresh Now
+                    </button>
+                    <button class="btn btn-download" onclick="downloadReport('unreceived')">
+                        <span>⬇️</span> Download
+                    </button>
+                </div>
+            </div>
+
+            <!-- Waiting for Approval Report -->
+            <div class="report-card">
+                <div class="report-header">
+                    <div class="report-icon">⏳</div>
+                    <div class="report-title">
+                        <h3>Waiting for Approval</h3>
+                        <p>Purchase orders pending approval</p>
+                    </div>
+                </div>
+
+                <div class="report-info">
+                    <div class="info-row">
+                        <span class="info-label">Status</span>
+                        <span class="info-value"><span class="status-badge status-ready" id="status-approval">Ready</span></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">File Size</span>
+                        <span class="info-value" id="size-approval">Loading...</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Last Generated</span>
+                        <span class="info-value" id="time-approval">Loading...</span>
+                    </div>
+                </div>
+
+                <div class="url-section">
+                    <div class="url-label">Excel Power Query URL</div>
+                    <div class="url-container">
+                        <input type="text" class="url-input" id="url-approval" readonly value="<%= baseUrl %>/purchase-orders/reports/waiting-for-approval">
+                        <button class="btn-copy" onclick="copyUrl('url-approval')">📋 Copy</button>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-refresh" onclick="refreshReport('approval')">
+                        <span>🔄</span> Refresh Now
+                    </button>
+                    <button class="btn btn-download" onclick="downloadReport('approval')">
+                        <span>⬇️</span> Download
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Update server time every second
+        function updateServerTime() {
+            const now = new Date();
+            document.getElementById('serverTime').textContent = now.toLocaleTimeString();
+        }
+        setInterval(updateServerTime, 1000);
+        updateServerTime();
+
+        // Calculate next update time
+        function updateNextUpdateTime() {
+            const now = new Date();
+            const next = new Date(now);
+            next.setHours(now.getHours() + 1, 0, 0, 0);
+            
+            const diff = next - now;
+            const minutes = Math.floor(diff / 60000);
+            
+            document.getElementById('nextUpdate').textContent = 
+                `${next.toLocaleTimeString()} (in ${minutes} min)`;
+        }
+        setInterval(updateNextUpdateTime, 30000);
+        updateNextUpdateTime();
+
+        // Load report status
+        async function loadReportStatus() {
+            try {
+                const response = await fetch('/api/excel-reports/status');
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update last update time
+                    document.getElementById('lastUpdate').textContent = 
+                        new Date(data.lastUpdate).toLocaleTimeString();
+                    
+                    // Update each report
+                    updateReportCard('main', data.reports.main);
+                    updateReportCard('unreceived', data.reports.unreceived);
+                    updateReportCard('approval', data.reports.approval);
+                }
+            } catch (error) {
+                console.error('Error loading report status:', error);
+            }
+        }
+
+        function updateReportCard(type, data) {
+            if (data.exists) {
+                document.getElementById(`size-${type}`).textContent = data.size;
+                document.getElementById(`time-${type}`).textContent = data.timestamp;
+                document.getElementById(`status-${type}`).textContent = 'Ready';
+                document.getElementById(`status-${type}`).className = 'status-badge status-ready';
+            } else {
+                document.getElementById(`status-${type}`).textContent = 'Not Generated';
+                document.getElementById(`status-${type}`).className = 'status-badge status-error';
+            }
+        }
+
+        // Copy URL to clipboard
+        function copyUrl(inputId) {
+            const input = document.getElementById(inputId);
+            input.select();
+            document.execCommand('copy');
+            showToast('✅ URL copied to clipboard!');
+        }
+
+        // Refresh report
+        async function refreshReport(type) {
+            const button = event.target.closest('button');
+            const originalContent = button.innerHTML;
+            
+            button.disabled = true;
+            button.innerHTML = '<div class="spinner"></div> Generating...';
+            
+            const statusBadge = document.getElementById(`status-${type}`);
+            statusBadge.textContent = 'Generating';
+            statusBadge.className = 'status-badge status-generating';
+            
+            try {
+                const response = await fetch(`/api/excel-reports/refresh/${type}`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast(`✅ ${data.message}`);
+                    updateReportCard(type, data.report);
+                    
+                    // Update last update time
+                    document.getElementById('lastUpdate').textContent = 
+                        new Date().toLocaleTimeString();
+                } else {
+                    showToast(`❌ Error: ${data.error}`);
+                    statusBadge.textContent = 'Error';
+                    statusBadge.className = 'status-badge status-error';
+                }
+            } catch (error) {
+                showToast('❌ Error refreshing report');
+                console.error(error);
+                statusBadge.textContent = 'Error';
+                statusBadge.className = 'status-badge status-error';
+            } finally {
+                button.disabled = false;
+                button.innerHTML = originalContent;
+            }
+        }
+
+        // Download report
+        function downloadReport(type) {
+            const urls = {
+                'main': '<%= baseUrl %>/purchase-orders/download/latest-excel',
+                'unreceived': '<%= baseUrl %>/purchase-orders/reports/unreceived-items',
+                'approval': '<%= baseUrl %>/purchase-orders/reports/waiting-for-approval'
+            };
+            
+            window.location.href = urls[type];
+            showToast('📥 Download started...');
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // Load initial status
+        loadReportStatus();
+        
+        // Refresh status every 30 seconds
+        setInterval(loadReportStatus, 30000);
+    </script>
+</body>
+</html>
