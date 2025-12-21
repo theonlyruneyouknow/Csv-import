@@ -589,6 +589,58 @@ app.get('/purchase-orders/download/latest-excel', (req, res) => {
     }
 });
 
+// Public endpoint for Unreceived Items Report
+app.get('/purchase-orders/reports/unreceived-items', (req, res) => {
+    try {
+        if (!fs.existsSync(UNRECEIVED_CACHE_FILE)) {
+            return res.status(404).send('Unreceived Items report not yet generated. Please try again in a few moments.');
+        }
+        
+        const stats = fs.statSync(UNRECEIVED_CACHE_FILE);
+        const timestamp = new Date(stats.mtime).toLocaleString();
+        const fileBuffer = fs.readFileSync(UNRECEIVED_CACHE_FILE);
+        
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename=unreceived-items-report.xlsx');
+        res.setHeader('Content-Length', fileBuffer.length);
+        res.setHeader('X-Generated-At', timestamp);
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        
+        res.send(fileBuffer);
+        console.log(`📥 Unreceived Items report downloaded (${Math.round(fileBuffer.length / 1024)} KB, updated: ${timestamp})`);
+    } catch (error) {
+        console.error('Error serving Unreceived Items report:', error);
+        res.status(500).send('Error serving report: ' + error.message);
+    }
+});
+
+// Public endpoint for Waiting for Approval Report
+app.get('/purchase-orders/reports/waiting-for-approval', (req, res) => {
+    try {
+        if (!fs.existsSync(WAITING_APPROVAL_CACHE_FILE)) {
+            return res.status(404).send('Waiting for Approval report not yet generated. Please try again in a few moments.');
+        }
+        
+        const stats = fs.statSync(WAITING_APPROVAL_CACHE_FILE);
+        const timestamp = new Date(stats.mtime).toLocaleString();
+        const fileBuffer = fs.readFileSync(WAITING_APPROVAL_CACHE_FILE);
+        
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename=waiting-for-approval-report.xlsx');
+        res.setHeader('Content-Length', fileBuffer.length);
+        res.setHeader('X-Generated-At', timestamp);
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        
+        res.send(fileBuffer);
+        console.log(`📥 Waiting for Approval report downloaded (${Math.round(fileBuffer.length / 1024)} KB, updated: ${timestamp})`);
+    } catch (error) {
+        console.error('Error serving Waiting for Approval report:', error);
+        res.status(500).send('Error serving report: ' + error.message);
+    }
+});
+
 app.get('/purchase-orders/export/csv-data', async (req, res) => {
     const apiKey = req.query.key;
     const validApiKey = process.env.EXCEL_API_KEY;
@@ -1119,13 +1171,157 @@ async function generateExcelCache() {
     }
 }
 
-// Generate initial cache on startup
+// ==============================================================
+// REPORT-SPECIFIC EXCEL CACHE GENERATORS
+// ==============================================================
+const UNRECEIVED_CACHE_FILE = path.join(EXCEL_CACHE_DIR, 'unreceived-items-report.xlsx');
+const WAITING_APPROVAL_CACHE_FILE = path.join(EXCEL_CACHE_DIR, 'waiting-for-approval-report.xlsx');
+
+// Generate Unreceived Items Report
+async function generateUnreceivedItemsReport() {
+    try {
+        console.log('🔄 Generating Unreceived Items report...');
+        const PurchaseOrder = require('./models/PurchaseOrder');
+        
+        // Fetch POs with unreceived items
+        const purchaseOrders = await PurchaseOrder.find()
+            .populate('lineItems')
+            .sort({ dateOrdered: -1 });
+        
+        const unreceivedData = [];
+        
+        purchaseOrders.forEach(po => {
+            if (po.lineItems && po.lineItems.length > 0) {
+                po.lineItems.forEach(item => {
+                    const qtyExpected = item.qtyExpected || item.qtyOrdered || 0;
+                    const qtyReceived = item.qtyReceived || 0;
+                    const qtyRemaining = qtyExpected - qtyReceived;
+                    
+                    // Only include items that have quantity remaining
+                    if (qtyRemaining > 0) {
+                        unreceivedData.push({
+                            'PO Number': po.poNumber || '',
+                            'Vendor': po.vendor || '',
+                            'PO Type': po.poType || '',
+                            'Item Number': item.itemNumber || '',
+                            'Variety': item.variety || '',
+                            'Description': item.description || '',
+                            'Location': item.location || '',
+                            'Qty Expected': qtyExpected,
+                            'Qty Received': qtyReceived,
+                            'Qty Remaining': qtyRemaining,
+                            'Unit': item.unit || '',
+                            'Item Status': item.status || '',
+                            'Urgency': item.urgency || '',
+                            'EAD': item.ead ? item.ead.toISOString().split('T')[0] : '',
+                            'Item ETA': item.eta ? item.eta.toISOString().split('T')[0] : '',
+                            'PO Status': po.status || '',
+                            'PO ETA': po.eta ? po.eta.toISOString().split('T')[0] : '',
+                            'Date Ordered': po.dateOrdered ? po.dateOrdered.toISOString().split('T')[0] : '',
+                            'Tracking': po.tracking || '',
+                            'Item Notes': item.notes || '',
+                            'PO Notes': po.notes || ''
+                        });
+                    }
+                });
+            }
+        });
+        
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet(unreceivedData);
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Unreceived Items');
+        XLSX.writeFile(workbook, UNRECEIVED_CACHE_FILE);
+        
+        const stats = fs.statSync(UNRECEIVED_CACHE_FILE);
+        console.log(`✅ Unreceived Items report generated (${Math.round(stats.size / 1024)} KB, ${unreceivedData.length} items)`);
+    } catch (error) {
+        console.error('❌ Error generating Unreceived Items report:', error);
+    }
+}
+
+// Generate Waiting for Approval Report
+async function generateWaitingForApprovalReport() {
+    try {
+        console.log('🔄 Generating Waiting for Approval report...');
+        const PurchaseOrder = require('./models/PurchaseOrder');
+        
+        // Fetch POs waiting for approval
+        const purchaseOrders = await PurchaseOrder.find({ 
+            status: { $in: ['Waiting for Approval', 'Pending', 'Pre-Purchase'] }
+        })
+            .populate('lineItems')
+            .sort({ dateOrdered: -1 });
+        
+        const approvalData = [];
+        
+        purchaseOrders.forEach(po => {
+            if (po.lineItems && po.lineItems.length > 0) {
+                po.lineItems.forEach(item => {
+                    approvalData.push({
+                        'PO Number': po.poNumber || '',
+                        'Vendor': po.vendor || '',
+                        'PO Type': po.poType || '',
+                        'PO Status': po.status || '',
+                        'Priority': po.priority || '',
+                        'Item Number': item.itemNumber || '',
+                        'Variety': item.variety || '',
+                        'Description': item.description || '',
+                        'Location': item.location || '',
+                        'Qty Ordered': item.qtyOrdered || 0,
+                        'Unit': item.unit || '',
+                        'Urgency': item.urgency || '',
+                        'EAD': item.ead ? item.ead.toISOString().split('T')[0] : '',
+                        'Date Ordered': po.dateOrdered ? po.dateOrdered.toISOString().split('T')[0] : '',
+                        'Item Notes': item.notes || '',
+                        'PO Notes': po.notes || ''
+                    });
+                });
+            } else {
+                // Include POs without line items
+                approvalData.push({
+                    'PO Number': po.poNumber || '',
+                    'Vendor': po.vendor || '',
+                    'PO Type': po.poType || '',
+                    'PO Status': po.status || '',
+                    'Priority': po.priority || '',
+                    'Item Number': '',
+                    'Variety': '',
+                    'Description': '',
+                    'Location': '',
+                    'Qty Ordered': 0,
+                    'Unit': '',
+                    'Urgency': '',
+                    'EAD': '',
+                    'Date Ordered': po.dateOrdered ? po.dateOrdered.toISOString().split('T')[0] : '',
+                    'Item Notes': '',
+                    'PO Notes': po.notes || ''
+                });
+            }
+        });
+        
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet(approvalData);
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Waiting for Approval');
+        XLSX.writeFile(workbook, WAITING_APPROVAL_CACHE_FILE);
+        
+        const stats = fs.statSync(WAITING_APPROVAL_CACHE_FILE);
+        console.log(`✅ Waiting for Approval report generated (${Math.round(stats.size / 1024)} KB, ${approvalData.length} items)`);
+    } catch (error) {
+        console.error('❌ Error generating Waiting for Approval report:', error);
+    }
+}
+
+// Generate all reports on startup
 generateExcelCache();
+generateUnreceivedItemsReport();
+generateWaitingForApprovalReport();
 
 // Schedule automatic generation every hour
 cron.schedule('0 * * * *', () => {
-    console.log('⏰ Scheduled Excel generation triggered');
+    console.log('⏰ Scheduled report generation triggered');
     generateExcelCache();
+    generateUnreceivedItemsReport();
+    generateWaitingForApprovalReport();
 });
 
 // Manual trigger endpoint (authenticated)
