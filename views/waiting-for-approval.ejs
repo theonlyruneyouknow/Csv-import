@@ -696,12 +696,73 @@
             font-weight: 500;
             color: #495057;
             flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* Badge styles for public/private/creator indicators */
+        .badge-public,
+        .badge-private,
+        .badge-creator {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-public {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .badge-private {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .badge-creator {
+            background: #e7f3ff;
+            color: #004085;
+            border: 1px solid #bee5eb;
+            font-weight: 500;
+            text-transform: none;
         }
 
         .favorite-item-actions {
             display: flex;
             align-items: center;
             gap: 6px;
+        }
+
+        /* Action buttons in favorite items */
+        .btn-toggle-visibility {
+            padding: 3px 8px;
+            font-size: 12px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-toggle-visibility:hover {
+            background: #5a6268;
+        }
+
+        .btn-toggle-visibility.admin {
+            background: #fd7e14;
+        }
+
+        .btn-toggle-visibility.admin:hover {
+            background: #e96b00;
         }
 
         .favorite-item-update {
@@ -1037,8 +1098,16 @@
                     </div>
                     <div class="save-favorite-row">
                         <input type="text" id="favoriteName" class="save-favorite-input"
-                            placeholder="Enter name for current configuration..." maxlength="50">
-                        <button class="btn-save-favorite" onclick="saveFavorite()">💾 Save</button>
+                            placeholder="Name for this configuration..." maxlength="50">
+                        <input type="text" id="favoriteDescription" class="save-favorite-input"
+                            placeholder="Optional description..." maxlength="200" style="margin-top: 5px;">
+                        <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="checkbox" id="favoritePublic">
+                                <span>🌐 Make Public (share with team)</span>
+                            </label>
+                            <button class="btn-save-favorite" onclick="saveFavorite()">💾 Save</button>
+                        </div>
                     </div>
                 </div>
 
@@ -1369,6 +1438,8 @@
             loadFavoritesList();
             // Load saved column preferences
             loadViewColumnPreferences();
+            // Check for localStorage favorites and offer migration
+            checkAndOfferMigration();
         });
 
         function toggleCompactMode() {
@@ -1960,64 +2031,115 @@
             document.getElementById('favoriteName').value = '';
         }
 
-        // ============= FAVORITES MANAGEMENT =============
+        // ============= FAVORITES MANAGEMENT (DATABASE-BACKED) =============
 
-        let currentLoadedFavoriteIndex = null; // Track which favorite is currently loaded
+        let currentLoadedFavoriteId = null; // Track which favorite is currently loaded
+        let allSavedConfigs = []; // Cache of loaded configs
 
-        function loadFavoritesList() {
-            const favorites = JSON.parse(localStorage.getItem('waitingForApprovalFavorites') || '[]');
+        async function loadFavoritesList() {
+            try {
+                const response = await fetch('/api/report-configs/waiting-for-approval');
+                const data = await response.json();
 
-            // Migrate old favorites to include notes column if missing
-            let needsSave = false;
-            favorites.forEach(favorite => {
-                if (favorite.config && favorite.config.columns) {
-                    const hasNotesColumn = favorite.config.columns.some(col => col.id === 'col_notes');
-                    if (!hasNotesColumn) {
-                        // Add notes column to the end, checked by default
-                        favorite.config.columns.push({
-                            id: 'col_notes',
-                            checked: true
-                        });
-                        needsSave = true;
-                    }
+                if (!data.success) {
+                    console.error('Failed to load favorites:', data.error);
+                    showFavoritesEmpty();
+                    return;
                 }
-            });
 
-            // Save migrated favorites back to localStorage
-            if (needsSave) {
-                localStorage.setItem('waitingForApprovalFavorites', JSON.stringify(favorites));
-                console.log('✅ Migrated favorites to include notes column');
+                allSavedConfigs = data.configs;
+
+                if (allSavedConfigs.length === 0) {
+                    showFavoritesEmpty();
+                    return;
+                }
+
+                renderFavoritesList();
+            } catch (error) {
+                console.error('Error loading favorites:', error);
+                showFavoritesEmpty();
             }
+        }
 
+        function showFavoritesEmpty() {
+            const favoritesList = document.getElementById('favoritesList');
+            favoritesList.innerHTML = '<div class="favorites-empty">No saved favorites yet</div>';
+        }
+
+        function renderFavoritesList() {
             const favoritesList = document.getElementById('favoritesList');
 
-            if (favorites.length === 0) {
-                favoritesList.innerHTML = '<div class="favorites-empty">No saved favorites yet</div>';
+            if (allSavedConfigs.length === 0) {
+                showFavoritesEmpty();
                 return;
             }
 
-            favoritesList.innerHTML = favorites.map((fav, index) => `
-                <div class="favorite-item ${currentLoadedFavoriteIndex === index ? 'favorite-loaded' : ''}" onclick="loadFavorite(${index})" title="Click to load this configuration">
-                    <span class="favorite-item-name">⭐ ${fav.name}</span>
-                    <span class="favorite-item-actions">
-                        <button class="favorite-item-update" 
-                                onclick="event.stopPropagation(); updateFavorite(${index})" 
-                                title="Update with current configuration"
-                                ${currentLoadedFavoriteIndex === index ? '' : 'disabled'}>
-                            ✓
-                        </button>
-                        <span class="favorite-item-delete" 
-                              onclick="event.stopPropagation(); deleteFavorite(${index})" 
-                              title="Delete">
-                            ×
-                        </span>
-                    </span>
-                </div>
-            `).join('');
+            let html = '';
+
+            allSavedConfigs.forEach((config, index) => {
+                const isLoaded = currentLoadedFavoriteId === config._id;
+                const isPublic = config.isPublic;
+                const isOwner = config.isOwner;
+                const canModify = config.canModify;
+                const isAdmin = <%= user.role === 'admin' ? 'true' : 'false' %>;
+
+                html += `
+                    <div class="favorite-item ${isLoaded ? 'favorite-loaded' : ''}" 
+                         onclick="loadFavorite('${config._id}')" 
+                         title="Click to load this configuration">
+                        <div class="favorite-info">
+                            <strong>${escapeHtml(config.name)}</strong>
+                            ${isPublic ? '<span class="badge-public">🌐 Public</span>' : '<span class="badge-private">🔒 Private</span>'}
+                            ${!isOwner ? `<span class="badge-creator">by ${escapeHtml(config.createdByUsername)}</span>` : ''}
+                            ${config.description ? `<div class="favorite-desc">${escapeHtml(config.description)}</div>` : ''}
+                            ${config.usageCount > 0 ? `<div class="favorite-stats">Used ${config.usageCount} times</div>` : ''}
+                        </div>
+                        <div class="favorite-actions" onclick="event.stopPropagation()">
+                            ${canModify ? `
+                                <button class="btn-update-fav ${isLoaded ? '' : 'disabled'}" 
+                                        onclick="updateFavorite('${config._id}')" 
+                                        ${!isLoaded ? 'disabled' : ''}
+                                        title="${isLoaded ? 'Update with current configuration' : 'Load this favorite first to update it'}">
+                                    ↻
+                                </button>
+                                <button class="btn-toggle-visibility" 
+                                        onclick="toggleVisibility('${config._id}')"
+                                        title="${isPublic ? 'Make Private' : 'Make Public'}">
+                                    ${isPublic ? '🔒' : '🌐'}
+                                </button>
+                                <button class="btn-delete-fav" 
+                                        onclick="deleteFavorite('${config._id}')" 
+                                        title="Delete this favorite">
+                                    🗑️
+                                </button>
+                            ` : ''}
+                            ${isAdmin && !isOwner ? `
+                                <button class="btn-admin-action" 
+                                        onclick="adminToggleVisibility('${config._id}')"
+                                        title="Admin: Toggle Public/Private">
+                                    👑 ${isPublic ? '🔒' : '🌐'}
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            favoritesList.innerHTML = html;
         }
 
-        function saveFavorite() {
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        
+        async function saveFavorite() {
             const nameInput = document.getElementById('favoriteName');
+            const descInput = document.getElementById('favoriteDescription');
+            const visibilityCheckbox = document.getElementById('favoritePublic');
+            
             const name = nameInput.value.trim();
 
             if (!name) {
@@ -2025,54 +2147,155 @@
                 return;
             }
 
-            // Get current configuration
             const config = getCurrentExportConfig();
 
-            // Get existing favorites
-            const favorites = JSON.parse(localStorage.getItem('waitingForApprovalFavorites') || '[]');
+            try {
+                const response = await fetch('/api/report-configs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        reportType: 'waiting-for-approval',
+                        config: config,
+                        isPublic: visibilityCheckbox ? visibilityCheckbox.checked : false,
+                        description: descInput ? descInput.value.trim() : ''
+                    })
+                });
 
-            // Check for duplicate name
-            const existingIndex = favorites.findIndex(f => f.name.toLowerCase() === name.toLowerCase());
-            if (existingIndex !== -1) {
-                if (!confirm(`A favorite named "${name}" already exists. Overwrite it?`)) {
-                    return;
+                const data = await response.json();
+
+                if (data.success) {
+                    nameInput.value = '';
+                    if (descInput) descInput.value = '';
+                    if (visibilityCheckbox) visibilityCheckbox.checked = false;
+                    
+                    await loadFavoritesList();
+                    showToast(`✅ Favorite "${name}" saved successfully!`);
+                } else {
+                    alert(`❌ Error: ${data.error}`);
                 }
-                favorites[existingIndex] = { name, config };
-            } else {
-                favorites.push({ name, config });
+            } catch (error) {
+                console.error('Error saving favorite:', error);
+                alert('❌ Error saving favorite. Please try again.');
             }
-
-            // Save to localStorage
-            localStorage.setItem('waitingForApprovalFavorites', JSON.stringify(favorites));
-
-            // Clear input and reload list
-            nameInput.value = '';
-            loadFavoritesList();
-            showToast(`✅ Favorite "${name}" saved successfully!`);
         }
 
-        function updateFavorite(index) {
-            const favorites = JSON.parse(localStorage.getItem('waitingForApprovalFavorites') || '[]');
-            if (!favorites[index]) return;
+        async function updateFavorite(configId) {
+            const config = allSavedConfigs.find(c => c._id === configId);
+            if (!config) return;
 
-            const name = favorites[index].name;
-
-            if (!confirm(`Update favorite "${name}" with current configuration?`)) {
+            if (!confirm(`Update favorite "${config.name}" with current configuration?`)) {
                 return;
             }
 
-            // Get current configuration
-            const config = getCurrentExportConfig();
+            const currentConfig = getCurrentExportConfig();
 
-            // Update the favorite
-            favorites[index] = { name, config };
+            try {
+                const response = await fetch(`/api/report-configs/${configId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ config: currentConfig })
+                });
 
-            // Save to localStorage
-            localStorage.setItem('waitingForApprovalFavorites', JSON.stringify(favorites));
+                const data = await response.json();
 
-            // Reload list
-            loadFavoritesList();
-            showToast(`✅ Favorite "${name}" updated successfully!`);
+                if (data.success) {
+                    await loadFavoritesList();
+                    showToast(`✅ Favorite "${config.name}" updated successfully!`);
+                } else {
+                    alert(`❌ Error: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Error updating favorite:', error);
+                alert('❌ Error updating favorite. Please try again.');
+            }
+        }
+
+        async function deleteFavorite(configId) {
+            const config = allSavedConfigs.find(c => c._id === configId);
+            if (!config) return;
+
+            if (!confirm(`Delete favorite "${config.name}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/report-configs/${configId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    if (currentLoadedFavoriteId === configId) {
+                        currentLoadedFavoriteId = null;
+                    }
+                    await loadFavoritesList();
+                    showToast(`✅ Favorite "${config.name}" deleted successfully!`);
+                } else {
+                    alert(`❌ Error: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Error deleting favorite:', error);
+                alert('❌ Error deleting favorite. Please try again.');
+            }
+        }
+
+        async function toggleVisibility(configId) {
+            const config = allSavedConfigs.find(c => c._id === configId);
+            if (!config) return;
+
+            const newVisibility = !config.isPublic;
+
+            try {
+                const response = await fetch(`/api/report-configs/${configId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ isPublic: newVisibility })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    await loadFavoritesList();
+                    showToast(`✅ Favorite is now ${newVisibility ? 'Public 🌐' : 'Private 🔒'}`);
+                } else {
+                    alert(`❌ Error: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Error toggling visibility:', error);
+                alert('❌ Error changing visibility. Please try again.');
+            }
+        }
+
+        async function adminToggleVisibility(configId) {
+            const config = allSavedConfigs.find(c => c._id === configId);
+            if (!config) return;
+
+            const newVisibility = !config.isPublic;
+            const endpoint = newVisibility ? 'make-public' : 'make-private';
+
+            if (!confirm(`Admin: Make "${config.name}" ${newVisibility ? 'PUBLIC' : 'PRIVATE'}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/report-configs/${configId}/${endpoint}`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    await loadFavoritesList();
+                    showToast(`✅ Admin: Favorite is now ${newVisibility ? 'Public 🌐' : 'Private 🔒'}`);
+                } else {
+                    alert(`❌ Error: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Error toggling visibility:', error);
+                alert('❌ Error changing visibility. Please try again.');
+            }
         }
 
         function getCurrentExportConfig() {
@@ -2099,88 +2322,155 @@
             return { columns, types, statuses };
         }
 
-        function loadFavorite(index) {
-            const favorites = JSON.parse(localStorage.getItem('waitingForApprovalFavorites') || '[]');
-            if (!favorites[index]) return;
+        async function loadFavorite(configId) {
+            try {
+                const response = await fetch(`/api/report-configs/${configId}/use`, {
+                    method: 'POST'
+                });
 
-            const favorite = favorites[index];
-            const config = favorite.config;
+                const data = await response.json();
 
-            // Track which favorite is loaded
-            currentLoadedFavoriteIndex = index;
-            loadFavoritesList(); // Refresh the list to show update button enabled
-
-            // Restore column selections
-            config.columns.forEach(col => {
-                const checkbox = document.getElementById(col.id);
-                if (checkbox) {
-                    checkbox.checked = col.checked;
+                if (!data.success) {
+                    alert(`❌ Error: ${data.error}`);
+                    return;
                 }
-            });
 
-            // Restore column order by reordering DOM elements
-            const columnList = document.getElementById('columnList');
-            config.columns.forEach(col => {
-                const item = columnList.querySelector(`[data-col="${col.id}"]`);
-                if (item) {
-                    columnList.appendChild(item);
+                const config = data.config;
+
+                currentLoadedFavoriteId = configId;
+                renderFavoritesList();
+
+                // Restore column selections
+                config.columns.forEach(col => {
+                    const checkbox = document.getElementById(col.id);
+                    if (checkbox) {
+                        checkbox.checked = col.checked;
+                    }
+                });
+
+                // Restore column order
+                const columnList = document.getElementById('columnList');
+                config.columns.forEach(col => {
+                    const item = columnList.querySelector(`[data-col="${col.id}"]`);
+                    if (item) {
+                        columnList.appendChild(item);
+                    }
+                });
+
+                // Restore PO type selections
+                config.types.forEach(type => {
+                    const checkbox = Array.from(document.querySelectorAll('.type-filter-checkbox')).find(cb => cb.value === type.value);
+                    if (checkbox) {
+                        checkbox.checked = type.checked;
+                    }
+                });
+
+                const allTypesChecked = config.types.every(t => t.checked);
+                const selectAllTypes = document.getElementById('selectAllTypes');
+                if (selectAllTypes) {
+                    selectAllTypes.checked = allTypesChecked;
                 }
-            });
 
-            // Restore PO type selections
-            config.types.forEach(type => {
-                const checkbox = Array.from(document.querySelectorAll('.type-filter-checkbox')).find(cb => cb.value === type.value);
-                if (checkbox) {
-                    checkbox.checked = type.checked;
+                // Restore status selections
+                config.statuses.forEach(status => {
+                    const checkbox = Array.from(document.querySelectorAll('.status-filter-checkbox')).find(cb => cb.value === status.value);
+                    if (checkbox) {
+                        checkbox.checked = status.checked;
+                    }
+                });
+
+                const allStatusesChecked = config.statuses.every(s => s.checked);
+                const selectAllStatuses = document.getElementById('selectAllStatuses');
+                if (selectAllStatuses) {
+                    selectAllStatuses.checked = allStatusesChecked;
                 }
-            });
 
-            // Update select all types checkbox
-            const allTypesChecked = config.types.every(t => t.checked);
-            const selectAllTypes = document.getElementById('selectAllTypes');
-            if (selectAllTypes) {
-                selectAllTypes.checked = allTypesChecked;
+                const configObj = allSavedConfigs.find(c => c._id === configId);
+                showToast(`✅ Loaded favorite: ${configObj ? configObj.name : 'Configuration'}`);
+                
+            } catch (error) {
+                console.error('Error loading favorite:', error);
+                alert('❌ Error loading favorite. Please try again.');
             }
-
-            // Restore status selections
-            config.statuses.forEach(status => {
-                const checkbox = Array.from(document.querySelectorAll('.status-filter-checkbox')).find(cb => cb.value === status.value);
-                if (checkbox) {
-                    checkbox.checked = status.checked;
-                }
-            });
-
-            // Update select all statuses checkbox
-            const allStatusesChecked = config.statuses.every(s => s.checked);
-            const selectAllStatuses = document.getElementById('selectAllStatuses');
-            if (selectAllStatuses) {
-                selectAllStatuses.checked = allStatusesChecked;
-            }
-
-            showToast(`✅ Loaded favorite: ${favorite.name}`);
         }
 
-        function deleteFavorite(index) {
-            const favorites = JSON.parse(localStorage.getItem('waitingForApprovalFavorites') || '[]');
-            if (!favorites[index]) return;
-
-            const name = favorites[index].name;
-            if (!confirm(`Delete favorite "${name}"?`)) {
+        // ============= AUTOMATIC MIGRATION FROM LOCALSTORAGE =============
+        
+        async function checkAndOfferMigration() {
+            const localStorageKey = 'waitingForApprovalFavorites';
+            const localFavorites = JSON.parse(localStorage.getItem(localStorageKey) || '[]');
+            
+            if (localFavorites.length === 0) {
                 return;
             }
-
-            favorites.splice(index, 1);
-            localStorage.setItem('waitingForApprovalFavorites', JSON.stringify(favorites));
-            loadFavoritesList();
-            showToast(`🗑️ Deleted favorite: ${name}`);
+            
+            const migrationDone = localStorage.getItem('waitingForApprovalMigrationDone');
+            if (migrationDone === 'true') {
+                return;
+            }
+            
+            const doMigration = confirm(
+                `🔄 Found ${localFavorites.length} saved favorite(s) in browser storage.\n\n` +
+                `Would you like to migrate them to the database?\n` +
+                `This will make them accessible from any computer.\n\n` +
+                `Click OK to migrate now.`
+            );
+            
+            if (!doMigration) {
+                const remindLater = confirm('Remind you about migration next time?');
+                if (!remindLater) {
+                    localStorage.setItem('waitingForApprovalMigrationDone', 'true');
+                }
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/report-configs/migrate-from-localstorage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        reportType: 'waiting-for-approval',
+                        favorites: localFavorites
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const message = 
+                        `✅ Migration Complete!\n\n` +
+                        `✓ ${data.results.success} favorites saved to database\n` +
+                        `${data.results.skipped > 0 ? `⊚ ${data.results.skipped} skipped (already existed)\n` : ''}` +
+                        `${data.results.errors.length > 0 ? `✗ ${data.results.errors.length} errors\n` : ''}\n` +
+                        `Your favorites are now accessible from any computer!`;
+                    
+                    alert(message);
+                    localStorage.setItem('waitingForApprovalMigrationDone', 'true');
+                    
+                    const clearLocal = confirm(
+                        'Migration successful! Would you like to clear the old browser storage?\n\n' +
+                        '(The favorites are now safely in the database)'
+                    );
+                    
+                    if (clearLocal) {
+                        localStorage.removeItem(localStorageKey);
+                        showToast('✅ Browser storage cleared');
+                    }
+                    
+                    await loadFavoritesList();
+                } else {
+                    alert(`❌ Migration failed: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Migration error:', error);
+                alert('❌ Migration failed. Please try again or contact support.');
+            }
         }
 
         // ============= MULTI-TAB EXCEL EXPORT =============
 
         function exportMultiTabExcel() {
-            const favorites = JSON.parse(localStorage.getItem('waitingForApprovalFavorites') || '[]');
-
-            if (favorites.length === 0) {
+            if (allSavedConfigs.length === 0) {
                 alert('No saved favorites found. Please save at least one favorite report configuration first.');
                 return;
             }
@@ -2190,7 +2480,7 @@
         }
 
         function openExcelSelectModal() {
-            const favorites = JSON.parse(localStorage.getItem('waitingForApprovalFavorites') || '[]');
+            const favorites = allSavedConfigs;
             const listContainer = document.getElementById('excelFavoritesList');
 
             // Load saved Excel presets
