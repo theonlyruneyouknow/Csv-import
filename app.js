@@ -1047,7 +1047,11 @@ app.get('/upload', ensureAuthenticated, ensureApproved, (req, res) => res.render
 
 // Excel Reports Manager page
 app.get('/excel-reports', ensureAuthenticated, ensureApproved, (req, res) => {
-    const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
+    // Automatically detect the base URL from the request
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const baseUrl = process.env.BASE_URL || `${protocol}://${host}`;
+    
     res.render('excel-reports', { 
         user: req.user,
         baseUrl: baseUrl
