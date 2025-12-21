@@ -2623,55 +2623,6 @@
             return div.innerHTML;
         }
 
-            // Migrate old favorites to include notes column if missing
-            let needsSave = false;
-            favorites.forEach(favorite => {
-                if (favorite.config && favorite.config.columns) {
-                    const hasNotesColumn = favorite.config.columns.some(col => col.id === 'col_notes');
-                    if (!hasNotesColumn) {
-                        // Add notes column to the end, checked by default
-                        favorite.config.columns.push({
-                            id: 'col_notes',
-                            checked: true
-                        });
-                        needsSave = true;
-                    }
-                }
-            });
-
-            // Save migrated favorites back to localStorage
-            if (needsSave) {
-                localStorage.setItem('unreceivedItemsFavorites', JSON.stringify(favorites));
-                console.log('✅ Migrated favorites to include notes column');
-            }
-
-            const favoritesList = document.getElementById('favoritesList');
-
-            if (favorites.length === 0) {
-                favoritesList.innerHTML = '<div class="favorites-empty">No saved favorites yet</div>';
-                return;
-            }
-
-            favoritesList.innerHTML = favorites.map((fav, index) => `
-                <div class="favorite-item ${currentLoadedFavoriteIndex === index ? 'favorite-loaded' : ''}" onclick="loadFavorite(${index})" title="Click to load this configuration">
-                    <span class="favorite-item-name">⭐ ${fav.name}</span>
-                    <span class="favorite-item-actions">
-                        <button class="favorite-item-update" 
-                                onclick="event.stopPropagation(); updateFavorite(${index})" 
-                                title="Update with current configuration"
-                                ${currentLoadedFavoriteIndex === index ? '' : 'disabled'}>
-                            ✓
-                        </button>
-                        <span class="favorite-item-delete" 
-                              onclick="event.stopPropagation(); deleteFavorite(${index})" 
-                              title="Delete">
-                            ×
-                        </span>
-                    </span>
-                </div>
-            `).join('');
-        }
-
         async function saveFavorite() {
             const nameInput = document.getElementById('favoriteName');
             const descInput = document.getElementById('favoriteDescription');
