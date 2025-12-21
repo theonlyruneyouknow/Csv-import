@@ -1095,10 +1095,20 @@ function getReportInfo(filePath) {
     try {
         if (fs.existsSync(filePath)) {
             const stats = fs.statSync(filePath);
+            const fileDate = new Date(stats.mtime);
             return {
                 exists: true,
                 size: `${Math.round(stats.size / 1024)} KB`,
-                timestamp: new Date(stats.mtime).toLocaleString(),
+                timestamp: fileDate.toLocaleString('en-US', { 
+                    timeZone: 'America/Los_Angeles',
+                    month: '2-digit',
+                    day: '2-digit', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                }),
                 mtime: stats.mtime
             };
         }

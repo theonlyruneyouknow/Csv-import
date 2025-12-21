@@ -500,15 +500,22 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // Update server time every second
+        // Update server time every second (Pacific Time)
         function updateServerTime() {
             const now = new Date();
-            document.getElementById('serverTime').textContent = now.toLocaleTimeString();
+            const timeStr = now.toLocaleTimeString('en-US', {
+                timeZone: 'America/Los_Angeles',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+            document.getElementById('serverTime').textContent = timeStr + ' PT';
         }
         setInterval(updateServerTime, 1000);
         updateServerTime();
 
-        // Calculate next update time
+        // Calculate next update time (Pacific Time)
         function updateNextUpdateTime() {
             const now = new Date();
             const next = new Date(now);
@@ -517,8 +524,14 @@
             const diff = next - now;
             const minutes = Math.floor(diff / 60000);
             
+            const timeStr = next.toLocaleTimeString('en-US', {
+                timeZone: 'America/Los_Angeles',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
             document.getElementById('nextUpdate').textContent = 
-                `${next.toLocaleTimeString()} (in ${minutes} min)`;
+                `${timeStr} PT (in ${minutes} min)`;
         }
         setInterval(updateNextUpdateTime, 30000);
         updateNextUpdateTime();
@@ -531,8 +544,14 @@
                 
                 if (data.success) {
                     // Update last update time
-                    document.getElementById('lastUpdate').textContent = 
-                        new Date(data.lastUpdate).toLocaleTimeString();
+                    const lastUpdateTime = new Date(data.lastUpdate).toLocaleTimeString('en-US', {
+                        timeZone: 'America/Los_Angeles',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                    });
+                    document.getElementById('lastUpdate').textContent = lastUpdateTime + ' PT';
                     
                     // Update each report
                     updateReportCard('main', data.reports.main);
@@ -588,8 +607,14 @@
                     updateReportCard(type, data.report);
                     
                     // Update last update time
-                    document.getElementById('lastUpdate').textContent = 
-                        new Date().toLocaleTimeString();
+                    const updateTime = new Date().toLocaleTimeString('en-US', {
+                        timeZone: 'America/Los_Angeles',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                    });
+                    document.getElementById('lastUpdate').textContent = updateTime + ' PT';
                 } else {
                     showToast(`❌ Error: ${data.error}`);
                     statusBadge.textContent = 'Error';
