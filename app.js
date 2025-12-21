@@ -6,6 +6,10 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const passport = require('./config/passport');
 const flash = require('connect-flash');
+const cron = require('node-cron');
+const fs = require('fs');
+const path = require('path');
+const XLSX = require('xlsx');
 
 // Import routes
 const purchaseOrderRoutes = require('./routes/purchaseOrders');
@@ -556,6 +560,32 @@ app.get('/food-test-meal-plans-list', (req, res) => {
 app.use('/test-upload', purchaseOrderRoutes);
 
 // Public API endpoints (require API key but not login) - MUST be before authenticated routes
+// Public endpoint to download the latest auto-generated Excel file
+app.get('/purchase-orders/download/latest-excel', (req, res) => {
+    try {
+        if (!fs.existsSync(EXCEL_CACHE_FILE)) {
+            return res.status(404).json({ 
+                error: 'Excel file not yet generated. Please try again in a few moments.' 
+            });
+        }
+        
+        const stats = fs.statSync(EXCEL_CACHE_FILE);
+        const timestamp = new Date(stats.mtime).toLocaleString();
+        
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename=purchase-orders-latest.xlsx');
+        res.setHeader('X-Generated-At', timestamp);
+        
+        const fileStream = fs.createReadStream(EXCEL_CACHE_FILE);
+        fileStream.pipe(res);
+        
+        console.log(`📥 Excel file downloaded (last updated: ${timestamp})`);
+    } catch (error) {
+        console.error('Error serving Excel file:', error);
+        res.status(500).json({ error: 'Error serving Excel file' });
+    }
+});
+
 app.get('/purchase-orders/export/csv-data', async (req, res) => {
     const apiKey = req.query.key;
     const validApiKey = process.env.EXCEL_API_KEY;
@@ -1003,6 +1033,114 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 3002;
 
+// ==============================================================
+// PERMANENT SOLUTION: Auto-Generate Excel File Every Hour
+// ==============================================================
+const EXCEL_CACHE_DIR = path.join(__dirname, 'cache');
+const EXCEL_CACHE_FILE = path.join(EXCEL_CACHE_DIR, 'purchase-orders-latest.xlsx');
+
+// Ensure cache directory exists
+if (!fs.existsSync(EXCEL_CACHE_DIR)) {
+    fs.mkdirSync(EXCEL_CACHE_DIR, { recursive: true });
+}
+
+// Function to generate Excel file
+async function generateExcelCache() {
+    try {
+        console.log('🔄 Generating Excel cache...');
+        const PurchaseOrder = require('./models/PurchaseOrder');
+        
+        // Fetch all purchase orders with line items
+        const purchaseOrders = await PurchaseOrder.find()
+            .populate('lineItems')
+            .sort({ dateOrdered: -1 });
+        
+        // Create workbook
+        const workbook = XLSX.utils.book_new();
+        
+        // Prepare PO data
+        const poData = purchaseOrders.map(po => ({
+            'PO Number': po.poNumber || '',
+            'Vendor': po.vendor || '',
+            'PO Type': po.poType || '',
+            'Status': po.status || '',
+            'NS Status': po.nsStatus || '',
+            'Priority': po.priority || '',
+            'Location': po.location || '',
+            'Tracking': po.tracking || '',
+            'ETA': po.eta ? po.eta.toISOString().split('T')[0] : '',
+            'Date Ordered': po.dateOrdered ? po.dateOrdered.toISOString().split('T')[0] : '',
+            'Notes': po.notes || ''
+        }));
+        
+        // Prepare Line Items data
+        const lineItemData = [];
+        purchaseOrders.forEach(po => {
+            if (po.lineItems && po.lineItems.length > 0) {
+                po.lineItems.forEach(item => {
+                    lineItemData.push({
+                        'PO Number': po.poNumber || '',
+                        'Item Number': item.itemNumber || '',
+                        'Variety': item.variety || '',
+                        'Description': item.description || '',
+                        'Location': item.location || '',
+                        'Qty Ordered': item.qtyOrdered || 0,
+                        'Qty Expected': item.qtyExpected || 0,
+                        'Qty Received': item.qtyReceived || 0,
+                        'Unit': item.unit || '',
+                        'Status': item.status || '',
+                        'Urgency': item.urgency || '',
+                        'EAD': item.ead ? item.ead.toISOString().split('T')[0] : '',
+                        'Item ETA': item.eta ? item.eta.toISOString().split('T')[0] : '',
+                        'Notes': item.notes || ''
+                    });
+                });
+            }
+        });
+        
+        // Add worksheets
+        const poSheet = XLSX.utils.json_to_sheet(poData);
+        const itemSheet = XLSX.utils.json_to_sheet(lineItemData);
+        
+        XLSX.utils.book_append_sheet(workbook, poSheet, 'Purchase Orders');
+        XLSX.utils.book_append_sheet(workbook, itemSheet, 'Line Items');
+        
+        // Write to cache file
+        XLSX.writeFile(workbook, EXCEL_CACHE_FILE);
+        
+        const stats = fs.statSync(EXCEL_CACHE_FILE);
+        console.log(`✅ Excel cache generated successfully (${Math.round(stats.size / 1024)} KB) at ${new Date().toLocaleString()}`);
+        
+    } catch (error) {
+        console.error('❌ Error generating Excel cache:', error);
+    }
+}
+
+// Generate initial cache on startup
+generateExcelCache();
+
+// Schedule automatic generation every hour
+cron.schedule('0 * * * *', () => {
+    console.log('⏰ Scheduled Excel generation triggered');
+    generateExcelCache();
+});
+
+// Manual trigger endpoint (authenticated)
+app.post('/purchase-orders/refresh-excel-cache', ensureAuthenticated, ensureApproved, async (req, res) => {
+    try {
+        await generateExcelCache();
+        res.json({ 
+            success: true, 
+            message: 'Excel cache regenerated successfully',
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Error refreshing Excel cache:', error);
+        res.status(500).json({ error: 'Error refreshing Excel cache' });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`📊 Excel auto-generation scheduled (every hour at :00)`);
 });
