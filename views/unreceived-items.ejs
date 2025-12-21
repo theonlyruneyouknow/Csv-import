@@ -2992,18 +2992,12 @@
                 console.error('Migration error:', error);
                 alert('❌ Migration failed. Please try again or contact support.');
             }
-        }            favorites.splice(index, 1);
-            localStorage.setItem('unreceivedItemsFavorites', JSON.stringify(favorites));
-            loadFavoritesList();
-            showToast(`🗑️ Deleted favorite: ${name}`);
         }
 
         // ============= MULTI-TAB EXCEL EXPORT =============
 
         function exportMultiTabExcel() {
-            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
-
-            if (favorites.length === 0) {
+            if (allSavedConfigs.length === 0) {
                 alert('No saved favorites found. Please save at least one favorite report configuration first.');
                 return;
             }
@@ -3013,7 +3007,7 @@
         }
 
         function openExcelSelectModal() {
-            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+            const favorites = allSavedConfigs;
             const listContainer = document.getElementById('excelFavoritesList');
 
             // Load saved Excel presets
@@ -3202,7 +3196,7 @@
         }
 
         function performExcelExport() {
-            const favorites = JSON.parse(localStorage.getItem('unreceivedItemsFavorites') || '[]');
+            const favorites = allSavedConfigs;
 
             // Get custom filename
             const customFilename = document.getElementById('excelFilenameInput').value.trim();
