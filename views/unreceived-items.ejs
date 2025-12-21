@@ -1676,6 +1676,8 @@
             loadFavoritesList();
             // Load saved column preferences
             loadViewColumnPreferences();
+            // Check for localStorage favorites and offer migration
+            checkAndOfferMigration();
         });
 
         function toggleCompactMode() {
@@ -2956,6 +2958,88 @@
             } catch (error) {
                 console.error('Error loading favorite:', error);
                 alert('❌ Error loading favorite. Please try again.');
+            }
+        }
+
+        // ============= AUTOMATIC MIGRATION FROM LOCALSTORAGE =============
+        
+        async function checkAndOfferMigration() {
+            // Check if there are any localStorage favorites
+            const localStorageKey = 'unreceivedItemsFavorites';
+            const localFavorites = JSON.parse(localStorage.getItem(localStorageKey) || '[]');
+            
+            if (localFavorites.length === 0) {
+                return; // No localStorage favorites to migrate
+            }
+            
+            // Check if migration was already completed
+            const migrationDone = localStorage.getItem('unreceivedItemsMigrationDone');
+            if (migrationDone === 'true') {
+                return; // Already migrated
+            }
+            
+            // Offer migration
+            const doMigration = confirm(
+                `🔄 Found ${localFavorites.length} saved favorite(s) in browser storage.\n\n` +
+                `Would you like to migrate them to the database?\n` +
+                `This will make them accessible from any computer.\n\n` +
+                `Click OK to migrate now.`
+            );
+            
+            if (!doMigration) {
+                // Ask if they want to be reminded later
+                const remindLater = confirm('Remind you about migration next time?');
+                if (!remindLater) {
+                    localStorage.setItem('unreceivedItemsMigrationDone', 'true');
+                }
+                return;
+            }
+            
+            // Perform migration
+            try {
+                const response = await fetch('/api/report-configs/migrate-from-localstorage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        reportType: 'unreceived-items',
+                        favorites: localFavorites
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const message = 
+                        `✅ Migration Complete!\n\n` +
+                        `✓ ${data.results.success} favorites saved to database\n` +
+                        `${data.results.skipped > 0 ? `⊘ ${data.results.skipped} skipped (already existed)\n` : ''}` +
+                        `${data.results.errors.length > 0 ? `✗ ${data.results.errors.length} errors\n` : ''}\n` +
+                        `Your favorites are now accessible from any computer!`;
+                    
+                    alert(message);
+                    
+                    // Mark migration as done
+                    localStorage.setItem('unreceivedItemsMigrationDone', 'true');
+                    
+                    // Ask if they want to clear localStorage
+                    const clearLocal = confirm(
+                        'Migration successful! Would you like to clear the old browser storage?\n\n' +
+                        '(The favorites are now safely in the database)'
+                    );
+                    
+                    if (clearLocal) {
+                        localStorage.removeItem(localStorageKey);
+                        showToast('✅ Browser storage cleared');
+                    }
+                    
+                    // Reload the favorites list
+                    await loadFavoritesList();
+                } else {
+                    alert(`❌ Migration failed: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Migration error:', error);
+                alert('❌ Migration failed. Please try again or contact support.');
             }
         }            favorites.splice(index, 1);
             localStorage.setItem('unreceivedItemsFavorites', JSON.stringify(favorites));
