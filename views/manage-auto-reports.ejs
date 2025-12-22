@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Auto-Updating Reports</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #333;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        .panel h2 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group small {
+            display: block;
+            color: #666;
+            margin-top: 5px;
+            font-size: 12px;
+        }
+
+        .reports-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .report-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .report-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+
+        .report-card.inactive {
+            opacity: 0.6;
+            background: #f9f9f9;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .report-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .report-description {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .report-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .report-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.show {
+            display: flex;
+        }
+
+        .toast.success {
+            border-left: 4px solid #10b981;
+        }
+
+        .toast.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        .url-preview {
+            background: #f9fafb;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #666;
+            word-break: break-all;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Manage Auto-Updating Reports</h1>
+            <div class="header-actions">
+                <a href="/excel-reports" class="btn btn-secondary">📈 View Reports</a>
+                <a href="/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Create New Report Panel -->
+            <div class="panel">
+                <h2>Create New Auto-Updating Report</h2>
+                <form id="createReportForm">
+                    <div class="form-group">
+                        <label for="reportName">Report Name *</label>
+                        <input type="text" id="reportName" name="reportName" required 
+                               placeholder="e.g., Priority Seeds Report">
+                        <small>This will appear on the Excel Reports Manager page</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" 
+                                  placeholder="Brief description of what this report shows..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reportConfig">Based on Saved Configuration *</label>
+                        <select id="reportConfig" name="reportConfig" required>
+                            <option value="">-- Select a saved configuration --</option>
+                        </select>
+                        <small>Choose which saved filter configuration to use</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="urlPath">URL Path *</label>
+                        <input type="text" id="urlPath" name="urlPath" required 
+                               placeholder="my-custom-report">
+                        <small>Only letters, numbers, and hyphens. No spaces.</small>
+                        <div class="url-preview" id="urlPreview">
+                            URL will be: <strong>/purchase-orders/reports/my-custom-report</strong>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="frequency">Update Frequency *</label>
+                        <select id="frequency" name="frequency" required>
+                            <option value="hourly">Every Hour (at :00)</option>
+                            <option value="daily">Daily (at midnight)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        ✨ Create Auto-Updating Report
+                    </button>
+                </form>
+            </div>
+
+            <!-- Existing Reports Panel -->
+            <div class="panel">
+                <h2>Your Auto-Updating Reports</h2>
+                <div id="reportsList" class="reports-list">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading reports...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        const currentUser = <%- JSON.stringify(user) %>;
+
+        // Load saved configurations for dropdown
+        async function loadSavedConfigs() {
+            try {
+                const [unreceivedRes, approvalRes] = await Promise.all([
+                    fetch('/api/report-configs/unreceived-items'),
+                    fetch('/api/report-configs/waiting-for-approval')
+                ]);
+
+                const unreceived = unreceivedRes.ok ? await unreceivedRes.json() : [];
+                const approval = approvalRes.ok ? await approvalRes.json() : [];
+                const allConfigs = [...unreceived, ...approval];
+
+                const select = document.getElementById('reportConfig');
+                select.innerHTML = '<option value="">-- Select a saved configuration --</option>';
+
+                allConfigs.forEach(config => {
+                    const option = document.createElement('option');
+                    option.value = config._id;
+                    option.textContent = `${config.name} (${config.reportType})`;
+                    option.dataset.configName = config.name;
+                    select.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error('Error loading configs:', error);
+                showToast('Failed to load saved configurations', 'error');
+            }
+        }
+
+        // Update URL preview as user types
+        document.getElementById('urlPath').addEventListener('input', (e) => {
+            const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+            e.target.value = value;
+            document.getElementById('urlPreview').innerHTML = 
+                `URL will be: <strong>/purchase-orders/reports/${value || 'your-report-name'}</strong>`;
+        });
+
+        // Load existing auto-reports
+        async function loadAutoReports() {
+            try {
+                const response = await fetch('/api/auto-reports');
+                if (!response.ok) throw new Error('Failed to load reports');
+
+                const reports = await response.json();
+                const container = document.getElementById('reportsList');
+
+                if (reports.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📊</div>
+                            <h3>No auto-updating reports yet</h3>
+                            <p>Create your first report using the form on the left.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = reports.map(report => `
+                    <div class="report-card ${!report.isActive ? 'inactive' : ''}">
+                        <div class="report-header">
+                            <div>
+                                <div class="report-title">${escapeHtml(report.name)}</div>
+                                ${report.description ? `<div class="report-description">${escapeHtml(report.description)}</div>` : ''}
+                            </div>
+                            <span class="badge ${report.isActive ? 'badge-success' : 'badge-warning'}">
+                                ${report.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                        </div>
+                        <div class="report-meta">
+                            <div class="report-meta-item">
+                                📁 <strong>${report.cacheFileName}</strong>
+                            </div>
+                            <div class="report-meta-item">
+                                🔗 ${report.urlPath}
+                            </div>
+                            <div class="report-meta-item">
+                                🕐 ${report.generationFrequency}
+                            </div>
+                            ${report.lastGenerated ? `
+                                <div class="report-meta-item">
+                                    ⏱️ Last: ${new Date(report.lastGenerated).toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="report-actions">
+                            <button class="btn btn-success" onclick="generateNow('${report._id}')">
+                                🔄 Generate Now
+                            </button>
+                            <button class="btn btn-secondary" onclick="toggleActive('${report._id}', ${!report.isActive})">
+                                ${report.isActive ? '⏸️ Deactivate' : '▶️ Activate'}
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteReport('${report._id}', '${escapeHtml(report.name)}')">
+                                🗑️ Delete
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading auto-reports:', error);
+                document.getElementById('reportsList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <h3>Error loading reports</h3>
+                        <p>${error.message}</p>
+                        <button class="btn btn-primary" onclick="loadAutoReports()">🔄 Retry</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Create new report
+        document.getElementById('createReportForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Creating...';
+
+            try {
+                const formData = new FormData(e.target);
+                const response = await fetch('/api/auto-reports', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: formData.get('reportName'),
+                        description: formData.get('description'),
+                        reportConfigId: formData.get('reportConfig'),
+                        urlPath: formData.get('urlPath'),
+                        frequency: formData.get('frequency')
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to create report');
+                }
+
+                showToast('Report created successfully! 🎉', 'success');
+                e.target.reset();
+                document.getElementById('urlPreview').innerHTML = 
+                    'URL will be: <strong>/purchase-orders/reports/your-report-name</strong>';
+                await loadAutoReports();
+
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '✨ Create Auto-Updating Report';
+            }
+        });
+
+        // Generate report now
+        async function generateNow(reportId) {
+            try {
+                const response = await fetch(`/api/auto-reports/${reportId}/generate`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Failed to generate report');
+                }
+
+                showToast('Report generated successfully! ✅', 'success');
+                await loadAutoReports();
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+
+        // Toggle active status
+        async function toggleActive(reportId, activate) {
+            try {
+                const response = await fetch(`/api/auto-reports/${reportId}/toggle`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ isActive: activate })
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Failed to update report');
+                }
+
+                showToast(`Report ${activate ? 'activated' : 'deactivated'} successfully! ✅`, 'success');
+                await loadAutoReports();
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+
+        // Delete report
+        async function deleteReport(reportId, reportName) {
+            if (!confirm(`Are you sure you want to delete "${reportName}"?\n\nThis will stop automatic generation and remove the report from the Excel Reports Manager page.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/auto-reports/${reportId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Failed to delete report');
+                }
+
+                showToast('Report deleted successfully! 🗑️', 'success');
+                await loadAutoReports();
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toast.className = `toast ${type} show`;
+            toastMessage.textContent = message;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize
+        loadSavedConfigs();
+        loadAutoReports();
+    </script>
+</body>
+</html>

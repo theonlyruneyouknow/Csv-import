@@ -590,6 +590,48 @@ app.get('/purchase-orders/download/latest-excel', (req, res) => {
     }
 });
 
+// Dynamic endpoint for auto-generated reports (must come before static routes)
+app.get('/purchase-orders/reports/:reportSlug', async (req, res) => {
+    try {
+        // Check if this is a static report first
+        const staticReports = ['unreceived-items', 'waiting-for-approval'];
+        if (staticReports.includes(req.params.reportSlug)) {
+            return; // Let the specific handlers below handle it
+        }
+        
+        const AutoReport = require('./models/AutoReport');
+        const urlPath = `/purchase-orders/reports/${req.params.reportSlug}`;
+        const autoReport = await AutoReport.findOne({ urlPath, isActive: true });
+        
+        if (!autoReport) {
+            return res.status(404).send('Report not found or inactive.');
+        }
+        
+        const cacheFilePath = path.join(EXCEL_CACHE_DIR, autoReport.cacheFileName);
+        
+        if (!fs.existsSync(cacheFilePath)) {
+            return res.status(404).send('Report file not yet generated. Please try again in a few moments.');
+        }
+        
+        const stats = fs.statSync(cacheFilePath);
+        const timestamp = new Date(stats.mtime).toLocaleString();
+        const fileBuffer = fs.readFileSync(cacheFilePath);
+        
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="${autoReport.cacheFileName}"`);
+        res.setHeader('Content-Length', fileBuffer.length);
+        res.setHeader('X-Generated-At', timestamp);
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        
+        res.send(fileBuffer);
+        console.log(`📥 Auto-report downloaded: ${autoReport.name} (${Math.round(fileBuffer.length / 1024)} KB, updated: ${timestamp})`);
+    } catch (error) {
+        console.error('Error serving auto-report:', error);
+        // Continue to next handler if this fails
+    }
+});
+
 // Public endpoint for Unreceived Items Report
 app.get('/purchase-orders/reports/unreceived-items', (req, res) => {
     try {
@@ -1058,6 +1100,11 @@ app.get('/excel-reports', ensureAuthenticated, ensureApproved, (req, res) => {
     });
 });
 
+// Manage Auto-Updating Reports page
+app.get('/manage-auto-reports', ensureAuthenticated, ensureApproved, (req, res) => {
+    res.render('manage-auto-reports', { user: req.user });
+});
+
 // Main dashboard route (redirect to purchase orders for now)
 app.get('/dashboard', ensureAuthenticated, ensureApproved, (req, res) => {
     res.redirect('/purchase-orders');
@@ -1380,6 +1427,164 @@ app.post('/api/excel-reports/generate-from-config/:configId', ensureAuthenticate
     }
 });
 
+// ==============================================================
+// AUTO-REPORTS API ENDPOINTS
+// ==============================================================
+
+// Get all auto-reports (user's own + public ones if they exist in future)
+app.get('/api/auto-reports', ensureAuthenticated, ensureApproved, async (req, res) => {
+    try {
+        const AutoReport = require('./models/AutoReport');
+        
+        // Admins see all, regular users see only their own
+        const query = req.user.role === 'admin' 
+            ? {} 
+            : { createdBy: req.user._id };
+        
+        const reports = await AutoReport.find(query)
+            .populate('reportConfigId', 'name reportType')
+            .sort({ createdAt: -1 });
+        
+        res.json(reports);
+    } catch (error) {
+        console.error('Error fetching auto-reports:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Create new auto-report
+app.post('/api/auto-reports', ensureAuthenticated, ensureApproved, async (req, res) => {
+    try {
+        const AutoReport = require('./models/AutoReport');
+        const ReportConfig = require('./models/ReportConfig');
+        const { name, description, reportConfigId, urlPath, frequency } = req.body;
+        
+        // Validate the report config exists and user has access
+        const config = await ReportConfig.findById(reportConfigId);
+        if (!config) {
+            return res.status(404).json({ error: 'Report configuration not found' });
+        }
+        
+        if (!config.canAccess(req.user)) {
+            return res.status(403).json({ error: 'You do not have access to this configuration' });
+        }
+        
+        // Check for duplicate URL path
+        const existingReport = await AutoReport.findOne({ urlPath: `/purchase-orders/reports/${urlPath}` });
+        if (existingReport) {
+            return res.status(400).json({ error: 'A report with this URL path already exists' });
+        }
+        
+        // Create cron expression based on frequency
+        let cronExpression = '0 * * * *'; // Default: hourly
+        if (frequency === 'daily') {
+            cronExpression = '0 0 * * *'; // Daily at midnight
+        }
+        
+        // Create the auto-report
+        const autoReport = new AutoReport({
+            name,
+            description,
+            reportConfigId,
+            urlPath,
+            generationFrequency: frequency,
+            cronExpression,
+            createdBy: req.user._id,
+            createdByUsername: req.user.username
+        });
+        
+        await autoReport.save();
+        
+        // Generate the report immediately
+        await generateAutoReport(autoReport._id);
+        
+        console.log(`✅ Created auto-report: ${name} by ${req.user.username}`);
+        res.json(autoReport);
+    } catch (error) {
+        console.error('Error creating auto-report:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Generate auto-report now (manual trigger)
+app.post('/api/auto-reports/:id/generate', ensureAuthenticated, ensureApproved, async (req, res) => {
+    try {
+        const AutoReport = require('./models/AutoReport');
+        const report = await AutoReport.findById(req.params.id);
+        
+        if (!report) {
+            return res.status(404).json({ error: 'Report not found' });
+        }
+        
+        if (!report.canAccess(req.user)) {
+            return res.status(403).json({ error: 'Access denied' });
+        }
+        
+        await generateAutoReport(report._id);
+        
+        res.json({ success: true, message: 'Report generated successfully' });
+    } catch (error) {
+        console.error('Error generating auto-report:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Toggle auto-report active status
+app.put('/api/auto-reports/:id/toggle', ensureAuthenticated, ensureApproved, async (req, res) => {
+    try {
+        const AutoReport = require('./models/AutoReport');
+        const report = await AutoReport.findById(req.params.id);
+        
+        if (!report) {
+            return res.status(404).json({ error: 'Report not found' });
+        }
+        
+        if (!report.canModify(req.user)) {
+            return res.status(403).json({ error: 'You do not have permission to modify this report' });
+        }
+        
+        report.isActive = req.body.isActive;
+        await report.save();
+        
+        console.log(`${report.isActive ? '▶️' : '⏸️'} Auto-report ${report.isActive ? 'activated' : 'deactivated'}: ${report.name}`);
+        res.json(report);
+    } catch (error) {
+        console.error('Error toggling auto-report:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete auto-report
+app.delete('/api/auto-reports/:id', ensureAuthenticated, ensureApproved, async (req, res) => {
+    try {
+        const AutoReport = require('./models/AutoReport');
+        const report = await AutoReport.findById(req.params.id);
+        
+        if (!report) {
+            return res.status(404).json({ error: 'Report not found' });
+        }
+        
+        if (!report.canModify(req.user)) {
+            return res.status(403).json({ error: 'You do not have permission to delete this report' });
+        }
+        
+        // Delete the cache file if it exists
+        const cacheFilePath = path.join(EXCEL_CACHE_DIR, report.cacheFileName);
+        if (fs.existsSync(cacheFilePath)) {
+            fs.unlinkSync(cacheFilePath);
+            console.log(`🗑️ Deleted cache file: ${report.cacheFileName}`);
+        }
+        
+        await AutoReport.findByIdAndDelete(req.params.id);
+        
+        console.log(`🗑️ Deleted auto-report: ${report.name} by ${req.user.username}`);
+        res.json({ success: true, message: 'Report deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting auto-report:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error('Error:', err);
@@ -1624,10 +1829,240 @@ async function generateWaitingForApprovalReport() {
     }
 }
 
+// ==============================================================
+// DYNAMIC AUTO-REPORT GENERATOR
+// ==============================================================
+
+// Generate a single auto-report based on its saved configuration
+async function generateAutoReport(reportId) {
+    try {
+        const AutoReport = require('./models/AutoReport');
+        const ReportConfig = require('./models/ReportConfig');
+        const PurchaseOrder = require('./models/PurchaseOrder');
+        
+        // Load the auto-report and its configuration
+        const autoReport = await AutoReport.findById(reportId).populate('reportConfigId');
+        
+        if (!autoReport) {
+            console.error(`❌ Auto-report not found: ${reportId}`);
+            return;
+        }
+        
+        if (!autoReport.isActive) {
+            console.log(`⏸️ Skipping inactive report: ${autoReport.name}`);
+            return;
+        }
+        
+        const config = autoReport.reportConfigId;
+        if (!config) {
+            console.error(`❌ Configuration not found for report: ${autoReport.name}`);
+            autoReport.lastError = 'Configuration not found';
+            await autoReport.save();
+            return;
+        }
+        
+        console.log(`🔄 Generating auto-report: ${autoReport.name}`);
+        
+        // Fetch data based on report type
+        let data = [];
+        const purchaseOrders = await PurchaseOrder.find().populate('lineItems').sort({ dateOrdered: -1 });
+        
+        if (config.reportType === 'unreceived-items') {
+            // Build unreceived items data
+            purchaseOrders.forEach(po => {
+                if (po.lineItems && po.lineItems.length > 0) {
+                    po.lineItems.forEach(item => {
+                        const qtyExpected = item.qtyExpected || item.qtyOrdered || 0;
+                        const qtyReceived = item.qtyReceived || 0;
+                        const unreceived = qtyExpected - qtyReceived;
+                        
+                        if (unreceived > 0) {
+                            data.push({
+                                poNumber: po.poNumber,
+                                vendor: po.vendor,
+                                poType: po.poType,
+                                poStatus: po.status,
+                                priority: po.priority,
+                                itemNumber: item.itemNumber,
+                                variety: item.variety,
+                                description: item.description,
+                                location: item.location,
+                                qtyOrdered: item.qtyOrdered,
+                                qtyExpected: qtyExpected,
+                                qtyReceived: qtyReceived,
+                                unreceived: unreceived,
+                                unit: item.unit,
+                                status: item.status,
+                                urgency: item.urgency,
+                                ead: item.ead,
+                                eta: item.eta,
+                                dateOrdered: po.dateOrdered,
+                                itemNotes: item.notes,
+                                poNotes: po.notes
+                            });
+                        }
+                    });
+                }
+            });
+        } else if (config.reportType === 'waiting-for-approval') {
+            // Build waiting for approval data
+            const approvalStatuses = ['Waiting for Approval', 'Pending', 'Pre-Purchase'];
+            purchaseOrders
+                .filter(po => approvalStatuses.includes(po.status))
+                .forEach(po => {
+                    if (po.lineItems && po.lineItems.length > 0) {
+                        po.lineItems.forEach(item => {
+                            data.push({
+                                poNumber: po.poNumber,
+                                vendor: po.vendor,
+                                poType: po.poType,
+                                poStatus: po.status,
+                                priority: po.priority,
+                                itemNumber: item.itemNumber,
+                                variety: item.variety,
+                                description: item.description,
+                                location: item.location,
+                                qtyOrdered: item.qtyOrdered,
+                                unit: item.unit,
+                                urgency: item.urgency,
+                                ead: item.ead,
+                                dateOrdered: po.dateOrdered,
+                                itemNotes: item.notes,
+                                poNotes: po.notes
+                            });
+                        });
+                    }
+                });
+        }
+        
+        // Apply filters from configuration
+        if (config.config.types && config.config.types.length > 0) {
+            const checkedTypes = config.config.types.filter(t => t.checked).map(t => t.value);
+            if (checkedTypes.length > 0) {
+                data = data.filter(row => checkedTypes.includes(row.poType));
+            }
+        }
+        
+        if (config.config.statuses && config.config.statuses.length > 0) {
+            const checkedStatuses = config.config.statuses.filter(s => s.checked).map(s => s.value);
+            if (checkedStatuses.length > 0) {
+                data = data.filter(row => checkedStatuses.includes(row.status));
+            }
+        }
+        
+        if (config.config.urgencies && config.config.urgencies.length > 0) {
+            const checkedUrgencies = config.config.urgencies.filter(u => u.checked).map(u => u.value);
+            if (checkedUrgencies.length > 0) {
+                data = data.filter(row => checkedUrgencies.includes(row.urgency));
+            }
+        }
+        
+        // Determine which columns to include
+        const checkedColumns = config.config.columns?.filter(col => col.checked).map(col => col.id) || [];
+        
+        // Build Excel data with selected columns
+        const excelData = data.map(row => {
+            const excelRow = {};
+            
+            const columnMap = {
+                'poNumber': 'PO Number',
+                'vendor': 'Vendor',
+                'poType': 'PO Type',
+                'poStatus': 'PO Status',
+                'priority': 'Priority',
+                'itemNumber': 'Item Number',
+                'variety': 'Variety',
+                'description': 'Description',
+                'location': 'Location',
+                'qtyOrdered': 'Qty Ordered',
+                'qtyExpected': 'Qty Expected',
+                'qtyReceived': 'Qty Received',
+                'unreceived': 'Unreceived',
+                'unit': 'Unit',
+                'status': 'Item Status',
+                'urgency': 'Urgency',
+                'ead': 'EAD',
+                'eta': 'ETA',
+                'dateOrdered': 'Date Ordered',
+                'itemNotes': 'Item Notes',
+                'poNotes': 'PO Notes'
+            };
+            
+            // If no columns specified, include all
+            const columnsToInclude = checkedColumns.length > 0 ? checkedColumns : Object.keys(columnMap);
+            
+            columnsToInclude.forEach(colId => {
+                const colName = columnMap[colId] || colId;
+                let value = row[colId];
+                
+                // Format dates
+                if (value instanceof Date) {
+                    value = value.toISOString().split('T')[0];
+                } else if (value === undefined || value === null) {
+                    value = '';
+                }
+                
+                excelRow[colName] = value;
+            });
+            
+            return excelRow;
+        });
+        
+        // Generate Excel file
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+        XLSX.utils.book_append_sheet(workbook, worksheet, autoReport.name.substring(0, 31)); // Sheet name max 31 chars
+        
+        const cacheFilePath = path.join(EXCEL_CACHE_DIR, autoReport.cacheFileName);
+        XLSX.writeFile(workbook, cacheFilePath);
+        
+        // Update auto-report metadata
+        autoReport.lastGenerated = new Date();
+        autoReport.lastError = null;
+        await autoReport.save();
+        
+        const stats = fs.statSync(cacheFilePath);
+        console.log(`✅ Auto-report generated: ${autoReport.name} (${Math.round(stats.size / 1024)} KB, ${excelData.length} rows)`);
+        
+    } catch (error) {
+        console.error(`❌ Error generating auto-report ${reportId}:`, error);
+        
+        try {
+            const AutoReport = require('./models/AutoReport');
+            const report = await AutoReport.findById(reportId);
+            if (report) {
+                report.lastError = error.message;
+                await report.save();
+            }
+        } catch (saveError) {
+            console.error('Error saving error state:', saveError);
+        }
+    }
+}
+
+// Generate all active auto-reports
+async function generateAllAutoReports() {
+    try {
+        const AutoReport = require('./models/AutoReport');
+        const activeReports = await AutoReport.find({ isActive: true });
+        
+        console.log(`🔄 Generating ${activeReports.length} active auto-reports...`);
+        
+        for (const report of activeReports) {
+            await generateAutoReport(report._id);
+        }
+        
+        console.log(`✅ Completed generating all auto-reports`);
+    } catch (error) {
+        console.error('❌ Error generating auto-reports:', error);
+    }
+}
+
 // Generate all reports on startup
 generateExcelCache();
 generateUnreceivedItemsReport();
 generateWaitingForApprovalReport();
+generateAllAutoReports();
 
 // Schedule automatic generation every hour
 cron.schedule('0 * * * *', () => {
@@ -1635,6 +2070,7 @@ cron.schedule('0 * * * *', () => {
     generateExcelCache();
     generateUnreceivedItemsReport();
     generateWaitingForApprovalReport();
+    generateAllAutoReports();
 });
 
 app.listen(PORT, () => {

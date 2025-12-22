@@ -578,6 +578,26 @@
             </div>
         </div>
 
+        <!-- Auto-Updating Reports Section -->
+        <div class="header" style="margin-top: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 style="font-size: 24px; margin-bottom: 10px;">🔄 Your Auto-Updating Reports</h2>
+                    <p>Custom reports that update automatically every hour</p>
+                </div>
+                <a href="/manage-auto-reports" class="btn btn-refresh" style="max-width: 250px; text-decoration: none;">
+                    ⚙️ Manage Auto-Reports
+                </a>
+            </div>
+        </div>
+
+        <div id="autoReportsContainer">
+            <div class="empty-state" style="padding: 40px;">
+                <div class="spinner" style="margin: 0 auto 15px;"></div>
+                <p style="color: #718096;">Loading auto-reports...</p>
+            </div>
+        </div>
+
         <!-- Saved Report Configurations Section -->
         <div class="header" style="margin-top: 30px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -971,6 +991,124 @@
             }
         }
 
+        // Load auto-updating reports
+        async function loadAutoReports() {
+            console.log('Loading auto-reports...');
+            const container = document.getElementById('autoReportsContainer');
+
+            try {
+                const response = await fetch('/api/auto-reports');
+                console.log('Auto-reports response:', response.ok, response.status);
+
+                if (!response.ok) {
+                    throw new Error(`Failed to load: ${response.status}`);
+                }
+
+                const reports = await response.json();
+                console.log('Auto-reports data:', reports);
+
+                if (reports.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <p style="color: #718096; font-size: 14px;">
+                                No auto-updating reports yet. 
+                                <a href="/manage-auto-reports" style="color: #667eea; font-weight: 600;">Create your first one →</a>
+                            </p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Create report cards
+                container.innerHTML = `
+                    <div class="reports-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px;">
+                        ${reports.map(report => `
+                            <div class="report-card">
+                                <div class="status-header">
+                                    <h3>${escapeHtml(report.name)}</h3>
+                                    <span class="status-badge ${report.isActive ? 'status-ready' : 'status-error'}">
+                                        ${report.isActive ? 'Active' : 'Inactive'}
+                                    </span>
+                                </div>
+                                ${report.description ? `<p style="color: #666; font-size: 13px; margin: 8px 0;">${escapeHtml(report.description)}</p>` : ''}
+                                <div class="report-info">
+                                    <div class="info-row">
+                                        <span class="info-label">Last Generated:</span>
+                                        <span class="info-value">
+                                            ${report.lastGenerated 
+                                                ? new Date(report.lastGenerated).toLocaleString('en-US', { 
+                                                    timeZone: 'America/Los_Angeles',
+                                                    month: 'short', day: 'numeric', year: 'numeric',
+                                                    hour: '2-digit', minute: '2-digit'
+                                                  }) + ' PT'
+                                                : 'Not yet generated'
+                                            }
+                                        </span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Frequency:</span>
+                                        <span class="info-value">${report.generationFrequency}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="url-section">
+                                    <label class="url-label">Excel Power Query URL:</label>
+                                    <div class="url-input-group">
+                                        <input type="text" 
+                                               readonly 
+                                               value="${window.location.origin}${report.urlPath}"
+                                               class="url-input"
+                                               id="autoUrl${report._id}">
+                                        <button class="btn btn-copy" onclick="copyAutoReportUrl('${report._id}')">
+                                            <span>📋</span> Copy
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                    <button class="btn btn-refresh" onclick="downloadAutoReport('${report.urlPath}', '${escapeHtml(report.cacheFileName)}')">
+                                        <span>⬇️</span> Download
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error loading auto-reports:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p style="color: #718096;">Error loading auto-reports: ${error.message}</p>
+                        <button class="btn btn-refresh" onclick="loadAutoReports()" style="margin-top: 10px;">
+                            🔄 Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Copy auto-report URL to clipboard
+        function copyAutoReportUrl(reportId) {
+            const input = document.getElementById('autoUrl' + reportId);
+            input.select();
+            input.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            showToast('URL copied to clipboard! 📋');
+        }
+
+        // Download auto-report
+        function downloadAutoReport(urlPath, filename) {
+            const url = window.location.origin + urlPath;
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Downloading report... ⬇️');
+        }
+
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
@@ -979,10 +1117,13 @@
 
         // Load initial status
         loadReportStatus();
+        loadAutoReports();
         loadSavedConfigs();
         
         // Refresh status every 30 seconds
         setInterval(loadReportStatus, 30000);
+        // Refresh auto-reports every 60 seconds
+        setInterval(loadAutoReports, 60000);
         // Refresh configs every 60 seconds
         setInterval(loadSavedConfigs, 60000);
     </script>
