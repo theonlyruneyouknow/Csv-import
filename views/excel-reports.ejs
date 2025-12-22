@@ -592,8 +592,9 @@
         </div>
 
         <div id="savedConfigsContainer">
-            <div style="text-align: center; padding: 40px; color: #718096;">
-                Loading saved configurations...
+            <div class="empty-state" style="padding: 40px;">
+                <div class="spinner" style="margin: 0 auto 15px;"></div>
+                <p style="color: #718096;">Loading saved configurations...</p>
             </div>
         </div>
     </div>
@@ -762,24 +763,50 @@
 
         // Load all saved configurations
         async function loadSavedConfigs() {
+            const container = document.getElementById('savedConfigsContainer');
+            
             try {
                 const types = ['unreceived-items', 'waiting-for-approval'];
                 let allConfigs = [];
 
                 for (const type of types) {
-                    const response = await fetch(`/api/report-configs/${type}`);
-                    const data = await response.json();
-                    if (data.success && data.configs) {
-                        allConfigs = allConfigs.concat(data.configs.map(c => ({...c, reportType: type})));
+                    try {
+                        const response = await fetch(`/api/report-configs/${type}`);
+                        
+                        if (!response.ok) {
+                            console.error(`Failed to fetch ${type} configs:`, response.status, response.statusText);
+                            continue;
+                        }
+                        
+                        const data = await response.json();
+                        console.log(`Loaded ${type} configs:`, data);
+                        
+                        if (data.success && data.configs && Array.isArray(data.configs)) {
+                            allConfigs = allConfigs.concat(data.configs.map(c => ({...c, reportType: type})));
+                        } else {
+                            console.warn(`Invalid response structure for ${type}:`, data);
+                        }
+                    } catch (typeError) {
+                        console.error(`Error fetching ${type} configs:`, typeError);
                     }
                 }
 
+                console.log(`Total configs loaded: ${allConfigs.length}`, allConfigs);
                 allSavedConfigs = allConfigs;
                 renderSavedConfigs();
+                
             } catch (error) {
                 console.error('Error loading saved configs:', error);
-                document.getElementById('savedConfigsContainer').innerHTML = 
-                    '<div class="empty-state"><div class="empty-state-icon">⚠️</div><p>Error loading configurations</p></div>';
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <h3 style="color: #2d3748; margin-bottom: 10px;">Error Loading Configurations</h3>
+                        <p>${error.message || 'Failed to load configurations'}</p>
+                        <button class="btn btn-refresh" onclick="loadSavedConfigs()" style="margin-top: 15px;">
+                            🔄 Retry
+                        </button>
+                    </div>
+                `;
             }
         }
 
