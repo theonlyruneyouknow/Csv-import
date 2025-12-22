@@ -424,18 +424,46 @@
 
         // Load saved configurations for dropdown
         async function loadSavedConfigs() {
+            const select = document.getElementById('reportConfig');
+            
             try {
                 const [unreceivedRes, approvalRes] = await Promise.all([
-                    fetch('/api/report-configs/unreceived-items'),
-                    fetch('/api/report-configs/waiting-for-approval')
+                    fetch('/api/report-configs/unreceived-items').catch(() => ({ ok: false })),
+                    fetch('/api/report-configs/waiting-for-approval').catch(() => ({ ok: false }))
                 ]);
 
-                const unreceived = unreceivedRes.ok ? await unreceivedRes.json() : [];
-                const approval = approvalRes.ok ? await approvalRes.json() : [];
+                let unreceived = [];
+                let approval = [];
+
+                if (unreceivedRes.ok) {
+                    try {
+                        unreceived = await unreceivedRes.json();
+                    } catch (e) {
+                        console.log('Could not parse unreceived configs');
+                    }
+                }
+
+                if (approvalRes.ok) {
+                    try {
+                        approval = await approvalRes.json();
+                    } catch (e) {
+                        console.log('Could not parse approval configs');
+                    }
+                }
+
                 const allConfigs = [...unreceived, ...approval];
 
-                const select = document.getElementById('reportConfig');
                 select.innerHTML = '<option value="">-- Select a saved configuration --</option>';
+
+                if (allConfigs.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'No saved configurations found';
+                    option.disabled = true;
+                    select.appendChild(option);
+                    console.log('No saved configurations available');
+                    return;
+                }
 
                 allConfigs.forEach(config => {
                     const option = document.createElement('option');
@@ -445,9 +473,11 @@
                     select.appendChild(option);
                 });
 
+                console.log(`Loaded ${allConfigs.length} saved configurations`);
+
             } catch (error) {
                 console.error('Error loading configs:', error);
-                showToast('Failed to load saved configurations', 'error');
+                select.innerHTML = '<option value="">-- Error loading configurations --</option>';
             }
         }
 
