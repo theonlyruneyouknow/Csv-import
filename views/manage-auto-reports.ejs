@@ -493,18 +493,6 @@
                 select.innerHTML = '<option value="">-- Error loading configurations --</option>';
             }
         }
-                    option.textContent = `${config.name} (${config.reportType})`;
-                    option.dataset.configName = config.name;
-                    select.appendChild(option);
-                });
-
-                console.log(`Loaded ${allConfigs.length} saved configurations`);
-
-            } catch (error) {
-                console.error('Error loading configs:', error);
-                select.innerHTML = '<option value="">-- Error loading configurations --</option>';
-            }
-        }
 
         // Update URL preview as user types
         document.getElementById('urlPath').addEventListener('input', (e) => {
