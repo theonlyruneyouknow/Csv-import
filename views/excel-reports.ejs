@@ -603,7 +603,7 @@
 
     <script>
         let allSavedConfigs = [];
-        const currentUser = <%= JSON.stringify(user) %>;
+        const currentUser = <%- JSON.stringify(user) %>;
 
         // Update server time every second (Pacific Time)
         function updateServerTime() {
