@@ -428,8 +428,14 @@
             
             try {
                 const [unreceivedRes, approvalRes] = await Promise.all([
-                    fetch('/api/report-configs/unreceived-items').catch(() => ({ ok: false })),
-                    fetch('/api/report-configs/waiting-for-approval').catch(() => ({ ok: false }))
+                    fetch('/api/report-configs/unreceived-items').catch(err => {
+                        console.error('Error fetching unreceived configs:', err);
+                        return { ok: false };
+                    }),
+                    fetch('/api/report-configs/waiting-for-approval').catch(err => {
+                        console.error('Error fetching approval configs:', err);
+                        return { ok: false };
+                    })
                 ]);
 
                 let unreceived = [];
@@ -437,28 +443,35 @@
 
                 if (unreceivedRes.ok) {
                     try {
-                        unreceived = await unreceivedRes.json();
+                        const data = await unreceivedRes.json();
+                        console.log('Unreceived response:', data);
+                        // API returns { success: true, configs: [...] }
+                        unreceived = data.configs || data || [];
                     } catch (e) {
-                        console.log('Could not parse unreceived configs');
+                        console.error('Could not parse unreceived configs:', e);
                     }
                 }
 
                 if (approvalRes.ok) {
                     try {
-                        approval = await approvalRes.json();
+                        const data = await approvalRes.json();
+                        console.log('Approval response:', data);
+                        // API returns { success: true, configs: [...] }
+                        approval = data.configs || data || [];
                     } catch (e) {
-                        console.log('Could not parse approval configs');
+                        console.error('Could not parse approval configs:', e);
                     }
                 }
 
                 const allConfigs = [...unreceived, ...approval];
+                console.log('Total configs loaded:', allConfigs.length);
 
                 select.innerHTML = '<option value="">-- Select a saved configuration --</option>';
 
                 if (allConfigs.length === 0) {
                     const option = document.createElement('option');
                     option.value = '';
-                    option.textContent = 'No saved configurations found';
+                    option.textContent = 'No saved configurations found - Create one first';
                     option.disabled = true;
                     select.appendChild(option);
                     console.log('No saved configurations available');
@@ -468,6 +481,18 @@
                 allConfigs.forEach(config => {
                     const option = document.createElement('option');
                     option.value = config._id;
+                    option.textContent = `${config.name} (${config.reportType})`;
+                    option.dataset.configName = config.name;
+                    select.appendChild(option);
+                });
+
+                console.log(`Loaded ${allConfigs.length} saved configurations`);
+
+            } catch (error) {
+                console.error('Error loading configs:', error);
+                select.innerHTML = '<option value="">-- Error loading configurations --</option>';
+            }
+        }
                     option.textContent = `${config.name} (${config.reportType})`;
                     option.dataset.configName = config.name;
                     select.appendChild(option);
