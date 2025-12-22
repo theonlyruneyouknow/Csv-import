@@ -1205,6 +1205,181 @@ app.post('/purchase-orders/refresh-excel-cache', ensureAuthenticated, ensureAppr
     }
 });
 
+// API: Generate Excel from saved report configuration
+app.post('/api/excel-reports/generate-from-config/:configId', ensureAuthenticated, ensureApproved, async (req, res) => {
+    const { configId } = req.params;
+    
+    try {
+        const ReportConfig = require('./models/ReportConfig');
+        const PurchaseOrder = require('./models/PurchaseOrder');
+        
+        // Load the configuration
+        const config = await ReportConfig.findById(configId);
+        
+        if (!config) {
+            return res.status(404).json({ success: false, error: 'Configuration not found' });
+        }
+        
+        // Check access permission
+        if (!config.canAccess(req.user)) {
+            return res.status(403).json({ success: false, error: 'Access denied' });
+        }
+        
+        // Record usage
+        await config.recordUsage();
+        
+        // Fetch data based on report type
+        let data = [];
+        const purchaseOrders = await PurchaseOrder.find().populate('lineItems').sort({ dateOrdered: -1 });
+        
+        if (config.reportType === 'unreceived-items') {
+            // Generate unreceived items data
+            purchaseOrders.forEach(po => {
+                if (po.lineItems && po.lineItems.length > 0) {
+                    po.lineItems.forEach(item => {
+                        const qtyExpected = item.qtyExpected || item.qtyOrdered || 0;
+                        const qtyReceived = item.qtyReceived || 0;
+                        const qtyRemaining = qtyExpected - qtyReceived;
+                        
+                        if (qtyRemaining > 0) {
+                            // Apply filters from config
+                            const matchesType = !config.config.types || config.config.types.length === 0 || 
+                                config.config.types.some(t => t.checked && t.value === po.poType);
+                            const matchesStatus = !config.config.statuses || config.config.statuses.length === 0 ||
+                                config.config.statuses.some(s => s.checked && s.value === item.status);
+                            const matchesUrgency = !config.config.urgencies || config.config.urgencies.length === 0 ||
+                                config.config.urgencies.some(u => u.checked && u.value === item.urgency);
+                            
+                            if (matchesType && matchesStatus && matchesUrgency) {
+                                const row = {
+                                    'PO Number': po.poNumber || '',
+                                    'Vendor': po.vendor || '',
+                                    'PO Type': po.poType || '',
+                                    'Item Number': item.itemNumber || '',
+                                    'Variety': item.variety || '',
+                                    'Description': item.description || '',
+                                    'Location': item.location || '',
+                                    'Qty Expected': qtyExpected,
+                                    'Qty Received': qtyReceived,
+                                    'Qty Remaining': qtyRemaining,
+                                    'Unit': item.unit || '',
+                                    'Item Status': item.status || '',
+                                    'Urgency': item.urgency || '',
+                                    'EAD': item.ead ? item.ead.toISOString().split('T')[0] : '',
+                                    'Item ETA': item.eta ? item.eta.toISOString().split('T')[0] : '',
+                                    'PO Status': po.status || '',
+                                    'PO ETA': po.eta ? po.eta.toISOString().split('T')[0] : '',
+                                    'Date Ordered': po.dateOrdered ? po.dateOrdered.toISOString().split('T')[0] : '',
+                                    'Tracking': po.tracking || '',
+                                    'Item Notes': item.notes || '',
+                                    'PO Notes': po.notes || ''
+                                };
+                                
+                                // Only include selected columns
+                                const filteredRow = {};
+                                if (config.config.columns) {
+                                    config.config.columns.forEach(col => {
+                                        if (col.checked) {
+                                            const columnName = col.id.replace('col_', '').replace(/_/g, ' ')
+                                                .split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                                            if (row[columnName] !== undefined) {
+                                                filteredRow[columnName] = row[columnName];
+                                            }
+                                        }
+                                    });
+                                    data.push(Object.keys(filteredRow).length > 0 ? filteredRow : row);
+                                } else {
+                                    data.push(row);
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        } else if (config.reportType === 'waiting-for-approval') {
+            // Generate waiting for approval data
+            const approvalStatuses = ['Waiting for approval', 'waiting for approval'];
+            
+            purchaseOrders.forEach(po => {
+                if (approvalStatuses.includes(po.status)) {
+                    // Apply filters from config
+                    const matchesType = !config.config.types || config.config.types.length === 0 || 
+                        config.config.types.some(t => t.checked && t.value === po.poType);
+                    
+                    if (matchesType) {
+                        if (po.lineItems && po.lineItems.length > 0) {
+                            po.lineItems.forEach(item => {
+                                const matchesStatus = !config.config.statuses || config.config.statuses.length === 0 ||
+                                    config.config.statuses.some(s => s.checked && s.value === item.status);
+                                
+                                if (matchesStatus) {
+                                    data.push({
+                                        'PO Number': po.poNumber || '',
+                                        'Vendor': po.vendor || '',
+                                        'PO Type': po.poType || '',
+                                        'PO Status': po.status || '',
+                                        'Priority': po.priority || '',
+                                        'Item Number': item.itemNumber || '',
+                                        'Variety': item.variety || '',
+                                        'Description': item.description || '',
+                                        'Location': item.location || '',
+                                        'Qty Ordered': item.qtyOrdered || 0,
+                                        'Unit': item.unit || '',
+                                        'Urgency': item.urgency || '',
+                                        'EAD': item.ead ? item.ead.toISOString().split('T')[0] : '',
+                                        'Date Ordered': po.dateOrdered ? po.dateOrdered.toISOString().split('T')[0] : '',
+                                        'Item Notes': item.notes || '',
+                                        'PO Notes': po.notes || ''
+                                    });
+                                }
+                            });
+                        } else {
+                            data.push({
+                                'PO Number': po.poNumber || '',
+                                'Vendor': po.vendor || '',
+                                'PO Type': po.poType || '',
+                                'PO Status': po.status || '',
+                                'Priority': po.priority || '',
+                                'Item Number': '',
+                                'Variety': '',
+                                'Description': '',
+                                'Location': '',
+                                'Qty Ordered': 0,
+                                'Unit': '',
+                                'Urgency': '',
+                                'EAD': '',
+                                'Date Ordered': po.dateOrdered ? po.dateOrdered.toISOString().split('T')[0] : '',
+                                'Item Notes': '',
+                                'PO Notes': po.notes || ''
+                            });
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Generate Excel file
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        XLSX.utils.book_append_sheet(workbook, worksheet, config.name.substring(0, 31));
+        
+        // Generate buffer
+        const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+        
+        // Send file
+        const filename = `${config.name.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', buffer.length);
+        res.send(buffer);
+        
+        console.log(`📥 Generated Excel from config: ${config.name} (${data.length} rows)`);
+    } catch (error) {
+        console.error('Error generating Excel from config:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error('Error:', err);

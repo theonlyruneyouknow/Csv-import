@@ -333,6 +333,88 @@
         .back-link:hover {
             background: rgba(255, 255, 255, 0.3);
         }
+
+        /* Saved Configs Styles */
+        .config-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .config-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .config-info {
+            flex: 1;
+        }
+
+        .config-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .config-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #718096;
+            margin-top: 8px;
+        }
+
+        .config-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .badge-public {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-private {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .config-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        .configs-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -495,11 +577,33 @@
                 </div>
             </div>
         </div>
+
+        <!-- Saved Report Configurations Section -->
+        <div class="header" style="margin-top: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 style="font-size: 24px; margin-bottom: 10px;">📊 Saved Report Configurations</h2>
+                    <p>Generate custom Excel files from your saved report configurations</p>
+                </div>
+                <button class="btn btn-refresh" onclick="checkAndMigrateLocalStorage()" style="max-width: 250px;">
+                    🔄 Import from Browser Storage
+                </button>
+            </div>
+        </div>
+
+        <div id="savedConfigsContainer">
+            <div style="text-align: center; padding: 40px; color: #718096;">
+                Loading saved configurations...
+            </div>
+        </div>
     </div>
 
     <div class="toast" id="toast"></div>
 
     <script>
+        let allSavedConfigs = [];
+        const currentUser = <%= JSON.stringify(user) %>;
+
         // Update server time every second (Pacific Time)
         function updateServerTime() {
             const now = new Date();
@@ -654,11 +758,206 @@
             }, 3000);
         }
 
+        // ============= SAVED REPORT CONFIGURATIONS =============
+
+        // Load all saved configurations
+        async function loadSavedConfigs() {
+            try {
+                const types = ['unreceived-items', 'waiting-for-approval'];
+                let allConfigs = [];
+
+                for (const type of types) {
+                    const response = await fetch(`/api/report-configs/${type}`);
+                    const data = await response.json();
+                    if (data.success && data.configs) {
+                        allConfigs = allConfigs.concat(data.configs.map(c => ({...c, reportType: type})));
+                    }
+                }
+
+                allSavedConfigs = allConfigs;
+                renderSavedConfigs();
+            } catch (error) {
+                console.error('Error loading saved configs:', error);
+                document.getElementById('savedConfigsContainer').innerHTML = 
+                    '<div class="empty-state"><div class="empty-state-icon">⚠️</div><p>Error loading configurations</p></div>';
+            }
+        }
+
+        // Render saved configurations
+        function renderSavedConfigs() {
+            const container = document.getElementById('savedConfigsContainer');
+
+            if (allSavedConfigs.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <h3 style="color: #2d3748; margin-bottom: 10px;">No Saved Configurations</h3>
+                        <p>Create custom report configurations from the Unreceived Items or Waiting for Approval pages.</p>
+                        <p style="margin-top: 10px;">Or click "Import from Browser Storage" above to migrate old favorites.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const configsHtml = allSavedConfigs.map(config => {
+                const reportLabel = config.reportType === 'unreceived-items' ? 'Unreceived Items' : 'Waiting for Approval';
+                const isPublic = config.isPublic;
+                const canGenerate = true; // Everyone can generate from any config they can see
+
+                return `
+                    <div class="config-card">
+                        <div class="config-info">
+                            <div class="config-name">
+                                ${escapeHtml(config.name)}
+                                <span class="config-badge ${isPublic ? 'badge-public' : 'badge-private'}">
+                                    ${isPublic ? '🌐 Public' : '🔒 Private'}
+                                </span>
+                            </div>
+                            ${config.description ? `<p style="color: #718096; font-size: 14px; margin-top: 5px;">${escapeHtml(config.description)}</p>` : ''}
+                            <div class="config-meta">
+                                <span>📋 ${reportLabel}</span>
+                                <span>👤 by ${escapeHtml(config.createdByUsername)}</span>
+                                ${config.usageCount > 0 ? `<span>📊 Used ${config.usageCount} times</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="config-actions">
+                            <button class="btn btn-download btn-small" onclick="generateExcelFromConfig('${config._id}')">
+                                <span>📥</span> Generate Excel
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `<div class="configs-grid">${configsHtml}</div>`;
+        }
+
+        // Generate Excel file from a saved configuration
+        async function generateExcelFromConfig(configId) {
+            try {
+                showToast('🔄 Generating Excel file from configuration...');
+
+                const response = await fetch(`/api/excel-reports/generate-from-config/${configId}`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    
+                    // Get filename from Content-Disposition header
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    let filename = 'report.xlsx';
+                    if (contentDisposition) {
+                        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+                        if (matches && matches[1]) {
+                            filename = matches[1].replace(/['"]/g, '');
+                        }
+                    }
+                    
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+
+                    showToast('✅ Excel file downloaded successfully!');
+                } else {
+                    const error = await response.json();
+                    showToast(`❌ Error: ${error.error || 'Failed to generate Excel'}`);
+                }
+            } catch (error) {
+                console.error('Error generating Excel:', error);
+                showToast('❌ Error generating Excel file');
+            }
+        }
+
+        // Check and migrate from localStorage
+        async function checkAndMigrateLocalStorage() {
+            const types = [
+                { key: 'unreceivedItemsFavorites', reportType: 'unreceived-items', label: 'Unreceived Items' },
+                { key: 'waitingForApprovalFavorites', reportType: 'waiting-for-approval', label: 'Waiting for Approval' }
+            ];
+
+            let totalFound = 0;
+            let allFavorites = [];
+
+            for (const type of types) {
+                const favorites = JSON.parse(localStorage.getItem(type.key) || '[]');
+                if (favorites.length > 0) {
+                    totalFound += favorites.length;
+                    allFavorites.push({ ...type, favorites });
+                }
+            }
+
+            if (totalFound === 0) {
+                showToast('ℹ️ No configurations found in browser storage');
+                return;
+            }
+
+            if (!confirm(`Found ${totalFound} configuration(s) in browser storage.\n\nMigrate them to the database?\nThis will make them accessible from any computer.`)) {
+                return;
+            }
+
+            let migrated = 0;
+            let errors = 0;
+
+            for (const typeData of allFavorites) {
+                try {
+                    const response = await fetch('/api/report-configs/migrate-from-localstorage', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            reportType: typeData.reportType,
+                            favorites: typeData.favorites
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        migrated += data.results.success;
+                        errors += data.results.errors.length;
+                    }
+                } catch (error) {
+                    console.error('Migration error:', error);
+                    errors++;
+                }
+            }
+
+            if (migrated > 0) {
+                showToast(`✅ Migrated ${migrated} configuration(s) successfully!`);
+                
+                if (confirm('Migration successful! Clear browser storage?')) {
+                    for (const type of types) {
+                        localStorage.removeItem(type.key);
+                        localStorage.setItem(`${type.reportType}MigrationDone`, 'true');
+                    }
+                    showToast('✅ Browser storage cleared');
+                }
+
+                // Reload configs
+                await loadSavedConfigs();
+            } else {
+                showToast(`⚠️ Migration completed with ${errors} error(s)`);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         // Load initial status
         loadReportStatus();
+        loadSavedConfigs();
         
         // Refresh status every 30 seconds
         setInterval(loadReportStatus, 30000);
+        // Refresh configs every 60 seconds
+        setInterval(loadSavedConfigs, 60000);
     </script>
 </body>
 </html>
