@@ -18,7 +18,6 @@ const autoReportSchema = new mongoose.Schema({
     },
     cacheFileName: {
         type: String,
-        required: true,
         unique: true
     },
     urlPath: {
