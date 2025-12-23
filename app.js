@@ -1862,10 +1862,18 @@ async function generateAutoReport(reportId) {
         }
         
         console.log(`🔄 Generating auto-report: ${autoReport.name}`);
+        console.log(`   Report type: ${config.reportType}`);
+        console.log(`   Config filters:`, {
+            types: config.config.types?.length || 0,
+            statuses: config.config.statuses?.length || 0,
+            urgencies: config.config.urgencies?.length || 0,
+            columns: config.config.columns?.length || 0
+        });
         
         // Fetch data based on report type
         let data = [];
         const purchaseOrders = await PurchaseOrder.find().populate('lineItems').sort({ dateOrdered: -1 });
+        console.log(`   Found ${purchaseOrders.length} purchase orders`);
         
         if (config.reportType === 'unreceived-items') {
             // Build unreceived items data
@@ -1935,27 +1943,37 @@ async function generateAutoReport(reportId) {
                 });
         }
         
+        console.log(`   Built ${data.length} data rows before filters`);
+        
         // Apply filters from configuration
         if (config.config.types && config.config.types.length > 0) {
             const checkedTypes = config.config.types.filter(t => t.checked).map(t => t.value);
+            console.log(`   Type filters (${checkedTypes.length}):`, checkedTypes);
             if (checkedTypes.length > 0) {
                 data = data.filter(row => checkedTypes.includes(row.poType));
+                console.log(`   After type filter: ${data.length} rows`);
             }
         }
         
         if (config.config.statuses && config.config.statuses.length > 0) {
             const checkedStatuses = config.config.statuses.filter(s => s.checked).map(s => s.value);
+            console.log(`   Status filters (${checkedStatuses.length}):`, checkedStatuses);
             if (checkedStatuses.length > 0) {
                 data = data.filter(row => checkedStatuses.includes(row.status));
+                console.log(`   After status filter: ${data.length} rows`);
             }
         }
         
         if (config.config.urgencies && config.config.urgencies.length > 0) {
             const checkedUrgencies = config.config.urgencies.filter(u => u.checked).map(u => u.value);
+            console.log(`   Urgency filters (${checkedUrgencies.length}):`, checkedUrgencies);
             if (checkedUrgencies.length > 0) {
                 data = data.filter(row => checkedUrgencies.includes(row.urgency));
+                console.log(`   After urgency filter: ${data.length} rows`);
             }
         }
+        
+        console.log(`   Final data rows: ${data.length}`);
         
         // Determine which columns to include
         const checkedColumns = config.config.columns?.filter(col => col.checked).map(col => col.id) || [];
