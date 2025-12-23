@@ -1143,9 +1143,29 @@ function getReportInfo(filePath) {
         if (fs.existsSync(filePath)) {
             const stats = fs.statSync(filePath);
             const fileDate = new Date(stats.mtime);
+            
+            // Try to read Excel file to get row/column count
+            let rowCount = 0;
+            let columnCount = 0;
+            try {
+                const workbook = XLSX.readFile(filePath);
+                const firstSheetName = workbook.SheetNames[0];
+                if (firstSheetName) {
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+                    rowCount = range.e.r - range.s.r; // Subtract header row
+                    columnCount = range.e.c - range.s.c + 1;
+                }
+            } catch (xlsxError) {
+                console.error('Could not read Excel file structure:', xlsxError.message);
+            }
+            
             return {
                 exists: true,
                 size: `${Math.round(stats.size / 1024)} KB`,
+                sizeBytes: stats.size,
+                rows: rowCount,
+                columns: columnCount,
                 timestamp: fileDate.toLocaleString('en-US', { 
                     timeZone: 'America/Los_Angeles',
                     month: '2-digit',
@@ -1510,7 +1530,7 @@ app.post('/api/auto-reports', ensureAuthenticated, ensureApproved, async (req, r
 app.post('/api/auto-reports/:id/generate', ensureAuthenticated, ensureApproved, async (req, res) => {
     try {
         const AutoReport = require('./models/AutoReport');
-        const report = await AutoReport.findById(req.params.id);
+        const report = await AutoReport.findById(req.params.id).populate('reportConfigId');
         
         if (!report) {
             return res.status(404).json({ error: 'Report not found' });
@@ -1519,6 +1539,13 @@ app.post('/api/auto-reports/:id/generate', ensureAuthenticated, ensureApproved, 
         if (!report.canAccess(req.user)) {
             return res.status(403).json({ error: 'Access denied' });
         }
+        
+        // Log the configuration for debugging
+        console.log(`\n=== MANUAL GENERATION TRIGGERED ===`);
+        console.log(`Report: ${report.name}`);
+        console.log(`Config ID: ${report.reportConfigId?._id}`);
+        console.log(`Config Type: ${report.reportConfigId?.reportType}`);
+        console.log(`Config Details:`, JSON.stringify(report.reportConfigId?.config, null, 2));
         
         await generateAutoReport(report._id);
         
@@ -1877,12 +1904,24 @@ async function generateAutoReport(reportId) {
         
         if (config.reportType === 'unreceived-items') {
             // Build unreceived items data
+            let processedPOs = 0;
+            let processedItems = 0;
+            
             purchaseOrders.forEach(po => {
                 if (po.lineItems && po.lineItems.length > 0) {
+                    processedPOs++;
                     po.lineItems.forEach(item => {
-                        const qtyExpected = item.qtyExpected || item.qtyOrdered || 0;
-                        const qtyReceived = item.qtyReceived || 0;
+                        processedItems++;
+                        
+                        // Use quantityExpected if available, fall back to quantityOrdered
+                        const qtyExpected = item.quantityExpected || item.qtyExpected || item.qtyOrdered || item.quantityOrdered || 0;
+                        const qtyReceived = item.quantityReceived || item.qtyReceived || 0;
                         const unreceived = qtyExpected - qtyReceived;
+                        
+                        // Debug first few items
+                        if (data.length < 3) {
+                            console.log(`   Sample item: PO${po.poNumber}, qty expected=${qtyExpected}, received=${qtyReceived}, unreceived=${unreceived}`);
+                        }
                         
                         if (unreceived > 0) {
                             data.push({
@@ -1895,7 +1934,7 @@ async function generateAutoReport(reportId) {
                                 variety: item.variety,
                                 description: item.description,
                                 location: item.location,
-                                qtyOrdered: item.qtyOrdered,
+                                qtyOrdered: item.qtyOrdered || item.quantityOrdered,
                                 qtyExpected: qtyExpected,
                                 qtyReceived: qtyReceived,
                                 unreceived: unreceived,
@@ -1912,6 +1951,8 @@ async function generateAutoReport(reportId) {
                     });
                 }
             });
+            
+            console.log(`   Processed ${processedPOs} POs with ${processedItems} total line items`);
         } else if (config.reportType === 'waiting-for-approval') {
             // Build waiting for approval data
             const approvalStatuses = ['Waiting for Approval', 'Pending', 'Pre-Purchase'];

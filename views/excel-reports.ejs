@@ -468,6 +468,10 @@
                         <span class="info-value" id="size-main">Loading...</span>
                     </div>
                     <div class="info-row">
+                        <span class="info-label">Rows × Columns</span>
+                        <span class="info-value" id="dims-main">Loading...</span>
+                    </div>
+                    <div class="info-row">
                         <span class="info-label">Last Generated</span>
                         <span class="info-value" id="time-main">Loading...</span>
                     </div>
@@ -511,6 +515,10 @@
                         <span class="info-value" id="size-unreceived">Loading...</span>
                     </div>
                     <div class="info-row">
+                        <span class="info-label">Rows × Columns</span>
+                        <span class="info-value" id="dims-unreceived">Loading...</span>
+                    </div>
+                    <div class="info-row">
                         <span class="info-label">Last Generated</span>
                         <span class="info-value" id="time-unreceived">Loading...</span>
                     </div>
@@ -552,6 +560,10 @@
                     <div class="info-row">
                         <span class="info-label">File Size</span>
                         <span class="info-value" id="size-approval">Loading...</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Rows × Columns</span>
+                        <span class="info-value" id="dims-approval">Loading...</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Last Generated</span>
@@ -692,6 +704,18 @@
             if (data.exists) {
                 document.getElementById(`size-${type}`).textContent = data.size;
                 document.getElementById(`time-${type}`).textContent = data.timestamp;
+                
+                // Update dimensions if element exists
+                const dimsEl = document.getElementById(`dims-${type}`);
+                if (dimsEl) {
+                    if (data.rows >= 0 && data.columns >= 0) {
+                        dimsEl.textContent = `${data.rows} × ${data.columns}`;
+                        dimsEl.style.color = data.rows === 0 ? '#ef4444' : '#10b981';
+                    } else {
+                        dimsEl.textContent = 'N/A';
+                    }
+                }
+                
                 document.getElementById(`status-${type}`).textContent = 'Ready';
                 document.getElementById(`status-${type}`).className = 'status-badge status-ready';
             } else {
