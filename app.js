@@ -1899,92 +1899,115 @@ async function generateAutoReport(reportId) {
         
         // Fetch data based on report type
         let data = [];
-        const purchaseOrders = await PurchaseOrder.find().populate('lineItems').sort({ dateOrdered: -1 });
-        console.log(`   Found ${purchaseOrders.length} purchase orders`);
+        const LineItem = require('./models/LineItem');
         
         if (config.reportType === 'unreceived-items') {
-            // Build unreceived items data
-            let processedPOs = 0;
-            let processedItems = 0;
+            // Query LineItem directly (like the working unreceived items page does)
+            const unreceivedItems = await LineItem.find({ received: false })
+                .populate('poId')
+                .sort({ poNumber: 1 })
+                .lean();
             
-            purchaseOrders.forEach(po => {
-                if (po.lineItems && po.lineItems.length > 0) {
-                    processedPOs++;
-                    po.lineItems.forEach(item => {
-                        processedItems++;
-                        
-                        // Use quantityExpected if available, fall back to quantityOrdered
-                        const qtyExpected = item.quantityExpected || item.qtyExpected || item.qtyOrdered || item.quantityOrdered || 0;
-                        const qtyReceived = item.quantityReceived || item.qtyReceived || 0;
-                        const unreceived = qtyExpected - qtyReceived;
-                        
-                        // Debug first few items
-                        if (data.length < 3) {
-                            console.log(`   Sample item: PO${po.poNumber}, qty expected=${qtyExpected}, received=${qtyReceived}, unreceived=${unreceived}`);
-                        }
-                        
-                        if (unreceived > 0) {
-                            data.push({
-                                poNumber: po.poNumber,
-                                vendor: po.vendor,
-                                poType: po.poType,
-                                poStatus: po.status,
-                                priority: po.priority,
-                                itemNumber: item.itemNumber,
-                                variety: item.variety,
-                                description: item.description,
-                                location: item.location,
-                                qtyOrdered: item.qtyOrdered || item.quantityOrdered,
-                                qtyExpected: qtyExpected,
-                                qtyReceived: qtyReceived,
-                                unreceived: unreceived,
-                                unit: item.unit,
-                                status: item.status,
-                                urgency: item.urgency,
-                                ead: item.ead,
-                                eta: item.eta,
-                                dateOrdered: po.dateOrdered,
-                                itemNotes: item.notes,
-                                poNotes: po.notes
-                            });
-                        }
+            console.log(`   Found ${unreceivedItems.length} unreceived line items from LineItem model`);
+            
+            // Debug first item to see what fields are available
+            if (unreceivedItems.length > 0) {
+                const firstItem = unreceivedItems[0];
+                console.log('   📊 Sample LineItem fields:', {
+                    quantityExpected: firstItem.quantityExpected,
+                    quantityOrdered: firstItem.quantityOrdered,
+                    quantityReceived: firstItem.quantityReceived,
+                    quantityRemaining: firstItem.quantityRemaining,
+                    allQuantityKeys: Object.keys(firstItem).filter(k => k.toLowerCase().includes('quant'))
+                });
+            }
+            
+            // Build unreceived items data (matching working code logic from routes/purchaseOrders.js)
+            unreceivedItems.forEach(item => {
+                // Skip if no PO or PO is hidden
+                if (!item.poId || item.poId.isHidden === true) return;
+                
+                // Use quantityRemaining first (auto-calculated field), then fall back to manual calculation
+                const quantity = item.quantityRemaining || item.quantityExpected || item.quantityOrdered || 0;
+                
+                // Debug first few items
+                if (data.length < 3) {
+                    console.log(`   Sample item: PO${item.poNumber}, quantity=${quantity}, quantityRemaining=${item.quantityRemaining}, expected=${item.quantityExpected}`);
+                }
+                
+                if (quantity > 0) {
+                    data.push({
+                        poNumber: item.poNumber,
+                        vendor: item.poId.vendor,
+                        poType: item.poId.poType,
+                        poStatus: item.poId.status,
+                        priority: item.poId.priority,
+                        itemNumber: item.sku,
+                        variety: item.memo,
+                        description: item.memo,
+                        location: item.locationName,
+                        quantity: quantity,
+                        unit: item.unit,
+                        status: item.itemStatus,
+                        urgency: item.urgency,
+                        ead: item.ead,
+                        eta: item.eta,
+                        dateOrdered: item.poId.date,
+                        itemNotes: item.notes,
+                        poNotes: item.poId.notes
                     });
                 }
             });
             
-            console.log(`   Processed ${processedPOs} POs with ${processedItems} total line items`);
+            console.log(`   Built ${data.length} rows with unreceived > 0`);
         } else if (config.reportType === 'waiting-for-approval') {
+            // Query LineItem directly for waiting for approval items
+            const waitingItems = await LineItem.find({ received: false })
+                .populate('poId')
+                .sort({ poNumber: 1 })
+                .lean();
+            
+            console.log(`   Found ${waitingItems.length} unreceived line items`);
+            
             // Build waiting for approval data
-            const approvalStatuses = ['Waiting for Approval', 'Pending', 'Pre-Purchase'];
-            purchaseOrders
-                .filter(po => approvalStatuses.includes(po.status))
-                .forEach(po => {
-                    if (po.lineItems && po.lineItems.length > 0) {
-                        po.lineItems.forEach(item => {
-                            data.push({
-                                poNumber: po.poNumber,
-                                vendor: po.vendor,
-                                poType: po.poType,
-                                poStatus: po.status,
-                                priority: po.priority,
-                                itemNumber: item.itemNumber,
-                                variety: item.variety,
-                                description: item.description,
-                                location: item.location,
-                                qtyOrdered: item.qtyOrdered,
-                                unit: item.unit,
-                                urgency: item.urgency,
-                                ead: item.ead,
-                                dateOrdered: po.dateOrdered,
-                                itemNotes: item.notes,
-                                poNotes: po.notes
-                            });
-                        });
-                    }
+            const approvalStatuses = ['Waiting for Approval', 'Waiting for approval', 'Pending', 'Pre-Purchase'];
+            
+            waitingItems.forEach(item => {
+                // Skip if no PO or PO is hidden
+                if (!item.poId || item.poId.isHidden === true) return;
+                
+                // Only include items with waiting for approval status
+                if (!approvalStatuses.includes(item.poId.status)) return;
+                
+                // Debug first few items
+                if (data.length < 3) {
+                    console.log(`   Sample approval item: PO${item.poNumber}, status=${item.poId.status}`);
+                }
+                
+                data.push({
+                    poNumber: item.poNumber,
+                    vendor: item.poId.vendor,
+                    poType: item.poId.poType,
+                    poStatus: item.poId.status,
+                    priority: item.poId.priority,
+                    itemNumber: item.sku,
+                    variety: item.memo,
+                    description: item.memo,
+                    location: item.locationName,
+                    quantity: item.quantityRemaining || item.quantityExpected || item.quantityOrdered || 0,
+                    unit: item.unit,
+                    urgency: item.urgency,
+                    ead: item.ead,
+                    dateOrdered: item.poId.date,
+                    itemNotes: item.notes,
+                    poNotes: item.poId.notes
                 });
+            });
+            
+            console.log(`   Built ${data.length} rows for waiting for approval`);
         }
         
-        console.log(`   Built ${data.length} data rows before filters`);
+        console.log(`   Data rows before filters: ${data.length}`);
         
         // Apply filters from configuration
         if (config.config.types && config.config.types.length > 0) {
