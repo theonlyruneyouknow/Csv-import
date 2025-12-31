@@ -6975,6 +6975,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     ${item.billVarianceStatus || '-'}
                                 </span>
                             </td>
+                            <td>${item.expectedArrivalDate ? new Date(item.expectedArrivalDate).toLocaleDateString() : '-'}</td>
                         </tr>
                     `;
                     }).join('');
@@ -6995,6 +6996,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     <th>Expected Availability Date</th>
                                     <th>Expected Receipt Date</th>
                                     <th>Bill Variance Status</th>
+                                    <th>Expected Arrival Date</th>
                                 </tr>
                             </thead>
                             <tbody>
