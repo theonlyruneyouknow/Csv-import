@@ -6602,6 +6602,7 @@ router.get('/unreceived-items', async (req, res) => {
       })
       .map(item => ({
         itemId: item._id,
+        poId: item.poId._id,
         poNumber: item.poNumber,
         poUrl: item.poId.poUrl || null,
         vendor: item.poId.vendor || 'N/A',

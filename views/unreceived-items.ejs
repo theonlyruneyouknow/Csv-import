@@ -2194,16 +2194,6 @@
                 const poLink = item.poUrl || '#';
                 const vendorLink = item.vendorId ? `/vendors/${item.vendorId}` : '#';
 
-                // Actions column (always visible)
-                const actionsCell = `<td class="actions-cell">
-                    <input type="checkbox" 
-                        class="mark-received-checkbox" 
-                        data-item-id="${item.itemId}" 
-                        data-po-id="${item.poId}"
-                        data-sku="${item.sku}" 
-                        title="Mark ${item.sku} as received">
-                </td>`;
-
                 const cells = visibleColumns.map(col => {
                     switch (col.id) {
                         case 'poNumber':
