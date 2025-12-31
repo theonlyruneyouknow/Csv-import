@@ -7299,6 +7299,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
                 const data = await response.json();
 
+                // Update Last Update display if PO data is returned
+                if (data.po) {
+                    updateLastUpdateDisplay(poId, data.po.lastUpdate, data.po.lastUpdatedBy);
+                }
+
                 // Update button visual state
                 if (newDropshipStatus) {
                     btn.classList.add('is-dropship');

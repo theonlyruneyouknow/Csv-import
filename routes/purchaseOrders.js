@@ -3895,7 +3895,8 @@ router.put('/:id/dropship', async (req, res) => {
     res.json({
       success: true,
       isDropship: updated.isDropship,
-      poNumber: updated.poNumber
+      poNumber: updated.poNumber,
+      po: updated
     });
   } catch (error) {
     console.error('❌ Dropship update error:', error);
