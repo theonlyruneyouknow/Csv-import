@@ -1302,6 +1302,8 @@
             <table id="itemsTable">
                 <thead>
                     <tr>
+                        <th>Actions</th>
+                        <th style="width: 60px; text-align: center;">✓</th>
                         <th class="sortable" data-sort="poNumber">PO Number</th>
                         <th class="sortable" data-sort="vendor">Vendor</th>
                         <th class="sortable" data-sort="poDate">PO Date</th>
@@ -2192,10 +2194,21 @@
                 const poLink = item.poUrl || '#';
                 const vendorLink = item.vendorId ? `/vendors/${item.vendorId}` : '#';
 
+                // Actions column (always visible)
+                const actionsCell = `<td class="actions-cell">
+                    <input type="checkbox" 
+                        class="mark-received-checkbox" 
+                        data-item-id="${item.itemId}" 
+                        data-po-id="${item.poId}"
+                        data-sku="${item.sku}" 
+                        title="Mark ${item.sku} as received">
+                </td>`;
+
                 const cells = visibleColumns.map(col => {
                     switch (col.id) {
                         case 'poNumber':
-                            return `<td>${item.poUrl ? `<a href="${poLink}" target="_blank" class="po-link">${item.poNumber}</a>` : item.poNumber}</td>`;
+                            // Link to dashboard with PO search filter
+                            return `<td><a href="/purchase-orders?search=${encodeURIComponent(item.poNumber)}" class="po-link" title="Open ${item.poNumber} in dashboard">${item.poNumber}</a>${item.poUrl ? ` <a href="${poLink}" target="_blank" class="external-link" title="Open PO document">🔗</a>` : ''}</td>`;
                         case 'vendor':
                             return `<td>${item.vendorId ? `<a href="${vendorLink}" class="vendor-link">${item.vendor}</a>` : item.vendor || 'N/A'}</td>`;
                         case 'poDate':
@@ -2281,11 +2294,39 @@
                     }
                 }).join('');
 
-                return `<tr>${cells}</tr>`;
+                // Add actions cell at the beginning
+                const actionsCell = `<td class="actions-cell" style="text-align: center;">
+                    <input type="checkbox" 
+                        class="mark-received-checkbox" 
+                        data-item-id="${item.itemId}" 
+                        data-po-id="${item.poId}"
+                        data-sku="${item.sku || ''}" 
+                        title="Mark ${item.sku} as received"
+                        style="cursor: pointer; width: 18px; height: 18px;">
+                </td>`;
+
+                return `<tr>${actionsCell}${cells}</tr>`;
             }).join('');
 
             // Attach event listeners to urgency dropdowns after rendering
             setTimeout(() => {
+                // Attach event listeners to Mark as Received checkboxes
+                document.querySelectorAll('.mark-received-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', async function () {
+                        if (this.checked) {
+                            const itemId = this.getAttribute('data-item-id');
+                            const poId = this.getAttribute('data-po-id');
+                            const sku = this.getAttribute('data-sku');
+                            
+                            if (confirm(`Mark ${sku} as received?`)) {
+                                await markItemAsReceived(itemId, poId, sku, this);
+                            } else {
+                                this.checked = false;
+                            }
+                        }
+                    });
+                });
+
                 document.querySelectorAll('.urgency-select').forEach(select => {
                     select.addEventListener('change', function () {
                         const itemId = this.getAttribute('data-item-id');
@@ -2436,6 +2477,63 @@
                 }
 
                 showToast('❌ ' + errorMessage);
+            }
+        }
+
+        async function markItemAsReceived(itemId, poId, sku, checkbox) {
+            try {
+                checkbox.disabled = true;
+                const row = checkbox.closest('tr');
+                if (row) row.style.opacity = '0.5';
+
+                console.log(`📦 Marking item ${itemId} (${sku}) as received...`);
+
+                const response = await fetch(`/purchase-orders/line-items/${itemId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ received: true })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    // Remove the row from the table with animation
+                    if (row) {
+                        row.style.transition = 'all 0.3s ease-out';
+                        row.style.opacity = '0';
+                        row.style.transform = 'translateX(20px)';
+                        
+                        setTimeout(() => {
+                            row.remove();
+                            
+                            // Update the filtered items
+                            const index = filteredItems.findIndex(i => i.itemId === itemId);
+                            if (index > -1) {
+                                filteredItems.splice(index, 1);
+                            }
+                            
+                            // Update the stats
+                            updateStats();
+                            
+                            // Check if table is now empty
+                            const tbody = document.querySelector('#unreceivedItemsTable tbody');
+                            if (tbody && tbody.children.length === 0) {
+                                renderTable();
+                            }
+                            
+                            showToast(`✅ ${sku} marked as received`);
+                        }, 300);
+                    }
+                } else {
+                    throw new Error('Failed to mark item as received');
+                }
+            } catch (error) {
+                console.error('❌ Error marking item as received:', error);
+                checkbox.disabled = false;
+                checkbox.checked = false;
+                const row = checkbox.closest('tr');
+                if (row) row.style.opacity = '1';
+                showToast('❌ Failed to mark item as received: ' + error.message);
             }
         }
 

@@ -10457,6 +10457,24 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 console.log('❌ One or more checkboxes not found in final initialization');
             }
         });
+
+        // Handle URL search parameter (from unreceived items report)
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchParam = urlParams.get('search');
+        if (searchParam) {
+            console.log('🔍 Search parameter found:', searchParam);
+            const searchInput = document.getElementById('searchFilter');
+            if (searchInput) {
+                searchInput.value = searchParam;
+                // Trigger filter application
+                applyFilters();
+                // Focus on the search input
+                setTimeout(() => {
+                    searchInput.focus();
+                    searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 500);
+            }
+        }
     </script>
 </body>
 
