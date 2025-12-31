@@ -6008,6 +6008,41 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         let currentSort = { column: null, direction: null };
 
+        // Helper function to update Last Update display in real-time
+        function updateLastUpdateDisplay(poId, lastUpdate, lastUpdatedBy) {
+            const row = document.querySelector(`tr[data-po-id="${poId}"]`);
+            if (!row) return;
+
+            const lastUpdateCell = row.querySelector('.last-update-cell');
+            if (!lastUpdateCell) return;
+
+            const displaySpan = lastUpdateCell.querySelector('.last-update-display');
+            if (!displaySpan) return;
+
+            if (lastUpdate) {
+                const date = new Date(lastUpdate);
+                const formatted = date.toLocaleString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric', 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    timeZone: 'America/Los_Angeles'
+                });
+                const fullTimestamp = date.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
+                
+                displaySpan.textContent = formatted;
+                displaySpan.classList.add('has-update');
+                displaySpan.classList.remove('no-update');
+                displaySpan.title = `Last modification: ${fullTimestamp}${lastUpdatedBy ? ' by ' + lastUpdatedBy : ''}`;
+            } else {
+                displaySpan.textContent = '-';
+                displaySpan.classList.remove('has-update');
+                displaySpan.classList.add('no-update');
+                displaySpan.title = 'Never updated';
+            }
+        }
+
         // Enhanced Notes functionality - notes appear below each row
         // NOTE: All button event listeners are now handled via event delegation above
         // This ensures buttons work even after dynamic table updates (filtering, sorting, etc.)
@@ -6099,6 +6134,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         poData.status = status;
                         row.dataset.po = JSON.stringify(poData);
 
+                        // Update Last Update display if PO data is returned
+                        if (data.po) {
+                            updateLastUpdateDisplay(id, data.po.lastUpdate, data.po.lastUpdatedBy);
+                        }
+
                         console.log(`Status saved for PO ${poNumber}: "${status}"`);
                     })
                     .catch(error => {
@@ -6136,6 +6176,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         const poData = JSON.parse(row.dataset.po);
                         poData.priority = parseInt(priority);
                         row.dataset.po = JSON.stringify(poData);
+
+                        // Update Last Update display if PO data is returned
+                        if (data.po) {
+                            updateLastUpdateDisplay(id, data.po.lastUpdate, data.po.lastUpdatedBy);
+                        }
 
                         console.log(`Priority saved for PO ${poNumber}: ${priority}`);
                     })
@@ -6175,6 +6220,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             this.style.borderColor = '';
                         }, 1000);
 
+                        // Update Last Update display if PO data is returned
+                        if (data.po) {
+                            updateLastUpdateDisplay(id, data.po.lastUpdate, data.po.lastUpdatedBy);
+                        }
+
                         console.log(`ETA saved for PO ${poNumber}: ${eta || 'cleared'}`);
                     })
                     .catch(error => {
@@ -6212,6 +6262,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     .then(data => {
                         // Remove saving state
                         this.style.backgroundColor = '';
+
+                        // Update Last Update display if PO data is returned
+                        if (data.po) {
+                            updateLastUpdateDisplay(id, data.po.lastUpdate, data.po.lastUpdatedBy);
+                        }
 
                         // Update appearance based on content
                         if (shippingTracking) {
@@ -6284,6 +6339,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     .then(data => {
                         // Remove saving state
                         this.style.backgroundColor = '';
+
+                        // Update Last Update display if PO data is returned
+                        if (data.po) {
+                            updateLastUpdateDisplay(id, data.po.lastUpdate, data.po.lastUpdatedBy);
+                        }
 
                         // Update tracking actions with new carrier
                         const trackingInfoBtn = this.closest('.tracking-container').querySelector('.tracking-info-btn');
@@ -9853,6 +9913,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
 
                 console.log('✅ Updated assignment for PO:', poId);
+
+                // Update Last Update display if PO data is returned
+                if (data.po) {
+                    updateLastUpdateDisplay(poId, data.po.lastUpdate, data.po.lastUpdatedBy);
+                }
 
                 // Optional: Show brief success indicator
                 const originalBg = selectElement.style.backgroundColor;

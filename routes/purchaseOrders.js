@@ -2678,10 +2678,101 @@ router.delete('/pre-purchase-orders/:id', async (req, res) => {
 
 // NOTE: Parameterized routes (/:id/*) moved to end of file to avoid conflicts
 
+// Universal PATCH endpoint for line item updates
+router.patch('/line-items/:id', async (req, res) => {
+  try {
+    const lineItem = await LineItem.findById(req.params.id);
+    if (!lineItem) {
+      return res.status(404).json({ error: 'Line item not found' });
+    }
+
+    // Track changes for each field
+    const changes = [];
+    const updateData = { updatedAt: new Date() };
+
+    // Handle received status
+    if (req.body.received !== undefined) {
+      const oldValue = lineItem.received;
+      updateData.received = Boolean(req.body.received);
+      if (req.body.received) {
+        updateData.receivedDate = new Date();
+      } else {
+        updateData.receivedDate = null;
+      }
+      if (oldValue !== updateData.received) {
+        changes.push({
+          changeType: 'Received Status',
+          oldValue: oldValue ? 'Yes' : 'No',
+          newValue: updateData.received ? 'Yes' : 'No'
+        });
+      }
+    }
+
+    // Handle EAD (Expected Availability Date)
+    if (req.body.ead !== undefined) {
+      const oldValue = lineItem.ead;
+      updateData.ead = req.body.ead || null;
+      if (oldValue !== updateData.ead) {
+        changes.push({
+          changeType: 'Expected Availability Date',
+          oldValue: oldValue,
+          newValue: updateData.ead
+        });
+      }
+    }
+
+    // Handle tracking number
+    if (req.body.trackingNumber !== undefined) {
+      const oldValue = lineItem.trackingNumber;
+      updateData.trackingNumber = req.body.trackingNumber || '';
+      if (oldValue !== updateData.trackingNumber) {
+        changes.push({
+          changeType: 'Tracking Number',
+          oldValue: oldValue,
+          newValue: updateData.trackingNumber
+        });
+      }
+    }
+
+    // Update the line item
+    const updated = await LineItem.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+
+    // Track changes to the parent PO if there are any
+    if (changes.length > 0 && updated.poId) {
+      const username = req.user?.name || req.user?.username || 'System';
+      await trackMultipleChanges(
+        updated.poId,
+        changes.map(c => ({
+          changeType: `Line Item [${updated.sku}] ${c.changeType}`,
+          oldValue: c.oldValue,
+          newValue: c.newValue
+        })),
+        username
+      );
+    }
+
+    console.log(`Line item ${updated._id} updated for PO ${updated.poNumber}`);
+    res.json({ success: true, lineItem: updated });
+  } catch (error) {
+    console.error('Line item update error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Mark line item as received
 router.put('/line-items/:lineItemId/received', async (req, res) => {
   try {
     const { received } = req.body;
+    const lineItem = await LineItem.findById(req.params.lineItemId);
+    if (!lineItem) {
+      return res.status(404).json({ error: 'Line item not found' });
+    }
+
+    const oldValue = lineItem.received;
     const updateData = {
       received: Boolean(received),
       updatedAt: new Date()
@@ -2694,18 +2785,27 @@ router.put('/line-items/:lineItemId/received', async (req, res) => {
       updateData.receivedDate = null;
     }
 
-    const lineItem = await LineItem.findByIdAndUpdate(
+    const updated = await LineItem.findByIdAndUpdate(
       req.params.lineItemId,
       updateData,
       { new: true }
     );
 
-    if (!lineItem) {
-      return res.status(404).json({ error: 'Line item not found' });
+    // Track the change
+    if (oldValue !== updateData.received && updated.poId) {
+      const username = req.user?.name || req.user?.username || 'System';
+      await trackLineItemChange(
+        updated.poId,
+        updated.sku,
+        'Received Status',
+        oldValue ? 'Yes' : 'No',
+        updateData.received ? 'Yes' : 'No',
+        username
+      );
     }
 
-    console.log(`Line item ${lineItem._id} marked as ${received ? 'received' : 'not received'} for PO ${lineItem.poNumber}`);
-    res.json({ success: true, lineItem });
+    console.log(`Line item ${updated._id} marked as ${received ? 'received' : 'not received'} for PO ${updated.poNumber}`);
+    res.json({ success: true, lineItem: updated });
   } catch (error) {
     console.error('Line item received update error:', error);
     res.status(500).json({ error: error.message });
@@ -3722,7 +3822,7 @@ router.put('/:id/shipping-tracking', async (req, res) => {
     }
 
     console.log(`Updated shipping tracking for PO ${updated.poNumber}: ${shippingTracking || 'cleared'} (${shippingCarrier || updated.shippingCarrier || 'FedEx'})`);
-    res.json({ success: true });
+    res.json({ success: true, po: updated });
   } catch (error) {
     console.error('Shipping tracking update error:', error);
     res.status(500).json({ error: error.message });
@@ -3757,7 +3857,7 @@ router.put('/:id/priority', async (req, res) => {
     await trackPOChange(req.params.id, 'Priority', oldPriority, priority, username);
 
     console.log(`Updated priority for PO ${updated.poNumber}: ${priority || 'cleared'}`);
-    res.json({ success: true });
+    res.json({ success: true, po: updated });
   } catch (error) {
     console.error('Priority update error:', error);
     res.status(500).json({ error: error.message });
