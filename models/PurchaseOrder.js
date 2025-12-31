@@ -37,11 +37,19 @@ const purchaseOrderSchema = new mongoose.Schema({
   },
   amount: Number,           // Amount as number
   location: String,         // Location
-  notes: {                  // User's notes - this persists across CSV uploads
+  notes: {                  // User's notes - this persists across CSV uploads (includes auto-logged changes)
     type: String,
     default: ''
   },
-  nextUpdateDate: {         // Next update date - user can set when this PO needs attention
+  lastUpdate: {             // Last update timestamp - auto-updated when any PO field changes
+    type: Date,
+    default: null
+  },
+  lastUpdatedBy: {          // User who made the last update
+    type: String,
+    default: ''
+  },
+  nextUpdateDate: {         // Next update date - deprecated, kept for backward compatibility
     type: Date,
     default: null
   },

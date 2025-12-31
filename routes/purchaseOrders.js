@@ -11,6 +11,7 @@ const Note = require('../models/Note');
 const LineItem = require('../models/LineItem');
 const OrganicVendor = require('../models/OrganicVendor');
 const { splitVendorData } = require('../lib/vendorUtils');
+const { trackPOChange, trackMultipleChanges, trackLineItemChange } = require('../lib/changeTracking');
 const Task = require('../models/Task');
 
 const router = express.Router();
@@ -1611,17 +1612,27 @@ router.put('/pos/:id/assign', async (req, res) => {
   try {
     const { assignedTo } = req.body;
 
+    // Get current PO to track the change
+    const currentPO = await PurchaseOrder.findById(req.params.id).populate('assignedTo');
+    if (!currentPO) {
+      return res.status(404).json({ success: false, error: 'PO not found' });
+    }
+
+    const oldAssignee = currentPO.assignedTo?.name || 'Unassigned';
+
     const po = await PurchaseOrder.findByIdAndUpdate(
       req.params.id,
       { assignedTo: assignedTo || null },
       { new: true }
     ).populate('assignedTo');
 
-    if (!po) {
-      return res.status(404).json({ success: false, error: 'PO not found' });
-    }
+    const newAssignee = po.assignedTo?.name || 'Unassigned';
 
-    console.log(`✅ Updated PO ${po.poNumber} assignment to ${po.assignedTo?.name || 'None'}`);
+    // Track the assignment change
+    const username = req.user?.name || req.user?.username || 'System';
+    await trackPOChange(req.params.id, 'Assigned To', oldAssignee, newAssignee, username);
+
+    console.log(`✅ Updated PO ${po.poNumber} assignment to ${newAssignee}`);
     res.json({ success: true, po });
   } catch (error) {
     console.error('Error updating PO assignment:', error);
@@ -3532,11 +3543,23 @@ router.get('/:id/line-items', async (req, res) => {
 // Update custom Status
 router.put('/:id/status', async (req, res) => {
   try {
+    const currentPO = await PurchaseOrder.findById(req.params.id);
+    if (!currentPO) {
+      return res.status(404).json({ error: 'Purchase order not found' });
+    }
+
+    const oldStatus = currentPO.status;
+    
     const updated = await PurchaseOrder.findByIdAndUpdate(
       req.params.id,
       { status: req.body.status, updatedAt: new Date() },
       { new: true }
     );
+
+    // Track the status change
+    const username = req.user?.name || req.user?.username || 'System';
+    await trackPOChange(req.params.id, 'Status', oldStatus, req.body.status, username);
+
     console.log(`Updated custom Status for PO ${updated.poNumber}: "${req.body.status}"`);
     res.json({ success: true });
   } catch (error) {
@@ -3570,11 +3593,23 @@ router.put('/:id/eta', async (req, res) => {
     const { eta } = req.body;
     const dateValue = eta ? new Date(eta) : null;
 
+    const currentPO = await PurchaseOrder.findById(req.params.id);
+    if (!currentPO) {
+      return res.status(404).json({ error: 'Purchase order not found' });
+    }
+
+    const oldETA = currentPO.eta;
+
     const updated = await PurchaseOrder.findByIdAndUpdate(
       req.params.id,
       { eta: dateValue, updatedAt: new Date() },
       { new: true }
     );
+
+    // Track the ETA change
+    const username = req.user?.name || req.user?.username || 'System';
+    await trackPOChange(req.params.id, 'ETA', oldETA, dateValue, username);
+
     console.log(`Updated ETA for PO ${updated.poNumber}: ${eta || 'cleared'}`);
     res.json({ success: true });
   } catch (error) {
@@ -3588,11 +3623,23 @@ router.put('/:id/url', async (req, res) => {
   try {
     const { url } = req.body;
 
+    const currentPO = await PurchaseOrder.findById(req.params.id);
+    if (!currentPO) {
+      return res.status(404).json({ error: 'Purchase order not found' });
+    }
+
+    const oldUrl = currentPO.poUrl;
+
     const updated = await PurchaseOrder.findByIdAndUpdate(
       req.params.id,
       { poUrl: url || '', updatedAt: new Date() },
       { new: true }
     );
+
+    // Track the URL change
+    const username = req.user?.name || req.user?.username || 'System';
+    await trackPOChange(req.params.id, 'PO URL', oldUrl, url || '', username);
+
     console.log(`Updated URL for PO ${updated.poNumber}: ${url || 'cleared'}`);
     res.json({ success: true });
   } catch (error) {
@@ -3605,6 +3652,14 @@ router.put('/:id/url', async (req, res) => {
 router.put('/:id/shipping-tracking', async (req, res) => {
   try {
     const { shippingTracking, shippingCarrier } = req.body;
+
+    // Get current PO to track the change
+    const currentPO = await PurchaseOrder.findById(req.params.id);
+    if (!currentPO) {
+      return res.status(404).json({ error: 'Purchase order not found' });
+    }
+
+    const oldTracking = currentPO.shippingTracking;
 
     // Update the PO with both tracking number and carrier
     const updateData = {
@@ -3622,6 +3677,10 @@ router.put('/:id/shipping-tracking', async (req, res) => {
       updateData,
       { new: true }
     );
+
+    // Track the shipping tracking change
+    const username = req.user?.name || req.user?.username || 'System';
+    await trackPOChange(req.params.id, 'Shipping Tracking', oldTracking, shippingTracking || '', username);
 
     // Also update line items for this PO if tracking number is provided
     if (shippingTracking && shippingTracking.trim()) {
@@ -3680,11 +3739,22 @@ router.put('/:id/priority', async (req, res) => {
       return res.status(400).json({ error: 'Priority must be between 1 and 5, or null to clear' });
     }
 
+    const currentPO = await PurchaseOrder.findById(req.params.id);
+    if (!currentPO) {
+      return res.status(404).json({ error: 'Purchase order not found' });
+    }
+
+    const oldPriority = currentPO.priority;
+
     const updated = await PurchaseOrder.findByIdAndUpdate(
       req.params.id,
       { priority: priority, updatedAt: new Date() },
       { new: true }
     );
+
+    // Track the priority change
+    const username = req.user?.name || req.user?.username || 'System';
+    await trackPOChange(req.params.id, 'Priority', oldPriority, priority, username);
 
     console.log(`Updated priority for PO ${updated.poNumber}: ${priority || 'cleared'}`);
     res.json({ success: true });
@@ -3704,15 +3774,22 @@ router.put('/:id/dropship', async (req, res) => {
       return res.status(400).json({ error: 'isDropship must be a boolean value' });
     }
 
+    const currentPO = await PurchaseOrder.findById(req.params.id);
+    if (!currentPO) {
+      return res.status(404).json({ error: 'Purchase order not found' });
+    }
+
+    const oldDropship = currentPO.isDropship;
+
     const updated = await PurchaseOrder.findByIdAndUpdate(
       req.params.id,
       { isDropship: isDropship, updatedAt: new Date() },
       { new: true }
     );
 
-    if (!updated) {
-      return res.status(404).json({ error: 'Purchase order not found' });
-    }
+    // Track the dropship status change
+    const username = req.user?.name || req.user?.username || 'System';
+    await trackPOChange(req.params.id, 'Dropship Status', oldDropship ? 'Yes' : 'No', isDropship ? 'Yes' : 'No', username);
 
     console.log(`🚚 Updated dropship status for PO ${updated.poNumber}: ${isDropship ? 'YES' : 'NO'}`);
     res.json({
