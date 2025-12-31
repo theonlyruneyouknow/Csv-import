@@ -1108,38 +1108,114 @@
             font-weight: 600;
         }
 
-        /* EAD Select Styles */
+        /* EAD Combined Dropdown Styles */
         .ead-container {
-            display: flex;
-            gap: 4px;
-            align-items: center;
+            position: relative;
+            display: inline-block;
         }
 
-        .ead-select {
-            padding: 4px 6px;
+        .ead-dropdown {
+            padding: 6px 10px;
             font-size: 12px;
             border: 1px solid #ced4da;
-            border-radius: 3px;
+            border-radius: 4px;
             background: white;
             cursor: pointer;
             transition: all 0.2s;
+            min-width: 140px;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
         }
 
-        .ead-select.period {
-            min-width: 60px;
+        .ead-dropdown:hover {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
         }
 
-        .ead-select.month {
-            min-width: 90px;
+        .ead-dropdown.open {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
         }
 
-        .ead-select:hover {
-            border-color: #adb5bd;
+        .ead-dropdown-arrow {
+            font-size: 10px;
+            color: #6c757d;
+            transition: transform 0.2s;
         }
 
-        .ead-select:disabled {
+        .ead-dropdown.open .ead-dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .ead-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 1000;
+            min-width: 180px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .ead-menu.show {
+            display: block;
+        }
+
+        .ead-period-group {
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .ead-period-group:last-child {
+            border-bottom: none;
+        }
+
+        .ead-period-header {
+            padding: 8px 12px;
+            background: #f8f9fa;
+            font-weight: 600;
+            font-size: 11px;
+            color: #495057;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .ead-month-option {
+            padding: 8px 12px 8px 24px;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-size: 13px;
+        }
+
+        .ead-month-option:hover {
             background: #e9ecef;
-            cursor: not-allowed;
+        }
+
+        .ead-month-option.selected {
+            background: #007bff;
+            color: white;
+            font-weight: 500;
+        }
+
+        .ead-clear-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-size: 12px;
+            color: #6c757d;
+            font-style: italic;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .ead-clear-option:hover {
+            background: #f8f9fa;
         }
     </style>
 </head>
@@ -2143,32 +2219,49 @@
                             return `<td><select class="urgency-select ${urgencyClass}" data-item-id="${item.itemId}"><option value="" ${!item.urgency ? 'selected' : ''}>-</option><option value="High" ${item.urgency === 'High' ? 'selected' : ''}>High</option><option value="Medium" ${item.urgency === 'Medium' ? 'selected' : ''}>Medium</option><option value="Low" ${item.urgency === 'Low' ? 'selected' : ''}>Low</option></select></td>`;
                         case 'ead':
                             // Parse EAD value (e.g., "Early January" or "Late March")
-                            const eadParts = (item.ead || '').split(' ');
-                            const period = eadParts[0] || '';
-                            const month = eadParts[1] || '';
-                            console.log(`🔍 Rendering EAD for item ${item.itemId}: "${item.ead}" -> period="${period}", month="${month}"`);
-                            return `<td><div class="ead-container">
-                                <select class="ead-select period" data-item-id="${item.itemId}" data-type="period">
-                                    <option value="">-</option>
-                                    <option value="Early" ${period === 'Early' ? 'selected' : ''}>Early</option>
-                                    <option value="Late" ${period === 'Late' ? 'selected' : ''}>Late</option>
-                                </select>
-                                <select class="ead-select month" data-item-id="${item.itemId}" data-type="month" ${!period ? 'disabled' : ''}>
-                                    <option value="">-</option>
-                                    <option value="January" ${month === 'January' ? 'selected' : ''}>January</option>
-                                    <option value="February" ${month === 'February' ? 'selected' : ''}>February</option>
-                                    <option value="March" ${month === 'March' ? 'selected' : ''}>March</option>
-                                    <option value="April" ${month === 'April' ? 'selected' : ''}>April</option>
-                                    <option value="May" ${month === 'May' ? 'selected' : ''}>May</option>
-                                    <option value="June" ${month === 'June' ? 'selected' : ''}>June</option>
-                                    <option value="July" ${month === 'July' ? 'selected' : ''}>July</option>
-                                    <option value="August" ${month === 'August' ? 'selected' : ''}>August</option>
-                                    <option value="September" ${month === 'September' ? 'selected' : ''}>September</option>
-                                    <option value="October" ${month === 'October' ? 'selected' : ''}>October</option>
-                                    <option value="November" ${month === 'November' ? 'selected' : ''}>November</option>
-                                    <option value="December" ${month === 'December' ? 'selected' : ''}>December</option>
-                                </select>
-                            </div></td>`;
+                            const displayText = item.ead || '-';
+                            console.log(`🔍 Rendering EAD for item ${item.itemId}: "${item.ead}"`);
+                            return `<td>
+                                <div class="ead-container" data-item-id="${item.itemId}">
+                                    <div class="ead-dropdown" data-value="${item.ead || ''}">
+                                        <span class="ead-value">${displayText}</span>
+                                        <span class="ead-dropdown-arrow">▼</span>
+                                    </div>
+                                    <div class="ead-menu">
+                                        <div class="ead-period-group">
+                                            <div class="ead-period-header">Early</div>
+                                            <div class="ead-month-option" data-value="Early January">January</div>
+                                            <div class="ead-month-option" data-value="Early February">February</div>
+                                            <div class="ead-month-option" data-value="Early March">March</div>
+                                            <div class="ead-month-option" data-value="Early April">April</div>
+                                            <div class="ead-month-option" data-value="Early May">May</div>
+                                            <div class="ead-month-option" data-value="Early June">June</div>
+                                            <div class="ead-month-option" data-value="Early July">July</div>
+                                            <div class="ead-month-option" data-value="Early August">August</div>
+                                            <div class="ead-month-option" data-value="Early September">September</div>
+                                            <div class="ead-month-option" data-value="Early October">October</div>
+                                            <div class="ead-month-option" data-value="Early November">November</div>
+                                            <div class="ead-month-option" data-value="Early December">December</div>
+                                        </div>
+                                        <div class="ead-period-group">
+                                            <div class="ead-period-header">Late</div>
+                                            <div class="ead-month-option" data-value="Late January">January</div>
+                                            <div class="ead-month-option" data-value="Late February">February</div>
+                                            <div class="ead-month-option" data-value="Late March">March</div>
+                                            <div class="ead-month-option" data-value="Late April">April</div>
+                                            <div class="ead-month-option" data-value="Late May">May</div>
+                                            <div class="ead-month-option" data-value="Late June">June</div>
+                                            <div class="ead-month-option" data-value="Late July">July</div>
+                                            <div class="ead-month-option" data-value="Late August">August</div>
+                                            <div class="ead-month-option" data-value="Late September">September</div>
+                                            <div class="ead-month-option" data-value="Late October">October</div>
+                                            <div class="ead-month-option" data-value="Late November">November</div>
+                                            <div class="ead-month-option" data-value="Late December">December</div>
+                                        </div>
+                                        <div class="ead-clear-option" data-value="">Clear Selection</div>
+                                    </div>
+                                </div>
+                            </td>`;
                         case 'notes':
                             return `<td><input type="text" class="item-notes-input" value="${(item.receivingNotes || '').replace(/"/g, '&quot;')}" placeholder="Add notes..." onblur="updateItemNotes('${item.itemId}', this.value)" data-item-id="${item.itemId}"></td>`;
                         case 'inventoryRawQuantity':
@@ -2201,41 +2294,80 @@
                     });
                 });
 
-                // Attach event listeners to EAD dropdowns
-                document.querySelectorAll('.ead-select').forEach(select => {
-                    select.addEventListener('change', function () {
-                        const itemId = this.getAttribute('data-item-id');
-                        const type = this.getAttribute('data-type');
+                // Attach event listeners to EAD combined dropdowns
+                document.querySelectorAll('.ead-container').forEach(container => {
+                    const itemId = container.getAttribute('data-item-id');
+                    const dropdown = container.querySelector('.ead-dropdown');
+                    const menu = container.querySelector('.ead-menu');
+                    const valueSpan = container.querySelector('.ead-value');
+                    const options = container.querySelectorAll('.ead-month-option, .ead-clear-option');
 
-                        console.log(`🎯 EAD dropdown changed: itemId="${itemId}", type="${type}", value="${this.value}"`);
-
-                        // Find both selects for this item
-                        const periodSelect = document.querySelector(`.ead-select.period[data-item-id="${itemId}"]`);
-                        const monthSelect = document.querySelector(`.ead-select.month[data-item-id="${itemId}"]`);
-
-                        console.log(`📊 Current values: period="${periodSelect.value}", month="${monthSelect.value}"`);
-
-                        // If period is selected/changed, enable month dropdown
-                        if (type === 'period') {
-                            if (this.value) {
-                                monthSelect.disabled = false;
-                                console.log(`✅ Month dropdown enabled`);
-                            } else {
-                                monthSelect.disabled = true;
-                                monthSelect.value = '';
-                                console.log(`🚫 Month dropdown disabled and cleared`);
-                            }
+                    // Highlight currently selected option
+                    const currentValue = dropdown.getAttribute('data-value');
+                    options.forEach(opt => {
+                        if (opt.getAttribute('data-value') === currentValue) {
+                            opt.classList.add('selected');
                         }
+                    });
 
-                        // Update EAD when either dropdown changes
-                        const period = periodSelect.value;
-                        const month = monthSelect.value;
-                        const ead = (period && month) ? `${period} ${month}` : '';
-                        console.log(`💾 Calling updateItemEAD with: "${ead}"`);
-                        updateItemEAD(itemId, ead);
+                    // Toggle menu on dropdown click
+                    dropdown.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const isOpen = menu.classList.contains('show');
+                        
+                        // Close all other EAD menus
+                        document.querySelectorAll('.ead-menu.show').forEach(m => {
+                            m.classList.remove('show');
+                            m.parentElement.querySelector('.ead-dropdown').classList.remove('open');
+                        });
+
+                        if (!isOpen) {
+                            menu.classList.add('show');
+                            dropdown.classList.add('open');
+                        }
+                    });
+
+                    // Handle option selection
+                    options.forEach(option => {
+                        option.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            const value = this.getAttribute('data-value');
+                            const displayText = value || '-';
+
+                            console.log(`🎯 EAD selected: itemId="${itemId}", value="${value}"`);
+
+                            // Update display
+                            valueSpan.textContent = displayText;
+                            dropdown.setAttribute('data-value', value);
+
+                            // Update selected state
+                            options.forEach(opt => opt.classList.remove('selected'));
+                            if (value) {
+                                this.classList.add('selected');
+                            }
+
+                            // Close menu
+                            menu.classList.remove('show');
+                            dropdown.classList.remove('open');
+
+                            // Save to database
+                            console.log(`💾 Calling updateItemEAD with: "${value}"`);
+                            updateItemEAD(itemId, value);
+                        });
                     });
                 });
-                console.log(`✅ Attached event listeners to ${document.querySelectorAll('.ead-select').length} EAD dropdowns`);
+
+                // Close menus when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.ead-container')) {
+                        document.querySelectorAll('.ead-menu.show').forEach(menu => {
+                            menu.classList.remove('show');
+                            menu.parentElement.querySelector('.ead-dropdown').classList.remove('open');
+                        });
+                    }
+                });
+
+                console.log(`✅ Attached event listeners to ${document.querySelectorAll('.ead-container').length} EAD dropdowns`);
             }, 0);
         }
 

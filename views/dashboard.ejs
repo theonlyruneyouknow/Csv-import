@@ -1724,6 +1724,116 @@
             color: #004085;
         }
 
+        /* EAD Combined Dropdown Styles for Line Items */
+        .ead-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .ead-dropdown {
+            padding: 4px 8px;
+            font-size: 11px;
+            border: 1px solid #ced4da;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 120px;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ead-dropdown:hover {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+
+        .ead-dropdown.open {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+
+        .ead-dropdown-arrow {
+            font-size: 9px;
+            color: #6c757d;
+            transition: transform 0.2s;
+        }
+
+        .ead-dropdown.open .ead-dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .ead-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 1000;
+            min-width: 160px;
+            max-height: 350px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .ead-menu.show {
+            display: block;
+        }
+
+        .ead-period-group {
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .ead-period-group:last-child {
+            border-bottom: none;
+        }
+
+        .ead-period-header {
+            padding: 6px 10px;
+            background: #f8f9fa;
+            font-weight: 600;
+            font-size: 10px;
+            color: #495057;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .ead-month-option {
+            padding: 6px 10px 6px 20px;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-size: 12px;
+        }
+
+        .ead-month-option:hover {
+            background: #e9ecef;
+        }
+
+        .ead-month-option.selected {
+            background: #007bff;
+            color: white;
+            font-weight: 500;
+        }
+
+        .ead-clear-option {
+            padding: 6px 10px;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-size: 11px;
+            color: #6c757d;
+            font-style: italic;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .ead-clear-option:hover {
+            background: #f8f9fa;
+        }
+
         /* Pre-Purchase Orders Styles */
         .pre-purchase-section {
             display: none;
@@ -6804,7 +6914,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     }
 
                     // Generate the HTML for line items table
-                    const lineItemsHtml = lineItems.map(item => `
+                    const lineItemsHtml = lineItems.map(item => {
+                        const displayText = item.ead || '-';
+                        return `
                         <tr class="line-item-row ${item.received ? 'received' : ''}" data-item-id="${item._id}">
                             <td>${item.sku || 'N/A'}</td>
                             <td>${item.quantityExpected || '-'}</td>
@@ -6816,15 +6928,56 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                 </button>
                             </td>
                             <td>${item.quantityReceived !== undefined ? item.quantityReceived : '-'}</td>
+                            <td>
+                                <div class="ead-container" data-item-id="${item._id}">
+                                    <div class="ead-dropdown" data-value="${item.ead || ''}">
+                                        <span class="ead-value">${displayText}</span>
+                                        <span class="ead-dropdown-arrow">▼</span>
+                                    </div>
+                                    <div class="ead-menu">
+                                        <div class="ead-period-group">
+                                            <div class="ead-period-header">Early</div>
+                                            <div class="ead-month-option" data-value="Early January">January</div>
+                                            <div class="ead-month-option" data-value="Early February">February</div>
+                                            <div class="ead-month-option" data-value="Early March">March</div>
+                                            <div class="ead-month-option" data-value="Early April">April</div>
+                                            <div class="ead-month-option" data-value="Early May">May</div>
+                                            <div class="ead-month-option" data-value="Early June">June</div>
+                                            <div class="ead-month-option" data-value="Early July">July</div>
+                                            <div class="ead-month-option" data-value="Early August">August</div>
+                                            <div class="ead-month-option" data-value="Early September">September</div>
+                                            <div class="ead-month-option" data-value="Early October">October</div>
+                                            <div class="ead-month-option" data-value="Early November">November</div>
+                                            <div class="ead-month-option" data-value="Early December">December</div>
+                                        </div>
+                                        <div class="ead-period-group">
+                                            <div class="ead-period-header">Late</div>
+                                            <div class="ead-month-option" data-value="Late January">January</div>
+                                            <div class="ead-month-option" data-value="Late February">February</div>
+                                            <div class="ead-month-option" data-value="Late March">March</div>
+                                            <div class="ead-month-option" data-value="Late April">April</div>
+                                            <div class="ead-month-option" data-value="Late May">May</div>
+                                            <div class="ead-month-option" data-value="Late June">June</div>
+                                            <div class="ead-month-option" data-value="Late July">July</div>
+                                            <div class="ead-month-option" data-value="Late August">August</div>
+                                            <div class="ead-month-option" data-value="Late September">September</div>
+                                            <div class="ead-month-option" data-value="Late October">October</div>
+                                            <div class="ead-month-option" data-value="Late November">November</div>
+                                            <div class="ead-month-option" data-value="Late December">December</div>
+                                        </div>
+                                        <div class="ead-clear-option" data-value="">Clear Selection</div>
+                                    </div>
+                                </div>
+                            </td>
                             <td>${item.date ? item.date : '-'}</td>
                             <td>
                                 <span class="status-badge ${item.billVarianceStatus ? 'status-' + item.billVarianceStatus.toLowerCase().replace(/\s+/g, '-') : ''}">
                                     ${item.billVarianceStatus || '-'}
                                 </span>
                             </td>
-                            <td>${item.expectedArrivalDate ? new Date(item.expectedArrivalDate).toLocaleDateString() : '-'}</td>
                         </tr>
-                    `).join('');
+                    `;
+                    }).join('');
 
                     container.innerHTML = `
                         <div class="line-items-summary">
@@ -6839,9 +6992,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     <th>Description</th>
                                     <th>Received</th>
                                     <th>Qty Received</th>
+                                    <th>Expected Availability Date</th>
                                     <th>Expected Receipt Date</th>
                                     <th>Bill Variance Status</th>
-                                    <th>Expected Arrival Date</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -6849,6 +7002,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             </tbody>
                         </table>
                     `;
+
+                    // Attach EAD dropdown event listeners
+                    setTimeout(() => {
+                        initEADDropdowns(container);
+                    }, 0);
                 }
             } catch (error) {
                 console.error('Error loading line items:', error);
@@ -6875,6 +7033,103 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
             } catch (error) {
                 console.error('Error updating received status:', error);
+            }
+        }
+
+        // Initialize EAD dropdowns
+        function initEADDropdowns(container) {
+            const eadContainers = container.querySelectorAll('.ead-container');
+            
+            eadContainers.forEach(eadContainer => {
+                const itemId = eadContainer.getAttribute('data-item-id');
+                const dropdown = eadContainer.querySelector('.ead-dropdown');
+                const menu = eadContainer.querySelector('.ead-menu');
+                const valueSpan = eadContainer.querySelector('.ead-value');
+                const options = eadContainer.querySelectorAll('.ead-month-option, .ead-clear-option');
+
+                // Highlight currently selected option
+                const currentValue = dropdown.getAttribute('data-value');
+                options.forEach(opt => {
+                    if (opt.getAttribute('data-value') === currentValue) {
+                        opt.classList.add('selected');
+                    }
+                });
+
+                // Toggle menu on dropdown click
+                dropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const isOpen = menu.classList.contains('show');
+                    
+                    // Close all other EAD menus
+                    document.querySelectorAll('.ead-menu.show').forEach(m => {
+                        m.classList.remove('show');
+                        m.parentElement.querySelector('.ead-dropdown').classList.remove('open');
+                    });
+
+                    if (!isOpen) {
+                        menu.classList.add('show');
+                        dropdown.classList.add('open');
+                    }
+                });
+
+                // Handle option selection
+                options.forEach(option => {
+                    option.addEventListener('click', async function(e) {
+                        e.stopPropagation();
+                        const value = this.getAttribute('data-value');
+                        const displayText = value || '-';
+
+                        console.log(`🎯 EAD selected: itemId="${itemId}", value="${value}"`);
+
+                        // Update display
+                        valueSpan.textContent = displayText;
+                        dropdown.setAttribute('data-value', value);
+
+                        // Update selected state
+                        options.forEach(opt => opt.classList.remove('selected'));
+                        if (value) {
+                            this.classList.add('selected');
+                        }
+
+                        // Close menu
+                        menu.classList.remove('show');
+                        dropdown.classList.remove('open');
+
+                        // Save to database
+                        await updateLineItemEAD(itemId, value);
+                    });
+                });
+            });
+
+            // Close menus when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.ead-container')) {
+                    document.querySelectorAll('.ead-menu.show').forEach(menu => {
+                        menu.classList.remove('show');
+                        menu.parentElement.querySelector('.ead-dropdown').classList.remove('open');
+                    });
+                }
+            });
+
+            console.log(`✅ Initialized ${eadContainers.length} EAD dropdowns`);
+        }
+
+        // Update line item EAD
+        async function updateLineItemEAD(itemId, ead) {
+            try {
+                const response = await fetch(`/purchase-orders/line-items/${itemId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ead })
+                });
+
+                if (response.ok) {
+                    console.log(`✅ EAD updated successfully for item ${itemId}`);
+                } else {
+                    console.error('Failed to update EAD');
+                }
+            } catch (error) {
+                console.error('Error updating EAD:', error);
             }
         }
 
