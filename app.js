@@ -571,22 +571,22 @@ app.get('/purchase-orders/download/latest-excel', (req, res) => {
         if (!fs.existsSync(EXCEL_CACHE_FILE)) {
             return res.status(404).send('Excel file not yet generated. Please try again in a few moments.');
         }
-        
+
         const stats = fs.statSync(EXCEL_CACHE_FILE);
         const timestamp = new Date(stats.mtime).toLocaleString();
-        
+
         // Read file into buffer and send directly (better for Excel Power Query)
         const fileBuffer = fs.readFileSync(EXCEL_CACHE_FILE);
-        
+
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', 'attachment; filename=purchase-orders-latest.xlsx');
         res.setHeader('Content-Length', fileBuffer.length);
         res.setHeader('X-Generated-At', timestamp);
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Access-Control-Allow-Origin', '*');
-        
+
         res.send(fileBuffer);
-        
+
         console.log(`📥 Excel file downloaded (${Math.round(fileBuffer.length / 1024)} KB, last updated: ${timestamp})`);
     } catch (error) {
         console.error('Error serving Excel file:', error);
@@ -602,32 +602,32 @@ app.get('/purchase-orders/reports/:reportSlug', async (req, res) => {
         if (staticReports.includes(req.params.reportSlug)) {
             return; // Let the specific handlers below handle it
         }
-        
+
         const AutoReport = require('./models/AutoReport');
         const urlPath = `/purchase-orders/reports/${req.params.reportSlug}`;
         const autoReport = await AutoReport.findOne({ urlPath, isActive: true });
-        
+
         if (!autoReport) {
             return res.status(404).send('Report not found or inactive.');
         }
-        
+
         const cacheFilePath = path.join(EXCEL_CACHE_DIR, autoReport.cacheFileName);
-        
+
         if (!fs.existsSync(cacheFilePath)) {
             return res.status(404).send('Report file not yet generated. Please try again in a few moments.');
         }
-        
+
         const stats = fs.statSync(cacheFilePath);
         const timestamp = new Date(stats.mtime).toLocaleString();
         const fileBuffer = fs.readFileSync(cacheFilePath);
-        
+
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', `attachment; filename="${autoReport.cacheFileName}"`);
         res.setHeader('Content-Length', fileBuffer.length);
         res.setHeader('X-Generated-At', timestamp);
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Access-Control-Allow-Origin', '*');
-        
+
         res.send(fileBuffer);
         console.log(`📥 Auto-report downloaded: ${autoReport.name} (${Math.round(fileBuffer.length / 1024)} KB, updated: ${timestamp})`);
     } catch (error) {
@@ -642,18 +642,18 @@ app.get('/purchase-orders/reports/unreceived-items', (req, res) => {
         if (!fs.existsSync(UNRECEIVED_CACHE_FILE)) {
             return res.status(404).send('Unreceived Items report not yet generated. Please try again in a few moments.');
         }
-        
+
         const stats = fs.statSync(UNRECEIVED_CACHE_FILE);
         const timestamp = new Date(stats.mtime).toLocaleString();
         const fileBuffer = fs.readFileSync(UNRECEIVED_CACHE_FILE);
-        
+
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', 'attachment; filename=unreceived-items-report.xlsx');
         res.setHeader('Content-Length', fileBuffer.length);
         res.setHeader('X-Generated-At', timestamp);
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Access-Control-Allow-Origin', '*');
-        
+
         res.send(fileBuffer);
         console.log(`📥 Unreceived Items report downloaded (${Math.round(fileBuffer.length / 1024)} KB, updated: ${timestamp})`);
     } catch (error) {
@@ -668,18 +668,18 @@ app.get('/purchase-orders/reports/waiting-for-approval', (req, res) => {
         if (!fs.existsSync(WAITING_APPROVAL_CACHE_FILE)) {
             return res.status(404).send('Waiting for Approval report not yet generated. Please try again in a few moments.');
         }
-        
+
         const stats = fs.statSync(WAITING_APPROVAL_CACHE_FILE);
         const timestamp = new Date(stats.mtime).toLocaleString();
         const fileBuffer = fs.readFileSync(WAITING_APPROVAL_CACHE_FILE);
-        
+
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', 'attachment; filename=waiting-for-approval-report.xlsx');
         res.setHeader('Content-Length', fileBuffer.length);
         res.setHeader('X-Generated-At', timestamp);
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Access-Control-Allow-Origin', '*');
-        
+
         res.send(fileBuffer);
         console.log(`📥 Waiting for Approval report downloaded (${Math.round(fileBuffer.length / 1024)} KB, updated: ${timestamp})`);
     } catch (error) {
@@ -691,15 +691,15 @@ app.get('/purchase-orders/reports/waiting-for-approval', (req, res) => {
 app.get('/purchase-orders/export/csv-data', async (req, res) => {
     const apiKey = req.query.key;
     const validApiKey = process.env.EXCEL_API_KEY;
-    
+
     if (!apiKey || apiKey !== validApiKey) {
         return res.status(401).send('Unauthorized. Invalid API key.');
     }
-    
+
     // Forward to the route handler
     const PurchaseOrder = require('./models/PurchaseOrder');
     const Papa = require('papaparse');
-    
+
     try {
         const purchaseOrders = await PurchaseOrder.find()
             .populate('lineItems')
@@ -1097,8 +1097,8 @@ app.get('/excel-reports', ensureAuthenticated, ensureApproved, (req, res) => {
     const protocol = req.protocol;
     const host = req.get('host');
     const baseUrl = process.env.BASE_URL || `${protocol}://${host}`;
-    
-    res.render('excel-reports', { 
+
+    res.render('excel-reports', {
         user: req.user,
         baseUrl: baseUrl
     });
@@ -1147,7 +1147,7 @@ function getReportInfo(filePath) {
         if (fs.existsSync(filePath)) {
             const stats = fs.statSync(filePath);
             const fileDate = new Date(stats.mtime);
-            
+
             // Try to read Excel file to get row/column count
             let rowCount = 0;
             let columnCount = 0;
@@ -1163,17 +1163,17 @@ function getReportInfo(filePath) {
             } catch (xlsxError) {
                 console.error('Could not read Excel file structure:', xlsxError.message);
             }
-            
+
             return {
                 exists: true,
                 size: `${Math.round(stats.size / 1024)} KB`,
                 sizeBytes: stats.size,
                 rows: rowCount,
                 columns: columnCount,
-                timestamp: fileDate.toLocaleString('en-US', { 
+                timestamp: fileDate.toLocaleString('en-US', {
                     timeZone: 'America/Los_Angeles',
                     month: '2-digit',
-                    day: '2-digit', 
+                    day: '2-digit',
                     year: 'numeric',
                     hour: '2-digit',
                     minute: '2-digit',
@@ -1226,11 +1226,11 @@ app.get('/api/excel-reports/status', ensureAuthenticated, ensureApproved, (req, 
 // API: Refresh specific report
 app.post('/api/excel-reports/refresh/:type', ensureAuthenticated, ensureApproved, async (req, res) => {
     const { type } = req.params;
-    
+
     try {
         let reportInfo;
-        
-        switch(type) {
+
+        switch (type) {
             case 'main':
                 await generateExcelCache();
                 reportInfo = getReportInfo(EXCEL_CACHE_FILE);
@@ -1265,8 +1265,8 @@ app.post('/purchase-orders/refresh-excel-cache', ensureAuthenticated, ensureAppr
         await generateExcelCache();
         await generateUnreceivedItemsReport();
         await generateWaitingForApprovalReport();
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             message: 'All Excel reports regenerated successfully',
             timestamp: new Date().toISOString()
         });
@@ -1279,30 +1279,30 @@ app.post('/purchase-orders/refresh-excel-cache', ensureAuthenticated, ensureAppr
 // API: Generate Excel from saved report configuration
 app.post('/api/excel-reports/generate-from-config/:configId', ensureAuthenticated, ensureApproved, async (req, res) => {
     const { configId } = req.params;
-    
+
     try {
         const ReportConfig = require('./models/ReportConfig');
         const PurchaseOrder = require('./models/PurchaseOrder');
-        
+
         // Load the configuration
         const config = await ReportConfig.findById(configId);
-        
+
         if (!config) {
             return res.status(404).json({ success: false, error: 'Configuration not found' });
         }
-        
+
         // Check access permission
         if (!config.canAccess(req.user)) {
             return res.status(403).json({ success: false, error: 'Access denied' });
         }
-        
+
         // Record usage
         await config.recordUsage();
-        
+
         // Fetch data based on report type
         let data = [];
         const purchaseOrders = await PurchaseOrder.find().populate('lineItems').sort({ dateOrdered: -1 });
-        
+
         if (config.reportType === 'unreceived-items') {
             // Generate unreceived items data
             purchaseOrders.forEach(po => {
@@ -1311,16 +1311,16 @@ app.post('/api/excel-reports/generate-from-config/:configId', ensureAuthenticate
                         const qtyExpected = item.qtyExpected || item.qtyOrdered || 0;
                         const qtyReceived = item.qtyReceived || 0;
                         const qtyRemaining = qtyExpected - qtyReceived;
-                        
+
                         if (qtyRemaining > 0) {
                             // Apply filters from config
-                            const matchesType = !config.config.types || config.config.types.length === 0 || 
+                            const matchesType = !config.config.types || config.config.types.length === 0 ||
                                 config.config.types.some(t => t.checked && t.value === po.poType);
                             const matchesStatus = !config.config.statuses || config.config.statuses.length === 0 ||
                                 config.config.statuses.some(s => s.checked && s.value === item.status);
                             const matchesUrgency = !config.config.urgencies || config.config.urgencies.length === 0 ||
                                 config.config.urgencies.some(u => u.checked && u.value === item.urgency);
-                            
+
                             if (matchesType && matchesStatus && matchesUrgency) {
                                 const row = {
                                     'PO Number': po.poNumber || '',
@@ -1345,7 +1345,7 @@ app.post('/api/excel-reports/generate-from-config/:configId', ensureAuthenticate
                                     'Item Notes': item.notes || '',
                                     'PO Notes': po.notes || ''
                                 };
-                                
+
                                 // Only include selected columns
                                 const filteredRow = {};
                                 if (config.config.columns) {
@@ -1370,19 +1370,19 @@ app.post('/api/excel-reports/generate-from-config/:configId', ensureAuthenticate
         } else if (config.reportType === 'waiting-for-approval') {
             // Generate waiting for approval data
             const approvalStatuses = ['Waiting for approval', 'waiting for approval'];
-            
+
             purchaseOrders.forEach(po => {
                 if (approvalStatuses.includes(po.status)) {
                     // Apply filters from config
-                    const matchesType = !config.config.types || config.config.types.length === 0 || 
+                    const matchesType = !config.config.types || config.config.types.length === 0 ||
                         config.config.types.some(t => t.checked && t.value === po.poType);
-                    
+
                     if (matchesType) {
                         if (po.lineItems && po.lineItems.length > 0) {
                             po.lineItems.forEach(item => {
                                 const matchesStatus = !config.config.statuses || config.config.statuses.length === 0 ||
                                     config.config.statuses.some(s => s.checked && s.value === item.status);
-                                
+
                                 if (matchesStatus) {
                                     data.push({
                                         'PO Number': po.poNumber || '',
@@ -1428,22 +1428,22 @@ app.post('/api/excel-reports/generate-from-config/:configId', ensureAuthenticate
                 }
             });
         }
-        
+
         // Generate Excel file
         const workbook = XLSX.utils.book_new();
         const worksheet = XLSX.utils.json_to_sheet(data);
         XLSX.utils.book_append_sheet(workbook, worksheet, config.name.substring(0, 31));
-        
+
         // Generate buffer
         const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
-        
+
         // Send file
         const filename = `${config.name.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().slice(0, 10)}.xlsx`;
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.setHeader('Content-Length', buffer.length);
         res.send(buffer);
-        
+
         console.log(`📥 Generated Excel from config: ${config.name} (${data.length} rows)`);
     } catch (error) {
         console.error('Error generating Excel from config:', error);
@@ -1459,16 +1459,16 @@ app.post('/api/excel-reports/generate-from-config/:configId', ensureAuthenticate
 app.get('/api/auto-reports', ensureAuthenticated, ensureApproved, async (req, res) => {
     try {
         const AutoReport = require('./models/AutoReport');
-        
+
         // Admins see all, regular users see only their own
-        const query = req.user.role === 'admin' 
-            ? {} 
+        const query = req.user.role === 'admin'
+            ? {}
             : { createdBy: req.user._id };
-        
+
         const reports = await AutoReport.find(query)
             .populate('reportConfigId', 'name reportType')
             .sort({ createdAt: -1 });
-        
+
         res.json(reports);
     } catch (error) {
         console.error('Error fetching auto-reports:', error);
@@ -1482,29 +1482,29 @@ app.post('/api/auto-reports', ensureAuthenticated, ensureApproved, async (req, r
         const AutoReport = require('./models/AutoReport');
         const ReportConfig = require('./models/ReportConfig');
         const { name, description, reportConfigId, urlPath, frequency } = req.body;
-        
+
         // Validate the report config exists and user has access
         const config = await ReportConfig.findById(reportConfigId);
         if (!config) {
             return res.status(404).json({ error: 'Report configuration not found' });
         }
-        
+
         if (!config.canAccess(req.user)) {
             return res.status(403).json({ error: 'You do not have access to this configuration' });
         }
-        
+
         // Check for duplicate URL path
         const existingReport = await AutoReport.findOne({ urlPath: `/purchase-orders/reports/${urlPath}` });
         if (existingReport) {
             return res.status(400).json({ error: 'A report with this URL path already exists' });
         }
-        
+
         // Create cron expression based on frequency
         let cronExpression = '0 * * * *'; // Default: hourly
         if (frequency === 'daily') {
             cronExpression = '0 0 * * *'; // Daily at midnight
         }
-        
+
         // Create the auto-report
         const autoReport = new AutoReport({
             name,
@@ -1516,12 +1516,12 @@ app.post('/api/auto-reports', ensureAuthenticated, ensureApproved, async (req, r
             createdBy: req.user._id,
             createdByUsername: req.user.username
         });
-        
+
         await autoReport.save();
-        
+
         // Generate the report immediately
         await generateAutoReport(autoReport._id);
-        
+
         console.log(`✅ Created auto-report: ${name} by ${req.user.username}`);
         res.json(autoReport);
     } catch (error) {
@@ -1535,24 +1535,24 @@ app.post('/api/auto-reports/:id/generate', ensureAuthenticated, ensureApproved, 
     try {
         const AutoReport = require('./models/AutoReport');
         const report = await AutoReport.findById(req.params.id).populate('reportConfigId');
-        
+
         if (!report) {
             return res.status(404).json({ error: 'Report not found' });
         }
-        
+
         if (!report.canAccess(req.user)) {
             return res.status(403).json({ error: 'Access denied' });
         }
-        
+
         // Log the configuration for debugging
         console.log(`\n=== MANUAL GENERATION TRIGGERED ===`);
         console.log(`Report: ${report.name}`);
         console.log(`Config ID: ${report.reportConfigId?._id}`);
         console.log(`Config Type: ${report.reportConfigId?.reportType}`);
         console.log(`Config Details:`, JSON.stringify(report.reportConfigId?.config, null, 2));
-        
+
         await generateAutoReport(report._id);
-        
+
         res.json({ success: true, message: 'Report generated successfully' });
     } catch (error) {
         console.error('Error generating auto-report:', error);
@@ -1565,18 +1565,18 @@ app.put('/api/auto-reports/:id/toggle', ensureAuthenticated, ensureApproved, asy
     try {
         const AutoReport = require('./models/AutoReport');
         const report = await AutoReport.findById(req.params.id);
-        
+
         if (!report) {
             return res.status(404).json({ error: 'Report not found' });
         }
-        
+
         if (!report.canModify(req.user)) {
             return res.status(403).json({ error: 'You do not have permission to modify this report' });
         }
-        
+
         report.isActive = req.body.isActive;
         await report.save();
-        
+
         console.log(`${report.isActive ? '▶️' : '⏸️'} Auto-report ${report.isActive ? 'activated' : 'deactivated'}: ${report.name}`);
         res.json(report);
     } catch (error) {
@@ -1590,24 +1590,24 @@ app.delete('/api/auto-reports/:id', ensureAuthenticated, ensureApproved, async (
     try {
         const AutoReport = require('./models/AutoReport');
         const report = await AutoReport.findById(req.params.id);
-        
+
         if (!report) {
             return res.status(404).json({ error: 'Report not found' });
         }
-        
+
         if (!report.canModify(req.user)) {
             return res.status(403).json({ error: 'You do not have permission to delete this report' });
         }
-        
+
         // Delete the cache file if it exists
         const cacheFilePath = path.join(EXCEL_CACHE_DIR, report.cacheFileName);
         if (fs.existsSync(cacheFilePath)) {
             fs.unlinkSync(cacheFilePath);
             console.log(`🗑️ Deleted cache file: ${report.cacheFileName}`);
         }
-        
+
         await AutoReport.findByIdAndDelete(req.params.id);
-        
+
         console.log(`🗑️ Deleted auto-report: ${report.name} by ${req.user.username}`);
         res.json({ success: true, message: 'Report deleted successfully' });
     } catch (error) {
@@ -1655,15 +1655,15 @@ async function generateExcelCache() {
     try {
         console.log('🔄 Generating Excel cache...');
         const PurchaseOrder = require('./models/PurchaseOrder');
-        
+
         // Fetch all purchase orders with line items
         const purchaseOrders = await PurchaseOrder.find()
             .populate('lineItems')
             .sort({ dateOrdered: -1 });
-        
+
         // Create workbook
         const workbook = XLSX.utils.book_new();
-        
+
         // Prepare PO data
         const poData = purchaseOrders.map(po => ({
             'PO Number': po.poNumber || '',
@@ -1678,7 +1678,7 @@ async function generateExcelCache() {
             'Date Ordered': po.dateOrdered ? po.dateOrdered.toISOString().split('T')[0] : '',
             'Notes': po.notes || ''
         }));
-        
+
         // Prepare Line Items data
         const lineItemData = [];
         purchaseOrders.forEach(po => {
@@ -1703,20 +1703,20 @@ async function generateExcelCache() {
                 });
             }
         });
-        
+
         // Add worksheets
         const poSheet = XLSX.utils.json_to_sheet(poData);
         const itemSheet = XLSX.utils.json_to_sheet(lineItemData);
-        
+
         XLSX.utils.book_append_sheet(workbook, poSheet, 'Purchase Orders');
         XLSX.utils.book_append_sheet(workbook, itemSheet, 'Line Items');
-        
+
         // Write to cache file
         XLSX.writeFile(workbook, EXCEL_CACHE_FILE);
-        
+
         const stats = fs.statSync(EXCEL_CACHE_FILE);
         console.log(`✅ Excel cache generated successfully (${Math.round(stats.size / 1024)} KB) at ${new Date().toLocaleString()}`);
-        
+
     } catch (error) {
         console.error('❌ Error generating Excel cache:', error);
     }
@@ -1731,21 +1731,21 @@ async function generateUnreceivedItemsReport() {
     try {
         console.log('🔄 Generating Unreceived Items report...');
         const PurchaseOrder = require('./models/PurchaseOrder');
-        
+
         // Fetch POs with unreceived items
         const purchaseOrders = await PurchaseOrder.find()
             .populate('lineItems')
             .sort({ dateOrdered: -1 });
-        
+
         const unreceivedData = [];
-        
+
         purchaseOrders.forEach(po => {
             if (po.lineItems && po.lineItems.length > 0) {
                 po.lineItems.forEach(item => {
                     const qtyExpected = item.qtyExpected || item.qtyOrdered || 0;
                     const qtyReceived = item.qtyReceived || 0;
                     const qtyRemaining = qtyExpected - qtyReceived;
-                    
+
                     // Only include items that have quantity remaining
                     if (qtyRemaining > 0) {
                         unreceivedData.push({
@@ -1775,12 +1775,12 @@ async function generateUnreceivedItemsReport() {
                 });
             }
         });
-        
+
         const workbook = XLSX.utils.book_new();
         const worksheet = XLSX.utils.json_to_sheet(unreceivedData);
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Unreceived Items');
         XLSX.writeFile(workbook, UNRECEIVED_CACHE_FILE);
-        
+
         const stats = fs.statSync(UNRECEIVED_CACHE_FILE);
         console.log(`✅ Unreceived Items report generated (${Math.round(stats.size / 1024)} KB, ${unreceivedData.length} items)`);
     } catch (error) {
@@ -1793,16 +1793,16 @@ async function generateWaitingForApprovalReport() {
     try {
         console.log('🔄 Generating Waiting for Approval report...');
         const PurchaseOrder = require('./models/PurchaseOrder');
-        
+
         // Fetch POs waiting for approval
-        const purchaseOrders = await PurchaseOrder.find({ 
+        const purchaseOrders = await PurchaseOrder.find({
             status: { $in: ['Waiting for Approval', 'Pending', 'Pre-Purchase'] }
         })
             .populate('lineItems')
             .sort({ dateOrdered: -1 });
-        
+
         const approvalData = [];
-        
+
         purchaseOrders.forEach(po => {
             if (po.lineItems && po.lineItems.length > 0) {
                 po.lineItems.forEach(item => {
@@ -1847,12 +1847,12 @@ async function generateWaitingForApprovalReport() {
                 });
             }
         });
-        
+
         const workbook = XLSX.utils.book_new();
         const worksheet = XLSX.utils.json_to_sheet(approvalData);
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Waiting for Approval');
         XLSX.writeFile(workbook, WAITING_APPROVAL_CACHE_FILE);
-        
+
         const stats = fs.statSync(WAITING_APPROVAL_CACHE_FILE);
         console.log(`✅ Waiting for Approval report generated (${Math.round(stats.size / 1024)} KB, ${approvalData.length} items)`);
     } catch (error) {
@@ -1870,20 +1870,20 @@ async function generateAutoReport(reportId) {
         const AutoReport = require('./models/AutoReport');
         const ReportConfig = require('./models/ReportConfig');
         const PurchaseOrder = require('./models/PurchaseOrder');
-        
+
         // Load the auto-report and its configuration
         const autoReport = await AutoReport.findById(reportId).populate('reportConfigId');
-        
+
         if (!autoReport) {
             console.error(`❌ Auto-report not found: ${reportId}`);
             return;
         }
-        
+
         if (!autoReport.isActive) {
             console.log(`⏸️ Skipping inactive report: ${autoReport.name}`);
             return;
         }
-        
+
         const config = autoReport.reportConfigId;
         if (!config) {
             console.error(`❌ Configuration not found for report: ${autoReport.name}`);
@@ -1891,7 +1891,7 @@ async function generateAutoReport(reportId) {
             await autoReport.save();
             return;
         }
-        
+
         console.log(`🔄 Generating auto-report: ${autoReport.name}`);
         console.log(`   Report type: ${config.reportType}`);
         console.log(`   Config filters:`, {
@@ -1900,20 +1900,20 @@ async function generateAutoReport(reportId) {
             urgencies: config.config.urgencies?.length || 0,
             columns: config.config.columns?.length || 0
         });
-        
+
         // Fetch data based on report type
         let data = [];
         const LineItem = require('./models/LineItem');
-        
+
         if (config.reportType === 'unreceived-items') {
             // Query LineItem directly (like the working unreceived items page does)
             const unreceivedItems = await LineItem.find({ received: false })
                 .populate('poId')
                 .sort({ poNumber: 1 })
                 .lean();
-            
+
             console.log(`   Found ${unreceivedItems.length} unreceived line items from LineItem model`);
-            
+
             // Debug first item to see what fields are available
             if (unreceivedItems.length > 0) {
                 const firstItem = unreceivedItems[0];
@@ -1925,20 +1925,20 @@ async function generateAutoReport(reportId) {
                     allQuantityKeys: Object.keys(firstItem).filter(k => k.toLowerCase().includes('quant'))
                 });
             }
-            
+
             // Build unreceived items data (matching working code logic from routes/purchaseOrders.js)
             unreceivedItems.forEach(item => {
                 // Skip if no PO or PO is hidden
                 if (!item.poId || item.poId.isHidden === true) return;
-                
+
                 // Use quantityRemaining first (auto-calculated field), then fall back to manual calculation
                 const quantity = item.quantityRemaining || item.quantityExpected || item.quantityOrdered || 0;
-                
+
                 // Debug first few items
                 if (data.length < 3) {
                     console.log(`   Sample item: PO${item.poNumber}, quantity=${quantity}, quantityRemaining=${item.quantityRemaining}, expected=${item.quantityExpected}`);
                 }
-                
+
                 if (quantity > 0) {
                     data.push({
                         poNumber: item.poNumber,
@@ -1962,7 +1962,7 @@ async function generateAutoReport(reportId) {
                     });
                 }
             });
-            
+
             console.log(`   Built ${data.length} rows with unreceived > 0`);
         } else if (config.reportType === 'waiting-for-approval') {
             // Query LineItem directly for waiting for approval items
@@ -1970,24 +1970,24 @@ async function generateAutoReport(reportId) {
                 .populate('poId')
                 .sort({ poNumber: 1 })
                 .lean();
-            
+
             console.log(`   Found ${waitingItems.length} unreceived line items`);
-            
+
             // Build waiting for approval data
             const approvalStatuses = ['Waiting for Approval', 'Waiting for approval', 'Pending', 'Pre-Purchase'];
-            
+
             waitingItems.forEach(item => {
                 // Skip if no PO or PO is hidden
                 if (!item.poId || item.poId.isHidden === true) return;
-                
+
                 // Only include items with waiting for approval status
                 if (!approvalStatuses.includes(item.poId.status)) return;
-                
+
                 // Debug first few items
                 if (data.length < 3) {
                     console.log(`   Sample approval item: PO${item.poNumber}, status=${item.poId.status}`);
                 }
-                
+
                 data.push({
                     poNumber: item.poNumber,
                     vendor: item.poId.vendor,
@@ -2007,12 +2007,12 @@ async function generateAutoReport(reportId) {
                     poNotes: item.poId.notes
                 });
             });
-            
+
             console.log(`   Built ${data.length} rows for waiting for approval`);
         }
-        
+
         console.log(`   Data rows before filters: ${data.length}`);
-        
+
         // Apply filters from configuration
         if (config.config.types && config.config.types.length > 0) {
             const checkedTypes = config.config.types.filter(t => t.checked).map(t => t.value);
@@ -2022,7 +2022,7 @@ async function generateAutoReport(reportId) {
                 console.log(`   After type filter: ${data.length} rows`);
             }
         }
-        
+
         if (config.config.statuses && config.config.statuses.length > 0) {
             const checkedStatuses = config.config.statuses.filter(s => s.checked).map(s => s.value);
             console.log(`   Status filters (${checkedStatuses.length}):`, checkedStatuses);
@@ -2031,7 +2031,7 @@ async function generateAutoReport(reportId) {
                 console.log(`   After status filter: ${data.length} rows`);
             }
         }
-        
+
         if (config.config.urgencies && config.config.urgencies.length > 0) {
             const checkedUrgencies = config.config.urgencies.filter(u => u.checked).map(u => u.value);
             console.log(`   Urgency filters (${checkedUrgencies.length}):`, checkedUrgencies);
@@ -2040,16 +2040,16 @@ async function generateAutoReport(reportId) {
                 console.log(`   After urgency filter: ${data.length} rows`);
             }
         }
-        
+
         console.log(`   Final data rows: ${data.length}`);
-        
+
         // Determine which columns to include
         const checkedColumns = config.config.columns?.filter(col => col.checked).map(col => col.id) || [];
-        
+
         // Build Excel data with selected columns
         const excelData = data.map(row => {
             const excelRow = {};
-            
+
             const columnMap = {
                 'poNumber': 'PO Number',
                 'vendor': 'Vendor',
@@ -2073,46 +2073,46 @@ async function generateAutoReport(reportId) {
                 'itemNotes': 'Item Notes',
                 'poNotes': 'PO Notes'
             };
-            
+
             // If no columns specified, include all
             const columnsToInclude = checkedColumns.length > 0 ? checkedColumns : Object.keys(columnMap);
-            
+
             columnsToInclude.forEach(colId => {
                 const colName = columnMap[colId] || colId;
                 let value = row[colId];
-                
+
                 // Format dates
                 if (value instanceof Date) {
                     value = value.toISOString().split('T')[0];
                 } else if (value === undefined || value === null) {
                     value = '';
                 }
-                
+
                 excelRow[colName] = value;
             });
-            
+
             return excelRow;
         });
-        
+
         // Generate Excel file
         const workbook = XLSX.utils.book_new();
         const worksheet = XLSX.utils.json_to_sheet(excelData);
         XLSX.utils.book_append_sheet(workbook, worksheet, autoReport.name.substring(0, 31)); // Sheet name max 31 chars
-        
+
         const cacheFilePath = path.join(EXCEL_CACHE_DIR, autoReport.cacheFileName);
         XLSX.writeFile(workbook, cacheFilePath);
-        
+
         // Update auto-report metadata
         autoReport.lastGenerated = new Date();
         autoReport.lastError = null;
         await autoReport.save();
-        
+
         const stats = fs.statSync(cacheFilePath);
         console.log(`✅ Auto-report generated: ${autoReport.name} (${Math.round(stats.size / 1024)} KB, ${excelData.length} rows)`);
-        
+
     } catch (error) {
         console.error(`❌ Error generating auto-report ${reportId}:`, error);
-        
+
         try {
             const AutoReport = require('./models/AutoReport');
             const report = await AutoReport.findById(reportId);
@@ -2131,13 +2131,13 @@ async function generateAllAutoReports() {
     try {
         const AutoReport = require('./models/AutoReport');
         const activeReports = await AutoReport.find({ isActive: true });
-        
+
         console.log(`🔄 Generating ${activeReports.length} active auto-reports...`);
-        
+
         for (const report of activeReports) {
             await generateAutoReport(report._id);
         }
-        
+
         console.log(`✅ Completed generating all auto-reports`);
     } catch (error) {
         console.error('❌ Error generating auto-reports:', error);

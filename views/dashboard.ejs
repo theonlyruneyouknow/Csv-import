@@ -1760,12 +1760,12 @@
 
         .ead-dropdown:hover {
             border-color: #80bdff;
-            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
         }
 
         .ead-dropdown.open {
             border-color: #80bdff;
-            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
         }
 
         .ead-dropdown-arrow {
@@ -1786,7 +1786,7 @@
             background: white;
             border: 1px solid #ced4da;
             border-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             z-index: 1050;
             min-width: 140px;
             width: auto;
@@ -1835,7 +1835,7 @@
             background: white;
             border: 1px solid #ced4da;
             border-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             min-width: 140px;
             width: auto;
             display: none;
@@ -4298,7 +4298,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 </div>
                 <div class="stat-divider">|</div>
                 <div class="stat-item">
-                    <a href="/purchase-orders/download/latest-excel" class="export-excel-btn" title="Download auto-refreshed Excel file (updates every hour)">
+                    <a href="/purchase-orders/download/latest-excel" class="export-excel-btn"
+                        title="Download auto-refreshed Excel file (updates every hour)">
                         📊 Download Latest Excel
                     </a>
                 </div>
@@ -4768,8 +4769,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                             </div>
                                         </td>
                                         <td class="last-update-cell">
-                                            <span class="last-update-display <%= po.lastUpdate ? 'has-update' : 'no-update' %>" title="Last modification: <%= po.lastUpdate ? new Date(po.lastUpdate).toLocaleString() : 'Never updated' %>">
-                                                <%= po.lastUpdate ? new Date(po.lastUpdate).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-' %>
+                                            <span
+                                                class="last-update-display <%= po.lastUpdate ? 'has-update' : 'no-update' %>"
+                                                title="Last modification: <%= po.lastUpdate ? new Date(po.lastUpdate).toLocaleString() : 'Never updated' %>">
+                                                <%= po.lastUpdate ? new Date(po.lastUpdate).toLocaleString('en-US', {
+                                                    month: 'short' , day: 'numeric' , year: 'numeric' , hour: '2-digit'
+                                                    , minute: '2-digit' }) : '-' %>
                                             </span>
                                         </td>
                                         <td class="location-cell">
@@ -6067,16 +6072,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             if (lastUpdate) {
                 const date = new Date(lastUpdate);
-                const formatted = date.toLocaleString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric', 
-                    year: 'numeric', 
-                    hour: '2-digit', 
+                const formatted = date.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: '2-digit',
                     minute: '2-digit',
                     timeZone: 'America/Los_Angeles'
                 });
                 const fullTimestamp = date.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
-                
+
                 displaySpan.textContent = formatted;
                 displaySpan.classList.add('has-update');
                 displaySpan.classList.remove('no-update');
@@ -7135,7 +7140,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         // Initialize EAD dropdowns
         function initEADDropdowns(container) {
             const eadContainers = container.querySelectorAll('.ead-container');
-            
+
             eadContainers.forEach(eadContainer => {
                 const itemId = eadContainer.getAttribute('data-item-id');
                 const dropdown = eadContainer.querySelector('.ead-dropdown');
@@ -7145,10 +7150,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const clearOption = eadContainer.querySelector('.ead-clear-option');
 
                 // Toggle menu on dropdown click
-                dropdown.addEventListener('click', function(e) {
+                dropdown.addEventListener('click', function (e) {
                     e.stopPropagation();
                     const isOpen = menu.classList.contains('show');
-                    
+
                     // Close all other EAD menus
                     document.querySelectorAll('.ead-menu.show').forEach(m => {
                         m.classList.remove('show');
@@ -7163,7 +7168,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
                 // Handle month selection (second click)
                 monthOptions.forEach(option => {
-                    option.addEventListener('click', async function(e) {
+                    option.addEventListener('click', async function (e) {
                         e.stopPropagation();
                         const value = this.getAttribute('data-value');
                         const displayText = value || '-';
@@ -7185,9 +7190,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
                 // Handle clear selection
                 if (clearOption) {
-                    clearOption.addEventListener('click', async function(e) {
+                    clearOption.addEventListener('click', async function (e) {
                         e.stopPropagation();
-                        
+
                         console.log(`🎯 EAD cleared for itemId="${itemId}"`);
 
                         // Update display
@@ -7205,7 +7210,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             });
 
             // Close menus when clicking outside
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 if (!e.target.closest('.ead-container')) {
                     document.querySelectorAll('.ead-menu.show').forEach(menu => {
                         menu.classList.remove('show');
@@ -9104,8 +9109,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function selectAllPoTypes() {
             <% poTypeOptions.forEach(type => { %>
             const checkbox<%= type.name.replace(/\s+/g, '') %> = document.getElementById('filter<%= type.name %>');
-            if (checkbox<%= type.name.replace(/\s+/g, '') %>) {
-                checkbox<%= type.name.replace(/\s+/g, '') %>.checked = true;
+            if (checkbox <%= type.name.replace(/\s+/g, '') %>) {
+                checkbox <%= type.name.replace(/\s+/g, '') %>.checked = true;
                 localStorage.setItem('filter<%= type.name %>', 'true');
             }
             <% }); %>
@@ -9115,8 +9120,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function clearAllPoTypes() {
             <% poTypeOptions.forEach(type => { %>
             const checkbox<%= type.name.replace(/\s+/g, '') %> = document.getElementById('filter<%= type.name %>');
-            if (checkbox<%= type.name.replace(/\s+/g, '') %>) {
-                checkbox<%= type.name.replace(/\s+/g, '') %>.checked = false;
+            if (checkbox <%= type.name.replace(/\s+/g, '') %>) {
+                checkbox <%= type.name.replace(/\s+/g, '') %>.checked = false;
                 localStorage.setItem('filter<%= type.name %>', 'false');
             }
             <% }); %>
