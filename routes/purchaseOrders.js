@@ -4668,6 +4668,7 @@ router.post('/import-netsuite', async (req, res) => {
         memo: description, // Use description as memo (required field)
         sku: itemCode,
         quantityExpected: quantity, // Store the quantity from CSV
+        quantityReceived: received, // Store actual received quantity
         unit: units, // Store the unit from CSV
         billVarianceStatus: billVarianceStatus,
         billVarianceField: billVarianceField,
