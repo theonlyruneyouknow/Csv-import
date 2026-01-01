@@ -256,6 +256,16 @@
             text-overflow: ellipsis;
         }
 
+        /* Allow dropdown menus to overflow table cells */
+        td:has(.ead-container) {
+            overflow: visible;
+            position: relative;
+        }
+
+        tbody tr {
+            position: relative;
+        }
+
         /* Column-specific widths */
         th:nth-child(1),
         td:nth-child(1) {
@@ -1170,10 +1180,11 @@
             border: 1px solid #ced4da;
             border-radius: 4px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            z-index: 1000;
+            z-index: 1050;
             min-width: 140px;
             width: auto;
             display: none;
+            margin-top: 2px;
         }
 
         .ead-menu.show {
@@ -1221,7 +1232,7 @@
             min-width: 140px;
             width: auto;
             display: none;
-            z-index: 1001;
+            z-index: 1051;
             margin-left: 2px;
         }
 
