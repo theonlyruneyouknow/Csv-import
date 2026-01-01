@@ -3,6 +3,7 @@
 
 <head>
     <title>Purchase Orders Dashboard</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -1728,22 +1729,33 @@
         .ead-container {
             position: relative;
             display: inline-block;
+            width: 100%;
+            max-width: 160px;
         }
 
         .ead-dropdown {
-            padding: 4px 8px;
-            font-size: 11px;
+            padding: 6px 10px;
+            font-size: 13px;
             border: 1px solid #ced4da;
-            border-radius: 3px;
+            border-radius: 4px;
             background: white;
             cursor: pointer;
             transition: all 0.2s;
-            min-width: 120px;
+            width: 100%;
             text-align: left;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .ead-value {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .ead-dropdown:hover {
@@ -1757,9 +1769,10 @@
         }
 
         .ead-dropdown-arrow {
-            font-size: 9px;
+            font-size: 10px;
             color: #6c757d;
             transition: transform 0.2s;
+            flex-shrink: 0;
         }
 
         .ead-dropdown.open .ead-dropdown-arrow {
@@ -1774,64 +1787,97 @@
             border: 1px solid #ced4da;
             border-radius: 4px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            z-index: 1000;
-            min-width: 160px;
-            max-height: 350px;
-            overflow-y: auto;
+            z-index: 1050;
+            min-width: 140px;
+            width: auto;
             display: none;
+            margin-top: 2px;
         }
 
         .ead-menu.show {
             display: block;
         }
 
-        .ead-period-group {
+        .ead-period-option {
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-size: 14px;
+            font-weight: 500;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border-bottom: 1px solid #e9ecef;
+            white-space: nowrap;
+            min-width: 100px;
         }
 
-        .ead-period-group:last-child {
+        .ead-period-option:last-of-type {
             border-bottom: none;
         }
 
-        .ead-period-header {
-            padding: 6px 10px;
-            background: #f8f9fa;
-            font-weight: 600;
-            font-size: 10px;
-            color: #495057;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .ead-month-option {
-            padding: 6px 10px 6px 20px;
-            cursor: pointer;
-            transition: background 0.15s;
-            font-size: 12px;
-        }
-
-        .ead-month-option:hover {
+        .ead-period-option:hover {
             background: #e9ecef;
         }
 
-        .ead-month-option.selected {
+        .ead-period-option .arrow {
+            font-size: 10px;
+            color: #6c757d;
+            flex-shrink: 0;
+            margin-left: 8px;
+        }
+
+        .ead-submenu {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            min-width: 140px;
+            width: auto;
+            display: none;
+            z-index: 1051;
+            margin-left: 2px;
+        }
+
+        .ead-period-option:hover .ead-submenu {
+            display: block;
+        }
+
+        .ead-month-option {
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .ead-month-option:hover {
             background: #007bff;
             color: white;
-            font-weight: 500;
         }
 
         .ead-clear-option {
-            padding: 6px 10px;
+            padding: 10px 16px;
             cursor: pointer;
             transition: background 0.15s;
-            font-size: 11px;
-            color: #6c757d;
-            font-style: italic;
-            border-top: 1px solid #e9ecef;
+            font-size: 13px;
+            color: #dc3545;
+            font-weight: 500;
+            border-top: 2px solid #e9ecef;
         }
 
         .ead-clear-option:hover {
-            background: #f8f9fa;
+            background: #f8d7da;
+        }
+
+        /* Fix overflow for table cells containing EAD dropdowns */
+        td:has(.ead-container) {
+            overflow: visible !important;
+            position: relative;
         }
 
         /* Pre-Purchase Orders Styles */
@@ -6977,37 +7023,43 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                         <span class="ead-dropdown-arrow">▼</span>
                                     </div>
                                     <div class="ead-menu">
-                                        <div class="ead-period-group">
-                                            <div class="ead-period-header">Early</div>
-                                            <div class="ead-month-option" data-value="Early January">January</div>
-                                            <div class="ead-month-option" data-value="Early February">February</div>
-                                            <div class="ead-month-option" data-value="Early March">March</div>
-                                            <div class="ead-month-option" data-value="Early April">April</div>
-                                            <div class="ead-month-option" data-value="Early May">May</div>
-                                            <div class="ead-month-option" data-value="Early June">June</div>
-                                            <div class="ead-month-option" data-value="Early July">July</div>
-                                            <div class="ead-month-option" data-value="Early August">August</div>
-                                            <div class="ead-month-option" data-value="Early September">September</div>
-                                            <div class="ead-month-option" data-value="Early October">October</div>
-                                            <div class="ead-month-option" data-value="Early November">November</div>
-                                            <div class="ead-month-option" data-value="Early December">December</div>
+                                        <div class="ead-period-option">
+                                            <span>Early</span>
+                                            <span class="arrow">►</span>
+                                            <div class="ead-submenu">
+                                                <div class="ead-month-option" data-value="Early January">January</div>
+                                                <div class="ead-month-option" data-value="Early February">February</div>
+                                                <div class="ead-month-option" data-value="Early March">March</div>
+                                                <div class="ead-month-option" data-value="Early April">April</div>
+                                                <div class="ead-month-option" data-value="Early May">May</div>
+                                                <div class="ead-month-option" data-value="Early June">June</div>
+                                                <div class="ead-month-option" data-value="Early July">July</div>
+                                                <div class="ead-month-option" data-value="Early August">August</div>
+                                                <div class="ead-month-option" data-value="Early September">September</div>
+                                                <div class="ead-month-option" data-value="Early October">October</div>
+                                                <div class="ead-month-option" data-value="Early November">November</div>
+                                                <div class="ead-month-option" data-value="Early December">December</div>
+                                            </div>
                                         </div>
-                                        <div class="ead-period-group">
-                                            <div class="ead-period-header">Late</div>
-                                            <div class="ead-month-option" data-value="Late January">January</div>
-                                            <div class="ead-month-option" data-value="Late February">February</div>
-                                            <div class="ead-month-option" data-value="Late March">March</div>
-                                            <div class="ead-month-option" data-value="Late April">April</div>
-                                            <div class="ead-month-option" data-value="Late May">May</div>
-                                            <div class="ead-month-option" data-value="Late June">June</div>
-                                            <div class="ead-month-option" data-value="Late July">July</div>
-                                            <div class="ead-month-option" data-value="Late August">August</div>
-                                            <div class="ead-month-option" data-value="Late September">September</div>
-                                            <div class="ead-month-option" data-value="Late October">October</div>
-                                            <div class="ead-month-option" data-value="Late November">November</div>
-                                            <div class="ead-month-option" data-value="Late December">December</div>
+                                        <div class="ead-period-option">
+                                            <span>Late</span>
+                                            <span class="arrow">►</span>
+                                            <div class="ead-submenu">
+                                                <div class="ead-month-option" data-value="Late January">January</div>
+                                                <div class="ead-month-option" data-value="Late February">February</div>
+                                                <div class="ead-month-option" data-value="Late March">March</div>
+                                                <div class="ead-month-option" data-value="Late April">April</div>
+                                                <div class="ead-month-option" data-value="Late May">May</div>
+                                                <div class="ead-month-option" data-value="Late June">June</div>
+                                                <div class="ead-month-option" data-value="Late July">July</div>
+                                                <div class="ead-month-option" data-value="Late August">August</div>
+                                                <div class="ead-month-option" data-value="Late September">September</div>
+                                                <div class="ead-month-option" data-value="Late October">October</div>
+                                                <div class="ead-month-option" data-value="Late November">November</div>
+                                                <div class="ead-month-option" data-value="Late December">December</div>
+                                            </div>
                                         </div>
-                                        <div class="ead-clear-option" data-value="">Clear Selection</div>
+                                        <div class="ead-clear-option" data-value="">Clear</div>
                                     </div>
                                 </div>
                             </td>
@@ -7089,15 +7141,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const dropdown = eadContainer.querySelector('.ead-dropdown');
                 const menu = eadContainer.querySelector('.ead-menu');
                 const valueSpan = eadContainer.querySelector('.ead-value');
-                const options = eadContainer.querySelectorAll('.ead-month-option, .ead-clear-option');
-
-                // Highlight currently selected option
-                const currentValue = dropdown.getAttribute('data-value');
-                options.forEach(opt => {
-                    if (opt.getAttribute('data-value') === currentValue) {
-                        opt.classList.add('selected');
-                    }
-                });
+                const monthOptions = eadContainer.querySelectorAll('.ead-month-option');
+                const clearOption = eadContainer.querySelector('.ead-clear-option');
 
                 // Toggle menu on dropdown click
                 dropdown.addEventListener('click', function(e) {
@@ -7116,8 +7161,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     }
                 });
 
-                // Handle option selection
-                options.forEach(option => {
+                // Handle month selection (second click)
+                monthOptions.forEach(option => {
                     option.addEventListener('click', async function(e) {
                         e.stopPropagation();
                         const value = this.getAttribute('data-value');
@@ -7129,12 +7174,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         valueSpan.textContent = displayText;
                         dropdown.setAttribute('data-value', value);
 
-                        // Update selected state
-                        options.forEach(opt => opt.classList.remove('selected'));
-                        if (value) {
-                            this.classList.add('selected');
-                        }
-
                         // Close menu
                         menu.classList.remove('show');
                         dropdown.classList.remove('open');
@@ -7143,6 +7182,26 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         await updateLineItemEAD(itemId, value);
                     });
                 });
+
+                // Handle clear selection
+                if (clearOption) {
+                    clearOption.addEventListener('click', async function(e) {
+                        e.stopPropagation();
+                        
+                        console.log(`🎯 EAD cleared for itemId="${itemId}"`);
+
+                        // Update display
+                        valueSpan.textContent = '-';
+                        dropdown.setAttribute('data-value', '');
+
+                        // Close menu
+                        menu.classList.remove('show');
+                        dropdown.classList.remove('open');
+
+                        // Save to database
+                        await updateLineItemEAD(itemId, '');
+                    });
+                }
             });
 
             // Close menus when clicking outside

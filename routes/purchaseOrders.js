@@ -6658,7 +6658,7 @@ router.get('/waiting-for-approval-items', async (req, res) => {
   try {
     console.log('📋 Fetching waiting for approval items...');
 
-    // Find all line items where received = false AND poId.status = "Waiting for approval"
+    // Find all line items where received = false AND poId.status = "Awaiting Approval"
     const waitingItems = await LineItem.find({ received: false })
       .populate('poId')
       .sort({ poNumber: 1, sku: 1 })
@@ -6666,15 +6666,15 @@ router.get('/waiting-for-approval-items', async (req, res) => {
 
     console.log(`Found ${waitingItems.length} unreceived items`);
 
-    // Format the data for the report - filter by "Waiting for approval" status
+    // Format the data for the report - filter by "Awaiting Approval" status
     const formattedItems = waitingItems
       .filter(item => {
         // Only include items with valid PO references
         if (!item.poId) return false;
         // Exclude items from hidden POs
         if (item.poId.isHidden === true) return false;
-        // Only include items with "Waiting for approval" status
-        if (item.poId.status !== 'Waiting for approval') return false;
+        // Only include items with "Awaiting Approval" status
+        if (item.poId.status !== 'Awaiting Approval') return false;
         return true;
       })
       .map(item => ({

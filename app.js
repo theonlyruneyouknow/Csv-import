@@ -343,9 +343,13 @@ app.use(logPageView);
 // Routes
 app.use('/auth', authRoutes);
 
-// Handle favicon requests to prevent 404 errors
+// Handle favicon requests - serve seed emoji as SVG
 app.get('/favicon.ico', (req, res) => {
-    res.status(204).end();
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <text y="75" font-size="75">🌱</text>
+    </svg>`;
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.send(svg);
 });
 
 // DEBUG: Simple test routes - place early to avoid middleware conflicts
