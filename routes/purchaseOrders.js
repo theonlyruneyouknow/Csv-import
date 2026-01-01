@@ -3649,7 +3649,7 @@ router.put('/:id/status', async (req, res) => {
     }
 
     const oldStatus = currentPO.status;
-    
+
     const updated = await PurchaseOrder.findByIdAndUpdate(
       req.params.id,
       { status: req.body.status, updatedAt: new Date() },
@@ -4668,6 +4668,7 @@ router.post('/import-netsuite', async (req, res) => {
         memo: description, // Use description as memo (required field)
         sku: itemCode,
         quantityExpected: quantity, // Store the quantity from CSV
+        quantityReceived: received, // Store actual received quantity
         unit: units, // Store the unit from CSV
         billVarianceStatus: billVarianceStatus,
         billVarianceField: billVarianceField,
@@ -5682,23 +5683,23 @@ router.get('/attachments/:poId', async (req, res) => {
 router.get('/export/live-excel', async (req, res) => {
   try {
     console.log('📊 Real-time Excel export requested');
-    
+
     // Check for API key in query params or headers
     const apiKey = req.query.api_key || req.headers['x-api-key'];
     const validApiKey = process.env.EXCEL_API_KEY;
-    
+
     // Allow access if user is authenticated OR has valid API key
     if (!req.isAuthenticated() && (!apiKey || apiKey !== validApiKey)) {
       console.log('❌ Unauthorized access attempt to Excel export');
-      return res.status(401).json({ 
-        success: false, 
+      return res.status(401).json({
+        success: false,
         error: 'Unauthorized. Please provide a valid API key or log in.',
         hint: 'Add ?api_key=YOUR_KEY to the URL or use X-API-Key header'
       });
     }
-    
+
     console.log('✅ Access granted:', req.isAuthenticated() ? 'authenticated user' : 'valid API key');
-    
+
     // Fetch all purchase orders with populated line items
     const purchaseOrders = await PurchaseOrder.find()
       .populate('lineItems')
@@ -5774,16 +5775,16 @@ router.get('/export/live-excel', async (req, res) => {
     res.setHeader('Content-Length', excelBuffer.length);
 
     console.log(`✅ Excel file generated: ${filename} (${excelBuffer.length} bytes)`);
-    
+
     // Send the buffer
     res.send(excelBuffer);
 
   } catch (error) {
     console.error('❌ Excel export error:', error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       error: 'Failed to generate Excel file',
-      details: error.message 
+      details: error.message
     });
   }
 });
@@ -5792,18 +5793,18 @@ router.get('/export/live-excel', async (req, res) => {
 router.get('/export/csv-data', async (req, res) => {
   try {
     console.log('📊 CSV data export requested');
-    
+
     // Check for API key
     const apiKey = req.query.key;
     const validApiKey = process.env.EXCEL_API_KEY;
-    
+
     if (!apiKey || apiKey !== validApiKey) {
       console.log('❌ Invalid or missing API key');
       return res.status(401).send('Unauthorized. Invalid API key.');
     }
-    
+
     console.log('✅ Valid API key provided');
-    
+
     // Fetch data
     const purchaseOrders = await PurchaseOrder.find()
       .populate('lineItems')
@@ -5881,7 +5882,7 @@ router.get('/export/csv-data', async (req, res) => {
     // Send CSV
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="PurchaseOrders_${new Date().toISOString().split('T')[0]}.csv"`);
-    
+
     console.log(`✅ CSV generated with ${csvData.length} rows`);
     res.send(csv);
 
@@ -6658,7 +6659,7 @@ router.get('/waiting-for-approval-items', async (req, res) => {
   try {
     console.log('📋 Fetching waiting for approval items...');
 
-    // Find all line items where received = false AND poId.status = "Waiting for approval"
+    // Find all line items where received = false AND poId.status = "Awaiting Approval"
     const waitingItems = await LineItem.find({ received: false })
       .populate('poId')
       .sort({ poNumber: 1, sku: 1 })
@@ -6666,15 +6667,15 @@ router.get('/waiting-for-approval-items', async (req, res) => {
 
     console.log(`Found ${waitingItems.length} unreceived items`);
 
-    // Format the data for the report - filter by "Waiting for approval" status
+    // Format the data for the report - filter by "Awaiting Approval" status
     const formattedItems = waitingItems
       .filter(item => {
         // Only include items with valid PO references
         if (!item.poId) return false;
         // Exclude items from hidden POs
         if (item.poId.isHidden === true) return false;
-        // Only include items with "Waiting for approval" status
-        if (item.poId.status !== 'Waiting for approval') return false;
+        // Only include items with "Awaiting Approval" status
+        if (item.poId.status !== 'Awaiting Approval') return false;
         return true;
       })
       .map(item => ({
