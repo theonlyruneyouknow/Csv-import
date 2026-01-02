@@ -8148,72 +8148,58 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 // Load email form data if not already loaded
                 const form = document.getElementById(`email-vendor-form-${index}`);
                 if (form && !form.dataset.loaded) {
-                    await loadEmailVendorFormV2(index, form);
+                    await loadEmailVendorFormV3(index, form);
                     form.dataset.loaded = 'true';
                 }
             }
         }
 
-        async function loadEmailVendorFormV2(index, form) {
+        async function loadEmailVendorFormV3(index, form) {
             const poId = form.dataset.poId;
             const poNumber = form.dataset.poNumber;
             const vendor = form.dataset.vendor;
             const linkedVendorId = form.dataset.linkedVendorId;
 
-            console.log('📧 V2 - Loading email form for PO:', poNumber);
-            console.log('📧 V2 - PO ID:', poId);
+            console.log('📧 V3 - Loading email form for PO:', poNumber);
+            console.log('📧 V3 - PO ID:', poId);
 
             try {
                 // Load PO details using explicit API endpoint
-                const apiUrl = `/purchase-orders/api/po-details/${poId}`;
-                console.log('🔍 V2 - Full API URL:', apiUrl);
+                const cacheBuster = Date.now();
+                const apiUrl = `/purchase-orders/api/po-details/${poId}?_=${cacheBuster}`;
+                console.log('🔍 V3 - Full API URL with cache buster:', apiUrl);
                 const response = await fetch(apiUrl, {
                     method: 'GET',
                     headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
+                        'Accept': 'application/json'
                     },
                     credentials: 'same-origin',
-                    redirect: 'error',  // Fail if server tries to redirect
-                    cache: 'no-store'   // Force fresh fetch, no cache
+                    cache: 'no-store'
                 });
-                console.log('🔍 Response status:', response.status);
-                console.log('🔍 Response URL:', response.url);
-                console.log('🔍 Response redirected:', response.redirected);
-                console.log('🔍 Response URL:', response.url);
-                console.log('🔍 Response redirected:', response.redirected);
-                console.log('🔍 Response content-type:', response.headers.get('content-type'));
                 
-                // Check if response is actually JSON
+                console.log('🔍 V3 - Response status:', response.status);
+                console.log('🔍 V3 - Response URL:', response.url);
+                console.log('🔍 V3 - Response redirected:', response.redirected);
+                console.log('🔍 V3 - Response content-type:', response.headers.get('content-type'));
+                
+                // Check if response is actually JSON before parsing
                 const contentType = response.headers.get('content-type');
                 if (!contentType || !contentType.includes('application/json')) {
-                    console.error('❌ Response is not JSON! Content-Type:', contentType);
+                    console.error('❌ V3 - Response is not JSON! Content-Type:', contentType);
                     const text = await response.text();
-                    console.error('❌ Received HTML/text instead:', text.substring(0, 500));
-                    throw new Error(`Server returned ${contentType} instead of JSON. This usually means authentication failed or the page redirected.`);
+                    console.error('❌ V3 - Received HTML/text instead (first 500 chars):', text.substring(0, 500));
+                    throw new Error(`Server returned ${contentType || 'unknown type'} instead of JSON. Check if you're logged in and the API endpoint is correct.`);
                 }
                 
                 if (!response.ok) {
-                    const text = await response.text();
-                    console.error('❌ Response not OK. Status:', response.status);
-                    console.error('❌ Response text:', text.substring(0, 500));
+                    console.error('❌ V3 - Response not OK. Status:', response.status);
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                console.log('✅ Response OK, parsing JSON...');
-                const responseText = await response.text();
-                console.log('📄 Raw response text (first 500 chars):', responseText.substring(0, 500));
-                
-                let data;
-                try {
-                    data = JSON.parse(responseText);
-                    console.log('✅ JSON parsed successfully');
-                    console.log('📦 Data structure:', Object.keys(data));
-                } catch (parseError) {
-                    console.error('❌ JSON parse error:', parseError);
-                    console.error('❌ Response was:', responseText.substring(0, 1000));
-                    throw new Error(`Failed to parse JSON: ${parseError.message}`);
-                }
+                console.log('✅ V3 - Response OK, parsing JSON...');
+                const data = await response.json();
+                console.log('✅ V3 - JSON parsed successfully');
+                console.log('📦 V3 - Data structure:', Object.keys(data));
                 
                 const po = data.purchaseOrder;
                 console.log('✅ PO extracted:', po?.poNumber);
