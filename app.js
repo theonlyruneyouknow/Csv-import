@@ -182,6 +182,12 @@ mongoose.connect(mongoURI)
     .then(() => {
         console.log('✅ Connected to MongoDB successfully');
 
+        // Initialize default email templates
+        const EmailTemplate = require('./models/EmailTemplate');
+        EmailTemplate.createDefaultTemplates()
+            .then(() => console.log('✅ Email templates initialized'))
+            .catch(err => console.error('⚠️ Error initializing email templates:', err));
+
         // Schedule announcement cleanup
         setupAnnouncementCleanup();
     })
@@ -1112,6 +1118,46 @@ app.get('/manage-auto-reports', ensureAuthenticated, ensureApproved, (req, res) 
 // Main dashboard route (redirect to purchase orders for now)
 app.get('/dashboard', ensureAuthenticated, ensureApproved, (req, res) => {
     res.redirect('/purchase-orders');
+});
+
+// DIAGNOSTIC: Super simple test route
+app.get('/simple-test-route', (req, res) => {
+    console.log('🎯 SIMPLE TEST ROUTE HIT!');
+    res.send('<h1>Simple Test Route Works!</h1>');
+});
+
+// Email Templates Management UI
+app.get('/manage-email-templates', ensureAuthenticated, ensureApproved, (req, res) => {
+    console.log('📧 === EMAIL TEMPLATES ROUTE HIT ===');
+    console.log('📧 User:', req.user?.username);
+    console.log('📧 User approved:', req.user?.approved);
+    console.log('📧 Attempting to render: email-templates');
+    
+    try {
+        res.render('email-templates', {
+            user: req.user
+        });
+        console.log('✅ Email templates rendered successfully');
+    } catch (error) {
+        console.error('❌ Error rendering email-templates:', error);
+        res.status(500).send('Error: ' + error.message);
+    }
+});
+
+// TEMP: Test route without auth to diagnose
+app.get('/test-email-templates', (req, res) => {
+    console.log('🧪 === TEST EMAIL TEMPLATES ROUTE HIT (NO AUTH) ===');
+    console.log('🧪 Attempting to render: email-templates');
+    
+    try {
+        res.render('email-templates', {
+            user: { username: 'test', approved: true }
+        });
+        console.log('✅ TEST: Email templates rendered successfully');
+    } catch (error) {
+        console.error('❌ TEST: Error rendering email-templates:', error);
+        res.status(500).send('Error: ' + error.message);
+    }
 });
 
 // Food dashboard route

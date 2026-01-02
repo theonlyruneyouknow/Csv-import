@@ -106,17 +106,27 @@ const requireRole = (roles) => {
 
 // Middleware to check if user's account is approved
 const ensureApproved = (req, res, next) => {
+    console.log('🔐 ensureApproved middleware - Path:', req.path);
+    console.log('🔐 Authenticated:', req.isAuthenticated());
+    
     if (!req.isAuthenticated()) {
+        console.log('❌ Not authenticated, redirecting to login');
         return res.redirect('/auth/login');
     }
 
+    console.log('🔐 User:', req.user?.username);
+    console.log('🔐 User status:', req.user?.status);
+    console.log('🔐 User approved field:', req.user?.approved);
+    
     if (req.user.status !== 'approved') {
+        console.log('❌ User not approved, showing pending approval page');
         if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
             return res.status(403).json({ error: 'Account not approved' });
         }
         return res.render('auth/pending-approval', { user: req.user });
     }
 
+    console.log('✅ User approved, proceeding to route');
     next();
 };
 
