@@ -787,10 +787,47 @@ app.get('/purchase-orders/export/csv-data', async (req, res) => {
     }
 });
 
-// TEST ROUTE - Explicitly check if /purchase-orders/api/po-details/:id is reachable
-app.get('/purchase-orders/api/po-details/test-route', (req, res) => {
-    console.log('✅ TEST ROUTE HIT - /purchase-orders/api/po-details/test-route');
-    res.json({ success: true, message: 'Test route works!', authenticated: req.isAuthenticated() });
+// API endpoint to get single PO details for AJAX requests (must be before router mounting)
+app.get('/purchase-orders/api/po-details/:id', ensureAuthenticated, ensureApproved, async (req, res) => {
+    try {
+        console.log('🔍 API endpoint hit for PO ID:', req.params.id);
+        
+        const PurchaseOrder = require('./models/PurchaseOrder');
+        const LineItem = require('./models/LineItem');
+        
+        const purchaseOrder = await PurchaseOrder.findById(req.params.id)
+            .populate('linkedVendor')
+            .lean();
+        
+        if (!purchaseOrder) {
+            console.log('❌ Purchase order not found with ID:', req.params.id);
+            return res.status(404).json({ success: false, error: 'Purchase order not found' });
+        }
+
+        console.log('✅ Found purchase order:', purchaseOrder.poNumber);
+
+        // Get line items for this PO
+        const lineItems = await LineItem.find({ poId: req.params.id })
+            .sort({ createdAt: 1 })
+            .lean();
+        
+        console.log('✅ Found', lineItems.length, 'line items');
+        
+        // Add line items to the purchase order object
+        purchaseOrder.lineItems = lineItems;
+
+        console.log('📤 Sending JSON response');
+        res.json({ 
+            success: true,
+            purchaseOrder 
+        });
+    } catch (error) {
+        console.error('❌ Get purchase order error:', error);
+        res.status(500).json({ 
+            success: false,
+            error: error.message
+        });
+    }
 });
 
 app.use('/purchase-orders', ensureAuthenticated, ensureApproved, purchaseOrderRoutes);
