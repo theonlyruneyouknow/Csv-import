@@ -3659,6 +3659,55 @@ router.post('/:id/notes', async (req, res) => {
   }
 });
 
+// EXPLICIT API ENDPOINT - Get a single purchase order by ID (for AJAX requests)
+router.get('/api/po-details/:id', async (req, res) => {
+  try {
+    console.log('🔍 API GET /api/po-details/:id route hit with ID:', req.params.id);
+    console.log('🔍 Request headers accept:', req.headers.accept);
+    
+    const purchaseOrder = await PurchaseOrder.findById(req.params.id)
+      .populate('linkedVendor')
+      .lean();
+    
+    if (!purchaseOrder) {
+      console.log('❌ Purchase order not found with ID:', req.params.id);
+      return res.status(404).json({ success: false, error: 'Purchase order not found' });
+    }
+
+    console.log('✅ Found purchase order:', purchaseOrder.poNumber);
+
+    // Get line items for this PO
+    const lineItems = await LineItem.find({ poId: req.params.id })
+      .sort({ createdAt: 1 })
+      .lean();
+    
+    console.log('✅ Found', lineItems.length, 'line items');
+    
+    // Add line items to the purchase order object
+    purchaseOrder.lineItems = lineItems;
+
+    console.log('📤 Sending JSON response with PO:', purchaseOrder.poNumber);
+    console.log('📤 Response will have', lineItems.length, 'line items');
+    
+    const responseData = { 
+      success: true,
+      purchaseOrder 
+    };
+    
+    console.log('📤 About to call res.json()');
+    res.json(responseData);
+    console.log('✅ res.json() called successfully');
+  } catch (error) {
+    console.error('❌ Get purchase order error:', error);
+    console.error('❌ Error stack:', error.stack);
+    res.status(500).json({ 
+      success: false,
+      error: error.message,
+      stack: error.stack 
+    });
+  }
+});
+
 // Get a single purchase order by ID
 router.get('/:id', async (req, res) => {
   try {

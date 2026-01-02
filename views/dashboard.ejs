@@ -8163,9 +8163,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             console.log('📧 Loading email form for PO:', poNumber);
 
             try {
-                // Load PO details
+                // Load PO details using explicit API endpoint
                 console.log('🔍 Fetching PO details for ID:', poId);
-                const response = await fetch(`/purchase-orders/${poId}`, {
+                const response = await fetch(`/purchase-orders/api/po-details/${poId}`, {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
