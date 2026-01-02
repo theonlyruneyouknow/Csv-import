@@ -4299,6 +4299,7 @@
                     <div id="managersAccordion" class="nav-accordion-content">
                         <a href="/excel-reports" class="nav-accordion-item">📊 Excel Reports Manager</a>
                         <a href="/manage-auto-reports" class="nav-accordion-item">🔄 Auto-Reports Manager</a>
+                        <a href="/vendors" class="nav-accordion-item">🏢 Vendors</a>
                         <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
                         <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items
                             Manager</a>
@@ -8239,6 +8240,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 
                 console.log('📧 V3 - About to load vendor contacts, linkedVendorId:', linkedVendorId);
                 
+                // Store vendor contact info for template use
+                let vendorContactInfo = {
+                    email: null,
+                    fullName: null,
+                    firstName: null,
+                    vendorName: vendor
+                };
+                
                 if (linkedVendorId) {
                     console.log('📧 V3 - Fetching vendor data for:', linkedVendorId);
                     try {
@@ -8250,19 +8259,44 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             console.log('📧 V3 - About to parse vendor JSON...');
                             const vendorData = await vendorResponse.json();
                             console.log('📧 V3 - Vendor data received:', vendorData.name);
-                            const contacts = [];
                             
-                            if (vendorData.mainEmail) contacts.push(vendorData.mainEmail);
-                            if (vendorData.contactInfo?.primaryContact?.email) contacts.push(vendorData.contactInfo.primaryContact.email);
-                            if (vendorData.contactInfo?.customerService?.email) contacts.push(vendorData.contactInfo.customerService.email);
-                            
-                            console.log('📧 V3 - Found', contacts.length, 'vendor contacts');
-                            if (contacts.length > 0) {
-                                recipientInput.value = contacts[0];
-                                if (contacts.length > 1) {
-                                    suggestionsDiv.innerHTML = `💡 Other contacts: ${contacts.slice(1).join(', ')}`;
+                            // Priority: primary contact email > main email
+                            if (vendorData.contactInfo?.primaryContact?.email) {
+                                vendorContactInfo.email = vendorData.contactInfo.primaryContact.email;
+                                vendorContactInfo.fullName = vendorData.contactInfo.primaryContact.name || null;
+                                
+                                // Extract first name from full name
+                                if (vendorContactInfo.fullName) {
+                                    const nameParts = vendorContactInfo.fullName.trim().split(/\s+/);
+                                    vendorContactInfo.firstName = nameParts[0];
                                 }
+                                
+                                console.log('📧 V3 - Using primary contact:', vendorContactInfo.fullName, 'Email:', vendorContactInfo.email);
+                            } else if (vendorData.mainEmail) {
+                                vendorContactInfo.email = vendorData.mainEmail;
+                                console.log('📧 V3 - Using main email:', vendorContactInfo.email);
                             }
+                            
+                            // Set recipient email
+                            if (vendorContactInfo.email) {
+                                recipientInput.value = vendorContactInfo.email;
+                            }
+                            
+                            // Show alternative contacts as suggestions
+                            const alternativeContacts = [];
+                            if (vendorData.mainEmail && vendorData.mainEmail !== vendorContactInfo.email) {
+                                alternativeContacts.push(vendorData.mainEmail);
+                            }
+                            if (vendorData.contactInfo?.customerService?.email && 
+                                vendorData.contactInfo.customerService.email !== vendorContactInfo.email) {
+                                alternativeContacts.push(vendorData.contactInfo.customerService.email);
+                            }
+                            
+                            if (alternativeContacts.length > 0) {
+                                suggestionsDiv.innerHTML = `💡 Other contacts: ${alternativeContacts.join(', ')}`;
+                            }
+                            
+                            console.log('📧 V3 - Vendor contact info prepared:', vendorContactInfo);
                         } else {
                             console.warn('⚠️ V3 - Vendor response not OK, status:', vendorResponse.status);
                         }
@@ -8279,7 +8313,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
                 // Load email templates from database
                 console.log('📧 V3 - CALLING loadDatabaseEmailTemplates...');
-                await loadDatabaseEmailTemplates(index, form, po, unreceivedItems, partlyReceivedItems);
+                await loadDatabaseEmailTemplates(index, form, po, unreceivedItems, partlyReceivedItems, vendorContactInfo);
                 console.log('📧 V3 - loadDatabaseEmailTemplates returned successfully');
 
                 // Setup form submission
@@ -8293,7 +8327,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         }
 
         // Load email templates from database
-        async function loadDatabaseEmailTemplates(index, form, po, unreceivedItems, partlyReceivedItems) {
+        async function loadDatabaseEmailTemplates(index, form, po, unreceivedItems, partlyReceivedItems, vendorContactInfo) {
             console.log('🎯 loadDatabaseEmailTemplates CALLED with:', { index, formExists: !!form, poNumber: po?.poNumber });
             
             try {
@@ -8359,7 +8393,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     const selectedOption = this.options[this.selectedIndex];
                     if (selectedOption.dataset.templateData) {
                         const template = JSON.parse(selectedOption.dataset.templateData);
-                        applyDatabaseTemplate(index, form, template, po, unreceivedItems, partlyReceivedItems);
+                        applyDatabaseTemplate(index, form, template, po, unreceivedItems, partlyReceivedItems, vendorContactInfo);
                     } else if (this.value === 'custom') {
                         clearEmailForm(index, form);
                     }
@@ -8369,7 +8403,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 // Load default template automatically
                 if (defaultTemplate) {
                     console.log('📧 STEP 13: Applying default template:', defaultTemplate.name);
-                    await applyDatabaseTemplate(index, form, defaultTemplate, po, unreceivedItems, partlyReceivedItems);
+                    await applyDatabaseTemplate(index, form, defaultTemplate, po, unreceivedItems, partlyReceivedItems, vendorContactInfo);
                     console.log('📧 STEP 14: Default template applied successfully!');
                 } else {
                     console.warn('⚠️ No default template found');
@@ -8395,7 +8429,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         }
 
         // Apply database template with variable substitution
-        async function applyDatabaseTemplate(index, form, template, po, unreceivedItems, partlyReceivedItems) {
+        async function applyDatabaseTemplate(index, form, template, po, unreceivedItems, partlyReceivedItems, vendorContactInfo) {
             try {
                 // Store original template for modification detection
                 form.dataset.originalTemplate = template._id;
@@ -8405,7 +8439,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 // Prepare template data for Handlebars
                 const templateData = {
                     poNumber: po.poNumber,
-                    vendor: po.vendor,
+                    vendor: vendorContactInfo?.firstName || vendorContactInfo?.fullName || po.vendor,
+                    vendorFullName: vendorContactInfo?.fullName || po.vendor,
+                    vendorCompany: po.vendor,
                     senderName: '<%= user.name || user.username %>',
                     senderTitle: 'Supply Chain Manager',
                     senderContact: '<%= user.email || "" %>',
