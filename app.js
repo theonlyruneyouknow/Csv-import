@@ -1671,8 +1671,17 @@ app.use((err, req, res, next) => {
     });
 });
 
-// 404 handler - redirect to splash with helpful message
+// 404 handler - redirect to splash with helpful message OR return JSON for API requests
 app.use((req, res) => {
+    // If it's an AJAX/API request, return JSON error instead of redirect
+    if (req.xhr || req.headers.accept?.indexOf('json') > -1 || req.path.startsWith('/api')) {
+        return res.status(404).json({ 
+            success: false,
+            error: 'Not found',
+            path: req.originalUrl 
+        });
+    }
+    
     req.flash('info', `The page "${req.originalUrl}" was not found. Here's what you can do from here:`);
     res.redirect('/splash');
 });
