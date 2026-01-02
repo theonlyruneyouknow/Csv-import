@@ -787,6 +787,12 @@ app.get('/purchase-orders/export/csv-data', async (req, res) => {
     }
 });
 
+// TEST ROUTE - Explicitly check if /purchase-orders/api/po-details/:id is reachable
+app.get('/purchase-orders/api/po-details/test-route', (req, res) => {
+    console.log('✅ TEST ROUTE HIT - /purchase-orders/api/po-details/test-route');
+    res.json({ success: true, message: 'Test route works!', authenticated: req.isAuthenticated() });
+});
+
 app.use('/purchase-orders', ensureAuthenticated, ensureApproved, purchaseOrderRoutes);
 app.use('/purchase-orders', ensureAuthenticated, ensureApproved, trackingRoutes); // NEW: Tracking routes
 app.use('/shipments', ensureAuthenticated, ensureApproved, shipmentRoutes); // NEW: Shipment management
