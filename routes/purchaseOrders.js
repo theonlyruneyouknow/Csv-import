@@ -3653,6 +3653,35 @@ router.post('/:id/notes', async (req, res) => {
   }
 });
 
+// Get a single purchase order by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const purchaseOrder = await PurchaseOrder.findById(req.params.id)
+      .populate('linkedVendor')
+      .lean();
+    
+    if (!purchaseOrder) {
+      return res.status(404).json({ error: 'Purchase order not found' });
+    }
+
+    // Get line items for this PO
+    const lineItems = await LineItem.find({ poId: req.params.id })
+      .sort({ createdAt: 1 })
+      .lean();
+    
+    // Add line items to the purchase order object
+    purchaseOrder.lineItems = lineItems;
+
+    res.json({ 
+      success: true,
+      purchaseOrder 
+    });
+  } catch (error) {
+    console.error('Get purchase order error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get notes history for a PO
 router.get('/:id/notes-history', async (req, res) => {
   try {
