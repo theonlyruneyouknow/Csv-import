@@ -8164,7 +8164,25 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             try {
                 // Load PO details
-                const response = await fetch(`/purchase-orders/${poId}`);
+                console.log('🔍 Fetching PO details for ID:', poId);
+                const response = await fetch(`/purchase-orders/${poId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                });
+                console.log('🔍 Response status:', response.status);
+                console.log('🔍 Response content-type:', response.headers.get('content-type'));
+                
+                if (!response.ok) {
+                    const text = await response.text();
+                    console.error('❌ Response not OK. Status:', response.status);
+                    console.error('❌ Response text:', text.substring(0, 500));
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 const po = data.purchaseOrder;
 

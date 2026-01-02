@@ -3656,18 +3656,26 @@ router.post('/:id/notes', async (req, res) => {
 // Get a single purchase order by ID
 router.get('/:id', async (req, res) => {
   try {
+    console.log('🔍 GET /:id route hit with ID:', req.params.id);
+    console.log('🔍 Request headers accept:', req.headers.accept);
+    
     const purchaseOrder = await PurchaseOrder.findById(req.params.id)
       .populate('linkedVendor')
       .lean();
     
     if (!purchaseOrder) {
+      console.log('❌ Purchase order not found with ID:', req.params.id);
       return res.status(404).json({ error: 'Purchase order not found' });
     }
+
+    console.log('✅ Found purchase order:', purchaseOrder.poNumber);
 
     // Get line items for this PO
     const lineItems = await LineItem.find({ poId: req.params.id })
       .sort({ createdAt: 1 })
       .lean();
+    
+    console.log('✅ Found', lineItems.length, 'line items');
     
     // Add line items to the purchase order object
     purchaseOrder.lineItems = lineItems;
@@ -3677,7 +3685,7 @@ router.get('/:id', async (req, res) => {
       purchaseOrder 
     });
   } catch (error) {
-    console.error('Get purchase order error:', error);
+    console.error('❌ Get purchase order error:', error);
     res.status(500).json({ error: error.message });
   }
 });
