@@ -2305,6 +2305,212 @@
             background: #138496;
         }
 
+        /* Email Vendor Row Styles */
+        .email-vendor-row {
+            display: none;
+            background: #e3f2fd;
+            border-left: 4px solid #007bff;
+        }
+
+        .email-vendor-row.expanded {
+            display: table-row;
+        }
+
+        .email-vendor-cell-expanded {
+            padding: 15px;
+            border: none;
+            border-top: 1px solid #dee2e6;
+            background: white;
+        }
+
+        .email-vendor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #007bff;
+        }
+
+        .email-vendor-title {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 16px;
+        }
+
+        .email-vendor-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .email-vendor-close {
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .email-vendor-close:hover {
+            background: #0056b3;
+        }
+
+        .email-vendor-container {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #90caf9;
+        }
+
+        .email-po-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .email-po-info h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .email-po-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            color: #6c757d;
+            font-size: 13px;
+        }
+
+        .email-po-details > div {
+            padding: 5px 0;
+        }
+
+        .email-po-details strong {
+            color: #495057;
+        }
+
+        .email-vendor-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .email-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .email-form-group label {
+            font-weight: 500;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .email-template-select,
+        .email-recipient-input,
+        .email-subject-input {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .email-template-select:focus,
+        .email-recipient-input:focus,
+        .email-subject-input:focus,
+        .email-body-textarea:focus {
+            outline: none;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .email-body-textarea {
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            resize: vertical;
+            width: 100%;
+            min-height: 250px;
+        }
+
+        .email-vendor-suggestions {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 3px;
+        }
+
+        .email-form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .email-track-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .email-track-checkbox {
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .email-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .email-cancel-btn,
+        .email-send-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .email-cancel-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .email-cancel-btn:hover {
+            background: #5a6268;
+        }
+
+        .email-send-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .email-send-btn:hover {
+            background: #0056b3;
+        }
+
+        .email-send-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
         .tracking-cell-expanded {
             padding: 15px;
         }
@@ -4959,6 +5165,80 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                             </div>
                                         </td>
                                     </tr>
+
+                                    <!-- Expandable email vendor row -->
+                                    <tr class="email-vendor-row" id="email-vendor-row-<%= index %>">
+                                        <td colspan="11" class="email-vendor-cell-expanded">
+                                            <div class="email-vendor-header">
+                                                <div class="email-vendor-title">📧 Email Vendor - Status Request for PO <%= po.poNumber %>
+                                                </div>
+                                                <div class="email-vendor-actions">
+                                                    <button class="email-vendor-close"
+                                                        data-index="<%= index %>">Close</button>
+                                                </div>
+                                            </div>
+                                            <div class="email-vendor-container">
+                                                <!-- PO Info Display -->
+                                                <div class="email-po-info" id="email-po-info-<%= index %>">
+                                                    <h4>Purchase Order Details</h4>
+                                                    <div class="email-po-details">
+                                                        <!-- Details will be loaded dynamically -->
+                                                    </div>
+                                                </div>
+
+                                                <!-- Email Form -->
+                                                <form class="email-vendor-form" id="email-vendor-form-<%= index %>" data-po-id="<%= po._id %>" data-po-number="<%= po.poNumber %>" data-vendor="<%= po.vendor %>" data-linked-vendor-id="<%= po.linkedVendor ? po.linkedVendor._id : '' %>">
+                                                    <!-- Email Template Selection -->
+                                                    <div class="email-form-group">
+                                                        <label>Email Template:</label>
+                                                        <select class="email-template-select" data-index="<%= index %>">
+                                                            <option value="">-- Select Template --</option>
+                                                            <option value="default">Default Status Request</option>
+                                                            <option value="urgent">Urgent Follow-up</option>
+                                                            <option value="custom">Custom Message</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <!-- Recipient Email -->
+                                                    <div class="email-form-group">
+                                                        <label>To:</label>
+                                                        <input type="email" class="email-recipient-input" required placeholder="vendor@example.com">
+                                                        <small class="email-vendor-suggestions" id="email-suggestions-<%= index %>">
+                                                            <!-- Vendor contact suggestions will appear here -->
+                                                        </small>
+                                                    </div>
+
+                                                    <!-- Subject -->
+                                                    <div class="email-form-group">
+                                                        <label>Subject:</label>
+                                                        <input type="text" class="email-subject-input" required>
+                                                    </div>
+
+                                                    <!-- Message Body -->
+                                                    <div class="email-form-group">
+                                                        <label>Message:</label>
+                                                        <textarea class="email-body-textarea" rows="12" required></textarea>
+                                                    </div>
+
+                                                    <!-- Actions -->
+                                                    <div class="email-form-actions">
+                                                        <label class="email-track-label">
+                                                            <input type="checkbox" class="email-track-checkbox" checked>
+                                                            <span>Track this communication</span>
+                                                        </label>
+                                                        <div class="email-buttons">
+                                                            <button type="button" class="email-cancel-btn" data-index="<%= index %>">
+                                                                Cancel
+                                                            </button>
+                                                            <button type="submit" class="email-send-btn">
+                                                                📧 Send Email
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
                                     <% }); %>
                             </tbody>
                         </table>
@@ -6203,17 +6483,25 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             // Handle email vendor button using event delegation
             if (event.target.closest('.email-vendor-btn')) {
                 const btn = event.target.closest('.email-vendor-btn');
-                const poId = btn.getAttribute('data-po-id');
-                const poNumber = btn.getAttribute('data-po-number');
-                const vendor = btn.getAttribute('data-vendor');
-                const linkedVendorId = btn.getAttribute('data-linked-vendor-id');
-                const hasUnreceived = btn.getAttribute('data-has-unreceived') === 'true';
+                
+                // Find the parent row to get the index
+                const parentRow = btn.closest('tr');
+                const index = parentRow.getAttribute('data-index') || Array.from(parentRow.parentElement.children).indexOf(parentRow);
+                
+                console.log('📧 Email Vendor button clicked, index:', index);
+                
+                // Toggle the email vendor row
+                toggleEmailVendorRow(index);
+            }
 
-                if (poId && poNumber && vendor) {
-                    console.log('📧 Email Vendor button clicked:', { poId, poNumber, vendor, hasUnreceived });
-                    openVendorEmailModal(poId, poNumber, vendor, linkedVendorId, hasUnreceived);
-                } else {
-                    console.error('❌ Missing data for email vendor button:', { poId, poNumber, vendor });
+            // Handle email vendor close buttons
+            if (event.target.closest('.email-vendor-close') || event.target.closest('.email-cancel-btn')) {
+                const btn = event.target.closest('.email-vendor-close') || event.target.closest('.email-cancel-btn');
+                const index = btn.getAttribute('data-index');
+                const emailRow = document.getElementById(`email-vendor-row-${index}`);
+                
+                if (emailRow) {
+                    emailRow.classList.remove('expanded');
                 }
             }
         });
@@ -7696,7 +7984,246 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             });
         }
 
-        // Vendor Email Modal Functions
+        // Vendor Email Row Functions (Expandable Row Approach)
+        async function toggleEmailVendorRow(index) {
+            const emailRow = document.getElementById(`email-vendor-row-${index}`);
+            
+            if (!emailRow) {
+                console.error('Email vendor row not found for index:', index);
+                return;
+            }
+
+            const isExpanded = emailRow.classList.contains('expanded');
+
+            if (isExpanded) {
+                // Close the email row
+                emailRow.classList.remove('expanded');
+            } else {
+                // Open the email row and load data
+                emailRow.classList.add('expanded');
+                
+                // Load email form data if not already loaded
+                const form = document.getElementById(`email-vendor-form-${index}`);
+                if (form && !form.dataset.loaded) {
+                    await loadEmailVendorForm(index, form);
+                    form.dataset.loaded = 'true';
+                }
+            }
+        }
+
+        async function loadEmailVendorForm(index, form) {
+            const poId = form.dataset.poId;
+            const poNumber = form.dataset.poNumber;
+            const vendor = form.dataset.vendor;
+            const linkedVendorId = form.dataset.linkedVendorId;
+
+            console.log('📧 Loading email form for PO:', poNumber);
+
+            try {
+                // Load PO details
+                const response = await fetch(`/purchase-orders/${poId}`);
+                const data = await response.json();
+                const po = data.purchaseOrder;
+
+                // Display PO info
+                const unreceivedItems = po.lineItems.filter(item => !item.received);
+                const partlyReceivedItems = po.lineItems.filter(item => item.received && item.quantityReceived < item.quantityExpected);
+                
+                const poInfoDiv = document.querySelector(`#email-po-info-${index} .email-po-details`);
+                poInfoDiv.innerHTML = `
+                    <div><strong>PO Number:</strong> ${poNumber}</div>
+                    <div><strong>Vendor:</strong> ${vendor}</div>
+                    <div><strong>Total Items:</strong> ${po.lineItems.length}</div>
+                    <div><strong>Unreceived:</strong> <span style="color: #dc3545; font-weight: 600;">${unreceivedItems.length}</span></div>
+                    ${partlyReceivedItems.length > 0 ? `<div><strong>Partly Received:</strong> <span style="color: #ffc107; font-weight: 600;">${partlyReceivedItems.length}</span></div>` : ''}
+                    ${po.lastEmailSent ? `<div style="grid-column: 1 / -1;"><strong>Last Contact:</strong> ${new Date(po.lastEmailSent).toLocaleString()}</div>` : ''}
+                `;
+
+                // Try to load vendor contact information
+                const recipientInput = form.querySelector('.email-recipient-input');
+                const suggestionsDiv = document.getElementById(`email-suggestions-${index}`);
+                
+                if (linkedVendorId) {
+                    const vendorResponse = await fetch(`/vendors/${linkedVendorId}`);
+                    if (vendorResponse.ok) {
+                        const vendorData = await vendorResponse.json();
+                        const contacts = [];
+                        
+                        if (vendorData.mainEmail) contacts.push(vendorData.mainEmail);
+                        if (vendorData.contactInfo?.primaryContact?.email) contacts.push(vendorData.contactInfo.primaryContact.email);
+                        if (vendorData.contactInfo?.customerService?.email) contacts.push(vendorData.contactInfo.customerService.email);
+                        
+                        if (contacts.length > 0) {
+                            recipientInput.value = contacts[0];
+                            if (contacts.length > 1) {
+                                suggestionsDiv.innerHTML = `💡 Other contacts: ${contacts.slice(1).join(', ')}`;
+                            }
+                        }
+                    }
+                }
+
+                // Set default subject
+                const subjectInput = form.querySelector('.email-subject-input');
+                subjectInput.value = `Status Update Request - PO ${poNumber}`;
+
+                // Setup template selector
+                const templateSelect = form.querySelector('.email-template-select');
+                templateSelect.addEventListener('change', function() {
+                    loadEmailTemplate(this.value, po, unreceivedItems, partlyReceivedItems, form);
+                });
+
+                // Load default template
+                await loadEmailTemplate('default', po, unreceivedItems, partlyReceivedItems, form);
+
+                // Setup form submission
+                setupEmailFormSubmission(form, index);
+
+            } catch (error) {
+                console.error('Error loading PO details:', error);
+                const poInfoDiv = document.querySelector(`#email-po-info-${index} .email-po-details`);
+                poInfoDiv.innerHTML = `<div style="color: #dc3545;">Error loading PO details: ${error.message}</div>`;
+            }
+        }
+
+        async function loadEmailTemplate(templateType, po, unreceivedItems, partlyReceivedItems, form) {
+            const bodyTextarea = form.querySelector('.email-body-textarea');
+            
+            if (!templateType || templateType === 'custom') {
+                bodyTextarea.value = '';
+                return;
+            }
+
+            let template = '';
+            const vendorName = po.vendor;
+            const poNumber = po.poNumber;
+
+            if (templateType === 'default') {
+                template = `Dear ${vendorName},
+
+I hope this email finds you well. I am writing to request a status update on Purchase Order ${poNumber}.
+
+`;
+
+                if (unreceivedItems.length > 0) {
+                    template += `We currently have ${unreceivedItems.length} item(s) showing as not yet received:\n\n`;
+                    unreceivedItems.slice(0, 10).forEach(item => {
+                        template += `• ${item.memo}${item.sku ? ' (SKU: ' + item.sku + ')' : ''}\n`;
+                        if (item.quantityExpected) template += `  Quantity: ${item.quantityExpected} ${item.unit || ''}\n`;
+                        if (item.ead) template += `  Expected: ${new Date(item.ead).toLocaleDateString()}\n`;
+                    });
+                    if (unreceivedItems.length > 10) {
+                        template += `\n...and ${unreceivedItems.length - 10} more items\n`;
+                    }
+                }
+
+                if (partlyReceivedItems.length > 0) {
+                    template += `\nAdditionally, ${partlyReceivedItems.length} item(s) have been partially received:\n\n`;
+                    partlyReceivedItems.slice(0, 5).forEach(item => {
+                        template += `• ${item.memo} - Received ${item.quantityReceived || 0} of ${item.quantityExpected} ${item.unit || ''}\n`;
+                    });
+                }
+
+                template += `\nCould you please provide:
+1. Updated delivery dates for any delayed items
+2. Tracking information if items have already shipped
+3. Status updates for any items on backorder
+
+This information would be greatly appreciated as we need to update our customers and plan our operations accordingly.
+
+Thank you for your prompt attention to this matter.
+
+Best regards`;
+
+            } else if (templateType === 'urgent') {
+                template = `Dear ${vendorName},
+
+URGENT: We need an immediate status update on Purchase Order ${poNumber}.
+
+We have ${unreceivedItems.length} item(s) that are critical for our operations and have not been received. `;
+
+                const overdueItems = unreceivedItems.filter(item => item.ead && new Date(item.ead) < new Date());
+                if (overdueItems.length > 0) {
+                    template += `${overdueItems.length} of these items are now OVERDUE:\n\n`;
+                    overdueItems.forEach(item => {
+                        template += `• ${item.memo}${item.sku ? ' (SKU: ' + item.sku + ')' : ''}\n`;
+                        template += `  Expected: ${new Date(item.ead).toLocaleDateString()} - NOW OVERDUE\n`;
+                    });
+                }
+
+                template += `\nWe urgently need:
+1. Immediate confirmation of shipment dates
+2. Tracking numbers for any shipped items  
+3. Alternative solutions for any items that cannot be delivered as promised
+
+Please respond within 24 hours.
+
+Thank you`;
+            }
+
+            bodyTextarea.value = template;
+        }
+
+        function setupEmailFormSubmission(form, index) {
+            // Remove any existing listeners
+            const newForm = form.cloneNode(true);
+            form.parentNode.replaceChild(newForm, form);
+            
+            newForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const submitBtn = this.querySelector('.email-send-btn');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = '📤 Sending...';
+                submitBtn.disabled = true;
+
+                const formData = {
+                    poId: this.dataset.poId,
+                    recipient: this.querySelector('.email-recipient-input').value,
+                    subject: this.querySelector('.email-subject-input').value,
+                    body: this.querySelector('.email-body-textarea').value,
+                    trackEmail: this.querySelector('.email-track-checkbox').checked
+                };
+
+                try {
+                    const response = await fetch('/purchase-orders/send-vendor-email', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showTrackingToast('Email sent successfully!', 'success');
+                        
+                        // Update the button to show email was sent
+                        const emailBtn = document.querySelector(`.email-vendor-btn[data-po-id="${formData.poId}"]`);
+                        if (emailBtn) {
+                            emailBtn.classList.add('email-sent');
+                            emailBtn.title = `Last emailed: ${new Date().toLocaleDateString()} - Click to email again`;
+                        }
+                        
+                        // Close the email row
+                        const emailRow = document.getElementById(`email-vendor-row-${index}`);
+                        if (emailRow) {
+                            emailRow.classList.remove('expanded');
+                        }
+                    } else {
+                        showTrackingToast('Failed to send email: ' + (result.error || 'Unknown error'), 'error');
+                    }
+                } catch (error) {
+                    console.error('Error sending email:', error);
+                    showTrackingToast('Error sending email: ' + error.message, 'error');
+                } finally {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            });
+        }
+
+        // Keep old modal functions for backwards compatibility, but they won't be used
         async function openVendorEmailModal(poId, poNumber, vendor, linkedVendorId, hasUnreceived) {
             const modal = document.getElementById('vendorEmailModal');
             const poIdInput = document.getElementById('emailPOId');
