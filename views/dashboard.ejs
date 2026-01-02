@@ -2634,22 +2634,20 @@
         }
 
         /* Dynamic PO Type select option and background colors */
-        <% poTypeOptions.forEach(type=> {
-                %> .po-type-select option.type-<%=type.name.toLowerCase() %> {
-                    background-color: <%=type.color %>22;
-                    color: <%=type.color %>;
-                    font-weight: 600;
-                }
+        <% poTypeOptions.forEach(type=> { %>
+        .po-type-select option.type-<%=type.name.toLowerCase() %> {
+            background-color: <%=type.color %>22;
+            color: <%=type.color %>;
+            font-weight: 600;
+        }
 
-                .po-type-select[data-type="<%= type.name %>"] {
-                    background-color: <%=type.color %>22;
-                    color: <%=type.color %>;
-                    border-color: <%=type.color %>;
-                    border-width: 2px;
-                }
-
-                <%
-            }) %>
+        .po-type-select[data-type="<%= type.name %>"] {
+            background-color: <%=type.color %>22;
+            color: <%=type.color %>;
+            border-color: <%=type.color %>;
+            border-width: 2px;
+        }
+        <% }) %>
 
         /* URL Modal */
         .url-modal {
@@ -4664,11 +4662,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                         data-id="<%= po._id %>" data-po="<%= po.poNumber %>"
                                                         title="View PO details: <%= po.lineItems.filter(item => item.received).length %> received / <%= po.lineItems.length %> total">
                                                         📦 <span class="count-number">
-                                                            <% const totalItems=po.lineItems.length; const
-                                                                receivedItems=po.lineItems.filter(item=>
-                                                                item.received).length;
-                                                                %>
-                                                                <%= receivedItems %>/<%= totalItems %>
+                                                            <% const totalItems = po.lineItems.length; const receivedItems = po.lineItems.filter(item => item.received).length; %>
+                                                            <%= receivedItems %>/<%= totalItems %>
                                                         </span>
                                                     </button>
                                                     <button class="update-netsuite-btn" data-po-id="<%= po._id %>"
@@ -9129,8 +9124,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function selectAllPoTypes() {
             <% poTypeOptions.forEach(type => { %>
             const checkbox<%= type.name.replace(/\s+/g, '') %> = document.getElementById('filter<%= type.name %>');
-            if (checkbox <%= type.name.replace(/\s+/g, '') %>) {
-                checkbox <%= type.name.replace(/\s+/g, '') %>.checked = true;
+            if (checkbox<%= type.name.replace(/\s+/g, '') %>) {
+                checkbox<%= type.name.replace(/\s+/g, '') %>.checked = true;
                 localStorage.setItem('filter<%= type.name %>', 'true');
             }
             <% }); %>
@@ -9140,8 +9135,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function clearAllPoTypes() {
             <% poTypeOptions.forEach(type => { %>
             const checkbox<%= type.name.replace(/\s+/g, '') %> = document.getElementById('filter<%= type.name %>');
-            if (checkbox <%= type.name.replace(/\s+/g, '') %>) {
-                checkbox <%= type.name.replace(/\s+/g, '') %>.checked = false;
+            if (checkbox<%= type.name.replace(/\s+/g, '') %>) {
+                checkbox<%= type.name.replace(/\s+/g, '') %>.checked = false;
                 localStorage.setItem('filter<%= type.name %>', 'false');
             }
             <% }); %>
