@@ -8241,24 +8241,35 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 
                 if (linkedVendorId) {
                     console.log('📧 V3 - Fetching vendor data for:', linkedVendorId);
-                    const vendorResponse = await fetch(`/vendors/${linkedVendorId}`);
-                    console.log('📧 V3 - Vendor response status:', vendorResponse.status);
-                    if (vendorResponse.ok) {
-                        const vendorData = await vendorResponse.json();
-                        console.log('📧 V3 - Vendor data received:', vendorData.name);
-                        const contacts = [];
+                    try {
+                        const vendorResponse = await fetch(`/vendors/${linkedVendorId}`);
+                        console.log('📧 V3 - Vendor response status:', vendorResponse.status);
+                        console.log('📧 V3 - Vendor response content-type:', vendorResponse.headers.get('content-type'));
                         
-                        if (vendorData.mainEmail) contacts.push(vendorData.mainEmail);
-                        if (vendorData.contactInfo?.primaryContact?.email) contacts.push(vendorData.contactInfo.primaryContact.email);
-                        if (vendorData.contactInfo?.customerService?.email) contacts.push(vendorData.contactInfo.customerService.email);
-                        
-                        console.log('📧 V3 - Found', contacts.length, 'vendor contacts');
-                        if (contacts.length > 0) {
-                            recipientInput.value = contacts[0];
-                            if (contacts.length > 1) {
-                                suggestionsDiv.innerHTML = `💡 Other contacts: ${contacts.slice(1).join(', ')}`;
+                        if (vendorResponse.ok) {
+                            console.log('📧 V3 - About to parse vendor JSON...');
+                            const vendorData = await vendorResponse.json();
+                            console.log('📧 V3 - Vendor data received:', vendorData.name);
+                            const contacts = [];
+                            
+                            if (vendorData.mainEmail) contacts.push(vendorData.mainEmail);
+                            if (vendorData.contactInfo?.primaryContact?.email) contacts.push(vendorData.contactInfo.primaryContact.email);
+                            if (vendorData.contactInfo?.customerService?.email) contacts.push(vendorData.contactInfo.customerService.email);
+                            
+                            console.log('📧 V3 - Found', contacts.length, 'vendor contacts');
+                            if (contacts.length > 0) {
+                                recipientInput.value = contacts[0];
+                                if (contacts.length > 1) {
+                                    suggestionsDiv.innerHTML = `💡 Other contacts: ${contacts.slice(1).join(', ')}`;
+                                }
                             }
+                        } else {
+                            console.warn('⚠️ V3 - Vendor response not OK, status:', vendorResponse.status);
                         }
+                    } catch (vendorError) {
+                        console.error('❌ V3 - Error loading vendor data:', vendorError);
+                        console.error('❌ V3 - Vendor error details:', vendorError.message, vendorError.stack);
+                        // Continue anyway - vendor contacts are optional
                     }
                 } else {
                     console.log('📧 V3 - No linkedVendorId, skipping vendor contact loading');
