@@ -2634,20 +2634,22 @@
         }
 
         /* Dynamic PO Type select option and background colors */
-        <% poTypeOptions.forEach(type => { %>
-            .po-type-select option.type-<%= type.name.toLowerCase() %> {
-                background-color: <%= type.color %>22;
-                color: <%= type.color %>;
-                font-weight: 600;
-            }
+        <% poTypeOptions.forEach(type=> {
+                %> .po-type-select option.type-<%=type.name.toLowerCase() %> {
+                    background-color: <%=type.color %>22;
+                    color: <%=type.color %>;
+                    font-weight: 600;
+                }
 
-            .po-type-select[data-type="<%= type.name %>"] {
-                background-color: <%= type.color %>22;
-                color: <%= type.color %>;
-                border-color: <%= type.color %>;
-                border-width: 2px;
-            }
-        <% }) %>
+                .po-type-select[data-type="<%= type.name %>"] {
+                    background-color: <%=type.color %>22;
+                    color: <%=type.color %>;
+                    border-color: <%=type.color %>;
+                    border-width: 2px;
+                }
+
+                <%
+            }) %>
 
         /* URL Modal */
         .url-modal {
@@ -4599,11 +4601,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                             <select class="priority-select" data-id="<%= po._id %>"
                                                 data-po="<%= po.poNumber %>"
                                                 title="Set priority for PO <%= po.poNumber %>">
-                                                <option value="1" <%= (po.priority || 3) == 1 ? 'selected' : '' %> class="priority-1">🔴 1</option>
-                                                <option value="2" <%= (po.priority || 3) == 2 ? 'selected' : '' %> class="priority-2">🩷 2</option>
-                                                <option value="3" <%= (po.priority || 3) == 3 ? 'selected' : '' %> class="priority-3">🟠 3</option>
-                                                <option value="4" <%= (po.priority || 3) == 4 ? 'selected' : '' %> class="priority-4">🟡 4</option>
-                                                <option value="5" <%= (po.priority || 3) == 5 ? 'selected' : '' %> class="priority-5">🟢 5</option>
+                                                <option value="1" <%=(po.priority || 3)==1 ? 'selected' : '' %>
+                                                    class="priority-1">🔴 1</option>
+                                                <option value="2" <%=(po.priority || 3)==2 ? 'selected' : '' %>
+                                                    class="priority-2">🩷 2</option>
+                                                <option value="3" <%=(po.priority || 3)==3 ? 'selected' : '' %>
+                                                    class="priority-3">🟠 3</option>
+                                                <option value="4" <%=(po.priority || 3)==4 ? 'selected' : '' %>
+                                                    class="priority-4">🟡 4</option>
+                                                <option value="5" <%=(po.priority || 3)==5 ? 'selected' : '' %>
+                                                    class="priority-5">🟢 5</option>
                                             </select>
                                         </td>
                                         <td class="po-type-cell">
@@ -4611,8 +4618,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                 data-po="<%= po.poNumber %>" data-type="<%= po.poType || 'Seed' %>"
                                                 title="Set type for PO <%= po.poNumber %>">
                                                 <% poTypeOptions.forEach(type=> { %>
-                                                    <option value="<%= type.name %>" <%= (po.poType || 'Seed') === type.name ? 'selected' : '' %> class="type-<%= type.name.toLowerCase() %>">
-                                                        <%= type.emoji %> <%= type.name %>
+                                                    <option value="<%= type.name %>" <%=(po.poType || 'Seed'
+                                                        )===type.name ? 'selected' : '' %> class="type-<%=
+                                                            type.name.toLowerCase() %>">
+                                                            <%= type.emoji %>
+                                                                <%= type.name %>
                                                     </option>
                                                     <% }) %>
                                             </select>
@@ -4638,7 +4648,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                 style="min-width: 60px; font-size: 11px; padding: 2px 4px;">
                                                 <option value="">-</option>
                                                 <% assignees.forEach(assignee=> { %>
-                                                    <option value="<%= assignee._id %>" <%= po.assignedTo && po.assignedTo._id && po.assignedTo._id.toString() === assignee._id.toString() ? 'selected' : '' %>>
+                                                    <option value="<%= assignee._id %>" <%=po.assignedTo &&
+                                                        po.assignedTo._id &&
+                                                        po.assignedTo._id.toString()===assignee._id.toString()
+                                                        ? 'selected' : '' %>>
                                                         <%= assignee.initials %>
                                                     </option>
                                                     <% }) %>
@@ -4709,15 +4722,24 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                     <select class="shipping-carrier-select form-control-sm"
                                                         data-po-id="<%= po._id %>"
                                                         style="font-size: 12px; border: 1px solid #ddd; padding: 4px 8px; width: 80px; margin-right: 4px;">
-                                                        <option value="FedEx" <%= (po.shippingCarrier || 'FedEx') === 'FedEx' ? 'selected' : '' %>>FedEx</option>
-                                                        <option value="UPS" <%= (po.shippingCarrier || 'FedEx') === 'UPS' ? 'selected' : '' %>>UPS</option>
-                                                        <option value="USPS" <%= (po.shippingCarrier || 'FedEx') === 'USPS' ? 'selected' : '' %>>USPS</option>
-                                                        <option value="DHL" <%= (po.shippingCarrier || 'FedEx') === 'DHL' ? 'selected' : '' %>>DHL</option>
-                                                        <option value="Amazon" <%= (po.shippingCarrier || 'FedEx') === 'Amazon' ? 'selected' : '' %>>Amazon</option>
-                                                        <option value="OnTrac" <%= (po.shippingCarrier || 'FedEx') === 'OnTrac' ? 'selected' : '' %>>OnTrac</option>
-                                                        <option value="LaserShip" <%= (po.shippingCarrier || 'FedEx') === 'LaserShip' ? 'selected' : '' %>>LaserShip</option>
-                                                        <option value="Canada Post" <%= (po.shippingCarrier || 'FedEx') === 'Canada Post' ? 'selected' : '' %>>Canada Post</option>
-                                                        <option value="Other" <%= (po.shippingCarrier || 'FedEx') === 'Other' ? 'selected' : '' %>>Other</option>
+                                                        <option value="FedEx" <%=(po.shippingCarrier || 'FedEx'
+                                                            )==='FedEx' ? 'selected' : '' %>>FedEx</option>
+                                                        <option value="UPS" <%=(po.shippingCarrier || 'FedEx' )==='UPS'
+                                                            ? 'selected' : '' %>>UPS</option>
+                                                        <option value="USPS" <%=(po.shippingCarrier || 'FedEx'
+                                                            )==='USPS' ? 'selected' : '' %>>USPS</option>
+                                                        <option value="DHL" <%=(po.shippingCarrier || 'FedEx' )==='DHL'
+                                                            ? 'selected' : '' %>>DHL</option>
+                                                        <option value="Amazon" <%=(po.shippingCarrier || 'FedEx'
+                                                            )==='Amazon' ? 'selected' : '' %>>Amazon</option>
+                                                        <option value="OnTrac" <%=(po.shippingCarrier || 'FedEx'
+                                                            )==='OnTrac' ? 'selected' : '' %>>OnTrac</option>
+                                                        <option value="LaserShip" <%=(po.shippingCarrier || 'FedEx'
+                                                            )==='LaserShip' ? 'selected' : '' %>>LaserShip</option>
+                                                        <option value="Canada Post" <%=(po.shippingCarrier || 'FedEx'
+                                                            )==='Canada Post' ? 'selected' : '' %>>Canada Post</option>
+                                                        <option value="Other" <%=(po.shippingCarrier || 'FedEx'
+                                                            )==='Other' ? 'selected' : '' %>>Other</option>
                                                     </select>
                                                     <input type="text" class="shipping-tracking-input form-control-sm"
                                                         placeholder="Enter tracking #"
@@ -5210,7 +5232,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
     <script>
         console.log('🚀 Dashboard JavaScript starting to load...');
-        
+
         // Navigation Functions
         function toggleAccordion(accordionId) {
             const content = document.getElementById(accordionId);
@@ -9107,8 +9129,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function selectAllPoTypes() {
             <% poTypeOptions.forEach(type => { %>
             const checkbox<%= type.name.replace(/\s+/g, '') %> = document.getElementById('filter<%= type.name %>');
-            if (checkbox<%= type.name.replace(/\s+/g, '') %>) {
-                checkbox<%= type.name.replace(/\s+/g, '') %>.checked = true;
+            if (checkbox <%= type.name.replace(/\s+/g, '') %>) {
+                checkbox <%= type.name.replace(/\s+/g, '') %>.checked = true;
                 localStorage.setItem('filter<%= type.name %>', 'true');
             }
             <% }); %>
@@ -9118,8 +9140,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         function clearAllPoTypes() {
             <% poTypeOptions.forEach(type => { %>
             const checkbox<%= type.name.replace(/\s+/g, '') %> = document.getElementById('filter<%= type.name %>');
-            if (checkbox<%= type.name.replace(/\s+/g, '') %>) {
-                checkbox<%= type.name.replace(/\s+/g, '') %>.checked = false;
+            if (checkbox <%= type.name.replace(/\s+/g, '') %>) {
+                checkbox <%= type.name.replace(/\s+/g, '') %>.checked = false;
                 localStorage.setItem('filter<%= type.name %>', 'false');
             }
             <% }); %>
