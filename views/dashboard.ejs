@@ -8173,10 +8173,25 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
-                    credentials: 'same-origin'
+                    credentials: 'same-origin',
+                    redirect: 'error',  // Fail if server tries to redirect
+                    cache: 'no-store'   // Force fresh fetch, no cache
                 });
                 console.log('🔍 Response status:', response.status);
+                console.log('🔍 Response URL:', response.url);
+                console.log('🔍 Response redirected:', response.redirected);
+                console.log('🔍 Response URL:', response.url);
+                console.log('🔍 Response redirected:', response.redirected);
                 console.log('🔍 Response content-type:', response.headers.get('content-type'));
+                
+                // Check if response is actually JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    console.error('❌ Response is not JSON! Content-Type:', contentType);
+                    const text = await response.text();
+                    console.error('❌ Received HTML/text instead:', text.substring(0, 500));
+                    throw new Error(`Server returned ${contentType} instead of JSON. This usually means authentication failed or the page redirected.`);
+                }
                 
                 if (!response.ok) {
                     const text = await response.text();
