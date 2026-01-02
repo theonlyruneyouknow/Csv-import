@@ -8255,47 +8255,71 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         // Load email templates from database
         async function loadDatabaseEmailTemplates(index, form, po, unreceivedItems, partlyReceivedItems) {
+            console.log('🎯 loadDatabaseEmailTemplates CALLED with:', { index, formExists: !!form, poNumber: po?.poNumber });
+            
             try {
-                console.log('📧 Loading email templates from database...');
+                console.log('📧 STEP 1: About to fetch /email-templates...');
                 const response = await fetch('/email-templates?isActive=true');
-                console.log('📧 Response status:', response.status);
+                console.log('📧 STEP 2: Fetch completed. Response status:', response.status);
+                console.log('📧 STEP 3: Response headers:', [...response.headers.entries()]);
                 
                 if (!response.ok) {
+                    console.error('❌ Response not OK:', response.status, response.statusText);
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
+                console.log('📧 STEP 4: About to parse JSON...');
                 const templates = await response.json();
+                console.log('📧 STEP 5: JSON parsed successfully');
+                console.log('📧 STEP 5: JSON parsed successfully');
                 console.log('📧 Loaded templates:', templates.length, 'templates');
                 console.log('📧 Template data:', templates);
 
+                console.log('📧 STEP 6: Finding template select element...');
                 const templateSelect = form.querySelector('.email-template-select');
+                console.log('📧 STEP 7: Template select found:', !!templateSelect);
+                
+                if (!templateSelect) {
+                    throw new Error('Template select element not found in form!');
+                }
+                
                 templateSelect.innerHTML = '<option value="">-- Select Template --</option>';
+                console.log('📧 STEP 8: Cleared template options');
                 
                 // Find default template for eta_request category
                 let defaultTemplate = null;
                 
-                templates.forEach(template => {
+                console.log('📧 STEP 9: Processing', templates.length, 'templates...');
+                templates.forEach((template, idx) => {
+                    console.log(`📧 Processing template ${idx + 1}:`, template.name, 'isDefault:', template.isDefault, 'category:', template.category);
                     const option = document.createElement('option');
                     option.value = template._id;
                     option.textContent = template.name;
                     option.dataset.templateData = JSON.stringify(template);
                     
                     if (template.isDefault && template.category === 'eta_request') {
+                        console.log('🎯 Found default template:', template.name);
                         defaultTemplate = template;
                         option.selected = true;
                     }
                     
                     templateSelect.appendChild(option);
                 });
+                console.log('📧 STEP 10: All templates added to dropdown');
+
+                });
+                console.log('📧 STEP 10: All templates added to dropdown');
 
                 // Add custom option
                 const customOption = document.createElement('option');
                 customOption.value = 'custom';
                 customOption.textContent = 'Custom Message';
                 templateSelect.appendChild(customOption);
+                console.log('📧 STEP 11: Added custom option');
 
                 // Setup change listener
                 templateSelect.addEventListener('change', function() {
+                    console.log('📧 Template changed to:', this.value);
                     const selectedOption = this.options[this.selectedIndex];
                     if (selectedOption.dataset.templateData) {
                         const template = JSON.parse(selectedOption.dataset.templateData);
@@ -8304,15 +8328,28 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         clearEmailForm(index, form);
                     }
                 });
+                console.log('📧 STEP 12: Change listener added');
 
                 // Load default template automatically
                 if (defaultTemplate) {
+                    console.log('📧 STEP 13: Applying default template:', defaultTemplate.name);
                     await applyDatabaseTemplate(index, form, defaultTemplate, po, unreceivedItems, partlyReceivedItems);
+                    console.log('📧 STEP 14: Default template applied successfully!');
+                } else {
+                    console.warn('⚠️ No default template found');
                 }
+                
+                console.log('✅ loadDatabaseEmailTemplates COMPLETED successfully');
 
             } catch (error) {
-                console.error('❌ Error loading email templates:', error);
-                console.error('❌ Error details:', error.message, error.stack);
+                console.error('❌ ERROR in loadDatabaseEmailTemplates:', error);
+                console.error('❌ Error name:', error.name);
+                console.error('❌ Error message:', error.message);
+                console.error('❌ Error stack:', error.stack);
+                
+                // Show error to user
+                alert(`Failed to load email templates: ${error.message}\n\nPlease check the browser console for details.`);
+                
                 // Fallback to basic template
                 const templateSelect = form.querySelector('.email-template-select');
                 if (templateSelect) {
