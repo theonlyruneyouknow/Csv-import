@@ -1828,19 +1828,54 @@ router.put('/line-items/:itemId/update', async (req, res) => {
       notes: notes ? 'provided' : 'none'
     });
 
+    // Get the existing line item first to track changes
+    const existingItem = await LineItem.findById(itemId);
+    if (!existingItem) {
+      return res.status(404).json({ error: 'Line item not found' });
+    }
+
     const updateData = {};
+    const changes = [];
 
     if (quantityOrdered !== undefined) {
       const qty = parseFloat(quantityOrdered);
+      if (existingItem.quantityOrdered !== qty) {
+        changes.push({
+          changeType: 'Quantity Ordered',
+          oldValue: existingItem.quantityOrdered || 0,
+          newValue: qty
+        });
+      }
       updateData.quantityOrdered = qty;
       updateData.quantityExpected = qty; // Keep both fields in sync
     }
 
     if (quantityReceived !== undefined) {
-      updateData.quantityReceived = parseFloat(quantityReceived);
+      const qty = parseFloat(quantityReceived);
+      if (existingItem.quantityReceived !== qty) {
+        // Build detailed change message with EAD if available
+        let changeMessage = `Qty Received: ${existingItem.quantityReceived || 0} → ${qty}`;
+        if (existingItem.ead) {
+          changeMessage += ` (EAD: ${existingItem.ead})`;
+        }
+        changes.push({
+          changeType: 'Quantity Received',
+          oldValue: existingItem.quantityReceived || 0,
+          newValue: qty,
+          detailedMessage: changeMessage
+        });
+      }
+      updateData.quantityReceived = qty;
     }
 
     if (itemStatus !== undefined && itemStatus !== '') {
+      if (existingItem.itemStatus !== itemStatus) {
+        changes.push({
+          changeType: 'Item Status',
+          oldValue: existingItem.itemStatus || 'None',
+          newValue: itemStatus
+        });
+      }
       updateData.itemStatus = itemStatus;
     }
 
@@ -1856,6 +1891,20 @@ router.put('/line-items/:itemId/update', async (req, res) => {
 
     if (!updatedItem) {
       return res.status(404).json({ error: 'Line item not found' });
+    }
+
+    // Track changes to the parent PO
+    if (changes.length > 0 && updatedItem.poId) {
+      await trackMultipleChanges(
+        updatedItem.poId,
+        changes.map(c => ({
+          changeType: `Line Item [${updatedItem.sku || updatedItem.memo}] ${c.changeType}`,
+          oldValue: c.oldValue,
+          newValue: c.newValue,
+          detailedMessage: c.detailedMessage
+        })),
+        username
+      );
     }
 
     // If notes provided, add them
