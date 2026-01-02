@@ -8183,8 +8183,23 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                const data = await response.json();
+                console.log('✅ Response OK, parsing JSON...');
+                const responseText = await response.text();
+                console.log('📄 Raw response text (first 500 chars):', responseText.substring(0, 500));
+                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                    console.log('✅ JSON parsed successfully');
+                    console.log('📦 Data structure:', Object.keys(data));
+                } catch (parseError) {
+                    console.error('❌ JSON parse error:', parseError);
+                    console.error('❌ Response was:', responseText.substring(0, 1000));
+                    throw new Error(`Failed to parse JSON: ${parseError.message}`);
+                }
+                
                 const po = data.purchaseOrder;
+                console.log('✅ PO extracted:', po?.poNumber);
 
                 // Display PO info
                 const unreceivedItems = po.lineItems.filter(item => !item.received);

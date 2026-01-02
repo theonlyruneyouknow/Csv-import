@@ -3686,13 +3686,25 @@ router.get('/:id', async (req, res) => {
     // Add line items to the purchase order object
     purchaseOrder.lineItems = lineItems;
 
-    res.json({ 
+    console.log('📤 Sending JSON response with PO:', purchaseOrder.poNumber);
+    console.log('📤 Response will have', lineItems.length, 'line items');
+    
+    const responseData = { 
       success: true,
       purchaseOrder 
-    });
+    };
+    
+    console.log('📤 About to call res.json()');
+    res.json(responseData);
+    console.log('✅ res.json() called successfully');
   } catch (error) {
     console.error('❌ Get purchase order error:', error);
-    res.status(500).json({ error: error.message });
+    console.error('❌ Error stack:', error.stack);
+    res.status(500).json({ 
+      success: false,
+      error: error.message,
+      stack: error.stack 
+    });
   }
 });
 
