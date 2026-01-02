@@ -17,6 +17,12 @@ const Task = require('../models/Task');
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
+// Debug middleware to log all requests hitting this router
+router.use((req, res, next) => {
+  console.log(`🔶 Router middleware: ${req.method} ${req.path} (originalUrl: ${req.originalUrl})`);
+  next();
+});
+
 // Test route to verify router is working
 router.get('/test-upload', (req, res) => {
   console.log('🧪 TEST ROUTE HIT - Upload route is accessible!');
