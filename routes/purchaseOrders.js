@@ -2498,6 +2498,11 @@ router.get('/', async (req, res) => {
       }
     }
 
+    // Set cache control headers to prevent browser caching of this page
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
     res.render('dashboard', {
       purchaseOrders: purchaseOrdersWithETA,
       prePurchaseOrders,
@@ -2509,7 +2514,8 @@ router.get('/', async (req, res) => {
       allStatusOptions: statusOptions, // Send full objects for management
       poTypeOptions: poTypeOptions, // Send PO type options for dynamic rendering
       assignees: assignees, // Send assignees for assignment dropdown
-      user: req.user // Pass user information for authentication status
+      user: req.user, // Pass user information for authentication status
+      cacheKey: Date.now() // Add cache-busting key
     });
   } catch (error) {
     console.error('❌ Dashboard route error:', error);
