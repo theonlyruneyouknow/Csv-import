@@ -18,11 +18,7 @@ router.get('/', async (req, res) => {
         const templates = await EmailTemplate.find(filter)
             .sort({ isDefault: -1, 'usage.count': -1, name: 1 });
 
-        res.json({
-            success: true,
-            templates,
-            count: templates.length
-        });
+        res.json(templates);
     } catch (error) {
         console.error('Error fetching email templates:', error);
         res.status(500).json({
@@ -305,6 +301,35 @@ router.post('/initialize', async (req, res) => {
         });
     } catch (error) {
         console.error('Error initializing default templates:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Track template usage
+router.post('/:id/use', async (req, res) => {
+    try {
+        const template = await EmailTemplate.findById(req.params.id);
+        
+        if (!template) {
+            return res.status(404).json({
+                success: false,
+                error: 'Template not found'
+            });
+        }
+
+        template.usage.count += 1;
+        template.usage.lastUsed = new Date();
+        await template.save();
+
+        res.json({
+            success: true,
+            message: 'Template usage tracked'
+        });
+    } catch (error) {
+        console.error('Error tracking template usage:', error);
         res.status(500).json({
             success: false,
             error: error.message

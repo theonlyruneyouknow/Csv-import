@@ -2443,6 +2443,115 @@
             min-height: 250px;
         }
 
+        .email-body-code {
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            width: 100%;
+            min-height: 250px;
+            background: #f8f9fa;
+        }
+
+        .email-body-preview {
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+            min-height: 250px;
+            background: white;
+        }
+
+        .view-mode-tabs {
+            display: flex;
+            gap: 5px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 3px;
+            background: #f8f9fa;
+        }
+
+        .view-mode-tab {
+            flex: 1;
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid transparent;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: #6c757d;
+            transition: all 0.2s;
+        }
+
+        .view-mode-tab:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .view-mode-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+        }
+
+        .template-manage-btn {
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        .template-manage-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .template-modified-notice {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            color: #856404;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .save-as-template-btn,
+        .update-template-btn {
+            padding: 5px 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .save-as-template-btn:hover,
+        .update-template-btn:hover {
+            background: #0056b3;
+        }
+
+        .update-template-btn {
+            background: #28a745;
+        }
+
+        .update-template-btn:hover {
+            background: #218838;
+        }
+
         .email-vendor-suggestions {
             font-size: 12px;
             color: #6c757d;
@@ -5194,12 +5303,30 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                     <!-- Email Template Selection -->
                                                     <div class="email-form-group">
                                                         <label>Email Template:</label>
-                                                        <select class="email-template-select" data-index="<%= index %>">
-                                                            <option value="">-- Select Template --</option>
-                                                            <option value="default">Default Status Request</option>
-                                                            <option value="urgent">Urgent Follow-up</option>
-                                                            <option value="custom">Custom Message</option>
-                                                        </select>
+                                                        <div style="display: flex; gap: 8px; align-items: center;">
+                                                            <select class="email-template-select" data-index="<%= index %>" style="flex: 1;">
+                                                                <option value="">Loading templates...</option>
+                                                            </select>
+                                                            <button type="button" class="template-manage-btn" onclick="window.open('/manage-email-templates', '_blank')" title="Manage Templates">
+                                                                ⚙️
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- View Mode Toggle -->
+                                                    <div class="email-form-group">
+                                                        <label>View Mode:</label>
+                                                        <div class="view-mode-tabs" data-index="<%= index %>">
+                                                            <button type="button" class="view-mode-tab active" data-mode="preview" data-index="<%= index %>" onclick="switchViewMode('<%= index %>', 'preview')">
+                                                                👁️ Preview
+                                                            </button>
+                                                            <button type="button" class="view-mode-tab" data-mode="edit" data-index="<%= index %>" onclick="switchViewMode('<%= index %>', 'edit')">
+                                                                ✏️ Edit
+                                                            </button>
+                                                            <button type="button" class="view-mode-tab" data-mode="code" data-index="<%= index %>" onclick="switchViewMode('<%= index %>', 'code')">
+                                                                💻 Code
+                                                            </button>
+                                                        </div>
                                                     </div>
 
                                                     <!-- Recipient Email -->
@@ -5220,7 +5347,20 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                                     <!-- Message Body -->
                                                     <div class="email-form-group">
                                                         <label>Message:</label>
-                                                        <textarea class="email-body-textarea" rows="12" required></textarea>
+                                                        <div class="email-body-preview" id="email-body-preview-<%= index %>" style="display: none;">
+                                                            <!-- Rendered preview will appear here -->
+                                                        </div>
+                                                        <textarea class="email-body-textarea" id="email-body-edit-<%= index %>" rows="12" required style="display: block;"></textarea>
+                                                        <textarea class="email-body-code" id="email-body-code-<%= index %>" rows="12" style="display: none; font-family: 'Courier New', monospace; font-size: 12px;"></textarea>
+                                                        <div class="template-modified-notice" id="template-modified-<%= index %>" style="display: none;">
+                                                            ⚠️ Template has been modified
+                                                            <button type="button" class="save-as-template-btn" onclick="saveAsTemplate('<%= index %>')">
+                                                                💾 Save as New Template
+                                                            </button>
+                                                            <button type="button" class="update-template-btn" onclick="updateTemplate('<%= index %>')" style="display: none;">
+                                                                🔄 Update Current Template
+                                                            </button>
+                                                        </div>
                                                     </div>
 
                                                     <!-- Actions -->
@@ -8065,18 +8205,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     }
                 }
 
-                // Set default subject
-                const subjectInput = form.querySelector('.email-subject-input');
-                subjectInput.value = `Status Update Request - PO ${poNumber}`;
-
-                // Setup template selector
-                const templateSelect = form.querySelector('.email-template-select');
-                templateSelect.addEventListener('change', function() {
-                    loadEmailTemplate(this.value, po, unreceivedItems, partlyReceivedItems, form);
-                });
-
-                // Load default template
-                await loadEmailTemplate('default', po, unreceivedItems, partlyReceivedItems, form);
+                // Load email templates from database
+                await loadDatabaseEmailTemplates(index, form, po, unreceivedItems, partlyReceivedItems);
 
                 // Setup form submission
                 setupEmailFormSubmission(form, index);
@@ -8088,82 +8218,305 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             }
         }
 
-        async function loadEmailTemplate(templateType, po, unreceivedItems, partlyReceivedItems, form) {
-            const bodyTextarea = form.querySelector('.email-body-textarea');
-            
-            if (!templateType || templateType === 'custom') {
-                bodyTextarea.value = '';
-                return;
+        // Load email templates from database
+        async function loadDatabaseEmailTemplates(index, form, po, unreceivedItems, partlyReceivedItems) {
+            try {
+                const response = await fetch('/email-templates?isActive=true');
+                const templates = await response.json();
+
+                const templateSelect = form.querySelector('.email-template-select');
+                templateSelect.innerHTML = '<option value="">-- Select Template --</option>';
+                
+                // Find default template for eta_request category
+                let defaultTemplate = null;
+                
+                templates.forEach(template => {
+                    const option = document.createElement('option');
+                    option.value = template._id;
+                    option.textContent = template.name;
+                    option.dataset.templateData = JSON.stringify(template);
+                    
+                    if (template.isDefault && template.category === 'eta_request') {
+                        defaultTemplate = template;
+                        option.selected = true;
+                    }
+                    
+                    templateSelect.appendChild(option);
+                });
+
+                // Add custom option
+                const customOption = document.createElement('option');
+                customOption.value = 'custom';
+                customOption.textContent = 'Custom Message';
+                templateSelect.appendChild(customOption);
+
+                // Setup change listener
+                templateSelect.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    if (selectedOption.dataset.templateData) {
+                        const template = JSON.parse(selectedOption.dataset.templateData);
+                        applyDatabaseTemplate(index, form, template, po, unreceivedItems, partlyReceivedItems);
+                    } else if (this.value === 'custom') {
+                        clearEmailForm(index, form);
+                    }
+                });
+
+                // Load default template automatically
+                if (defaultTemplate) {
+                    await applyDatabaseTemplate(index, form, defaultTemplate, po, unreceivedItems, partlyReceivedItems);
+                }
+
+            } catch (error) {
+                console.error('Error loading email templates:', error);
+                // Fallback to basic template
+                const templateSelect = form.querySelector('.email-template-select');
+                templateSelect.innerHTML = '<option value="custom">Custom Message</option>';
             }
+        }
 
-            let template = '';
-            const vendorName = po.vendor;
-            const poNumber = po.poNumber;
+        // Apply database template with variable substitution
+        async function applyDatabaseTemplate(index, form, template, po, unreceivedItems, partlyReceivedItems) {
+            try {
+                // Store original template for modification detection
+                form.dataset.originalTemplate = template._id;
+                form.dataset.originalBody = template.bodyTemplate;
+                form.dataset.originalSubject = template.subject;
 
-            if (templateType === 'default') {
-                template = `Dear ${vendorName},
+                // Prepare template data for Handlebars
+                const templateData = {
+                    poNumber: po.poNumber,
+                    vendor: po.vendor,
+                    senderName: '<%= user.name || user.username %>',
+                    senderTitle: 'Supply Chain Manager',
+                    senderContact: '<%= user.email || "" %>',
+                    currentDate: new Date().toLocaleDateString(),
+                    currentTime: new Date().toLocaleTimeString(),
+                    totalItems: po.lineItems.length,
+                    noEtaItems: unreceivedItems.filter(item => !item.ead),
+                    overdueItems: unreceivedItems.filter(item => item.ead && new Date(item.ead) < new Date()),
+                    partlyReceivedItems: partlyReceivedItems,
+                    allItems: po.lineItems
+                };
 
-I hope this email finds you well. I am writing to request a status update on Purchase Order ${poNumber}.
+                // Render template with Handlebars
+                const renderedSubject = await renderHandlebarsTemplate(template.subject, templateData);
+                const renderedBody = await renderHandlebarsTemplate(template.bodyTemplate, templateData);
 
-`;
+                // Set subject
+                const subjectInput = form.querySelector('.email-subject-input');
+                subjectInput.value = renderedSubject;
 
-                if (unreceivedItems.length > 0) {
-                    template += `We currently have ${unreceivedItems.length} item(s) showing as not yet received:\n\n`;
-                    unreceivedItems.slice(0, 10).forEach(item => {
-                        template += `• ${item.memo}${item.sku ? ' (SKU: ' + item.sku + ')' : ''}\n`;
-                        if (item.quantityExpected) template += `  Quantity: ${item.quantityExpected} ${item.unit || ''}\n`;
-                        if (item.ead) template += `  Expected: ${new Date(item.ead).toLocaleDateString()}\n`;
+                // Set body in edit mode
+                const bodyEdit = document.getElementById(`email-body-edit-${index}`);
+                const bodyCode = document.getElementById(`email-body-code-${index}`);
+                bodyEdit.value = renderedBody;
+                bodyCode.value = template.bodyTemplate; // Store original template code
+
+                // Show preview
+                await updatePreview(index);
+
+                // Track template usage
+                await fetch(`/email-templates/${template._id}/use`, { method: 'POST' });
+
+                // Setup modification detection
+                setupModificationDetection(index, form);
+
+            } catch (error) {
+                console.error('Error applying template:', error);
+            }
+        }
+
+        // Render Handlebars template (simple client-side implementation)
+        async function renderHandlebarsTemplate(templateString, data) {
+            let rendered = templateString;
+
+            // Replace simple variables {{variable}}
+            rendered = rendered.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+                return data[key] !== undefined ? data[key] : match;
+            });
+
+            // Handle {{#if}} conditionals
+            rendered = rendered.replace(/\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (match, key, content) => {
+                const value = data[key];
+                return (value && (Array.isArray(value) ? value.length > 0 : true)) ? content : '';
+            });
+
+            // Handle {{#each}} loops
+            rendered = rendered.replace(/\{\{#each (\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g, (match, key, itemTemplate) => {
+                const array = data[key];
+                if (!Array.isArray(array) || array.length === 0) return '';
+                
+                return array.map(item => {
+                    let itemRendered = itemTemplate;
+                    // Replace item properties
+                    itemRendered = itemRendered.replace(/\{\{(\w+)\}\}/g, (m, prop) => {
+                        if (prop === 'eta' && item[prop]) {
+                            return new Date(item[prop]).toLocaleDateString();
+                        }
+                        return item[prop] !== undefined ? item[prop] : '';
                     });
-                    if (unreceivedItems.length > 10) {
-                        template += `\n...and ${unreceivedItems.length - 10} more items\n`;
+                    return itemRendered;
+                }).join('');
+            });
+
+            return rendered;
+        }
+
+        // Switch view mode (preview/edit/code)
+        function switchViewMode(index, mode) {
+            const preview = document.getElementById(`email-body-preview-${index}`);
+            const edit = document.getElementById(`email-body-edit-${index}`);
+            const code = document.getElementById(`email-body-code-${index}`);
+            const tabs = document.querySelectorAll(`.view-mode-tab[data-index="${index}"]`);
+
+            // Update tab states
+            tabs.forEach(tab => {
+                if (tab.dataset.mode === mode) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+
+            // Show/hide appropriate view
+            preview.style.display = mode === 'preview' ? 'block' : 'none';
+            edit.style.display = mode === 'edit' ? 'block' : 'none';
+            code.style.display = mode === 'code' ? 'block' : 'none';
+
+            // Update preview if in preview mode
+            if (mode === 'preview') {
+                updatePreview(index);
+            }
+        }
+
+        // Update preview from edit content
+        async function updatePreview(index) {
+            const edit = document.getElementById(`email-body-edit-${index}`);
+            const preview = document.getElementById(`email-body-preview-${index}`);
+            
+            // Convert plain text to HTML with preserved formatting
+            const htmlContent = edit.value
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\n/g, '<br>')
+                .replace(/  /g, '&nbsp;&nbsp;');
+            
+            preview.innerHTML = `<div style="padding: 15px; background: white; border: 1px solid #ddd; border-radius: 4px; white-space: pre-wrap;">${htmlContent}</div>`;
+        }
+
+        // Setup modification detection
+        function setupModificationDetection(index, form) {
+            const edit = document.getElementById(`email-body-edit-${index}`);
+            const code = document.getElementById(`email-body-code-${index}`);
+            const notice = document.getElementById(`template-modified-${index}`);
+            const updateBtn = notice?.querySelector('.update-template-btn');
+
+            const checkModification = () => {
+                const isModified = edit.value !== form.dataset.originalBody && form.dataset.originalTemplate;
+                if (notice) {
+                    notice.style.display = isModified ? 'flex' : 'none';
+                    if (updateBtn) {
+                        // Only show update button if user has permission (admin/manager)
+                        updateBtn.style.display = 'inline-block';
                     }
                 }
+            };
 
-                if (partlyReceivedItems.length > 0) {
-                    template += `\nAdditionally, ${partlyReceivedItems.length} item(s) have been partially received:\n\n`;
-                    partlyReceivedItems.slice(0, 5).forEach(item => {
-                        template += `• ${item.memo} - Received ${item.quantityReceived || 0} of ${item.quantityExpected} ${item.unit || ''}\n`;
-                    });
+            edit.addEventListener('input', checkModification);
+            code.addEventListener('input', () => {
+                // Sync code changes back to edit view
+                edit.value = code.value;
+                checkModification();
+            });
+        }
+
+        // Clear email form
+        function clearEmailForm(index, form) {
+            const subjectInput = form.querySelector('.email-subject-input');
+            const edit = document.getElementById(`email-body-edit-${index}`);
+            const code = document.getElementById(`email-body-code-${index}`);
+            
+            subjectInput.value = `Status Update Request - PO ${form.dataset.poNumber}`;
+            edit.value = '';
+            code.value = '';
+            
+            delete form.dataset.originalTemplate;
+            delete form.dataset.originalBody;
+        }
+
+        // Save as new template
+        async function saveAsTemplate(index) {
+            const form = document.getElementById(`email-vendor-form-${index}`);
+            const edit = document.getElementById(`email-body-edit-${index}`);
+            const subject = form.querySelector('.email-subject-input').value;
+            
+            const name = prompt('Enter a name for this template:');
+            if (!name) return;
+            
+            try {
+                const response = await fetch('/email-templates', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        description: 'Created from email vendor form',
+                        category: 'custom',
+                        subject: subject,
+                        bodyTemplate: edit.value,
+                        createdBy: '<%= user.username %>'
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('✅ Template saved successfully!');
+                    // Reload templates
+                    const poResponse = await fetch(`/purchase-orders/${form.dataset.poId}`);
+                    const data = await poResponse.json();
+                    await loadDatabaseEmailTemplates(index, form, data.purchaseOrder, [], []);
+                } else {
+                    alert('❌ Failed to save template');
                 }
-
-                template += `\nCould you please provide:
-1. Updated delivery dates for any delayed items
-2. Tracking information if items have already shipped
-3. Status updates for any items on backorder
-
-This information would be greatly appreciated as we need to update our customers and plan our operations accordingly.
-
-Thank you for your prompt attention to this matter.
-
-Best regards`;
-
-            } else if (templateType === 'urgent') {
-                template = `Dear ${vendorName},
-
-URGENT: We need an immediate status update on Purchase Order ${poNumber}.
-
-We have ${unreceivedItems.length} item(s) that are critical for our operations and have not been received. `;
-
-                const overdueItems = unreceivedItems.filter(item => item.ead && new Date(item.ead) < new Date());
-                if (overdueItems.length > 0) {
-                    template += `${overdueItems.length} of these items are now OVERDUE:\n\n`;
-                    overdueItems.forEach(item => {
-                        template += `• ${item.memo}${item.sku ? ' (SKU: ' + item.sku + ')' : ''}\n`;
-                        template += `  Expected: ${new Date(item.ead).toLocaleDateString()} - NOW OVERDUE\n`;
-                    });
-                }
-
-                template += `\nWe urgently need:
-1. Immediate confirmation of shipment dates
-2. Tracking numbers for any shipped items  
-3. Alternative solutions for any items that cannot be delivered as promised
-
-Please respond within 24 hours.
-
-Thank you`;
+            } catch (error) {
+                console.error('Error saving template:', error);
+                alert('❌ Error saving template');
             }
+        }
 
-            bodyTextarea.value = template;
+        // Update existing template
+        async function updateTemplate(index) {
+            const form = document.getElementById(`email-vendor-form-${index}`);
+            const edit = document.getElementById(`email-body-edit-${index}`);
+            const subject = form.querySelector('.email-subject-input').value;
+            const templateId = form.dataset.originalTemplate;
+            
+            if (!templateId) return;
+            
+            if (!confirm('Update the original template with these changes?')) return;
+            
+            try {
+                const response = await fetch(`/email-templates/${templateId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        subject: subject,
+                        bodyTemplate: edit.value,
+                        updatedBy: '<%= user.username %>'
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('✅ Template updated successfully!');
+                    form.dataset.originalBody = edit.value;
+                    form.dataset.originalSubject = subject;
+                    document.getElementById(`template-modified-${index}`).style.display = 'none';
+                } else {
+                    alert('❌ Failed to update template');
+                }
+            } catch (error) {
+                console.error('Error updating template:', error);
+                alert('❌ Error updating template');
+            }
         }
 
         function setupEmailFormSubmission(form, index) {
@@ -8179,11 +8532,13 @@ Thank you`;
                 submitBtn.textContent = '📤 Sending...';
                 submitBtn.disabled = true;
 
+                const bodyEdit = document.getElementById(`email-body-edit-${index}`);
+                
                 const formData = {
                     poId: this.dataset.poId,
                     recipient: this.querySelector('.email-recipient-input').value,
                     subject: this.querySelector('.email-subject-input').value,
-                    body: this.querySelector('.email-body-textarea').value,
+                    body: bodyEdit.value,
                     trackEmail: this.querySelector('.email-track-checkbox').checked
                 };
 
