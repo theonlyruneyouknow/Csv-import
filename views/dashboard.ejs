@@ -8199,10 +8199,25 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 console.log('✅ V3 - Response OK, parsing JSON...');
                 const data = await response.json();
                 console.log('✅ V3 - JSON parsed successfully');
-                console.log('📦 V3 - Data structure:', Object.keys(data));
+                console.log('📦 V3 - Data type:', typeof data, 'Is Array:', Array.isArray(data));
+                console.log('📦 V3 - Data:', data);
+                console.log('📦 V3 - Data keys:', Object.keys(data));
                 
                 const po = data.purchaseOrder;
-                console.log('✅ PO extracted:', po?.poNumber);
+                console.log('✅ V3 - PO from data.purchaseOrder:', po);
+                console.log('✅ V3 - PO extracted:', po?.poNumber);
+                
+                if (!po) {
+                    console.error('❌ V3 - No purchaseOrder in data!');
+                    throw new Error('API response missing purchaseOrder');
+                }
+                
+                if (!po.lineItems || !Array.isArray(po.lineItems)) {
+                    console.error('❌ V3 - No lineItems array in PO!', 'po.lineItems:', po.lineItems);
+                    throw new Error('Purchase order missing lineItems');
+                }
+                
+                console.log('✅ V3 - Line items count:', po.lineItems.length);
 
                 // Display PO info
                 const unreceivedItems = po.lineItems.filter(item => !item.received);
