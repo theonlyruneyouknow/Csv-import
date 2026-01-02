@@ -8221,8 +8221,17 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         // Load email templates from database
         async function loadDatabaseEmailTemplates(index, form, po, unreceivedItems, partlyReceivedItems) {
             try {
+                console.log('📧 Loading email templates from database...');
                 const response = await fetch('/email-templates?isActive=true');
+                console.log('📧 Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const templates = await response.json();
+                console.log('📧 Loaded templates:', templates.length, 'templates');
+                console.log('📧 Template data:', templates);
 
                 const templateSelect = form.querySelector('.email-template-select');
                 templateSelect.innerHTML = '<option value="">-- Select Template --</option>';
@@ -8267,10 +8276,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
 
             } catch (error) {
-                console.error('Error loading email templates:', error);
+                console.error('❌ Error loading email templates:', error);
+                console.error('❌ Error details:', error.message, error.stack);
                 // Fallback to basic template
                 const templateSelect = form.querySelector('.email-template-select');
-                templateSelect.innerHTML = '<option value="custom">Custom Message</option>';
+                if (templateSelect) {
+                    templateSelect.innerHTML = '<option value="custom">Custom Message (Templates failed to load)</option>';
+                }
             }
         }
 
