@@ -8237,16 +8237,22 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 const recipientInput = form.querySelector('.email-recipient-input');
                 const suggestionsDiv = document.getElementById(`email-suggestions-${index}`);
                 
+                console.log('📧 V3 - About to load vendor contacts, linkedVendorId:', linkedVendorId);
+                
                 if (linkedVendorId) {
+                    console.log('📧 V3 - Fetching vendor data for:', linkedVendorId);
                     const vendorResponse = await fetch(`/vendors/${linkedVendorId}`);
+                    console.log('📧 V3 - Vendor response status:', vendorResponse.status);
                     if (vendorResponse.ok) {
                         const vendorData = await vendorResponse.json();
+                        console.log('📧 V3 - Vendor data received:', vendorData.name);
                         const contacts = [];
                         
                         if (vendorData.mainEmail) contacts.push(vendorData.mainEmail);
                         if (vendorData.contactInfo?.primaryContact?.email) contacts.push(vendorData.contactInfo.primaryContact.email);
                         if (vendorData.contactInfo?.customerService?.email) contacts.push(vendorData.contactInfo.customerService.email);
                         
+                        console.log('📧 V3 - Found', contacts.length, 'vendor contacts');
                         if (contacts.length > 0) {
                             recipientInput.value = contacts[0];
                             if (contacts.length > 1) {
@@ -8254,10 +8260,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             }
                         }
                     }
+                } else {
+                    console.log('📧 V3 - No linkedVendorId, skipping vendor contact loading');
                 }
+                
+                console.log('📧 V3 - Vendor loading complete, about to load email templates...');
 
                 // Load email templates from database
+                console.log('📧 V3 - CALLING loadDatabaseEmailTemplates...');
                 await loadDatabaseEmailTemplates(index, form, po, unreceivedItems, partlyReceivedItems);
+                console.log('📧 V3 - loadDatabaseEmailTemplates returned successfully');
 
                 // Setup form submission
                 setupEmailFormSubmission(form, index);
