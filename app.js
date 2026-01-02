@@ -275,6 +275,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views'); // Set the views directory explicitly
 
+// Disable view caching in development to ensure template changes are picked up
+if (process.env.NODE_ENV !== 'production') {
+    app.set('view cache', false);
+}
+
 // Flash messages
 app.use(flash());
 
