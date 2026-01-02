@@ -6788,4 +6788,86 @@ router.post('/:id/email-sent', async (req, res) => {
   }
 });
 
+// POST route to send vendor status request email
+router.post('/send-vendor-email', async (req, res) => {
+  try {
+    const { poId, recipient, subject, body, trackEmail } = req.body;
+
+    console.log('📧 Sending vendor status request email:', { poId, recipient, subject: subject.substring(0, 50) + '...' });
+
+    if (!poId || !recipient || !subject || !body) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: poId, recipient, subject, body'
+      });
+    }
+
+    // Get the PO to include details in email
+    const po = await PurchaseOrder.findById(poId);
+    if (!po) {
+      return res.status(404).json({
+        success: false,
+        error: 'Purchase Order not found'
+      });
+    }
+
+    // Import email service
+    const emailService = require('../services/emailService');
+
+    // Send the email
+    const emailResult = await emailService.sendEmail({
+      to: recipient,
+      subject: subject,
+      text: body,
+      html: body.replace(/\n/g, '<br>')
+    });
+
+    if (!emailResult.success) {
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to send email: ' + emailResult.error
+      });
+    }
+
+    // Track the email communication if requested
+    if (trackEmail) {
+      const user = req.user || { username: 'system' };
+      
+      po.lastEmailSent = new Date();
+      po.lastEmailRecipient = recipient;
+      po.lastEmailSubject = subject;
+      po.lastEmailSentBy = user.username || user.email || 'system';
+
+      // Add to history
+      po.emailCommunicationHistory.push({
+        sentAt: new Date(),
+        recipient: recipient,
+        subject: subject,
+        sentBy: user.username || user.email || 'system',
+        notes: `Status request sent via dashboard`
+      });
+
+      await po.save();
+      console.log(`✅ Email tracked for PO ${po.poNumber}`);
+    }
+
+    console.log('✅ Email sent successfully:', emailResult.messageId);
+
+    res.json({
+      success: true,
+      message: 'Email sent successfully',
+      messageId: emailResult.messageId,
+      lastEmailSent: po.lastEmailSent,
+      previewUrl: emailResult.previewUrl || null
+    });
+
+  } catch (error) {
+    console.error('❌ Error sending vendor email:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
