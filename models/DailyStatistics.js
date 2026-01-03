@@ -5,7 +5,23 @@ const dailyStatisticsSchema = new mongoose.Schema({
   date: {
     type: Date,
     required: true,
-    unique: true,
+    index: true
+  },
+  periodType: {
+    type: String,
+    enum: ['daily', 'weekly', 'bi-weekly', 'monthly', 'quarterly', 'yearly'],
+    default: 'daily',
+    required: true,
+    index: true
+  },
+  periodStart: {
+    type: Date,
+    required: true,
+    index: true
+  },
+  periodEnd: {
+    type: Date,
+    required: true,
     index: true
   },
   generatedAt: {
@@ -18,8 +34,8 @@ const dailyStatisticsSchema = new mongoose.Schema({
     total: { type: Number, default: 0 },
     active: { type: Number, default: 0 },
     completed: { type: Number, default: 0 },
-    newToday: { type: Number, default: 0 },
-    updatedToday: { type: Number, default: 0 },
+    newInPeriod: { type: Number, default: 0 },
+    updatedInPeriod: { type: Number, default: 0 },
     byType: {
       seed: { type: Number, default: 0 },
       hardgood: { type: Number, default: 0 },
@@ -41,7 +57,7 @@ const dailyStatisticsSchema = new mongoose.Schema({
     total: { type: Number, default: 0 },
     unreceived: { type: Number, default: 0 },
     received: { type: Number, default: 0 },
-    receivedToday: { type: Number, default: 0 },
+    receivedInPeriod: { type: Number, default: 0 },
     partiallyReceived: { type: Number, default: 0 },
     overdueItems: { type: Number, default: 0 },
     noEtaItems: { type: Number, default: 0 },
@@ -59,7 +75,7 @@ const dailyStatisticsSchema = new mongoose.Schema({
 
   // Email Activity Statistics
   emails: {
-    sentToday: { type: Number, default: 0 },
+    sentInPeriod: { type: Number, default: 0 },
     uniqueVendorsContacted: { type: Number, default: 0 },
     totalSentAllTime: { type: Number, default: 0 },
     byTemplate: [{
@@ -90,7 +106,7 @@ const dailyStatisticsSchema = new mongoose.Schema({
   tracking: {
     itemsInTransit: { type: Number, default: 0 },
     itemsDelivered: { type: Number, default: 0 },
-    itemsDeliveredToday: { type: Number, default: 0 },
+    itemsDeliveredInPeriod: { type: Number, default: 0 },
     averageTransitTime: { type: Number, default: 0 },
     byCarrier: [{
       carrier: String,
@@ -135,8 +151,8 @@ const dailyStatisticsSchema = new mongoose.Schema({
     completedTasks: { type: Number, default: 0 },
     pendingTasks: { type: Number, default: 0 },
     overdueTasks: { type: Number, default: 0 },
-    tasksCreatedToday: { type: Number, default: 0 },
-    tasksCompletedToday: { type: Number, default: 0 }
+    tasksCreatedInPeriod: { type: Number, default: 0 },
+    tasksCompletedInPeriod: { type: Number, default: 0 }
   },
 
   // Change Log Summary
@@ -171,8 +187,12 @@ const dailyStatisticsSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Compound index for unique period reports
+dailyStatisticsSchema.index({ periodType: 1, periodStart: 1, periodEnd: 1 }, { unique: true });
+
 // Indexes for efficient querying
 dailyStatisticsSchema.index({ date: -1 });
+dailyStatisticsSchema.index({ periodType: 1 });
 dailyStatisticsSchema.index({ generatedAt: -1 });
 
 module.exports = mongoose.model('DailyStatistics', dailyStatisticsSchema);

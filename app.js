@@ -2238,10 +2238,10 @@ cron.schedule('59 23 * * *', async () => {
         const statisticsRouter = require('./routes/statistics');
         
         // Generate statistics for today
-        const response = await fetch('http://localhost:' + PORT + '/statistics/generate-daily-stats', {
+        const response = await fetch('http://localhost:' + PORT + '/statistics/generate-stats', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ force: true })
+            body: JSON.stringify({ force: true, periodType: 'daily' })
         });
         
         console.log('✅ Daily statistics generated automatically');

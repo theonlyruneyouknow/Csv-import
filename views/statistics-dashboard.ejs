@@ -154,9 +154,44 @@
         <a href="/purchase-orders" class="nav-back">← Back to Dashboard</a>
         
         <div class="stats-header">
-            <h1>📊 Daily Statistics Report</h1>
+            <h1 id="reportTitle">📊 Daily Statistics Report</h1>
             <p class="text-muted">Comprehensive overview of your purchase order system</p>
-            <button class="generate-btn" onclick="generateStats()">🔄 Generate Today's Stats</button>
+            
+            <!-- Period Type Selector -->
+            <div class="period-selector" style="margin: 20px 0;">
+                <label for="periodType" style="font-weight: bold; margin-right: 10px;">Report Period:</label>
+                <select id="periodType" onchange="changePeriodType()" style="padding: 8px 15px; border-radius: 5px; border: 2px solid #667eea; font-size: 16px; margin-right: 20px;">
+                    <option value="daily" selected>Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="bi-weekly">Bi-Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+                
+                <button class="generate-btn" onclick="generateStats()" style="display: inline-block; margin: 0;">
+                    🔄 Generate Stats
+                </button>
+                
+                <button onclick="exportToExcel()" style="display: inline-block; margin: 0 0 0 10px; padding: 10px 20px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    📊 Export Excel
+                </button>
+                
+                <button onclick="showEmailDialog()" style="display: inline-block; margin: 0 0 0 10px; padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    📧 Email Report
+                </button>
+            </div>
+            
+            <!-- Period Navigation -->
+            <div class="period-navigation" style="margin-top: 15px;">
+                <button onclick="navigatePeriod('prev')" style="padding: 8px 20px; margin-right: 10px; border-radius: 5px; border: 2px solid #667eea; background: white; color: #667eea; cursor: pointer;">
+                    ← Previous Period
+                </button>
+                <span id="currentPeriodLabel" style="font-weight: bold; margin: 0 15px;"></span>
+                <button onclick="navigatePeriod('next')" style="padding: 8px 20px; margin-left: 10px; border-radius: 5px; border: 2px solid #667eea; background: white; color: #667eea; cursor: pointer;">
+                    Next Period →
+                </button>
+            </div>
         </div>
 
         <% if (todayStats) { %>
@@ -178,8 +213,8 @@
                 </div>
                 <div class="col-md-3">
                     <div class="stat-box">
-                        <p>Emails Sent Today</p>
-                        <h3><%= todayStats.emails.sentToday %></h3>
+                        <p>Emails Sent This Period</p>
+                        <h3><%= todayStats.emails.sentInPeriod %></h3>
                         <small><%= todayStats.emails.uniqueVendorsContacted %> Vendors</small>
                     </div>
                 </div>
@@ -368,11 +403,11 @@
                     <div class="stats-card">
                         <h3 class="section-title">📧 Email Activity</h3>
                         <div class="metric-row">
-                            <span class="metric-label">Emails Sent Today</span>
-                            <span class="metric-value"><%= todayStats.emails.sentToday %></span>
+                            <span class="metric-label">Emails Sent This Period</span>
+                            <span class="metric-value"><%= todayStats.emails.sentInPeriod %></span>
                         </div>
                         <div class="metric-row">
-                            <span class="metric-label">Vendors Contacted Today</span>
+                            <span class="metric-label">Vendors Contacted This Period</span>
                             <span class="metric-value"><%= todayStats.emails.uniqueVendorsContacted %></span>
                         </div>
                         <div class="metric-row">
@@ -419,12 +454,12 @@
                             <span class="metric-value"><%= todayStats.tasks.pendingTasks %></span>
                         </div>
                         <div class="metric-row">
-                            <span class="metric-label">Overdue</span>
+                            <span class="metric-label">Overdue Tasks</span>
                             <span class="metric-value"><%= todayStats.tasks.overdueTasks %></span>
                         </div>
                         <div class="metric-row">
-                            <span class="metric-label">Completed Today</span>
-                            <span class="metric-value"><%= todayStats.tasks.tasksCompletedToday %></span>
+                            <span class="metric-label">Completed This Period</span>
+                            <span class="metric-value"><%= todayStats.tasks.tasksCompletedInPeriod %></span>
                         </div>
                     </div>
                 </div>
@@ -445,18 +480,119 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        let currentPeriodType = 'daily';
+        let currentReferenceDate = new Date();
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePeriodLabel();
+        });
+
+        // Update the report title and period label based on selected period type
+        function updateReportTitle() {
+            const periodType = document.getElementById('periodType').value;
+            const titleMap = {
+                'daily': 'Daily Statistics Report',
+                'weekly': 'Weekly Statistics Report',
+                'bi-weekly': 'Bi-Weekly Statistics Report',
+                'monthly': 'Monthly Statistics Report',
+                'quarterly': 'Quarterly Statistics Report',
+                'yearly': 'Yearly Statistics Report'
+            };
+            document.getElementById('reportTitle').textContent = '📊 ' + titleMap[periodType];
+        }
+
+        // Update the current period label
+        function updatePeriodLabel() {
+            const periodType = document.getElementById('periodType').value;
+            const date = currentReferenceDate;
+            let label = '';
+
+            switch(periodType) {
+                case 'daily':
+                    label = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    break;
+                case 'weekly':
+                    const sunday = new Date(date);
+                    sunday.setDate(date.getDate() - date.getDay());
+                    label = 'Week of ' + sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    break;
+                case 'bi-weekly':
+                    const biWeekSunday = new Date(date);
+                    biWeekSunday.setDate(date.getDate() - date.getDay());
+                    label = 'Bi-Week starting ' + biWeekSunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    break;
+                case 'monthly':
+                    label = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                    break;
+                case 'quarterly':
+                    const quarter = Math.floor(date.getMonth() / 3) + 1;
+                    label = 'Q' + quarter + ' ' + date.getFullYear();
+                    break;
+                case 'yearly':
+                    label = date.getFullYear().toString();
+                    break;
+            }
+
+            document.getElementById('currentPeriodLabel').textContent = label;
+        }
+
+        // Change period type
+        function changePeriodType() {
+            currentPeriodType = document.getElementById('periodType').value;
+            updateReportTitle();
+            updatePeriodLabel();
+        }
+
+        // Navigate to previous/next period
+        function navigatePeriod(direction) {
+            const periodType = document.getElementById('periodType').value;
+            const multiplier = direction === 'prev' ? -1 : 1;
+
+            switch(periodType) {
+                case 'daily':
+                    currentReferenceDate.setDate(currentReferenceDate.getDate() + (1 * multiplier));
+                    break;
+                case 'weekly':
+                    currentReferenceDate.setDate(currentReferenceDate.getDate() + (7 * multiplier));
+                    break;
+                case 'bi-weekly':
+                    currentReferenceDate.setDate(currentReferenceDate.getDate() + (14 * multiplier));
+                    break;
+                case 'monthly':
+                    currentReferenceDate.setMonth(currentReferenceDate.getMonth() + (1 * multiplier));
+                    break;
+                case 'quarterly':
+                    currentReferenceDate.setMonth(currentReferenceDate.getMonth() + (3 * multiplier));
+                    break;
+                case 'yearly':
+                    currentReferenceDate.setFullYear(currentReferenceDate.getFullYear() + (1 * multiplier));
+                    break;
+            }
+
+            updatePeriodLabel();
+            // Auto-load stats for the new period
+            loadStatsForCurrentPeriod();
+        }
+
+        // Generate stats for the selected period
         async function generateStats() {
-            const btn = document.querySelector('.generate-btn');
+            const btn = event.target;
+            const periodType = document.getElementById('periodType').value;
             btn.disabled = true;
             btn.textContent = '⏳ Generating...';
 
             try {
-                const response = await fetch('/statistics/generate-daily-stats', {
+                const response = await fetch('/statistics/generate-stats', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ force: true })
+                    body: JSON.stringify({ 
+                        force: true,
+                        periodType: periodType,
+                        referenceDate: currentReferenceDate.toISOString()
+                    })
                 });
 
                 const data = await response.json();
@@ -467,13 +603,102 @@
                 } else {
                     alert('❌ Error: ' + data.error);
                     btn.disabled = false;
-                    btn.textContent = '🔄 Generate Today\'s Stats';
+                    btn.textContent = '🔄 Generate Stats';
                 }
             } catch (error) {
                 alert('❌ Error: ' + error.message);
                 btn.disabled = false;
-                btn.textContent = '🔄 Generate Today\'s Stats';
+                btn.textContent = '🔄 Generate Stats';
             }
+        }
+
+        // Export statistics to Excel
+        async function exportToExcel() {
+            const periodType = document.getElementById('periodType').value;
+            
+            try {
+                const response = await fetch('/statistics/export-excel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        periodType: periodType,
+                        referenceDate: currentReferenceDate
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to export Excel');
+                }
+
+                // Download the file
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Statistics_${periodType}_${currentReferenceDate.split('T')[0]}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                alert('✅ Excel file downloaded successfully!');
+            } catch (error) {
+                alert('❌ Error exporting Excel: ' + error.message);
+            }
+        }
+
+        // Show email dialog
+        function showEmailDialog() {
+            const emails = prompt('Enter recipient email addresses (comma-separated):');
+            if (emails && emails.trim()) {
+                emailReport(emails);
+            }
+        }
+
+        // Email statistics report
+        async function emailReport(emailsString) {
+            const periodType = document.getElementById('periodType').value;
+            const recipients = emailsString.split(',').map(e => e.trim()).filter(e => e);
+
+            if (recipients.length === 0) {
+                alert('❌ Please provide at least one email address');
+                return;
+            }
+
+            try {
+                const response = await fetch('/statistics/email-report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        periodType: periodType,
+                        referenceDate: currentReferenceDate,
+                        recipients: recipients
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || 'Failed to send email');
+                }
+
+                alert(`✅ ${result.message}`);
+            } catch (error) {
+                alert('❌ Error sending email: ' + error.message);
+            }
+        }
+
+        // Load stats for current period (future enhancement)
+        async function loadStatsForCurrentPeriod() {
+            // This would fetch stats for the selected period
+            // For now, we just show a message
+            console.log('Loading stats for:', currentReferenceDate, document.getElementById('periodType').value);
+            // TODO: Implement API call to fetch stats by period
         }
     </script>
 </body>
