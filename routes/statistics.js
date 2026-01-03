@@ -709,8 +709,8 @@ router.post('/export-excel', async (req, res) => {
 
     // Performance section
     summarySheet.addRow({ metric: 'PERFORMANCE', value: '' }).font = { bold: true };
-    summarySheet.addRow({ metric: 'Avg Days Order to Stock', value: stats.performance.avgDaysOrderToStock.toFixed(1) });
-    summarySheet.addRow({ metric: 'On-Time Delivery Rate', value: `${stats.performance.onTimeDeliveryRate.toFixed(1)}%` });
+    summarySheet.addRow({ metric: 'Avg Days Order to Stock', value: (stats.performance.avgDaysOrderToStock || 0).toFixed(1) });
+    summarySheet.addRow({ metric: 'On-Time Delivery Rate', value: `${(stats.performance.onTimeDeliveryRate || 0).toFixed(1)}%` });
     summarySheet.addRow({ metric: '', value: '' }); // Blank row
 
     // Tasks section
@@ -745,7 +745,7 @@ router.post('/export-excel', async (req, res) => {
           rank: index + 1,
           vendor: vendor.vendor,
           poCount: vendor.poCount,
-          totalValue: `$${vendor.totalValue.toFixed(2)}`
+          totalValue: `$${(vendor.totalValue || 0).toFixed(2)}`
         });
       });
     }
@@ -857,8 +857,8 @@ router.post('/email-report', async (req, res) => {
     summarySheet.addRow({ metric: '', value: '' });
 
     summarySheet.addRow({ metric: 'PERFORMANCE', value: '' }).font = { bold: true };
-    summarySheet.addRow({ metric: 'Avg Days Order to Stock', value: stats.performance.avgDaysOrderToStock.toFixed(1) });
-    summarySheet.addRow({ metric: 'On-Time Delivery Rate', value: `${stats.performance.onTimeDeliveryRate.toFixed(1)}%` });
+    summarySheet.addRow({ metric: 'Avg Days Order to Stock', value: (stats.performance.avgDaysOrderToStock || 0).toFixed(1) });
+    summarySheet.addRow({ metric: 'On-Time Delivery Rate', value: `${(stats.performance.onTimeDeliveryRate || 0).toFixed(1)}%` });
 
     const buffer = await workbook.xlsx.writeBuffer();
     const filename = `Statistics_${periodType || 'daily'}_${start.toISOString().split('T')[0]}.xlsx`;
@@ -939,11 +939,11 @@ router.post('/email-report', async (req, res) => {
             <h2>📊 Performance</h2>
             <div class="metric-row">
               <span class="metric-label">Avg Days Order to Stock:</span>
-              <span class="metric-value">${stats.performance.avgDaysOrderToStock.toFixed(1)} days</span>
+              <span class="metric-value">${(stats.performance.avgDaysOrderToStock || 0).toFixed(1)} days</span>
             </div>
             <div class="metric-row">
               <span class="metric-label">On-Time Delivery Rate:</span>
-              <span class="metric-value">${stats.performance.onTimeDeliveryRate.toFixed(1)}%</span>
+              <span class="metric-value">${(stats.performance.onTimeDeliveryRate || 0).toFixed(1)}%</span>
             </div>
           </div>
 
