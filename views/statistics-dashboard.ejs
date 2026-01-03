@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .stats-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .stats-header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .stat-box h3 {
+            font-size: 2.5rem;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .stat-box p {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .section-title {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .metric-label {
+            font-weight: 500;
+            color: #555;
+        }
+        .metric-value {
+            font-weight: bold;
+            color: #333;
+        }
+        .trend-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-left: 10px;
+        }
+        .trend-up {
+            background: #d4edda;
+            color: #155724;
+        }
+        .trend-down {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .alert-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .nav-back {
+            background: white;
+            color: #667eea;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav-back:hover {
+            background: #667eea;
+            color: white;
+        }
+        .generate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .generate-btn:hover {
+            opacity: 0.9;
+        }
+        .chart-container {
+            height: 300px;
+            margin: 20px 0;
+        }
+        .top-list {
+            list-style: none;
+            padding: 0;
+        }
+        .top-list li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .rank-badge {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="stats-container">
+        <a href="/purchase-orders" class="nav-back">← Back to Dashboard</a>
+        
+        <div class="stats-header">
+            <h1>📊 Daily Statistics Report</h1>
+            <p class="text-muted">Comprehensive overview of your purchase order system</p>
+            <button class="generate-btn" onclick="generateStats()">🔄 Generate Today's Stats</button>
+        </div>
+
+        <% if (todayStats) { %>
+            <!-- Key Performance Indicators -->
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-box">
+                        <p>Total Purchase Orders</p>
+                        <h3><%= todayStats.purchaseOrders.total %></h3>
+                        <small><%= todayStats.purchaseOrders.active %> Active</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-box">
+                        <p>Unreceived Items</p>
+                        <h3><%= todayStats.lineItems.unreceived %></h3>
+                        <small><%= todayStats.lineItems.overdueItems %> Overdue</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-box">
+                        <p>Emails Sent Today</p>
+                        <h3><%= todayStats.emails.sentToday %></h3>
+                        <small><%= todayStats.emails.uniqueVendorsContacted %> Vendors</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-box">
+                        <p>Avg Days to Receive</p>
+                        <h3><%= todayStats.lineItems.averageDaysToReceive %></h3>
+                        <small>Median: <%= todayStats.lineItems.medianDaysToReceive %> days</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts & Issues -->
+            <% if (todayStats.issues.itemsMissingEta > 0 || todayStats.issues.overdueWithoutUpdate > 0) { %>
+            <div class="stats-card">
+                <h3 class="section-title">⚠️ Alerts & Issues</h3>
+                <% if (todayStats.issues.itemsMissingEta > 0) { %>
+                <div class="alert-box">
+                    <strong><%= todayStats.issues.itemsMissingEta %></strong> items are missing ETA information
+                </div>
+                <% } %>
+                <% if (todayStats.issues.overdueWithoutUpdate > 0) { %>
+                <div class="alert-box">
+                    <strong><%= todayStats.issues.overdueWithoutUpdate %></strong> overdue items haven't been updated in over 7 days
+                </div>
+                <% } %>
+                <% if (todayStats.issues.partialShipmentPending > 0) { %>
+                <div class="alert-box">
+                    <strong><%= todayStats.issues.partialShipmentPending %></strong> partial shipments are pending
+                </div>
+                <% } %>
+            </div>
+            <% } %>
+
+            <!-- Purchase Orders & Line Items -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="stats-card">
+                        <h3 class="section-title">📦 Purchase Orders</h3>
+                        <div class="metric-row">
+                            <span class="metric-label">Total POs</span>
+                            <span class="metric-value"><%= todayStats.purchaseOrders.total %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Active POs</span>
+                            <span class="metric-value"><%= todayStats.purchaseOrders.active %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Completed POs</span>
+                            <span class="metric-value"><%= todayStats.purchaseOrders.completed %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">New Today</span>
+                            <span class="metric-value"><%= todayStats.purchaseOrders.newToday %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Updated Today</span>
+                            <span class="metric-value"><%= todayStats.purchaseOrders.updatedToday %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Average PO Value</span>
+                            <span class="metric-value">$<%= todayStats.purchaseOrders.averageValue.toLocaleString() %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Total PO Value</span>
+                            <span class="metric-value">$<%= todayStats.purchaseOrders.totalValue.toLocaleString() %></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="stats-card">
+                        <h3 class="section-title">📋 Line Items</h3>
+                        <div class="metric-row">
+                            <span class="metric-label">Total Items</span>
+                            <span class="metric-value"><%= todayStats.lineItems.total %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Received</span>
+                            <span class="metric-value"><%= todayStats.lineItems.received %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Unreceived</span>
+                            <span class="metric-value"><%= todayStats.lineItems.unreceived %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Received Today</span>
+                            <span class="metric-value"><%= todayStats.lineItems.receivedToday %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Overdue Items</span>
+                            <span class="metric-value"><%= todayStats.lineItems.overdueItems %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Items Without ETA</span>
+                            <span class="metric-value"><%= todayStats.lineItems.noEtaItems %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Fastest Delivery</span>
+                            <span class="metric-value"><%= todayStats.lineItems.fastestDelivery %> days</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Slowest Delivery</span>
+                            <span class="metric-value"><%= todayStats.lineItems.slowestDelivery %> days</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PO Types & Urgency -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="stats-card">
+                        <h3 class="section-title">📊 PO by Type</h3>
+                        <div class="metric-row">
+                            <span class="metric-label">Seed</span>
+                            <span class="metric-value"><%= todayStats.purchaseOrders.byType.seed %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Hardgood</span>
+                            <span class="metric-value"><%= todayStats.purchaseOrders.byType.hardgood %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Greengood</span>
+                            <span class="metric-value"><%= todayStats.purchaseOrders.byType.greengood %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Supplies</span>
+                            <span class="metric-value"><%= todayStats.purchaseOrders.byType.supplies %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Dropship</span>
+                            <span class="metric-value"><%= todayStats.purchaseOrders.byType.dropship %></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="stats-card">
+                        <h3 class="section-title">🔥 Urgency Levels</h3>
+                        <div class="metric-row">
+                            <span class="metric-label">High Priority</span>
+                            <span class="metric-value"><%= todayStats.lineItems.byUrgency.high %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Medium Priority</span>
+                            <span class="metric-value"><%= todayStats.lineItems.byUrgency.medium %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Low Priority</span>
+                            <span class="metric-value"><%= todayStats.lineItems.byUrgency.low %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">No Priority Set</span>
+                            <span class="metric-value"><%= todayStats.lineItems.byUrgency.none %></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance & Emails -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="stats-card">
+                        <h3 class="section-title">⚡ Performance Metrics</h3>
+                        <div class="metric-row">
+                            <span class="metric-label">On-Time Delivery Rate</span>
+                            <span class="metric-value"><%= todayStats.performance.onTimeDeliveryRate %>%</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Avg Days Order → Stock</span>
+                            <span class="metric-value"><%= todayStats.performance.avgDaysFromOrderToStock %> days</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Arriving Next 7 Days</span>
+                            <span class="metric-value"><%= todayStats.performance.itemsArrivingNext7Days %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Arriving Next 30 Days</span>
+                            <span class="metric-value"><%= todayStats.performance.itemsArrivingNext30Days %></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="stats-card">
+                        <h3 class="section-title">📧 Email Activity</h3>
+                        <div class="metric-row">
+                            <span class="metric-label">Emails Sent Today</span>
+                            <span class="metric-value"><%= todayStats.emails.sentToday %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Vendors Contacted Today</span>
+                            <span class="metric-value"><%= todayStats.emails.uniqueVendorsContacted %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Total Emails Sent (All Time)</span>
+                            <span class="metric-value"><%= todayStats.emails.totalSentAllTime %></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Vendors & Tasks -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="stats-card">
+                        <h3 class="section-title">🏆 Top Vendors by Value</h3>
+                        <ul class="top-list">
+                            <% todayStats.vendors.topVendorsByVolume.slice(0, 5).forEach((vendor, index) => { %>
+                            <li>
+                                <div>
+                                    <span class="rank-badge"><%= index + 1 %></span>
+                                    <strong><%= vendor.vendor %></strong>
+                                    <small class="text-muted">(<%= vendor.poCount %> POs)</small>
+                                </div>
+                                <span class="metric-value">$<%= vendor.totalValue.toLocaleString() %></span>
+                            </li>
+                            <% }); %>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="stats-card">
+                        <h3 class="section-title">✅ Tasks Overview</h3>
+                        <div class="metric-row">
+                            <span class="metric-label">Total Tasks</span>
+                            <span class="metric-value"><%= todayStats.tasks.totalTasks %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Completed</span>
+                            <span class="metric-value"><%= todayStats.tasks.completedTasks %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Pending</span>
+                            <span class="metric-value"><%= todayStats.tasks.pendingTasks %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Overdue</span>
+                            <span class="metric-value"><%= todayStats.tasks.overdueTasks %></span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Completed Today</span>
+                            <span class="metric-value"><%= todayStats.tasks.tasksCompletedToday %></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generated timestamp -->
+            <div class="text-center text-muted mt-4">
+                <small>Report generated: <%= new Date(todayStats.generatedAt).toLocaleString() %></small>
+            </div>
+
+        <% } else { %>
+            <div class="stats-card text-center">
+                <h3>No Statistics Available</h3>
+                <p class="text-muted">Click the button above to generate today's statistics</p>
+            </div>
+        <% } %>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function generateStats() {
+            const btn = document.querySelector('.generate-btn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Generating...';
+
+            try {
+                const response = await fetch('/statistics/generate-daily-stats', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ force: true })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ Statistics generated successfully!');
+                    window.location.reload();
+                } else {
+                    alert('❌ Error: ' + data.error);
+                    btn.disabled = false;
+                    btn.textContent = '🔄 Generate Today\'s Stats';
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+                btn.disabled = false;
+                btn.textContent = '🔄 Generate Today\'s Stats';
+            }
+        }
+    </script>
+</body>
+</html>

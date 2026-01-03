@@ -802,6 +802,7 @@ app.use('/enhanced-vendors', ensureAuthenticated, ensureApproved, enhancedVendor
 app.use('/tasks', ensureAuthenticated, ensureApproved, taskRoutes);
 app.use('/receiving', ensureAuthenticated, ensureApproved, receivingRoutes);
 app.use('/email-templates', ensureAuthenticated, ensureApproved, emailTemplateRoutes);
+app.use('/statistics', ensureAuthenticated, ensureApproved, require('./routes/statistics')); // NEW: Daily Statistics
 app.use('/forms', ensureAuthenticated, ensureApproved, formRoutes); // NEW: Forms management
 app.use('/seed-catalog', ensureAuthenticated, ensureApproved, seedCatalogRoutes); // NEW: AI Seed Catalog
 app.use('/dropshipments', ensureAuthenticated, ensureApproved, dropshipmentRoutes); // NEW: Dropshipment Tracking
@@ -2223,6 +2224,30 @@ cron.schedule('0 * * * *', () => {
     generateUnreceivedItemsReport();
     generateWaitingForApprovalReport();
     generateAllAutoReports();
+});
+
+// Schedule daily statistics generation at 11:59 PM every day
+cron.schedule('59 23 * * *', async () => {
+    console.log('📊 Generating daily statistics...');
+    try {
+        const DailyStatistics = require('./models/DailyStatistics');
+        const PurchaseOrder = require('./models/PurchaseOrder');
+        const LineItem = require('./models/LineItem');
+        
+        // Import the statistics generation function
+        const statisticsRouter = require('./routes/statistics');
+        
+        // Generate statistics for today
+        const response = await fetch('http://localhost:' + PORT + '/statistics/generate-daily-stats', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ force: true })
+        });
+        
+        console.log('✅ Daily statistics generated automatically');
+    } catch (error) {
+        console.error('❌ Error generating daily statistics:', error);
+    }
 });
 
 app.listen(PORT, () => {
