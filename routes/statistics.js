@@ -516,20 +516,20 @@ router.post('/generate-stats', async (req, res) => {
     // Save or update statistics
     if (existingStats) {
       await DailyStatistics.findByIdAndUpdate(existingStats._id, stats);
-      console.log('✅ Daily statistics updated');
+      console.log(`✅ ${periodType.charAt(0).toUpperCase() + periodType.slice(1)} statistics updated for ${periodLabel}`);
     } else {
       await DailyStatistics.create(stats);
-      console.log('✅ Daily statistics created');
+      console.log(`✅ ${periodType.charAt(0).toUpperCase() + periodType.slice(1)} statistics created for ${periodLabel}`);
     }
 
     res.json({
       success: true,
-      message: 'Daily statistics generated successfully',
+      message: `${periodType.charAt(0).toUpperCase() + periodType.slice(1)} statistics generated successfully`,
       stats
     });
 
   } catch (error) {
-    console.error('❌ Error generating daily statistics:', error);
+    console.error(`❌ Error generating ${req.body.periodType || 'daily'} statistics:`, error);
     res.status(500).json({
       success: false,
       error: error.message

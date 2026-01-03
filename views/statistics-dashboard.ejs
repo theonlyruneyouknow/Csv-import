@@ -624,7 +624,7 @@
                     },
                     body: JSON.stringify({
                         periodType: periodType,
-                        referenceDate: currentReferenceDate
+                        referenceDate: currentReferenceDate.toISOString()
                     })
                 });
 
@@ -638,7 +638,7 @@
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `Statistics_${periodType}_${currentReferenceDate.split('T')[0]}.xlsx`;
+                a.download = `Statistics_${periodType}_${currentReferenceDate.toISOString().split('T')[0]}.xlsx`;
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
@@ -676,7 +676,7 @@
                     },
                     body: JSON.stringify({
                         periodType: periodType,
-                        referenceDate: currentReferenceDate,
+                        referenceDate: currentReferenceDate.toISOString(),
                         recipients: recipients
                     })
                 });
