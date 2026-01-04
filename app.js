@@ -2226,27 +2226,27 @@ cron.schedule('0 * * * *', () => {
     generateAllAutoReports();
 });
 
-// Schedule daily statistics generation at 11:59 PM every day
-cron.schedule('59 23 * * *', async () => {
-    console.log('📊 Generating daily statistics...');
+// Schedule daily statistics generation at midnight every day
+cron.schedule('0 0 * * *', async () => {
+    console.log('📊 Auto-generating daily statistics at midnight...');
     try {
-        const DailyStatistics = require('./models/DailyStatistics');
-        const PurchaseOrder = require('./models/PurchaseOrder');
-        const LineItem = require('./models/LineItem');
+        // Generate yesterday's stats (the day that just ended)
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
         
-        // Import the statistics generation function
-        const statisticsRouter = require('./routes/statistics');
-        
-        // Generate statistics for today
         const response = await fetch('http://localhost:' + PORT + '/statistics/generate-stats', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ force: true, periodType: 'daily' })
+            body: JSON.stringify({ 
+                force: true, 
+                periodType: 'daily',
+                referenceDate: yesterday.toISOString()
+            })
         });
         
-        console.log('✅ Daily statistics generated automatically');
+        console.log('✅ Daily statistics auto-generated for', yesterday.toDateString());
     } catch (error) {
-        console.error('❌ Error generating daily statistics:', error);
+        console.error('❌ Error in automatic daily statistics generation:', error);
     }
 });
 

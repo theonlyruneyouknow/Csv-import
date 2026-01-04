@@ -190,6 +190,36 @@ router.post('/generate-stats', async (req, res) => {
     const totalValue = allPOs.reduce((sum, po) => sum + (po.amount || 0), 0);
     const averageValue = allPOs.length > 0 ? totalValue / allPOs.length : 0;
 
+    // Build detailed PO lists
+    const newPOsDetailList = newPOsInPeriod.map(po => ({
+      poNumber: po.poNumber,
+      vendor: po.vendor,
+      type: po.type || 'N/A',
+      createdDate: po.createdAt || po.date,
+      itemCount: po.items ? po.items.length : 0,
+      totalValue: po.amount || 0
+    }));
+
+    const completedPOsInPeriod = completedPOs.filter(po => {
+      const updated = new Date(po.lastUpdate || po.updatedAt);
+      return updated >= start && updated <= end;
+    });
+
+    const completedPOsDetailList = completedPOsInPeriod.map(po => {
+      const created = new Date(po.createdAt || po.date);
+      const completed = new Date(po.lastUpdate || po.updatedAt);
+      const daysToComplete = Math.floor((completed - created) / (1000 * 60 * 60 * 24));
+      return {
+        poNumber: po.poNumber,
+        vendor: po.vendor,
+        type: po.type || 'N/A',
+        completedDate: completed,
+        itemCount: po.items ? po.items.length : 0,
+        totalValue: po.amount || 0,
+        daysToComplete: daysToComplete >= 0 ? daysToComplete : 0
+      };
+    });
+
     stats.purchaseOrders = {
       total: allPOs.length,
       active: activePOs.length,
@@ -199,7 +229,9 @@ router.post('/generate-stats', async (req, res) => {
       byType: poByType,
       byStatus: poByStatus,
       averageValue: Math.round(averageValue * 100) / 100,
-      totalValue: Math.round(totalValue * 100) / 100
+      totalValue: Math.round(totalValue * 100) / 100,
+      newPOsInPeriod: newPOsDetailList,
+      completedPOsInPeriod: completedPOsDetailList
     };
 
     // ========== LINE ITEM STATISTICS ==========
@@ -256,6 +288,61 @@ router.post('/generate-stats', async (req, res) => {
       ? daysToReceive[Math.floor(daysToReceive.length / 2)]
       : 0;
 
+    // Build detailed item lists
+    const topItemsByQuantity = allLineItems
+      .map(item => ({
+        itemName: item.itemName || item.description || 'Unknown',
+        poNumber: item.poNumber,
+        vendor: item.vendor || 'Unknown',
+        quantity: item.quantityExpected || item.quantity || 0,
+        received: item.received || false,
+        status: item.status || 'N/A'
+      }))
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 20);
+
+    const itemsReceivedInPeriodList = receivedInPeriod.map(item => {
+      const orderDate = new Date(item.createdAt);
+      const receiveDate = new Date(item.receivedDate);
+      const daysToReceive = Math.floor((receiveDate - orderDate) / (1000 * 60 * 60 * 24));
+      return {
+        itemName: item.itemName || item.description || 'Unknown',
+        poNumber: item.poNumber,
+        vendor: item.vendor || 'Unknown',
+        quantity: item.quantityExpected || item.quantity || 0,
+        receivedDate: item.receivedDate,
+        daysToReceive: daysToReceive >= 0 ? daysToReceive : 0
+      };
+    }).slice(0, 50);
+
+    const overdueItemsList = overdueItems.map(item => {
+      const eta = new Date(item.eta);
+      const daysOverdue = Math.floor((now - eta) / (1000 * 60 * 60 * 24));
+      return {
+        itemName: item.itemName || item.description || 'Unknown',
+        poNumber: item.poNumber,
+        vendor: item.vendor || 'Unknown',
+        eta: item.eta,
+        daysOverdue: daysOverdue,
+        urgency: item.urgency || 'None'
+      };
+    })
+    .sort((a, b) => b.daysOverdue - a.daysOverdue)
+    .slice(0, 50);
+
+    // High value items (estimate based on quantity - could be improved with actual pricing)
+    const highValueItems = allLineItems
+      .filter(item => (item.quantityExpected || item.quantity || 0) > 100)
+      .map(item => ({
+        itemName: item.itemName || item.description || 'Unknown',
+        poNumber: item.poNumber,
+        vendor: item.vendor || 'Unknown',
+        quantity: item.quantityExpected || item.quantity || 0,
+        estimatedValue: 0, // Could be populated if pricing data available
+        status: item.status || 'N/A'
+      }))
+      .slice(0, 20);
+
     stats.lineItems = {
       total: allLineItems.length,
       unreceived: unreceivedItems.length,
@@ -268,7 +355,11 @@ router.post('/generate-stats', async (req, res) => {
       averageDaysToReceive: Math.round(avgDays * 10) / 10,
       medianDaysToReceive: medianDays,
       fastestDelivery: daysToReceive.length > 0 ? daysToReceive[0] : 0,
-      slowestDelivery: daysToReceive.length > 0 ? daysToReceive[daysToReceive.length - 1] : 0
+      slowestDelivery: daysToReceive.length > 0 ? daysToReceive[daysToReceive.length - 1] : 0,
+      topItemsByQuantity,
+      itemsReceivedInPeriod: itemsReceivedInPeriodList,
+      overdueItemsList,
+      highValueItems
     };
 
     // ========== EMAIL STATISTICS ==========
@@ -332,13 +423,85 @@ router.post('/generate-stats', async (req, res) => {
       .sort((a, b) => b.totalValue - a.totalValue)
       .slice(0, 10);
 
+    // Build detailed vendor lists
+    const vendorOpenPOsMap = {};
+    const vendorCompletedPOsMap = {};
+
+    activePOs.forEach(po => {
+      if (!vendorOpenPOsMap[po.vendor]) {
+        vendorOpenPOsMap[po.vendor] = {
+          vendorName: po.vendor,
+          openPONumbers: [],
+          totalOpenValue: 0,
+          oldestPODate: new Date(po.createdAt || po.date),
+          unreceiveItems: 0
+        };
+      }
+      vendorOpenPOsMap[po.vendor].openPONumbers.push(po.poNumber);
+      vendorOpenPOsMap[po.vendor].totalOpenValue += (po.amount || 0);
+      const poDate = new Date(po.createdAt || po.date);
+      if (poDate < vendorOpenPOsMap[po.vendor].oldestPODate) {
+        vendorOpenPOsMap[po.vendor].oldestPODate = poDate;
+      }
+      // Count unreceived items for this PO
+      const poUnreceivedItems = allLineItems.filter(item => 
+        item.poNumber === po.poNumber && !item.received
+      );
+      vendorOpenPOsMap[po.vendor].unreceiveItems += poUnreceivedItems.length;
+    });
+
+    completedPOs.forEach(po => {
+      if (!vendorCompletedPOsMap[po.vendor]) {
+        vendorCompletedPOsMap[po.vendor] = {
+          vendorName: po.vendor,
+          completedPONumbers: [],
+          totalCompletedValue: 0,
+          completedInPeriod: 0,
+          lastCompletionDate: null
+        };
+      }
+      vendorCompletedPOsMap[po.vendor].completedPONumbers.push(po.poNumber);
+      vendorCompletedPOsMap[po.vendor].totalCompletedValue += (po.amount || 0);
+      
+      const completedDate = new Date(po.lastUpdate || po.updatedAt);
+      if (completedDate >= start && completedDate <= end) {
+        vendorCompletedPOsMap[po.vendor].completedInPeriod++;
+      }
+      
+      if (!vendorCompletedPOsMap[po.vendor].lastCompletionDate || 
+          completedDate > vendorCompletedPOsMap[po.vendor].lastCompletionDate) {
+        vendorCompletedPOsMap[po.vendor].lastCompletionDate = completedDate;
+      }
+    });
+
+    const vendorsWithOpenPOsList = Object.values(vendorOpenPOsMap).map(v => ({
+      ...v,
+      openPOCount: v.openPONumbers.length,
+      totalOpenValue: Math.round(v.totalOpenValue * 100) / 100
+    })).sort((a, b) => b.openPOCount - a.openPOCount);
+
+    const vendorsWithCompletedPOsList = Object.values(vendorCompletedPOsMap).map(v => ({
+      ...v,
+      completedPOCount: v.completedPONumbers.length,
+      totalCompletedValue: Math.round(v.totalCompletedValue * 100) / 100
+    })).sort((a, b) => b.completedPOCount - a.completedPOCount);
+
+    const vendorsCreatedInPeriodList = newVendorsInPeriod.map(vendor => ({
+      vendorName: vendor.vendorName || vendor.name || 'Unknown',
+      createdDate: vendor.createdAt,
+      poCount: allPOs.filter(po => po.vendor === (vendor.vendorName || vendor.name)).length
+    }));
+
     stats.vendors = {
       total: allVendors.length,
       activeVendors: allVendors.filter(v => v.isActive !== false).length,
       vendorsWithOpenPOs,
       newVendors: newVendorsInPeriod.length,
       averageResponseTime: 0, // TODO: Implement when we track vendor response times
-      topVendorsByVolume
+      topVendorsByVolume,
+      vendorsWithOpenPOsList,
+      vendorsWithCompletedPOsList,
+      vendorsCreatedInPeriod: vendorsCreatedInPeriodList
     };
 
     // ========== TRACKING STATISTICS ==========
@@ -537,6 +700,40 @@ router.post('/generate-stats', async (req, res) => {
   }
 });
 
+// Get existing stats without generating (for navigation)
+router.post('/get-stats', async (req, res) => {
+  try {
+    const periodType = req.body.periodType || 'daily';
+    const targetDate = req.body.referenceDate ? new Date(req.body.referenceDate) : new Date();
+    const { start, end } = getPeriodBounds(periodType, targetDate);
+    
+    const stats = await DailyStatistics.findOne({
+      periodType,
+      periodStart: start,
+      periodEnd: end
+    });
+
+    if (stats) {
+      return res.json({
+        success: true,
+        stats,
+        periodLabel: getPeriodLabel(periodType, start, end)
+      });
+    } else {
+      return res.json({
+        success: false,
+        message: 'No statistics found for this period'
+      });
+    }
+  } catch (error) {
+    console.error('❌ Error fetching statistics:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Get statistics for a specific date
 router.get('/daily-stats/:date', async (req, res) => {
   try {
@@ -596,27 +793,31 @@ router.get('/daily-stats', async (req, res) => {
 // Get dashboard view of statistics
 router.get('/dashboard', async (req, res) => {
   try {
-    // Get today's stats (generate if not exist)
-    const today = new Date();
-    const { start, end } = getPeriodBounds('daily', today);
+    // Get period type and date from query params or use defaults
+    const periodType = req.query.periodType || 'daily';
+    const targetDate = req.query.date ? new Date(req.query.date) : new Date();
+    const { start, end } = getPeriodBounds(periodType, targetDate);
     
     let todayStats = await DailyStatistics.findOne({
-      periodType: 'daily',
+      periodType: periodType,
       periodStart: start,
       periodEnd: end
     });
 
-    // Get last 30 days for trends
+    // Get last 30 days for trends (daily stats only)
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const recentStats = await DailyStatistics.find({
-      date: { $gte: thirtyDaysAgo }
-    }).sort({ date: -1 }).limit(30);
+      periodType: 'daily',
+      periodStart: { $gte: thirtyDaysAgo }
+    }).sort({ periodStart: -1 }).limit(30);
 
     res.render('statistics-dashboard', {
       user: req.user,
       todayStats,
       recentStats,
-      pageTitle: 'Daily Statistics Dashboard'
+      pageTitle: 'Statistics Dashboard',
+      currentPeriodType: periodType,
+      currentDate: targetDate.toISOString()
     });
   } catch (error) {
     console.error('❌ Error loading statistics dashboard:', error);
@@ -1004,4 +1205,545 @@ router.post('/email-report', async (req, res) => {
   }
 });
 
+// Get trend data for charts (last N periods)
+router.get('/trends/:periodType/:count', async (req, res) => {
+  try {
+    const { periodType, count } = req.params;
+    const limit = parseInt(count) || 30;
+
+    const stats = await DailyStatistics.find({ periodType })
+      .sort({ periodStart: -1 })
+      .limit(limit);
+
+    // Reverse to get chronological order
+    const trendData = stats.reverse().map(stat => ({
+      period: getPeriodLabel(stat.periodType, stat.periodStart, stat.periodEnd),
+      date: stat.periodStart,
+      newPOs: stat.purchaseOrders.newInPeriod,
+      updatedPOs: stat.purchaseOrders.updatedInPeriod,
+      receivedItems: stat.lineItems.receivedInPeriod,
+      emailsSent: stat.emails.sentInPeriod,
+      avgDaysToStock: stat.performance.avgDaysOrderToStock || 0,
+      onTimeDelivery: stat.performance.onTimeDeliveryRate || 0,
+      tasksCreated: stat.tasks.tasksCreatedInPeriod,
+      tasksCompleted: stat.tasks.tasksCompletedInPeriod
+    }));
+
+    res.json({
+      success: true,
+      periodType,
+      count: trendData.length,
+      data: trendData
+    });
+
+  } catch (error) {
+    console.error('❌ Error fetching trend data:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Compare two specific periods
+router.post('/compare', async (req, res) => {
+  try {
+    const { period1Type, period1Date, period2Type, period2Date } = req.body;
+
+    const bounds1 = getPeriodBounds(period1Type, new Date(period1Date));
+    const bounds2 = getPeriodBounds(period2Type, new Date(period2Date));
+
+    const [stats1, stats2] = await Promise.all([
+      DailyStatistics.findOne({
+        periodType: period1Type,
+        periodStart: bounds1.start,
+        periodEnd: bounds1.end
+      }),
+      DailyStatistics.findOne({
+        periodType: period2Type,
+        periodStart: bounds2.start,
+        periodEnd: bounds2.end
+      })
+    ]);
+
+    if (!stats1 || !stats2) {
+      return res.status(404).json({
+        success: false,
+        message: 'Statistics not found for one or both periods'
+      });
+    }
+
+    // Calculate differences and percentages
+    const comparison = {
+      period1: {
+        label: getPeriodLabel(period1Type, bounds1.start, bounds1.end),
+        stats: stats1
+      },
+      period2: {
+        label: getPeriodLabel(period2Type, bounds2.start, bounds2.end),
+        stats: stats2
+      },
+      differences: {
+        newPOs: {
+          value: stats2.purchaseOrders.newInPeriod - stats1.purchaseOrders.newInPeriod,
+          percent: calculatePercentChange(stats1.purchaseOrders.newInPeriod, stats2.purchaseOrders.newInPeriod)
+        },
+        updatedPOs: {
+          value: stats2.purchaseOrders.updatedInPeriod - stats1.purchaseOrders.updatedInPeriod,
+          percent: calculatePercentChange(stats1.purchaseOrders.updatedInPeriod, stats2.purchaseOrders.updatedInPeriod)
+        },
+        receivedItems: {
+          value: stats2.lineItems.receivedInPeriod - stats1.lineItems.receivedInPeriod,
+          percent: calculatePercentChange(stats1.lineItems.receivedInPeriod, stats2.lineItems.receivedInPeriod)
+        },
+        emailsSent: {
+          value: stats2.emails.sentInPeriod - stats1.emails.sentInPeriod,
+          percent: calculatePercentChange(stats1.emails.sentInPeriod, stats2.emails.sentInPeriod)
+        },
+        avgDaysToStock: {
+          value: (stats2.performance.avgDaysOrderToStock || 0) - (stats1.performance.avgDaysOrderToStock || 0),
+          percent: calculatePercentChange(stats1.performance.avgDaysOrderToStock || 0, stats2.performance.avgDaysOrderToStock || 0)
+        },
+        onTimeDelivery: {
+          value: (stats2.performance.onTimeDeliveryRate || 0) - (stats1.performance.onTimeDeliveryRate || 0),
+          percent: calculatePercentChange(stats1.performance.onTimeDeliveryRate || 0, stats2.performance.onTimeDeliveryRate || 0)
+        }
+      }
+    };
+
+    res.json({
+      success: true,
+      comparison
+    });
+
+  } catch (error) {
+    console.error('❌ Error comparing periods:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Helper function to calculate percent change
+function calculatePercentChange(oldValue, newValue) {
+  if (oldValue === 0) return newValue > 0 ? 100 : 0;
+  return Math.round(((newValue - oldValue) / oldValue) * 100);
+}
+
+// Period-over-period comparison (this period vs previous period)
+router.get('/period-over-period/:periodType', async (req, res) => {
+  try {
+    const { periodType } = req.params;
+    const referenceDate = req.query.date ? new Date(req.query.date) : new Date();
+
+    // Get current period
+    const currentBounds = getPeriodBounds(periodType, referenceDate);
+    
+    // Calculate previous period
+    let previousDate = new Date(referenceDate);
+    switch (periodType) {
+      case 'daily':
+        previousDate.setDate(previousDate.getDate() - 1);
+        break;
+      case 'weekly':
+        previousDate.setDate(previousDate.getDate() - 7);
+        break;
+      case 'bi-weekly':
+        previousDate.setDate(previousDate.getDate() - 14);
+        break;
+      case 'monthly':
+        previousDate.setMonth(previousDate.getMonth() - 1);
+        break;
+      case 'quarterly':
+        previousDate.setMonth(previousDate.getMonth() - 3);
+        break;
+      case 'yearly':
+        previousDate.setFullYear(previousDate.getFullYear() - 1);
+        break;
+    }
+    
+    const previousBounds = getPeriodBounds(periodType, previousDate);
+
+    const [currentStats, previousStats] = await Promise.all([
+      DailyStatistics.findOne({
+        periodType,
+        periodStart: currentBounds.start,
+        periodEnd: currentBounds.end
+      }),
+      DailyStatistics.findOne({
+        periodType,
+        periodStart: previousBounds.start,
+        periodEnd: previousBounds.end
+      })
+    ]);
+
+    if (!currentStats) {
+      return res.status(404).json({
+        success: false,
+        message: 'No statistics found for current period'
+      });
+    }
+
+    const comparison = {
+      current: {
+        label: getPeriodLabel(periodType, currentBounds.start, currentBounds.end),
+        stats: currentStats
+      },
+      previous: previousStats ? {
+        label: getPeriodLabel(periodType, previousBounds.start, previousBounds.end),
+        stats: previousStats
+      } : null,
+      changes: previousStats ? calculateChanges(previousStats, currentStats) : null
+    };
+
+    res.json({
+      success: true,
+      comparison
+    });
+
+  } catch (error) {
+    console.error('❌ Error in period-over-period comparison:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Helper function to calculate all changes between two periods
+function calculateChanges(oldStats, newStats) {
+  return {
+    purchaseOrders: {
+      newInPeriod: {
+        value: newStats.purchaseOrders.newInPeriod - oldStats.purchaseOrders.newInPeriod,
+        percent: calculatePercentChange(oldStats.purchaseOrders.newInPeriod, newStats.purchaseOrders.newInPeriod),
+        trend: getTrend(oldStats.purchaseOrders.newInPeriod, newStats.purchaseOrders.newInPeriod)
+      },
+      updatedInPeriod: {
+        value: newStats.purchaseOrders.updatedInPeriod - oldStats.purchaseOrders.updatedInPeriod,
+        percent: calculatePercentChange(oldStats.purchaseOrders.updatedInPeriod, newStats.purchaseOrders.updatedInPeriod),
+        trend: getTrend(oldStats.purchaseOrders.updatedInPeriod, newStats.purchaseOrders.updatedInPeriod)
+      }
+    },
+    lineItems: {
+      receivedInPeriod: {
+        value: newStats.lineItems.receivedInPeriod - oldStats.lineItems.receivedInPeriod,
+        percent: calculatePercentChange(oldStats.lineItems.receivedInPeriod, newStats.lineItems.receivedInPeriod),
+        trend: getTrend(oldStats.lineItems.receivedInPeriod, newStats.lineItems.receivedInPeriod)
+      }
+    },
+    emails: {
+      sentInPeriod: {
+        value: newStats.emails.sentInPeriod - oldStats.emails.sentInPeriod,
+        percent: calculatePercentChange(oldStats.emails.sentInPeriod, newStats.emails.sentInPeriod),
+        trend: getTrend(oldStats.emails.sentInPeriod, newStats.emails.sentInPeriod)
+      }
+    },
+    performance: {
+      avgDaysOrderToStock: {
+        value: (newStats.performance.avgDaysOrderToStock || 0) - (oldStats.performance.avgDaysOrderToStock || 0),
+        percent: calculatePercentChange(oldStats.performance.avgDaysOrderToStock || 0, newStats.performance.avgDaysOrderToStock || 0),
+        trend: getTrend(oldStats.performance.avgDaysOrderToStock || 0, newStats.performance.avgDaysOrderToStock || 0, true) // Lower is better
+      },
+      onTimeDeliveryRate: {
+        value: (newStats.performance.onTimeDeliveryRate || 0) - (oldStats.performance.onTimeDeliveryRate || 0),
+        percent: calculatePercentChange(oldStats.performance.onTimeDeliveryRate || 0, newStats.performance.onTimeDeliveryRate || 0),
+        trend: getTrend(oldStats.performance.onTimeDeliveryRate || 0, newStats.performance.onTimeDeliveryRate || 0)
+      }
+    },
+    tasks: {
+      tasksCreatedInPeriod: {
+        value: newStats.tasks.tasksCreatedInPeriod - oldStats.tasks.tasksCreatedInPeriod,
+        percent: calculatePercentChange(oldStats.tasks.tasksCreatedInPeriod, newStats.tasks.tasksCreatedInPeriod),
+        trend: getTrend(oldStats.tasks.tasksCreatedInPeriod, newStats.tasks.tasksCreatedInPeriod)
+      },
+      tasksCompletedInPeriod: {
+        value: newStats.tasks.tasksCompletedInPeriod - oldStats.tasks.tasksCompletedInPeriod,
+        percent: calculatePercentChange(oldStats.tasks.tasksCompletedInPeriod, newStats.tasks.tasksCompletedInPeriod),
+        trend: getTrend(oldStats.tasks.tasksCompletedInPeriod, newStats.tasks.tasksCompletedInPeriod)
+      }
+    }
+  };
+}
+
+// Helper function to determine trend direction
+function getTrend(oldValue, newValue, lowerIsBetter = false) {
+  if (newValue > oldValue) return lowerIsBetter ? 'down' : 'up';
+  if (newValue < oldValue) return lowerIsBetter ? 'up' : 'down';
+  return 'stable';
+}
+
+// ========== DETAILED LIST ENDPOINTS ==========
+
+// Get vendors with open POs
+router.get('/vendors/open-pos', async (req, res) => {
+  try {
+    const periodType = req.query.periodType || 'daily';
+    const targetDate = req.query.date ? new Date(req.query.date) : new Date();
+    const { start, end } = getPeriodBounds(periodType, targetDate);
+
+    const stats = await DailyStatistics.findOne({
+      periodType,
+      periodStart: start,
+      periodEnd: end
+    });
+
+    if (!stats) {
+      return res.status(404).json({
+        success: false,
+        message: 'No statistics found for this period'
+      });
+    }
+
+    res.json({
+      success: true,
+      vendors: stats.vendors.vendorsWithOpenPOsList || [],
+      summary: {
+        totalVendors: stats.vendors.vendorsWithOpenPOsList?.length || 0,
+        totalOpenPOs: stats.vendors.vendorsWithOpenPOsList?.reduce((sum, v) => sum + v.openPOCount, 0) || 0,
+        totalValue: stats.vendors.vendorsWithOpenPOsList?.reduce((sum, v) => sum + v.totalOpenValue, 0) || 0
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error fetching vendors with open POs:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get vendors with completed POs
+router.get('/vendors/completed-pos', async (req, res) => {
+  try {
+    const periodType = req.query.periodType || 'daily';
+    const targetDate = req.query.date ? new Date(req.query.date) : new Date();
+    const { start, end } = getPeriodBounds(periodType, targetDate);
+
+    const stats = await DailyStatistics.findOne({
+      periodType,
+      periodStart: start,
+      periodEnd: end
+    });
+
+    if (!stats) {
+      return res.status(404).json({
+        success: false,
+        message: 'No statistics found for this period'
+      });
+    }
+
+    res.json({
+      success: true,
+      vendors: stats.vendors.vendorsWithCompletedPOsList || [],
+      summary: {
+        totalVendors: stats.vendors.vendorsWithCompletedPOsList?.length || 0,
+        totalCompletedPOs: stats.vendors.vendorsWithCompletedPOsList?.reduce((sum, v) => sum + v.completedPOCount, 0) || 0,
+        totalValue: stats.vendors.vendorsWithCompletedPOsList?.reduce((sum, v) => sum + v.totalCompletedValue, 0) || 0
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error fetching vendors with completed POs:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get new POs created in period
+router.get('/pos/new', async (req, res) => {
+  try {
+    const periodType = req.query.periodType || 'daily';
+    const targetDate = req.query.date ? new Date(req.query.date) : new Date();
+    const { start, end } = getPeriodBounds(periodType, targetDate);
+
+    const stats = await DailyStatistics.findOne({
+      periodType,
+      periodStart: start,
+      periodEnd: end
+    });
+
+    if (!stats) {
+      return res.status(404).json({
+        success: false,
+        message: 'No statistics found for this period'
+      });
+    }
+
+    res.json({
+      success: true,
+      pos: stats.purchaseOrders.newPOsInPeriod || [],
+      summary: {
+        totalPOs: stats.purchaseOrders.newPOsInPeriod?.length || 0,
+        totalValue: stats.purchaseOrders.newPOsInPeriod?.reduce((sum, po) => sum + po.totalValue, 0) || 0,
+        totalItems: stats.purchaseOrders.newPOsInPeriod?.reduce((sum, po) => sum + po.itemCount, 0) || 0
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error fetching new POs:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get completed POs in period
+router.get('/pos/completed', async (req, res) => {
+  try {
+    const periodType = req.query.periodType || 'daily';
+    const targetDate = req.query.date ? new Date(req.query.date) : new Date();
+    const { start, end } = getPeriodBounds(periodType, targetDate);
+
+    const stats = await DailyStatistics.findOne({
+      periodType,
+      periodStart: start,
+      periodEnd: end
+    });
+
+    if (!stats) {
+      return res.status(404).json({
+        success: false,
+        message: 'No statistics found for this period'
+      });
+    }
+
+    res.json({
+      success: true,
+      pos: stats.purchaseOrders.completedPOsInPeriod || [],
+      summary: {
+        totalPOs: stats.purchaseOrders.completedPOsInPeriod?.length || 0,
+        totalValue: stats.purchaseOrders.completedPOsInPeriod?.reduce((sum, po) => sum + po.totalValue, 0) || 0,
+        avgDaysToComplete: stats.purchaseOrders.completedPOsInPeriod?.length > 0
+          ? stats.purchaseOrders.completedPOsInPeriod.reduce((sum, po) => sum + po.daysToComplete, 0) / stats.purchaseOrders.completedPOsInPeriod.length
+          : 0
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error fetching completed POs:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get items received in period
+router.get('/items/received', async (req, res) => {
+  try {
+    const periodType = req.query.periodType || 'daily';
+    const targetDate = req.query.date ? new Date(req.query.date) : new Date();
+    const { start, end } = getPeriodBounds(periodType, targetDate);
+
+    const stats = await DailyStatistics.findOne({
+      periodType,
+      periodStart: start,
+      periodEnd: end
+    });
+
+    if (!stats) {
+      return res.status(404).json({
+        success: false,
+        message: 'No statistics found for this period'
+      });
+    }
+
+    res.json({
+      success: true,
+      items: stats.lineItems.itemsReceivedInPeriod || [],
+      summary: {
+        totalItems: stats.lineItems.itemsReceivedInPeriod?.length || 0,
+        totalQuantity: stats.lineItems.itemsReceivedInPeriod?.reduce((sum, item) => sum + item.quantity, 0) || 0,
+        avgDaysToReceive: stats.lineItems.averageDaysToReceive || 0
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error fetching received items:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get overdue items
+router.get('/items/overdue', async (req, res) => {
+  try {
+    const periodType = req.query.periodType || 'daily';
+    const targetDate = req.query.date ? new Date(req.query.date) : new Date();
+    const { start, end } = getPeriodBounds(periodType, targetDate);
+
+    const stats = await DailyStatistics.findOne({
+      periodType,
+      periodStart: start,
+      periodEnd: end
+    });
+
+    if (!stats) {
+      return res.status(404).json({
+        success: false,
+        message: 'No statistics found for this period'
+      });
+    }
+
+    res.json({
+      success: true,
+      items: stats.lineItems.overdueItemsList || [],
+      summary: {
+        totalOverdue: stats.lineItems.overdueItemsList?.length || 0,
+        avgDaysOverdue: stats.lineItems.overdueItemsList?.length > 0
+          ? stats.lineItems.overdueItemsList.reduce((sum, item) => sum + item.daysOverdue, 0) / stats.lineItems.overdueItemsList.length
+          : 0,
+        byUrgency: {
+          high: stats.lineItems.overdueItemsList?.filter(i => i.urgency === 'High').length || 0,
+          medium: stats.lineItems.overdueItemsList?.filter(i => i.urgency === 'Medium').length || 0,
+          low: stats.lineItems.overdueItemsList?.filter(i => i.urgency === 'Low').length || 0
+        }
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error fetching overdue items:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get top items by quantity
+router.get('/items/top-by-quantity', async (req, res) => {
+  try {
+    const periodType = req.query.periodType || 'daily';
+    const targetDate = req.query.date ? new Date(req.query.date) : new Date();
+    const { start, end } = getPeriodBounds(periodType, targetDate);
+
+    const stats = await DailyStatistics.findOne({
+      periodType,
+      periodStart: start,
+      periodEnd: end
+    });
+
+    if (!stats) {
+      return res.status(404).json({
+        success: false,
+        message: 'No statistics found for this period'
+      });
+    }
+
+    res.json({
+      success: true,
+      items: stats.lineItems.topItemsByQuantity || []
+    });
+  } catch (error) {
+    console.error('❌ Error fetching top items:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
+

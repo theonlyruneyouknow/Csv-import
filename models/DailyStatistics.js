@@ -49,7 +49,25 @@ const dailyStatisticsSchema = new mongoose.Schema({
       count: Number
     }],
     averageValue: { type: Number, default: 0 },
-    totalValue: { type: Number, default: 0 }
+    totalValue: { type: Number, default: 0 },
+    // Detailed PO lists
+    newPOsInPeriod: [{
+      poNumber: String,
+      vendor: String,
+      type: String,
+      createdDate: Date,
+      itemCount: Number,
+      totalValue: Number
+    }],
+    completedPOsInPeriod: [{
+      poNumber: String,
+      vendor: String,
+      type: String,
+      completedDate: Date,
+      itemCount: Number,
+      totalValue: Number,
+      daysToComplete: Number
+    }]
   },
 
   // Line Item Statistics
@@ -70,7 +88,40 @@ const dailyStatisticsSchema = new mongoose.Schema({
     averageDaysToReceive: { type: Number, default: 0 },
     medianDaysToReceive: { type: Number, default: 0 },
     fastestDelivery: { type: Number, default: 0 },
-    slowestDelivery: { type: Number, default: 0 }
+    slowestDelivery: { type: Number, default: 0 },
+    // Detailed item lists
+    topItemsByQuantity: [{
+      itemName: String,
+      poNumber: String,
+      vendor: String,
+      quantity: Number,
+      received: Boolean,
+      status: String
+    }],
+    itemsReceivedInPeriod: [{
+      itemName: String,
+      poNumber: String,
+      vendor: String,
+      quantity: Number,
+      receivedDate: Date,
+      daysToReceive: Number
+    }],
+    overdueItemsList: [{
+      itemName: String,
+      poNumber: String,
+      vendor: String,
+      eta: Date,
+      daysOverdue: Number,
+      urgency: String
+    }],
+    highValueItems: [{
+      itemName: String,
+      poNumber: String,
+      vendor: String,
+      quantity: Number,
+      estimatedValue: Number,
+      status: String
+    }]
   },
 
   // Email Activity Statistics
@@ -99,6 +150,28 @@ const dailyStatisticsSchema = new mongoose.Schema({
       vendor: String,
       poCount: Number,
       totalValue: Number
+    }],
+    // Detailed vendor lists
+    vendorsWithOpenPOsList: [{
+      vendorName: String,
+      openPOCount: Number,
+      openPONumbers: [String],
+      totalOpenValue: Number,
+      oldestPODate: Date,
+      unreceiveItems: Number
+    }],
+    vendorsWithCompletedPOsList: [{
+      vendorName: String,
+      completedPOCount: Number,
+      completedPONumbers: [String],
+      totalCompletedValue: Number,
+      completedInPeriod: Number,
+      lastCompletionDate: Date
+    }],
+    vendorsCreatedInPeriod: [{
+      vendorName: String,
+      createdDate: Date,
+      poCount: Number
     }]
   },
 

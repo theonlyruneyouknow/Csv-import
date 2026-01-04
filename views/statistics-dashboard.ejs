@@ -9,11 +9,11 @@
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 20px 1%; /* 1% buffer on sides */
         }
         .stats-container {
-            max-width: 1400px;
-            margin: 0 auto;
+            max-width: 100%;
+            margin: 0;
         }
         .stats-card {
             background: white;
@@ -27,9 +27,238 @@
             border-radius: 15px;
             padding: 30px;
             margin-bottom: 30px;
-            text-align: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
+        
+        /* Navigation Styles */
+        .navigation-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+        
+        .nav-section {
+            position: relative;
+        }
+        
+        .nav-accordion-btn {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        
+        .nav-accordion-btn:hover, .nav-accordion-btn.active {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        .nav-accordion-content {
+            display: none;
+            position: absolute;
+            background: white;
+            min-width: 250px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            z-index: 1000;
+            margin-top: 8px;
+            border: 1px solid #e2e8f0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .nav-accordion-content.show {
+            display: block;
+        }
+        
+        .nav-accordion-item {
+            display: block;
+            padding: 12px 20px;
+            color: #334155;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .nav-accordion-item:hover {
+            background: #f8fafc;
+            color: #667eea;
+            padding-left: 25px;
+        }
+        
+        .nav-accordion-item:last-child {
+            border-bottom: none;
+        }
+        
+        .accordion-icon {
+            font-size: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .nav-accordion-btn.open .accordion-icon {
+            transform: rotate(180deg);
+        }
+        
+        /* Sticky header behavior */
+        .header-sticky {
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 12px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .header-sticky h1 {
+            color: white;
+            margin: 0;
+            font-size: 1.5rem;
+            white-space: nowrap;
+        }
+        
+        .header-content {
+            max-width: 100%;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .header-content h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .navigation-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+        
+        .controls-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-left: auto;
+        }
+        
+        .period-selector-inline {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .period-selector-inline label {
+            font-weight: 600;
+            color: white;
+            margin: 0;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        
+        .period-selector-inline select {
+            padding: 6px 12px;
+            border-radius: 5px;
+            border: 2px solid white;
+            font-size: 13px;
+            background: white;
+        }
+        
+        .period-navigation-inline {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .period-navigation-inline button {
+            padding: 6px 12px;
+            border-radius: 5px;
+            border: 2px solid white;
+            background: white;
+            color: #667eea;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        
+        .period-navigation-inline button:hover {
+            background: rgba(255,255,255,0.9);
+            transform: translateY(-1px);
+        }
+        
+        .period-navigation-inline span {
+            color: white;
+            font-weight: 600;
+            padding: 0 8px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: nowrap;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 5px;
+            border: 2px solid white;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        /* Hide only period comparison when scrolling */
+        .header-sticky.scrolled #periodComparison:not(.hidden) {
+            max-height: 0;
+            overflow: hidden;
+            margin: 0;
+            opacity: 0;
+            padding: 0;
+            transition: all 0.3s ease;
+        }
+        
+        #periodComparison {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        #periodComparison.hidden {
+            display: none;
+        }
+        
+        #periodComparisonContent {
+            transition: all 0.3s ease;
+        }
+        
         .stat-box {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -150,50 +379,104 @@
     </style>
 </head>
 <body>
-    <div class="stats-container">
-        <a href="/purchase-orders" class="nav-back">← Back to Dashboard</a>
-        
-        <div class="stats-header">
+    <!-- Sticky Header with Navigation -->
+    <div class="header-sticky" id="stickyHeader">
+        <div class="header-content">
             <h1 id="reportTitle">📊 Daily Statistics Report</h1>
-            <p class="text-muted">Comprehensive overview of your purchase order system</p>
             
-            <!-- Period Type Selector -->
-            <div class="period-selector" style="margin: 20px 0;">
-                <label for="periodType" style="font-weight: bold; margin-right: 10px;">Report Period:</label>
-                <select id="periodType" onchange="changePeriodType()" style="padding: 8px 15px; border-radius: 5px; border: 2px solid #667eea; font-size: 16px; margin-right: 20px;">
-                    <option value="daily" selected>Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="bi-weekly">Bi-Weekly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="quarterly">Quarterly</option>
-                    <option value="yearly">Yearly</option>
-                </select>
-                
-                <button class="generate-btn" onclick="generateStats()" style="display: inline-block; margin: 0;">
-                    🔄 Generate Stats
-                </button>
-                
-                <button onclick="exportToExcel()" style="display: inline-block; margin: 0 0 0 10px; padding: 10px 20px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                    📊 Export Excel
-                </button>
-                
-                <button onclick="showEmailDialog()" style="display: inline-block; margin: 0 0 0 10px; padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                    📧 Email Report
-                </button>
+            <!-- Navigation -->
+            <div class="navigation-container">
+                <div class="nav-section">
+                    <a href="/purchase-orders" class="nav-accordion-btn" style="text-decoration: none;">
+                        🏠 Dashboard
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <button class="nav-accordion-btn" onclick="toggleAccordion('managersAccordion')">
+                        📊 Managers <span class="accordion-icon">▼</span>
+                    </button>
+                    <div id="managersAccordion" class="nav-accordion-content">
+                        <a href="/excel-reports" class="nav-accordion-item">📊 Excel Reports Manager</a>
+                        <a href="/manage-auto-reports" class="nav-accordion-item">🔄 Auto-Reports Manager</a>
+                        <a href="/statistics/dashboard" class="nav-accordion-item">📈 Daily Statistics</a>
+                        <a href="/vendors" class="nav-accordion-item">🏢 Vendors</a>
+                        <a href="/purchase-orders/trouble-seed" class="nav-accordion-item">⚠️ Trouble Seed</a>
+                        <a href="/purchase-orders/line-items-manager" class="nav-accordion-item">📦 Line Items Manager</a>
+                        <a href="/purchase-orders/tracking-dashboard" class="nav-accordion-item">🚚 Tracking Dashboard</a>
+                        <a href="/shipments/dashboard" class="nav-accordion-item">📦 Shipment Management</a>
+                        <a href="/purchase-orders/orphaned-line-items" class="nav-accordion-item">🧹 Orphaned Items</a>
+                        <a href="/purchase-orders/notes-manager" class="nav-accordion-item">📝 Notes Manager</a>
+                        <a href="/organic-vendors" class="nav-accordion-item">🌱 Organic Vendors</a>
+                    </div>
+                </div>
             </div>
             
-            <!-- Period Navigation -->
-            <div class="period-navigation" style="margin-top: 15px;">
-                <button onclick="navigatePeriod('prev')" style="padding: 8px 20px; margin-right: 10px; border-radius: 5px; border: 2px solid #667eea; background: white; color: #667eea; cursor: pointer;">
-                    ← Previous Period
-                </button>
-                <span id="currentPeriodLabel" style="font-weight: bold; margin: 0 15px;"></span>
-                <button onclick="navigatePeriod('next')" style="padding: 8px 20px; margin-left: 10px; border-radius: 5px; border: 2px solid #667eea; background: white; color: #667eea; cursor: pointer;">
-                    Next Period →
-                </button>
+            <!-- Period Controls and Actions -->
+            <div class="controls-row">
+                <!-- Period Selector -->
+                <div class="period-selector-inline">
+                    <label for="periodType">Report Period:</label>
+                    <select id="periodType" onchange="changePeriodType()">
+                        <option value="daily" selected>Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="bi-weekly">Bi-Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="quarterly">Quarterly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
+                
+                <!-- Period Navigation -->
+                <div class="period-navigation-inline">
+                    <button onclick="navigatePeriod('prev')">← Previous</button>
+                    <span id="currentPeriodLabel"></span>
+                    <button onclick="navigatePeriod('next')">Next →</button>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="generateStats()" style="background: #10b981; color: white; border-color: #10b981;">
+                        🔄 Generate
+                    </button>
+                    <button class="action-btn" onclick="exportToExcel()" style="background: #3b82f6; color: white; border-color: #3b82f6;">
+                        📊 Excel
+                    </button>
+                    <button class="action-btn" onclick="showEmailDialog()" style="background: #8b5cf6; color: white; border-color: #8b5cf6;">
+                        📧 Email
+                    </button>
+                    <button class="action-btn" onclick="showComparisonView()" style="background: #ec4899; color: white; border-color: #ec4899;">
+                        📊 Compare
+                    </button>
+                    <button class="action-btn" onclick="showTrendsView()" style="background: #f59e0b; color: white; border-color: #f59e0b;">
+                        📈 Trends
+                    </button>
+                    <button id="popCompareBtn" class="action-btn" onclick="togglePeriodComparison()" style="background: #06b6d4; color: white; border-color: #06b6d4;">
+                        📊 POP Compare
+                    </button>
+                </div>
             </div>
         </div>
+    </div>
 
+    <div class="stats-container">
+        <!-- Period-over-Period Comparison (hidden on scroll) -->
+        <div id="periodComparison" style="margin: 20px 0; padding: 20px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #667eea;">
+            <div id="periodComparisonContent"></div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div style="margin: 30px 0; border-bottom: 3px solid #e2e8f0;">
+            <button id="statsTab" onclick="switchTab('stats')" style="padding: 15px 30px; background: #667eea; color: white; border: none; border-radius: 8px 8px 0 0; cursor: pointer; font-weight: bold; font-size: 16px; margin-right: 5px;">
+                📊 Statistics Report By Numbers
+            </button>
+            <button id="listsTab" onclick="switchTab('lists')" style="padding: 15px 30px; background: #e2e8f0; color: #64748b; border: none; border-radius: 8px 8px 0 0; cursor: pointer; font-weight: bold; font-size: 16px;">
+                📋 Detailed Lists & Reports
+            </button>
+        </div>
+
+        <!-- Statistics Tab Content -->
+        <div id="statsTabContent" style="display: block;">
         <% if (todayStats) { %>
             <!-- Key Performance Indicators -->
             <div class="row">
@@ -473,19 +756,175 @@
         <% } else { %>
             <div class="stats-card text-center">
                 <h3>No Statistics Available</h3>
-                <p class="text-muted">Click the button above to generate today's statistics</p>
+                <p class="text-muted">Click "Generate Stats" button above to create statistics for this period</p>
             </div>
         <% } %>
+        </div>
+        <!-- End Statistics Tab Content -->
+
+        <!-- Detailed Lists Tab Content -->
+        <div id="listsTabContent" style="display: none;">
+            <% if (todayStats) { %>
+            <div class="stats-card">
+                <h3 style="margin-bottom: 25px;">📋 Select a report to view detailed information</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <button onclick="loadVendorsList('open')" style="padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        🏢 Vendors with Open POs
+                        <div style="font-size: 12px; font-weight: normal; margin-top: 8px; opacity: 0.9;">View all vendors with active purchase orders</div>
+                    </button>
+                    
+                    <button onclick="loadVendorsList('completed')" style="padding: 20px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        ✅ Vendors with Completed POs
+                        <div style="font-size: 12px; font-weight: normal; margin-top: 8px; opacity: 0.9;">View vendors with fulfilled orders</div>
+                    </button>
+                    
+                    <button onclick="loadPOsList('new')" style="padding: 20px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        📝 New POs Created
+                        <div style="font-size: 12px; font-weight: normal; margin-top: 8px; opacity: 0.9;">Purchase orders created in this period</div>
+                    </button>
+                    
+                    <button onclick="loadPOsList('completed')" style="padding: 20px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        🎉 Completed POs
+                        <div style="font-size: 12px; font-weight: normal; margin-top: 8px; opacity: 0.9;">Orders completed in this period</div>
+                    </button>
+                    
+                    <button onclick="loadItemsList('received')" style="padding: 20px; background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        📦 Items Received
+                        <div style="font-size: 12px; font-weight: normal; margin-top: 8px; opacity: 0.9;">Items received during this period</div>
+                    </button>
+                    
+                    <button onclick="loadItemsList('overdue')" style="padding: 20px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        ⚠️ Overdue Items
+                        <div style="font-size: 12px; font-weight: normal; margin-top: 8px; opacity: 0.9;">Items past their expected delivery date</div>
+                    </button>
+                </div>
+                
+                <div id="detailedListContent" style="margin-top: 30px; padding: 20px; background: #f8fafc; border-radius: 10px; min-height: 200px;">
+                    <div style="text-align: center; padding: 40px; color: #64748b;">
+                        <p style="font-size: 18px; margin-bottom: 10px;">👆 Select a report above to view detailed data</p>
+                        <p style="font-size: 14px;">All reports are based on the selected period and date range</p>
+                    </div>
+                </div>
+            </div>
+            <% } else { %>
+            <div class="stats-card text-center">
+                <h3>No Statistics Available</h3>
+                <p class="text-muted">Generate statistics first to view detailed lists</p>
+            </div>
+            <% } %>
+        </div>
+        <!-- End Detailed Lists Tab Content -->
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let currentPeriodType = 'daily';
-        let currentReferenceDate = new Date();
+        let currentPeriodType = '<%= typeof currentPeriodType !== "undefined" ? currentPeriodType : "daily" %>';
+        let currentReferenceDate = new Date('<%= typeof currentDate !== "undefined" ? currentDate : new Date().toISOString() %>');
+        let currentDetailedList = null; // Track currently loaded detailed list
+
+        // Toggle period comparison visibility
+        function togglePeriodComparison() {
+            const comparisonDiv = document.getElementById('periodComparison');
+            const btn = document.getElementById('popCompareBtn');
+            
+            if (comparisonDiv.classList.contains('hidden')) {
+                comparisonDiv.classList.remove('hidden');
+                btn.textContent = '📊 POP Compare';
+                btn.style.background = '#06b6d4';
+            } else {
+                comparisonDiv.classList.add('hidden');
+                btn.textContent = '📊 Show POP';
+                btn.style.background = '#10b981';
+            }
+        }
+
+        // Navigation accordion toggle
+        function toggleAccordion(accordionId) {
+            const accordion = document.getElementById(accordionId);
+            const allAccordions = document.querySelectorAll('.nav-accordion-content');
+            
+            // Close all other accordions
+            allAccordions.forEach(acc => {
+                if (acc.id !== accordionId) {
+                    acc.style.display = 'none';
+                }
+            });
+            
+            // Toggle current accordion
+            if (accordion.style.display === 'block') {
+                accordion.style.display = 'none';
+            } else {
+                accordion.style.display = 'block';
+            }
+        }
+
+        // Close accordions when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.matches('.nav-accordion-btn')) {
+                const accordions = document.querySelectorAll('.nav-accordion-content');
+                accordions.forEach(acc => acc.style.display = 'none');
+            }
+        });
+
+        // Sticky header scroll behavior - only hide period comparison
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('stickyHeader');
+            const st = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (st > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+            
+            lastScrollTop = st <= 0 ? 0 : st;
+        });
+
+        // Tab switching function
+        function switchTab(tab) {
+            const statsTab = document.getElementById('statsTab');
+            const listsTab = document.getElementById('listsTab');
+            const statsContent = document.getElementById('statsTabContent');
+            const listsContent = document.getElementById('listsTabContent');
+            
+            if (tab === 'stats') {
+                statsTab.style.background = '#667eea';
+                statsTab.style.color = 'white';
+                listsTab.style.background = '#e2e8f0';
+                listsTab.style.color = '#64748b';
+                statsContent.style.display = 'block';
+                listsContent.style.display = 'none';
+            } else {
+                statsTab.style.background = '#e2e8f0';
+                statsTab.style.color = '#64748b';
+                listsTab.style.background = '#667eea';
+                listsTab.style.color = 'white';
+                statsContent.style.display = 'none';
+                listsContent.style.display = 'block';
+            }
+        }
+
+        // Reload the currently active detailed list
+        function reloadCurrentDetailedList() {
+            if (currentDetailedList) {
+                currentDetailedList.func(...currentDetailedList.args);
+            }
+        }
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // Set the period type selector
+            document.getElementById('periodType').value = currentPeriodType;
+            
+            updateReportTitle();
             updatePeriodLabel();
+            
+            // Load period comparison if stats exist
+            <% if (todayStats) { %>
+                loadPeriodComparison();
+            <% } %>
         });
 
         // Update the report title and period label based on selected period type
@@ -542,6 +981,8 @@
             currentPeriodType = document.getElementById('periodType').value;
             updateReportTitle();
             updatePeriodLabel();
+            // Load stats for the new period type
+            loadStatsForCurrentPeriod();
         }
 
         // Navigate to previous/next period
@@ -573,6 +1014,37 @@
             updatePeriodLabel();
             // Auto-load stats for the new period
             loadStatsForCurrentPeriod();
+            // Reload the currently active detailed list if any
+            reloadCurrentDetailedList();
+        }
+
+        // Load and display stats for the current period
+        async function loadStatsForCurrentPeriod() {
+            const periodType = document.getElementById('periodType').value;
+            
+            try {
+                const response = await fetch(`/statistics/get-stats`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        periodType: periodType,
+                        referenceDate: currentReferenceDate.toISOString()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.stats) {
+                    // Stats exist - reload the page with the new data
+                    window.location.href = `/statistics/dashboard?periodType=${periodType}&date=${currentReferenceDate.toISOString()}`;
+                } else {
+                    // No stats found - show message
+                    alert('ℹ️ No statistics found for this period. Click "Generate Statistics" to create them.');
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                alert('❌ Error loading statistics for this period');
+            }
         }
 
         // Generate stats for the selected period
@@ -693,12 +1165,555 @@
             }
         }
 
+        // Load and display period-over-period comparison
+        async function loadPeriodComparison() {
+            const periodType = document.getElementById('periodType').value;
+            
+            try {
+                const response = await fetch(`/statistics/period-over-period/${periodType}?date=${currentReferenceDate.toISOString()}`);
+                const data = await response.json();
+
+                if (!data.success || !data.comparison.previous) {
+                    document.getElementById('periodComparisonContent').innerHTML = '';
+                    return;
+                }
+
+                const { current, previous, changes } = data.comparison;
+
+                let html = `
+                    <h4 style="margin-bottom: 15px;">📊 Period-over-Period Comparison</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        ${createComparisonCard('New POs', previous.stats.purchaseOrders.newInPeriod, current.stats.purchaseOrders.newInPeriod, changes.purchaseOrders.newInPeriod)}
+                        ${createComparisonCard('Updated POs', previous.stats.purchaseOrders.updatedInPeriod, current.stats.purchaseOrders.updatedInPeriod, changes.purchaseOrders.updatedInPeriod)}
+                        ${createComparisonCard('Items Received', previous.stats.lineItems.receivedInPeriod, current.stats.lineItems.receivedInPeriod, changes.lineItems.receivedInPeriod)}
+                        ${createComparisonCard('Emails Sent', previous.stats.emails.sentInPeriod, current.stats.emails.sentInPeriod, changes.emails.sentInPeriod)}
+                        ${createComparisonCard('Avg Days to Stock', (previous.stats.performance.avgDaysOrderToStock || 0).toFixed(1), (current.stats.performance.avgDaysOrderToStock || 0).toFixed(1), changes.performance.avgDaysOrderToStock, true)}
+                        ${createComparisonCard('On-Time Delivery %', (previous.stats.performance.onTimeDeliveryRate || 0).toFixed(1) + '%', (current.stats.performance.onTimeDeliveryRate || 0).toFixed(1) + '%', changes.performance.onTimeDeliveryRate)}
+                    </div>
+                    <div style="margin-top: 10px; font-size: 12px; color: #64748b;">
+                        Comparing <strong>${current.label}</strong> vs <strong>${previous.label}</strong>
+                    </div>
+                `;
+
+                document.getElementById('periodComparisonContent').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading period comparison:', error);
+                document.getElementById('periodComparisonContent').innerHTML = '';
+            }
+        }
+
+        function createComparisonCard(label, prevValue, currValue, change, lowerIsBetter = false) {
+            const trendIcon = change.trend === 'up' ? '📈' : change.trend === 'down' ? '📉' : '➡️';
+            const trendColor = change.trend === 'up' ? (lowerIsBetter ? '#ef4444' : '#10b981') : 
+                              change.trend === 'down' ? (lowerIsBetter ? '#10b981' : '#ef4444') : '#64748b';
+            const percentSign = change.percent > 0 ? '+' : '';
+
+            return `
+                <div style="background: white; padding: 15px; border-radius: 6px; border-left: 3px solid ${trendColor};">
+                    <div style="font-size: 12px; color: #64748b; margin-bottom: 5px;">${label}</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #1e293b; margin-bottom: 5px;">${currValue}</div>
+                    <div style="font-size: 14px; color: ${trendColor};">
+                        ${trendIcon} ${percentSign}${change.percent}%
+                        <span style="color: #64748b; font-size: 12px;">(${change.value > 0 ? '+' : ''}${change.value})</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Show comparison modal
+        function showComparisonView() {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center;';
+            
+            modal.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 10px; max-width: 600px; width: 90%;">
+                    <h3 style="margin-bottom: 20px;">Compare Two Periods</h3>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Period 1:</label>
+                        <select id="period1Type" style="width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="quarterly">Quarterly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                        <input type="date" id="period1Date" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc;" value="${currentReferenceDate.toISOString().split('T')[0]}">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Period 2:</label>
+                        <select id="period2Type" style="width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="quarterly">Quarterly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                        <input type="date" id="period2Date" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="performComparison()" style="flex: 1; padding: 10px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                            Compare
+                        </button>
+                        <button onclick="this.closest('div').parentElement.parentElement.remove()" style="flex: 1; padding: 10px; background: #94a3b8; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                            Cancel
+                        </button>
+                    </div>
+                    
+                    <div id="comparisonResult" style="margin-top: 20px;"></div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        async function performComparison() {
+            const period1Type = document.getElementById('period1Type').value;
+            const period1Date = document.getElementById('period1Date').value;
+            const period2Type = document.getElementById('period2Type').value;
+            const period2Date = document.getElementById('period2Date').value;
+
+            if (!period1Date || !period2Date) {
+                alert('Please select dates for both periods');
+                return;
+            }
+
+            try {
+                const response = await fetch('/statistics/compare', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ period1Type, period1Date, period2Type, period2Date })
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message);
+                }
+
+                const { comparison } = data;
+                const resultDiv = document.getElementById('comparisonResult');
+                
+                resultDiv.innerHTML = `
+                    <h4 style="margin-bottom: 15px;">Comparison Results</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        ${createDetailedComparisonCard('New POs', comparison.period1.stats.purchaseOrders.newInPeriod, comparison.period2.stats.purchaseOrders.newInPeriod, comparison.differences.newPOs)}
+                        ${createDetailedComparisonCard('Updated POs', comparison.period1.stats.purchaseOrders.updatedInPeriod, comparison.period2.stats.purchaseOrders.updatedInPeriod, comparison.differences.updatedPOs)}
+                        ${createDetailedComparisonCard('Items Received', comparison.period1.stats.lineItems.receivedInPeriod, comparison.period2.stats.lineItems.receivedInPeriod, comparison.differences.receivedItems)}
+                        ${createDetailedComparisonCard('Emails Sent', comparison.period1.stats.emails.sentInPeriod, comparison.period2.stats.emails.sentInPeriod, comparison.differences.emailsSent)}
+                    </div>
+                    <div style="margin-top: 15px; padding: 15px; background: #f1f5f9; border-radius: 6px;">
+                        <strong>${comparison.period1.label}</strong> vs <strong>${comparison.period2.label}</strong>
+                    </div>
+                `;
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        function createDetailedComparisonCard(label, value1, value2, diff) {
+            const color = diff.value > 0 ? '#10b981' : diff.value < 0 ? '#ef4444' : '#64748b';
+            return `
+                <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    <div style="font-weight: bold; margin-bottom: 10px;">${label}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 24px; font-weight: bold;">${value1}</div>
+                            <div style="font-size: 12px; color: #64748b;">Period 1</div>
+                        </div>
+                        <div style="font-size: 20px;">→</div>
+                        <div>
+                            <div style="font-size: 24px; font-weight: bold;">${value2}</div>
+                            <div style="font-size: 12px; color: #64748b;">Period 2</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0; color: ${color}; font-weight: bold;">
+                        ${diff.value > 0 ? '+' : ''}${diff.value} (${diff.percent > 0 ? '+' : ''}${diff.percent}%)
+                    </div>
+                </div>
+            `;
+        }
+
+        // Show trends view
+        function showTrendsView() {
+            const periodType = document.getElementById('periodType').value;
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; overflow-y: auto;';
+            
+            modal.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 10px; max-width: 1200px; width: 95%; max-height: 90vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>📈 Trend Analysis</h3>
+                        <button onclick="this.closest('div').parentElement.parentElement.remove()" style="padding: 8px 16px; background: #94a3b8; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Close
+                        </button>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label>Show last: </label>
+                        <select id="trendCount" onchange="loadTrendData()" style="padding: 5px 10px; border-radius: 5px; border: 1px solid #ccc;">
+                            <option value="7">7 periods</option>
+                            <option value="14">14 periods</option>
+                            <option value="30" selected>30 periods</option>
+                            <option value="60">60 periods</option>
+                            <option value="90">90 periods</option>
+                        </select>
+                    </div>
+                    
+                    <div id="trendsContent">Loading trends...</div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            loadTrendData();
+        }
+
+        async function loadTrendData() {
+            const periodType = document.getElementById('periodType').value;
+            const count = document.getElementById('trendCount')?.value || 30;
+            
+            try {
+                const response = await fetch(`/statistics/trends/${periodType}/${count}`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error('Failed to load trend data');
+                }
+
+                displayTrendCharts(data.data);
+            } catch (error) {
+                document.getElementById('trendsContent').innerHTML = `<p style="color: #ef4444;">Error loading trends: ${error.message}</p>`;
+            }
+        }
+
+        function displayTrendCharts(trendData) {
+            if (!trendData || trendData.length === 0) {
+                document.getElementById('trendsContent').innerHTML = '<p>No trend data available</p>';
+                return;
+            }
+
+            const content = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">
+                    ${createSparklineCard('New POs', trendData.map(d => d.newPOs), trendData.map(d => d.period), '#667eea')}
+                    ${createSparklineCard('Items Received', trendData.map(d => d.receivedItems), trendData.map(d => d.period), '#10b981')}
+                    ${createSparklineCard('Emails Sent', trendData.map(d => d.emailsSent), trendData.map(d => d.period), '#3b82f6')}
+                    ${createSparklineCard('Avg Days to Stock', trendData.map(d => d.avgDaysToStock), trendData.map(d => d.period), '#f59e0b')}
+                    ${createSparklineCard('On-Time Delivery %', trendData.map(d => d.onTimeDelivery), trendData.map(d => d.period), '#8b5cf6')}
+                    ${createSparklineCard('Tasks Completed', trendData.map(d => d.tasksCompleted), trendData.map(d => d.period), '#ec4899')}
+                </div>
+                
+                <div style="margin-top: 30px; padding: 20px; background: #f8fafc; border-radius: 8px;">
+                    <h4 style="margin-bottom: 15px;">Trend Summary</h4>
+                    ${createTrendSummary(trendData)}
+                </div>
+            `;
+
+            document.getElementById('trendsContent').innerHTML = content;
+        }
+
+        function createSparklineCard(title, values, labels, color) {
+            const max = Math.max(...values);
+            const min = Math.min(...values);
+            const range = max - min || 1;
+            const height = 60;
+            
+            const points = values.map((value, i) => {
+                const x = (i / (values.length - 1)) * 100;
+                const y = height - ((value - min) / range) * height;
+                return `${x},${y}`;
+            }).join(' ');
+
+            const current = values[values.length - 1];
+            const previous = values[values.length - 2] || current;
+            const change = current - previous;
+            const percentChange = previous !== 0 ? Math.round((change / previous) * 100) : 0;
+            const trendIcon = change > 0 ? '📈' : change < 0 ? '📉' : '➡️';
+
+            return `
+                <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                        <div>
+                            <div style="font-size: 14px; color: #64748b; margin-bottom: 5px;">${title}</div>
+                            <div style="font-size: 32px; font-weight: bold; color: #1e293b;">${current.toFixed(1)}</div>
+                            <div style="font-size: 14px; color: ${change >= 0 ? '#10b981' : '#ef4444'};">
+                                ${trendIcon} ${change > 0 ? '+' : ''}${change.toFixed(1)} (${percentChange > 0 ? '+' : ''}${percentChange}%)
+                            </div>
+                        </div>
+                    </div>
+                    <svg width="100%" height="${height}" style="display: block;">
+                        <polyline
+                            fill="none"
+                            stroke="${color}"
+                            stroke-width="2"
+                            points="${points}"
+                            vector-effect="non-scaling-stroke"
+                        />
+                    </svg>
+                </div>
+            `;
+        }
+
+        function createTrendSummary(trendData) {
+            const latest = trendData[trendData.length - 1];
+            const oldest = trendData[0];
+            
+            return `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div>
+                        <div style="font-size: 12px; color: #64748b;">Data Points</div>
+                        <div style="font-size: 20px; font-weight: bold;">${trendData.length}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: #64748b;">First Period</div>
+                        <div style="font-size: 14px; font-weight: bold;">${oldest.period}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: #64748b;">Latest Period</div>
+                        <div style="font-size: 14px; font-weight: bold;">${latest.period}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Load period comparison on page load and when period changes
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPeriodComparison();
+        });
+
+        // Update comparison when period type changes
+        const originalUpdateReportTitle = updateReportTitle;
+        updateReportTitle = function() {
+            if (originalUpdateReportTitle) originalUpdateReportTitle();
+            loadPeriodComparison();
+        };
+
         // Load stats for current period (future enhancement)
         async function loadStatsForCurrentPeriod() {
             // This would fetch stats for the selected period
             // For now, we just show a message
             console.log('Loading stats for:', currentReferenceDate, document.getElementById('periodType').value);
             // TODO: Implement API call to fetch stats by period
+        }
+
+        // Load vendors list
+        async function loadVendorsList(type) {
+            currentDetailedList = { func: loadVendorsList, args: [type] };
+            const periodType = document.getElementById('periodType').value;
+            const contentDiv = document.getElementById('detailedListContent');
+            contentDiv.innerHTML = '<p style="text-align: center;">Loading...</p>';
+
+            try {
+                const endpoint = type === 'open' ? '/statistics/vendors/open-pos' : '/statistics/vendors/completed-pos';
+                const response = await fetch(`${endpoint}?periodType=${periodType}&date=${currentReferenceDate.toISOString()}`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to load data');
+                }
+
+                const title = type === 'open' ? 'Vendors with Open POs' : 'Vendors with Completed POs';
+                const vendors = data.vendors;
+
+                let html = `
+                    <h4>${title}</h4>
+                    <div style="margin-bottom: 15px; padding: 15px; background: #f1f5f9; border-radius: 8px;">
+                        <strong>Summary:</strong> ${data.summary.totalVendors} vendors | 
+                        ${type === 'open' ? data.summary.totalOpenPOs : data.summary.totalCompletedPOs} POs | 
+                        Total Value: $${data.summary.totalValue.toLocaleString()}
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f8fafc;">
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #e2e8f0;">Vendor</th>
+                                <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">PO Count</th>
+                                <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Total Value</th>
+                                ${type === 'open' ? '<th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Unreceived Items</th>' : ''}
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #e2e8f0;">PO Numbers</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                vendors.forEach((vendor, index) => {
+                    const poNumbers = type === 'open' ? vendor.openPONumbers : vendor.completedPONumbers;
+                    const poCount = type === 'open' ? vendor.openPOCount : vendor.completedPOCount;
+                    const value = type === 'open' ? vendor.totalOpenValue : vendor.totalCompletedValue;
+                    
+                    html += `
+                        <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f9fafb;' : ''}">
+                            <td style="padding: 10px;">${vendor.vendorName}</td>
+                            <td style="padding: 10px; text-align: center;">${poCount}</td>
+                            <td style="padding: 10px; text-align: center;">$${value.toLocaleString()}</td>
+                            ${type === 'open' ? `<td style="padding: 10px; text-align: center;">${vendor.unreceiveItems}</td>` : ''}
+                            <td style="padding: 10px; font-size: 12px;">${poNumbers.slice(0, 5).join(', ')}${poNumbers.length > 5 ? '...' : ''}</td>
+                        </tr>
+                    `;
+                });
+
+                html += '</tbody></table>';
+                contentDiv.innerHTML = html;
+            } catch (error) {
+                contentDiv.innerHTML = `<p style="color: #ef4444;">Error: ${error.message}</p>`;
+            }
+        }
+
+        // Load POs list
+        async function loadPOsList(type) {
+            currentDetailedList = { func: loadPOsList, args: [type] };
+            const periodType = document.getElementById('periodType').value;
+            const contentDiv = document.getElementById('detailedListContent');
+            contentDiv.innerHTML = '<p style="text-align: center;">Loading...</p>';
+
+            try {
+                const endpoint = type === 'new' ? '/statistics/pos/new' : '/statistics/pos/completed';
+                const response = await fetch(`${endpoint}?periodType=${periodType}&date=${currentReferenceDate.toISOString()}`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to load data');
+                }
+
+                const title = type === 'new' ? 'New POs Created in Period' : 'Completed POs in Period';
+                const pos = data.pos;
+
+                let html = `
+                    <h4>${title}</h4>
+                    <div style="margin-bottom: 15px; padding: 15px; background: #f1f5f9; border-radius: 8px;">
+                        <strong>Summary:</strong> ${data.summary.totalPOs} POs | 
+                        ${data.summary.totalItems} items | 
+                        Total Value: $${data.summary.totalValue.toLocaleString()}
+                        ${type === 'completed' ? ` | Avg Days to Complete: ${Math.round(data.summary.avgDaysToComplete)}` : ''}
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f8fafc;">
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #e2e8f0;">PO Number</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #e2e8f0;">Vendor</th>
+                                <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Type</th>
+                                <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Items</th>
+                                <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Value</th>
+                                <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Date</th>
+                                ${type === 'completed' ? '<th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Days</th>' : ''}
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                pos.forEach((po, index) => {
+                    const date = type === 'new' ? new Date(po.createdDate) : new Date(po.completedDate);
+                    html += `
+                        <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f9fafb;' : ''}">
+                            <td style="padding: 10px; font-weight: bold;">${po.poNumber}</td>
+                            <td style="padding: 10px;">${po.vendor}</td>
+                            <td style="padding: 10px; text-align: center;">${po.type}</td>
+                            <td style="padding: 10px; text-align: center;">${po.itemCount}</td>
+                            <td style="padding: 10px; text-align: center;">$${po.totalValue.toLocaleString()}</td>
+                            <td style="padding: 10px; text-align: center; font-size: 12px;">${date.toLocaleDateString()}</td>
+                            ${type === 'completed' ? `<td style="padding: 10px; text-align: center;">${po.daysToComplete}</td>` : ''}
+                        </tr>
+                    `;
+                });
+
+                html += '</tbody></table>';
+                contentDiv.innerHTML = html;
+            } catch (error) {
+                contentDiv.innerHTML = `<p style="color: #ef4444;">Error: ${error.message}</p>`;
+            }
+        }
+
+        // Load items list
+        async function loadItemsList(type) {
+            currentDetailedList = { func: loadItemsList, args: [type] };
+            const periodType = document.getElementById('periodType').value;
+            const contentDiv = document.getElementById('detailedListContent');
+            contentDiv.innerHTML = '<p style="text-align: center;">Loading...</p>';
+
+            try {
+                const endpoint = type === 'received' ? '/statistics/items/received' : '/statistics/items/overdue';
+                const response = await fetch(`${endpoint}?periodType=${periodType}&date=${currentReferenceDate.toISOString()}`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to load data');
+                }
+
+                const title = type === 'received' ? 'Items Received in Period' : 'Overdue Items';
+                const items = data.items;
+
+                let summaryHtml = '';
+                if (type === 'received') {
+                    summaryHtml = `
+                        <strong>Summary:</strong> ${data.summary.totalItems} items | 
+                        Total Quantity: ${data.summary.totalQuantity.toLocaleString()} | 
+                        Avg Days to Receive: ${data.summary.avgDaysToReceive}
+                    `;
+                } else {
+                    summaryHtml = `
+                        <strong>Summary:</strong> ${data.summary.totalOverdue} items | 
+                        Avg Days Overdue: ${Math.round(data.summary.avgDaysOverdue)} | 
+                        High Urgency: ${data.summary.byUrgency.high} | 
+                        Medium: ${data.summary.byUrgency.medium} | 
+                        Low: ${data.summary.byUrgency.low}
+                    `;
+                }
+
+                let html = `
+                    <h4>${title}</h4>
+                    <div style="margin-bottom: 15px; padding: 15px; background: #f1f5f9; border-radius: 8px;">
+                        ${summaryHtml}
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f8fafc;">
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #e2e8f0;">Item</th>
+                                <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">PO Number</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #e2e8f0;">Vendor</th>
+                                <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Quantity</th>
+                                ${type === 'received' 
+                                    ? '<th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Received Date</th><th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Days</th>'
+                                    : '<th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">ETA</th><th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Days Overdue</th><th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Urgency</th>'}
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                items.forEach((item, index) => {
+                    if (type === 'received') {
+                        const date = new Date(item.receivedDate);
+                        html += `
+                            <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f9fafb;' : ''}">
+                                <td style="padding: 10px;">${item.itemName}</td>
+                                <td style="padding: 10px; text-align: center; font-weight: bold;">${item.poNumber}</td>
+                                <td style="padding: 10px;">${item.vendor}</td>
+                                <td style="padding: 10px; text-align: center;">${item.quantity}</td>
+                                <td style="padding: 10px; text-align: center; font-size: 12px;">${date.toLocaleDateString()}</td>
+                                <td style="padding: 10px; text-align: center;">${item.daysToReceive}</td>
+                            </tr>
+                        `;
+                    } else {
+                        const eta = new Date(item.eta);
+                        const urgencyColor = item.urgency === 'High' ? '#ef4444' : item.urgency === 'Medium' ? '#f59e0b' : '#64748b';
+                        html += `
+                            <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f9fafb;' : ''}">
+                                <td style="padding: 10px;">${item.itemName}</td>
+                                <td style="padding: 10px; text-align: center; font-weight: bold;">${item.poNumber}</td>
+                                <td style="padding: 10px;">${item.vendor}</td>
+                                <td style="padding: 10px; text-align: center;">-</td>
+                                <td style="padding: 10px; text-align: center; font-size: 12px;">${eta.toLocaleDateString()}</td>
+                                <td style="padding: 10px; text-align: center; font-weight: bold; color: #ef4444;">${item.daysOverdue}</td>
+                                <td style="padding: 10px; text-align: center;"><span style="background: ${urgencyColor}; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px;">${item.urgency}</span></td>
+                            </tr>
+                        `;
+                    }
+                });
+
+                html += '</tbody></table>';
+                contentDiv.innerHTML = html;
+            } catch (error) {
+                contentDiv.innerHTML = `<p style="color: #ef4444;">Error: ${error.message}</p>`;
+            }
         }
     </script>
 </body>
