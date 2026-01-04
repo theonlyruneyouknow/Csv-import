@@ -100,6 +100,8 @@ function getPeriodLabel(periodType, start, end) {
 // Generate statistics for any period type
 router.post('/generate-stats', async (req, res) => {
   try {
+    console.log('📊 Generate stats request received:', req.body);
+    
     const periodType = req.body.periodType || 'daily';
     const targetDate = req.body.referenceDate ? new Date(req.body.referenceDate) : 
                        req.body.date ? new Date(req.body.date) : 
@@ -108,6 +110,7 @@ router.post('/generate-stats', async (req, res) => {
     
     const periodLabel = getPeriodLabel(periodType, start, end);
     console.log(`📊 Generating ${periodType} statistics for ${periodLabel}...`);
+    console.log(`   Period: ${start.toISOString()} to ${end.toISOString()}`);
 
     // Check if stats already exist for this period
     const existingStats = await DailyStatistics.findOne({
@@ -678,17 +681,26 @@ router.post('/generate-stats', async (req, res) => {
 
     // Save or update statistics
     if (existingStats) {
-      await DailyStatistics.findByIdAndUpdate(existingStats._id, stats);
+      const updated = await DailyStatistics.findByIdAndUpdate(existingStats._id, stats, { new: true });
       console.log(`✅ ${periodType.charAt(0).toUpperCase() + periodType.slice(1)} statistics updated for ${periodLabel}`);
+      console.log(`   Stats ID: ${updated._id}, POs: ${updated.purchaseOrders?.total || 0}, Items: ${updated.lineItems?.total || 0}`);
     } else {
-      await DailyStatistics.create(stats);
+      const created = await DailyStatistics.create(stats);
       console.log(`✅ ${periodType.charAt(0).toUpperCase() + periodType.slice(1)} statistics created for ${periodLabel}`);
+      console.log(`   Stats ID: ${created._id}, POs: ${created.purchaseOrders?.total || 0}, Items: ${created.lineItems?.total || 0}`);
     }
 
     res.json({
       success: true,
       message: `${periodType.charAt(0).toUpperCase() + periodType.slice(1)} statistics generated successfully`,
-      stats
+      stats,
+      debug: {
+        periodType,
+        periodStart: start,
+        periodEnd: end,
+        totalPOs: stats.purchaseOrders?.total || 0,
+        totalItems: stats.lineItems?.total || 0
+      }
     });
 
   } catch (error) {
