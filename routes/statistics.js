@@ -10,6 +10,18 @@ const EmailTemplate = require('../models/EmailTemplate');
 const ExcelJS = require('exceljs');
 const nodemailer = require('nodemailer');
 
+// Helper function to build flexible date query to handle timezone variations
+function buildFlexibleDateQuery(periodType, start, end) {
+  return {
+    periodType,
+    $or: [
+      { periodStart: start, periodEnd: end },  // Exact match
+      { periodStart: { $lte: start }, periodEnd: { $gte: end } },  // Contains range
+      { periodStart: { $lte: end }, periodEnd: { $gte: start } }  // Overlaps range
+    ]
+  };
+}
+
 // Helper function to calculate period bounds
 function getPeriodBounds(periodType, referenceDate = new Date()) {
   const date = new Date(referenceDate);
@@ -1518,11 +1530,9 @@ router.get('/vendors/open-pos', async (req, res) => {
     const targetDate = req.query.date ? new Date(req.query.date) : new Date();
     const { start, end } = getPeriodBounds(periodType, targetDate);
 
-    const stats = await DailyStatistics.findOne({
-      periodType,
-      periodStart: start,
-      periodEnd: end
-    });
+    const stats = await DailyStatistics.findOne(
+      buildFlexibleDateQuery(periodType, start, end)
+    ).sort({ periodStart: -1 });
 
     if (!stats) {
       return res.status(404).json({
@@ -1556,11 +1566,9 @@ router.get('/vendors/completed-pos', async (req, res) => {
     const targetDate = req.query.date ? new Date(req.query.date) : new Date();
     const { start, end } = getPeriodBounds(periodType, targetDate);
 
-    const stats = await DailyStatistics.findOne({
-      periodType,
-      periodStart: start,
-      periodEnd: end
-    });
+    const stats = await DailyStatistics.findOne(
+      buildFlexibleDateQuery(periodType, start, end)
+    ).sort({ periodStart: -1 });
 
     if (!stats) {
       return res.status(404).json({
@@ -1594,11 +1602,9 @@ router.get('/pos/new', async (req, res) => {
     const targetDate = req.query.date ? new Date(req.query.date) : new Date();
     const { start, end } = getPeriodBounds(periodType, targetDate);
 
-    const stats = await DailyStatistics.findOne({
-      periodType,
-      periodStart: start,
-      periodEnd: end
-    });
+    const stats = await DailyStatistics.findOne(
+      buildFlexibleDateQuery(periodType, start, end)
+    ).sort({ periodStart: -1 });
 
     if (!stats) {
       return res.status(404).json({
@@ -1632,11 +1638,9 @@ router.get('/pos/completed', async (req, res) => {
     const targetDate = req.query.date ? new Date(req.query.date) : new Date();
     const { start, end } = getPeriodBounds(periodType, targetDate);
 
-    const stats = await DailyStatistics.findOne({
-      periodType,
-      periodStart: start,
-      periodEnd: end
-    });
+    const stats = await DailyStatistics.findOne(
+      buildFlexibleDateQuery(periodType, start, end)
+    ).sort({ periodStart: -1 });
 
     if (!stats) {
       return res.status(404).json({
@@ -1672,11 +1676,9 @@ router.get('/items/received', async (req, res) => {
     const targetDate = req.query.date ? new Date(req.query.date) : new Date();
     const { start, end } = getPeriodBounds(periodType, targetDate);
 
-    const stats = await DailyStatistics.findOne({
-      periodType,
-      periodStart: start,
-      periodEnd: end
-    });
+    const stats = await DailyStatistics.findOne(
+      buildFlexibleDateQuery(periodType, start, end)
+    ).sort({ periodStart: -1 });
 
     if (!stats) {
       return res.status(404).json({
@@ -1710,11 +1712,9 @@ router.get('/items/overdue', async (req, res) => {
     const targetDate = req.query.date ? new Date(req.query.date) : new Date();
     const { start, end } = getPeriodBounds(periodType, targetDate);
 
-    const stats = await DailyStatistics.findOne({
-      periodType,
-      periodStart: start,
-      periodEnd: end
-    });
+    const stats = await DailyStatistics.findOne(
+      buildFlexibleDateQuery(periodType, start, end)
+    ).sort({ periodStart: -1 });
 
     if (!stats) {
       return res.status(404).json({
@@ -1754,11 +1754,9 @@ router.get('/items/top-by-quantity', async (req, res) => {
     const targetDate = req.query.date ? new Date(req.query.date) : new Date();
     const { start, end } = getPeriodBounds(periodType, targetDate);
 
-    const stats = await DailyStatistics.findOne({
-      periodType,
-      periodStart: start,
-      periodEnd: end
-    });
+    const stats = await DailyStatistics.findOne(
+      buildFlexibleDateQuery(periodType, start, end)
+    ).sort({ periodStart: -1 });
 
     if (!stats) {
       return res.status(404).json({
