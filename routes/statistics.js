@@ -1757,5 +1757,37 @@ router.get('/items/top-by-quantity', async (req, res) => {
   }
 });
 
+// Diagnostic endpoint to check what statistics exist
+router.get('/debug/list-all', async (req, res) => {
+  try {
+    const allStats = await DailyStatistics.find()
+      .select('periodType periodStart periodEnd generatedAt purchaseOrders.total lineItems.total')
+      .sort({ periodStart: -1 })
+      .limit(50);
+    
+    console.log(`📊 Found ${allStats.length} statistics records in database`);
+    
+    res.json({
+      success: true,
+      count: allStats.length,
+      stats: allStats.map(s => ({
+        id: s._id,
+        periodType: s.periodType,
+        periodStart: s.periodStart,
+        periodEnd: s.periodEnd,
+        generatedAt: s.generatedAt,
+        totalPOs: s.purchaseOrders?.total || 0,
+        totalItems: s.lineItems?.total || 0
+      }))
+    });
+  } catch (error) {
+    console.error('❌ Error listing statistics:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
 
