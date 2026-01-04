@@ -810,11 +810,34 @@ router.get('/dashboard', async (req, res) => {
     const targetDate = req.query.date ? new Date(req.query.date) : new Date();
     const { start, end } = getPeriodBounds(periodType, targetDate);
     
+    console.log(`📊 Dashboard loading for ${periodType}, date: ${targetDate.toISOString()}`);
+    console.log(`   Looking for stats between ${start.toISOString()} and ${end.toISOString()}`);
+    
+    // Find stats where the period overlaps with our target period
+    // This is more flexible than exact match
     let todayStats = await DailyStatistics.findOne({
       periodType: periodType,
-      periodStart: start,
-      periodEnd: end
-    });
+      $or: [
+        // Exact match
+        { periodStart: start, periodEnd: end },
+        // Or period that contains our target date
+        { 
+          periodStart: { $lte: start },
+          periodEnd: { $gte: end }
+        },
+        // Or period that overlaps with our range
+        {
+          periodStart: { $lte: end },
+          periodEnd: { $gte: start }
+        }
+      ]
+    }).sort({ periodStart: -1 });
+    
+    if (todayStats) {
+      console.log(`✅ Found stats: ${todayStats._id}, period: ${todayStats.periodStart.toISOString()} to ${todayStats.periodEnd.toISOString()}`);
+    } else {
+      console.log(`⚠️ No stats found for this period`);
+    }
 
     // Get last 30 days for trends (daily stats only)
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
