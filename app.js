@@ -802,6 +802,37 @@ app.use('/enhanced-vendors', ensureAuthenticated, ensureApproved, enhancedVendor
 app.use('/tasks', ensureAuthenticated, ensureApproved, taskRoutes);
 app.use('/receiving', ensureAuthenticated, ensureApproved, receivingRoutes);
 app.use('/email-templates', ensureAuthenticated, ensureApproved, emailTemplateRoutes);
+// Debug route without authentication (for Render troubleshooting)
+app.get('/statistics/debug/list-all', async (req, res) => {
+    try {
+        const DailyStatistics = require('./models/DailyStatistics');
+        const allStats = await DailyStatistics.find()
+            .select('periodType periodStart periodEnd generatedAt purchaseOrders.total lineItems.total')
+            .sort({ periodStart: -1 })
+            .limit(50);
+        
+        res.json({
+            success: true,
+            count: allStats.length,
+            databaseConnected: require('mongoose').connection.readyState === 1,
+            stats: allStats.map(s => ({
+                id: s._id,
+                periodType: s.periodType,
+                periodStart: s.periodStart,
+                periodEnd: s.periodEnd,
+                generatedAt: s.generatedAt,
+                totalPOs: s.purchaseOrders?.total || 0,
+                totalItems: s.lineItems?.total || 0
+            }))
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            stack: error.stack
+        });
+    }
+});
 app.use('/statistics', ensureAuthenticated, ensureApproved, require('./routes/statistics')); // NEW: Daily Statistics
 app.use('/forms', ensureAuthenticated, ensureApproved, formRoutes); // NEW: Forms management
 app.use('/seed-catalog', ensureAuthenticated, ensureApproved, seedCatalogRoutes); // NEW: AI Seed Catalog
