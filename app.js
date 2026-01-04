@@ -2230,23 +2230,51 @@ cron.schedule('0 * * * *', () => {
 cron.schedule('0 0 * * *', async () => {
     console.log('📊 Auto-generating daily statistics at midnight...');
     try {
+        const DailyStatistics = require('./models/DailyStatistics');
+        const PurchaseOrder = require('./models/PurchaseOrder');
+        
         // Generate yesterday's stats (the day that just ended)
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0);
         
-        const response = await fetch('http://localhost:' + PORT + '/statistics/generate-stats', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                force: true, 
-                periodType: 'daily',
-                referenceDate: yesterday.toISOString()
-            })
+        const today = new Date(yesterday);
+        today.setDate(today.getDate() + 1);
+        
+        // Check if stats already exist
+        const existingStats = await DailyStatistics.findOne({
+            periodType: 'daily',
+            periodStart: yesterday,
+            periodEnd: today
         });
         
-        console.log('✅ Daily statistics auto-generated for', yesterday.toDateString());
+        if (!existingStats) {
+            // Trigger generation by making internal call
+            // Use 127.0.0.1 which works in all environments
+            const host = process.env.RENDER ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` : `http://127.0.0.1:${PORT}`;
+            const fetch = require('node-fetch');
+            
+            const response = await fetch(`${host}/statistics/generate-stats`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    force: true, 
+                    periodType: 'daily',
+                    referenceDate: yesterday.toISOString()
+                })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                console.log('✅ Daily statistics auto-generated for', yesterday.toDateString());
+            } else {
+                console.error('❌ Failed to generate statistics:', result.error);
+            }
+        } else {
+            console.log('ℹ️ Statistics already exist for', yesterday.toDateString());
+        }
     } catch (error) {
-        console.error('❌ Error in automatic daily statistics generation:', error);
+        console.error('❌ Error in automatic daily statistics generation:', error.message);
     }
 });
 
