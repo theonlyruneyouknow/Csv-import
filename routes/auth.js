@@ -720,4 +720,343 @@ router.post('/reset-password/:token', async (req, res) => {
     }
 });
 
+// ======================================
+// USER INVITATION SYSTEM
+// ======================================
+
+// Send invitation
+router.post('/admin/users/invite', ensureAuthenticated, requireRole(['admin', 'manager']), async (req, res) => {
+    try {
+        const { email, role, firstName, lastName } = req.body;
+        
+        // Validation
+        if (!email) {
+            return res.status(400).json({ error: 'Email is required' });
+        }
+        
+        // Check if user already exists
+        const existingUser = await User.findOne({ email: email.toLowerCase() });
+        if (existingUser) {
+            return res.status(400).json({ error: 'A user with this email already exists' });
+        }
+        
+        // Check if there's a pending invitation
+        const pendingInvitation = await User.findOne({
+            invitedEmail: email.toLowerCase(),
+            invitationExpires: { $gt: Date.now() },
+            invitationAccepted: false
+        });
+        
+        if (pendingInvitation) {
+            return res.status(400).json({ error: 'An invitation has already been sent to this email' });
+        }
+        
+        // Create placeholder user with invitation
+        const user = new User({
+            username: email.split('@')[0].toLowerCase() + '_' + Date.now(), // Temporary username
+            email: email.toLowerCase(),
+            password: require('crypto').randomBytes(32).toString('hex'), // Temporary password
+            firstName: firstName || 'Invited',
+            lastName: lastName || 'User',
+            role: role || 'user',
+            status: 'pending', // Will be auto-approved when they register
+            invitedBy: req.user._id,
+            invitedAt: new Date(),
+            invitedEmail: email.toLowerCase()
+        });
+        
+        const token = user.generateInvitationToken();
+        await user.save();
+        
+        // Send invitation email
+        const inviteUrl = `${req.protocol}://${req.get('host')}/auth/accept-invite/${token}`;
+        
+        try {
+            await emailService.sendEmail({
+                to: email,
+                subject: 'You\'re Invited to TSC Management System',
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h2 style="color: #333;">You're Invited!</h2>
+                        <p>Hello${firstName ? ' ' + firstName : ''},</p>
+                        <p>${req.user.firstName} ${req.user.lastName} has invited you to join the TSC Management System.</p>
+                        <p><strong>Role:</strong> ${role || 'user'}</p>
+                        <p>Click the button below to accept your invitation and create your account:</p>
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="${inviteUrl}" style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Accept Invitation</a>
+                        </div>
+                        <p style="color: #666; font-size: 14px;">This invitation will expire in 7 days.</p>
+                        <p style="color: #666; font-size: 14px;">If the button doesn't work, copy and paste this link into your browser:</p>
+                        <p style="color: #007bff; word-break: break-all; font-size: 12px;">${inviteUrl}</p>
+                    </div>
+                `
+            });
+            
+            console.log(`✉️ Invitation sent to ${email}`);
+            
+            await AuditLog.logAction({
+                userId: req.user._id,
+                username: req.user.username,
+                action: 'USER_INVITED',
+                entityType: 'User',
+                entityId: user._id,
+                details: {
+                    invitedEmail: email,
+                    role: role || 'user',
+                    invitedBy: req.user.username
+                },
+                req,
+                success: true
+            });
+            
+            res.json({ 
+                success: true, 
+                message: `Invitation sent to ${email}`,
+                userId: user._id
+            });
+            
+        } catch (emailError) {
+            console.error('Error sending invitation email:', emailError);
+            // Delete the user if email fails
+            await User.findByIdAndDelete(user._id);
+            res.status(500).json({ error: 'Failed to send invitation email' });
+        }
+        
+    } catch (error) {
+        console.error('Error sending invitation:', error);
+        res.status(500).json({ error: 'Error sending invitation' });
+    }
+});
+
+// Accept invitation page
+router.get('/accept-invite/:token', async (req, res) => {
+    try {
+        const { token } = req.params;
+        
+        const user = await User.findOne({
+            invitationToken: token,
+            invitationExpires: { $gt: Date.now() },
+            invitationAccepted: false
+        });
+        
+        if (!user) {
+            req.flash('error', 'Invitation link is invalid or has expired.');
+            return res.redirect('/auth/login');
+        }
+        
+        res.render('auth/accept-invite', {
+            title: 'Accept Invitation',
+            token,
+            invitedEmail: user.invitedEmail,
+            role: user.role,
+            messages: {
+                error: req.flash('error'),
+                success: req.flash('success')
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error validating invitation token:', error);
+        req.flash('error', 'An error occurred. Please contact the administrator.');
+        res.redirect('/auth/login');
+    }
+});
+
+// Process invitation acceptance
+router.post('/accept-invite/:token', async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { username, password, confirmPassword, firstName, lastName } = req.body;
+        
+        // Validation
+        if (!username || !password || !confirmPassword || !firstName || !lastName) {
+            req.flash('error', 'All fields are required');
+            return res.redirect(`/auth/accept-invite/${token}`);
+        }
+        
+        if (password !== confirmPassword) {
+            req.flash('error', 'Passwords do not match');
+            return res.redirect(`/auth/accept-invite/${token}`);
+        }
+        
+        if (password.length < 6) {
+            req.flash('error', 'Password must be at least 6 characters long');
+            return res.redirect(`/auth/accept-invite/${token}`);
+        }
+        
+        // Find invitation
+        const user = await User.findOne({
+            invitationToken: token,
+            invitationExpires: { $gt: Date.now() },
+            invitationAccepted: false
+        });
+        
+        if (!user) {
+            req.flash('error', 'Invitation link is invalid or has expired.');
+            return res.redirect('/auth/login');
+        }
+        
+        // Check if username is already taken
+        const existingUsername = await User.findOne({ 
+            username: username.toLowerCase(),
+            _id: { $ne: user._id }
+        });
+        
+        if (existingUsername) {
+            req.flash('error', 'Username is already taken. Please choose another.');
+            return res.redirect(`/auth/accept-invite/${token}`);
+        }
+        
+        // Update user with registration info
+        user.username = username.toLowerCase();
+        user.password = password; // Will be hashed by pre-save middleware
+        user.firstName = firstName;
+        user.lastName = lastName;
+        user.status = 'approved'; // Auto-approve invited users
+        user.approvedBy = user.invitedBy;
+        user.approvedAt = new Date();
+        user.invitationAccepted = true;
+        user.invitationAcceptedAt = new Date();
+        user.emailVerified = true; // Since they clicked the email link
+        user.invitationToken = undefined;
+        user.invitationExpires = undefined;
+        
+        user.setDefaultPermissions();
+        await user.save();
+        
+        await AuditLog.logAction({
+            userId: user._id,
+            username: user.username,
+            action: 'INVITATION_ACCEPTED',
+            entityType: 'User',
+            entityId: user._id,
+            details: {
+                email: user.email,
+                role: user.role,
+                invitedBy: user.invitedBy
+            },
+            req,
+            success: true
+        });
+        
+        // Send welcome email
+        try {
+            await emailService.sendEmail({
+                to: user.email,
+                subject: 'Welcome to TSC Management System',
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h2 style="color: #333;">Welcome, ${user.firstName}!</h2>
+                        <p>Your account has been successfully created and approved.</p>
+                        <p><strong>Username:</strong> ${user.username}</p>
+                        <p><strong>Role:</strong> ${user.role}</p>
+                        <p>You can now log in to access the TSC Management System.</p>
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="${req.protocol}://${req.get('host')}/auth/login" style="background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Log In Now</a>
+                        </div>
+                    </div>
+                `
+            });
+        } catch (emailError) {
+            console.error('Error sending welcome email:', emailError);
+        }
+        
+        req.flash('success', 'Account created successfully! You can now log in.');
+        res.redirect('/auth/login');
+        
+    } catch (error) {
+        console.error('Error accepting invitation:', error);
+        req.flash('error', 'An error occurred. Please try again.');
+        res.redirect(`/auth/accept-invite/${req.params.token}`);
+    }
+});
+
+// Resend invitation
+router.post('/admin/users/:id/resend-invite', ensureAuthenticated, requireRole(['admin', 'manager']), async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        
+        if (!user || !user.invitedEmail || user.invitationAccepted) {
+            return res.status(400).json({ error: 'Cannot resend invitation for this user' });
+        }
+        
+        // Generate new token
+        const token = user.generateInvitationToken();
+        await user.save();
+        
+        // Resend invitation email
+        const inviteUrl = `${req.protocol}://${req.get('host')}/auth/accept-invite/${token}`;
+        
+        await emailService.sendEmail({
+            to: user.invitedEmail,
+            subject: 'Reminder: You\'re Invited to TSC Management System',
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #333;">Reminder: You're Invited!</h2>
+                    <p>This is a reminder that you've been invited to join the TSC Management System.</p>
+                    <p><strong>Role:</strong> ${user.role}</p>
+                    <p>Click the button below to accept your invitation and create your account:</p>
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="${inviteUrl}" style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Accept Invitation</a>
+                    </div>
+                    <p style="color: #666; font-size: 14px;">This invitation will expire in 7 days.</p>
+                </div>
+            `
+        });
+        
+        await AuditLog.logAction({
+            userId: req.user._id,
+            username: req.user.username,
+            action: 'INVITATION_RESENT',
+            entityType: 'User',
+            entityId: user._id,
+            details: {
+                invitedEmail: user.invitedEmail,
+                resentBy: req.user.username
+            },
+            req,
+            success: true
+        });
+        
+        res.json({ success: true, message: 'Invitation resent successfully' });
+        
+    } catch (error) {
+        console.error('Error resending invitation:', error);
+        res.status(500).json({ error: 'Error resending invitation' });
+    }
+});
+
+// Cancel/delete invitation
+router.delete('/admin/users/:id/cancel-invite', ensureAuthenticated, requireRole(['admin', 'manager']), async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        
+        if (!user || !user.invitedEmail || user.invitationAccepted) {
+            return res.status(400).json({ error: 'Cannot cancel invitation for this user' });
+        }
+        
+        await User.findByIdAndDelete(user._id);
+        
+        await AuditLog.logAction({
+            userId: req.user._id,
+            username: req.user.username,
+            action: 'INVITATION_CANCELLED',
+            entityType: 'User',
+            entityId: user._id,
+            details: {
+                invitedEmail: user.invitedEmail,
+                cancelledBy: req.user.username
+            },
+            req,
+            success: true
+        });
+        
+        res.json({ success: true, message: 'Invitation cancelled successfully' });
+        
+    } catch (error) {
+        console.error('Error cancelling invitation:', error);
+        res.status(500).json({ error: 'Error cancelling invitation' });
+    }
+});
+
 module.exports = router;

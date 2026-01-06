@@ -64,6 +64,9 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2><i class="fas fa-users me-2"></i>User Management</h2>
                     <div>
+                        <button class="btn btn-success" onclick="showInviteModal()">
+                            <i class="fas fa-user-plus me-2"></i>Invite User
+                        </button>
                         <a href="/purchase-orders" class="btn btn-secondary">
                             <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
                         </a>
@@ -112,6 +115,9 @@
                                             <strong><%= user.firstName %> <%= user.lastName %></strong>
                                             <br>
                                             <small class="text-muted">@<%= user.username %></small>
+                                            <% if (user.invitedEmail && !user.invitationAccepted) { %>
+                                                <br><span class="badge bg-warning text-dark"><i class="fas fa-envelope"></i> Invited</span>
+                                            <% } %>
                                         </div>
                                     </td>
                                     <td><%= user.email %></td>
@@ -120,23 +126,38 @@
                                     </td>
                                     <td>
                                         <span class="status-badge status-<%= user.status %>"><%= user.status %></span>
+                                        <% if (user.invitedEmail && !user.invitationAccepted) { %>
+                                            <br><small class="text-muted">Pending invitation</small>
+                                        <% } %>
                                     </td>
                                     <td>
                                         <small><%= new Date(user.createdAt).toLocaleDateString() %></small>
                                         <% if (user.createdBy) { %>
                                             <br><small class="text-muted">by <%= user.createdBy.username %></small>
+                                        <% } else if (user.invitedBy) { %>
+                                            <br><small class="text-muted">invited by <%= user.invitedBy.username %></small>
                                         <% } %>
                                     </td>
                                     <td>
                                         <% if (user.lastLogin) { %>
                                             <small><%= new Date(user.lastLogin).toLocaleDateString() %></small>
+                                        <% } else if (user.invitedEmail && !user.invitationAccepted) { %>
+                                            <small class="text-warning"><i class="fas fa-clock"></i> Awaiting response</small>
                                         <% } else { %>
                                             <small class="text-muted">Never</small>
                                         <% } %>
                                     </td>
                                     <td>
                                         <% if (user._id.toString() !== currentUser._id.toString()) { %>
-                                            <% if (user.status === 'pending') { %>
+                                            <% if (user.invitedEmail && !user.invitationAccepted) { %>
+                                                <!-- Invited user actions -->
+                                                <button class="action-btn btn-edit" onclick="resendInvite('<%= user._id %>')" title="Resend Invitation">
+                                                    <i class="fas fa-paper-plane"></i> Resend
+                                                </button>
+                                                <button class="action-btn btn-reject" onclick="cancelInvite('<%= user._id %>')" title="Cancel Invitation">
+                                                    <i class="fas fa-times"></i> Cancel
+                                                </button>
+                                            <% } else if (user.status === 'pending') { %>
                                                 <button class="action-btn btn-approve" onclick="approveUser('<%= user._id %>')">
                                                     <i class="fas fa-check"></i> Approve
                                                 </button>
@@ -152,9 +173,11 @@
                                                     <i class="fas fa-play"></i> Reactivate
                                                 </button>
                                             <% } %>
-                                            <button class="action-btn btn-edit" onclick="editUserPermissions('<%= user._id %>')">
-                                                <i class="fas fa-edit"></i> Edit
-                                            </button>
+                                            <% if (!user.invitedEmail || user.invitationAccepted) { %>
+                                                <button class="action-btn btn-edit" onclick="editUserPermissions('<%= user._id %>')">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </button>
+                                            <% } %>
                                         <% } else { %>
                                             <small class="text-muted">Current User</small>
                                         <% } %>
@@ -300,6 +323,63 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary" onclick="saveUserPermissions()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invite User Modal -->
+    <div class="modal fade" id="inviteUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Invite New User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="inviteUserForm" onsubmit="event.preventDefault(); sendInvitation();">
+                        <div class="mb-3">
+                            <label for="inviteEmail" class="form-label">Email Address *</label>
+                            <input type="email" class="form-control" id="inviteEmail" required
+                                   placeholder="user@example.com">
+                            <small class="text-muted">An invitation email will be sent to this address</small>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="inviteFirstName" class="form-label">First Name (Optional)</label>
+                                <input type="text" class="form-control" id="inviteFirstName" 
+                                       placeholder="John">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="inviteLastName" class="form-label">Last Name (Optional)</label>
+                                <input type="text" class="form-control" id="inviteLastName" 
+                                       placeholder="Doe">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="inviteRole" class="form-label">Role *</label>
+                            <select class="form-select" id="inviteRole" required>
+                                <option value="viewer">Viewer - View-only access</option>
+                                <option value="user" selected>User - Standard access</option>
+                                <option value="manager">Manager - Extended access</option>
+                                <option value="admin">Admin - Full access</option>
+                            </select>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> The user will receive an email with a link to create their account. 
+                            Their account will be automatically approved when they complete registration.
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="sendInviteBtn" onclick="sendInvitation()">
+                        <i class="fas fa-paper-plane me-2"></i>Send Invitation
+                    </button>
                 </div>
             </div>
         </div>
@@ -489,6 +569,97 @@
                 // Reset button state
                 saveButton.textContent = originalText;
                 saveButton.disabled = false;
+            }
+        }
+        
+        // Invite User Modal Functions
+        function showInviteModal() {
+            new bootstrap.Modal(document.getElementById('inviteUserModal')).show();
+        }
+        
+        async function sendInvitation() {
+            const email = document.getElementById('inviteEmail').value;
+            const role = document.getElementById('inviteRole').value;
+            const firstName = document.getElementById('inviteFirstName').value;
+            const lastName = document.getElementById('inviteLastName').value;
+            const button = document.getElementById('sendInviteBtn');
+            
+            if (!email) {
+                alert('Email is required');
+                return;
+            }
+            
+            button.textContent = 'Sending...';
+            button.disabled = true;
+            
+            try {
+                const response = await fetch('/auth/admin/users/invite', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, role, firstName, lastName })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    button.textContent = 'Sent!';
+                    button.classList.remove('btn-primary');
+                    button.classList.add('btn-success');
+                    
+                    setTimeout(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('inviteUserModal')).hide();
+                        location.reload();
+                    }, 1000);
+                } else {
+                    alert('Error: ' + result.error);
+                    button.textContent = 'Send Invitation';
+                    button.disabled = false;
+                }
+            } catch (error) {
+                alert('Error sending invitation: ' + error.message);
+                button.textContent = 'Send Invitation';
+                button.disabled = false;
+            }
+        }
+        
+        async function resendInvite(userId) {
+            if (!confirm('Resend invitation to this user?')) return;
+            
+            try {
+                const response = await fetch(`/auth/admin/users/${userId}/resend-invite`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(result.message);
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error resending invitation: ' + error.message);
+            }
+        }
+        
+        async function cancelInvite(userId) {
+            if (!confirm('Cancel this invitation? The pending user will be removed.')) return;
+            
+            try {
+                const response = await fetch(`/auth/admin/users/${userId}/cancel-invite`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(result.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error cancelling invitation: ' + error.message);
             }
         }
     </script>

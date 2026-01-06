@@ -113,6 +113,34 @@ const userSchema = new mongoose.Schema({
     },
     rejectionReason: {
         type: String
+    },
+    // Invitation system
+    invitationToken: {
+        type: String,
+        unique: true,
+        sparse: true // Allows multiple null values
+    },
+    invitationExpires: {
+        type: Date
+    },
+    invitedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    invitedAt: {
+        type: Date
+    },
+    invitedEmail: {
+        type: String,
+        trim: true,
+        lowercase: true
+    },
+    invitationAccepted: {
+        type: Boolean,
+        default: false
+    },
+    invitationAcceptedAt: {
+        type: Date
     }
 }, {
     timestamps: true
@@ -157,6 +185,14 @@ userSchema.methods.generatePasswordResetToken = function() {
     this.passwordResetToken = crypto.randomBytes(32).toString('hex');
     this.passwordResetExpires = Date.now() + 3600000; // 1 hour
     return this.passwordResetToken;
+};
+
+// Generate invitation token
+userSchema.methods.generateInvitationToken = function() {
+    const crypto = require('crypto');
+    this.invitationToken = crypto.randomBytes(32).toString('hex');
+    this.invitationExpires = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
+    return this.invitationToken;
 };
 
 // Increment login attempts

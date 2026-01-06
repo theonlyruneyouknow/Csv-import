@@ -30,7 +30,13 @@ const auditLogSchema = new mongoose.Schema({
             'USER_APPROVED',
             'USER_SUSPENDED',
             'USER_DELETED',
+            'USER_INVITED',
+            'INVITATION_ACCEPTED',
+            'INVITATION_RESENT',
+            'INVITATION_CANCELLED',
             'PERMISSIONS_CHANGED',
+            'PASSWORD_RESET_REQUESTED',
+            'PASSWORD_RESET_COMPLETED',
             
             // Purchase Order actions
             'PO_VIEWED',
