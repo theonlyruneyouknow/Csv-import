@@ -798,6 +798,21 @@
                         ⚠️ Overdue Items
                         <div style="font-size: 12px; font-weight: normal; margin-top: 8px; opacity: 0.9;">Items past their expected delivery date</div>
                     </button>
+                    
+                    <button onclick="loadEADReport('items')" style="padding: 20px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        📅 Items by EAD
+                        <div style="font-size: 12px; font-weight: normal; margin-top: 8px; opacity: 0.9;">View items by Estimated Arrival Date</div>
+                    </button>
+                    
+                    <button onclick="loadEADReport('pos')" style="padding: 20px; background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        🗓️ POs by ETA
+                        <div style="font-size: 12px; font-weight: normal; margin-top: 8px; opacity: 0.9;">Purchase orders by Estimated Time of Arrival</div>
+                    </button>
+                    
+                    <button onclick="loadEADReport('vendors')" style="padding: 20px; background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        🏆 Vendor EAD Performance
+                        <div style="font-size: 12px; font-weight: normal; margin-top: 8px; opacity: 0.9;">Vendor delivery accuracy and performance</div>
+                    </button>
                 </div>
                 
                 <div id="detailedListContent" style="margin-top: 30px; padding: 20px; background: #f8fafc; border-radius: 10px; min-height: 200px;">
@@ -1710,6 +1725,182 @@
                 });
 
                 html += '</tbody></table>';
+                contentDiv.innerHTML = html;
+            } catch (error) {
+                contentDiv.innerHTML = `<p style="color: #ef4444;">Error: ${error.message}</p>`;
+            }
+        }
+
+        // Load EAD reports
+        async function loadEADReport(type) {
+            currentDetailedList = { func: loadEADReport, args: [type] };
+            const periodType = document.getElementById('periodType').value;
+            const contentDiv = document.getElementById('detailedListContent');
+            contentDiv.innerHTML = '<p style="text-align: center;">Loading...</p>';
+
+            try {
+                const endpoint = `/statistics/ead/${type}`;
+                const response = await fetch(`${endpoint}?periodType=${periodType}&date=${currentReferenceDate.toISOString()}`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to load data');
+                }
+
+                let html = '';
+
+                if (type === 'items') {
+                    html = `
+                        <h4>📅 Items by Estimated Arrival Date (EAD)</h4>
+                        <div style="margin-bottom: 15px; padding: 15px; background: #f1f5f9; border-radius: 8px;">
+                            <strong>Summary:</strong> 
+                            With EAD: ${data.summary.withEAD} | 
+                            Without EAD: ${data.summary.withoutEAD} | 
+                            Arriving This Week: ${data.summary.arrivingThisWeek} | 
+                            This Month: ${data.summary.arrivingThisMonth} | 
+                            Past Due: ${data.summary.pastDue}
+                        </div>
+                        
+                        ${data.summary.byMonth && data.summary.byMonth.length > 0 ? `
+                        <div style="margin-bottom: 20px; padding: 15px; background: #fef3c7; border-radius: 8px;">
+                            <strong>Items by Month:</strong>
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                                ${data.summary.byMonth.map(m => `
+                                    <span style="background: white; padding: 8px 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                        ${m.month}: <strong>${m.count}</strong> items (${m.totalQuantity} qty)
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f8fafc;">
+                                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #e2e8f0;">Item</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">PO Number</th>
+                                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #e2e8f0;">Vendor</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">EAD</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">ETA</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Qty</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Days Until</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    data.items.forEach((item, index) => {
+                        const eta = item.eta ? new Date(item.eta) : null;
+                        const daysColor = item.daysUntilArrival < 0 ? '#ef4444' : item.daysUntilArrival <= 7 ? '#f59e0b' : '#10b981';
+                        const statusColor = item.status === 'Received' ? '#10b981' : item.status === 'Partial' ? '#f59e0b' : '#64748b';
+                        
+                        html += `
+                            <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f9fafb;' : ''}">
+                                <td style="padding: 10px;">${item.itemName}</td>
+                                <td style="padding: 10px; text-align: center; font-weight: bold;">${item.poNumber}</td>
+                                <td style="padding: 10px;">${item.vendor}</td>
+                                <td style="padding: 10px; text-align: center; font-size: 12px;">${item.ead}</td>
+                                <td style="padding: 10px; text-align: center; font-size: 12px;">${eta ? eta.toLocaleDateString() : 'N/A'}</td>
+                                <td style="padding: 10px; text-align: center;">${item.quantity}</td>
+                                <td style="padding: 10px; text-align: center; font-weight: bold; color: ${daysColor};">${item.daysUntilArrival}</td>
+                                <td style="padding: 10px; text-align: center;"><span style="background: ${statusColor}; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px;">${item.status}</span></td>
+                            </tr>
+                        `;
+                    });
+
+                    html += '</tbody></table>';
+
+                } else if (type === 'pos') {
+                    html = `
+                        <h4>🗓️ Purchase Orders by ETA</h4>
+                        <div style="margin-bottom: 15px; padding: 15px; background: #f1f5f9; border-radius: 8px;">
+                            <strong>Summary:</strong> 
+                            With ETA: ${data.summary.withETA} | 
+                            Without ETA: ${data.summary.withoutETA} | 
+                            Arriving This Week: ${data.summary.arrivingThisWeek} | 
+                            This Month: ${data.summary.arrivingThisMonth} | 
+                            Past Due: ${data.summary.pastDue}
+                        </div>
+                        
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f8fafc;">
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">PO Number</th>
+                                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #e2e8f0;">Vendor</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">ETA</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Item Count</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Days Until</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    data.pos.forEach((po, index) => {
+                        const eta = new Date(po.eta);
+                        const daysColor = po.daysUntilArrival < 0 ? '#ef4444' : po.daysUntilArrival <= 7 ? '#f59e0b' : '#10b981';
+                        const statusColor = po.status === 'Completed' ? '#10b981' : '#64748b';
+                        
+                        html += `
+                            <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f9fafb;' : ''}">
+                                <td style="padding: 10px; text-align: center; font-weight: bold;">${po.poNumber}</td>
+                                <td style="padding: 10px;">${po.vendor}</td>
+                                <td style="padding: 10px; text-align: center; font-size: 12px;">${eta.toLocaleDateString()}</td>
+                                <td style="padding: 10px; text-align: center;">${po.itemCount}</td>
+                                <td style="padding: 10px; text-align: center; font-weight: bold; color: ${daysColor};">${po.daysUntilArrival}</td>
+                                <td style="padding: 10px; text-align: center;"><span style="background: ${statusColor}; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px;">${po.status}</span></td>
+                            </tr>
+                        `;
+                    });
+
+                    html += '</tbody></table>';
+
+                } else if (type === 'vendors') {
+                    html = `
+                        <h4>🏆 Vendor EAD Performance</h4>
+                        <div style="margin-bottom: 15px; padding: 15px; background: #f1f5f9; border-radius: 8px;">
+                            <strong>Overall Metrics:</strong> 
+                            Vendors with Pending: ${data.summary.withPendingDeliveries} | 
+                            On-Time Rate: ${data.summary.onTimeRate}% | 
+                            Avg Days Early: ${data.summary.averageDaysEarly} | 
+                            Avg Days Late: ${data.summary.averageDaysLate}
+                        </div>
+                        
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f8fafc;">
+                                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #e2e8f0;">Vendor</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Pending Items</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Overdue Items</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Delivery Accuracy</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Earliest ETA</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Latest ETA</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    data.vendors.forEach((vendor, index) => {
+                        const accuracyColor = vendor.avgDeliveryAccuracy >= 90 ? '#10b981' : vendor.avgDeliveryAccuracy >= 70 ? '#f59e0b' : '#ef4444';
+                        const earliestETA = vendor.earliestETA ? new Date(vendor.earliestETA) : null;
+                        const latestETA = vendor.latestETA ? new Date(vendor.latestETA) : null;
+                        
+                        html += `
+                            <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f9fafb;' : ''}">
+                                <td style="padding: 10px; font-weight: bold;">${vendor.vendorName}</td>
+                                <td style="padding: 10px; text-align: center;">${vendor.pendingItems}</td>
+                                <td style="padding: 10px; text-align: center; ${vendor.overdueItems > 0 ? 'color: #ef4444; font-weight: bold;' : ''}">${vendor.overdueItems}</td>
+                                <td style="padding: 10px; text-align: center;"><span style="background: ${accuracyColor}; color: white; padding: 4px 10px; border-radius: 4px; font-weight: bold;">${vendor.avgDeliveryAccuracy}%</span></td>
+                                <td style="padding: 10px; text-align: center; font-size: 12px;">${earliestETA ? earliestETA.toLocaleDateString() : 'N/A'}</td>
+                                <td style="padding: 10px; text-align: center; font-size: 12px;">${latestETA ? latestETA.toLocaleDateString() : 'N/A'}</td>
+                            </tr>
+                        `;
+                    });
+
+                    html += '</tbody></table>';
+                }
+
                 contentDiv.innerHTML = html;
             } catch (error) {
                 contentDiv.innerHTML = `<p style="color: #ef4444;">Error: ${error.message}</p>`;

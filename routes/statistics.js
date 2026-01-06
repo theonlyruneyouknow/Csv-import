@@ -681,6 +681,225 @@ router.post('/generate-stats', async (req, res) => {
       vendorsNotResponding: 0 // TODO: Track vendor responsiveness
     };
 
+    // ========== EAD (ESTIMATED ARRIVAL DATE) STATISTICS ==========
+    const itemsWithEAD = allLineItems.filter(item => item.ead && item.ead.trim() !== '');
+    const itemsWithETA = unreceivedItems.filter(item => item.eta);
+    const itemsWithoutEAD = unreceivedItems.filter(item => !item.ead || item.ead.trim() === '');
+    
+    // Calculate time-based arrival counts for items
+    const thisWeekEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const thisMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const thisQuarterEnd = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3 + 3, 0);
+    
+    const itemsArrivingThisWeek = itemsWithETA.filter(item => {
+      const eta = new Date(item.eta);
+      return eta >= now && eta <= thisWeekEnd;
+    });
+    
+    const itemsArrivingThisMonth = itemsWithETA.filter(item => {
+      const eta = new Date(item.eta);
+      return eta >= now && eta <= thisMonthEnd;
+    });
+    
+    const itemsArrivingThisQuarter = itemsWithETA.filter(item => {
+      const eta = new Date(item.eta);
+      return eta >= now && eta <= thisQuarterEnd;
+    });
+    
+    const itemsPastDue = overdueItems.length;
+    
+    // Group items by month
+    const itemsByMonth = {};
+    itemsWithETA.forEach(item => {
+      const eta = new Date(item.eta);
+      const monthKey = `${eta.getFullYear()}-${String(eta.getMonth() + 1).padStart(2, '0')}`;
+      if (!itemsByMonth[monthKey]) {
+        itemsByMonth[monthKey] = {
+          count: 0,
+          totalQuantity: 0
+        };
+      }
+      itemsByMonth[monthKey].count++;
+      itemsByMonth[monthKey].totalQuantity += (item.quantityExpected || item.quantity || 0);
+    });
+    
+    const itemsByMonthArray = Object.keys(itemsByMonth).map(month => ({
+      month,
+      count: itemsByMonth[month].count,
+      totalQuantity: itemsByMonth[month].totalQuantity
+    })).sort((a, b) => a.month.localeCompare(b.month));
+    
+    // Build detailed items by EAD list
+    const itemsByEADList = itemsWithETA.map(item => {
+      const eta = new Date(item.eta);
+      const daysUntil = Math.floor((eta - now) / (1000 * 60 * 60 * 24));
+      return {
+        itemName: item.itemName || item.description || 'Unknown',
+        poNumber: item.poNumber,
+        vendor: item.vendor || 'Unknown',
+        ead: item.ead || 'Not specified',
+        eta: item.eta,
+        quantity: item.quantityExpected || item.quantity || 0,
+        status: item.received ? 'Received' : (item.partialShipmentStatus ? 'Partial' : 'Pending'),
+        daysUntilArrival: daysUntil
+      };
+    }).sort((a, b) => a.daysUntilArrival - b.daysUntilArrival).slice(0, 100);
+    
+    // PO-level EAD statistics
+    const posWithETA = allPOs.filter(po => po.eta);
+    const posWithoutETA = activePOs.filter(po => !po.eta);
+    
+    const posArrivingThisWeek = posWithETA.filter(po => {
+      const eta = new Date(po.eta);
+      return eta >= now && eta <= thisWeekEnd;
+    });
+    
+    const posArrivingThisMonth = posWithETA.filter(po => {
+      const eta = new Date(po.eta);
+      return eta >= now && eta <= thisMonthEnd;
+    });
+    
+    const posPastDue = posWithETA.filter(po => {
+      const eta = new Date(po.eta);
+      return eta < now && !['Completed', 'Received', 'Cancelled'].includes(po.status);
+    });
+    
+    // Build detailed POs by ETA list
+    const posByETAList = posWithETA.map(po => {
+      const eta = new Date(po.eta);
+      const daysUntil = Math.floor((eta - now) / (1000 * 60 * 60 * 24));
+      const poItems = allLineItems.filter(item => item.poNumber === po.poNumber);
+      return {
+        poNumber: po.poNumber,
+        vendor: po.vendor || 'Unknown',
+        eta: po.eta,
+        itemCount: poItems.length,
+        status: po.status || 'Unknown',
+        daysUntilArrival: daysUntil
+      };
+    }).sort((a, b) => a.daysUntilArrival - b.daysUntilArrival).slice(0, 50);
+    
+    // Vendor-level EAD statistics
+    const vendorEADMap = {};
+    
+    itemsWithETA.forEach(item => {
+      const vendor = item.vendor || 'Unknown';
+      if (!vendorEADMap[vendor]) {
+        vendorEADMap[vendor] = {
+          pendingItems: 0,
+          overdueItems: 0,
+          onTimeDeliveries: 0,
+          lateDeliveries: 0,
+          earlyDeliveries: 0,
+          totalDeliveries: 0,
+          etaDates: []
+        };
+      }
+      
+      if (!item.received) {
+        vendorEADMap[vendor].pendingItems++;
+        const eta = new Date(item.eta);
+        if (eta < now) {
+          vendorEADMap[vendor].overdueItems++;
+        }
+        vendorEADMap[vendor].etaDates.push(eta);
+      } else if (item.receivedDate) {
+        // Calculate delivery performance
+        const eta = new Date(item.eta);
+        const received = new Date(item.receivedDate);
+        vendorEADMap[vendor].totalDeliveries++;
+        
+        if (received <= eta) {
+          vendorEADMap[vendor].onTimeDeliveries++;
+          if (received < eta) {
+            vendorEADMap[vendor].earlyDeliveries++;
+          }
+        } else {
+          vendorEADMap[vendor].lateDeliveries++;
+        }
+      }
+    });
+    
+    const vendorPerformanceList = Object.keys(vendorEADMap).map(vendor => {
+      const data = vendorEADMap[vendor];
+      const avgAccuracy = data.totalDeliveries > 0 
+        ? (data.onTimeDeliveries / data.totalDeliveries) * 100 
+        : 0;
+      
+      const sortedDates = data.etaDates.sort((a, b) => a - b);
+      const earliestETA = sortedDates.length > 0 ? sortedDates[0] : null;
+      const latestETA = sortedDates.length > 0 ? sortedDates[sortedDates.length - 1] : null;
+      
+      return {
+        vendorName: vendor,
+        pendingItems: data.pendingItems,
+        overdueItems: data.overdueItems,
+        avgDeliveryAccuracy: Math.round(avgAccuracy * 10) / 10,
+        earliestETA,
+        latestETA
+      };
+    }).sort((a, b) => b.pendingItems - a.pendingItems).slice(0, 50);
+    
+    // Calculate overall vendor-level metrics
+    let totalOnTime = 0;
+    let totalDeliveries = 0;
+    let totalDaysEarly = 0;
+    let totalDaysLate = 0;
+    let earlyCount = 0;
+    let lateCount = 0;
+    
+    receivedItems.forEach(item => {
+      if (item.eta && item.receivedDate) {
+        const eta = new Date(item.eta);
+        const received = new Date(item.receivedDate);
+        const daysDiff = Math.floor((received - eta) / (1000 * 60 * 60 * 24));
+        
+        totalDeliveries++;
+        if (received <= eta) {
+          totalOnTime++;
+          if (daysDiff < 0) {
+            totalDaysEarly += Math.abs(daysDiff);
+            earlyCount++;
+          }
+        } else {
+          totalDaysLate += daysDiff;
+          lateCount++;
+        }
+      }
+    });
+    
+    const overallOnTimeRate = totalDeliveries > 0 ? (totalOnTime / totalDeliveries) * 100 : 0;
+    const avgDaysEarly = earlyCount > 0 ? totalDaysEarly / earlyCount : 0;
+    const avgDaysLate = lateCount > 0 ? totalDaysLate / lateCount : 0;
+    
+    stats.ead = {
+      items: {
+        withEAD: itemsWithEAD.length,
+        withoutEAD: itemsWithoutEAD.length,
+        arrivingThisWeek: itemsArrivingThisWeek.length,
+        arrivingThisMonth: itemsArrivingThisMonth.length,
+        arrivingThisQuarter: itemsArrivingThisQuarter.length,
+        pastDue: itemsPastDue,
+        byMonth: itemsByMonthArray,
+        itemsByEAD: itemsByEADList
+      },
+      pos: {
+        withETA: posWithETA.length,
+        withoutETA: posWithoutETA.length,
+        arrivingThisWeek: posArrivingThisWeek.length,
+        arrivingThisMonth: posArrivingThisMonth.length,
+        pastDue: posPastDue.length,
+        posByETA: posByETAList
+      },
+      vendors: {
+        withPendingDeliveries: Object.keys(vendorEADMap).length,
+        onTimeRate: Math.round(overallOnTimeRate * 10) / 10,
+        averageDaysEarly: Math.round(avgDaysEarly * 10) / 10,
+        averageDaysLate: Math.round(avgDaysLate * 10) / 10,
+        vendorPerformance: vendorPerformanceList
+      }
+    };
+
     // ========== SNAPSHOT DATA ==========
     const pendingValue = activePOs.reduce((sum, po) => sum + (po.amount || 0), 0);
     const completedValue = completedPOs.reduce((sum, po) => sum + (po.amount || 0), 0);
@@ -1771,6 +1990,123 @@ router.get('/items/top-by-quantity', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Error fetching top items:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// ========== EAD (ESTIMATED ARRIVAL DATE) ENDPOINTS ==========
+
+// Get items by EAD
+router.get('/ead/items', async (req, res) => {
+  try {
+    const periodType = req.query.periodType || 'daily';
+    const targetDate = req.query.date ? new Date(req.query.date) : new Date();
+    const { start, end } = getPeriodBounds(periodType, targetDate);
+
+    const stats = await DailyStatistics.findOne(
+      buildFlexibleDateQuery(periodType, start, end)
+    ).sort({ periodStart: -1 });
+
+    if (!stats) {
+      return res.status(404).json({
+        success: false,
+        message: 'No statistics found for this period'
+      });
+    }
+
+    res.json({
+      success: true,
+      items: stats.ead?.items?.itemsByEAD || [],
+      summary: {
+        withEAD: stats.ead?.items?.withEAD || 0,
+        withoutEAD: stats.ead?.items?.withoutEAD || 0,
+        arrivingThisWeek: stats.ead?.items?.arrivingThisWeek || 0,
+        arrivingThisMonth: stats.ead?.items?.arrivingThisMonth || 0,
+        arrivingThisQuarter: stats.ead?.items?.arrivingThisQuarter || 0,
+        pastDue: stats.ead?.items?.pastDue || 0,
+        byMonth: stats.ead?.items?.byMonth || []
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error fetching EAD items:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get POs by ETA
+router.get('/ead/pos', async (req, res) => {
+  try {
+    const periodType = req.query.periodType || 'daily';
+    const targetDate = req.query.date ? new Date(req.query.date) : new Date();
+    const { start, end } = getPeriodBounds(periodType, targetDate);
+
+    const stats = await DailyStatistics.findOne(
+      buildFlexibleDateQuery(periodType, start, end)
+    ).sort({ periodStart: -1 });
+
+    if (!stats) {
+      return res.status(404).json({
+        success: false,
+        message: 'No statistics found for this period'
+      });
+    }
+
+    res.json({
+      success: true,
+      pos: stats.ead?.pos?.posByETA || [],
+      summary: {
+        withETA: stats.ead?.pos?.withETA || 0,
+        withoutETA: stats.ead?.pos?.withoutETA || 0,
+        arrivingThisWeek: stats.ead?.pos?.arrivingThisWeek || 0,
+        arrivingThisMonth: stats.ead?.pos?.arrivingThisMonth || 0,
+        pastDue: stats.ead?.pos?.pastDue || 0
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error fetching EAD POs:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get vendor EAD performance
+router.get('/ead/vendors', async (req, res) => {
+  try {
+    const periodType = req.query.periodType || 'daily';
+    const targetDate = req.query.date ? new Date(req.query.date) : new Date();
+    const { start, end } = getPeriodBounds(periodType, targetDate);
+
+    const stats = await DailyStatistics.findOne(
+      buildFlexibleDateQuery(periodType, start, end)
+    ).sort({ periodStart: -1 });
+
+    if (!stats) {
+      return res.status(404).json({
+        success: false,
+        message: 'No statistics found for this period'
+      });
+    }
+
+    res.json({
+      success: true,
+      vendors: stats.ead?.vendors?.vendorPerformance || [],
+      summary: {
+        withPendingDeliveries: stats.ead?.vendors?.withPendingDeliveries || 0,
+        onTimeRate: stats.ead?.vendors?.onTimeRate || 0,
+        averageDaysEarly: stats.ead?.vendors?.averageDaysEarly || 0,
+        averageDaysLate: stats.ead?.vendors?.averageDaysLate || 0
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error fetching EAD vendor performance:', error);
     res.status(500).json({
       success: false,
       error: error.message

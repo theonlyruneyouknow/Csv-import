@@ -175,6 +175,68 @@ const dailyStatisticsSchema = new mongoose.Schema({
     }]
   },
 
+  // EAD (Estimated Arrival Date) Statistics
+  ead: {
+    // Item-level EAD statistics
+    items: {
+      withEAD: { type: Number, default: 0 },
+      withoutEAD: { type: Number, default: 0 },
+      arrivingThisWeek: { type: Number, default: 0 },
+      arrivingThisMonth: { type: Number, default: 0 },
+      arrivingThisQuarter: { type: Number, default: 0 },
+      pastDue: { type: Number, default: 0 },
+      byMonth: [{
+        month: String, // "2026-01", "2026-02", etc.
+        count: Number,
+        totalQuantity: Number
+      }],
+      // Detailed lists
+      itemsByEAD: [{
+        itemName: String,
+        poNumber: String,
+        vendor: String,
+        ead: String,
+        eta: Date,
+        quantity: Number,
+        status: String,
+        daysUntilArrival: Number
+      }]
+    },
+    // PO-level EAD statistics
+    pos: {
+      withETA: { type: Number, default: 0 },
+      withoutETA: { type: Number, default: 0 },
+      arrivingThisWeek: { type: Number, default: 0 },
+      arrivingThisMonth: { type: Number, default: 0 },
+      pastDue: { type: Number, default: 0 },
+      // Detailed lists
+      posByETA: [{
+        poNumber: String,
+        vendor: String,
+        eta: Date,
+        itemCount: Number,
+        status: String,
+        daysUntilArrival: Number
+      }]
+    },
+    // Vendor-level EAD statistics
+    vendors: {
+      withPendingDeliveries: { type: Number, default: 0 },
+      onTimeRate: { type: Number, default: 0 },
+      averageDaysEarly: { type: Number, default: 0 },
+      averageDaysLate: { type: Number, default: 0 },
+      // Detailed lists
+      vendorPerformance: [{
+        vendorName: String,
+        pendingItems: Number,
+        overdueItems: Number,
+        avgDeliveryAccuracy: Number, // percentage
+        earliestETA: Date,
+        latestETA: Date
+      }]
+    }
+  },
+
   // Tracking & Shipment Statistics
   tracking: {
     itemsInTransit: { type: Number, default: 0 },
