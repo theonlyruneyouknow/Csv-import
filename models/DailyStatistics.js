@@ -51,23 +51,29 @@ const dailyStatisticsSchema = new mongoose.Schema({
     averageValue: { type: Number, default: 0 },
     totalValue: { type: Number, default: 0 },
     // Detailed PO lists
-    newPOsInPeriod: [{
-      poNumber: String,
-      vendor: String,
-      type: String,
-      createdDate: Date,
-      itemCount: Number,
-      totalValue: Number
-    }],
-    completedPOsInPeriod: [{
-      poNumber: String,
-      vendor: String,
-      type: String,
-      completedDate: Date,
-      itemCount: Number,
-      totalValue: Number,
-      daysToComplete: Number
-    }]
+    newPOsInPeriod: {
+      type: [{
+        poNumber: String,
+        vendor: String,
+        type: String,
+        createdDate: Date,
+        itemCount: Number,
+        totalValue: Number
+      }],
+      default: []
+    },
+    completedPOsInPeriod: {
+      type: [{
+        poNumber: String,
+        vendor: String,
+        type: String,
+        completedDate: Date,
+        itemCount: Number,
+        totalValue: Number,
+        daysToComplete: Number
+      }],
+      default: []
+    }
   },
 
   // Line Item Statistics

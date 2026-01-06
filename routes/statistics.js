@@ -205,15 +205,21 @@ router.post('/generate-stats', async (req, res) => {
     const totalValue = allPOs.reduce((sum, po) => sum + (po.amount || 0), 0);
     const averageValue = allPOs.length > 0 ? totalValue / allPOs.length : 0;
 
-    // Build detailed PO lists
-    const newPOsDetailList = newPOsInPeriod.map(po => ({
-      poNumber: po.poNumber,
-      vendor: po.vendor,
-      type: po.type || 'N/A',
-      createdDate: po.createdAt || po.date,
-      itemCount: po.items ? po.items.length : 0,
-      totalValue: po.amount || 0
-    }));
+    // Build detailed PO lists with validation
+    const newPOsDetailList = newPOsInPeriod.map(po => {
+      // Ensure all fields are properly typed
+      const itemCount = po.items ? (Array.isArray(po.items) ? po.items.length : 0) : 0;
+      const poAmount = typeof po.amount === 'number' ? po.amount : (parseFloat(po.amount) || 0);
+      
+      return {
+        poNumber: String(po.poNumber || ''),
+        vendor: String(po.vendor || ''),
+        type: String(po.type || 'N/A'),
+        createdDate: po.createdAt || po.date || new Date(),
+        itemCount: itemCount,
+        totalValue: poAmount
+      };
+    });
 
     const completedPOsInPeriod = completedPOs.filter(po => {
       const updated = new Date(po.lastUpdate || po.updatedAt);
@@ -224,13 +230,16 @@ router.post('/generate-stats', async (req, res) => {
       const created = new Date(po.createdAt || po.date);
       const completed = new Date(po.lastUpdate || po.updatedAt);
       const daysToComplete = Math.floor((completed - created) / (1000 * 60 * 60 * 24));
+      const itemCount = po.items ? (Array.isArray(po.items) ? po.items.length : 0) : 0;
+      const poAmount = typeof po.amount === 'number' ? po.amount : (parseFloat(po.amount) || 0);
+      
       return {
-        poNumber: po.poNumber,
-        vendor: po.vendor,
-        type: po.type || 'N/A',
+        poNumber: String(po.poNumber || ''),
+        vendor: String(po.vendor || ''),
+        type: String(po.type || 'N/A'),
         completedDate: completed,
-        itemCount: po.items ? po.items.length : 0,
-        totalValue: po.amount || 0,
+        itemCount: itemCount,
+        totalValue: poAmount,
         daysToComplete: daysToComplete >= 0 ? daysToComplete : 0
       };
     });
