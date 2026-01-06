@@ -76,20 +76,6 @@
         </div>
     </div>
 
-    <!-- Rune Accordion -->
-    <div class="nav-section">
-        <button class="nav-accordion-btn" onclick="toggleAccordion('runeAccordion')">
-            ᚱ Rune <span class="accordion-icon">▼</span>
-        </button>
-        <div id="runeAccordion" class="nav-accordion-content">
-            <a href="/story/dashboard" class="nav-accordion-item <%= currentPage === 'story' ? 'active' : '' %>">📖
-                Story</a>
-            <a href="/medicine/dashboard"
-                class="nav-accordion-item <%= currentPage === 'medicine' ? 'active' : '' %>">💊 Medicine</a>
-            <a href="/bulletin" class="nav-accordion-item <%= currentPage === 'bulletin' ? 'active' : '' %>">📌
-                Bulletin</a>
-        </div>
-    </div>
 </div>
 
 <!-- User Info and Controls -->
@@ -147,6 +133,23 @@
                                         <i class="fas fa-envelope me-2"></i>Test Email
                                     </a></li>
                                 <% } %>
+                                    
+                                    <% if (user.email && (user.email.toLowerCase() === 'theonlyruneyouknow@gmail.com' || user.email.toLowerCase() === 'rlarsen@territorialseed.com')) { %>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li class="dropdown-header"><i class="fas fa-rune me-2"></i>ᚱ Rune Modules</li>
+                                    <li><a class="dropdown-item" href="/story/dashboard">
+                                            <i class="fas fa-book me-2"></i>📖 Story
+                                        </a></li>
+                                    <li><a class="dropdown-item" href="/medicine/dashboard">
+                                            <i class="fas fa-pills me-2"></i>💊 Medicine
+                                        </a></li>
+                                    <li><a class="dropdown-item" href="/bulletin">
+                                            <i class="fas fa-thumbtack me-2"></i>📌 Bulletin
+                                        </a></li>
+                                    <% } %>
+                                    
                                     <li>
                                         <hr class="dropdown-divider">
                                     </li>

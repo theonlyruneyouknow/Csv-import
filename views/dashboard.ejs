@@ -4396,18 +4396,6 @@
                     </div>
                 </div>
 
-                <!-- Rune Accordion -->
-                <div class="nav-section">
-                    <button class="nav-accordion-btn" onclick="toggleAccordion('runeAccordion')">
-                        ᚱ Rune <span class="accordion-icon">▼</span>
-                    </button>
-                    <div id="runeAccordion" class="nav-accordion-content">
-                        <a href="/story/dashboard" class="nav-accordion-item">📖 Story</a>
-                        <a href="/medicine/dashboard" class="nav-accordion-item">💊 Medicine</a>
-                        <a href="/bulletin" class="nav-accordion-item">📌 Bulletin</a>
-                    </div>
-                </div>
-
                 <!-- User Profile -->
                 <% if (user) { %>
                     <div class="user-profile-section">
@@ -4440,6 +4428,21 @@
                                 <a href="/auth/admin/test-email" class="user-dropdown-item">
                                     <span class="dropdown-icon">✉️</span> Test Email
                                 </a>
+                                <% if (user.email && (user.email.toLowerCase() === 'theonlyruneyouknow@gmail.com' || user.email.toLowerCase() === 'rlarsen@territorialseed.com')) { %>
+                                <div class="dropdown-divider"></div>
+                                <div class="user-dropdown-header" style="padding: 8px 15px; font-size: 12px; color: #6c757d;">
+                                    <span class="dropdown-icon">ᚱ</span> Rune Modules
+                                </div>
+                                <a href="/story/dashboard" class="user-dropdown-item">
+                                    <span class="dropdown-icon">📖</span> Story
+                                </a>
+                                <a href="/medicine/dashboard" class="user-dropdown-item">
+                                    <span class="dropdown-icon">💊</span> Medicine
+                                </a>
+                                <a href="/bulletin" class="user-dropdown-item">
+                                    <span class="dropdown-icon">📌</span> Bulletin
+                                </a>
+                                <% } %>
                                 <form action="/auth/logout" method="POST" style="margin: 0;">
                                     <button type="submit" class="user-dropdown-item logout">
                                         <span class="dropdown-icon">🚪</span> Logout
@@ -5904,7 +5907,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const optionsDropdown = document.getElementById('optionsDropdown');
             const importsDropdown = document.getElementById('importsDropdown');
             const formsDropdown = document.getElementById('formsDropdown');
-            const runeAccordion = document.getElementById('runeAccordion');
             const userSection = document.querySelector('.user-dropdown');
 
             // Close Managers accordion if clicking outside
@@ -5944,16 +5946,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     formsDropdown.classList.remove('show');
                     const formsIcon = formsSection.querySelector('.dropdown-icon');
                     if (formsIcon) formsIcon.classList.remove('rotated');
-                }
-            }
-
-            // Close Rune accordion if clicking outside
-            if (runeAccordion) {
-                const runeSection = runeAccordion.closest('.nav-section');
-                if (runeSection && !runeSection.contains(event.target)) {
-                    runeAccordion.classList.remove('show');
-                    const runeIcon = runeSection.querySelector('.accordion-icon');
-                    if (runeIcon) runeIcon.classList.remove('rotated');
                 }
             }
 
