@@ -522,19 +522,110 @@ router.post('/:vendorId/upload', upload.single('document'), async (req, res) => 
 
         console.log(`📄 Uploaded document for vendor ${vendor.vendorName}: ${req.file.originalname}`);
         
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-            res.json({ success: true, document: document });
-        } else {
-            res.redirect(`/vendors/${vendorId}?success=document-uploaded`);
-        }
+        // Always return JSON for AJAX upload requests
+        res.json({ success: true, document: document });
 
     } catch (error) {
         console.error('❌ Error uploading document:', error);
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-            res.status(500).json({ error: 'Error uploading document' });
-        } else {
-            res.redirect(`/vendors/${req.params.vendorId}?error=upload-failed`);
+        res.status(500).json({ success: false, error: error.message || 'Error uploading document' });
+    }
+});
+
+// ======================================
+// DOWNLOAD DOCUMENT
+// ======================================
+router.get('/:vendorId/documents/:documentId/download', async (req, res) => {
+    try {
+        const { vendorId, documentId } = req.params;
+        
+        console.log(`📥 Download request - Vendor: ${vendorId}, Document: ${documentId}`);
+
+        const vendor = await Vendor.findById(vendorId);
+        if (!vendor) {
+            console.error(`❌ Vendor not found: ${vendorId}`);
+            return res.status(404).send('Vendor not found');
         }
+
+        console.log(`✅ Vendor found: ${vendor.vendorName}`);
+        console.log(`📄 Documents count: ${vendor.documents ? vendor.documents.length : 0}`);
+
+        const document = vendor.documents.id(documentId);
+        if (!document) {
+            console.error(`❌ Document not found in vendor: ${documentId}`);
+            console.log(`📋 Available document IDs: ${vendor.documents.map(d => d._id).join(', ')}`);
+            return res.status(404).send('Document not found');
+        }
+
+        console.log(`✅ Document found: ${document.originalName} (filename: ${document.filename})`);
+
+        const filePath = path.join(__dirname, '../uploads/vendors', document.filename);
+        console.log(`📂 File path: ${filePath}`);
+        
+        // Check if file exists
+        if (!fs.existsSync(filePath)) {
+            console.error(`❌ File not found on disk: ${filePath}`);
+            return res.status(404).send('File not found on server');
+        }
+
+        console.log(`✅ File exists, sending download...`);
+
+        // Set headers for download
+        res.setHeader('Content-Disposition', `attachment; filename="${document.originalName}"`);
+        res.setHeader('Content-Type', document.mimeType || 'application/octet-stream');
+
+        // Send the file
+        res.sendFile(filePath, (err) => {
+            if (err) {
+                console.error('❌ Error sending file:', err);
+                if (!res.headersSent) {
+                    res.status(500).send('Error downloading file');
+                }
+            } else {
+                console.log(`✅ File sent successfully: ${document.originalName}`);
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Error downloading document:', error);
+        if (!res.headersSent) {
+            res.status(500).send('Error downloading document');
+        }
+    }
+});
+
+// ======================================
+// DELETE DOCUMENT
+// ======================================
+router.delete('/:vendorId/documents/:documentId', async (req, res) => {
+    try {
+        const { vendorId, documentId } = req.params;
+
+        const vendor = await Vendor.findById(vendorId);
+        if (!vendor) {
+            return res.status(404).json({ error: 'Vendor not found' });
+        }
+
+        const document = vendor.documents.id(documentId);
+        if (!document) {
+            return res.status(404).json({ error: 'Document not found' });
+        }
+
+        // Delete physical file
+        const filePath = path.join(__dirname, '../uploads/vendors', document.filename);
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+
+        // Remove from database
+        document.deleteOne();
+        await vendor.save();
+
+        console.log(`🗑️ Deleted document for vendor ${vendor.vendorName}: ${document.originalName}`);
+        res.json({ success: true });
+
+    } catch (error) {
+        console.error('❌ Error deleting document:', error);
+        res.status(500).json({ error: 'Error deleting document' });
     }
 });
 
