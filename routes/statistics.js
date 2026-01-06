@@ -25,57 +25,67 @@ function buildFlexibleDateQuery(periodType, start, end) {
 // Helper function to calculate period bounds
 function getPeriodBounds(periodType, referenceDate = new Date()) {
   const date = new Date(referenceDate);
-  date.setHours(0, 0, 0, 0);
+  
+  // PST timezone offset (UTC-8)
+  const PST_OFFSET_HOURS = 8;
   
   let start, end;
   
   switch (periodType) {
     case 'daily':
-      start = new Date(date);
-      end = new Date(date);
-      end.setHours(23, 59, 59, 999);
+      // For daily stats, we want the full day in PST
+      // If referenceDate is Jan 5, 2026, we want:
+      // Start: Jan 5, 2026 00:00:00 PST = Jan 5, 2026 08:00:00 UTC
+      // End: Jan 5, 2026 23:59:59.999 PST = Jan 6, 2026 07:59:59.999 UTC
+      start = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), PST_OFFSET_HOURS, 0, 0, 0));
+      end = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate() + 1, PST_OFFSET_HOURS - 1, 59, 59, 999));
       break;
       
     case 'weekly':
-      // Start from Sunday
-      start = new Date(date);
-      start.setDate(date.getDate() - date.getDay());
-      end = new Date(start);
-      end.setDate(start.getDate() + 6);
-      end.setHours(23, 59, 59, 999);
+      // Start from Sunday in PST
+      const localDate = new Date(date);
+      localDate.setDate(date.getDate() - date.getDay());
+      start = new Date(Date.UTC(localDate.getFullYear(), localDate.getMonth(), localDate.getDate(), PST_OFFSET_HOURS, 0, 0, 0));
+      
+      const endDate = new Date(localDate);
+      endDate.setDate(localDate.getDate() + 6);
+      end = new Date(Date.UTC(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() + 1, PST_OFFSET_HOURS - 1, 59, 59, 999));
       break;
       
     case 'bi-weekly':
-      // Start from Sunday, 14-day period
-      start = new Date(date);
-      start.setDate(date.getDate() - date.getDay());
+      // Start from Sunday, 14-day period in PST
+      const biWeekStart = new Date(date);
+      biWeekStart.setDate(date.getDate() - date.getDay());
       // Adjust to bi-weekly period (every other week)
-      const weeksSinceEpoch = Math.floor(start.getTime() / (7 * 24 * 60 * 60 * 1000));
+      const weeksSinceEpoch = Math.floor(biWeekStart.getTime() / (7 * 24 * 60 * 60 * 1000));
       if (weeksSinceEpoch % 2 !== 0) {
-        start.setDate(start.getDate() - 7);
+        biWeekStart.setDate(biWeekStart.getDate() - 7);
       }
-      end = new Date(start);
-      end.setDate(start.getDate() + 13);
-      end.setHours(23, 59, 59, 999);
+      start = new Date(Date.UTC(biWeekStart.getFullYear(), biWeekStart.getMonth(), biWeekStart.getDate(), PST_OFFSET_HOURS, 0, 0, 0));
+      
+      const biWeekEnd = new Date(biWeekStart);
+      biWeekEnd.setDate(biWeekStart.getDate() + 13);
+      end = new Date(Date.UTC(biWeekEnd.getFullYear(), biWeekEnd.getMonth(), biWeekEnd.getDate() + 1, PST_OFFSET_HOURS - 1, 59, 59, 999));
       break;
       
     case 'monthly':
-      start = new Date(date.getFullYear(), date.getMonth(), 1);
-      end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-      end.setHours(23, 59, 59, 999);
+      start = new Date(Date.UTC(date.getFullYear(), date.getMonth(), 1, PST_OFFSET_HOURS, 0, 0, 0));
+      const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+      end = new Date(Date.UTC(date.getFullYear(), date.getMonth(), lastDay + 1, PST_OFFSET_HOURS - 1, 59, 59, 999));
       break;
       
     case 'quarterly':
       const quarter = Math.floor(date.getMonth() / 3);
-      start = new Date(date.getFullYear(), quarter * 3, 1);
-      end = new Date(date.getFullYear(), quarter * 3 + 3, 0);
-      end.setHours(23, 59, 59, 999);
+      start = new Date(Date.UTC(date.getFullYear(), quarter * 3, 1, PST_OFFSET_HOURS, 0, 0, 0));
+      
+      const quarterEndMonth = quarter * 3 + 2;
+      const quarterLastDay = new Date(date.getFullYear(), quarterEndMonth + 1, 0).getDate();
+      end = new Date(Date.UTC(date.getFullYear(), quarterEndMonth, quarterLastDay + 1, PST_OFFSET_HOURS - 1, 59, 59, 999));
       break;
       
     case 'yearly':
-      start = new Date(date.getFullYear(), 0, 1);
-      end = new Date(date.getFullYear(), 11, 31);
-      end.setHours(23, 59, 59, 999);
+      start = new Date(Date.UTC(date.getFullYear(), 0, 1, PST_OFFSET_HOURS, 0, 0, 0));
+      end = new Date(Date.UTC(date.getFullYear() + 1, 0, 1, PST_OFFSET_HOURS - 1, 59, 59, 999));
       break;
       
     default:
