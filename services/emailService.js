@@ -6,13 +6,27 @@ const fs = require('fs').promises;
 class EmailService {
     constructor() {
         this.transporter = null;
-        this.init();
+        this.initPromise = this.init();
     }
 
     async init() {
+        // Support both EMAIL_* and GMAIL_* naming conventions (for Render compatibility)
+        const emailService = process.env.EMAIL_SERVICE || process.env.GMAIL_SERVICE;
+        const emailUser = process.env.EMAIL_USER || process.env.GMAIL_USER;
+        const emailPassword = process.env.EMAIL_PASSWORD || process.env.GMAIL_PASSWORD || process.env.TSC2;
+        const emailFrom = process.env.EMAIL_FROM || process.env.GMAIL_FROM;
+        
+        console.log('📧 ========== EMAIL SERVICE INITIALIZATION ==========');
+        console.log('📧 EMAIL_SERVICE env var:', emailService);
+        console.log('📧 EMAIL_USER:', emailUser);
+        console.log('📧 EMAIL_PASSWORD set:', !!emailPassword);
+        console.log('📧 Using password from:', process.env.TSC2 ? 'TSC2' : process.env.GMAIL_PASSWORD ? 'GMAIL_PASSWORD' : 'EMAIL_PASSWORD');
+        console.log('📧 ================================================');
+        
         // Initialize email transporter based on configuration
-        if (process.env.EMAIL_SERVICE === 'sendgrid') {
+        if (emailService === 'sendgrid') {
             // SendGrid configuration
+            console.log('📧 Using SendGrid configuration');
             this.transporter = nodemailer.createTransport({
                 service: 'SendGrid',
                 auth: {
@@ -20,17 +34,21 @@ class EmailService {
                     pass: process.env.SENDGRID_API_KEY
                 }
             });
-        } else if (process.env.EMAIL_SERVICE === 'gmail') {
+        } else if (emailService === 'gmail') {
             // Gmail configuration
+            console.log('📧 Using Gmail configuration');
+            console.log('📧 Gmail user:', emailUser);
             this.transporter = nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
-                    user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASSWORD // Use App Password for Gmail
+                    user: emailUser,
+                    pass: emailPassword // Use App Password for Gmail
                 }
             });
-        } else if (process.env.EMAIL_SERVICE === 'smtp') {
+            console.log('📧 Gmail transporter created successfully');
+        } else if (emailService === 'smtp') {
             // Generic SMTP configuration
+            console.log('📧 Using generic SMTP configuration');
             this.transporter = nodemailer.createTransport({
                 host: process.env.SMTP_HOST,
                 port: process.env.SMTP_PORT || 587,
@@ -54,16 +72,26 @@ class EmailService {
                 }
             });
         }
+        
+        console.log('📧 Email service initialized successfully');
     }
 
     async sendEmail(options) {
         try {
+            // Ensure initialization is complete
+            if (this.initPromise) {
+                await this.initPromise;
+            }
+            
             if (!this.transporter) {
-                await this.init();
+                throw new Error('Email transporter not initialized');
             }
 
+            console.log('📧 Sending email to:', options.to);
+            console.log('📧 Using transporter:', this.transporter.transporter ? this.transporter.transporter.name : 'unknown');
+
             const mailOptions = {
-                from: process.env.EMAIL_FROM || 'noreply@purchaseorder-system.com',
+                from: process.env.EMAIL_FROM || process.env.GMAIL_FROM || 'noreply@purchaseorder-system.com',
                 to: options.to,
                 subject: options.subject,
                 html: options.html || options.text,
