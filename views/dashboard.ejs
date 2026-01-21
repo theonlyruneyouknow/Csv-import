@@ -4826,12 +4826,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         </button>
                     </div>
 
-                    <!-- Pending Supervisor Approval checkbox -->
+                    <!-- Pending Supervisor Approval toggle button -->
                     <div class="filter-group filter-actions">
-                        <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px; cursor: pointer;">
-                            <input type="checkbox" id="showPendingSupervisorApproval" style="margin: 0;">
-                            <span style="font-size: 12px;">Pending Supervisor Approval</span>
-                        </label>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="togglePendingSupervisorApproval()"
+                            id="togglePendingSupervisorBtn" title="Show/Hide Pending Supervisor Approval POs" style="width: 100%;">
+                            📋 <span id="pendingSupervisorText">Show Pending Supervisor</span>
+                        </button>
+                        <!-- Hidden checkbox for actual filter state -->
+                        <input type="checkbox" id="showPendingSupervisorApproval" style="display: none;">
                     </div>
 
                     <!-- Clear Filters button -->
@@ -7937,6 +7939,38 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             showTrackingToast(message, 'success');
         }
 
+        function togglePendingSupervisorApproval() {
+            const checkbox = document.getElementById('showPendingSupervisorApproval');
+            const btnText = document.getElementById('pendingSupervisorText');
+            const btn = document.getElementById('togglePendingSupervisorBtn');
+            
+            if (checkbox) {
+                // Toggle the checkbox state
+                checkbox.checked = !checkbox.checked;
+                
+                // Update button appearance and text
+                if (checkbox.checked) {
+                    btnText.textContent = 'Hide Pending Supervisor';
+                    btn.classList.remove('btn-outline-secondary');
+                    btn.classList.add('btn-outline-success');
+                } else {
+                    btnText.textContent = 'Show Pending Supervisor';
+                    btn.classList.remove('btn-outline-success');
+                    btn.classList.add('btn-outline-secondary');
+                }
+                
+                // Save state to localStorage
+                localStorage.setItem('filter_showPendingSupervisorApproval', checkbox.checked.toString());
+                
+                // Apply filters
+                applyFilters();
+                
+                // Show a toast notification
+                const message = checkbox.checked ? '📋 Showing Pending Supervisor Approval POs' : '📋 Hiding Pending Supervisor Approval POs';
+                showTrackingToast(message, 'success');
+            }
+        }
+
         async function toggleDropshipStatus(poId, poNumber, newDropshipStatus, btn) {
             try {
                 console.log(`🚚 Toggling dropship status for PO ${poNumber}: ${newDropshipStatus}`);
@@ -10393,6 +10427,15 @@ Thank you`;
             document.getElementById('showOnlyNoLineItems').checked = false;
             document.getElementById('showOnlyDropship').checked = false;
 
+            // Update Pending Supervisor Approval button appearance
+            const pendingSupervisorBtn = document.getElementById('togglePendingSupervisorBtn');
+            const pendingSupervisorText = document.getElementById('pendingSupervisorText');
+            if (pendingSupervisorBtn && pendingSupervisorText) {
+                pendingSupervisorBtn.classList.remove('btn-outline-success');
+                pendingSupervisorBtn.classList.add('btn-outline-secondary');
+                pendingSupervisorText.textContent = 'Show Pending Supervisor';
+            }
+
             // Clear localStorage for filter states
             localStorage.removeItem('filter_showNotMyConcern');
             localStorage.removeItem('filter_showPendingBill');
@@ -10423,6 +10466,23 @@ Thank you`;
                     const checkbox = document.getElementById(filterId);
                     if (checkbox) {
                         checkbox.checked = savedState === 'true';
+                        
+                        // Update Pending Supervisor Approval button appearance if restored
+                        if (filterId === 'showPendingSupervisorApproval') {
+                            const btn = document.getElementById('togglePendingSupervisorBtn');
+                            const btnText = document.getElementById('pendingSupervisorText');
+                            if (btn && btnText) {
+                                if (savedState === 'true') {
+                                    btn.classList.remove('btn-outline-secondary');
+                                    btn.classList.add('btn-outline-success');
+                                    btnText.textContent = 'Hide Pending Supervisor';
+                                } else {
+                                    btn.classList.remove('btn-outline-success');
+                                    btn.classList.add('btn-outline-secondary');
+                                    btnText.textContent = 'Show Pending Supervisor';
+                                }
+                            }
+                        }
                     }
                 }
             });
