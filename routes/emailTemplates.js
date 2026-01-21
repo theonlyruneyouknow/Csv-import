@@ -18,7 +18,10 @@ router.get('/', async (req, res) => {
         const templates = await EmailTemplate.find(filter)
             .sort({ isDefault: -1, 'usage.count': -1, name: 1 });
 
-        res.json(templates);
+        res.json({
+            success: true,
+            templates
+        });
     } catch (error) {
         console.error('Error fetching email templates:', error);
         res.status(500).json({
