@@ -7950,7 +7950,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 
                 // Update button appearance and text
                 if (checkbox.checked) {
-                    btnText.textContent = 'Hide Pending Supervisor';
+                    btnText.textContent = 'Showing Only Pending Supervisor';
                     btn.classList.remove('btn-outline-secondary');
                     btn.classList.add('btn-outline-success');
                 } else {
@@ -7966,7 +7966,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 applyFilters();
                 
                 // Show a toast notification
-                const message = checkbox.checked ? '📋 Showing Pending Supervisor Approval POs' : '📋 Hiding Pending Supervisor Approval POs';
+                const message = checkbox.checked ? '📋 Showing ONLY Pending Supervisor Approval POs' : '📋 Showing all POs';
                 showTrackingToast(message, 'success');
             }
         }
@@ -10175,9 +10175,9 @@ Thank you`;
                 const isPendingBill = nsStatus === 'Pending Bill';
                 const shouldShowPendingBill = !isPendingBill || showPendingBill;
 
-                // "Pending Supervisor Approval" NS Status filter - hide by default unless checkbox is checked
+                // "Pending Supervisor Approval" filter - when active, show ONLY these POs
                 const isPendingSupervisorApproval = nsStatus === 'Pending Supervisor Approval';
-                const shouldShowPendingSupervisorApproval = !isPendingSupervisorApproval || showPendingSupervisorApproval;
+                const shouldShowPendingSupervisorApproval = !showPendingSupervisorApproval || isPendingSupervisorApproval;
 
                 // Missing URL filter - only show POs without URLs if checkbox is checked
                 const hasUrl = poUrl && poUrl.trim().length > 0;
@@ -10214,7 +10214,7 @@ Thank you`;
                     hiddenPendingBillCount++;
                 }
 
-                if (isPendingSupervisorApproval && !showPendingSupervisorApproval) {
+                if (showPendingSupervisorApproval && !isPendingSupervisorApproval) {
                     hiddenPendingSupervisorApprovalCount++;
                 }
 
@@ -10475,7 +10475,7 @@ Thank you`;
                                 if (savedState === 'true') {
                                     btn.classList.remove('btn-outline-secondary');
                                     btn.classList.add('btn-outline-success');
-                                    btnText.textContent = 'Hide Pending Supervisor';
+                                    btnText.textContent = 'Showing Only Pending Supervisor';
                                 } else {
                                     btn.classList.remove('btn-outline-success');
                                     btn.classList.add('btn-outline-secondary');
