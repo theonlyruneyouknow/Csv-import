@@ -4826,8 +4826,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         </button>
                     </div>
 
-                    <!-- Reserved space for future button -->
-                    <div class="filter-group filter-actions"></div>
+                    <!-- Pending Supervisor Approval checkbox -->
+                    <div class="filter-group filter-actions">
+                        <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px; cursor: pointer;">
+                            <input type="checkbox" id="showPendingSupervisorApproval" style="margin: 0;">
+                            <span style="font-size: 12px;">Pending Supervisor Approval</span>
+                        </label>
+                    </div>
 
                     <!-- Clear Filters button -->
                     <div class="filter-group filter-actions">
@@ -10074,6 +10079,8 @@ Thank you`;
             const showNotMyConcern = showNotMyConcernCheckbox ? showNotMyConcernCheckbox.checked : false;
             const showPendingBillCheckbox = document.getElementById('showPendingBill');
             const showPendingBill = showPendingBillCheckbox ? showPendingBillCheckbox.checked : false;
+            const showPendingSupervisorApprovalCheckbox = document.getElementById('showPendingSupervisorApproval');
+            const showPendingSupervisorApproval = showPendingSupervisorApprovalCheckbox ? showPendingSupervisorApprovalCheckbox.checked : false;
             const showOnlyMissingUrlsCheckbox = document.getElementById('showOnlyMissingUrls');
             const showOnlyMissingUrls = showOnlyMissingUrlsCheckbox ? showOnlyMissingUrlsCheckbox.checked : false;
             const showOnlyMissingEtaCheckbox = document.getElementById('showOnlyMissingEta');
@@ -10099,6 +10106,7 @@ Thank you`;
             let visibleCount = 0;
             let hiddenNotMyConcernCount = 0;
             let hiddenPendingBillCount = 0;
+            let hiddenPendingSupervisorApprovalCount = 0;
             let hiddenHasUrlCount = 0;
             let hiddenMissingEtaCount = 0;
             let hiddenWithLineItemsCount = 0;
@@ -10132,6 +10140,10 @@ Thank you`;
                 // "Pending Bill" NS Status filter - hide by default unless checkbox is checked
                 const isPendingBill = nsStatus === 'Pending Bill';
                 const shouldShowPendingBill = !isPendingBill || showPendingBill;
+
+                // "Pending Supervisor Approval" NS Status filter - hide by default unless checkbox is checked
+                const isPendingSupervisorApproval = nsStatus === 'Pending Supervisor Approval';
+                const shouldShowPendingSupervisorApproval = !isPendingSupervisorApproval || showPendingSupervisorApproval;
 
                 // Missing URL filter - only show POs without URLs if checkbox is checked
                 const hasUrl = poUrl && poUrl.trim().length > 0;
@@ -10168,6 +10180,10 @@ Thank you`;
                     hiddenPendingBillCount++;
                 }
 
+                if (isPendingSupervisorApproval && !showPendingSupervisorApproval) {
+                    hiddenPendingSupervisorApprovalCount++;
+                }
+
                 if (showOnlyMissingUrls && hasUrl) {
                     hiddenHasUrlCount++;
                 }
@@ -10199,7 +10215,7 @@ Thank you`;
                 // Priority filter
                 const matchesPriority = priorityFilter === 'all' || (poData.priority && poData.priority.toString() === priorityFilter);
 
-                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowBasedOnUrl && shouldShowBasedOnEta && shouldShowBasedOnLineItems && matchesLocation && matchesPoType) {
+                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowPendingSupervisorApproval && shouldShowBasedOnUrl && shouldShowBasedOnEta && shouldShowBasedOnLineItems && matchesLocation && matchesPoType) {
                     row.classList.remove('hidden');
                     // Also show the corresponding notes row if it's expanded
                     const notesRow = document.getElementById(`notes-row-${index}`);
@@ -10372,6 +10388,7 @@ Thank you`;
             document.getElementById('locationFilter').value = '';
             document.getElementById('showNotMyConcern').checked = false;
             document.getElementById('showPendingBill').checked = false;
+            document.getElementById('showPendingSupervisorApproval').checked = false;
             document.getElementById('showOnlyMissingUrls').checked = false;
             document.getElementById('showOnlyNoLineItems').checked = false;
             document.getElementById('showOnlyDropship').checked = false;
@@ -10379,6 +10396,7 @@ Thank you`;
             // Clear localStorage for filter states
             localStorage.removeItem('filter_showNotMyConcern');
             localStorage.removeItem('filter_showPendingBill');
+            localStorage.removeItem('filter_showPendingSupervisorApproval');
             localStorage.removeItem('filter_showOnlyMissingUrls');
             localStorage.removeItem('filter_showOnlyNoLineItems');
 
@@ -10397,7 +10415,7 @@ Thank you`;
         }
 
         function restoreFilterStates() {
-            const filters = ['showNotMyConcern', 'showPendingBill', 'showOnlyMissingUrls', 'showOnlyDropship', 'showOnlyNoLineItems'];
+            const filters = ['showNotMyConcern', 'showPendingBill', 'showPendingSupervisorApproval', 'showOnlyMissingUrls', 'showOnlyDropship', 'showOnlyNoLineItems'];
 
             filters.forEach(filterId => {
                 const savedState = localStorage.getItem(`filter_${filterId}`);
@@ -10429,7 +10447,7 @@ Thank you`;
         restoreFilterStates();
 
         // Add event listeners to save state when checkboxes change
-        ['showNotMyConcern', 'showPendingBill', 'showOnlyMissingUrls', 'showOnlyNoLineItems'].forEach(filterId => {
+        ['showNotMyConcern', 'showPendingBill', 'showPendingSupervisorApproval', 'showOnlyMissingUrls', 'showOnlyNoLineItems'].forEach(filterId => {
             const checkbox = document.getElementById(filterId);
             if (checkbox) {
                 checkbox.addEventListener('change', function () {
@@ -10623,6 +10641,7 @@ Thank you`;
         const locationFilter = document.getElementById('locationFilter');
         const showNotMyConcern = document.getElementById('showNotMyConcern');
         const showPendingBill = document.getElementById('showPendingBill');
+        const showPendingSupervisorApproval = document.getElementById('showPendingSupervisorApproval');
         const showOnlyMissingUrls = document.getElementById('showOnlyMissingUrls');
         const showOnlyMissingEta = document.getElementById('showOnlyMissingEta');
         const showOnlyNoLineItems = document.getElementById('showOnlyNoLineItems');
@@ -10659,6 +10678,7 @@ Thank you`;
         if (locationFilter) locationFilter.addEventListener('change', applyFilters);
         if (showNotMyConcern) showNotMyConcern.addEventListener('change', applyFilters);
         if (showPendingBill) showPendingBill.addEventListener('change', applyFilters);
+        if (showPendingSupervisorApproval) showPendingSupervisorApproval.addEventListener('change', applyFilters);
         if (showOnlyMissingUrls) showOnlyMissingUrls.addEventListener('change', applyFilters);
         if (showOnlyMissingEta) showOnlyMissingEta.addEventListener('change', applyFilters);
         if (showOnlyNoLineItems) showOnlyNoLineItems.addEventListener('change', applyFilters);
