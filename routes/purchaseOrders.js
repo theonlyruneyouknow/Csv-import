@@ -326,6 +326,9 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
         console.log(`🔄 CSV ROW DEBUG - Creating new PO ${poNumber}`);
 
         // Create new PO - CSV status goes to nsStatus, custom status starts empty
+        // Set default NetSuite URL for the PO
+        const defaultPoUrl = `https://4774474.app.netsuite.com/app/accounting/transactions/transaction.nl?&siaQ=${poNumber}`;
+        
         await PurchaseOrder.create({
           reportDate,
           date: row[1],
@@ -338,10 +341,11 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
           amount: parseFloat((row[5] || '0').replace(/[$,]/g, '')),
           location: row[6],
           notes: '',
+          poUrl: defaultPoUrl, // Set default NetSuite URL
           createdAt: new Date(),
           updatedAt: new Date()
         });
-        console.log(`Created new PO ${poNumber} - Vendor: "${vendorData.vendorNumber} ${vendorData.vendorName}" - NS Status: "${csvStatus}", Custom Status: empty`);
+        console.log(`Created new PO ${poNumber} - Vendor: "${vendorData.vendorNumber} ${vendorData.vendorName}" - NS Status: "${csvStatus}", Custom Status: empty, URL: ${defaultPoUrl}`);
       }
     }
 
@@ -5107,6 +5111,60 @@ router.post('/tracking/bulk-update', async (req, res) => {
 
   } catch (error) {
     console.error('❌ Bulk tracking update error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Bulk update PO URLs to NetSuite format
+router.post('/bulk-update-netsuite-urls', async (req, res) => {
+  try {
+    console.log('🔗 Starting bulk update of NetSuite URLs...');
+
+    // Find all POs that don't have a URL or have an empty URL
+    const posWithoutUrl = await PurchaseOrder.find({
+      $or: [
+        { poUrl: { $exists: false } },
+        { poUrl: '' },
+        { poUrl: null }
+      ]
+    });
+
+    console.log(`📋 Found ${posWithoutUrl.length} POs without NetSuite URLs`);
+
+    let updated = 0;
+    let failed = 0;
+
+    for (const po of posWithoutUrl) {
+      try {
+        const defaultPoUrl = `https://4774474.app.netsuite.com/app/accounting/transactions/transaction.nl?&siaQ=${po.poNumber}`;
+        
+        await PurchaseOrder.findByIdAndUpdate(po._id, {
+          poUrl: defaultPoUrl
+        });
+
+        updated++;
+        console.log(`✅ Updated ${po.poNumber}: ${defaultPoUrl}`);
+      } catch (error) {
+        console.error(`❌ Error updating ${po.poNumber}:`, error.message);
+        failed++;
+      }
+    }
+
+    console.log(`✅ Bulk URL update complete: ${updated} updated, ${failed} failed`);
+
+    res.json({
+      success: true,
+      message: `Updated NetSuite URLs for ${updated} of ${posWithoutUrl.length} purchase orders`,
+      total: posWithoutUrl.length,
+      updated,
+      failed
+    });
+
+  } catch (error) {
+    console.error('❌ Bulk NetSuite URL update error:', error);
     res.status(500).json({
       success: false,
       error: error.message
