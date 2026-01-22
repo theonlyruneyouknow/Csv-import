@@ -261,6 +261,10 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
       if (existingPO) {
         console.log(`🔄 CSV ROW DEBUG - Updating existing PO ${poNumber}`);
 
+        // Set default NetSuite URL if missing
+        const defaultPoUrl = `https://4774474.app.netsuite.com/app/accounting/transactions/transaction.nl?&siaQ=${poNumber}`;
+        const poUrl = existingPO.poUrl || defaultPoUrl;
+
         // Update existing PO - CSV status goes to nsStatus, preserve custom status
         const updateData = {
           reportDate,
@@ -274,7 +278,8 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
           location: row[6],
           updatedAt: new Date(),
           notes: existingPO.notes, // Keep existing notes!
-          status: existingPO.status // Keep existing custom Status (not from CSV)!
+          status: existingPO.status, // Keep existing custom Status (not from CSV)!
+          poUrl: poUrl // Set URL if missing
         };
 
         // 🔄 RESURRECTION LOGIC: If this PO was hidden (especially "Not in import"), unhide it
@@ -321,7 +326,8 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
 
         // THEN: Update the regular fields (separate operation)
         await PurchaseOrder.findByIdAndUpdate(existingPO._id, updateData);
-        console.log(`Updated PO ${poNumber} - NS Status: "${csvStatus}", Custom Status: "${existingPO.status}"${existingPO.isHidden ? ' (UNHIDDEN)' : ''}`);
+        const urlStatus = !existingPO.poUrl ? ' (URL SET)' : '';
+        console.log(`Updated PO ${poNumber} - NS Status: "${csvStatus}", Custom Status: "${existingPO.status}"${existingPO.isHidden ? ' (UNHIDDEN)' : ''}${urlStatus}`);
       } else {
         console.log(`🔄 CSV ROW DEBUG - Creating new PO ${poNumber}`);
 
