@@ -262,7 +262,7 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
         console.log(`🔄 CSV ROW DEBUG - Updating existing PO ${poNumber}`);
 
         // Set default NetSuite URL if missing
-        const defaultPoUrl = `https://4774474.app.netsuite.com/app/accounting/transactions/transaction.nl?&siaQ=${poNumber}`;
+        const defaultPoUrl = `https://4774474.app.netsuite.com/app/accounting/transactions/transaction.nl?16604806&siaQ=${poNumber}`;
         const poUrl = existingPO.poUrl || defaultPoUrl;
 
         // Update existing PO - CSV status goes to nsStatus, preserve custom status
@@ -333,7 +333,7 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
 
         // Create new PO - CSV status goes to nsStatus, custom status starts empty
         // Set default NetSuite URL for the PO
-        const defaultPoUrl = `https://4774474.app.netsuite.com/app/accounting/transactions/transaction.nl?&siaQ=${poNumber}`;
+        const defaultPoUrl = `https://4774474.app.netsuite.com/app/accounting/transactions/transaction.nl?16604806&siaQ=${poNumber}`;
         
         await PurchaseOrder.create({
           reportDate,
@@ -5145,7 +5145,7 @@ router.post('/bulk-update-netsuite-urls', async (req, res) => {
 
     for (const po of posWithoutUrl) {
       try {
-        const defaultPoUrl = `https://4774474.app.netsuite.com/app/accounting/transactions/transaction.nl?&siaQ=${po.poNumber}`;
+        const defaultPoUrl = `https://4774474.app.netsuite.com/app/accounting/transactions/transaction.nl?16604806&siaQ=${po.poNumber}`;
         
         await PurchaseOrder.findByIdAndUpdate(po._id, {
           poUrl: defaultPoUrl
