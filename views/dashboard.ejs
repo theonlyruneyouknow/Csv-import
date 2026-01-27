@@ -4806,10 +4806,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     </div>
 
                     <div class="filter-group filter-actions">
-                        <button class="btn btn-sm btn-outline-success" onclick="updateNetSuiteUrls()"
-                            id="bulkUrlBtn" title="Set NetSuite URLs for POs without links" style="width: 100%;">
-                            🔗 Set NS URLs
-                        </button>
+                        <a href="/manage-po-urls" class="btn btn-sm btn-outline-success" 
+                            title="Manage PO URLs and Types" style="width: 100%; text-decoration: none;">
+                            🔗 Manage URLs
+                        </a>
                     </div>
 
                     <div class="filter-group filter-actions">
@@ -7295,44 +7295,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             } catch (error) {
                 console.error('Error updating all tracking:', error);
                 showTrackingToast('Error updating tracking', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            }
-        }
-
-        // Bulk NetSuite URL update function
-        async function updateNetSuiteUrls() {
-            const btn = document.getElementById('bulkUrlBtn');
-            const originalText = btn.innerHTML;
-
-            // Show loading state
-            btn.disabled = true;
-            btn.innerHTML = '⏳ Updating...';
-
-            try {
-                showTrackingToast('🔗 Setting NetSuite URLs for POs...', 'success');
-
-                const response = await fetch('/purchase-orders/bulk-update-netsuite-urls', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showTrackingToast(`✅ ${result.message}`, 'success');
-                    
-                    // Reload page after 2 seconds to show updated URLs
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 2000);
-                } else {
-                    showTrackingToast('❌ ' + (result.error || 'Failed to update URLs'), 'error');
-                }
-            } catch (error) {
-                console.error('Error updating NetSuite URLs:', error);
-                showTrackingToast('❌ Error updating NetSuite URLs', 'error');
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = originalText;

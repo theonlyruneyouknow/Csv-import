@@ -1169,6 +1169,22 @@ app.get('/simple-test-route', (req, res) => {
     res.send('<h1>Simple Test Route Works!</h1>');
 });
 
+// Manage PO URLs page (post-import)
+app.get('/manage-po-urls', ensureAuthenticated, ensureApproved, (req, res) => {
+    console.log('🔗 === MANAGE PO URLS ROUTE HIT ===');
+    console.log('🔗 User:', req.user?.username);
+    
+    try {
+        res.render('manage-urls', {
+            user: req.user
+        });
+        console.log('✅ Manage URLs page rendered successfully');
+    } catch (error) {
+        console.error('❌ Error rendering manage-urls:', error);
+        res.status(500).send('Error: ' + error.message);
+    }
+});
+
 // Email Templates Management UI
 app.get('/manage-email-templates', ensureAuthenticated, ensureApproved, (req, res) => {
     console.log('📧 === EMAIL TEMPLATES ROUTE HIT ===');

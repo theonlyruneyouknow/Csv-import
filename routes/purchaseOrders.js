@@ -261,11 +261,6 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
       if (existingPO) {
         console.log(`🔄 CSV ROW DEBUG - Updating existing PO ${poNumber}`);
 
-        // Set default NetSuite URL if missing (extract numbers only from PO number)
-        const poNumberOnly = poNumber.replace(/[^0-9]/g, '');
-        const defaultPoUrl = `https://4774474.app.netsuite.com/app//common/search/globalseacrchresults.nl?searchtype=Transactions&Uber_NAME=${poNumberOnly}`;
-        const poUrl = existingPO.poUrl || defaultPoUrl;
-
         // Update existing PO - CSV status goes to nsStatus, preserve custom status
         const updateData = {
           reportDate,
@@ -279,8 +274,7 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
           location: row[6],
           updatedAt: new Date(),
           notes: existingPO.notes, // Keep existing notes!
-          status: existingPO.status, // Keep existing custom Status (not from CSV)!
-          poUrl: poUrl // Set URL if missing
+          status: existingPO.status // Keep existing custom Status (not from CSV)!
         };
 
         // 🔄 RESURRECTION LOGIC: If this PO was hidden (especially "Not in import"), unhide it
@@ -327,16 +321,11 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
 
         // THEN: Update the regular fields (separate operation)
         await PurchaseOrder.findByIdAndUpdate(existingPO._id, updateData);
-        const urlStatus = !existingPO.poUrl ? ' (URL SET)' : '';
-        console.log(`Updated PO ${poNumber} - NS Status: "${csvStatus}", Custom Status: "${existingPO.status}"${existingPO.isHidden ? ' (UNHIDDEN)' : ''}${urlStatus}`);
+        console.log(`Updated PO ${poNumber} - NS Status: "${csvStatus}", Custom Status: "${existingPO.status}"${existingPO.isHidden ? ' (UNHIDDEN)' : ''}`);
       } else {
         console.log(`🔄 CSV ROW DEBUG - Creating new PO ${poNumber}`);
 
         // Create new PO - CSV status goes to nsStatus, custom status starts empty
-        // Set default NetSuite URL for the PO (extract numbers only from PO number)
-        const poNumberOnly = poNumber.replace(/[^0-9]/g, '');
-        const defaultPoUrl = `https://4774474.app.netsuite.com/app//common/search/globalseacrchresults.nl?searchtype=Transactions&Uber_NAME=${poNumberOnly}`;
-        
         await PurchaseOrder.create({
           reportDate,
           date: row[1],
@@ -349,11 +338,10 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
           amount: parseFloat((row[5] || '0').replace(/[$,]/g, '')),
           location: row[6],
           notes: '',
-          poUrl: defaultPoUrl, // Set default NetSuite URL
           createdAt: new Date(),
           updatedAt: new Date()
         });
-        console.log(`Created new PO ${poNumber} - Vendor: "${vendorData.vendorNumber} ${vendorData.vendorName}" - NS Status: "${csvStatus}", Custom Status: empty, URL: ${defaultPoUrl}`);
+        console.log(`Created new PO ${poNumber} - Vendor: "${vendorData.vendorNumber} ${vendorData.vendorName}" - NS Status: "${csvStatus}", Custom Status: empty`);
       }
     }
 
@@ -5175,6 +5163,116 @@ router.post('/bulk-update-netsuite-urls', async (req, res) => {
 
   } catch (error) {
     console.error('❌ Bulk NetSuite URL update error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get POs that need URLs (for post-import form)
+router.get('/pos-needing-urls', async (req, res) => {
+  try {
+    console.log('🔗 Fetching POs that need URLs...');
+
+    const posWithoutUrl = await PurchaseOrder.find({
+      $or: [
+        { poUrl: { $exists: false } },
+        { poUrl: '' },
+        { poUrl: null }
+      ]
+    })
+    .select('poNumber vendor poType amount nsStatus status poUrl')
+    .sort({ poNumber: -1 })
+    .limit(100); // Limit to recent 100 POs
+
+    console.log(`📋 Found ${posWithoutUrl.length} POs without URLs`);
+
+    res.json({
+      success: true,
+      count: posWithoutUrl.length,
+      pos: posWithoutUrl
+    });
+
+  } catch (error) {
+    console.error('❌ Error fetching POs needing URLs:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Bulk update URLs and PO types from post-import form
+router.post('/bulk-update-urls-and-types', async (req, res) => {
+  try {
+    console.log('🔗 Starting bulk URL and PO type update from form...');
+    
+    const { updates } = req.body; // Array of { poNumber, url, poType }
+
+    if (!updates || !Array.isArray(updates)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Updates array is required'
+      });
+    }
+
+    console.log(`📋 Processing ${updates.length} PO updates`);
+
+    let updated = 0;
+    let failed = 0;
+    const errors = [];
+
+    for (const update of updates) {
+      try {
+        const { poNumber, url, poType } = update;
+
+        if (!poNumber) {
+          errors.push(`Missing PO number in update`);
+          failed++;
+          continue;
+        }
+
+        const updateData = {};
+        if (url) updateData.poUrl = url.trim();
+        if (poType) updateData.poType = poType;
+
+        if (Object.keys(updateData).length === 0) {
+          continue; // Skip if no updates
+        }
+
+        const result = await PurchaseOrder.findOneAndUpdate(
+          { poNumber: poNumber },
+          updateData,
+          { new: true }
+        );
+
+        if (result) {
+          updated++;
+          console.log(`✅ Updated ${poNumber}: URL=${!!url}, Type=${poType || 'unchanged'}`);
+        } else {
+          errors.push(`PO ${poNumber} not found`);
+          failed++;
+        }
+      } catch (error) {
+        console.error(`❌ Error updating ${update.poNumber}:`, error.message);
+        errors.push(`${update.poNumber}: ${error.message}`);
+        failed++;
+      }
+    }
+
+    console.log(`✅ Bulk update complete: ${updated} updated, ${failed} failed`);
+
+    res.json({
+      success: true,
+      message: `Updated ${updated} purchase orders`,
+      updated,
+      failed,
+      errors: errors.length > 0 ? errors : undefined
+    });
+
+  } catch (error) {
+    console.error('❌ Bulk URL and type update error:', error);
     res.status(500).json({
       success: false,
       error: error.message
