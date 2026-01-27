@@ -403,6 +403,90 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
       }
     }
 
+    // ============================================================
+    // AUTOMATIC VENDOR RECONCILIATION
+    // ============================================================
+    // Automatically link vendors to the main Vendor model after import
+    console.log('\n🔗 === AUTOMATIC VENDOR RECONCILIATION ===');
+    
+    const Vendor = require('../models/Vendor');
+
+    // Find all POs that don't have a linkedVendor
+    const unlinkedPOs = await PurchaseOrder.find({
+      vendor: { $exists: true, $ne: null, $ne: '' },
+      $or: [
+        { linkedVendor: { $exists: false } },
+        { linkedVendor: null }
+      ]
+    });
+
+    console.log(`📊 Found ${unlinkedPOs.length} POs with unlinked vendors`);
+
+    if (unlinkedPOs.length > 0) {
+      // Extract unique vendor strings
+      const uniqueVendors = [...new Set(unlinkedPOs.map(po => po.vendor))];
+      console.log(`📋 Processing ${uniqueVendors.length} unique vendors`);
+
+      let vendorsCreated = 0;
+      let posLinked = 0;
+
+      // Process each unique vendor
+      for (const vendorString of uniqueVendors) {
+        // Split vendor data
+        const vendorData = splitVendorData(vendorString);
+
+        // Generate a vendor code if vendorNumber is empty
+        let vendorCode = vendorData.vendorNumber || '';
+        if (!vendorCode || vendorCode.trim() === '') {
+          // Generate vendor code from vendor name
+          const words = vendorData.vendorName.trim().split(/\s+/);
+          if (words.length === 1) {
+            vendorCode = words[0].substring(0, 4).toUpperCase();
+          } else {
+            vendorCode = words.slice(0, 5).map(word => word.charAt(0)).join('').toUpperCase();
+          }
+        }
+
+        // Check if vendor already exists by vendorCode
+        let vendor = await Vendor.findOne({ vendorCode: vendorCode });
+
+        if (!vendor) {
+          // Ensure vendor code is unique
+          let finalVendorCode = vendorCode;
+          let counter = 1;
+          while (await Vendor.findOne({ vendorCode: finalVendorCode })) {
+            finalVendorCode = vendorCode + counter;
+            counter++;
+          }
+
+          // Create new vendor in the Vendor model
+          vendor = new Vendor({
+            vendorName: vendorData.vendorName,
+            vendorCode: finalVendorCode,
+            vendorType: 'Seeds', // Default type
+            status: 'Active'
+          });
+
+          await vendor.save();
+          vendorsCreated++;
+          console.log(`✅ Created vendor: ${vendor.vendorName} (Code: ${finalVendorCode})`);
+        }
+
+        // Link this vendor to all matching POs
+        const matchingPOs = unlinkedPOs.filter(po => po.vendor === vendorString);
+        
+        for (const po of matchingPOs) {
+          po.linkedVendor = vendor._id;
+          await po.save();
+          posLinked++;
+        }
+      }
+
+      console.log(`✅ Vendor reconciliation complete: ${vendorsCreated} vendors created, ${posLinked} POs linked`);
+    } else {
+      console.log(`✅ All POs already linked to vendors`);
+    }
+
     // Clean up uploaded file
     fs.unlinkSync(req.file.path);
 
