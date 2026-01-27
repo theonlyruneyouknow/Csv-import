@@ -4280,6 +4280,17 @@
 </head>
 
 <body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999; justify-content: center; align-items: center;">
+        <div style="text-align: center; color: white;">
+            <div class="spinner-border" role="status" style="width: 3rem; height: 3rem; margin-bottom: 1rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h4>Refreshing Dashboard...</h4>
+            <p>Please wait while we update the page</p>
+        </div>
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>Purchase Orders Dashboard</h1>
@@ -10138,7 +10149,8 @@ Thank you`;
                 (function () {
                     const checkbox = document.getElementById('filter<%= type.name %>');
                     console.log('🔍 Checkbox for <%= type.name %>:', checkbox, 'checked:', checkbox?.checked);
-                    poTypeFilters['<%= type.name %>'] = checkbox ? checkbox.checked : true;
+                    // Default to checked (true) if checkbox not found, otherwise use actual checked state
+                    poTypeFilters['<%= type.name %>'] = checkbox ? checkbox.checked : false;
                 })();
             <% }) %>
                 console.log('🎯 PO Type Filters:', poTypeFilters);
@@ -10456,6 +10468,35 @@ Thank you`;
         // ============ FILTER STATE PERSISTENCE ============
         // Save and restore filter checkbox states using localStorage
 
+        // Scroll position persistence
+        function saveScrollPosition() {
+            try {
+                const scrollPos = window.pageYOffset || document.documentElement.scrollTop;
+                localStorage.setItem('dashboard_scroll_position', scrollPos.toString());
+                console.log('💾 Saved scroll position:', scrollPos);
+            } catch (e) {
+                console.error('Error saving scroll position:', e);
+            }
+        }
+
+        function restoreScrollPosition() {
+            try {
+                const savedScroll = localStorage.getItem('dashboard_scroll_position');
+                if (savedScroll !== null) {
+                    const scrollPos = parseInt(savedScroll, 10);
+                    console.log('📜 Restoring scroll position:', scrollPos);
+                    // Use setTimeout to ensure DOM is ready
+                    setTimeout(() => {
+                        window.scrollTo(0, scrollPos);
+                        // Clear the saved position after restoring
+                        localStorage.removeItem('dashboard_scroll_position');
+                    }, 50);
+                }
+            } catch (e) {
+                console.error('Error restoring scroll position:', e);
+            }
+        }
+
         function saveFilterState(filterId, checked) {
             try {
                 localStorage.setItem(`filter_${filterId}`, checked.toString());
@@ -10499,11 +10540,17 @@ Thank you`;
                 (function () {
                     const filterId = 'filter<%= type.name %>';
                     const savedState = localStorage.getItem(`filter_${filterId}`);
-                    if (savedState !== null) {
-                        const checkbox = document.getElementById(filterId);
-                        if (checkbox) {
+                    const checkbox = document.getElementById(filterId);
+                    if (checkbox) {
+                        if (savedState !== null) {
+                            // If we have a saved state, use it
                             checkbox.checked = savedState === 'true';
-                            console.log('📦 Restored PO Type filter <%= type.name %>:', savedState === 'true');
+                            console.log('📦 Restored PO Type filter <%= type.name %> from saved state:', savedState === 'true');
+                        } else {
+                            // If no saved state, initialize to checked (default) and save it
+                            checkbox.checked = true;
+                            localStorage.setItem(`filter_${filterId}`, 'true');
+                            console.log('📦 Initialized PO Type filter <%= type.name %> to checked (default)');
                         }
                     }
                 })();
@@ -10540,9 +10587,42 @@ Thank you`;
             setTimeout(() => {
                 console.log('🔄 Applying filters with restored state');
                 applyFilters();
-            }, 100);
+                // Restore scroll position after filters are applied
+                restoreScrollPosition();
+                // Hide loading overlay after everything is restored
+                hideLoadingOverlay();
+            }, 150);
 
         // ============ END FILTER STATE PERSISTENCE ============
+
+        // Intercept page reloads to save scroll position and show loading overlay
+        const originalReload = window.location.reload.bind(window.location);
+        window.location.reload = function() {
+            showLoadingOverlay();
+            saveScrollPosition();
+            originalReload();
+        };
+
+        // Show loading overlay function
+        function showLoadingOverlay() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.style.display = 'flex';
+            }
+        }
+
+        // Hide loading overlay after page loads
+        function hideLoadingOverlay() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+        }
+
+        // Also save scroll position before unload
+        window.addEventListener('beforeunload', function() {
+            saveScrollPosition();
+        });
 
         // ============ SEARCH HISTORY FUNCTIONALITY ============
         const SEARCH_HISTORY_KEY = 'po_search_history';
