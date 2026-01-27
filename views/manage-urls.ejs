@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage PO URLs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .po-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+        }
+        .po-number {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .btn-submit:hover {
+            opacity: 0.9;
+        }
+        .stats-box {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .url-input {
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        .copy-po-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            margin-left: 8px;
+        }
+        .copy-po-btn:hover {
+            background: #764ba2;
+        }
+        .copy-po-btn.copied {
+            background: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔗 Manage Purchase Order URLs</h1>
+            <p class="mb-0">Update URLs and PO types for purchase orders</p>
+        </div>
+
+        <div id="statsBox" class="stats-box" style="display: none;">
+            <h5>📊 Update Statistics</h5>
+            <div id="statsContent"></div>
+            <p class="mt-2 mb-0"><small><em>Note: Only POs with URLs or PO types entered were updated</em></small></p>
+        </div>
+
+        <div id="loadingBox" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">Loading purchase orders...</p>
+        </div>
+
+        <div id="noPosBox" class="alert alert-success" style="display: none;">
+            <h4>✅ All Done!</h4>
+            <p class="mb-0">No purchase orders need URL updates. All POs have their URLs set!</p>
+            <a href="/purchase-orders" class="btn btn-primary mt-3">← Back to Dashboard</a>
+        </div>
+
+        <div id="formBox" style="display: none;">
+            <div class="mb-4">
+                <h5>Instructions:</h5>
+                <ol>
+                    <li>Paste the NetSuite URL for each PO in the URL field</li>
+                    <li>Optionally update the PO Type if needed</li>
+                    <li>Click "Update All POs" when done</li>
+                </ol>
+            </div>
+
+            <form id="urlForm">
+                <div id="posList"></div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn-submit">
+                        🚀 Update All POs
+                    </button>
+                    <a href="/purchase-orders" class="btn btn-secondary ms-3">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let posData = [];
+
+        // Load POs that need URLs
+        async function loadPOs() {
+            try {
+                const response = await fetch('/purchase-orders/pos-needing-urls');
+                const result = await response.json();
+
+                document.getElementById('loadingBox').style.display = 'none';
+
+                if (result.success) {
+                    if (result.count === 0) {
+                        document.getElementById('noPosBox').style.display = 'block';
+                    } else {
+                        posData = result.pos;
+                        renderPOs();
+                        document.getElementById('formBox').style.display = 'block';
+                    }
+                } else {
+                    alert('Error loading POs: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loadingBox').innerHTML = 
+                    '<div class="alert alert-danger">Error loading POs. Please try again.</div>';
+            }
+        }
+
+        // Render PO cards
+        function renderPOs() {
+            const container = document.getElementById('posList');
+            container.innerHTML = '';
+
+            posData.forEach((po, index) => {
+                const card = document.createElement('div');
+                card.className = 'po-card';
+                card.innerHTML = `
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            <div class="po-number">
+                                ${po.poNumber}
+                                <button type="button" class="copy-po-btn" data-po="${po.poNumber}" title="Copy PO Number">
+                                    📋
+                                </button>
+                            </div>
+                            <small class="text-muted">${po.vendor || 'No vendor'}</small>
+                        </div>
+                        <div class="col-md-2">
+                            <small class="text-muted d-block">NS Status</small>
+                            <strong>${po.nsStatus || 'N/A'}</strong>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label mb-1"><small>PO Type</small></label>
+                            <select class="form-select form-select-sm" id="type_${index}" name="type_${index}">
+                                <option value="">- Select Type -</option>
+                                <option value="Seed" ${po.poType === 'Seed' ? 'selected' : ''}>Seed</option>
+                                <option value="Dropship" ${po.poType === 'Dropship' ? 'selected' : ''}>Dropship</option>
+                                <option value="Greengood" ${po.poType === 'Greengood' ? 'selected' : ''}>Greengood</option>
+                                <option value="Hardgood" ${po.poType === 'Hardgood' ? 'selected' : ''}>Hardgood</option>
+                                <option value="Supplies" ${po.poType === 'Supplies' ? 'selected' : ''}>Supplies</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label mb-1"><small>NetSuite URL</small></label>
+                            <input type="url" 
+                                   class="form-control form-control-sm url-input" 
+                                   id="url_${index}" 
+                                   name="url_${index}"
+                                   placeholder="Paste NetSuite URL here..."
+                                   value="${po.poUrl || ''}">
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Copy PO number to clipboard
+        document.addEventListener('click', (event) => {
+            if (event.target.closest('.copy-po-btn')) {
+                event.preventDefault(); // Prevent form submission
+                const btn = event.target.closest('.copy-po-btn');
+                const poNumber = btn.getAttribute('data-po');
+
+                try {
+                    navigator.clipboard.writeText(poNumber).then(() => {
+                        // Visual feedback
+                        btn.classList.add('copied');
+                        const originalTitle = btn.title;
+                        btn.title = 'Copied!';
+
+                        // Reset after 2 seconds
+                        setTimeout(() => {
+                            btn.classList.remove('copied');
+                            btn.title = originalTitle;
+                        }, 2000);
+
+                        console.log(`📋 Copied PO Number: ${poNumber}`);
+                    }).catch(error => {
+                        console.error('Failed to copy:', error);
+                        fallbackCopyTextToClipboard(poNumber);
+                    });
+                } catch (error) {
+                    console.error('Error copying:', error);
+                    fallbackCopyTextToClipboard(poNumber);
+                }
+            }
+        });
+
+        // Fallback copy for older browsers
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                console.log(`📋 Fallback copy successful: ${text}`);
+            } catch (err) {
+                console.error('❌ Fallback copy error:', err);
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        // Submit form
+        document.getElementById('urlForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const updates = [];
+            posData.forEach((po, index) => {
+                const url = document.getElementById(`url_${index}`).value;
+                const poType = document.getElementById(`type_${index}`).value;
+
+                if (url || poType) {
+                    updates.push({
+                        poNumber: po.poNumber,
+                        url: url,
+                        poType: poType
+                    });
+                }
+            });
+
+            if (updates.length === 0) {
+                alert('No updates to submit. Please enter URLs or select PO types.');
+                return;
+            }
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '⏳ Updating...';
+
+            try {
+                const response = await fetch('/purchase-orders/bulk-update-urls-and-types', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ updates })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Show statistics
+                    document.getElementById('statsContent').innerHTML = `
+                        <p class="mb-1"><strong>✅ Successfully updated:</strong> ${result.updated} POs</p>
+                        ${result.failed > 0 ? `<p class="mb-1 text-danger"><strong>❌ Failed:</strong> ${result.failed} POs</p>` : ''}
+                        ${result.errors ? `<p class="mb-0"><small>${result.errors.join(', ')}</small></p>` : ''}
+                    `;
+                    document.getElementById('statsBox').style.display = 'block';
+                    document.getElementById('formBox').style.display = 'none';
+
+                    // Add button to go back to dashboard
+                    document.getElementById('statsBox').innerHTML += 
+                        '<a href="/purchase-orders" class="btn btn-primary mt-3">← Back to Dashboard</a>';
+                } else {
+                    alert('Error: ' + result.error);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error submitting updates. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+
+        // Load POs on page load
+        loadPOs();
+    </script>
+</body>
+</html>
