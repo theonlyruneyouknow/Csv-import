@@ -4291,35 +4291,108 @@
         </div>
     </div>
 
-    <!-- Quick Upload Modal -->
+    <!-- Quick Upload Modal with NetSuite Integration -->
     <div id="quickUploadModal" class="modal" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7);">
-        <div class="modal-content" style="position: relative; background: white; margin: 5% auto; padding: 40px; width: 90%; max-width: 700px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-            <span class="close" onclick="closeQuickUpload()" style="position: absolute; right: 20px; top: 15px; font-size: 35px; font-weight: bold; cursor: pointer; color: #999;">&times;</span>
-            <h2 style="margin: 0 0 10px 0; color: #333;">⚡ Quick CSV Upload</h2>
-            <p style="color: #666; margin-bottom: 25px;">Upload your NetSuite CSV directly - file picker will open to your Downloads folder</p>
+        <div class="modal-content" style="position: relative; background: white; margin: 2% auto; padding: 30px; width: 95%; max-width: 1400px; height: 90vh; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column;">
+            <span class="close" onclick="closeQuickUpload()" style="position: absolute; right: 20px; top: 15px; font-size: 35px; font-weight: bold; cursor: pointer; color: #999; z-index: 10001;">&times;</span>
             
-            <form id="quickUploadForm" action="/purchase-orders/upload" method="post" enctype="multipart/form-data" style="margin: 0;">
-                <div class="upload-zone" id="dropZone" style="border: 3px dashed #667eea; border-radius: 12px; padding: 50px 30px; text-align: center; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); cursor: pointer; transition: all 0.3s ease;">
-                    <div class="upload-icon" style="font-size: 64px; margin-bottom: 20px;">📁</div>
-                    <p style="font-size: 18px; font-weight: 600; color: #333; margin: 0 0 10px 0;">Drop CSV file here or click to browse</p>
-                    <p style="color: #666; margin: 0;">Supports .csv files from NetSuite exports</p>
-                    <input type="file" name="csvFile" id="quickCsvFile" accept=".csv" required style="display: none;">
-                    <button type="button" class="btn btn-primary btn-lg" onclick="document.getElementById('quickCsvFile').click()" style="margin-top: 20px; padding: 12px 40px; font-size: 16px; border-radius: 8px;">📂 Choose File from Downloads</button>
-                    <div id="selectedFileName" style="margin-top: 15px; padding: 10px; background: #e8f5e9; border-radius: 6px; display: none;">
-                        <span style="color: #2e7d32; font-weight: 600;">✓ Selected: </span>
-                        <span id="fileNameText" style="color: #1b5e20;"></span>
+            <!-- Header -->
+            <div style="margin-bottom: 20px;">
+                <h2 style="margin: 0 0 5px 0; color: #333;">⚡ Quick Upload with NetSuite Integration</h2>
+                <p style="color: #666; margin: 0;">Download from NetSuite and upload in one seamless workflow</p>
+            </div>
+
+            <!-- Two Column Layout -->
+            <div style="display: flex; gap: 20px; flex: 1; min-height: 0;">
+                
+                <!-- Left Column: NetSuite Frame -->
+                <div style="flex: 1; display: flex; flex-direction: column; border: 2px solid #e0e0e0; border-radius: 10px; overflow: hidden; background: #f5f5f5;">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="font-size: 16px;">🌐 NetSuite Export</strong>
+                            <p style="margin: 5px 0 0 0; font-size: 12px; opacity: 0.9;">Enter your NetSuite URL or use the saved link</p>
+                        </div>
+                        <button onclick="toggleNetSuiteFrame()" class="btn btn-sm" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 5px 15px;">
+                            <span id="frameToggleText">▼ Collapse</span>
+                        </button>
+                    </div>
+                    
+                    <div id="netsuiteUrlInput" style="padding: 15px; background: white; border-bottom: 1px solid #e0e0e0;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px;">NetSuite Export URL:</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="url" id="netsuiteUrl" placeholder="Paste your NetSuite saved search URL here..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            <button onclick="loadNetSuiteFrame()" class="btn btn-primary" style="padding: 10px 20px; white-space: nowrap;">📥 Load NetSuite</button>
+                            <button onclick="openNetSuitePopup()" class="btn btn-secondary" style="padding: 10px 20px; white-space: nowrap;" title="Open in popup if frame is blocked">🪟 Popup</button>
+                        </div>
+                        <p style="margin: 8px 0 0 0; font-size: 12px; color: #666;">
+                            💡 <strong>Tip:</strong> Looking for file: <code>OpenPurchaseOrdersPendingBill(Rune)NTK*.csv</code>
+                        </p>
+                    </div>
+                    
+                    <div id="netsuiteFrameContainer" style="flex: 1; position: relative; background: white; display: flex; align-items: center; justify-content: center;">
+                        <div id="netsuiteFramePlaceholder" style="text-align: center; padding: 40px; color: #999;">
+                            <div style="font-size: 48px; margin-bottom: 15px;">🌐</div>
+                            <p style="font-size: 16px; margin: 0 0 10px 0;">NetSuite page will load here</p>
+                            <p style="font-size: 13px; margin: 0; color: #888;">Enter URL above and click "Load NetSuite"</p>
+                            <p style="font-size: 12px; margin: 15px 0 0 0; color: #aaa;">If the frame doesn't work due to security, use "Popup" button</p>
+                        </div>
+                        <iframe id="netsuiteFrame" style="display: none; width: 100%; height: 100%; border: none; background: white;"></iframe>
                     </div>
                 </div>
-                <div style="margin-top: 25px; text-align: right;">
-                    <button type="button" class="btn btn-secondary" onclick="closeQuickUpload()" style="margin-right: 10px; padding: 10px 24px;">Cancel</button>
-                    <button type="submit" id="quickUploadBtn" class="btn btn-success" disabled style="padding: 10px 32px; font-size: 16px;">🚀 Upload & Import</button>
+
+                <!-- Right Column: Upload Zone -->
+                <div style="flex: 1; display: flex; flex-direction: column;">
+                    <form id="quickUploadForm" action="/purchase-orders/upload" method="post" enctype="multipart/form-data" style="flex: 1; display: flex; flex-direction: column;">
+                        
+                        <!-- Auto-detect Section -->
+                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 15px; border-radius: 10px 10px 0 0;">
+                            <strong style="font-size: 16px;">🎯 Smart File Detection</strong>
+                            <p style="margin: 5px 0 0 0; font-size: 12px; opacity: 0.9;">Automatically finds your latest NetSuite export</p>
+                        </div>
+
+                        <div style="flex: 1; display: flex; flex-direction: column; border: 2px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; padding: 20px; background: white;">
+                            
+                            <!-- Auto-detect button -->
+                            <div style="margin-bottom: 20px;">
+                                <button type="button" onclick="autoDetectLatestFile()" class="btn btn-lg" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border: none; color: white; font-weight: 600; font-size: 16px; border-radius: 8px;">
+                                    🔍 Auto-Detect Latest File
+                                </button>
+                                <p style="margin: 8px 0 0 0; font-size: 12px; text-align: center; color: #666;">
+                                    Searches for: <code style="background: #f5f5f5; padding: 2px 6px; border-radius: 3px;">OpenPurchaseOrdersPendingBill(Rune)NTK*.csv</code>
+                                </p>
+                            </div>
+
+                            <div style="text-align: center; margin: 15px 0; color: #999; font-weight: 600;">— OR —</div>
+
+                            <!-- Manual Upload Zone -->
+                            <div class="upload-zone" id="dropZone" style="flex: 1; border: 3px dashed #667eea; border-radius: 12px; padding: 40px 30px; text-align: center; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; justify-content: center; min-height: 200px;">
+                                <div class="upload-icon" style="font-size: 64px; margin-bottom: 15px;">📁</div>
+                                <p style="font-size: 18px; font-weight: 600; color: #333; margin: 0 0 10px 0;">Drop CSV file here or click to browse</p>
+                                <p style="color: #666; margin: 0 0 15px 0; font-size: 14px;">Supports .csv files from NetSuite exports</p>
+                                <input type="file" name="csvFile" id="quickCsvFile" accept=".csv" required style="display: none;">
+                                <button type="button" class="btn btn-primary btn-lg" onclick="document.getElementById('quickCsvFile').click()" style="padding: 12px 40px; font-size: 16px; border-radius: 8px;">📂 Choose File Manually</button>
+                                <div id="selectedFileName" style="margin-top: 15px; padding: 12px; background: #e8f5e9; border-radius: 6px; display: none;">
+                                    <span style="color: #2e7d32; font-weight: 600;">✓ Selected: </span>
+                                    <span id="fileNameText" style="color: #1b5e20; word-break: break-all;"></span>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                                <button type="button" class="btn btn-secondary" onclick="closeQuickUpload()" style="padding: 10px 24px;">Cancel</button>
+                                <button type="submit" id="quickUploadBtn" class="btn btn-success btn-lg" disabled style="padding: 10px 32px; font-size: 16px;">🚀 Upload & Import</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Upload Progress -->
+                    <div id="uploadProgress" style="display: none; margin-top: 15px; padding: 15px; background: white; border: 2px solid #e0e0e0; border-radius: 10px;">
+                        <div style="background: #f0f0f0; border-radius: 10px; overflow: hidden; height: 30px;">
+                            <div id="progressBar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;"></div>
+                        </div>
+                        <p id="uploadStatus" style="text-align: center; margin: 10px 0 0 0; color: #666; font-weight: 600;">Uploading...</p>
+                    </div>
                 </div>
-            </form>
-            <div id="uploadProgress" style="display: none; margin-top: 20px;">
-                <div style="background: #f0f0f0; border-radius: 10px; overflow: hidden; height: 30px;">
-                    <div id="progressBar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;"></div>
-                </div>
-                <p id="uploadStatus" style="text-align: center; margin-top: 10px; color: #666;">Uploading...</p>
             </div>
         </div>
     </div>
@@ -5890,6 +5963,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             // Close the imports dropdown
             document.getElementById('importsDropdown').classList.remove('show');
             document.querySelector('.nav-imports-btn .dropdown-icon').classList.remove('rotated');
+            
+            // Try to load saved NetSuite URL
+            const savedUrl = localStorage.getItem('netsuiteExportUrl');
+            if (savedUrl) {
+                document.getElementById('netsuiteUrl').value = savedUrl;
+            }
         }
 
         function closeQuickUpload() {
@@ -5898,6 +5977,169 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById('selectedFileName').style.display = 'none';
             document.getElementById('quickUploadBtn').disabled = true;
             document.getElementById('uploadProgress').style.display = 'none';
+            
+            // Reset NetSuite frame
+            const frame = document.getElementById('netsuiteFrame');
+            frame.src = '';
+            frame.style.display = 'none';
+            document.getElementById('netsuiteFramePlaceholder').style.display = 'block';
+        }
+
+        // NetSuite Frame Functions
+        function loadNetSuiteFrame() {
+            const url = document.getElementById('netsuiteUrl').value.trim();
+            if (!url) {
+                alert('Please enter a NetSuite URL');
+                return;
+            }
+
+            // Save URL for future use
+            localStorage.setItem('netsuiteExportUrl', url);
+
+            const frame = document.getElementById('netsuiteFrame');
+            const placeholder = document.getElementById('netsuiteFramePlaceholder');
+
+            try {
+                frame.src = url;
+                frame.style.display = 'block';
+                placeholder.style.display = 'none';
+
+                // Listen for frame load errors
+                frame.onerror = function() {
+                    alert('⚠️ Unable to load NetSuite in frame due to security restrictions.\\n\\nPlease use the "Popup" button instead, or download the file manually and use "Choose File Manually".');
+                    frame.style.display = 'none';
+                    placeholder.style.display = 'block';
+                };
+
+                // Set a timeout to check if frame loaded
+                setTimeout(() => {
+                    try {
+                        // Try to access frame content (will fail if X-Frame-Options blocks it)
+                        const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                        if (!frameDoc || frameDoc.location.href === 'about:blank') {
+                            console.warn('Frame may be blocked by X-Frame-Options');
+                        }
+                    } catch (e) {
+                        // Frame is blocked
+                        console.warn('Frame access blocked:', e.message);
+                        setTimeout(() => {
+                            if (confirm('⚠️ NetSuite cannot be displayed in frame due to security settings.\\n\\nWould you like to open it in a popup window instead?')) {
+                                openNetSuitePopup();
+                            }
+                        }, 1000);
+                    }
+                }, 2000);
+
+            } catch (error) {
+                alert('Error loading NetSuite: ' + error.message);
+                frame.style.display = 'none';
+                placeholder.style.display = 'block';
+            }
+        }
+
+        function openNetSuitePopup() {
+            const url = document.getElementById('netsuiteUrl').value.trim();
+            if (!url) {
+                alert('Please enter a NetSuite URL');
+                return;
+            }
+
+            // Save URL for future use
+            localStorage.setItem('netsuiteExportUrl', url);
+
+            // Open in popup
+            const width = 1200;
+            const height = 800;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+
+            window.open(
+                url,
+                'NetSuiteExport',
+                `width=${width},height=${height},left=${left},top=${top},toolbar=yes,location=yes,status=yes,menubar=yes,scrollbars=yes,resizable=yes`
+            );
+
+            alert('💡 NetSuite opened in popup window.\\n\\nAfter downloading, click "Auto-Detect Latest File" or use "Choose File Manually".');
+        }
+
+        function toggleNetSuiteFrame() {
+            const container = document.getElementById('netsuiteFrameContainer');
+            const urlInput = document.getElementById('netsuiteUrlInput');
+            const toggleText = document.getElementById('frameToggleText');
+
+            if (container.style.display === 'none') {
+                container.style.display = 'flex';
+                urlInput.style.display = 'block';
+                toggleText.textContent = '▼ Collapse';
+            } else {
+                container.style.display = 'none';
+                urlInput.style.display = 'none';
+                toggleText.textContent = '▶ Expand';
+            }
+        }
+
+        // Auto-detect latest file
+        async function autoDetectLatestFile() {
+            const fileInput = document.getElementById('quickCsvFile');
+            
+            try {
+                // Use File System Access API to let user pick Downloads folder
+                if ('showDirectoryPicker' in window) {
+                    const directoryHandle = await window.showDirectoryPicker({
+                        id: 'downloads-folder',
+                        startIn: 'downloads',
+                        mode: 'read'
+                    });
+
+                    // Search for matching files
+                    const matchingFiles = [];
+                    const pattern = /^OpenPurchaseOrdersPendingBill\(Rune\)NTK.*\.csv$/i;
+
+                    for await (const entry of directoryHandle.values()) {
+                        if (entry.kind === 'file' && pattern.test(entry.name)) {
+                            const file = await entry.getFile();
+                            matchingFiles.push({ name: entry.name, file: file, modified: file.lastModified });
+                        }
+                    }
+
+                    if (matchingFiles.length === 0) {
+                        alert('❌ No matching files found.\\n\\nLooking for: OpenPurchaseOrdersPendingBill(Rune)NTK*.csv\\n\\nPlease download from NetSuite first, or use "Choose File Manually".');
+                        return;
+                    }
+
+                    // Sort by date (newest first)
+                    matchingFiles.sort((a, b) => b.modified - a.modified);
+                    const latestFile = matchingFiles[0];
+
+                    // Create a new FileList-like object
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(latestFile.file);
+                    fileInput.files = dataTransfer.files;
+
+                    // Trigger change event
+                    const event = new Event('change', { bubbles: true });
+                    fileInput.dispatchEvent(event);
+
+                    // Show success message
+                    if (matchingFiles.length > 1) {
+                        alert(`✅ Found ${matchingFiles.length} matching files!\\n\\nSelected latest: ${latestFile.name}\\n\\nModified: ${new Date(latestFile.modified).toLocaleString()}`);
+                    }
+
+                } else {
+                    // Fallback for browsers without File System Access API
+                    alert('⚠️ Auto-detect not supported in this browser.\\n\\nPlease use "Choose File Manually" button.');
+                    document.getElementById('quickCsvFile').click();
+                }
+
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // User cancelled
+                    console.log('User cancelled folder selection');
+                } else {
+                    console.error('Error auto-detecting file:', error);
+                    alert('❌ Error: ' + error.message + '\\n\\nPlease use "Choose File Manually" instead.');
+                }
+            }
         }
 
         // Handle file selection
