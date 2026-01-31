@@ -5946,9 +5946,18 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         // Track if NetSuite window was opened
         let netsuiteWindowOpened = false;
         let autoDetectEnabled = false;
+        let netsuiteWindow = null;
+        const DEBUG = true; // Enable debug logging
+
+        function debugLog(message, data = null) {
+            if (DEBUG) {
+                console.log(`[Quick Upload Debug] ${message}`, data || '');
+            }
+        }
 
         // Open NetSuite in a new window
         function openNetSuiteWindow() {
+            debugLog('Opening NetSuite window...');
             const netsuiteUrl = 'https://4774474.app.netsuite.com/app/reporting/reportrunner.nl?cr=545&reload=T&whence=&siaT=1763569172700';
             
             // Calculate window position (centered but not maximized)
@@ -5957,51 +5966,75 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const left = (screen.width - width) / 2;
             const top = (screen.height - height) / 2;
 
-            const newWindow = window.open(
+            netsuiteWindow = window.open(
                 netsuiteUrl,
                 '_blank',
                 `popup=yes,width=${width},height=${height},left=${left},top=${top},toolbar=yes,location=yes,status=yes,menubar=yes,scrollbars=yes,resizable=yes`
             );
 
-            if (newWindow) {
-                newWindow.focus();
+            if (netsuiteWindow) {
+                netsuiteWindow.focus();
                 netsuiteWindowOpened = true;
                 autoDetectEnabled = true;
+                debugLog('NetSuite window opened successfully', { opened: netsuiteWindowOpened, autoDetect: autoDetectEnabled });
+                
+                // Monitor when NetSuite window closes
+                const checkWindowClosed = setInterval(() => {
+                    if (netsuiteWindow && netsuiteWindow.closed) {
+                        debugLog('NetSuite window was closed by user');
+                        clearInterval(checkWindowClosed);
+                        // Trigger auto-detect after window closes
+                        setTimeout(() => {
+                            debugLog('Triggering auto-detect after window close...');
+                            if (autoDetectEnabled) {
+                                autoDetectLatestFile();
+                            }
+                        }, 1500);
+                    }
+                }, 500);
                 
                 // Show a helpful message
                 setTimeout(() => {
-                    alert('💡 NetSuite export page opened!\\n\\n1. Click the export/download button in NetSuite\\n2. Come back to this window\\n\\n✨ File will be auto-detected when you return!');
+                    alert('💡 NetSuite export page opened!\\n\\n1. Click the export/download button in NetSuite\\n2. Close the NetSuite window when done\\n\\n✨ File will be auto-detected when window closes!');
                 }, 500);
             } else {
+                debugLog('NetSuite window blocked!');
                 alert('⚠️ Pop-up blocked!\\n\\nPlease allow pop-ups for this site and try again.');
             }
         }
 
         // Auto-detect latest file
         async function autoDetectLatestFile() {
+            debugLog('Auto-detect function called', { enabled: autoDetectEnabled, windowOpened: netsuiteWindowOpened });
             const fileInput = document.getElementById('quickCsvFile');
             
             try {
                 // Use File System Access API to let user pick Downloads folder
                 if ('showDirectoryPicker' in window) {
+                    debugLog('Requesting directory picker...');
                     const directoryHandle = await window.showDirectoryPicker({
                         id: 'downloads-folder',
                         startIn: 'downloads',
                         mode: 'read'
                     });
+                    debugLog('Directory selected:', directoryHandle.name);
 
                     // Search for matching files
                     const matchingFiles = [];
                     const pattern = /^OpenPurchaseOrdersPendingBill\(Rune\)NTK.*\.csv$/i;
+                    debugLog('Searching for files matching pattern:', pattern.toString());
 
                     for await (const entry of directoryHandle.values()) {
                         if (entry.kind === 'file' && pattern.test(entry.name)) {
                             const file = await entry.getFile();
                             matchingFiles.push({ name: entry.name, file: file, modified: file.lastModified });
+                            debugLog('Found matching file:', entry.name);
                         }
                     }
 
+                    debugLog('Total matching files found:', matchingFiles.length);
                     if (matchingFiles.length === 0) {
+                        debugLog('No matching files found');
                         alert('❌ No matching files found.\\n\\nLooking for: OpenPurchaseOrdersPendingBill(Rune)NTK*.csv\\n\\nPlease download from NetSuite first, or use "Choose File Manually".');
                         return;
                     }
@@ -6009,20 +6042,28 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     // Sort by date (newest first)
                     matchingFiles.sort((a, b) => b.modified - a.modified);
                     const latestFile = matchingFiles[0];
+                    debugLog('Selected latest file:', { name: latestFile.name, modified: new Date(latestFile.modified) });
 
                     // Create a new FileList-like object
                     const dataTransfer = new DataTransfer();
                     dataTransfer.items.add(latestFile.file);
                     fileInput.files = dataTransfer.files;
+                    debugLog('File assigned to input element');
 
                     // Update UI to show selected file
                     document.getElementById('fileNameText').textContent = latestFile.name;
                     document.getElementById('selectedFileName').style.display = 'block';
                     document.getElementById('quickUploadBtn').disabled = false;
+                    debugLog('UI updated with selected file');
 
                     // Trigger change event
                     const event = new Event('change', { bubbles: true });
                     fileInput.dispatchEvent(event);
+                    debugLog('Change event dispatched');
+
+                    // Disable auto-detect for this session
+                    autoDetectEnabled = false;
+                    debugLog('Auto-detect disabled after successful selection');
 
                     // Show success message
                     if (matchingFiles.length > 1) {
@@ -6040,8 +6081,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             } catch (error) {
                 if (error.name === 'AbortError') {
                     // User cancelled
-                    console.log('User cancelled folder selection');
+                    debugLog('User cancelled folder selection');
+                    autoDetectEnabled = false;
                 } else {
+                    debugLog('Error in auto-detect:', error);
                     console.error('Error auto-detecting file:', error);
                     alert('❌ Error: ' + error.message + '\\n\\nPlease use "Choose File Manually" instead.');
                 }
@@ -6050,22 +6093,24 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         // Handle file selection
         document.addEventListener('DOMContentLoaded', function() {
+            debugLog('DOM Content Loaded - initializing event listeners');
             const fileInput = document.getElementById('quickCsvFile');
             const dropZone = document.getElementById('dropZone');
             const uploadForm = document.getElementById('quickUploadForm');
 
-            // Auto-detect when window regains focus after opening NetSuite
+            // Auto-detect when window regains focus after opening NetSuite (backup method)
             window.addEventListener('focus', async function() {
+                debugLog('Window focus event', { autoDetectEnabled, netsuiteWindowOpened });
                 if (autoDetectEnabled && netsuiteWindowOpened) {
+                    debugLog('Window focused - scheduling auto-detect in 1 second...');
                     // Wait a moment to ensure download is complete
                     setTimeout(async () => {
                         try {
-                            // Silently attempt auto-detection
+                            debugLog('Executing auto-detect from focus event');
                             await autoDetectLatestFile();
-                            autoDetectEnabled = false; // Only auto-detect once
                         } catch (error) {
                             // If auto-detect fails, user can still manually select
-                            console.log('Auto-detect on focus failed:', error);
+                            debugLog('Auto-detect on focus failed:', error);
                         }
                     }, 1000);
                 }
