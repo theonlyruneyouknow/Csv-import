@@ -5943,6 +5943,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById('uploadProgress').style.display = 'none';
         }
 
+        // Track if NetSuite window was opened
+        let netsuiteWindowOpened = false;
+        let autoDetectEnabled = false;
+
         // Open NetSuite in a new window
         function openNetSuiteWindow() {
             const netsuiteUrl = 'https://4774474.app.netsuite.com/app/reporting/reportrunner.nl?cr=545&reload=T&whence=&siaT=1763569172700';
@@ -5961,9 +5965,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             if (newWindow) {
                 newWindow.focus();
+                netsuiteWindowOpened = true;
+                autoDetectEnabled = true;
+                
                 // Show a helpful message
                 setTimeout(() => {
-                    alert('💡 NetSuite export page opened!\\n\\n1. Click the export/download button in NetSuite\\n2. Come back here and click "Auto-Detect Latest File"\\n   or use "Choose File Manually"');
+                    alert('💡 NetSuite export page opened!\\n\\n1. Click the export/download button in NetSuite\\n2. Come back to this window\\n\\n✨ File will be auto-detected when you return!');
                 }, 500);
             } else {
                 alert('⚠️ Pop-up blocked!\\n\\nPlease allow pop-ups for this site and try again.');
@@ -6046,6 +6053,23 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const fileInput = document.getElementById('quickCsvFile');
             const dropZone = document.getElementById('dropZone');
             const uploadForm = document.getElementById('quickUploadForm');
+
+            // Auto-detect when window regains focus after opening NetSuite
+            window.addEventListener('focus', async function() {
+                if (autoDetectEnabled && netsuiteWindowOpened) {
+                    // Wait a moment to ensure download is complete
+                    setTimeout(async () => {
+                        try {
+                            // Silently attempt auto-detection
+                            await autoDetectLatestFile();
+                            autoDetectEnabled = false; // Only auto-detect once
+                        } catch (error) {
+                            // If auto-detect fails, user can still manually select
+                            console.log('Auto-detect on focus failed:', error);
+                        }
+                    }, 1000);
+                }
+            });
 
             // File input change handler
             fileInput.addEventListener('change', function(e) {
