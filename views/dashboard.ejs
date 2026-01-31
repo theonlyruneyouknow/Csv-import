@@ -5947,12 +5947,44 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         let netsuiteWindowOpened = false;
         let autoDetectEnabled = false;
         let netsuiteWindow = null;
+        let cachedDirectoryHandle = null; // Cache the Downloads folder handle
         const DEBUG = true; // Enable debug logging
 
         function debugLog(message, data = null) {
             if (DEBUG) {
                 console.log(`[Quick Upload Debug] ${message}`, data || '');
             }
+        }
+
+        // Get Downloads directory handle (cached or request permission)
+        async function getDownloadsDirectory() {
+            // Try to use cached handle first
+            if (cachedDirectoryHandle) {
+                try {
+                    // Verify we still have permission
+                    const permission = await cachedDirectoryHandle.queryPermission({ mode: 'read' });
+                    if (permission === 'granted') {
+                        debugLog('Using cached Downloads directory handle');
+                        return cachedDirectoryHandle;
+                    }
+                } catch (error) {
+                    debugLog('Cached handle invalid, requesting new permission', error);
+                    cachedDirectoryHandle = null;
+                }
+            }
+
+            // Request new permission
+            debugLog('Requesting Downloads directory access...');
+            const directoryHandle = await window.showDirectoryPicker({
+                id: 'downloads-folder',
+                startIn: 'downloads',
+                mode: 'read'
+            });
+            
+            // Cache for future use
+            cachedDirectoryHandle = directoryHandle;
+            debugLog('Downloads directory access granted and cached');
+            return directoryHandle;
         }
 
         // Open NetSuite in a new window
@@ -5993,7 +6025,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     autoDetectBtn.style.animation = 'pulse 1.5s ease-in-out 3';
                                     autoDetectBtn.style.boxShadow = '0 0 20px rgba(16, 185, 129, 0.6)';
                                 }
-                                alert('✅ NetSuite window closed!\\n\\n📁 File downloaded?\\n\\n👉 Click "🔍 Auto-Detect Latest File" button below to select it');
+                                alert('✅ NetSuite window closed!\\n\\n📁 File downloaded?\\n\\n👉 Click "🔍 Auto-Detect Latest File" to import it\\n\\n(First time: Grant Downloads folder access)');
                             }
                         }, 500);
                     }
@@ -6001,7 +6033,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 
                 // Show a helpful message
                 setTimeout(() => {
-                    alert('💡 NetSuite export page opened!\\n\\n1. Click the export/download button in NetSuite\\n2. Close the NetSuite window when done\\n3. Click "Auto-Detect" button to select the file');
+                    alert('💡 NetSuite export page opened!\\n\\n1. Click the export/download button in NetSuite\\n2. Close the NetSuite window when done\\n3. Click "Auto-Detect" to import latest file\\n\\n💡 First use: You\'ll grant Downloads folder access once');
                 }, 500);
             } else {
                 debugLog('NetSuite window blocked!');
@@ -6015,15 +6047,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const fileInput = document.getElementById('quickCsvFile');
             
             try {
-                // Use File System Access API to let user pick Downloads folder
+                // Use File System Access API
                 if ('showDirectoryPicker' in window) {
-                    debugLog('Requesting directory picker...');
-                    const directoryHandle = await window.showDirectoryPicker({
-                        id: 'downloads-folder',
-                        startIn: 'downloads',
-                        mode: 'read'
-                    });
-                    debugLog('Directory selected:', directoryHandle.name);
+                    // Get Downloads directory (will use cached permission if available)
+                    const directoryHandle = await getDownloadsDirectory();
+                    debugLog('Directory handle obtained:', directoryHandle.name);
 
                     // Search for matching files
                     const matchingFiles = [];
