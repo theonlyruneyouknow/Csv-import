@@ -4326,11 +4326,11 @@
                     
                     <!-- Auto-detect button -->
                     <div style="margin-bottom: 20px;">
-                        <button type="button" onclick="autoDetectLatestFile()" class="btn btn-lg" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border: none; color: white; font-weight: 600; font-size: 16px; border-radius: 8px;">
-                            🔍 Auto-Detect Latest File
+                        <button type="button" onclick="autoDetectLatestFile()" class="btn btn-lg" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: white; font-weight: 600; font-size: 16px; border-radius: 8px;">
+                            🔍 Quick Select Latest CSV
                         </button>
                         <p style="margin: 8px 0 0 0; font-size: 12px; text-align: center; color: #666;">
-                            Searches Downloads folder for matching file
+                            Opens file picker to select your CSV file
                         </p>
                     </div>
 
@@ -5947,43 +5947,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         let netsuiteWindowOpened = false;
         let autoDetectEnabled = false;
         let netsuiteWindow = null;
-        let cachedDirectoryHandle = null; // Cache the Downloads folder handle
         const DEBUG = true; // Enable debug logging
 
         function debugLog(message, data = null) {
             if (DEBUG) {
                 console.log(`[Quick Upload Debug] ${message}`, data || '');
             }
-        }
-
-        // Get Downloads directory handle (cached or request permission)
-        async function getDownloadsDirectory() {
-            // Try to use cached handle first
-            if (cachedDirectoryHandle) {
-                try {
-                    // Verify we still have permission
-                    const permission = await cachedDirectoryHandle.queryPermission({ mode: 'read' });
-                    if (permission === 'granted') {
-                        debugLog('Using cached Downloads directory handle');
-                        return cachedDirectoryHandle;
-                    }
-                } catch (error) {
-                    debugLog('Cached handle invalid, requesting new permission', error);
-                    cachedDirectoryHandle = null;
-                }
-            }
-
-            // Request new permission - let user select folder manually
-            debugLog('Requesting folder access (user must select Downloads folder)...');
-            const directoryHandle = await window.showDirectoryPicker({
-                id: 'downloads-folder',
-                mode: 'read'
-            });
-            
-            // Cache for future use
-            cachedDirectoryHandle = directoryHandle;
-            debugLog('Folder access granted and cached:', directoryHandle.name);
-            return directoryHandle;
         }
 
         // Open NetSuite in a new window
@@ -6024,7 +5993,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     autoDetectBtn.style.animation = 'pulse 1.5s ease-in-out 3';
                                     autoDetectBtn.style.boxShadow = '0 0 20px rgba(16, 185, 129, 0.6)';
                                 }
-                                alert('✅ NetSuite window closed!\\n\\n📁 File downloaded?\\n\\n👉 Click "🔍 Auto-Detect Latest File" to import it\\n\\n(First time: Select your Downloads folder)');
+                                alert('✅ NetSuite window closed!\\n\\n📁 File downloaded?\\n\\n👉 Click "🔍 Quick Select Latest CSV" to choose it');
                             }
                         }, 500);
                     }
@@ -6032,7 +6001,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 
                 // Show a helpful message
                 setTimeout(() => {
-                    alert('💡 NetSuite export page opened!\\n\\n1. Click the export/download button in NetSuite\\n2. Close the NetSuite window when done\\n3. Click "Auto-Detect" to import latest file\\n\\n💡 First use: Select Downloads folder in the picker');
+                    alert('💡 NetSuite export page opened!\\n\\n1. Click the export/download button in NetSuite\\n2. Close the NetSuite window when done\\n3. Click "Quick Select" to choose the file');
                 }, 500);
             } else {
                 debugLog('NetSuite window blocked!');
@@ -6040,88 +6009,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             }
         }
 
-        // Auto-detect latest file
+        // Simplified auto-detect - just opens file picker for CSV files
         async function autoDetectLatestFile() {
-            debugLog('Auto-detect function called', { enabled: autoDetectEnabled, windowOpened: netsuiteWindowOpened });
+            debugLog('Quick select function called');
             const fileInput = document.getElementById('quickCsvFile');
             
-            try {
-                // Use File System Access API
-                if ('showDirectoryPicker' in window) {
-                    // Get Downloads directory (will use cached permission if available)
-                    const directoryHandle = await getDownloadsDirectory();
-                    debugLog('Directory handle obtained:', directoryHandle.name);
-
-                    // Search for matching files
-                    const matchingFiles = [];
-                    const pattern = /^OpenPurchaseOrdersPendingBill\(Rune\)NTK.*\.csv$/i;
-                    debugLog('Searching for files matching pattern:', pattern.toString());
-
-                    for await (const entry of directoryHandle.values()) {
-                        if (entry.kind === 'file' && pattern.test(entry.name)) {
-                            const file = await entry.getFile();
-                            matchingFiles.push({ name: entry.name, file: file, modified: file.lastModified });
-                            debugLog('Found matching file:', entry.name);
-                        }
-                    }
-
-                    debugLog('Total matching files found:', matchingFiles.length);
-                    if (matchingFiles.length === 0) {
-                        debugLog('No matching files found');
-                        alert('❌ No matching files found.\\n\\nLooking for: OpenPurchaseOrdersPendingBill(Rune)NTK*.csv\\n\\nPlease download from NetSuite first, or use "Choose File Manually".');
-                        return;
-                    }
-
-                    // Sort by date (newest first)
-                    matchingFiles.sort((a, b) => b.modified - a.modified);
-                    const latestFile = matchingFiles[0];
-                    debugLog('Selected latest file:', { name: latestFile.name, modified: new Date(latestFile.modified) });
-
-                    // Create a new FileList-like object
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(latestFile.file);
-                    fileInput.files = dataTransfer.files;
-                    debugLog('File assigned to input element');
-
-                    // Update UI to show selected file
-                    document.getElementById('fileNameText').textContent = latestFile.name;
-                    document.getElementById('selectedFileName').style.display = 'block';
-                    document.getElementById('quickUploadBtn').disabled = false;
-                    debugLog('UI updated with selected file');
-
-                    // Trigger change event
-                    const event = new Event('change', { bubbles: true });
-                    fileInput.dispatchEvent(event);
-                    debugLog('Change event dispatched');
-
-                    // Disable auto-detect for this session
-                    autoDetectEnabled = false;
-                    debugLog('Auto-detect disabled after successful selection');
-
-                    // Show success message
-                    if (matchingFiles.length > 1) {
-                        alert(`✅ Found ${matchingFiles.length} matching files!\\n\\nSelected latest: ${latestFile.name}\\n\\nModified: ${new Date(latestFile.modified).toLocaleString()}`);
-                    } else {
-                        alert(`✅ File detected and selected!\\n\\n${latestFile.name}\\n\\nModified: ${new Date(latestFile.modified).toLocaleString()}`);
-                    }
-
-                } else {
-                    // Fallback for browsers without File System Access API
-                    alert('⚠️ Auto-detect not supported in this browser.\\n\\nPlease use "Choose File Manually" button.');
-                    document.getElementById('quickCsvFile').click();
-                }
-
-            } catch (error) {
-                if (error.name === 'AbortError') {
-                    // User cancelled
-                    debugLog('User cancelled folder selection');
-                    autoDetectEnabled = false;
-                } else {
-                    debugLog('Error in auto-detect:', error);
-                    console.error('Error auto-detecting file:', error);
-                    alert('❌ Error: ' + error.message + '\\n\\nPlease use "Choose File Manually" instead.');
-                }
-            }
+            // Simply trigger the file input click
+            fileInput.click();
+            debugLog('File picker opened');
         }
 
         // Handle file selection
@@ -6130,13 +6025,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const fileInput = document.getElementById('quickCsvFile');
             const dropZone = document.getElementById('dropZone');
             const uploadForm = document.getElementById('quickUploadForm');
-
-            // Auto-detect when window regains focus after opening NetSuite (backup method - DISABLED)
-            // Note: showDirectoryPicker() requires direct user gesture, can't be triggered automatically
-            window.addEventListener('focus', function() {
-                debugLog('Window focus event', { autoDetectEnabled, netsuiteWindowOpened });
-                // Don't automatically trigger - browser security blocks showDirectoryPicker without user gesture
-            });
 
             // File input change handler
             fileInput.addEventListener('change', function(e) {
