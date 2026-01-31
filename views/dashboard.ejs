@@ -4291,6 +4291,39 @@
         </div>
     </div>
 
+    <!-- Quick Upload Modal -->
+    <div id="quickUploadModal" class="modal" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7);">
+        <div class="modal-content" style="position: relative; background: white; margin: 5% auto; padding: 40px; width: 90%; max-width: 700px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <span class="close" onclick="closeQuickUpload()" style="position: absolute; right: 20px; top: 15px; font-size: 35px; font-weight: bold; cursor: pointer; color: #999;">&times;</span>
+            <h2 style="margin: 0 0 10px 0; color: #333;">⚡ Quick CSV Upload</h2>
+            <p style="color: #666; margin-bottom: 25px;">Upload your NetSuite CSV directly - file picker will open to your Downloads folder</p>
+            
+            <form id="quickUploadForm" action="/purchase-orders/upload" method="post" enctype="multipart/form-data" style="margin: 0;">
+                <div class="upload-zone" id="dropZone" style="border: 3px dashed #667eea; border-radius: 12px; padding: 50px 30px; text-align: center; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); cursor: pointer; transition: all 0.3s ease;">
+                    <div class="upload-icon" style="font-size: 64px; margin-bottom: 20px;">📁</div>
+                    <p style="font-size: 18px; font-weight: 600; color: #333; margin: 0 0 10px 0;">Drop CSV file here or click to browse</p>
+                    <p style="color: #666; margin: 0;">Supports .csv files from NetSuite exports</p>
+                    <input type="file" name="csvFile" id="quickCsvFile" accept=".csv" required style="display: none;">
+                    <button type="button" class="btn btn-primary btn-lg" onclick="document.getElementById('quickCsvFile').click()" style="margin-top: 20px; padding: 12px 40px; font-size: 16px; border-radius: 8px;">📂 Choose File from Downloads</button>
+                    <div id="selectedFileName" style="margin-top: 15px; padding: 10px; background: #e8f5e9; border-radius: 6px; display: none;">
+                        <span style="color: #2e7d32; font-weight: 600;">✓ Selected: </span>
+                        <span id="fileNameText" style="color: #1b5e20;"></span>
+                    </div>
+                </div>
+                <div style="margin-top: 25px; text-align: right;">
+                    <button type="button" class="btn btn-secondary" onclick="closeQuickUpload()" style="margin-right: 10px; padding: 10px 24px;">Cancel</button>
+                    <button type="submit" id="quickUploadBtn" class="btn btn-success" disabled style="padding: 10px 32px; font-size: 16px;">🚀 Upload & Import</button>
+                </div>
+            </form>
+            <div id="uploadProgress" style="display: none; margin-top: 20px;">
+                <div style="background: #f0f0f0; border-radius: 10px; overflow: hidden; height: 30px;">
+                    <div id="progressBar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;"></div>
+                </div>
+                <p id="uploadStatus" style="text-align: center; margin-top: 10px; color: #666;">Uploading...</p>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>Purchase Orders Dashboard</h1>
@@ -4370,6 +4403,7 @@
                         📁 Import <span class="dropdown-icon">▼</span>
                     </button>
                     <div id="importsDropdown" class="nav-dropdown-content">
+                        <button class="nav-dropdown-item" onclick="openQuickUpload()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">⚡ Quick Upload (Downloads)</button>
                         <a href="/upload" class="nav-dropdown-item">📄 Upload CSV</a>
                         <a href="/organic-vendors" class="nav-dropdown-item">🌱 Organic Vendors</a>
                         <a href="/trouble-seed" class="nav-dropdown-item">⚠️ Trouble Seed</a>
@@ -5848,6 +5882,139 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById('optionsDropdown').classList.remove('show');
             document.querySelector('.nav-options-btn .dropdown-icon').classList.remove('rotated');
         }
+
+        // ============ QUICK UPLOAD FUNCTIONALITY ============
+        
+        function openQuickUpload() {
+            document.getElementById('quickUploadModal').style.display = 'block';
+            // Close the imports dropdown
+            document.getElementById('importsDropdown').classList.remove('show');
+            document.querySelector('.nav-imports-btn .dropdown-icon').classList.remove('rotated');
+        }
+
+        function closeQuickUpload() {
+            document.getElementById('quickUploadModal').style.display = 'none';
+            document.getElementById('quickUploadForm').reset();
+            document.getElementById('selectedFileName').style.display = 'none';
+            document.getElementById('quickUploadBtn').disabled = true;
+            document.getElementById('uploadProgress').style.display = 'none';
+        }
+
+        // Handle file selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('quickCsvFile');
+            const dropZone = document.getElementById('dropZone');
+            const uploadForm = document.getElementById('quickUploadForm');
+
+            // File input change handler
+            fileInput.addEventListener('change', function(e) {
+                if (this.files.length > 0) {
+                    const fileName = this.files[0].name;
+                    document.getElementById('fileNameText').textContent = fileName;
+                    document.getElementById('selectedFileName').style.display = 'block';
+                    document.getElementById('quickUploadBtn').disabled = false;
+                }
+            });
+
+            // Drag and drop handlers
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.style.borderColor = '#764ba2';
+                this.style.background = 'linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%)';
+            });
+
+            dropZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.style.borderColor = '#667eea';
+                this.style.background = 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)';
+            });
+
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.style.borderColor = '#667eea';
+                this.style.background = 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)';
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].name.endsWith('.csv')) {
+                    fileInput.files = files;
+                    const event = new Event('change', { bubbles: true });
+                    fileInput.dispatchEvent(event);
+                } else {
+                    alert('Please drop a CSV file');
+                }
+            });
+
+            // Click handler for drop zone
+            dropZone.addEventListener('click', function(e) {
+                if (e.target !== dropZone && e.target.closest('button')) {
+                    return; // Let button handle the click
+                }
+                fileInput.click();
+            });
+
+            // Form submission with progress
+            uploadForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const progressDiv = document.getElementById('uploadProgress');
+                const progressBar = document.getElementById('progressBar');
+                const statusText = document.getElementById('uploadStatus');
+                const uploadBtn = document.getElementById('quickUploadBtn');
+
+                // Show progress
+                progressDiv.style.display = 'block';
+                uploadBtn.disabled = true;
+                progressBar.style.width = '0%';
+                statusText.textContent = 'Uploading...';
+
+                // Simulate progress (since we can't track real upload progress easily)
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += Math.random() * 15;
+                    if (progress > 90) progress = 90;
+                    progressBar.style.width = progress + '%';
+                    progressBar.textContent = Math.round(progress) + '%';
+                }, 200);
+
+                try {
+                    const response = await fetch('/purchase-orders/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    clearInterval(progressInterval);
+                    progressBar.style.width = '100%';
+                    progressBar.textContent = '100%';
+
+                    if (response.ok || response.redirected) {
+                        statusText.textContent = '✅ Upload complete! Refreshing...';
+                        statusText.style.color = '#2e7d32';
+                        
+                        setTimeout(() => {
+                            showLoadingOverlay();
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        throw new Error('Upload failed');
+                    }
+                } catch (error) {
+                    clearInterval(progressInterval);
+                    statusText.textContent = '❌ Upload failed: ' + error.message;
+                    statusText.style.color = '#c62828';
+                    uploadBtn.disabled = false;
+                    
+                    setTimeout(() => {
+                        progressDiv.style.display = 'none';
+                    }, 3000);
+                }
+            });
+        });
+
+        // ============ END QUICK UPLOAD FUNCTIONALITY ============
 
         function toggleFormsDropdown() {
             const content = document.getElementById('formsDropdown');
