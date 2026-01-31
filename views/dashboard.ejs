@@ -4298,7 +4298,12 @@
             
             <!-- Header -->
             <h2 style="margin: 0 0 8px 0; color: #333; font-size: 22px;">⚡ Quick CSV Upload</h2>
-            <p style="color: #666; margin: 0 0 18px 0; font-size: 14px;">Download from NetSuite and upload in one seamless workflow</p>
+            <p style="color: #666; margin: 0 0 18px 0; font-size: 14px;">
+                Download from NetSuite and upload in one seamless workflow
+                <a href="/manage-po-urls" style="margin-left: 10px; font-size: 12px; text-decoration: none;">
+                    🔗 Manage URLs
+                </a>
+            </p>
 
             <!-- NetSuite Button -->
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; padding: 15px; margin-bottom: 18px;">
@@ -5928,7 +5933,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
         // ============ QUICK UPLOAD FUNCTIONALITY ============
         
-        function openQuickUpload() {
+        async function openQuickUpload() {
+            // Load the latest NetSuite URL
+            await loadNetSuiteUrl();
+            
             document.getElementById('quickUploadModal').style.display = 'block';
             // Close the imports dropdown
             document.getElementById('importsDropdown').classList.remove('show');
@@ -5947,6 +5955,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         let netsuiteWindowOpened = false;
         let autoDetectEnabled = false;
         let netsuiteWindow = null;
+        let netsuiteUrl = 'https://4774474.app.netsuite.com/app/reporting/reportrunner.nl?cr=545&reload=T&whence=&siaT=1763569172700'; // Default
         const DEBUG = true; // Enable debug logging
 
         function debugLog(message, data = null) {
@@ -5955,10 +5964,23 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             }
         }
 
+        // Load NetSuite URL from server
+        async function loadNetSuiteUrl() {
+            try {
+                const response = await fetch('/api/get-netsuite-url');
+                const data = await response.json();
+                if (data.success && data.url) {
+                    netsuiteUrl = data.url;
+                    debugLog('NetSuite URL loaded from server:', netsuiteUrl);
+                }
+            } catch (error) {
+                debugLog('Error loading NetSuite URL, using default:', error);
+            }
+        }
+
         // Open NetSuite in a new window
         function openNetSuiteWindow() {
-            debugLog('Opening NetSuite window...');
-            const netsuiteUrl = 'https://4774474.app.netsuite.com/app/reporting/reportrunner.nl?cr=545&reload=T&whence=&siaT=1763569172700';
+            debugLog('Opening NetSuite window with URL:', netsuiteUrl);
             
             // Calculate window position (centered but not maximized)
             const width = 1200;

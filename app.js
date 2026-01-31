@@ -1169,6 +1169,34 @@ app.get('/simple-test-route', (req, res) => {
     res.send('<h1>Simple Test Route Works!</h1>');
 });
 
+// API endpoint to save/get NetSuite export URL
+app.post('/api/save-netsuite-url', ensureAuthenticated, ensureApproved, express.json(), (req, res) => {
+    try {
+        const { url } = req.body;
+        if (!url) {
+            return res.status(400).json({ success: false, error: 'URL is required' });
+        }
+        
+        // Store in session for now - could be saved to database if needed
+        req.session.netsuiteExportUrl = url;
+        console.log('✅ NetSuite export URL saved:', url);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('❌ Error saving NetSuite URL:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.get('/api/get-netsuite-url', ensureAuthenticated, ensureApproved, (req, res) => {
+    try {
+        const url = req.session.netsuiteExportUrl || 'https://4774474.app.netsuite.com/app/reporting/reportrunner.nl?cr=545&reload=T&whence=&siaT=1763569172700';
+        res.json({ success: true, url });
+    } catch (error) {
+        console.error('❌ Error getting NetSuite URL:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Manage PO URLs page (post-import)
 app.get('/manage-po-urls', ensureAuthenticated, ensureApproved, (req, res) => {
     console.log('🔗 === MANAGE PO URLS ROUTE HIT ===');

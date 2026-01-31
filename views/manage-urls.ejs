@@ -86,6 +86,25 @@
             <p class="mb-0">Update URLs and PO types for purchase orders</p>
         </div>
 
+        <!-- NetSuite Quick Upload URL Configuration -->
+        <div class="card mb-4" style="border-left: 4px solid #10b981;">
+            <div class="card-body">
+                <h5 class="card-title">⚡ Quick Upload Configuration</h5>
+                <p class="card-text">Set the NetSuite export URL used by the Quick Upload feature</p>
+                <div class="input-group">
+                    <input type="text" 
+                           id="quickUploadUrl" 
+                           class="form-control url-input" 
+                           placeholder="https://4774474.app.netsuite.com/app/reporting/reportrunner.nl?cr=545&reload=T&whence=&siaT=..."
+                           value="">
+                    <button class="btn btn-success" onclick="saveQuickUploadUrl()">
+                        💾 Save URL
+                    </button>
+                </div>
+                <small class="text-muted">This URL will be used when clicking "Open NetSuite" in Quick Upload</small>
+            </div>
+        </div>
+
         <div id="statsBox" class="stats-box" style="display: none;">
             <h5>📊 Update Statistics</h5>
             <div id="statsContent"></div>
@@ -130,6 +149,46 @@
 
     <script>
         let posData = [];
+
+        // Load Quick Upload URL on page load
+        async function loadQuickUploadUrl() {
+            try {
+                const response = await fetch('/api/get-netsuite-url');
+                const data = await response.json();
+                if (data.success && data.url) {
+                    document.getElementById('quickUploadUrl').value = data.url;
+                }
+            } catch (error) {
+                console.error('Error loading Quick Upload URL:', error);
+            }
+        }
+
+        // Save Quick Upload URL
+        async function saveQuickUploadUrl() {
+            const url = document.getElementById('quickUploadUrl').value.trim();
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/save-netsuite-url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('✅ Quick Upload URL saved successfully!');
+                } else {
+                    alert('❌ Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error saving Quick Upload URL:', error);
+                alert('❌ Error saving URL. Please try again.');
+            }
+        }
 
         // Load POs that need URLs
         async function loadPOs() {
@@ -324,7 +383,8 @@
             }
         });
 
-        // Load POs on page load
+        // Load URLs and POs on page load
+        loadQuickUploadUrl();
         loadPOs();
     </script>
 </body>
