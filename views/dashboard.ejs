@@ -5983,19 +5983,25 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     if (netsuiteWindow && netsuiteWindow.closed) {
                         debugLog('NetSuite window was closed by user');
                         clearInterval(checkWindowClosed);
-                        // Trigger auto-detect after window closes
+                        // Show notification to click auto-detect button
                         setTimeout(() => {
-                            debugLog('Triggering auto-detect after window close...');
+                            debugLog('Showing auto-detect reminder...');
                             if (autoDetectEnabled) {
-                                autoDetectLatestFile();
+                                // Highlight the auto-detect button
+                                const autoDetectBtn = document.querySelector('button[onclick="autoDetectLatestFile()"]');
+                                if (autoDetectBtn) {
+                                    autoDetectBtn.style.animation = 'pulse 1.5s ease-in-out 3';
+                                    autoDetectBtn.style.boxShadow = '0 0 20px rgba(16, 185, 129, 0.6)';
+                                }
+                                alert('✅ NetSuite window closed!\\n\\n📁 File downloaded?\\n\\n👉 Click "🔍 Auto-Detect Latest File" button below to select it');
                             }
-                        }, 1500);
+                        }, 500);
                     }
                 }, 500);
                 
                 // Show a helpful message
                 setTimeout(() => {
-                    alert('💡 NetSuite export page opened!\\n\\n1. Click the export/download button in NetSuite\\n2. Close the NetSuite window when done\\n\\n✨ File will be auto-detected when window closes!');
+                    alert('💡 NetSuite export page opened!\\n\\n1. Click the export/download button in NetSuite\\n2. Close the NetSuite window when done\\n3. Click "Auto-Detect" button to select the file');
                 }, 500);
             } else {
                 debugLog('NetSuite window blocked!');
@@ -6098,22 +6104,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             const dropZone = document.getElementById('dropZone');
             const uploadForm = document.getElementById('quickUploadForm');
 
-            // Auto-detect when window regains focus after opening NetSuite (backup method)
-            window.addEventListener('focus', async function() {
+            // Auto-detect when window regains focus after opening NetSuite (backup method - DISABLED)
+            // Note: showDirectoryPicker() requires direct user gesture, can't be triggered automatically
+            window.addEventListener('focus', function() {
                 debugLog('Window focus event', { autoDetectEnabled, netsuiteWindowOpened });
-                if (autoDetectEnabled && netsuiteWindowOpened) {
-                    debugLog('Window focused - scheduling auto-detect in 1 second...');
-                    // Wait a moment to ensure download is complete
-                    setTimeout(async () => {
-                        try {
-                            debugLog('Executing auto-detect from focus event');
-                            await autoDetectLatestFile();
-                        } catch (error) {
-                            // If auto-detect fails, user can still manually select
-                            debugLog('Auto-detect on focus failed:', error);
-                        }
-                    }, 1000);
-                }
+                // Don't automatically trigger - browser security blocks showDirectoryPicker without user gesture
             });
 
             // File input change handler
@@ -12324,6 +12319,17 @@ Thank you`;
     </div>
 
     <style>
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 30px rgba(16, 185, 129, 0.9);
+            }
+        }
+
         .modal {
             position: fixed;
             z-index: 1000;
