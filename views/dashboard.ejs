@@ -5973,17 +5973,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 }
             }
 
-            // Request new permission
-            debugLog('Requesting Downloads directory access...');
+            // Request new permission - let user select folder manually
+            debugLog('Requesting folder access (user must select Downloads folder)...');
             const directoryHandle = await window.showDirectoryPicker({
                 id: 'downloads-folder',
-                startIn: 'downloads',
                 mode: 'read'
             });
             
             // Cache for future use
             cachedDirectoryHandle = directoryHandle;
-            debugLog('Downloads directory access granted and cached');
+            debugLog('Folder access granted and cached:', directoryHandle.name);
             return directoryHandle;
         }
 
@@ -6025,7 +6024,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                     autoDetectBtn.style.animation = 'pulse 1.5s ease-in-out 3';
                                     autoDetectBtn.style.boxShadow = '0 0 20px rgba(16, 185, 129, 0.6)';
                                 }
-                                alert('✅ NetSuite window closed!\\n\\n📁 File downloaded?\\n\\n👉 Click "🔍 Auto-Detect Latest File" to import it\\n\\n(First time: Grant Downloads folder access)');
+                                alert('✅ NetSuite window closed!\\n\\n📁 File downloaded?\\n\\n👉 Click "🔍 Auto-Detect Latest File" to import it\\n\\n(First time: Select your Downloads folder)');
                             }
                         }, 500);
                     }
@@ -6033,7 +6032,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 
                 // Show a helpful message
                 setTimeout(() => {
-                    alert('💡 NetSuite export page opened!\\n\\n1. Click the export/download button in NetSuite\\n2. Close the NetSuite window when done\\n3. Click "Auto-Detect" to import latest file\\n\\n💡 First use: You\'ll grant Downloads folder access once');
+                    alert('💡 NetSuite export page opened!\\n\\n1. Click the export/download button in NetSuite\\n2. Close the NetSuite window when done\\n3. Click "Auto-Detect" to import latest file\\n\\n💡 First use: Select Downloads folder in the picker');
                 }, 500);
             } else {
                 debugLog('NetSuite window blocked!');
