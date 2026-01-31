@@ -5955,8 +5955,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             const newWindow = window.open(
                 netsuiteUrl,
-                'NetSuiteExport',
-                `width=${width},height=${height},left=${left},top=${top},toolbar=yes,location=yes,status=yes,menubar=yes,scrollbars=yes,resizable=yes`
+                '_blank',
+                `popup=yes,width=${width},height=${height},left=${left},top=${top},toolbar=yes,location=yes,status=yes,menubar=yes,scrollbars=yes,resizable=yes`
             );
 
             if (newWindow) {
@@ -6008,6 +6008,11 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     dataTransfer.items.add(latestFile.file);
                     fileInput.files = dataTransfer.files;
 
+                    // Update UI to show selected file
+                    document.getElementById('fileNameText').textContent = latestFile.name;
+                    document.getElementById('selectedFileName').style.display = 'block';
+                    document.getElementById('quickUploadBtn').disabled = false;
+
                     // Trigger change event
                     const event = new Event('change', { bubbles: true });
                     fileInput.dispatchEvent(event);
@@ -6015,6 +6020,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     // Show success message
                     if (matchingFiles.length > 1) {
                         alert(`✅ Found ${matchingFiles.length} matching files!\\n\\nSelected latest: ${latestFile.name}\\n\\nModified: ${new Date(latestFile.modified).toLocaleString()}`);
+                    } else {
+                        alert(`✅ File detected and selected!\\n\\n${latestFile.name}\\n\\nModified: ${new Date(latestFile.modified).toLocaleString()}`);
                     }
 
                 } else {
