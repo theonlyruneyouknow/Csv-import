@@ -224,6 +224,11 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
         const mainVendor = await Vendor.findOne({ vendorCode: vendorData.vendorNumber });
         if (mainVendor && mainVendor.defaultPoType) {
           defaultPoType = mainVendor.defaultPoType;
+          console.log(`✅ Found default PO type for vendor ${vendorData.vendorNumber}: ${defaultPoType}`);
+        } else if (mainVendor) {
+          console.log(`ℹ️ Vendor ${vendorData.vendorNumber} exists but has no default PO type set`);
+        } else {
+          console.log(`⚠️ Vendor ${vendorData.vendorNumber} (${vendorData.vendorName}) not found in Vendor collection`);
         }
       }
 
