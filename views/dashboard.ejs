@@ -6133,12 +6133,12 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     progressBar.textContent = '100%';
 
                     if (response.ok || response.redirected) {
-                        statusText.textContent = '✅ Upload complete! Refreshing...';
+                        statusText.textContent = '✅ Upload complete! Opening Manage URLs...';
                         statusText.style.color = '#2e7d32';
                         
                         setTimeout(() => {
                             showLoadingOverlay();
-                            window.location.reload();
+                            window.location.href = '/manage-po-urls';
                         }, 1000);
                     } else {
                         throw new Error('Upload failed');
