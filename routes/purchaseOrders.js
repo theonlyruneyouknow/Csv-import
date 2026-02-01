@@ -5255,28 +5255,58 @@ router.get('/pos-needing-urls', async (req, res) => {
         { poUrl: null }
       ]
     })
-    .select('poNumber vendor vendorNumber poType amount nsStatus status poUrl')
+    .select('poNumber vendor vendorNumber vendorName poType amount nsStatus status poUrl')
     .sort({ poNumber: -1 })
     .limit(100); // Limit to recent 100 POs
 
     console.log(`📋 Found ${posWithoutUrl.length} POs without URLs`);
 
-    // For each PO, look up the vendor's default PO type
+    // For each PO, look up the vendor's default PO type using vendor name
     const posWithDefaultTypes = await Promise.all(posWithoutUrl.map(async (po) => {
       const poObj = po.toObject();
       
-      // Try to get vendor's default PO type from Vendor collection
+      let vendor = null;
+      
+      // Try to find vendor by vendor code first
       if (poObj.vendorNumber) {
-        const vendor = await Vendor.findOne({ vendorCode: poObj.vendorNumber });
-        if (vendor && vendor.defaultPoType) {
-          // If PO doesn't have a type set, use vendor's default
-          if (!poObj.poType || poObj.poType === '') {
-            poObj.poType = vendor.defaultPoType;
-            console.log(`   ✅ Pre-filling PO ${poObj.poNumber} with vendor default: ${vendor.defaultPoType}`);
-          }
-          // Store the vendor's default for reference
-          poObj.vendorDefaultPoType = vendor.defaultPoType;
+        vendor = await Vendor.findOne({ vendorCode: poObj.vendorNumber });
+        console.log(`   🔍 Lookup by code "${poObj.vendorNumber}": ${vendor ? 'FOUND' : 'NOT FOUND'}`);
+      }
+      
+      // If not found by code, try by vendor name
+      if (!vendor && poObj.vendorName) {
+        vendor = await Vendor.findOne({ 
+          vendorName: { $regex: new RegExp('^' + poObj.vendorName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') }
+        });
+        console.log(`   🔍 Lookup by name "${poObj.vendorName}": ${vendor ? 'FOUND' : 'NOT FOUND'}`);
+      }
+      
+      // If still not found, try parsing the vendor string "619 CASCADIA MUSHROOMS"
+      if (!vendor && poObj.vendor) {
+        const vendorData = splitVendorData(poObj.vendor);
+        if (vendorData.vendorNumber) {
+          vendor = await Vendor.findOne({ vendorCode: vendorData.vendorNumber });
+          console.log(`   🔍 Lookup by parsed code "${vendorData.vendorNumber}": ${vendor ? 'FOUND' : 'NOT FOUND'}`);
         }
+        if (!vendor && vendorData.vendorName) {
+          vendor = await Vendor.findOne({ 
+            vendorName: { $regex: new RegExp('^' + vendorData.vendorName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') }
+          });
+          console.log(`   🔍 Lookup by parsed name "${vendorData.vendorName}": ${vendor ? 'FOUND' : 'NOT FOUND'}`);
+        }
+      }
+      
+      // If vendor found and has default PO type, apply it
+      if (vendor) {
+        console.log(`   ✅ Found vendor: ${vendor.vendorName} (code: ${vendor.vendorCode}), defaultPoType: "${vendor.defaultPoType || '(none)'}"`);
+        
+        if (vendor.defaultPoType) {
+          // Always use vendor's default type to pre-fill the dropdown
+          poObj.poType = vendor.defaultPoType;
+          console.log(`   ✅ Pre-filling PO ${poObj.poNumber} with vendor default: ${vendor.defaultPoType}`);
+        }
+      } else {
+        console.log(`   ⚠️ No vendor found for PO ${poObj.poNumber} (vendor: "${poObj.vendor}")`);
       }
       
       return poObj;
