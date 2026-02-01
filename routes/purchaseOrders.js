@@ -5255,16 +5255,37 @@ router.get('/pos-needing-urls', async (req, res) => {
         { poUrl: null }
       ]
     })
-    .select('poNumber vendor poType amount nsStatus status poUrl')
+    .select('poNumber vendor vendorNumber poType amount nsStatus status poUrl')
     .sort({ poNumber: -1 })
     .limit(100); // Limit to recent 100 POs
 
     console.log(`📋 Found ${posWithoutUrl.length} POs without URLs`);
 
+    // For each PO, look up the vendor's default PO type
+    const posWithDefaultTypes = await Promise.all(posWithoutUrl.map(async (po) => {
+      const poObj = po.toObject();
+      
+      // Try to get vendor's default PO type from Vendor collection
+      if (poObj.vendorNumber) {
+        const vendor = await Vendor.findOne({ vendorCode: poObj.vendorNumber });
+        if (vendor && vendor.defaultPoType) {
+          // If PO doesn't have a type set, use vendor's default
+          if (!poObj.poType || poObj.poType === '') {
+            poObj.poType = vendor.defaultPoType;
+            console.log(`   ✅ Pre-filling PO ${poObj.poNumber} with vendor default: ${vendor.defaultPoType}`);
+          }
+          // Store the vendor's default for reference
+          poObj.vendorDefaultPoType = vendor.defaultPoType;
+        }
+      }
+      
+      return poObj;
+    }));
+
     res.json({
       success: true,
-      count: posWithoutUrl.length,
-      pos: posWithoutUrl
+      count: posWithDefaultTypes.length,
+      pos: posWithDefaultTypes
     });
 
   } catch (error) {
