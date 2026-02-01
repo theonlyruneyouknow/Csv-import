@@ -24,6 +24,13 @@ const vendorSchema = new mongoose.Schema({
         default: 'Seeds'
     },
     
+    // Default PO type for this vendor (auto-applied to new POs)
+    defaultPoType: {
+        type: String,
+        enum: ['Seed', 'Dropship', 'Greengood', 'Hardgood', 'Supplies', ''],
+        default: ''
+    },
+    
     // Contact Information
     mainPhone: String, // Main vendor phone number
     mainEmail: String, // Main vendor email

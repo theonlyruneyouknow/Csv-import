@@ -101,23 +101,13 @@ const ensureVendorExists = async (vendorData) => {
   try {
     const { vendorNumber, vendorName, originalVendor } = vendorData;
 
-    // Enhanced debugging for vendor creation
-    console.log(`🔍 VENDOR DEBUG - Processing vendor:`, {
-      original: originalVendor,
-      vendorNumber: vendorNumber,
-      vendorName: vendorName
-    });
-
     // Skip if no vendor data
     if (!vendorNumber && !vendorName) {
-      console.log(`⚠️ VENDOR DEBUG - Skipping vendor creation: no vendor number or name`);
       return null;
     }
 
     // Create a unique internal ID from vendor number or name
     const internalId = vendorNumber || vendorName.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-
-    console.log(`🔍 VENDOR DEBUG - Generated internal ID: ${internalId}`);
 
     // Check if vendor already exists by internal ID or vendor number
     const searchCriteria = {
@@ -128,46 +118,28 @@ const ensureVendorExists = async (vendorData) => {
       ]
     };
 
-    console.log(`🔍 VENDOR DEBUG - Searching with criteria:`, searchCriteria);
-
     let existingVendor = await OrganicVendor.findOne(searchCriteria);
 
     if (existingVendor) {
-      console.log(`✅ VENDOR DEBUG - Vendor "${vendorName}" (${vendorNumber}) already exists in database with ID: ${existingVendor.internalId}`);
-      console.log(`✅ VENDOR DEBUG - Existing vendor details:`, {
-        id: existingVendor._id,
-        internalId: existingVendor.internalId,
-        vendorName: existingVendor.vendorName,
-        status: existingVendor.status
-      });
       return existingVendor;
     }
-
-    console.log(`🆕 VENDOR DEBUG - Creating new vendor with data:`, {
-      vendorName: vendorName || `Vendor ${vendorNumber}`,
-      internalId: internalId,
-      originalVendor: originalVendor
-    });
 
     // Create new vendor with minimal required fields
     const newVendor = new OrganicVendor({
       vendorName: vendorName || `Vendor ${vendorNumber}`,
       internalId: internalId,
-      lastOrganicCertificationDate: new Date('1900-01-01'), // Default placeholder date
-      status: 'Pending Review', // Valid status for auto-created vendors
+      lastOrganicCertificationDate: new Date('1900-01-01'),
+      status: 'Pending Review',
       address: {
-        country: 'United States' // Use default from schema
+        country: 'United States'
       },
       notes: `Auto-created during CSV import from PO data. Original vendor string: "${originalVendor}". Vendor Number: ${vendorNumber || 'N/A'}`
     });
 
     await newVendor.save();
-    console.log(`� VENDOR DEBUG - Successfully created new vendor: "${vendorName}" (${vendorNumber}) with ID: ${internalId}`);
-
     return newVendor;
   } catch (error) {
-    console.error(`❌ VENDOR DEBUG - Error ensuring vendor exists for "${vendorData.originalVendor}":`, error);
-    // Don't fail the entire import if vendor creation fails
+    console.error(`❌ Error ensuring vendor exists for "${vendorData.originalVendor}":`, error);
     return null;
   }
 };
@@ -228,38 +200,33 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
       const csvStatus = row[4]; // Status from CSV (this goes to NS Status!)
       const vendorString = row[3]; // Vendor data
 
-      console.log(`🔄 CSV ROW DEBUG - Processing row: PO=${poNumber}, Vendor="${vendorString}", Status="${csvStatus}"`);
-
       // Skip empty rows or invalid PO numbers
       if (!poNumber || !poNumber.trim()) {
-        console.log(`⚠️ CSV ROW DEBUG - Skipping row: empty PO number`);
         continue;
       }
 
       // Add to processed list
       processedPONumbers.add(poNumber.trim());
 
-      // Special logging for PO11322 to help debug
-      if (poNumber.includes('11322')) {
-        console.log(`🎯 FOUND PO11322 in import! Processing...`);
-        console.log(`   Raw PO number from CSV: "${poNumber}"`);
-        console.log(`   Trimmed PO number: "${poNumber.trim()}"`);
-      }
-
       // Find existing PO by PO number
       const existingPO = await PurchaseOrder.findOne({ poNumber: poNumber });
 
       // ALWAYS split vendor data and ensure vendor exists FIRST
       const vendorData = splitVendorData(vendorString);
-      console.log(`🔄 CSV ROW DEBUG - Split vendor data:`, vendorData);
 
-      // CRITICAL: Always ensure vendor exists in vendor database BEFORE processing PO
-      console.log(`🔍 VENDOR CHECK - Ensuring vendor exists for PO ${poNumber}`);
+      // Ensure vendor exists in vendor database and get default PO type
       const vendorResult = await ensureVendorExists(vendorData);
-      console.log(`🔍 VENDOR CHECK - Result:`, vendorResult ? 'SUCCESS' : 'FAILED');
+      
+      // Try to get default PO type from main Vendor model
+      let defaultPoType = '';
+      if (vendorData.vendorNumber) {
+        const mainVendor = await Vendor.findOne({ internalId: vendorData.vendorNumber });
+        if (mainVendor && mainVendor.defaultPoType) {
+          defaultPoType = mainVendor.defaultPoType;
+        }
+      }
 
       if (existingPO) {
-        console.log(`🔄 CSV ROW DEBUG - Updating existing PO ${poNumber}`);
 
         // Update existing PO - CSV status goes to nsStatus, preserve custom status
         const updateData = {
@@ -323,9 +290,7 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
         await PurchaseOrder.findByIdAndUpdate(existingPO._id, updateData);
         console.log(`Updated PO ${poNumber} - NS Status: "${csvStatus}", Custom Status: "${existingPO.status}"${existingPO.isHidden ? ' (UNHIDDEN)' : ''}`);
       } else {
-        console.log(`🔄 CSV ROW DEBUG - Creating new PO ${poNumber}`);
-
-        // Create new PO - CSV status goes to nsStatus, custom status starts empty
+        // Create new PO - CSV status goes to nsStatus, custom status starts empty, apply default PO type
         await PurchaseOrder.create({
           reportDate,
           date: row[1],
@@ -335,13 +300,13 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
           vendorName: vendorData.vendorName,
           nsStatus: csvStatus, // CSV status goes to NS Status
           status: '', // Custom status starts EMPTY
+          poType: defaultPoType, // Auto-apply vendor's default PO type
           amount: parseFloat((row[5] || '0').replace(/[$,]/g, '')),
           location: row[6],
           notes: '',
           createdAt: new Date(),
           updatedAt: new Date()
         });
-        console.log(`Created new PO ${poNumber} - Vendor: "${vendorData.vendorNumber} ${vendorData.vendorName}" - NS Status: "${csvStatus}", Custom Status: empty`);
       }
     }
 
