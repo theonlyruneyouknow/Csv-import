@@ -742,4 +742,57 @@ router.get('/api/stats', async (req, res) => {
     }
 });
 
+// ======================================
+// VENDOR DEFAULT PO TYPES PAGE
+// ======================================
+router.get('/manage-po-types', async (req, res) => {
+    try {
+        console.log('🏷️ Loading Vendor Default PO Types page...');
+        res.render('vendor-po-types', {
+            user: req.user,
+            title: 'Manage Vendor Default PO Types'
+        });
+    } catch (error) {
+        console.error('❌ Error loading vendor PO types page:', error);
+        res.status(500).send('Error loading page');
+    }
+});
+
+// API: Get all vendors with their default PO types
+router.get('/api/po-types', async (req, res) => {
+    try {
+        const vendors = await Vendor.find({})
+            .select('vendorName vendorCode internalId defaultPoType status')
+            .sort({ vendorName: 1 });
+        
+        res.json({ success: true, vendors });
+    } catch (error) {
+        console.error('❌ Error fetching vendors:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch vendors' });
+    }
+});
+
+// API: Update vendor default PO type
+router.post('/api/po-types/:vendorId', async (req, res) => {
+    try {
+        const { vendorId } = req.params;
+        const { defaultPoType } = req.body;
+
+        const vendor = await Vendor.findByIdAndUpdate(
+            vendorId,
+            { defaultPoType },
+            { new: true }
+        );
+
+        if (!vendor) {
+            return res.status(404).json({ success: false, error: 'Vendor not found' });
+        }
+
+        res.json({ success: true, vendor });
+    } catch (error) {
+        console.error('❌ Error updating vendor PO type:', error);
+        res.status(500).json({ success: false, error: 'Failed to update vendor' });
+    }
+});
+
 module.exports = router;
