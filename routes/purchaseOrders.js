@@ -490,7 +490,8 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
     // Clean up uploaded file
     fs.unlinkSync(req.file.path);
 
-    res.redirect('/purchase-orders');
+    // Send JSON response instead of redirect so client can handle navigation
+    res.json({ success: true, redirect: '/manage-po-urls' });
   } catch (error) {
     console.error('Upload error:', error);
     res.status(500).json({ error: error.message });
