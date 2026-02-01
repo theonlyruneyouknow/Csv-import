@@ -220,19 +220,37 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
       
       // Try to get default PO type from main Vendor model
       let defaultPoType = '';
+      console.log(`\n🔍 VENDOR DEFAULT PO TYPE LOOKUP for PO ${poNumber}:`);
+      console.log(`   Vendor string: "${vendorString}"`);
+      console.log(`   Vendor number: "${vendorData.vendorNumber}"`);
+      console.log(`   Vendor name: "${vendorData.vendorName}"`);
+      
       if (vendorData.vendorNumber) {
         const mainVendor = await Vendor.findOne({ vendorCode: vendorData.vendorNumber });
-        if (mainVendor && mainVendor.defaultPoType) {
-          defaultPoType = mainVendor.defaultPoType;
-          console.log(`✅ Found default PO type for vendor ${vendorData.vendorNumber}: ${defaultPoType}`);
-        } else if (mainVendor) {
-          console.log(`ℹ️ Vendor ${vendorData.vendorNumber} exists but has no default PO type set`);
+        console.log(`   Query: Vendor.findOne({ vendorCode: "${vendorData.vendorNumber}" })`);
+        
+        if (mainVendor) {
+          console.log(`   ✅ Found vendor in Vendor collection:`);
+          console.log(`      - Vendor name: ${mainVendor.vendorName}`);
+          console.log(`      - Vendor code: ${mainVendor.vendorCode}`);
+          console.log(`      - Default PO type: "${mainVendor.defaultPoType || '(empty)'}"`);
+          
+          if (mainVendor.defaultPoType) {
+            defaultPoType = mainVendor.defaultPoType;
+            console.log(`   ✅ Will apply default PO type: "${defaultPoType}"`);
+          } else {
+            console.log(`   ⚠️ Vendor has no default PO type set`);
+          }
         } else {
-          console.log(`⚠️ Vendor ${vendorData.vendorNumber} (${vendorData.vendorName}) not found in Vendor collection`);
+          console.log(`   ❌ Vendor NOT FOUND in Vendor collection`);
+          console.log(`   💡 This vendor needs to be created in the main Vendors page`);
         }
+      } else {
+        console.log(`   ⚠️ No vendor number extracted from vendor string`);
       }
 
       if (existingPO) {
+        console.log(`   📝 PO ${poNumber} is EXISTING - will NOT apply default PO type (preserves existing type)`);
 
         // Update existing PO - CSV status goes to nsStatus, preserve custom status
         const updateData = {
@@ -296,8 +314,10 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
         await PurchaseOrder.findByIdAndUpdate(existingPO._id, updateData);
         console.log(`Updated PO ${poNumber} - NS Status: "${csvStatus}", Custom Status: "${existingPO.status}"${existingPO.isHidden ? ' (UNHIDDEN)' : ''}`);
       } else {
+        console.log(`   🆕 PO ${poNumber} is NEW - WILL apply default PO type: "${defaultPoType || '(none)'}"`);
+        
         // Create new PO - CSV status goes to nsStatus, custom status starts empty, apply default PO type
-        await PurchaseOrder.create({
+        const newPO = await PurchaseOrder.create({
           reportDate,
           date: row[1],
           poNumber: poNumber,
@@ -313,6 +333,8 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
           createdAt: new Date(),
           updatedAt: new Date()
         });
+        
+        console.log(`   ✅ Created new PO ${poNumber} with PO Type: "${newPO.poType || '(empty)'}"`);
       }
     }
 
