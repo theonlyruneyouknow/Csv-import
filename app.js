@@ -2353,6 +2353,18 @@ cron.schedule('0 0 * * *', async () => {
     }
 });
 
+// Global error handler - add right before app.listen
+app.use((err, req, res, next) => {
+    console.error('🚨🚨🚨 GLOBAL ERROR HANDLER CAUGHT:', err.message);
+    console.error('🚨 Request URL:', req.url);
+    console.error('🚨 Request Method:', req.method);
+    console.error('🚨 Stack:', err.stack);
+    res.status(500).render('error', {
+        message: err.message || 'An unexpected error occurred',
+        error: err
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
     console.log(`📊 Excel auto-generation scheduled (every hour at :00)`);
