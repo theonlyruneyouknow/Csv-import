@@ -221,7 +221,7 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
       // Try to get default PO type from main Vendor model
       let defaultPoType = '';
       if (vendorData.vendorNumber) {
-        const mainVendor = await Vendor.findOne({ internalId: vendorData.vendorNumber });
+        const mainVendor = await Vendor.findOne({ vendorCode: vendorData.vendorNumber });
         if (mainVendor && mainVendor.defaultPoType) {
           defaultPoType = mainVendor.defaultPoType;
         }
