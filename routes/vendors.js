@@ -194,7 +194,7 @@ router.get('/', async (req, res) => {
 // ======================================
 router.get('/manage-po-types', async (req, res) => {
     try {
-        console.log('🏷️ Loading Vendor Default PO Types page...');
+        console.log('🏷️🏷️🏷️ MANAGE-PO-TYPES ROUTE HIT! This is the correct route!');
         res.render('vendor-po-types', {
             user: req.user,
             title: 'Manage Vendor Default PO Types'
@@ -348,7 +348,7 @@ router.post('/new', async (req, res) => {
 router.get('/:vendorId', async (req, res) => {
     try {
         const { vendorId } = req.params;
-        console.log(`🔍 Loading vendor details for: ${vendorId}`);
+        console.log(`🔍🔍🔍 VENDOR DETAIL ROUTE HIT with ID: ${vendorId}`);
 
         // Get vendor details
         const vendor = await Vendor.findById(vendorId);
