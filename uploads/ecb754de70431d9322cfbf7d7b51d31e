@@ -1,0 +1,567 @@
+Territorial Seed Company
+Territorial Seed Company - Parent Company : London Spring Inc. : Territorial Seed Company
+Open Purchase Orders Pending Bill (Rune) NTK
+"As of December 31, 2026"
+
+
+Account ,Date ,Document Number ,Vendor ,Current Status ,Current Amount ,Location: Name 
+8003 Purchase Orders,,,,,,
+,1/28/2025,PO11933,225 MAGGOT BARRIERS,Pending Receipt,$982.50,TERRITORIAL
+,5/14/2025,PO11140,68 AMERICAN TAKII INC,Partially Received,"$2,380.00",TERRITORIAL
+,8/1/2025,PO11314,300 SEEDS BY DESIGN,Pending Receipt,"$4,000.00",TERRITORIAL
+,8/4/2025,PO11315,191 JBM PACKAGING,Pending Bill,"$2,042.15",TERRITORIAL
+,8/6/2025,PO11324,216 LOCATI FARMS,Pending Receipt,$975.00,TERRITORIAL
+,8/14/2025,PO11338,31 TAKII EUROPE BV,Pending Billing/Partially Received,"$3,376.26",TERRITORIAL
+,8/21/2025,PO11353,609 August's Harvest,Partially Received,"$1,500.75",GARLIC
+,9/15/2025,PO11400,79 BEJO SEEDS,Pending Receipt,"$2,070.60",TERRITORIAL
+,9/16/2025,PO11401,354 VILMORIN-MIKADO,Partially Received,"$9,720.75",TERRITORIAL
+,9/17/2025,PO11410,"932 JOHN PLANK GREENHOUSES, INC.",Pending Bill,"$3,380.00",GREENGOODS X
+,9/22/2025,PO11415,608 SKLARCZYK SEED FARM LLC,Pending Receipt,"$29,795.00",POTATOES
+,9/29/2025,PO10921,26 PIETERPIKZONEN BV HOLLAND,Pending Bill,$505.20,TERRITORIAL
+,9/29/2025,PO11359,717 W. LEGUTKO,Pending Bill,"$1,698.29",TERRITORIAL
+,10/3/2025,PO11429,12 COMPASS HORTICULTURE LTD,Pending Receipt,"$1,213.00",TERRITORIAL
+,10/6/2025,PO11447,79 BEJO SEEDS,Pending Receipt,"$2,726.67",TERRITORIAL
+,10/7/2025,PO11450,835 Rockey Farms LLC,Pending Receipt,"$5,608.00",POTATOES
+,10/9/2025,PO11454,913 GRAND TETON ORGANICS,Pending Receipt,"$14,400.00",POTATOES
+,10/11/2025,PO11455,133 DP SEEDS LLC,Partially Received,"$2,030.60",TERRITORIAL
+,10/16/2025,PO11472,31 TAKII EUROPE BV,Pending Bill,"$2,326.85",TERRITORIAL
+,10/20/2025,PO11476,145 ENZA ZADEN/VITALIS,Pending Receipt,"$1,835.80",TERRITORIAL
+,10/20/2025,PO11479,219 LONDON SPRING FARMS LLC,Pending Receipt,$340.00,TERRITORIAL
+,10/20/2025,PO11480,145 ENZA ZADEN/VITALIS,Pending Receipt,"$3,217.60",TERRITORIAL
+,10/22/2025,PO11486,5 SAKATA SEED AMERICA,Partially Received,"$1,487.50",TERRITORIAL
+,10/22/2025,PO11489,339 TOKITA,Pending Receipt,"$3,978.00",TERRITORIAL
+,10/22/2025,PO11493,5 SAKATA SEED AMERICA,Pending Receipt,$333.40,TERRITORIAL
+,10/22/2025,PO11494,417 TOZER SEEDS AMERICA LLC,Partially Received,$149.50,TERRITORIAL
+,10/23/2025,PO11495,368 WILD GARDEN SEED,Pending Billing/Partially Received,"$5,985.00",TERRITORIAL
+,10/23/2025,PO11496,217 LOG HOUSE PLANTS,Pending Receipt,"$3,230.64",TRANSPLANT_A
+,10/23/2025,PO11500,79 BEJO SEEDS,Pending Receipt,"$2,701.22",TERRITORIAL
+,10/24/2025,PO11501,717 W. LEGUTKO,Pending Receipt,$893.60,TERRITORIAL
+,10/27/2025,PO11508,145 ENZA ZADEN/VITALIS,Pending Receipt,"$56,623.36",TERRITORIAL
+,10/28/2025,PO11512,217 LOG HOUSE PLANTS,Pending Receipt,"$3,230.64",TRANSPLANT_B
+,10/28/2025,PO11513,217 LOG HOUSE PLANTS,Pending Receipt,"$3,788.64",TRANSPLANT_C
+,10/28/2025,PO11514,217 LOG HOUSE PLANTS,Pending Receipt,"$3,788.64",TRANSPLANT_D
+,10/28/2025,PO11523,14 De Bolster BV,Pending Billing/Partially Received,"$1,549.71",TERRITORIAL
+,10/28/2025,PO11528,176 HARRIS GARDEN TRENDS,Partially Received,"$2,093.70",TERRITORIAL
+,10/28/2025,PO11535,5 SAKATA SEED AMERICA,Partially Received,"$1,168.40",TERRITORIAL
+,10/29/2025,PO11550,217 LOG HOUSE PLANTS,Partially Received,$915.30,GREENGOODS X
+,10/30/2025,PO11558,56 AP WHALEY LLC,Pending Receipt,"$4,950.00",TERRITORIAL
+,10/31/2025,PO11560,324 SYNGENTA SEEDS INC,Pending Bill,"$2,241.87",TERRITORIAL
+,11/7/2025,PO11562,336 TIERRA-DERCO INTERNATIONAL LLC,Partially Received,$721.35,TERRITORIAL
+,11/11/2025,PO11544,31 TAKII EUROPE BV,Pending Bill,$375.40,TERRITORIAL
+,11/11/2025,PO11575,18 HEM-ZADEN,Pending Bill,$178.10,TERRITORIAL
+,11/11/2025,PO11581,249 NORTHWOODS NURSERY,Pending Receipt,"$3,150.00",GREENGOODS X
+,11/12/2025,PO11509,369 WILD WEST SEED INC,Pending Billing/Partially Received,"$2,227.50",TERRITORIAL
+,11/12/2025,PO11534,52 PRO-VEG SEEDS LTD,Pending Receipt,"$11,073.98",TERRITORIAL
+,11/12/2025,PO11583,217 LOG HOUSE PLANTS,Pending Receipt,"$2,080.00",GREENGOODS X
+,11/12/2025,PO11585,217 LOG HOUSE PLANTS,Pending Receipt,"$9,609.30",TRANSPLANT_A
+,11/12/2025,PO11586,217 LOG HOUSE PLANTS,Pending Receipt,"$10,166.40",TRANSPLANT_B
+,11/12/2025,PO11587,217 LOG HOUSE PLANTS,Pending Receipt,"$13,252.40",TRANSPLANT_C
+,11/12/2025,PO11588,217 LOG HOUSE PLANTS,Pending Receipt,"$9,048.60",TRANSPLANT_D
+,11/13/2025,PO11589,5 SAKATA SEED AMERICA,Partially Received,$527.00,TERRITORIAL
+,11/13/2025,PO11591,706 The McGregor Company,Pending Receipt,$601.40,TERRITORIAL
+,11/13/2025,PO11592,5 SAKATA SEED AMERICA,Pending Receipt,"$2,971.20",TERRITORIAL
+,11/14/2025,PO11441,185 HYDROFARM,Partially Received,"$1,834.20",TERRITORIAL
+,11/18/2025,PO11603,42 HM CLAUSE,Pending Receipt,"$1,884.00",TERRITORIAL
+,11/18/2025,PO11604,850 Platform Displays,Pending Receipt,"$18,398.00",20 PALMER
+,11/21/2025,PO11613,229 MECHANICAL TRANSPLANTER CO,Pending Bill,$49.50,DROPSHIP
+,11/26/2025,PO11520,81 BENARY,Partially Received,"$1,285.20",TERRITORIAL
+,11/26/2025,PO11526,169 GOLDEN VALLEY SEED,Pending Receipt,$66.00,TERRITORIAL
+,11/26/2025,PO11621,219 LONDON SPRING FARMS LLC,Pending Receipt,"$1,097.73",TERRITORIAL
+,12/3/2025,PO11639,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/3/2025,PO11640,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/4/2025,PO11642,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/4/2025,PO11643,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/4/2025,PO11646,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11652,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11653,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/5/2025,PO11654,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/5/2025,PO11655,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11647,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11648,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11649,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11650,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/5/2025,PO11651,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11656,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11657,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11658,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11659,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11660,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11661,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11666,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11662,619 Cascadia Mushrooms,Pending Bill,$74.00,DROPSHIP
+,12/5/2025,PO11663,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11664,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11665,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11667,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/5/2025,PO11668,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11669,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11670,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11671,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11672,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11673,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/5/2025,PO11674,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/5/2025,PO11675,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11676,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11677,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11678,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11679,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/5/2025,PO11680,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11681,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11682,619 Cascadia Mushrooms,Pending Bill,$74.00,DROPSHIP
+,12/5/2025,PO11683,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/5/2025,PO11684,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11685,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11686,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11687,619 Cascadia Mushrooms,Pending Bill,$50.00,DROPSHIP
+,12/5/2025,PO11688,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11689,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11690,619 Cascadia Mushrooms,Pending Bill,$72.00,DROPSHIP
+,12/5/2025,PO11691,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11692,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/5/2025,PO11693,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11694,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/5/2025,PO11695,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11696,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11697,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11701,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11702,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11703,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/5/2025,PO11698,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11699,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11700,619 Cascadia Mushrooms,Pending Bill,$44.00,DROPSHIP
+,12/5/2025,PO11704,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11705,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/5/2025,PO11706,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/5/2025,PO11707,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11708,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/5/2025,PO11709,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/5/2025,PO11711,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11712,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11713,619 Cascadia Mushrooms,Pending Bill,$44.00,DROPSHIP
+,12/5/2025,PO11714,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11715,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/5/2025,PO11716,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/5/2025,PO11710,619 Cascadia Mushrooms,Pending Bill,$50.00,DROPSHIP
+,12/5/2025,PO11717,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11718,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11719,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11720,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11721,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11722,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11723,619 Cascadia Mushrooms,Pending Bill,$44.00,DROPSHIP
+,12/5/2025,PO11724,619 Cascadia Mushrooms,Pending Bill,$40.00,DROPSHIP
+,12/5/2025,PO11725,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/5/2025,PO11726,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/5/2025,PO11727,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11728,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11729,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11730,619 Cascadia Mushrooms,Pending Bill,$40.00,DROPSHIP
+,12/5/2025,PO11731,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11732,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11733,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11734,619 Cascadia Mushrooms,Pending Bill,$98.00,DROPSHIP
+,12/5/2025,PO11735,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11737,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/5/2025,PO11738,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11739,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11740,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11741,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11742,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/5/2025,PO11743,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11744,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/5/2025,PO11745,619 Cascadia Mushrooms,Pending Bill,$50.00,DROPSHIP
+,12/5/2025,PO11746,619 Cascadia Mushrooms,Pending Bill,$44.00,DROPSHIP
+,12/5/2025,PO11747,619 Cascadia Mushrooms,Pending Bill,$40.00,DROPSHIP
+,12/5/2025,PO11748,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11749,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11750,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/5/2025,PO11751,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11823,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/5/2025,PO11826,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/5/2025,PO11827,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11752,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11753,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/6/2025,PO11754,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11755,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11756,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11757,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/6/2025,PO11758,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/6/2025,PO11759,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11760,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11761,619 Cascadia Mushrooms,Pending Bill,$40.00,DROPSHIP
+,12/6/2025,PO11762,619 Cascadia Mushrooms,Pending Bill,$40.00,DROPSHIP
+,12/6/2025,PO11763,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/6/2025,PO11764,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/6/2025,PO11765,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/6/2025,PO11766,619 Cascadia Mushrooms,Pending Bill,$50.00,DROPSHIP
+,12/6/2025,PO11767,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/6/2025,PO11768,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11769,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11770,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11771,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/6/2025,PO11772,619 Cascadia Mushrooms,Pending Bill,$44.00,DROPSHIP
+,12/6/2025,PO11773,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11774,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11775,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/6/2025,PO11776,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11777,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/6/2025,PO11778,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/6/2025,PO11779,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11780,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11781,619 Cascadia Mushrooms,Pending Bill,$45.00,DROPSHIP
+,12/6/2025,PO11782,619 Cascadia Mushrooms,Pending Bill,$44.00,DROPSHIP
+,12/6/2025,PO11783,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/6/2025,PO11784,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/6/2025,PO11785,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11786,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/6/2025,PO11788,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11789,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/6/2025,PO11790,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11791,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/6/2025,PO11825,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/7/2025,PO11792,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/7/2025,PO11793,619 Cascadia Mushrooms,Pending Bill,$64.00,DROPSHIP
+,12/7/2025,PO11794,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/7/2025,PO11795,619 Cascadia Mushrooms,Pending Bill,$68.00,DROPSHIP
+,12/7/2025,PO11796,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/7/2025,PO11797,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/7/2025,PO11798,619 Cascadia Mushrooms,Pending Bill,$44.00,DROPSHIP
+,12/7/2025,PO11799,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/7/2025,PO11800,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/7/2025,PO11801,619 Cascadia Mushrooms,Pending Bill,$40.00,DROPSHIP
+,12/7/2025,PO11802,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/7/2025,PO11803,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/7/2025,PO11804,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/7/2025,PO11805,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/7/2025,PO11806,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/7/2025,PO11807,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/7/2025,PO11808,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/7/2025,PO11809,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/7/2025,PO11810,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/7/2025,PO11811,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/7/2025,PO11812,619 Cascadia Mushrooms,Pending Bill,$45.00,DROPSHIP
+,12/7/2025,PO11813,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/7/2025,PO11815,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/7/2025,PO11814,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/7/2025,PO11816,619 Cascadia Mushrooms,Pending Bill,$97.00,DROPSHIP
+,12/7/2025,PO11822,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/7/2025,PO11828,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/8/2025,PO11519,79 BEJO SEEDS,Partially Received,"$1,539.00",TERRITORIAL
+,12/8/2025,PO11574,79 BEJO SEEDS,Partially Received,$570.00,TERRITORIAL
+,12/8/2025,PO11817,619 Cascadia Mushrooms,Pending Bill,$40.00,DROPSHIP
+,12/8/2025,PO11818,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/8/2025,PO11819,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/8/2025,PO11820,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/8/2025,PO11821,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/8/2025,PO11829,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/8/2025,PO11831,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/8/2025,PO11832,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/8/2025,PO11833,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/8/2025,PO11834,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/8/2025,PO11835,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/8/2025,PO11836,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/8/2025,PO11837,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/8/2025,PO11839,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/8/2025,PO11840,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/8/2025,PO11841,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/9/2025,PO11842,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/9/2025,PO11843,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/9/2025,PO11844,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/9/2025,PO11846,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/9/2025,PO11847,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/9/2025,PO11845,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/9/2025,PO11848,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/9/2025,PO11849,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/9/2025,PO11850,619 Cascadia Mushrooms,Pending Bill,$88.00,DROPSHIP
+,12/9/2025,PO11851,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/9/2025,PO11852,619 Cascadia Mushrooms,Pending Bill,$50.00,DROPSHIP
+,12/9/2025,PO11853,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/9/2025,PO11854,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/9/2025,PO11855,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/9/2025,PO11856,619 Cascadia Mushrooms,Pending Bill,$40.00,DROPSHIP
+,12/9/2025,PO11858,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/9/2025,PO11857,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/9/2025,PO11859,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/9/2025,PO11861,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/10/2025,PO11527,661 GRAINES VOLTZ,Pending Receipt,$909.25,TERRITORIAL
+,12/10/2025,PO11862,619 Cascadia Mushrooms,Pending Bill,$97.00,DROPSHIP
+,12/10/2025,PO11863,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/10/2025,PO11864,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/10/2025,PO11865,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/11/2025,PO11867,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/11/2025,PO11868,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/11/2025,PO11869,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/11/2025,PO11870,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/11/2025,PO11871,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/11/2025,PO11872,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/11/2025,PO11873,619 Cascadia Mushrooms,Pending Bill,$96.00,DROPSHIP
+,12/11/2025,PO11874,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/12/2025,PO11875,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/12/2025,PO11877,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/12/2025,PO11878,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/13/2025,PO11879,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/13/2025,PO11880,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/14/2025,PO11881,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/14/2025,PO11882,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/14/2025,PO11883,619 Cascadia Mushrooms,Pending Bill,$44.00,DROPSHIP
+,12/14/2025,PO11884,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/15/2025,PO11885,619 Cascadia Mushrooms,Pending Bill,$44.00,DROPSHIP
+,12/15/2025,PO11886,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/15/2025,PO11887,255 OMEGA SEED INC,Partially Received,$85.50,TERRITORIAL
+,12/15/2025,PO11889,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/15/2025,PO11890,219 LONDON SPRING FARMS LLC,Pending Bill,"$4,050.00",TERRITORIAL
+,12/15/2025,PO11891,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/15/2025,PO11892,619 Cascadia Mushrooms,Pending Bill,$50.00,DROPSHIP
+,12/15/2025,PO11893,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/15/2025,PO11894,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/16/2025,PO11896,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/16/2025,PO11895,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/16/2025,PO11897,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/16/2025,PO11898,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/16/2025,PO11899,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/16/2025,PO11900,619 Cascadia Mushrooms,Pending Bill,$20.00,DROPSHIP
+,12/16/2025,PO11902,619 Cascadia Mushrooms,Pending Bill,$50.00,DROPSHIP
+,12/16/2025,PO11901,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/17/2025,PO11903,619 Cascadia Mushrooms,Pending Bill,$73.00,DROPSHIP
+,12/17/2025,PO11904,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/17/2025,PO11905,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/17/2025,PO11906,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/17/2025,PO11907,792 DLF USA Inc,Pending Bill,"$1,960.00",TERRITORIAL
+,12/18/2025,PO11908,3 HOLLAR SEEDS,Partially Received,"$1,804.38",TERRITORIAL
+,12/18/2025,PO11909,12 COMPASS HORTICULTURE LTD,Pending Receipt,"$7,919.71",TERRITORIAL
+,12/18/2025,PO11913,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/18/2025,PO11914,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/19/2025,PO11915,619 Cascadia Mushrooms,Pending Bill,$50.00,DROPSHIP
+,12/19/2025,PO11916,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/19/2025,PO11917,86 BIOCHAR SUPREME INC,Pending Bill,"$2,030.00",TERRITORIAL
+,12/19/2025,PO11920,324 SYNGENTA SEEDS INC,Pending Receipt,"$20,607.10",TERRITORIAL
+,12/19/2025,PO11921,324 SYNGENTA SEEDS INC,Pending Receipt,"$1,366.25",TERRITORIAL
+,12/20/2025,PO11922,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/20/2025,PO11923,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/20/2025,PO11924,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/22/2025,PO11925,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/22/2025,PO11926,619 Cascadia Mushrooms,Pending Bill,$72.00,DROPSHIP
+,12/22/2025,PO11927,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/22/2025,PO11942,619 Cascadia Mushrooms,Pending Bill,$72.00,DROPSHIP
+,12/22/2025,PO11931,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/22/2025,PO11936,49 LADBROOKE 98 LTD,Pending Receipt,"$1,008.60",TERRITORIAL
+,12/23/2025,PO11943,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/25/2025,PO11944,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/25/2025,PO11945,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/25/2025,PO11946,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/25/2025,PO11947,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/27/2025,PO11948,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/27/2025,PO11949,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/27/2025,PO11950,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/28/2025,PO11952,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/29/2025,PO11928,"194 JIFFY PRODUCTS OF AMERICA, INC",Pending Receipt,"$1,165.20",TERRITORIAL
+,12/29/2025,PO11929,172 GROWERS NURSERY SUPPLY INC,Pending Billing/Partially Received,"$1,740.18",TERRITORIAL
+,12/29/2025,PO11953,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/29/2025,PO11955,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/29/2025,PO11956,130 DIXONDALE FARMS,Pending Bill,"$1,047.25",DIXONDALE
+,12/29/2025,PO11957,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/29/2025,PO11959,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/29/2025,PO11960,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/29/2025,PO11962,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/30/2025,PO11910,260 OSBORNE SEED COMPANY,Partially Received,"$4,024.50",TERRITORIAL
+,12/30/2025,PO11963,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/30/2025,PO11964,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/30/2025,PO11965,"551 The American Root Company, LLC",Pending Receipt,"$1,902.00",TERRITORIAL
+,12/30/2025,PO11966,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/30/2025,PO11967,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/30/2025,PO11968,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/30/2025,PO11969,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,12/31/2025,PO11932,222 LUSTER LEAF PRODUCTS INC,Pending Billing/Partially Received,"$4,660.20",TERRITORIAL
+,12/31/2025,PO11970,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/31/2025,PO11971,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/31/2025,PO11972,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,12/31/2025,PO11973,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/31/2025,PO11974,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/31/2025,PO11975,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,12/31/2025,PO11976,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,12/31/2025,PO11977,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/1/2026,PO11978,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,1/1/2026,PO11979,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/1/2026,PO11980,619 Cascadia Mushrooms,Pending Bill,$50.00,DROPSHIP
+,1/1/2026,PO11982,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,1/1/2026,PO11983,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,1/2/2026,PO11984,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/2/2026,PO11985,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/2/2026,PO11986,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/2/2026,PO11987,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,1/2/2026,PO11988,"675 Country Joy Farm, LLC",Pending Receipt,"$18,900.00",GARLIC
+,1/2/2026,PO11989,933 Coyote Smile Farm LLC,Pending Receipt,$10.00,GARLIC
+,1/2/2026,PO11991,824 Seattle Urban Farm Company,Pending Receipt,$263.20,DROPSHIP
+,1/2/2026,PO11992,684 DeVroomen Garden Products,Pending Receipt,"$17,476.68",BULB_SPRING
+,1/3/2026,PO11993,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/4/2026,PO11995,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/4/2026,PO11997,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/4/2026,PO11998,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/5/2026,PO11999,619 Cascadia Mushrooms,Pending Receipt,$97.00,DROPSHIP
+,1/5/2026,PO12000,130 DIXONDALE FARMS,Pending Bill,$964.25,DIXONDALE
+,1/5/2026,PO12001,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/5/2026,PO12002,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/5/2026,PO12003,31 TAKII EUROPE BV,Pending Receipt,"$2,310.00",TERRITORIAL
+,1/5/2026,PO12004,933 Coyote Smile Farm LLC,Pending Receipt,"$4,800.00",GARLIC
+,1/5/2026,PO12005,252 OBC NORTHWEST INC,Pending Bill,$950.90,TERRITORIAL
+,1/5/2026,PO12006,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/5/2026,PO12007,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/6/2026,PO12008,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/6/2026,PO12009,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/6/2026,PO12010,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/6/2026,PO12011,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,1/6/2026,PO12012,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/6/2026,PO12013,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/6/2026,PO12014,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/6/2026,PO12015,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/6/2026,PO12016,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/6/2026,PO12017,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/7/2026,PO12018,364 WHISTLING DUCK FARM LLC,Pending Receipt,"$14,060.00",GARLIC
+,1/8/2026,PO12019,228 MEADOWLARK HEARTH,Pending Receipt,"$8,400.00",GARLIC
+,1/8/2026,PO12021,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/8/2026,PO12020,947 DESCHUTES CANYON GARLIC,Pending Receipt,"$12,000.00",GARLIC
+,1/8/2026,PO12022,532 SLOOT FARM,Pending Receipt,"$63,655.00",GARLIC
+,1/8/2026,PO12023,609 August's Harvest,Pending Receipt,"$137,508.25",GARLIC
+,1/8/2026,PO12025,72 ATMORE INDUSTRIES INC,Pending Receipt,"$4,172.94",TERRITORIAL
+,1/8/2026,PO12026,"747 BFG Supply Co., LLC",Pending Receipt,$381.00,TERRITORIAL
+,1/8/2026,PO12027,17 ECONSEEDS BV,Pending Receipt,"$4,256.04",TERRITORIAL
+,1/8/2026,PO12028,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/8/2026,PO12029,940 4 GUYS GARLIC,Pending Receipt,"$103,728.75",GARLIC
+,1/8/2026,PO12030,219 LONDON SPRING FARMS LLC,Partially Received,"$1,350.00",TERRITORIAL
+,1/8/2026,PO12031,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/8/2026,PO12032,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/8/2026,PO12033,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/9/2026,PO12034,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,1/9/2026,PO12036,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/9/2026,PO12037,909 PACIFIC COAST SEEDS,Pending Receipt,"$1,836.00",TERRITORIAL
+,1/9/2026,PO12039,70 APPLEWOOD SEED CO,Pending Receipt,"$4,500.00",TERRITORIAL
+,1/9/2026,PO12040,63 ALBERT LEA SEED HOUSE,Pending Receipt,"$1,564.00",TERRITORIAL
+,1/9/2026,PO12042,450 WASHINGTON STATE CROP IMPROVEMENT ASSOCIATION,Pending Receipt,$75.00,TERRITORIAL
+,1/9/2026,PO12049,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/9/2026,PO12091,792 DLF USA Inc,Pending Receipt,"$21,000.00",TERRITORIAL
+,1/10/2026,PO12050,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/10/2026,PO12051,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/11/2026,PO12052,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/11/2026,PO12053,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,1/11/2026,PO12054,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,1/11/2026,PO12055,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/11/2026,PO12056,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,1/12/2026,PO12057,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/12/2026,PO12058,243 NATURES CONTROL,Pending Bill,$16.70,DROPSHIP
+,1/12/2026,PO12059,619 Cascadia Mushrooms,Pending Bill,$49.00,DROPSHIP
+,1/12/2026,PO12061,5 SAKATA SEED AMERICA,Pending Supervisor Approval,"$1,750.00",TERRITORIAL
+,1/12/2026,PO12062,130 DIXONDALE FARMS,Pending Bill,$915.75,DIXONDALE
+,1/12/2026,PO12063,185 HYDROFARM,Partially Received,$532.00,TERRITORIAL
+,1/12/2026,PO12064,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/12/2026,PO12066,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/13/2026,PO12065,243 NATURES CONTROL,Pending Bill,$39.80,DROPSHIP
+,1/13/2026,PO12067,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,1/13/2026,PO12068,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/13/2026,PO12069,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/13/2026,PO12070,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/13/2026,PO12071,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/13/2026,PO12072,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/14/2026,PO12074,243 NATURES CONTROL,Pending Bill,$225.00,TERRITORIAL
+,1/14/2026,PO12078,243 NATURES CONTROL,Pending Receipt,$787.50,TERRITORIAL
+,1/14/2026,PO12079,243 NATURES CONTROL,Pending Receipt,"$1,125.00",TERRITORIAL
+,1/14/2026,PO12080,338 TIP TOP BIO-CONTROL,Pending Receipt,$439.70,TERRITORIAL
+,1/14/2026,PO12081,338 TIP TOP BIO-CONTROL,Pending Receipt,$559.60,TERRITORIAL
+,1/14/2026,PO12082,338 TIP TOP BIO-CONTROL,Pending Supervisor Approval,$479.60,TERRITORIAL
+,1/14/2026,PO12084,122 CROWN BEES,Pending Receipt,"$1,800.00",TERRITORIAL
+,1/14/2026,PO12085,122 CROWN BEES,Pending Supervisor Approval,$630.00,TERRITORIAL
+,1/14/2026,PO12086,122 CROWN BEES,Pending Supervisor Approval,$360.00,TERRITORIAL
+,1/14/2026,PO12087,122 CROWN BEES,Pending Supervisor Approval,$225.00,TERRITORIAL
+,1/14/2026,PO12089,552 SeaCoast Compost,Pending Bill,"$1,914.49",TERRITORIAL
+,1/14/2026,PO12090,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/15/2026,PO12099,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/15/2026,PO12100,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/16/2026,PO12101,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/16/2026,PO12103,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/16/2026,PO12102,40 GENESIS SEEDS LTD,Pending Supervisor Approval,"$16,768.13",TERRITORIAL
+,1/16/2026,PO12105,176 HARRIS GARDEN TRENDS,Pending Receipt,"$2,700.00",TERRITORIAL
+,1/17/2026,PO12106,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/17/2026,PO12108,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/17/2026,PO12107,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/17/2026,PO12109,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/17/2026,PO12110,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/17/2026,PO12111,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/18/2026,PO12112,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/18/2026,PO12113,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/18/2026,PO12114,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,1/18/2026,PO12115,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/18/2026,PO12118,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/19/2026,PO12116,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/19/2026,PO12117,130 DIXONDALE FARMS,Pending Bill,"$3,789.50",DIXONDALE
+,1/19/2026,PO12122,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/19/2026,PO12121,56 AP WHALEY LLC,Pending Receipt,"$14,810.10",TERRITORIAL
+,1/20/2026,PO12123,354 VILMORIN-MIKADO,Pending Supervisor Approval,"$5,640.00",TERRITORIAL
+,1/20/2026,PO12124,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+,1/20/2026,PO12125,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/21/2026,PO12127,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/21/2026,PO12126,773 The Home Depot,Pending Supervisor Approval,$431.90,TERRITORIAL
+,1/21/2026,PO12128,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/21/2026,PO12129,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/21/2026,PO12130,115 CONCENTRATES INC,Pending Supervisor Approval,$760.00,TERRITORIAL
+,1/21/2026,PO12131,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,1/22/2026,PO11536,432 SATIMEX QUEDLINBURG,Pending Receipt,$123.58,TERRITORIAL
+,1/22/2026,PO12133,339 TOKITA,Pending Bill,"$6,200.00",TERRITORIAL
+,1/22/2026,PO12135,913 GRAND TETON ORGANICS,Pending Receipt,"$4,400.00",POTATOES
+,1/23/2026,PO12038,234 MOUNTAIN VIEW SEEDS LTD,Pending Receipt,"$1,800.00",TERRITORIAL
+,1/23/2026,PO12041,69 AMPAC SEED COMPANY,Pending Receipt,$600.00,TERRITORIAL
+,1/23/2026,PO12137,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/23/2026,PO12136,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,1/23/2026,PO12138,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,1/23/2026,PO12140,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,1/23/2026,PO12139,234 MOUNTAIN VIEW SEEDS LTD,Pending Supervisor Approval,"$2,286.00",TERRITORIAL
+,1/23/2026,PO12141,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+,1/23/2026,PO12142,257 OREGON COAST WASABI,Pending Receipt,$400.00,TERRITORIAL
+,1/23/2026,PO12143,339 TOKITA,Pending Supervisor Approval,"$3,541.38",TERRITORIAL
+,1/23/2026,PO12144,368 WILD GARDEN SEED,Pending Receipt,"$22,615.80",TERRITORIAL
+,1/23/2026,PO12145,63 ALBERT LEA SEED HOUSE,Pending Receipt,$75.50,TERRITORIAL
+,1/24/2026,PO12146,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/24/2026,PO12147,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/24/2026,PO12148,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,1/24/2026,PO12149,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/25/2026,PO12150,619 Cascadia Mushrooms,Pending Bill,$48.00,DROPSHIP
+,1/25/2026,PO12151,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/26/2026,PO12077,243 NATURES CONTROL,Pending Receipt,$225.00,TERRITORIAL
+,1/26/2026,PO12083,122 CROWN BEES,Pending Receipt,$900.00,TERRITORIAL
+,1/26/2026,PO12152,130 DIXONDALE FARMS,Pending Bill,"$2,253.50",DIXONDALE
+,1/26/2026,PO12153,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/26/2026,PO12154,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/26/2026,PO12155,26 PIETERPIKZONEN BV HOLLAND,Pending Receipt,"$6,295.14",TERRITORIAL
+,1/26/2026,PO12156,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+,1/26/2026,PO12158,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+,1/26/2026,PO12157,219 LONDON SPRING FARMS LLC,Pending Receipt,$288.40,TERRITORIAL
+,1/26/2026,PO12159,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/27/2026,PO12160,300 SEEDS BY DESIGN,Pending Receipt,$300.00,TERRITORIAL
+,1/27/2026,PO12161,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+,1/27/2026,PO12162,243 NATURES CONTROL,Pending Receipt,$8.25,DROPSHIP
+,1/27/2026,PO12163,619 Cascadia Mushrooms,Pending Bill,$24.00,DROPSHIP
+,1/27/2026,PO12168,"747 BFG Supply Co., LLC",Pending Receipt,$919.44,TERRITORIAL
+,1/28/2026,PO11538,299 SEED SAVERS EXCHANGE,Pending Receipt,"$4,535.16",TERRITORIAL
+,1/28/2026,PO12073,338 TIP TOP BIO-CONTROL,Pending Receipt,$359.90,TERRITORIAL
+,1/28/2026,PO12169,619 Cascadia Mushrooms,Pending Bill,$25.00,DROPSHIP
+,1/28/2026,PO12170,5 SAKATA SEED AMERICA,Pending Receipt,$420.00,TERRITORIAL
+,1/28/2026,PO12172,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+,1/28/2026,PO12171,Test Vendor,Pending Receipt,$148.00,TERRITORIAL
+,1/28/2026,PO12173,38 FRATELLI INGEGNOLI SPA,Pending Receipt,"$1,935.00",TERRITORIAL
+,1/28/2026,PO12174,56 AP WHALEY LLC,Pending Receipt,"$1,034.00",TERRITORIAL
+,1/28/2026,PO12175,417 TOZER SEEDS AMERICA LLC,Pending Receipt,"$10,550.86",TERRITORIAL
+,1/28/2026,PO12176,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+,1/29/2026,PO12177,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+,1/29/2026,PO12180,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+,1/30/2026,PO12181,619 Cascadia Mushrooms,Pending Receipt,$25.00,DROPSHIP
+,1/30/2026,PO12182,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+,1/30/2026,PO12183,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+,1/30/2026,PO12184,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+,1/31/2026,PO12185,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+,1/31/2026,PO12186,824 Seattle Urban Farm Company,Pending Receipt,$263.20,DROPSHIP
+,1/31/2026,PO12187,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+,1/31/2026,PO12188,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+,1/31/2026,PO12189,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+,1/31/2026,PO12190,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+,1/31/2026,PO12191,619 Cascadia Mushrooms,Pending Receipt,$73.00,DROPSHIP
+,1/31/2026,PO12192,619 Cascadia Mushrooms,Pending Receipt,$24.00,DROPSHIP
+Total - 8003 Purchase Orders,,,,,"$910,085.41",
+Total,,,,,"$910,085.41",

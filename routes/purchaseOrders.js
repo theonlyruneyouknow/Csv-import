@@ -10,6 +10,7 @@ const PoTypeOption = require('../models/PoTypeOption');
 const Note = require('../models/Note');
 const LineItem = require('../models/LineItem');
 const OrganicVendor = require('../models/OrganicVendor');
+const Vendor = require('../models/Vendor');
 const { splitVendorData } = require('../lib/vendorUtils');
 const { trackPOChange, trackMultipleChanges, trackLineItemChange } = require('../lib/changeTracking');
 const Task = require('../models/Task');
