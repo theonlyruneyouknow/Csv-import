@@ -375,8 +375,6 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
     // Automatically link vendors to the main Vendor model after import
     console.log('\n🔗 === AUTOMATIC VENDOR RECONCILIATION ===');
     
-    const Vendor = require('../models/Vendor');
-
     // Find all POs that don't have a linkedVendor
     const unlinkedPOs = await PurchaseOrder.find({
       vendor: { $exists: true, $ne: null, $ne: '' },
@@ -2434,9 +2432,6 @@ router.get('/', async (req, res) => {
     const uniqueVendors = [...new Set(allVendors.filter(Boolean))].sort();
 
     // Create vendor mapping for clickable links using the Vendor model (main vendor dashboard)
-    const Vendor = require('../models/Vendor');
-    const { splitVendorData } = require('../lib/vendorUtils');
-
     // First, try to use the linkedVendor field if it exists
     const vendorMap = {};
     purchaseOrdersWithETA.forEach(po => {
@@ -6633,9 +6628,6 @@ router.post('/reconcile-main-vendors', async (req, res) => {
   try {
     console.log('🔄 Starting main vendor reconciliation...');
 
-    const Vendor = require('../models/Vendor');
-    const { splitVendorData } = require('../lib/vendorUtils');
-
     // Find all POs that don't have a linkedVendor
     const unlinkedPOs = await PurchaseOrder.find({
       vendor: { $exists: true, $ne: null, $ne: '' },
@@ -6753,9 +6745,6 @@ router.get('/reconcile-main-vendors', async (req, res) => {
   try {
     console.log('🔄 Starting main vendor reconciliation via GET...');
 
-    const Vendor = require('../models/Vendor');
-    const { splitVendorData } = require('../lib/vendorUtils');
-
     // Find all POs that don't have a linkedVendor
     const unlinkedPOs = await PurchaseOrder.find({
       vendor: { $exists: true, $ne: null, $ne: '' },
@@ -6849,9 +6838,6 @@ router.get('/reconcile-main-vendors', async (req, res) => {
 router.get('/check-vendor-links', async (req, res) => {
   try {
     console.log('🔍 Checking vendor links...');
-
-    const Vendor = require('../models/Vendor');
-    const OrganicVendor = require('../models/OrganicVendor');
 
     // Count vendors in both collections
     const vendorCount = await Vendor.countDocuments();
