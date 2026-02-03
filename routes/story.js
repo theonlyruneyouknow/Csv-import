@@ -115,6 +115,30 @@ router.post('/projects', ensureStoryAccess, async (req, res) => {
     }
 });
 
+// Get Project Details (API)
+router.get('/api/projects/:id', ensureStoryAccess, async (req, res) => {
+    try {
+        const project = await Project.findOne({ 
+            _id: req.params.id, 
+            $or: [
+                { author: req.user._id },
+                { 'collaborators.user': req.user._id }
+            ]
+        })
+        .populate('author', 'username firstName lastName')
+        .populate('collaborators.user', 'username firstName lastName');
+        
+        if (!project) {
+            return res.status(404).json({ success: false, error: 'Project not found' });
+        }
+        
+        res.json({ success: true, project });
+    } catch (error) {
+        console.error('Error loading project:', error);
+        res.status(500).json({ success: false, error: 'Failed to load project' });
+    }
+});
+
 // Get Project Details
 router.get('/projects/:id', ensureStoryAccess, async (req, res) => {
     try {

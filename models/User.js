@@ -62,6 +62,7 @@ const userSchema = new mongoose.Schema({
         accessMedicineManagement: { type: Boolean, default: false },
         accessOrganicVendors: { type: Boolean, default: false },
         accessBulletinManagement: { type: Boolean, default: false },
+        accessEBMAlumni: { type: Boolean, default: false },
         // Tool access permissions
         accessLineItemsManager: { type: Boolean, default: false },
         accessTrackingDashboard: { type: Boolean, default: false },
@@ -122,7 +123,7 @@ const userSchema = new mongoose.Schema({
     },
     invitationExpires: {
         type: Date
-    },
+    },87*-/
     invitedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'

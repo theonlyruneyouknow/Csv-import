@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Story Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Georgia', serif;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+            transition: all 0.3s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .project-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .project-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .badge-status {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .progress-section {
+            margin-top: 1rem;
+        }
+
+        .progress {
+            height: 8px;
+            border-radius: 10px;
+        }
+
+        .filter-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-action {
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <%- include('partials/header') %>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-folder-open me-2"></i>My Projects</h1>
+                    <p class="mb-0">Manage and organize your writing projects</p>
+                </div>
+                <button class="btn btn-light btn-lg" onclick="showCreateProject()">
+                    <i class="fas fa-plus me-2"></i>New Project
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Filters -->
+        <div class="filter-section">
+            <form method="GET" action="/story/projects" id="filterForm">
+                <div class="row align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="status" onchange="document.getElementById('filterForm').submit()">
+                            <option value="">All Statuses</option>
+                            <option value="planning" <%= filters.status === 'planning' ? 'selected' : '' %>>Planning</option>
+                            <option value="writing" <%= filters.status === 'writing' ? 'selected' : '' %>>Writing</option>
+                            <option value="editing" <%= filters.status === 'editing' ? 'selected' : '' %>>Editing</option>
+                            <option value="reviewing" <%= filters.status === 'reviewing' ? 'selected' : '' %>>Reviewing</option>
+                            <option value="completed" <%= filters.status === 'completed' ? 'selected' : '' %>>Completed</option>
+                            <option value="published" <%= filters.status === 'published' ? 'selected' : '' %>>Published</option>
+                            <option value="archived" <%= filters.status === 'archived' ? 'selected' : '' %>>Archived</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Type</label>
+                        <select class="form-select" name="type" onchange="document.getElementById('filterForm').submit()">
+                            <option value="">All Types</option>
+                            <option value="book" <%= filters.type === 'book' ? 'selected' : '' %>>Book</option>
+                            <option value="collection" <%= filters.type === 'collection' ? 'selected' : '' %>>Collection</option>
+                            <option value="short-story" <%= filters.type === 'short-story' ? 'selected' : '' %>>Short Story</option>
+                            <option value="memoir" <%= filters.type === 'memoir' ? 'selected' : '' %>>Memoir</option>
+                            <option value="screenplay" <%= filters.type === 'screenplay' ? 'selected' : '' %>>Screenplay</option>
+                            <option value="poetry" <%= filters.type === 'poetry' ? 'selected' : '' %>>Poetry</option>
+                            <option value="other" <%= filters.type === 'other' ? 'selected' : '' %>>Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Sort By</label>
+                        <select class="form-select" name="sort" onchange="document.getElementById('filterForm').submit()">
+                            <option value="updatedAt" <%= filters.sort === 'updatedAt' ? 'selected' : '' %>>Last Updated</option>
+                            <option value="createdAt" <%= filters.sort === 'createdAt' ? 'selected' : '' %>>Date Created</option>
+                            <option value="title" <%= filters.sort === 'title' ? 'selected' : '' %>>Title</option>
+                            <option value="currentWordCount" <%= filters.sort === 'currentWordCount' ? 'selected' : '' %>>Word Count</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Order</label>
+                        <select class="form-select" name="order" onchange="document.getElementById('filterForm').submit()">
+                            <option value="desc" <%= filters.order === 'desc' ? 'selected' : '' %>>Descending</option>
+                            <option value="asc" <%= filters.order === 'asc' ? 'selected' : '' %>>Ascending</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Projects List -->
+        <% if (projects && projects.length > 0) { %>
+            <% projects.forEach(project => { %>
+                <div class="project-card">
+                    <div class="project-header">
+                        <div>
+                            <div class="project-title">
+                                <a href="/story/projects/<%= project._id %>" style="text-decoration: none; color: inherit;">
+                                    <%= project.title %>
+                                </a>
+                            </div>
+                            <div class="project-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-book"></i>
+                                    <span><%= project.type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) %></span>
+                                </div>
+                                <% if (project.genre) { %>
+                                    <div class="meta-item">
+                                        <i class="fas fa-tag"></i>
+                                        <span><%= project.genre %></span>
+                                    </div>
+                                <% } %>
+                                <div class="meta-item">
+                                    <i class="far fa-calendar"></i>
+                                    <span>Updated <%= new Date(project.updatedAt).toLocaleDateString() %></span>
+                                </div>
+                                <% if (project.collaborators && project.collaborators.length > 0) { %>
+                                    <div class="meta-item">
+                                        <i class="fas fa-users"></i>
+                                        <span><%= project.collaborators.length %> Collaborator<%= project.collaborators.length > 1 ? 's' : '' %></span>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="badge-status badge bg-<%= 
+                                project.status === 'completed' || project.status === 'published' ? 'success' :
+                                project.status === 'writing' || project.status === 'editing' ? 'primary' :
+                                project.status === 'reviewing' ? 'info' :
+                                project.status === 'archived' ? 'secondary' : 'warning'
+                            %>">
+                                <%= project.status.charAt(0).toUpperCase() + project.status.slice(1) %>
+                            </span>
+                        </div>
+                    </div>
+
+                    <% if (project.description) { %>
+                        <p class="text-muted mb-3"><%= project.description %></p>
+                    <% } %>
+
+                    <div class="progress-section">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted">
+                                <%= project.currentWordCount.toLocaleString() %> 
+                                <% if (project.targetWordCount) { %>
+                                    / <%= project.targetWordCount.toLocaleString() %> words
+                                <% } else { %>
+                                    words
+                                <% } %>
+                            </small>
+                            <% if (project.targetWordCount) { %>
+                                <% const percentage = Math.min(Math.round((project.currentWordCount / project.targetWordCount) * 100), 100); %>
+                                <small class="text-muted"><%= percentage %>% complete</small>
+                            <% } %>
+                        </div>
+                        <% if (project.targetWordCount) { %>
+                            <% const percentage = Math.min(Math.round((project.currentWordCount / project.targetWordCount) * 100), 100); %>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: <%= percentage %>%"
+                                    aria-valuenow="<%= percentage %>" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <div class="mt-3 d-flex gap-2">
+                        <a href="/story/projects/<%= project._id %>" class="btn btn-primary btn-action btn-sm">
+                            <i class="fas fa-folder-open me-1"></i>Open
+                        </a>
+                        <button class="btn btn-outline-secondary btn-action btn-sm" onclick="editProject('<%= project._id %>')">
+                            <i class="fas fa-edit me-1"></i>Edit
+                        </button>
+                        <button class="btn btn-outline-danger btn-action btn-sm" onclick="deleteProject('<%= project._id %>')">
+                            <i class="fas fa-trash me-1"></i>Delete
+                        </button>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="empty-state">
+                <i class="fas fa-folder-open"></i>
+                <h3>No Projects Found</h3>
+                <p>Start by creating your first writing project.</p>
+                <button class="btn btn-primary btn-lg" onclick="showCreateProject()">
+                    <i class="fas fa-plus me-2"></i>Create Project
+                </button>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Create/Edit Project Modal -->
+    <div class="modal fade" id="projectModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="projectModalTitle">Create Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="projectForm">
+                        <input type="hidden" id="projectId" name="projectId">
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="title" class="form-label">Title *</label>
+                                <input type="text" class="form-control" id="title" name="title" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="type" class="form-label">Type *</label>
+                                <select class="form-select" id="type" name="type" required>
+                                    <option value="">Select...</option>
+                                    <option value="book">Book</option>
+                                    <option value="collection">Collection</option>
+                                    <option value="short-story">Short Story</option>
+                                    <option value="memoir">Memoir</option>
+                                    <option value="screenplay">Screenplay</option>
+                                    <option value="poetry">Poetry</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="genre" class="form-label">Genre</label>
+                                <input type="text" class="form-control" id="genre" name="genre">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="planning">Planning</option>
+                                    <option value="writing">Writing</option>
+                                    <option value="editing">Editing</option>
+                                    <option value="reviewing">Reviewing</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="published">Published</option>
+                                    <option value="archived">Archived</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="targetWordCount" class="form-label">Target Word Count</label>
+                                <input type="number" class="form-control" id="targetWordCount" name="targetWordCount" min="0">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="deadline" class="form-label">Deadline</label>
+                                <input type="date" class="form-control" id="deadline" name="deadline">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="4"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveProject()">Save Project</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let projectModal;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            projectModal = new bootstrap.Modal(document.getElementById('projectModal'));
+        });
+
+        function showCreateProject() {
+            document.getElementById('projectModalTitle').textContent = 'Create Project';
+            document.getElementById('projectForm').reset();
+            document.getElementById('projectId').value = '';
+            projectModal.show();
+        }
+
+        async function editProject(projectId) {
+            try {
+                const response = await fetch(`/story/api/projects/${projectId}`);
+                if (!response.ok) throw new Error('Failed to load project');
+                
+                const data = await response.json();
+                const project = data.project;
+
+                document.getElementById('projectModalTitle').textContent = 'Edit Project';
+                document.getElementById('projectId').value = project._id;
+                document.getElementById('title').value = project.title;
+                document.getElementById('type').value = project.type;
+                document.getElementById('genre').value = project.genre || '';
+                document.getElementById('status').value = project.status;
+                document.getElementById('description').value = project.description || '';
+                document.getElementById('targetWordCount').value = project.targetWordCount || '';
+                document.getElementById('deadline').value = project.deadline ? new Date(project.deadline).toISOString().split('T')[0] : '';
+                document.getElementById('notes').value = project.notes || '';
+
+                projectModal.show();
+            } catch (error) {
+                console.error('Error loading project:', error);
+                alert('Failed to load project details');
+            }
+        }
+
+        async function saveProject() {
+            const projectId = document.getElementById('projectId').value;
+            const formData = {
+                title: document.getElementById('title').value,
+                type: document.getElementById('type').value,
+                genre: document.getElementById('genre').value,
+                status: document.getElementById('status').value,
+                description: document.getElementById('description').value,
+                targetWordCount: document.getElementById('targetWordCount').value,
+                deadline: document.getElementById('deadline').value,
+                notes: document.getElementById('notes').value
+            };
+
+            try {
+                const url = projectId ? `/story/projects/${projectId}` : '/story/projects';
+                const method = projectId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) throw new Error('Failed to save project');
+
+                const data = await response.json();
+                if (data.success) {
+                    projectModal.hide();
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error('Error saving project:', error);
+                alert('Failed to save project');
+            }
+        }
+
+        async function deleteProject(projectId) {
+            if (!confirm('Are you sure you want to delete this project? This will also delete all related stories, timelines, and characters.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/story/projects/${projectId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error('Failed to delete project');
+
+                const data = await response.json();
+                if (data.success) {
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error('Error deleting project:', error);
+                alert('Failed to delete project');
+            }
+        }
+    </script>
+</body>
+
+</html>

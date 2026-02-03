@@ -28,6 +28,7 @@ const storyRoutes = require('./routes/story');
 const medicineRoutes = require('./routes/medicine');
 const bulletinRoutes = require('./routes/bulletin');
 const hymnRoutes = require('./routes/hymns');
+const ebmRoutes = require('./routes/ebm');
 const announcementRoutes = require('./routes/announcements');
 const emailClientRoutes = require('./email-client/enhancedEmailRoutes');
 const reportConfigRoutes = require('./routes/reportConfigs'); // NEW: Saved report configurations
@@ -1074,6 +1075,7 @@ app.use('/story', ensureAuthenticated, ensureApproved, storyRoutes);
 app.use('/medicine', ensureAuthenticated, ensureApproved, medicineRoutes);
 app.use('/bulletin', bulletinRoutes); // Temporarily remove auth for testing
 app.use('/hymns', hymnRoutes); // Remove authentication requirement for hymn search
+app.use('/ebm', ensureAuthenticated, ensureApproved, ebmRoutes);
 app.use('/api/report-configs', reportConfigRoutes); // NEW: Saved report configurations
 
 // Public email template routes for dashboard access (read-only)

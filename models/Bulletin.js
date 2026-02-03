@@ -40,25 +40,37 @@ const bulletinSchema = new mongoose.Schema({
         reference: String
     },
     
-    // Leadership Roles
+    // Leadership Roles with additional info
     presiding: {
-        type: String,
-        default: 'Bishop Name'
+        name: {
+            type: String,
+            default: 'Bishop Name'
+        },
+        notes: String
     },
     conducting: {
-        type: String,
-        default: 'Counselor Name'
+        name: {
+            type: String,
+            default: 'Counselor Name'
+        },
+        notes: String
     },
     organist: {
-        type: String,
-        default: 'Organist Name'
+        name: {
+            type: String,
+            default: 'Organist Name'
+        },
+        notes: String
     },
     chorister: {
-        type: String,
-        default: 'Chorister Name'
+        name: {
+            type: String,
+            default: 'Chorister Name'
+        },
+        notes: String
     },
     
-    // Program Items
+    // Program Items with LDS hymn links
     openingHymn: {
         number: {
             type: String,
@@ -67,12 +79,16 @@ const bulletinSchema = new mongoose.Schema({
         title: {
             type: String,
             default: 'Hymn Title'
-        }
+        },
+        url: String  // LDS hymn URL
     },
     
     invocation: {
-        type: String,
-        default: 'By Invitation'
+        name: {
+            type: String,
+            default: 'By Invitation'
+        },
+        notes: String
     },
     
     wardBusiness: {
@@ -93,7 +109,8 @@ const bulletinSchema = new mongoose.Schema({
         title: {
             type: String,
             default: 'As Now We Take the Sacrament'
-        }
+        },
+        url: String  // LDS hymn URL
     },
     
     speakers: {
@@ -102,14 +119,16 @@ const bulletinSchema = new mongoose.Schema({
                 type: String,
                 default: 'Speaker Name'
             },
-            topic: String
+            topic: String,
+            notes: String
         },
         second: {
             name: {
                 type: String,
                 default: 'Speaker Name'
             },
-            topic: String
+            topic: String,
+            notes: String
         }
     },
     
@@ -118,7 +137,8 @@ const bulletinSchema = new mongoose.Schema({
             type: String,
             default: 'Performer Name'
         },
-        selection: String
+        selection: String,
+        notes: String
     },
     
     closingHymn: {
@@ -129,12 +149,16 @@ const bulletinSchema = new mongoose.Schema({
         title: {
             type: String,
             default: 'Hymn Title'
-        }
+        },
+        url: String  // LDS hymn URL
     },
     
     benediction: {
-        type: String,
-        default: 'By Invitation'
+        name: {
+            type: String,
+            default: 'By Invitation'
+        },
+        notes: String
     },
     
     comeFollowMe: {

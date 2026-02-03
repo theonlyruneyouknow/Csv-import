@@ -299,9 +299,45 @@ router.post('/:id', ensureAuthenticated, ensureBulletinAccess, async (req, res) 
     }
 });
 
+// Admin dashboard - MUST be before /:id route
+router.get('/admin', ensureAuthenticated, ensureBulletinAccess, async (req, res) => {
+    try {
+        console.log('✅ /bulletin/admin route HIT - Admin dashboard route accessed');
+        console.log('👤 User:', req.user.username);
+        
+        // Get the current bulletin
+        const currentBulletin = await Bulletin.getCurrentBulletin();
+        
+        // Get all bulletins, sorted by meeting date (most recent first)
+        const recentBulletins = await Bulletin.find()
+            .sort({ meetingDate: -1 })
+            .limit(50)
+            .populate('createdBy', 'firstName lastName username')
+            .populate('lastModifiedBy', 'firstName lastName username');
+        
+        console.log(`📊 Found ${recentBulletins.length} bulletins for admin dashboard`);
+        console.log(`📅 Current bulletin: ${currentBulletin ? currentBulletin._id : 'None'}`);
+        
+        res.render('bulletin-admin', {
+            user: req.user,
+            recentBulletins,
+            currentBulletin,
+            title: 'Bulletin Administration'
+        });
+    } catch (error) {
+        console.error('❌ Error loading bulletin admin:', error);
+        res.status(500).render('error', { 
+            message: 'Error loading bulletin administration',
+            error: error.message 
+        });
+    }
+});
+
 // View specific bulletin
 router.get('/:id', async (req, res) => {
     try {
+        console.log(`🔍 /:id route HIT - Attempting to load bulletin with ID: ${req.params.id}`);
+        
         const bulletin = await Bulletin.findById(req.params.id);
         
         if (!bulletin) {
