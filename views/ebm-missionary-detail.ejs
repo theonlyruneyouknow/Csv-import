@@ -346,6 +346,77 @@
         </div>
         <% } %>
 
+        <!-- Companionships -->
+        <% if (companions && companions.length > 0) { %>
+        <div class="detail-card">
+            <div class="info-section">
+                <h4><i class="bi bi-people-fill"></i> Companions</h4>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Companion</th>
+                                <th>Area</th>
+                                <th>Period</th>
+                                <th>Duration</th>
+                                <th>Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% companions.forEach(comp => { %>
+                                <tr>
+                                    <td>
+                                        <strong><%= comp.companion.displayName || `${comp.companion.firstName} ${comp.companion.lastName}` %></strong>
+                                    </td>
+                                    <td>
+                                        <% if (comp.companionship.area && comp.companionship.area.name) { %>
+                                            <%= comp.companionship.area.name %>
+                                        <% } else { %>
+                                            <span class="text-muted fst-italic">Area not recorded</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (comp.companionship.startDate) { %>
+                                            <%= new Date(comp.companionship.startDate).toLocaleDateString() %>
+                                            <% if (comp.companionship.endDate) { %>
+                                                - <%= new Date(comp.companionship.endDate).toLocaleDateString() %>
+                                            <% } else { %>
+                                                - Present
+                                            <% } %>
+                                        <% } else { %>
+                                            <span class="text-muted">Date unknown</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (comp.companionship.duration) { %>
+                                            <%= comp.companionship.duration %> weeks
+                                        <% } else { %>
+                                            <span class="text-muted">-</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (comp.role) { %>
+                                            <span class="badge bg-info"><%= comp.role %></span>
+                                        <% } %>
+                                        <% if (comp.companionship.isDistrictLeadership) { %>
+                                            <span class="badge bg-warning">District Leader</span>
+                                        <% } %>
+                                        <% if (comp.companionship.isZoneLeadership) { %>
+                                            <span class="badge bg-danger">Zone Leader</span>
+                                        <% } %>
+                                        <% if (comp.companionship.isTraining) { %>
+                                            <span class="badge bg-success">Training</span>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <% } %>
+
         <!-- Notes & Additional Info -->
         <% if (missionary.notes || missionary.other) { %>
         <div class="detail-card">

@@ -123,7 +123,7 @@ const userSchema = new mongoose.Schema({
     },
     invitationExpires: {
         type: Date
-    },87*-/
+    },
     invitedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'

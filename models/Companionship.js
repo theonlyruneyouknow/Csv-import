@@ -15,11 +15,11 @@ const companionshipSchema = new mongoose.Schema({
         }
     }],
     
-    // Area Information
+    // Area Information (optional - some legacy data may not have area info)
     area: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'MissionArea',
-        required: true
+        required: false
     },
     
     // Time Period
@@ -132,19 +132,25 @@ companionshipSchema.statics.findByMissionary = function(missionaryId) {
 // Static method to find companions of a missionary
 companionshipSchema.statics.findCompanionsOf = async function(missionaryId) {
     const companionships = await this.find({ 'missionaries.missionary': missionaryId })
-        .populate('missionaries.missionary', 'firstName lastName missionPhoto currentPhoto');
+        .populate('missionaries.missionary', 'firstName lastName displayName missionPhoto currentPhoto')
+        .populate('area', 'name city legacyAreaId');
     
     const companions = [];
     companionships.forEach(comp => {
         comp.missionaries.forEach(m => {
-            if (m.missionary._id.toString() !== missionaryId.toString()) {
+            if (m.missionary && m.missionary._id.toString() !== missionaryId.toString()) {
                 companions.push({
-                    missionary: m.missionary,
+                    companion: m.missionary,
+                    role: m.role,
                     companionship: {
+                        _id: comp._id,
                         area: comp.area,
                         startDate: comp.startDate,
                         endDate: comp.endDate,
-                        role: m.role
+                        duration: comp.duration,
+                        isDistrictLeadership: comp.isDistrictLeadership,
+                        isZoneLeadership: comp.isZoneLeadership,
+                        isTraining: comp.isTraining
                     }
                 });
             }

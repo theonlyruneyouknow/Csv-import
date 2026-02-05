@@ -520,6 +520,9 @@ router.post('/import', ensureEBMAccess, upload.single('csvFile'), async (req, re
             case 'missionary-areas':
                 result = await importMissionaryAreas(parsed.data, req.user);
                 break;
+            case 'companionships':
+                result = await importCompanionships(parsed.data, req.user);
+                break;
             default:
                 return res.status(400).json({ success: false, error: 'Invalid import type' });
         }
@@ -843,6 +846,177 @@ async function importMissionaryAreas(data, user) {
         };
     } catch (error) {
         throw new Error('Missionary-Area linking failed: ' + error.message);
+    }
+}
+
+// Helper: Import Companionships
+async function importCompanionships(data, user) {
+    let created = 0;
+    let alreadyExists = 0;
+    let skipped = 0;
+    let notFoundMissionary1 = 0;
+    let notFoundMissionary2 = 0;
+    let notFoundArea = 0;
+    let errors = [];
+
+    try {
+        // Build lookup maps for missionaries and areas
+        const missionaries = await Missionary.find({});
+        const missionaryMap = new Map();
+        missionaries.forEach(m => {
+            if (m.legacyData && m.legacyData.alumId) {
+                missionaryMap.set(m.legacyData.alumId, m);
+            }
+        });
+
+        const areas = await MissionArea.find({});
+        const areaMap = new Map();
+        areas.forEach(a => {
+            if (a.legacyAreaId) {
+                areaMap.set(a.legacyAreaId, a);
+            }
+        });
+
+        console.log(`Found ${missionaryMap.size} missionaries and ${areaMap.size} areas for companionship import`);
+        console.log(`📊 Total rows in CSV: ${data.length}`);
+
+        // Log first few rows to see structure
+        if (data.length > 0) {
+            console.log('📋 Sample CSV row structure:', Object.keys(data[0]));
+            console.log('📋 First row data:', data[0]);
+        }
+
+        for (const row of data) {
+            try {
+                // Support both companicrm1_id and companionship_rm1_id variants
+                const rm1IdValue = row.companicrm1_id || row.companionship_rm1_id || row.rm1_id;
+                const rm2IdValue = row.rm2_id || row.companionship_rm2_id;
+                const areaIdValue = row.area_id;
+
+                // Skip if missing required missionary fields
+                if (!rm1IdValue || !rm2IdValue || 
+                    rm1IdValue === 'NULL' || rm2IdValue === 'NULL') {
+                    skipped++;
+                    if (skipped <= 5) {
+                        console.log(`⊘ Skipping row (missing/NULL missionary fields): rm1=${rm1IdValue}, rm2=${rm2IdValue}`);
+                    }
+                    continue;
+                }
+
+                const rm1Id = rm1IdValue.toString().trim();
+                const rm2Id = rm2IdValue.toString().trim();
+                
+                // Area is optional - handle NULL or missing values
+                let areaId = null;
+                if (areaIdValue && areaIdValue !== 'NULL' && areaIdValue !== '') {
+                    areaId = areaIdValue.toString().trim();
+                }
+
+                // Find both missionaries
+                const missionary1 = missionaryMap.get(rm1Id);
+                if (!missionary1) {
+                    notFoundMissionary1++;
+                    continue;
+                }
+
+                const missionary2 = missionaryMap.get(rm2Id);
+                if (!missionary2) {
+                    notFoundMissionary2++;
+                    continue;
+                }
+
+                // Find area (optional)
+                let area = null;
+                if (areaId) {
+                    area = areaMap.get(areaId);
+                    if (!area) {
+                        notFoundArea++;
+                        // Continue anyway - we'll create companionship without area
+                    }
+                }
+
+                // Check if companionship already exists
+                // Look for existing with same missionaries (and area if provided)
+                const query = {
+                    $and: [
+                        { 'missionaries.missionary': missionary1._id },
+                        { 'missionaries.missionary': missionary2._id }
+                    ]
+                };
+                
+                // Only filter by area if we have one
+                if (area) {
+                    query.area = area._id;
+                }
+                
+                const existingComp = await Companionship.findOne(query);
+
+                if (existingComp) {
+                    alreadyExists++;
+                    continue;
+                }
+
+                // Create new companionship
+                const companionshipData = {
+                    missionaries: [
+                        { missionary: missionary1._id, role: 'senior' },
+                        { missionary: missionary2._id, role: 'junior' }
+                    ],
+                    startDate: new Date('2000-01-01'), // Default date for legacy imports without dates
+                    addedBy: user._id
+                };
+                
+                // Add area only if we have one
+                if (area) {
+                    companionshipData.area = area._id;
+                }
+                
+                const newCompanionship = new Companionship(companionshipData);
+
+                await newCompanionship.save();
+
+                // Add companionship reference to both missionaries
+                if (!missionary1.companionships.includes(newCompanionship._id)) {
+                    missionary1.companionships.push(newCompanionship._id);
+                    await missionary1.save();
+                }
+                if (!missionary2.companionships.includes(newCompanionship._id)) {
+                    missionary2.companionships.push(newCompanionship._id);
+                    await missionary2.save();
+                }
+
+                created++;
+
+            } catch (err) {
+                errors.push({
+                    name: `rm1: ${row.companicrm1_id}, rm2: ${row.rm2_id}, area: ${row.area_id}`,
+                    error: err.message
+                });
+            }
+        }
+
+        console.log(`\n📊 Companionship Import Summary:`);
+        console.log(`   ✅ Created: ${created}`);
+        console.log(`   ↷ Already exists: ${alreadyExists}`);
+        console.log(`   ⊘ Skipped (missing fields): ${skipped}`);
+        console.log(`   ⚠️  Missionary 1 not found: ${notFoundMissionary1}`);
+        console.log(`   ⚠️  Missionary 2 not found: ${notFoundMissionary2}`);
+        console.log(`   ⚠️  Area not found: ${notFoundArea}`);
+        console.log(`   ❌ Errors: ${errors.length}`);
+
+        return {
+            success: true,
+            created,
+            alreadyExists,
+            skipped,
+            notFoundMissionary1,
+            notFoundMissionary2,
+            notFoundArea,
+            errors: errors.length > 0 ? errors : undefined,
+            message: `Successfully created ${created} companionships (${alreadyExists} already exist, ${skipped} skipped, ${notFoundMissionary1} missionary1 not found, ${notFoundMissionary2} missionary2 not found, ${notFoundArea} areas not found)`
+        };
+    } catch (error) {
+        throw new Error('Companionship import failed: ' + error.message);
     }
 }
 

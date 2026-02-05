@@ -179,6 +179,7 @@
                         <option value="missionaries">Missionaries (Alumni Data)</option>
                         <option value="areas">Mission Areas</option>
                         <option value="missionary-areas">Missionary-Area Relationships</option>
+                        <option value="companionships">Companionships</option>
                     </select>
                 </div>
 
@@ -210,6 +211,17 @@
                         <li><strong>Required:</strong> alum_id (or a_id) and area_id</li>
                         <li><strong>Example:</strong> 1,18 (links alumId=1 to area_id=18)</li>
                         <li><strong>Optional:</strong> alum_area, area_sequ (ignored during import)</li>
+                        <li><strong>Note:</strong> Make sure missionaries and areas are already imported</li>
+                    </ul>
+                </div>
+
+                <div class="instruction-box" id="companionshipsInstructions" style="display: none;">
+                    <h5><i class="fas fa-info-circle me-2"></i>Companionships CSV Format</h5>
+                    <p class="mb-2">Your CSV should include these columns:</p>
+                    <ul class="mb-0">
+                        <li><strong>Required:</strong> companicrm1_id (first missionary), rm2_id (second missionary), area_id</li>
+                        <li><strong>Example:</strong> 1,1,203 (companionship between alumId=1 and alumId=1 in area_id=203)</li>
+                        <li><strong>Optional:</strong> real_comp (1 for real companionship, 0 for other)</li>
                         <li><strong>Note:</strong> Make sure missionaries and areas are already imported</li>
                     </ul>
                 </div>
@@ -413,6 +425,7 @@
             document.getElementById('missionariesInstructions').style.display = 'none';
             document.getElementById('areasInstructions').style.display = 'none';
             document.getElementById('missionaryAreasInstructions').style.display = 'none';
+            document.getElementById('companionshipsInstructions').style.display = 'none';
             
             // Show relevant instruction box
             if (importType === 'missionaries') {
@@ -421,6 +434,8 @@
                 document.getElementById('areasInstructions').style.display = 'block';
             } else if (importType === 'missionary-areas') {
                 document.getElementById('missionaryAreasInstructions').style.display = 'block';
+            } else if (importType === 'companionships') {
+                document.getElementById('companionshipsInstructions').style.display = 'block';
             }
             
             // Keep file selection visible if file is selected
@@ -490,6 +505,17 @@
                         message = `✅ Linked ${result.linked} new missionary-area connections\n↷ Already linked: ${result.alreadyLinked}\n⊘ Skipped: ${result.skipped}`;
                         if (result.notFoundMissionary > 0) {
                             message += `\n⚠️  Missionaries not found: ${result.notFoundMissionary}`;
+                        }
+                        if (result.notFoundArea > 0) {
+                            message += `\n⚠️  Areas not found: ${result.notFoundArea}`;
+                        }
+                    } else if (importType === 'companionships') {
+                        message = `✅ Created ${result.created} new companionships\n↷ Already exists: ${result.alreadyExists}\n⊘ Skipped: ${result.skipped}`;
+                        if (result.notFoundMissionary1 > 0) {
+                            message += `\n⚠️  First missionary not found: ${result.notFoundMissionary1}`;
+                        }
+                        if (result.notFoundMissionary2 > 0) {
+                            message += `\n⚠️  Second missionary not found: ${result.notFoundMissionary2}`;
                         }
                         if (result.notFoundArea > 0) {
                             message += `\n⚠️  Areas not found: ${result.notFoundArea}`;
