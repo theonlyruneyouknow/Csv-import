@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📦 Manual Tracking Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: block;
+            color: #495057;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-info:hover { background: #138496; }
+        
+        .tracking-info-display {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        .tracking-info-display.show {
+            display: block;
+        }
+        .info-row {
+            padding: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+            display: inline-block;
+            width: 150px;
+        }
+        .info-value {
+            color: #212529;
+        }
+        .copy-section {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .history-entry {
+            background: #f8f9fa;
+            border-left: 3px solid #007bff;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .history-date {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .custom-carrier-input {
+            display: none;
+            margin-top: 10px;
+        }
+        .custom-carrier-input.show {
+            display: block;
+        }
+        
+        /* PO Suggestions Dropdown */
+        .po-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .po-suggestions.show {
+            display: block;
+        }
+        .po-suggestion-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f1f1;
+            transition: background 0.2s;
+        }
+        .po-suggestion-item:hover {
+            background: #f8f9fa;
+        }
+        .po-suggestion-item:last-child {
+            border-bottom: none;
+        }
+        .po-suggestion-item .po-number {
+            font-weight: 600;
+            color: #007bff;
+        }
+        .po-suggestion-item .po-vendor {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 2px;
+        }
+        .form-group {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 Manual Tracking Dashboard</h1>
+            <button class="btn btn-secondary" onclick="window.location.href='/purchase-orders'">
+                ← Back to Dashboard
+            </button>
+        </div>
+
+        <!-- Main Tracking Form -->
+        <div class="card">
+            <h3 style="margin-bottom: 20px;">➕ Add/Update Tracking Information</h3>
+            <form id="trackingForm">
+                <!-- PO Number (First) -->
+                <div class="form-group">
+                    <label for="poNumber">Purchase Order Number *</label>
+                    <input type="text" id="poNumber" placeholder="Type digits to search PO..." required autocomplete="off">
+                    <div id="poSuggestions" class="po-suggestions"></div>
+                    <small style="color: #6c757d;">Type numbers to filter (e.g., "114" shows PO11140, PO11432, etc.)</small>
+                </div>
+
+                <!-- Vendor (Auto-populated) -->
+                <div class="form-group">
+                    <label for="vendorName">Vendor</label>
+                    <input type="text" id="vendorName" readonly placeholder="Will auto-populate when PO is selected" style="background: #e9ecef;">
+                </div>
+
+                <!-- Tracking Number -->
+                <div class="form-group">
+                    <label for="trackingNumber">Tracking Number *</label>
+                    <input type="text" id="trackingNumber" placeholder="Enter tracking number" required>
+                </div>
+
+                <!-- Freight Company (Dropdown) -->
+                <div class="form-group">
+                    <label for="freightCompany">Freight Company *</label>
+                    <select id="freightCompany" required>
+                        <option value="">Select Freight Company...</option>
+                        <option value="FedEx">FedEx</option>
+                        <option value="UPS">UPS</option>
+                        <option value="USPS">USPS</option>
+                        <option value="DHL">DHL</option>
+                        <option value="OnTrac">OnTrac</option>
+                        <option value="R+L Carriers">R+L Carriers</option>
+                        <option value="Old Dominion">Old Dominion Freight</option>
+                        <option value="Estes">Estes Express</option>
+                        <option value="YRC">YRC Freight</option>
+                        <option value="Other">Other (Add New)</option>
+                    </select>
+                </div>
+
+                <!-- Custom Carrier Input (shown when "Other" is selected) -->
+                <div class="form-group custom-carrier-input" id="customCarrierGroup">
+                    <label for="customCarrier">New Freight Company Name *</label>
+                    <input type="text" id="customCarrier" placeholder="Enter freight company name">
+                    <small style="color: #6c757d;">This will be added to the dropdown list</small>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn btn-info" onclick="searchTracking()">
+                        🔍 Search Tracking Info
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        💾 Save to System
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                        🔄 Clear Form
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tracking Information Display -->
+        <div class="card tracking-info-display" id="trackingInfoDisplay">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3>📦 Tracking Information</h3>
+                <div>
+                    <button class="btn btn-info" onclick="searchTracking()" style="padding: 8px 16px;">
+                        🔄 Refresh Frame
+                    </button>
+                    <button class="btn btn-primary" onclick="copyTrackingInfo()" style="padding: 8px 16px;">
+                        📋 Copy All
+                    </button>
+                </div>
+            </div>
+
+            <!-- Iframe to show carrier's tracking website -->
+            <div style="margin-bottom: 20px;">
+                <div style="background: #e9ecef; padding: 10px; border-radius: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>Freight Company Tracking Page</strong>
+                        <div id="trackingUrlDisplay" style="font-size: 12px; color: #6c757d; margin-top: 5px;"></div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="openInNewWindow()" style="padding: 5px 10px; font-size: 12px;">
+                        🔗 Open in New Window
+                    </button>
+                </div>
+                <iframe id="trackingIframe" style="width: 100%; height: 500px; border: 2px solid #dee2e6; border-radius: 6px; background: white;"></iframe>
+            </div>
+
+            <div id="trackingInfoContent">
+                <div class="info-row">
+                    <span class="info-label">Tracking Number:</span>
+                    <span class="info-value" id="displayTrackingNumber">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Freight Company:</span>
+                    <span class="info-value" id="displayFreightCompany">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Current Location:</span>
+                    <span class="info-value" id="displayLocation">
+                        <textarea id="locationInput" style="width: 100%; min-height: 60px;" placeholder="Enter current location manually"></textarea>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">ETA:</span>
+                    <span class="info-value" id="displayETA">
+                        <input type="date" id="etaInput" style="width: 200px;">
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Status:</span>
+                    <span class="info-value" id="displayStatus">
+                        <select id="statusInput" style="width: 250px;">
+                            <option value="In Transit">In Transit</option>
+                            <option value="Out for Delivery">Out for Delivery</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Delayed">Delayed</option>
+                            <option value="Exception">Exception</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Notes:</span>
+                    <span class="info-value">
+                        <textarea id="notesInput" style="width: 100%; min-height: 80px;" placeholder="Add any additional notes or details"></textarea>
+                    </span>
+                </div>
+            </div>
+
+            <div class="copy-section">
+                <label style="font-weight: 600; margin-bottom: 10px; display: block;">Copy/Paste Format:</label>
+                <textarea id="copyableText" readonly style="width: 100%; min-height: 150px; font-family: monospace; background: #f8f9fa;"></textarea>
+                <button class="btn btn-primary" onclick="copyToClipboard()" style="margin-top: 10px;">
+                    📋 Copy to Clipboard
+                </button>
+            </div>
+
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <button class="btn btn-success" onclick="saveTrackingUpdate()">
+                    💾 Save Update
+                </button>
+                <button class="btn btn-secondary" onclick="hideTrackingInfo()">
+                    ✕ Close
+                </button>
+            </div>
+        </div>
+
+        <!-- Tracking History -->
+        <div class="card" id="trackingHistory" style="display: none;">
+            <h3 style="margin-bottom: 15px;">📜 Tracking History</h3>
+            <div id="historyContent"></div>
+        </div>
+
+        <!-- Saved Tracking List -->
+        <div class="card">
+            <h3 style="margin-bottom: 15px;">📋 Saved Tracking Numbers</h3>
+            <div id="savedTrackingList">
+                <p style="color: #6c757d;">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentPO = null;
+        let currentLineItem = null;
+        let allPOs = []; // Store all PO data
+        let customCarriers = JSON.parse(localStorage.getItem('customCarriers') || '[]');
+        let trackingHistory = JSON.parse(localStorage.getItem('trackingHistory') || '[]');
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPONumbers();
+            loadCustomCarriers();
+            loadSavedTracking();
+            setupEventListeners();
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // PO input - filter as user types
+            const poInput = document.getElementById('poNumber');
+            const poSuggestions = document.getElementById('poSuggestions');
+            
+            poInput.addEventListener('input', function() {
+                filterPOs(this.value);
+            });
+            
+            poInput.addEventListener('focus', function() {
+                if (this.value) filterPOs(this.value);
+            });
+            
+            // Close suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('#poNumber') && !e.target.closest('#poSuggestions')) {
+                    poSuggestions.classList.remove('show');
+                }
+            });
+
+            // Freight company changes
+            document.getElementById('freightCompany').addEventListener('change', function() {
+                const customGroup = document.getElementById('customCarrierGroup');
+                if (this.value === 'Other') {
+                    customGroup.classList.add('show');
+                    document.getElementById('customCarrier').required = true;
+                } else {
+                    customGroup.classList.remove('show');
+                    document.getElementById('customCarrier').required = false;
+                }
+            });
+
+            // Form submission
+            document.getElementById('trackingForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveToSystem();
+            });
+        }
+
+        // Load PO numbers
+        async function loadPONumbers() {
+            try {
+                const response = await fetch('/purchase-orders/line-items-api?limit=5000');
+                const data = await response.json();
+                
+                if (data.lineItems) {
+                    // Create a map of PO numbers with their vendors
+                    const poMap = new Map();
+                    data.lineItems.forEach(item => {
+                        if (item.poNumber && !poMap.has(item.poNumber)) {
+                            poMap.set(item.poNumber, {
+                                poNumber: item.poNumber,
+                                vendor: item.poId?.vendor || 'Unknown Vendor',
+                                lineItems: []
+                            });
+                        }
+                        if (item.poNumber) {
+                            poMap.get(item.poNumber).lineItems.push(item);
+                        }
+                    });
+                    
+                    // Convert to array and sort
+                    allPOs = Array.from(poMap.values()).sort((a, b) => 
+                        a.poNumber.localeCompare(b.poNumber)
+                    );
+                    
+                    console.log(`Loaded ${allPOs.length} unique PO numbers`);
+                }
+            } catch (error) {
+                console.error('Error loading PO numbers:', error);
+                alert('Error loading PO numbers: ' + error.message);
+            }
+        }
+        
+        // Filter POs based on input
+        function filterPOs(searchText) {
+            const poSuggestions = document.getElementById('poSuggestions');
+            
+            if (!searchText) {
+                poSuggestions.classList.remove('show');
+                return;
+            }
+            
+            // Filter POs that contain the search text (case insensitive)
+            const filtered = allPOs.filter(po => 
+                po.poNumber.toLowerCase().includes(searchText.toLowerCase())
+            );
+            
+            if (filtered.length === 0) {
+                poSuggestions.innerHTML = '<div style="padding: 10px; color: #6c757d;">No matching POs found</div>';
+                poSuggestions.classList.add('show');
+                return;
+            }
+            
+            // Display filtered results
+            let html = '';
+            filtered.slice(0, 20).forEach(po => {
+                html += `<div class="po-suggestion-item" onclick="selectPO('${po.poNumber}')">`;
+                html += `<div class="po-number">${po.poNumber}</div>`;
+                html += `<div class="po-vendor">${po.vendor}</div>`;
+                html += `</div>`;
+            });
+            
+            if (filtered.length > 20) {
+                html += `<div style="padding: 10px; color: #6c757d; font-size: 12px;">+${filtered.length - 20} more (type more to narrow down)</div>`;
+            }
+            
+            poSuggestions.innerHTML = html;
+            poSuggestions.classList.add('show');
+        }
+        
+        // Select a PO from suggestions
+        function selectPO(poNumber) {
+            document.getElementById('poNumber').value = poNumber;
+            document.getElementById('poSuggestions').classList.remove('show');
+            loadPODetails(poNumber);
+        }
+
+        // Load PO details and populate vendor
+        async function loadPODetails(poNumber) {
+            if (!poNumber) {
+                document.getElementById('vendorName').value = '';
+                currentPO = null;
+                return;
+            }
+
+            try {
+                const response = await fetch(`/purchase-orders/line-items-api?poNumber=${encodeURIComponent(poNumber)}&limit=100`);
+                const data = await response.json();
+                
+                if (data.lineItems && data.lineItems.length > 0) {
+                    currentLineItem = data.lineItems[0];
+                    currentPO = data.lineItems[0].poId;
+                    
+                    // Populate vendor name
+                    const vendorName = currentPO?.vendor || 'Unknown Vendor';
+                    document.getElementById('vendorName').value = vendorName;
+                    
+                    // Pre-fill tracking if it exists
+                    if (currentLineItem.trackingNumber) {
+                        document.getElementById('trackingNumber').value = currentLineItem.trackingNumber;
+                    }
+                    if (currentLineItem.trackingCarrier) {
+                        document.getElementById('freightCompany').value = currentLineItem.trackingCarrier;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading PO details:', error);
+                alert('Error loading PO details: ' + error.message);
+            }
+        }
+
+        // Load custom carriers from localStorage
+        function loadCustomCarriers() {
+            const select = document.getElementById('freightCompany');
+            const otherOption = select.querySelector('option[value="Other"]');
+            
+            customCarriers.forEach(carrier => {
+                const option = document.createElement('option');
+                option.value = carrier;
+                option.textContent = carrier;
+                select.insertBefore(option, otherOption);
+            });
+        }
+
+        // Search tracking info
+        function searchTracking() {
+            const poNumber = document.getElementById('poNumber').value;
+            const trackingNumber = document.getElementById('trackingNumber').value;
+            let freightCompany = document.getElementById('freightCompany').value;
+            
+            if (!trackingNumber) {
+                alert('Please enter a tracking number');
+                return;
+            }
+
+            // Handle custom carrier
+            if (freightCompany === 'Other') {
+                const customCarrier = document.getElementById('customCarrier').value.trim();
+                if (!customCarrier) {
+                    alert('Please enter a freight company name');
+                    return;
+                }
+                freightCompany = customCarrier;
+                
+                // Add to custom carriers
+                if (!customCarriers.includes(customCarrier)) {
+                    customCarriers.push(customCarrier);
+                    localStorage.setItem('customCarriers', JSON.stringify(customCarriers));
+                    
+                    // Add to dropdown
+                    const select = document.getElementById('freightCompany');
+                    const option = document.createElement('option');
+                    option.value = customCarrier;
+                    option.textContent = customCarrier;
+                    const otherOption = select.querySelector('option[value="Other"]');
+                    select.insertBefore(option, otherOption);
+                    select.value = customCarrier;
+                }
+            }
+
+            // Get tracking URL for the carrier
+            const trackingUrl = getCarrierTrackingURL(freightCompany, trackingNumber);
+
+            // Display the tracking info section
+            const display = document.getElementById('trackingInfoDisplay');
+            display.classList.add('show');
+            
+            // Populate display
+            document.getElementById('displayTrackingNumber').textContent = trackingNumber;
+            document.getElementById('displayFreightCompany').textContent = freightCompany;
+            
+            // Load iframe with carrier's tracking page
+            const iframe = document.getElementById('trackingIframe');
+            const urlDisplay = document.getElementById('trackingUrlDisplay');
+            
+            if (trackingUrl) {
+                iframe.src = trackingUrl;
+                urlDisplay.textContent = trackingUrl;
+                
+                // Show success message
+                alert('✅ Loading tracking page in frame below!\n\n' +
+                      'Instructions:\n' +
+                      '1. View tracking info in the frame\n' +
+                      '2. Copy location, ETA, and status from the carrier\'s page\n' +
+                      '3. Paste into the fields below the frame\n' +
+                      '4. Click "Save Update" when done\n\n' +
+                      'Note: Some carriers may block iframe display. Use "Open in New Window" if frame is blank.');
+            } else {
+                iframe.src = '';
+                urlDisplay.textContent = 'No tracking URL available for ' + freightCompany;
+                alert('⚠️ No tracking URL available for ' + freightCompany + '\n\n' +
+                      'Please visit the carrier\'s website manually:\n' +
+                      '1. Search for "' + freightCompany + ' tracking"\n' +
+                      '2. Enter tracking number: ' + trackingNumber + '\n' +
+                      '3. Copy the information and paste below');
+            }
+            
+            // Update copyable text
+            updateCopyableText();
+        }
+        
+        // Get carrier tracking URL
+        function getCarrierTrackingURL(carrier, trackingNumber) {
+            const carriers = {
+                'FedEx': `https://www.fedex.com/fedextrack/?trknbr=${trackingNumber}`,
+                'UPS': `https://www.ups.com/track?track=yes&trackNums=${trackingNumber}`,
+                'USPS': `https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}`,
+                'DHL': `https://www.dhl.com/en/express/tracking.html?AWB=${trackingNumber}`,
+                'OnTrac': `https://www.ontrac.com/tracking/?number=${trackingNumber}`,
+                'R+L Carriers': `https://www2.rlcarriers.com/freight/shipping/shipment-tracing?pro=${trackingNumber}`,
+                'Old Dominion': `https://www.odfl.com/Trace/standardResult.faces?pro=${trackingNumber}`,
+                'Estes': `https://www.estes-express.com/shipment-tracking/?pro=${trackingNumber}`,
+                'YRC': `https://my.yrc.com/tools/track/shipments?referenceNumber=${trackingNumber}`
+            };
+            
+            return carriers[carrier] || null;
+        }
+        
+        // Open in new window
+        function openInNewWindow() {
+            const trackingNumber = document.getElementById('trackingNumber').value;
+            let freightCompany = document.getElementById('freightCompany').value;
+            
+            if (freightCompany === 'Other') {
+                freightCompany = document.getElementById('customCarrier').value.trim();
+            }
+            
+            const url = getCarrierTrackingURL(freightCompany, trackingNumber);
+            if (url) {
+                window.open(url, '_blank', 'width=1200,height=800');
+            } else {
+                alert('No tracking URL available for ' + freightCompany);
+            }
+        }
+
+        // Update copyable text
+        function updateCopyableText() {
+            const trackingNumber = document.getElementById('displayTrackingNumber').textContent;
+            const freightCompany = document.getElementById('displayFreightCompany').textContent;
+            const location = document.getElementById('locationInput').value;
+            const eta = document.getElementById('etaInput').value;
+            const status = document.getElementById('statusInput').value;
+            const notes = document.getElementById('notesInput').value;
+            
+            let text = `Tracking Number: ${trackingNumber}\n`;
+            text += `Freight Company: ${freightCompany}\n`;
+            text += `Status: ${status}\n`;
+            if (location) text += `Current Location: ${location}\n`;
+            if (eta) text += `ETA: ${new Date(eta).toLocaleDateString()}\n`;
+            if (notes) text += `Notes: ${notes}\n`;
+            text += `\nLast Updated: ${new Date().toLocaleString()}\n`;
+            
+            document.getElementById('copyableText').value = text;
+        }
+
+        // Copy to clipboard
+        function copyToClipboard() {
+            const textarea = document.getElementById('copyableText');
+            textarea.select();
+            document.execCommand('copy');
+            alert('✅ Copied to clipboard!');
+        }
+
+        // Copy all tracking info
+        function copyTrackingInfo() {
+            updateCopyableText();
+            copyToClipboard();
+        }
+
+        // Save tracking update
+        async function saveTrackingUpdate() {
+            const poNumber = document.getElementById('poNumber').value;
+            const trackingNumber = document.getElementById('trackingNumber').value;
+            const location = document.getElementById('locationInput').value;
+            const eta = document.getElementById('etaInput').value;
+            const status = document.getElementById('statusInput').value;
+            const notes = document.getElementById('notesInput').value;
+            
+            // Save to history
+            const historyEntry = {
+                poNumber,
+                trackingNumber,
+                location,
+                eta,
+                status,
+                notes,
+                timestamp: new Date().toISOString()
+            };
+            
+            trackingHistory.unshift(historyEntry);
+            if (trackingHistory.length > 50) trackingHistory = trackingHistory.slice(0, 50); // Keep last 50
+            localStorage.setItem('trackingHistory', JSON.stringify(trackingHistory));
+            
+            // Update database if we have a line item
+            if (currentLineItem) {
+                try {
+                    const updateData = {
+                        trackingNumber,
+                        trackingCarrier: document.getElementById('displayFreightCompany').textContent,
+                        trackingStatus: status,
+                        trackingLocation: location,
+                        trackingNotes: notes
+                    };
+                    
+                    if (eta) {
+                        updateData.estimatedDelivery = eta;
+                    }
+                    
+                    const response = await fetch(`/purchase-orders/line-items/${currentLineItem._id}/tracking`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(updateData)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('✅ Tracking information saved successfully!');
+                        loadSavedTracking();
+                    } else {
+                        alert('⚠️ Saved locally but failed to update database: ' + (result.error || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Error saving to database:', error);
+                    alert('⚠️ Saved locally but failed to update database: ' + error.message);
+                }
+            } else {
+                alert('✅ Tracking information saved to local history!');
+            }
+            
+            displayHistory();
+        }
+
+        // Save to system (initial save)
+        async function saveToSystem() {
+            const poNumber = document.getElementById('poNumber').value;
+            const trackingNumber = document.getElementById('trackingNumber').value;
+            let freightCompany = document.getElementById('freightCompany').value;
+            
+            if (freightCompany === 'Other') {
+                freightCompany = document.getElementById('customCarrier').value.trim();
+            }
+            
+            if (!currentLineItem) {
+                alert('Please select a valid PO number first');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/purchase-orders/line-items/${currentLineItem._id}/tracking`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        trackingNumber,
+                        trackingCarrier: freightCompany
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Tracking number saved to system!\n\nNow click "Search Tracking Info" to add location and ETA details.');
+                    loadSavedTracking();
+                } else {
+                    alert('❌ Error saving: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error saving to system:', error);
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        // Display history
+        function displayHistory() {
+            if (trackingHistory.length === 0) return;
+            
+            const historyDiv = document.getElementById('trackingHistory');
+            const contentDiv = document.getElementById('historyContent');
+            
+            let html = '';
+            trackingHistory.slice(0, 10).forEach(entry => {
+                html += `<div class="history-entry">`;
+                html += `<div><strong>${entry.trackingNumber}</strong> - ${entry.poNumber}</div>`;
+                html += `<div>${entry.status} | ${entry.location || 'No location'}</div>`;
+                if (entry.eta) html += `<div>ETA: ${new Date(entry.eta).toLocaleDateString()}</div>`;
+                html += `<div class="history-date">${new Date(entry.timestamp).toLocaleString()}</div>`;
+                html += `</div>`;
+            });
+            
+            contentDiv.innerHTML = html;
+            historyDiv.style.display = 'block';
+        }
+
+        // Load saved tracking
+        async function loadSavedTracking() {
+            try {
+                const response = await fetch('/purchase-orders/line-items-api?limit=5000');
+                const data = await response.json();
+                
+                if (!data.lineItems) {
+                    document.getElementById('savedTrackingList').innerHTML = '<p style="color: #6c757d;">No tracking numbers found</p>';
+                    return;
+                }
+                
+                const itemsWithTracking = data.lineItems.filter(item => item.trackingNumber);
+                
+                if (itemsWithTracking.length === 0) {
+                    document.getElementById('savedTrackingList').innerHTML = '<p style="color: #6c757d;">No tracking numbers saved yet. Add one using the form above.</p>';
+                    return;
+                }
+                
+                let html = '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse;">';
+                html += '<thead><tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">';
+                html += '<th style="padding: 10px; text-align: left;">PO</th>';
+                html += '<th style="padding: 10px; text-align: left;">Vendor</th>';
+                html += '<th style="padding: 10px; text-align: left;">Tracking #</th>';
+                html += '<th style="padding: 10px; text-align: left;">Carrier</th>';
+                html += '<th style="padding: 10px; text-align: left;">Status</th>';
+                html += '<th style="padding: 10px; text-align: left;">Actions</th>';
+                html += '</tr></thead><tbody>';
+                
+                itemsWithTracking.slice(0, 50).forEach(item => {
+                    html += '<tr style="border-bottom: 1px solid #e9ecef;">';
+                    html += `<td style="padding: 10px;"><strong>${item.poNumber || 'N/A'}</strong></td>`;
+                    html += `<td style="padding: 10px;">${item.poId?.vendor || 'Unknown'}</td>`;
+                    html += `<td style="padding: 10px;"><code>${item.trackingNumber}</code></td>`;
+                    html += `<td style="padding: 10px;">${item.trackingCarrier || 'Unknown'}</td>`;
+                    html += `<td style="padding: 10px;">${item.trackingStatus || 'No status'}</td>`;
+                    html += `<td style="padding: 10px;"><button class="btn btn-info" style="padding: 5px 10px;" onclick="editTracking('${item.poNumber}', '${item.trackingNumber}', '${item.trackingCarrier}')">✏️ Edit</button></td>`;
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table></div>';
+                document.getElementById('savedTrackingList').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading saved tracking:', error);
+                document.getElementById('savedTrackingList').innerHTML = '<p style="color: #dc3545;">Error loading tracking numbers</p>';
+            }
+        }
+
+        // Edit existing tracking
+        function editTracking(poNumber, trackingNumber, carrier) {
+            document.getElementById('poNumber').value = poNumber;
+            document.getElementById('trackingNumber').value = trackingNumber;
+            document.getElementById('freightCompany').value = carrier;
+            
+            loadPODetails(poNumber);
+            document.getElementById('poSuggestions').classList.remove('show');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Hide tracking info
+        function hideTrackingInfo() {
+            document.getElementById('trackingInfoDisplay').classList.remove('show');
+        }
+
+        // Clear form
+        function clearForm() {
+            document.getElementById('trackingForm').reset();
+            document.getElementById('vendorName').value = '';
+            currentPO = null;
+            currentLineItem = null;
+            hideTrackingInfo();
+        }
+
+        // Update copyable text when inputs change
+        document.querySelectorAll('#locationInput, #etaInput, #statusInput, #notesInput').forEach(input => {
+            input.addEventListener('input', updateCopyableText);
+            input.addEventListener('change', updateCopyableText);
+        });
+    </script>
+</body>
+</html>

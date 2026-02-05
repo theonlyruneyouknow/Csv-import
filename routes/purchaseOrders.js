@@ -5722,9 +5722,9 @@ router.get('/tracking-dashboard', async (req, res) => {
       }
     });
 
-    console.log(`✅ Tracking dashboard loaded: ${recentlyUpdated.length} items, ${trackingIssues.length} issues`);
+    console.log(`✅ Manual Tracking dashboard loaded: ${totalLineItems} total items, ${itemsWithTracking} with tracking`);
 
-    res.render('tracking-dashboard', {
+    res.render('tracking-dashboard-manual', {
       stats: {
         totalLineItems,
         itemsWithTracking,
@@ -5733,15 +5733,6 @@ router.get('/tracking-dashboard', async (req, res) => {
         exceptionItems,
         noTracking: totalLineItems - itemsWithTracking,
         trackingCoverage: totalLineItems > 0 ? Math.round((itemsWithTracking / totalLineItems) * 100) : 0
-      },
-      recentlyUpdated,
-      trackingIssues,
-      uniqueCarriers: uniqueCarriers.filter(Boolean).sort(),
-      uniqueStatuses: uniqueStatuses.filter(Boolean).sort(),
-      filters: {
-        status: statusFilter,
-        carrier: carrierFilter,
-        dateRange: dateRange
       },
       user: req.user
     });
