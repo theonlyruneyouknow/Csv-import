@@ -3,6 +3,24 @@ const express = require('express');
 const router = express.Router();
 const Form = require('../models/Form');
 const Link = require('../models/Link');
+const ExcelFile = require('../models/ExcelFile');
+
+// Main index page showing both forms and Excel files
+router.get('/', async (req, res) => {
+    try {
+        const forms = await Form.find({ isActive: true })
+            .sort({ category: 1, order: 1 })
+            .lean();
+        const excelFiles = await ExcelFile.find({ isActive: true })
+            .sort({ category: 1, order: 1 })
+            .lean();
+        
+        res.render('forms-excel-index', { forms, excelFiles });
+    } catch (error) {
+        console.error('❌ Error loading forms and Excel files:', error);
+        res.status(500).send('Error loading page');
+    }
+});
 
 // Render forms management page
 router.get('/manage', (req, res) => {

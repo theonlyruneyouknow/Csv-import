@@ -23,6 +23,7 @@ const emailTemplateRoutes = require('./routes/emailTemplates');
 const trackingRoutes = require('./routes/tracking'); // NEW: Self-managed tracking
 const shipmentRoutes = require('./routes/shipments'); // NEW: Shipment management
 const formRoutes = require('./routes/forms'); // NEW: Dynamic forms management
+const excelFileRoutes = require('./routes/excelFiles'); // NEW: SharePoint Excel integration
 const foodRoutes = require('./routes/food');
 const storyRoutes = require('./routes/story');
 const medicineRoutes = require('./routes/medicine');
@@ -836,6 +837,7 @@ app.get('/statistics/debug/list-all', async (req, res) => {
 });
 app.use('/statistics', ensureAuthenticated, ensureApproved, require('./routes/statistics')); // NEW: Daily Statistics
 app.use('/forms', ensureAuthenticated, ensureApproved, formRoutes); // NEW: Forms management
+app.use('/excel-files', ensureAuthenticated, ensureApproved, excelFileRoutes); // NEW: SharePoint Excel integration
 app.use('/seed-catalog', ensureAuthenticated, ensureApproved, seedCatalogRoutes); // NEW: AI Seed Catalog
 app.use('/dropshipments', ensureAuthenticated, ensureApproved, dropshipmentRoutes); // NEW: Dropshipment Tracking
 app.use('/dropship', ensureAuthenticated, ensureApproved, dropshipRoutes);

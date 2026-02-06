@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forms & Excel Files - Purchase Order Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+
+        .management-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-secondary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .item-card {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: white;
+        }
+
+        .item-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .item-icon {
+            font-size: 36px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .item-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .item-description {
+            font-size: 14px;
+            color: #7f8c8d;
+            line-height: 1.5;
+        }
+
+        .item-category {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #e9ecef;
+            color: #495057;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 10px;
+            text-transform: capitalize;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-4px);
+        }
+
+        .back-link::before {
+            content: '←';
+            margin-right: 8px;
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .management-links {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .items-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="/purchase-orders" class="back-link">Back to Dashboard</a>
+
+        <div class="header">
+            <h1>📋 Forms & Excel Files</h1>
+            <p>Access forms, reports, and SharePoint Excel files</p>
+            <div class="management-links">
+                <a href="/forms/manage" class="btn btn-primary">
+                    📝 Manage Forms
+                </a>
+                <a href="/excel-files/manage" class="btn btn-secondary">
+                    📊 Manage Excel Files
+                </a>
+            </div>
+        </div>
+
+        <!-- Forms Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">📝 Forms</h2>
+                <span style="color: #7f8c8d; font-size: 14px;"><%= forms.length %> form(s)</span>
+            </div>
+            <% if (forms.length > 0) { %>
+                <div class="items-grid">
+                    <% forms.forEach(form => { %>
+                        <div class="item-card" onclick="window.location.href='/forms/<%= form._id %>'">
+                            <span class="item-icon">📝</span>
+                            <div class="item-name"><%= form.name %></div>
+                            <% if (form.description) { %>
+                                <div class="item-description"><%= form.description %></div>
+                            <% } %>
+                            <span class="item-category"><%= form.category %></span>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <div class="empty-state-icon">📝</div>
+                    <p>No forms available</p>
+                    <a href="/forms/manage" class="btn btn-primary">Add Form</a>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Excel Files Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">📊 Excel Files</h2>
+                <span style="color: #7f8c8d; font-size: 14px;"><%= excelFiles.length %> file(s)</span>
+            </div>
+            <% if (excelFiles.length > 0) { %>
+                <div class="items-grid">
+                    <% excelFiles.forEach(file => { %>
+                        <div class="item-card" onclick="window.location.href='/excel-files/<%= file._id %>'">
+                            <span class="item-icon">📊</span>
+                            <div class="item-name"><%= file.name %></div>
+                            <% if (file.description) { %>
+                                <div class="item-description"><%= file.description %></div>
+                            <% } %>
+                            <span class="item-category"><%= file.category %></span>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <p>No Excel files available</p>
+                    <a href="/excel-files/manage" class="btn btn-secondary">Add Excel File</a>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</body>
+
+</html>

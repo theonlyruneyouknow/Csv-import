@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= file.name %> - Purchase Order Management
+    </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            flex: 1;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: #3498db;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 15px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #2980b9;
+        }
+
+        .back-link::before {
+            content: '←';
+            margin-right: 8px;
+            font-size: 18px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #218838;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .excel-container {
+            background: white;
+            border-radius: 8px;
+            padding: 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .excel-embed {
+            width: 100%;
+            min-height: 900px;
+            height: calc(100vh - 180px);
+            border: none;
+            display: block;
+        }
+
+        .info-banner {
+            background: #e7f3ff;
+            border-left: 4px solid #3498db;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .info-banner p {
+            color: #2c3e50;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .loading::before {
+            content: '⏳';
+            display: block;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .excel-embed {
+                min-height: 600px;
+                height: calc(100vh - 250px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="/forms" class="back-link">Back to Forms & Files</a>
+
+        <div class="header">
+            <div class="header-left">
+                <h1>📊 <%= file.name %></h1>
+                <% if (file.description) { %>
+                    <p><%= file.description %></p>
+                <% } %>
+            </div>
+            <div class="header-actions">
+                <% if (file.allowDirectAccess) { %>
+                    <a href="<%= file.sharePointUrl %>" target="_blank" class="btn btn-primary">
+                        🔗 Open in SharePoint
+                    </a>
+                <% } %>
+                <a href="/excel-files/manage" class="btn btn-secondary">
+                    ⚙️ Manage Files
+                </a>
+            </div>
+        </div>
+
+        <% if (file.embedUrl) { %>
+            <div class="excel-container">
+                <iframe
+                    src="<%= file.embedUrl %>"
+                    class="excel-embed"
+                    frameborder="0"
+                    allowfullscreen
+                    title="<%= file.name %>">
+                </iframe>
+            </div>
+        <% } else { %>
+            <div class="info-banner">
+                <p>⚠️ No embed URL available. Please configure an embed URL in the management panel or <a href="<%= file.sharePointUrl %>" target="_blank">open the file in SharePoint</a>.</p>
+            </div>
+        <% } %>
+    </div>
+
+    <script>
+        // Handle iframe loading
+        const iframe = document.querySelector('.excel-embed');
+        if (iframe) {
+            iframe.addEventListener('load', function() {
+                console.log('📊 Excel file loaded successfully');
+            });
+
+            iframe.addEventListener('error', function() {
+                console.error('❌ Error loading Excel file');
+                const container = document.querySelector('.excel-container');
+                container.innerHTML = `
+                    <div class="loading">
+                        <p style="color: #e74c3c; font-size: 16px;">
+                            ❌ Error loading Excel file<br>
+                            <small>The file may not be accessible or the embed URL is invalid.</small><br>
+                            <a href="<%= file.sharePointUrl %>" target="_blank" style="color: #3498db; margin-top: 10px; display: inline-block;">Try opening in SharePoint</a>
+                        </p>
+                    </div>
+                `;
+            });
+        }
+
+        // Track when user leaves the page
+        window.addEventListener('beforeunload', function() {
+            // Could send analytics here if needed
+            console.log('📊 User finished viewing Excel file');
+        });
+    </script>
+</body>
+
+</html>
