@@ -334,7 +334,15 @@
 
         <!-- Saved Tracking List -->
         <div class="card">
-            <h3 style="margin-bottom: 15px;">📋 Saved Tracking Numbers</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0;">📋 Saved Tracking Numbers</h3>
+                <div>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="showArchivedToggle" onchange="loadSavedTracking()">
+                        <span>Show Archived</span>
+                    </label>
+                </div>
+            </div>
             <div id="savedTrackingList">
                 <p style="color: #6c757d;">Loading...</p>
             </div>
@@ -348,6 +356,7 @@
         let allPOs = []; // Store all PO data
         let customCarriers = JSON.parse(localStorage.getItem('customCarriers') || '[]');
         let trackingHistory = JSON.parse(localStorage.getItem('trackingHistory') || '[]');
+        let archivedTracking = JSON.parse(localStorage.getItem('archivedTracking') || '[]');
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
@@ -602,16 +611,19 @@
         
         // Get carrier tracking URL
         function getCarrierTrackingURL(carrier, trackingNumber) {
+            // Remove spaces and other common formatting characters from tracking number
+            const cleanTracking = trackingNumber.replace(/[\s\-]/g, '');
+            
             const carriers = {
-                'FedEx': `https://www.fedex.com/fedextrack/?trknbr=${trackingNumber}`,
-                'UPS': `https://www.ups.com/track?track=yes&trackNums=${trackingNumber}`,
-                'USPS': `https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}`,
-                'DHL': `https://www.dhl.com/en/express/tracking.html?AWB=${trackingNumber}`,
-                'OnTrac': `https://www.ontrac.com/tracking/?number=${trackingNumber}`,
-                'R+L Carriers': `https://www2.rlcarriers.com/freight/shipping/shipment-tracing?pro=${trackingNumber}`,
-                'Old Dominion': `https://www.odfl.com/Trace/standardResult.faces?pro=${trackingNumber}`,
-                'Estes': `https://www.estes-express.com/shipment-tracking/?pro=${trackingNumber}`,
-                'YRC': `https://my.yrc.com/tools/track/shipments?referenceNumber=${trackingNumber}`
+                'FedEx': `https://www.fedex.com/fedextrack/?trknbr=${cleanTracking}`,
+                'UPS': `https://www.ups.com/track?track=yes&trackNums=${cleanTracking}`,
+                'USPS': `https://tools.usps.com/go/TrackConfirmAction?tLabels=${cleanTracking}`,
+                'DHL': `https://www.dhl.com/en/express/tracking.html?AWB=${cleanTracking}`,
+                'OnTrac': `https://www.ontrac.com/tracking/?number=${cleanTracking}`,
+                'R+L Carriers': `https://www2.rlcarriers.com/freight/shipping/shipment-tracing?pro=${cleanTracking}`,
+                'Old Dominion': `https://www.odfl.com/Trace/standardResult.faces?pro=${cleanTracking}`,
+                'Estes': `https://www.estes-express.com/shipment-tracking/?pro=${cleanTracking}`,
+                'YRC': `https://my.yrc.com/tools/track/shipments?referenceNumber=${cleanTracking}`
             };
             
             return carriers[carrier] || null;
@@ -671,11 +683,14 @@
         // Save tracking update
         async function saveTrackingUpdate() {
             const poNumber = document.getElementById('poNumber').value;
-            const trackingNumber = document.getElementById('trackingNumber').value;
+            let trackingNumber = document.getElementById('trackingNumber').value.trim();
             const location = document.getElementById('locationInput').value;
             const eta = document.getElementById('etaInput').value;
             const status = document.getElementById('statusInput').value;
             const notes = document.getElementById('notesInput').value;
+            
+            // Remove spaces and dashes from tracking number
+            trackingNumber = trackingNumber.replace(/[\s\-]/g, '');
             
             // Save to history
             const historyEntry = {
@@ -717,7 +732,10 @@
                     
                     if (result.success) {
                         alert('✅ Tracking information saved successfully!');
-                        loadSavedTracking();
+                        // Update the input field with cleaned tracking number
+                        document.getElementById('trackingNumber').value = trackingNumber;
+                        // Reload the saved tracking list to show updated information
+                        await loadSavedTracking();
                     } else {
                         alert('⚠️ Saved locally but failed to update database: ' + (result.error || 'Unknown error'));
                     }
@@ -735,8 +753,11 @@
         // Save to system (initial save)
         async function saveToSystem() {
             const poNumber = document.getElementById('poNumber').value;
-            const trackingNumber = document.getElementById('trackingNumber').value;
+            let trackingNumber = document.getElementById('trackingNumber').value.trim();
             let freightCompany = document.getElementById('freightCompany').value;
+            
+            // Remove spaces and dashes from tracking number for cleaner storage
+            trackingNumber = trackingNumber.replace(/[\s\-]/g, '');
             
             if (freightCompany === 'Other') {
                 freightCompany = document.getElementById('customCarrier').value.trim();
@@ -761,7 +782,10 @@
                 
                 if (result.success) {
                     alert('✅ Tracking number saved to system!\n\nNow click "Search Tracking Info" to add location and ETA details.');
-                    loadSavedTracking();
+                    // Update the input field with cleaned tracking number
+                    document.getElementById('trackingNumber').value = trackingNumber;
+                    // Reload the saved tracking list to show updated URL
+                    await loadSavedTracking();
                 } else {
                     alert('❌ Error saving: ' + (result.error || 'Unknown error'));
                 }
@@ -794,6 +818,8 @@
 
         // Load saved tracking
         async function loadSavedTracking() {
+            const showArchived = document.getElementById('showArchivedToggle').checked;
+            
             try {
                 const response = await fetch('/purchase-orders/line-items-api?limit=5000');
                 const data = await response.json();
@@ -803,10 +829,20 @@
                     return;
                 }
                 
-                const itemsWithTracking = data.lineItems.filter(item => item.trackingNumber);
+                let itemsWithTracking = data.lineItems.filter(item => item.trackingNumber);
+                
+                // Filter archived/unarchived based on toggle
+                if (!showArchived) {
+                    itemsWithTracking = itemsWithTracking.filter(item => 
+                        !archivedTracking.includes(item.trackingNumber)
+                    );
+                }
                 
                 if (itemsWithTracking.length === 0) {
-                    document.getElementById('savedTrackingList').innerHTML = '<p style="color: #6c757d;">No tracking numbers saved yet. Add one using the form above.</p>';
+                    const message = showArchived ? 
+                        'No archived tracking numbers found.' : 
+                        'No tracking numbers saved yet. Add one using the form above.';
+                    document.getElementById('savedTrackingList').innerHTML = `<p style="color: #6c757d;">${message}</p>`;
                     return;
                 }
                 
@@ -820,31 +856,140 @@
                 html += '<th style="padding: 10px; text-align: left;">Actions</th>';
                 html += '</tr></thead><tbody>';
                 
-                itemsWithTracking.slice(0, 50).forEach(item => {
-                    html += '<tr style="border-bottom: 1px solid #e9ecef;">';
-                    html += `<td style="padding: 10px;"><strong>${item.poNumber || 'N/A'}</strong></td>`;
+                itemsWithTracking.slice(0, 100).forEach(item => {
+                    const isArchived = archivedTracking.includes(item.trackingNumber);
+                    const rowStyle = isArchived ? 'background: #f8f9fa; opacity: 0.7;' : '';
+                    
+                    // Escape values for onclick
+                    const carrier = (item.trackingCarrier || 'Unknown').replace(/'/g, "\\'");
+                    const tracking = (item.trackingNumber || '').replace(/'/g, "\\'");
+                    const vendor = (item.poId?.vendor || 'Unknown').replace(/'/g, "\\'");
+                    const poNumber = (item.poNumber || 'N/A').replace(/'/g, "\\'");
+                    
+                    html += `<tr style="border-bottom: 1px solid #e9ecef; ${rowStyle}">`;
+                    html += `<td style="padding: 10px;">`;
+                    html += `<a href="javascript:void(0)" onclick="openPOSplit('${poNumber}')" style="color: #007bff; text-decoration: underline; cursor: pointer; font-weight: 600;">`;
+                    html += `${item.poNumber || 'N/A'} 🔗</a>`;
+                    html += `</td>`;
                     html += `<td style="padding: 10px;">${item.poId?.vendor || 'Unknown'}</td>`;
-                    html += `<td style="padding: 10px;"><code>${item.trackingNumber}</code></td>`;
+                    html += `<td style="padding: 10px;">`;
+                    html += `<a href="javascript:void(0)" onclick="openTrackingSplit('${carrier}', '${tracking}', '${vendor}')" style="color: #007bff; text-decoration: underline; cursor: pointer; font-weight: 600;">`;
+                    html += `${item.trackingNumber} 🔗</a>`;
+                    html += `</td>`;
                     html += `<td style="padding: 10px;">${item.trackingCarrier || 'Unknown'}</td>`;
                     html += `<td style="padding: 10px;">${item.trackingStatus || 'No status'}</td>`;
-                    html += `<td style="padding: 10px;"><button class="btn btn-info" style="padding: 5px 10px;" onclick="editTracking('${item.poNumber}', '${item.trackingNumber}', '${item.trackingCarrier}')">✏️ Edit</button></td>`;
+                    html += `<td style="padding: 10px;">`;
+                    html += `<button class="btn btn-info" style="padding: 5px 10px; margin-right: 5px;" onclick="editTracking('${item.poNumber}', '${tracking}', '${carrier}')">✏️ Edit</button>`;
+                    
+                    if (isArchived) {
+                        html += `<button class="btn btn-success" style="padding: 5px 10px;" onclick="unarchiveTracking('${tracking}')">📥 Unarchive</button>`;
+                    } else {
+                        html += `<button class="btn btn-secondary" style="padding: 5px 10px;" onclick="archiveTracking('${tracking}')">📦 Archive</button>`;
+                    }
+                    
+                    html += `</td>`;
                     html += '</tr>';
                 });
                 
                 html += '</tbody></table></div>';
+                
+                if (itemsWithTracking.length > 100) {
+                    html += `<p style="color: #6c757d; margin-top: 10px; font-size: 12px;">Showing first 100 of ${itemsWithTracking.length} tracking numbers</p>`;
+                }
+                
                 document.getElementById('savedTrackingList').innerHTML = html;
             } catch (error) {
                 console.error('Error loading saved tracking:', error);
                 document.getElementById('savedTrackingList').innerHTML = '<p style="color: #dc3545;">Error loading tracking numbers</p>';
             }
         }
+        
+        // Archive tracking number
+        function archiveTracking(trackingNumber) {
+            if (!confirm('Archive this tracking number? It will be hidden from the main list.')) return;
+            
+            if (!archivedTracking.includes(trackingNumber)) {
+                archivedTracking.push(trackingNumber);
+                localStorage.setItem('archivedTracking', JSON.stringify(archivedTracking));
+            }
+            
+            loadSavedTracking();
+        }
+        
+        // Unarchive tracking number
+        function unarchiveTracking(trackingNumber) {
+            archivedTracking = archivedTracking.filter(t => t !== trackingNumber);
+            localStorage.setItem('archivedTracking', JSON.stringify(archivedTracking));
+            loadSavedTracking();
+        }
+        
+        // Open tracking in split screen
+        function openTrackingSplit(carrier, trackingNumber, vendor) {
+            const url = getCarrierTrackingURL(carrier, trackingNumber);
+            
+            if (!url) {
+                alert('No tracking URL available for ' + carrier);
+                return;
+            }
+            
+            // Calculate split screen dimensions
+            const screenWidth = window.screen.availWidth;
+            const screenHeight = window.screen.availHeight;
+            const splitWidth = Math.floor(screenWidth / 2);
+            
+            // Open in new window positioned on the right half of screen
+            const windowFeatures = `width=${splitWidth},height=${screenHeight},left=${splitWidth},top=0,scrollbars=yes,resizable=yes`;
+            const newWindow = window.open(url, `tracking_${trackingNumber}`, windowFeatures);
+            
+            if (newWindow) {
+                newWindow.focus();
+                
+                // Show notification
+                const notification = document.createElement('div');
+                notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 15px 20px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); z-index: 10000;';
+                notification.innerHTML = `✅ Opened tracking for ${vendor}<br><small>Tracking: ${trackingNumber}</small>`;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => notification.remove(), 3000);
+            } else {
+                alert('Please allow pop-ups to open tracking in split view');
+            }
+        }
+        
+        // Open PO in split screen
+        function openPOSplit(poNumber) {
+            const url = `/purchase-orders?search=${encodeURIComponent(poNumber)}`;
+            
+            // Calculate split screen dimensions
+            const screenWidth = window.screen.availWidth;
+            const screenHeight = window.screen.availHeight;
+            const splitWidth = Math.floor(screenWidth / 2);
+            
+            // Open in new window positioned on the right half of screen
+            const windowFeatures = `width=${splitWidth},height=${screenHeight},left=${splitWidth},top=0,scrollbars=yes,resizable=yes`;
+            const newWindow = window.open(url, `po_${poNumber}`, windowFeatures);
+            
+            if (newWindow) {
+                newWindow.focus();
+                
+                // Show notification
+                const notification = document.createElement('div');
+                notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #007bff; color: white; padding: 15px 20px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); z-index: 10000;';
+                notification.innerHTML = `✅ Opened PO Dashboard<br><small>PO: ${poNumber}</small>`;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => notification.remove(), 3000);
+            } else {
+                alert('Please allow pop-ups to open PO in split view');
+            }
+        }
 
-        // Edit existing tracking
-        function editTracking(poNumber, trackingNumber, carrier) {
+        async function editTracking(poNumber, trackingNumber, carrier) {
             document.getElementById('poNumber').value = poNumber;
             document.getElementById('trackingNumber').value = trackingNumber;
             document.getElementById('freightCompany').value = carrier;
             
+            await 
             loadPODetails(poNumber);
             document.getElementById('poSuggestions').classList.remove('show');
             window.scrollTo({ top: 0, behavior: 'smooth' });
