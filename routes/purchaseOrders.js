@@ -2400,9 +2400,10 @@ router.get('/', async (req, res) => {
       })
     );
 
-    // Get all tasks that are related to purchase orders
+    // Get all tasks that are related to purchase orders (exclude archived)
     const allTasks = await Task.find({
-      relatedPOs: { $exists: true, $ne: [] }
+      relatedPOs: { $exists: true, $ne: [] },
+      archived: { $ne: true }
     }).populate('relatedPOs', 'poNumber');
 
     // Create a map of PO ObjectId to tasks
@@ -2587,6 +2588,7 @@ router.get('/', async (req, res) => {
       allStatusOptions: statusOptions, // Send full objects for management
       poTypeOptions: poTypeOptions, // Send PO type options for dynamic rendering
       assignees: assignees, // Send assignees for assignment dropdown
+      allTasks: allTasks, // Pass all tasks for task viewer
       user: req.user, // Pass user information for authentication status
       cacheKey: Date.now() // Add cache-busting key
     });

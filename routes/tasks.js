@@ -318,6 +318,24 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+// API endpoint for getting a single task (for AJAX calls)
+router.get('/api/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const task = await Task.findById(id)
+            .populate('relatedPOs', 'poNumber vendor expectedShipDate totalValue');
+
+        if (!task) {
+            return res.status(404).json({ error: 'Task not found' });
+        }
+
+        res.json({ success: true, task });
+    } catch (error) {
+        console.error('Get task error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // API endpoint for autocomplete/search
 router.get('/api/search', async (req, res) => {
     try {

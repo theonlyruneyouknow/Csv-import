@@ -100,6 +100,10 @@ const taskSchema = new mongoose.Schema({
     },
     completedAt: {
         type: Date
+    },
+    archived: {
+        type: Boolean,
+        default: false
     }
 });
 
