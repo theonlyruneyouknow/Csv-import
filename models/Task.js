@@ -32,6 +32,37 @@ const taskSchema = new mongoose.Schema({
     reminderDate: {
         type: Date
     },
+    
+    // Recurring reminder settings
+    isRecurring: {
+        type: Boolean,
+        default: false
+    },
+    recurringType: {
+        type: String,
+        enum: ['daily', 'weekly', 'monthly', 'none'],
+        default: 'none'
+    },
+    recurringDays: [{
+        type: Number, // 0=Sunday, 1=Monday, etc.
+        min: 0,
+        max: 6
+    }],
+    recurringTime: {
+        type: String, // HH:MM format
+        default: '09:00'
+    },
+    lastReminderShown: {
+        type: Date
+    },
+    reminderSnoozedUntil: {
+        type: Date
+    },
+    reminderDismissed: {
+        type: Boolean,
+        default: false
+    },
+    
     assignedTo: {
         type: String,
         default: ''

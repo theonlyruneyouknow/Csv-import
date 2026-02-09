@@ -358,4 +358,133 @@ router.get('/api/search', async (req, res) => {
     }
 });
 
+// Get active reminders (tasks with reminders not snoozed or dismissed)
+router.get('/api/reminders/active', async (req, res) => {
+    try {
+        const now = new Date();
+        
+        // Find tasks with reminders that should be shown
+        const tasks = await Task.find({
+            archived: { $ne: true },
+            status: { $nin: ['completed', 'cancelled'] },
+            $or: [
+                {
+                    // One-time reminders
+                    reminderDate: { $lte: now },
+                    reminderDismissed: { $ne: true },
+                    $or: [
+                        { reminderSnoozedUntil: { $exists: false } },
+                        { reminderSnoozedUntil: null },
+                        { reminderSnoozedUntil: { $lte: now } }
+                    ]
+                },
+                {
+                    // Recurring reminders
+                    isRecurring: true,
+                    recurringType: { $ne: 'none' },
+                    $or: [
+                        { reminderSnoozedUntil: { $exists: false } },
+                        { reminderSnoozedUntil: null },
+                        { reminderSnoozedUntil: { $lte: now } }
+                    ]
+                }
+            ]
+        })
+        .select('title description priority dueDate isRecurring recurringType lastReminderShown')
+        .lean();
+        
+        // Filter recurring tasks based on schedule
+        const validReminders = tasks.filter(task => {
+            if (!task.isRecurring) return true;
+            
+            // Check if we already showed a reminder today for this task
+            if (task.lastReminderShown) {
+                const lastShown = new Date(task.lastReminderShown);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                lastShown.setHours(0, 0, 0, 0);
+                
+                if (task.recurringType === 'daily' && lastShown.getTime() === today.getTime()) {
+                    return false; // Already shown today
+                }
+                
+                if (task.recurringType === 'weekly') {
+                    const daysSinceLastShown = Math.floor((now - task.lastReminderShown) / (1000 * 60 * 60 * 24));
+                    if (daysSinceLastShown < 7) {
+                        return false; // Less than a week since last reminder
+                    }
+                }
+            }
+            
+            return true;
+        });
+        
+        res.json({ success: true, reminders: validReminders });
+    } catch (error) {
+        console.error('Get reminders error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Snooze a reminder
+router.post('/api/reminders/:id/snooze', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { minutes = 60 } = req.body; // Default 1 hour
+        
+        const snoozeUntil = new Date();
+        snoozeUntil.setMinutes(snoozeUntil.getMinutes() + minutes);
+        
+        const task = await Task.findByIdAndUpdate(
+            id,
+            { 
+                reminderSnoozedUntil: snoozeUntil,
+                lastReminderShown: new Date()
+            },
+            { new: true }
+        );
+        
+        if (!task) {
+            return res.status(404).json({ error: 'Task not found' });
+        }
+        
+        res.json({ 
+            success: true, 
+            message: `Reminder snoozed for ${minutes} minutes`,
+            snoozedUntil: snoozeUntil
+        });
+    } catch (error) {
+        console.error('Snooze reminder error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Dismiss a reminder (for one-time reminders)
+router.post('/api/reminders/:id/dismiss', async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const task = await Task.findByIdAndUpdate(
+            id,
+            { 
+                reminderDismissed: true,
+                lastReminderShown: new Date()
+            },
+            { new: true }
+        );
+        
+        if (!task) {
+            return res.status(404).json({ error: 'Task not found' });
+        }
+        
+        res.json({ 
+            success: true, 
+            message: 'Reminder dismissed'
+        });
+    } catch (error) {
+        console.error('Dismiss reminder error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;

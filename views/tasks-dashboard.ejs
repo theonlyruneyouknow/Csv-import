@@ -661,6 +661,27 @@
 
         <!-- Filters and Actions -->
         <div class="filters-section">
+            <!-- Quick Filter Buttons -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e9ecef; flex-wrap: wrap; align-items: center;">
+                <span style="font-weight: 600; color: #495057; margin-right: 5px;">Quick Filters:</span>
+                <button type="button" class="btn btn-sm quick-filter-btn" id="quickTodayBtn" onclick="applyQuickFilter('today')"
+                        style="background: #e3f2fd; color: #1976d2; border: 1px solid #1976d2; font-weight: 500;">
+                    📅 Today
+                </button>
+                <button type="button" class="btn btn-sm quick-filter-btn" id="quickHighBtn" onclick="applyQuickFilter('high')"
+                        style="background: #fff3e0; color: #f57c00; border: 1px solid #f57c00; font-weight: 500;">
+                    🔥 High Priority
+                </button>
+                <button type="button" class="btn btn-sm quick-filter-btn" id="quickOldestBtn" onclick="applyQuickFilter('oldest')"
+                        style="background: #f3e5f5; color: #7b1fa2; border: 1px solid #7b1fa2; font-weight: 500;">
+                    ⏰ Oldest First
+                </button>
+                <button type="button" class="btn btn-sm quick-filter-btn" id="quickAllBtn" onclick="applyQuickFilter('all')"
+                        style="background: #e8f5e9; color: #388e3c; border: 1px solid #388e3c; font-weight: 500;">
+                    📋 All Tasks
+                </button>
+            </div>
+            
             <form method="GET" id="filterForm">
                 <div class="filters-row">
                     <div class="form-floating">
@@ -743,7 +764,9 @@
                         const isOverdue = daysUntil < 0;
                         const isDueSoon = daysUntil >= 0 && daysUntil <= 3;
                     %>
-                        <div class="task-card priority-<%= task.priority %> <%= isOverdue ? 'overdue' : '' %> <%= isDueSoon ? 'due-soon' : '' %>">
+                        <div class="task-card priority-<%= task.priority %> <%= isOverdue ? 'overdue' : '' %> <%= isDueSoon ? 'due-soon' : '' %>" 
+                             data-task-created="<%= task.createdAt %>" 
+                             data-task-due="<%= task.dueDate %>">
                             <div class="task-header">
                                 <div class="flex-grow-1">
                                     <div class="task-title"><%= task.title %></div>
@@ -1527,6 +1550,96 @@
             // If click is outside navigation container, close all dropdowns/accordions
             if (navigationContainer && !navigationContainer.contains(event.target)) {
                 closeAllDropdowns();
+            }
+        });
+
+        // Quick filter functionality
+        function applyQuickFilter(filterType) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Update button styles
+            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+                btn.style.background = '#e8eaf6';
+                btn.style.color = '#5e35b1';
+                btn.style.border = '1px solid #5e35b1';
+                btn.style.fontWeight = '500';
+            });
+            
+            const activeBtn = document.getElementById(
+                filterType === 'today' ? 'quickTodayBtn' : 
+                filterType === 'high' ? 'quickHighBtn' : 
+                filterType === 'oldest' ? 'quickOldestBtn' : 
+                'quickAllBtn'
+            );
+            if (activeBtn) {
+                activeBtn.style.background = '#5e35b1';
+                activeBtn.style.color = 'white';
+                activeBtn.style.border = '1px solid #5e35b1';
+                activeBtn.style.fontWeight = '600';
+            }
+            
+            // Build query parameters based on filter type
+            let url = '/tasks?';
+            
+            if (filterType === 'today') {
+                // Tasks due today - use search parameter to filter client-side
+                url += 'quickFilter=today';
+            } else if (filterType === 'high') {
+                // High and critical priority
+                url += 'priority=high&quickFilter=highPriority';
+            } else if (filterType === 'oldest') {
+                // Sort by oldest creation date
+                url += 'sortBy=createdAt&sortOrder=asc&quickFilter=oldest';
+            } else {
+                // All tasks with default sorting
+                url += 'sortBy=dueDate&sortOrder=asc';
+            }
+            
+            window.location.href = url;
+        }
+
+        // Check if quick filter is active on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const quickFilter = urlParams.get('quickFilter');
+            
+            if (quickFilter === 'today') {
+                // Filter tasks that are created today or due today
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                
+                document.querySelectorAll('.task-card').forEach(card => {
+                    const taskData = card.getAttribute('data-task-created');
+                    const taskDue = card.getAttribute('data-task-due');
+                    
+                    const createdDate = taskData ? new Date(taskData) : null;
+                    if (createdDate) createdDate.setHours(0, 0, 0, 0);
+                    
+                    const dueDate = taskDue ? new Date(taskDue) : null;
+                    if (dueDate) dueDate.setHours(0, 0, 0, 0);
+                    
+                    const isToday = (createdDate && createdDate.getTime() === today.getTime()) || 
+                                   (dueDate && dueDate.getTime() === today.getTime());
+                    
+                    if (!isToday) {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                document.getElementById('quickTodayBtn').style.background = '#5e35b1';
+                document.getElementById('quickTodayBtn').style.color = 'white';
+                document.getElementById('quickTodayBtn').style.fontWeight = '600';
+            } else if (quickFilter === 'highPriority') {
+                document.getElementById('quickHighBtn').style.background = '#5e35b1';
+                document.getElementById('quickHighBtn').style.color = 'white';
+                document.getElementById('quickHighBtn').style.fontWeight = '600';
+            } else if (quickFilter === 'oldest') {
+                document.getElementById('quickOldestBtn').style.background = '#5e35b1';
+                document.getElementById('quickOldestBtn').style.color = 'white';
+                document.getElementById('quickOldestBtn').style.fontWeight = '600';
             }
         });
     </script>

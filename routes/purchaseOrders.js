@@ -2400,21 +2400,22 @@ router.get('/', async (req, res) => {
       })
     );
 
-    // Get all tasks that are related to purchase orders (exclude archived)
+    // Get all tasks (exclude archived)
     const allTasks = await Task.find({
-      relatedPOs: { $exists: true, $ne: [] },
       archived: { $ne: true }
-    }).populate('relatedPOs', 'poNumber');
+    }).populate('relatedPOs', 'poNumber').sort({ createdAt: -1 });
 
     // Create a map of PO ObjectId to tasks
     const tasksByPOId = {};
     allTasks.forEach(task => {
-      task.relatedPOs.forEach(po => {
-        if (!tasksByPOId[po._id]) {
-          tasksByPOId[po._id] = [];
-        }
-        tasksByPOId[po._id].push(task);
-      });
+      if (task.relatedPOs && task.relatedPOs.length > 0) {
+        task.relatedPOs.forEach(po => {
+          if (!tasksByPOId[po._id]) {
+            tasksByPOId[po._id] = [];
+          }
+          tasksByPOId[po._id].push(task);
+        });
+      }
     });
 
     // Add task data to each purchase order
@@ -2422,7 +2423,7 @@ router.get('/', async (req, res) => {
       po.relatedTasks = tasksByPOId[po._id] || [];
     });
 
-    console.log(`📋 Found ${allTasks.length} tasks related to purchase orders`);
+    console.log(`📋 Found ${allTasks.length} total tasks (excluding archived)`);
 
     // Try multiple queries to see what's in the database
     const allPrePurchaseOrders = await PrePurchaseOrder.find().sort({ createdAt: -1 });

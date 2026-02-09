@@ -4959,24 +4959,66 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 </div>
             </div>
             
+            <!-- Task Reminder Notifications -->
+            <div id="reminderContainer" style="position: fixed; top: 20px; right: 20px; z-index: 10000; max-width: 400px;"></div>
+            
             <!-- Task Management Viewer (Collapsible) -->
             <div id="taskViewerSection" style="display: none; margin: 20px 0; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
                 <div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px;">
-                        <h4 style="margin: 0; color: #2c3e50; font-weight: 600;">
-                            📋 Task Management Dashboard
-                            <span style="font-size: 0.8rem; color: #7f8c8d; font-weight: normal; margin-left: 10px;">
-                                (<%= allTasks ? allTasks.length : 0 %> tasks)
-                            </span>
-                        </h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                            <h4 style="margin: 0; color: #2c3e50; font-weight: 600;">
+                                📋 Task Management Dashboard
+                                <span id="taskCountSpan" style="font-size: 0.8rem; color: #7f8c8d; font-weight: normal; margin-left: 10px;">
+                                    (<%= allTasks ? allTasks.length : 0 %> tasks)
+                                </span>
+                            </h4>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button class="btn btn-sm" id="todayTasksBtn" onclick="filterTasksCompact('today')" 
+                                        style="background: #e3f2fd; color: #1976d2; border: 1px solid #1976d2; font-weight: 500; padding: 4px 12px;">
+                                    📅 Today
+                                </button>
+                                <button class="btn btn-sm" id="highPriorityBtn" onclick="filterTasksCompact('high')" 
+                                        style="background: #fff3e0; color: #f57c00; border: 1px solid #f57c00; font-weight: 500; padding: 4px 12px;">
+                                    🔥 High Priority
+                                </button>
+                                <button class="btn btn-sm" id="oldestTasksBtn" onclick="filterTasksCompact('oldest')" 
+                                        style="background: #f3e5f5; color: #7b1fa2; border: 1px solid #7b1fa2; font-weight: 500; padding: 4px 12px;">
+                                    ⏰ Oldest First
+                                </button>
+                                <button class="btn btn-sm" id="allTasksBtn" onclick="filterTasksCompact('all')" 
+                                        style="background: #5e35b1; color: white; border: 1px solid #5e35b1; font-weight: 600; padding: 4px 12px;">
+                                    📋 All
+                                </button>
+                            </div>
+                        </div>
                         <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/tasks'" style="font-weight: 500;">
                             Open Full Dashboard →
                         </button>
                     </div>
                     
                     <% if (allTasks && allTasks.length > 0) { %>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 15px;">
-                            <% allTasks.slice(0, 12).forEach(task => { 
+                        <% 
+                        // Store all tasks for client-side filtering
+                        const allTasksJson = JSON.stringify(allTasks.map(task => ({
+                            _id: task._id.toString(),
+                            title: task.title,
+                            description: task.description || '',
+                            status: task.status,
+                            priority: task.priority,
+                            category: task.category,
+                            dueDate: task.dueDate,
+                            createdAt: task.createdAt,
+                            assignedTo: task.assignedTo || '',
+                            relatedPONumbers: task.relatedPONumbers || [],
+                            relatedPOs: task.relatedPOs ? task.relatedPOs.map(po => ({ _id: po._id.toString(), poNumber: po.poNumber })) : []
+                        })));
+                        %>
+                        <script>
+                            window.allTasksData = <%- allTasksJson %>;
+                        </script>
+                        <div id="compactTasksGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 15px;">
+                            <% allTasks.slice(0, 8).forEach(task => { 
                                 const priorityColors = {
                                     'critical': '#dc3545',
                                     'high': '#fd7e14',
@@ -5107,7 +5149,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             <% }); %>
                         </div>
                         
-                        <% if (allTasks.length > 12) { %>
+                        <% if (allTasks.length > 8) { %>
                             <div style="text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef;">
                                 <button class="btn btn-outline-secondary btn-sm" onclick="window.location.href='/tasks'" style="font-weight: 500;">
                                     View All <%= allTasks.length %> Tasks →
@@ -12940,6 +12982,433 @@ Thank you`;
                 closeTaskEditModal();
             }
         });
+
+        // Task filtering functions for compact view
+        let currentTaskFilter = 'all';
+
+        function filterTasksCompact(filterType) {
+            console.log('🔍 filterTasksCompact called with:', filterType);
+            currentTaskFilter = filterType;
+            const allTasks = window.allTasksData || [];
+            console.log('📊 Total tasks available:', allTasks.length);
+            let filteredTasks = [...allTasks];
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            // Apply filter
+            if (filterType === 'today') {
+                // Tasks created today OR due today
+                filteredTasks = allTasks.filter(task => {
+                    const createdDate = new Date(task.createdAt);
+                    createdDate.setHours(0, 0, 0, 0);
+                    const dueDate = new Date(task.dueDate);
+                    dueDate.setHours(0, 0, 0, 0);
+                    
+                    return (createdDate.getTime() === today.getTime()) || (dueDate.getTime() === today.getTime());
+                });
+            } else if (filterType === 'high') {
+                // High or critical priority
+                filteredTasks = allTasks.filter(task => 
+                    task.priority === 'high' || task.priority === 'critical'
+                );
+            } else if (filterType === 'oldest') {
+                // Sort by oldest creation date first
+                filteredTasks.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            }
+            
+            // Update button styles
+            document.querySelectorAll('#todayTasksBtn, #highPriorityBtn, #oldestTasksBtn, #allTasksBtn').forEach(btn => {
+                btn.style.background = '#e8eaf6';
+                btn.style.color = '#5e35b1';
+                btn.style.border = '1px solid #5e35b1';
+                btn.style.fontWeight = '500';
+            });
+            
+            const activeBtn = document.getElementById(
+                filterType === 'today' ? 'todayTasksBtn' : 
+                filterType === 'high' ? 'highPriorityBtn' : 
+                filterType === 'oldest' ? 'oldestTasksBtn' : 
+                'allTasksBtn'
+            );
+            if (activeBtn) {
+                activeBtn.style.background = '#5e35b1';
+                activeBtn.style.color = 'white';
+                activeBtn.style.border = '1px solid #5e35b1';
+                activeBtn.style.fontWeight = '600';
+            }
+            
+            // Update task count
+            document.getElementById('taskCountSpan').textContent = `(${filteredTasks.length} tasks)`;
+            
+            console.log('✅ Filtered tasks count:', filteredTasks.length);
+            console.log('🎨 Rendering first', Math.min(8, filteredTasks.length), 'tasks');
+            
+            // Render tasks (limit to 8 for 2 rows)
+            renderCompactTasks(filteredTasks.slice(0, 8));
+        }
+
+        function renderCompactTasks(tasks) {
+            console.log('🎨 renderCompactTasks called with', tasks.length, 'tasks');
+            const grid = document.getElementById('compactTasksGrid');
+            if (!grid) {
+                console.error('❌ Grid element not found!');
+                return;
+            }
+            console.log('✅ Grid element found:', grid);
+            
+            const priorityColors = {
+                'critical': '#dc3545',
+                'high': '#fd7e14',
+                'medium': '#ffc107',
+                'low': '#28a745'
+            };
+            const statusColors = {
+                'pending': '#6c757d',
+                'in-progress': '#0dcaf0',
+                'completed': '#198754',
+                'cancelled': '#adb5bd',
+                'on-hold': '#fd7e14'
+            };
+            const statusIcons = {
+                'pending': '⏳',
+                'in-progress': '🔄',
+                'completed': '✅',
+                'cancelled': '❌',
+                'on-hold': '⏸️'
+            };
+            const priorityIcons = {
+                'critical': '🔴',
+                'high': '🟠',
+                'medium': '🟡',
+                'low': '🟢'
+            };
+            
+            // Clear existing tasks
+            grid.innerHTML = '';
+            
+            console.log('🔄 Cleared grid, now rendering', tasks.length, 'task cards');
+            
+            tasks.forEach(task => {
+                const dueDate = new Date(task.dueDate);
+                const now = new Date();
+                const isOverdue = dueDate < now && task.status !== 'completed';
+                const dueDateStr = dueDate.toLocaleDateString();
+                
+                const taskCard = document.createElement('div');
+                taskCard.className = 'task-card-clickable';
+                taskCard.setAttribute('data-task-url', `/tasks?taskId=${task._id}`);
+                taskCard.style.cssText = `background: ${isOverdue ? '#fff5f5' : '#f8f9fa'}; border-left: 4px solid ${priorityColors[task.priority]}; border-radius: 8px; padding: 15px; transition: all 0.3s ease; cursor: pointer;`;
+                taskCard.onmouseover = () => { taskCard.style.transform = 'translateY(-2px)'; taskCard.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'; };
+                taskCard.onmouseout = () => { taskCard.style.transform = 'translateY(0)'; taskCard.style.boxShadow = 'none'; };
+                
+                taskCard.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                        <div style="flex: 1; padding-right: 10px;">
+                            <div style="font-weight: 600; color: #2c3e50; font-size: 0.95rem; margin-bottom: 5px; line-height: 1.3;">
+                                ${task.title}
+                            </div>
+                            ${task.description ? `
+                                <div style="font-size: 0.8rem; color: #6c757d; margin-bottom: 8px; line-height: 1.4; max-height: 2.8em; overflow: hidden; text-overflow: ellipsis;">
+                                    ${task.description.substring(0, 80)}${task.description.length > 80 ? '...' : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div style="display: flex; gap: 5px; flex-shrink: 0;">
+                            <button class="task-edit-btn" data-task-id="${task._id}"
+                                    style="background: #0d6efd; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;"
+                                    onmouseover="this.style.background='#0b5ed7'" onmouseout="this.style.background='#0d6efd'"
+                                    title="Edit task">
+                                ✏️ Edit
+                            </button>
+                            <button class="task-archive-btn" data-task-id="${task._id}"
+                                    style="background: #6c757d; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;"
+                                    onmouseover="this.style.background='#5c636a'" onmouseout="this.style.background='#6c757d'"
+                                    title="Archive task">
+                                📦 Archive
+                            </button>
+                            <button class="task-delete-btn" data-task-id="${task._id}" data-task-title="${task.title}"
+                                    style="background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;"
+                                    onmouseover="this.style.background='#bb2d3b'" onmouseout="this.style.background='#dc3545'"
+                                    title="Delete task">
+                                🗑️ Delete
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+                        <span style="background: ${statusColors[task.status]}; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                            ${statusIcons[task.status]} ${task.status.replace('-', ' ').toUpperCase()}
+                        </span>
+                        <span style="background: ${priorityColors[task.priority]}; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                            ${priorityIcons[task.priority]} ${task.priority.toUpperCase()}
+                        </span>
+                        ${task.category ? `
+                            <span style="background: #e9ecef; color: #495057; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 500;">
+                                📁 ${task.category.replace('-', ' ').toUpperCase()}
+                            </span>
+                        ` : ''}
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #6c757d; padding-top: 10px; border-top: 1px solid #e9ecef;">
+                        <div>
+                            ${isOverdue ? 
+                                '<span style="color: #dc3545; font-weight: 600;">⚠️ OVERDUE</span>' : 
+                                `<span>📅 Due: ${dueDateStr}</span>`
+                            }
+                        </div>
+                        <div>
+                            ${task.assignedTo ? 
+                                `<span>👤 ${task.assignedTo}</span>` : 
+                                '<span style="color: #adb5bd;">Unassigned</span>'
+                            }
+                        </div>
+                    </div>
+                    
+                    ${task.relatedPONumbers && task.relatedPONumbers.length > 0 ? `
+                        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e9ecef; font-size: 0.75rem;">
+                            <span style="color: #6c757d;">🔗 POs: </span>
+                            ${task.relatedPONumbers.slice(0, 3).map(poNum => 
+                                `<span style="background: #e3f2fd; color: #1976d2; padding: 2px 8px; border-radius: 8px; margin-right: 4px; font-weight: 500;">${poNum}</span>`
+                            ).join('')}
+                            ${task.relatedPONumbers.length > 3 ? `<span style="color: #6c757d;">+${task.relatedPONumbers.length - 3} more</span>` : ''}
+                        </div>
+                    ` : ''}
+                `;
+                
+                grid.appendChild(taskCard);
+            });
+            
+            console.log('✅ Rendered', tasks.length, 'task cards');
+            console.log('📊 Grid now has', grid.children.length, 'children');
+            
+            // Re-attach event listeners
+            attachTaskEventListeners();
+        }
+
+        function attachTaskEventListeners() {
+            // Task card click handler
+            document.querySelectorAll('.task-card-clickable').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (!e.target.closest('button')) {
+                        window.location.href = card.getAttribute('data-task-url');
+                    }
+                });
+            });
+
+            // Edit button handlers
+            document.querySelectorAll('.task-edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openTaskEditModal(btn.getAttribute('data-task-id'));
+                });
+            });
+
+            // Archive button handlers
+            document.querySelectorAll('.task-archive-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    archiveTaskFromViewer(btn.getAttribute('data-task-id'), btn);
+                });
+            });
+
+            // Delete button handlers
+            document.querySelectorAll('.task-delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteTaskFromViewer(
+                        btn.getAttribute('data-task-id'),
+                        btn.getAttribute('data-task-title'),
+                        btn
+                    );
+                });
+            });
+        }
+
+        // Initialize event listeners on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            attachTaskEventListeners();
+            checkReminders(); // Check for task reminders on load
+            setInterval(checkReminders, 60000); // Check every minute
+        });
+
+        // Task Reminder System
+        async function checkReminders() {
+            try {
+                const response = await fetch('/tasks/api/reminders/active');
+                const data = await response.json();
+                
+                if (data.success && data.reminders && data.reminders.length > 0) {
+                    data.reminders.forEach(reminder => {
+                        showReminderNotification(reminder);
+                    });
+                }
+            } catch (error) {
+                console.error('Error checking reminders:', error);
+            }
+        }
+
+        function showReminderNotification(task) {
+            const container = document.getElementById('reminderContainer');
+            if (!container) return;
+            
+            // Check if reminder already exists
+            if (document.getElementById(`reminder-${task._id}`)) {
+                return;
+            }
+            
+            const priorityColors = {
+                'low': '#28a745',
+                'medium': '#ffc107',
+                'high': '#fd7e14',
+                'critical': '#dc3545'
+            };
+            
+            const notification = document.createElement('div');
+            notification.id = `reminder-${task._id}`;
+            notification.style.cssText = `
+                background: white;
+                border-left: 4px solid ${priorityColors[task.priority] || '#6c757d'};
+                border-radius: 8px;
+                padding: 15px;
+                margin-bottom: 10px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                animation: slideInRight 0.3s ease-out;
+            `;
+            
+            const dueDate = new Date(task.dueDate);
+            const dueDateStr = dueDate.toLocaleDateString();
+            const recurringBadge = task.isRecurring ? 
+                `<span style="background: #e3f2fd; color: #1976d2; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; margin-left: 8px;">
+                    🔄 ${task.recurringType.toUpperCase()}
+                </span>` : '';
+            
+            notification.innerHTML = `
+                <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 10px;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: #2c3e50; font-size: 0.95rem; margin-bottom: 5px;">
+                            🔔 Task Reminder
+                        </div>
+                        <div style="font-weight: 600; color: #495057; font-size: 0.9rem;">
+                            ${task.title}
+                            ${recurringBadge}
+                        </div>
+                    </div>
+                    <button onclick="dismissReminder('${task._id}', ${task.isRecurring || false})" 
+                            style="background: transparent; border: none; color: #6c757d; font-size: 1.2rem; cursor: pointer; padding: 0; margin-left: 10px;"
+                            title="Dismiss">
+                        ×
+                    </button>
+                </div>
+                ${task.description ? `
+                    <div style="font-size: 0.85rem; color: #6c757d; margin-bottom: 10px; line-height: 1.4;">
+                        ${task.description.substring(0, 100)}${task.description.length > 100 ? '...' : ''}
+                    </div>
+                ` : ''}
+                <div style="font-size: 0.75rem; color: #6c757d; margin-bottom: 12px;">
+                    📅 Due: ${dueDateStr}
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button onclick="snoozeReminder('${task._id}', 60)" 
+                            style="background: #667eea; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.2s;"
+                            onmouseover="this.style.background='#5568d3'" 
+                            onmouseout="this.style.background='#667eea'">
+                        ⏰ Snooze 1 hour
+                    </button>
+                    <button onclick="snoozeReminder('${task._id}', 240)" 
+                            style="background: #764ba2; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.2s;"
+                            onmouseover="this.style.background='#6a4391'" 
+                            onmouseout="this.style.background='#764ba2'">
+                        ⏰ Snooze 4 hours
+                    </button>
+                    <button onclick="window.location.href='/tasks?taskId=${task._id}'" 
+                            style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.2s;"
+                            onmouseover="this.style.background='#218838'" 
+                            onmouseout="this.style.background='#28a745'">
+                        📋 View Task
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(notification);
+            
+            // Add slide-in animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideInRight {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            if (!document.getElementById('reminder-animations')) {
+                style.id = 'reminder-animations';
+                document.head.appendChild(style);
+            }
+        }
+
+        async function snoozeReminder(taskId, minutes) {
+            try {
+                const response = await fetch(`/tasks/api/reminders/${taskId}/snooze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ minutes })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    removeReminderNotification(taskId);
+                    showTrackingToast(`⏰ Reminder snoozed for ${minutes} minutes`, 'success');
+                }
+            } catch (error) {
+                console.error('Error snoozing reminder:', error);
+                showTrackingToast('❌ Failed to snooze reminder', 'error');
+            }
+        }
+
+        async function dismissReminder(taskId, isRecurring) {
+            try {
+                if (!isRecurring) {
+                    // Only dismiss one-time reminders permanently
+                    const response = await fetch(`/tasks/api/reminders/${taskId}/dismiss`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!data.success) {
+                        throw new Error('Failed to dismiss reminder');
+                    }
+                } else {
+                    // For recurring reminders, just snooze for 24 hours
+                    await snoozeReminder(taskId, 1440); // 24 hours
+                    return;
+                }
+                
+                removeReminderNotification(taskId);
+                showTrackingToast('✅ Reminder dismissed', 'success');
+            } catch (error) {
+                console.error('Error dismissing reminder:', error);
+                showTrackingToast('❌ Failed to dismiss reminder', 'error');
+            }
+        }
+
+        function removeReminderNotification(taskId) {
+            const notification = document.getElementById(`reminder-${taskId}`);
+            if (notification) {
+                notification.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }
+        }
     </script>
 </body>
 
