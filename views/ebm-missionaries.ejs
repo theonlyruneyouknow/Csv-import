@@ -36,6 +36,65 @@
             margin-bottom: 2rem;
         }
         
+        .missionaries-table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        
+        .missionaries-table {
+            margin: 0;
+        }
+        
+        .missionaries-table thead {
+            background: linear-gradient(135deg, var(--ebm-primary) 0%, var(--ebm-secondary) 100%);
+            color: white;
+        }
+        
+        .missionaries-table thead th {
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+        
+        .missionaries-table thead th:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .missionaries-table thead th.sortable::after {
+            content: '⇅';
+            margin-left: 8px;
+            opacity: 0.5;
+        }
+        
+        .missionaries-table thead th.sorted-asc::after {
+            content: '↑';
+            opacity: 1;
+        }
+        
+        .missionaries-table thead th.sorted-desc::after {
+            content: '↓';
+            opacity: 1;
+        }
+        
+        .missionaries-table tbody tr {
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+        
+        .missionaries-table tbody tr:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .missionaries-table td {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+        
         .missionary-card {
             background: white;
             border-radius: 12px;
@@ -58,6 +117,11 @@
             margin-bottom: 0.5rem;
         }
         
+        .table-missionary-name {
+            font-weight: 600;
+            color: var(--ebm-primary);
+        }
+        
         .missionary-info {
             color: #666;
             font-size: 0.95rem;
@@ -74,6 +138,7 @@
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 500;
+            display: inline-block;
         }
         
         .status-complete {
@@ -115,6 +180,25 @@
             color: white;
         }
         
+        .view-toggle {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.25rem;
+        }
+        
+        .view-toggle .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+        }
+        
+        .view-toggle .btn.active {
+            background: var(--ebm-secondary);
+            color: white;
+            border-radius: 6px;
+        }
+        
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
@@ -124,6 +208,100 @@
             font-size: 4rem;
             color: #cbd5e0;
             margin-bottom: 1rem;
+        }
+        
+        #cardView {
+            display: none;
+        }
+        
+        #tableView {
+            display: block;
+        }
+        
+        .filter-section {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        
+        .results-info {
+            color: #666;
+            font-size: 0.95rem;
+            padding: 0.5rem 0;
+        }
+        
+        .expand-btn {
+            background: none;
+            border: none;
+            color: var(--ebm-secondary);
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .expand-btn:hover {
+            color: var(--ebm-primary);
+            transform: scale(1.1);
+        }
+        
+        .expanded-row {
+            background-color: #f8f9fa;
+        }
+        
+        .expanded-content {
+            padding: 1.5rem;
+            border-top: 2px solid #dee2e6;
+        }
+        
+        .detail-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .detail-section h6 {
+            color: var(--ebm-primary);
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+        
+        .detail-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+            min-width: 150px;
+            display: inline-block;
+        }
+        
+        .detail-value {
+            color: #666;
+        }
+        
+        .date-filter-inputs {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .date-filter-inputs input {
+            flex: 1;
+        }
+        
+        .filter-badge {
+            background: var(--ebm-secondary);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-left: 0.5rem;
         }
     </style>
 </head>
@@ -148,17 +326,34 @@
     <div class="container-fluid mt-4">
         <!-- Search and Filters -->
         <div class="search-card">
-            <div class="row align-items-center">
-                <div class="col-md-6">
+            <div class="row align-items-center mb-3">
+                <div class="col-md-4">
                     <h2><i class="bi bi-person-lines-fill"></i> Missionaries Directory</h2>
-                    <p class="text-muted mb-0">Total: <%= missionaries.length %> missionaries</p>
+                    <p class="results-info mb-0">
+                        Showing <%= missionaries.length %> 
+                        <% if (filters.search || filters.status) { %>
+                            of filtered
+                        <% } %>
+                        missionaries
+                    </p>
                 </div>
-                <div class="col-md-6 text-end">
+                <div class="col-md-8 text-end">
+                    <div class="d-inline-block me-2 view-toggle">
+                        <button class="btn btn-sm active" id="tableViewBtn" onclick="switchView('table')">
+                            <i class="bi bi-table"></i> Table
+                        </button>
+                        <button class="btn btn-sm" id="cardViewBtn" onclick="switchView('card')">
+                            <i class="bi bi-grid-3x3-gap"></i> Cards
+                        </button>
+                    </div>
                     <a href="/ebm/dashboard" class="btn btn-outline-secondary me-2">
-                        <i class="bi bi-arrow-left"></i> Back to Dashboard
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                    <a href="/ebm/import" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-upload"></i> Import
                     </a>
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMissionaryModal">
-                        <i class="bi bi-plus-circle"></i> Add Missionary
+                        <i class="bi bi-plus-circle"></i> Add
                     </button>
                 </div>
             </div>
@@ -166,111 +361,400 @@
             <hr>
             
             <!-- Search Bar -->
-            <form method="GET" class="mb-3">
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-search"></i></span>
-                    <input type="text" class="form-control" name="search" placeholder="Search by name, email..." value="<%= filters.search || '' %>">
-                    <button class="btn btn-primary" type="submit">Search</button>
-                    <% if (filters.search || filters.status) { %>
-                    <a href="/ebm/missionaries" class="btn btn-outline-secondary">Clear</a>
-                    <% } %>
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <form method="GET" id="searchForm">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" name="search" placeholder="Search by name, email, city, state..." value="<%= filters.search || '' %>">
+                            <input type="hidden" name="status" value="<%= filters.status || '' %>">
+                            <input type="hidden" name="sort" value="<%= filters.sort || 'lastName' %>">
+                            <input type="hidden" name="order" value="<%= filters.order || 'asc' %>">
+                            <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Search</button>
+                            <% if (filters.search || filters.status) { %>
+                            <a href="/ebm/missionaries" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Clear
+                            </a>
+                            <% } %>
+                        </div>
+                    </form>
                 </div>
-            </form>
+                <div class="col-md-4 mb-3">
+                    <button class="btn btn-outline-secondary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#filterSection">
+                        <i class="bi bi-funnel"></i> Advanced Filters
+                        <i class="bi bi-chevron-down float-end"></i>
+                    </button>
+                </div>
+            </div>
             
-            <!-- Status Filters -->
-            <div>
-                <strong>Filter by Status:</strong>
-                <div class="btn-group mt-2" role="group">
-                    <a href="/ebm/missionaries" class="btn btn-outline-secondary filter-btn <%= !filters.status ? 'active' : '' %>">
-                        All
-                    </a>
-                    <a href="/ebm/missionaries?status=complete" class="btn btn-outline-success filter-btn <%= filters.status === 'complete' ? 'active' : '' %>">
-                        Complete
-                    </a>
-                    <a href="/ebm/missionaries?status=partial" class="btn btn-outline-warning filter-btn <%= filters.status === 'partial' ? 'active' : '' %>">
-                        Partial
-                    </a>
-                    <a href="/ebm/missionaries?status=minimal" class="btn btn-outline-danger filter-btn <%= filters.status === 'minimal' ? 'active' : '' %>">
-                        Minimal
-                    </a>
+            <!-- Advanced Filters -->
+            <div class="collapse <%= filters.status || filters.yearFrom || filters.yearTo ? 'show' : '' %>" id="filterSection">
+                <div class="filter-section">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <strong><i class="bi bi-funnel-fill"></i> Filter by Status:</strong>
+                            <div class="btn-group mt-2" role="group">
+                                <a href="?search=<%= filters.search || '' %>&yearFrom=<%= filters.yearFrom || '' %>&yearTo=<%= filters.yearTo || '' %>&sort=<%= filters.sort || 'lastName' %>&order=<%= filters.order || 'asc' %>" 
+                                   class="btn btn-outline-secondary filter-btn <%= !filters.status ? 'active' : '' %>">
+                                    <i class="bi bi-list-ul"></i> All
+                                </a>
+                                <a href="?status=complete&search=<%= filters.search || '' %>&yearFrom=<%= filters.yearFrom || '' %>&yearTo=<%= filters.yearTo || '' %>&sort=<%= filters.sort || 'lastName' %>&order=<%= filters.order || 'asc' %>" 
+                                   class="btn btn-outline-success filter-btn <%= filters.status === 'complete' ? 'active' : '' %>">
+                                    <i class="bi bi-check-circle"></i> Complete
+                                </a>
+                                <a href="?status=partial&search=<%= filters.search || '' %>&yearFrom=<%= filters.yearFrom || '' %>&yearTo=<%= filters.yearTo || '' %>&sort=<%= filters.sort || 'lastName' %>&order=<%= filters.order || 'asc' %>" 
+                                   class="btn btn-outline-warning filter-btn <%= filters.status === 'partial' ? 'active' : '' %>">
+                                    <i class="bi bi-dash-circle"></i> Partial
+                                </a>
+                                <a href="?status=minimal&search=<%= filters.search || '' %>&yearFrom=<%= filters.yearFrom || '' %>&yearTo=<%= filters.yearTo || '' %>&sort=<%= filters.sort || 'lastName' %>&order=<%= filters.order || 'asc' %>" 
+                                   class="btn btn-outline-danger filter-btn <%= filters.status === 'minimal' ? 'active' : '' %>">
+                                    <i class="bi bi-exclamation-circle"></i> Minimal
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong><i class="bi bi-calendar-range"></i> Filter by Service Years:</strong>
+                            <form method="GET" class="mt-2">
+                                <input type="hidden" name="status" value="<%= filters.status || '' %>">
+                                <input type="hidden" name="search" value="<%= filters.search || '' %>">
+                                <input type="hidden" name="sort" value="<%= filters.sort || 'lastName' %>">
+                                <input type="hidden" name="order" value="<%= filters.order || 'asc' %>">
+                                <div class="date-filter-inputs">
+                                    <input type="number" class="form-control" name="yearFrom" placeholder="From (e.g., 1990)" 
+                                           value="<%= filters.yearFrom || '' %>" min="1950" max="2026">
+                                    <span>to</span>
+                                    <input type="number" class="form-control" name="yearTo" placeholder="To (e.g., 2000)" 
+                                           value="<%= filters.yearTo || '' %>" min="1950" max="2026">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-funnel"></i> Apply
+                                    </button>
+                                    <% if (filters.yearFrom || filters.yearTo) { %>
+                                    <a href="?status=<%= filters.status || '' %>&search=<%= filters.search || '' %>&sort=<%= filters.sort || 'lastName' %>&order=<%= filters.order || 'asc' %>" 
+                                       class="btn btn-outline-secondary">
+                                        <i class="bi bi-x"></i>
+                                    </a>
+                                    <% } %>
+                                </div>
+                                <% if (filters.yearFrom || filters.yearTo) { %>
+                                <small class="text-muted mt-1 d-block">
+                                    <i class="bi bi-info-circle"></i> 
+                                    Showing missionaries who served <%= filters.yearFrom ? 'from ' + filters.yearFrom : '' %> 
+                                    <%= filters.yearTo ? 'to ' + filters.yearTo : '' %>
+                                </small>
+                                <% } %>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Missionaries List -->
-        <div class="row">
-            <% if (missionaries.length === 0) { %>
-            <div class="col-12">
-                <div class="empty-state">
-                    <i class="bi bi-inbox"></i>
-                    <h3>No Missionaries Found</h3>
-                    <p class="text-muted">
-                        <% if (filters.search || filters.status) { %>
-                            Try adjusting your search or filters
-                        <% } else { %>
-                            Start by adding your first missionary or importing data
-                        <% } %>
-                    </p>
-                    <% if (!filters.search && !filters.status) { %>
-                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addMissionaryModal">
-                        <i class="bi bi-plus-circle"></i> Add First Missionary
-                    </button>
-                    <% } %>
-                </div>
-            </div>
-            <% } else { %>
-                <% missionaries.forEach(missionary => { %>
-                <div class="col-md-6 col-lg-4">
-                    <div class="missionary-card" onclick="window.location.href='/ebm/missionaries/<%= missionary._id %>'">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div class="missionary-name">
+        <% if (missionaries.length === 0) { %>
+        <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <h3>No Missionaries Found</h3>
+            <p class="text-muted">
+                <% if (filters.search || filters.status) { %>
+                    Try adjusting your search or filters
+                <% } else { %>
+                    Start by adding your first missionary or importing data
+                <% } %>
+            </p>
+            <% if (!filters.search && !filters.status) { %>
+            <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addMissionaryModal">
+                <i class="bi bi-plus-circle"></i> Add First Missionary
+            </button>
+            <% } %>
+        </div>
+        <% } else { %>
+        
+        <!-- Table View -->
+        <div id="tableView" class="missionaries-table-container">
+            <table class="table table-hover missionaries-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;"></th>
+                        <th class="sortable <%= filters.sort === 'lastName' ? 'sorted-' + filters.order : '' %>" 
+                            onclick="sortTable('lastName')">
+                            Name
+                        </th>
+                        <th class="sortable <%= filters.sort === 'email' ? 'sorted-' + filters.order : '' %>" 
+                            onclick="sortTable('email')">
+                            Email
+                        </th>
+                        <th class="sortable <%= filters.sort === 'serviceStartDate' ? 'sorted-' + filters.order : '' %>" 
+                            onclick="sortTable('serviceStartDate')">
+                            Service Dates
+                        </th>
+                        <th class="sortable <%= filters.sort === 'currentCity' ? 'sorted-' + filters.order : '' %>" 
+                            onclick="sortTable('currentCity')">
+                            Current Location
+                        </th>
+                        <th class="sortable <%= filters.sort === 'dataStatus' ? 'sorted-' + filters.order : '' %>" 
+                            onclick="sortTable('dataStatus')">
+                            Status
+                        </th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% missionaries.forEach((missionary, index) => { %>
+                    <tr id="row-<%= index %>">
+                        <td>
+                            <button class="expand-btn" onclick="toggleRow(event, <%= index %>)" title="Expand details">
+                                <i class="bi bi-plus-circle" id="icon-<%= index %>"></i>
+                            </button>
+                        </td>
+                        <td onclick="window.location.href='/ebm/missionaries/<%= missionary._id %>'" style="cursor: pointer;">
+                            <div class="table-missionary-name">
                                 <%= missionary.firstName %> <%= missionary.lastName %>
-                                <% if (missionary.maidenName) { %>
-                                    <small class="text-muted">(<%= missionary.maidenName %>)</small>
-                                <% } %>
                             </div>
+                            <% if (missionary.maidenName) { %>
+                            <small class="text-muted">(<%= missionary.maidenName %>)</small>
+                            <% } %>
+                        </td>
+                        <td onclick="window.location.href='/ebm/missionaries/<%= missionary._id %>'" style="cursor: pointer;">
+                            <% if (missionary.email) { %>
+                                <i class="bi bi-envelope text-muted"></i> <%= missionary.email %>
+                            <% } else { %>
+                                <span class="text-muted">-</span>
+                            <% } %>
+                        </td>
+                        <td onclick="window.location.href='/ebm/missionaries/<%= missionary._id %>'" style="cursor: pointer;">
+                            <% if (missionary.serviceStartDate) { %>
+                                <i class="bi bi-calendar-event text-muted"></i>
+                                <%= new Date(missionary.serviceStartDate).getFullYear() %> - 
+                                <%= missionary.serviceEndDate ? new Date(missionary.serviceEndDate).getFullYear() : 'Present' %>
+                            <% } else { %>
+                                <span class="text-muted">-</span>
+                            <% } %>
+                        </td>
+                        <td onclick="window.location.href='/ebm/missionaries/<%= missionary._id %>'" style="cursor: pointer;">
+                            <% if (missionary.currentCity || missionary.currentState) { %>
+                                <i class="bi bi-geo-alt text-muted"></i>
+                                <%= missionary.currentCity %><%= missionary.currentCity && missionary.currentState ? ', ' : '' %><%= missionary.currentState %>
+                            <% } else { %>
+                                <span class="text-muted">-</span>
+                            <% } %>
+                        </td>
+                        <td onclick="window.location.href='/ebm/missionaries/<%= missionary._id %>'" style="cursor: pointer;">
                             <span class="status-badge status-<%= missionary.dataStatus %>">
                                 <%= missionary.dataStatus %>
                             </span>
-                        </div>
-                        
-                        <% if (missionary.missionName) { %>
-                        <div class="missionary-info">
-                            <i class="bi bi-pin-map"></i> <%= missionary.missionName %>
-                        </div>
-                        <% } %>
-                        
-                        <% if (missionary.serviceStartDate) { %>
-                        <div class="missionary-info">
-                            <i class="bi bi-calendar-event"></i> 
-                            <%= new Date(missionary.serviceStartDate).getFullYear() %> - 
-                            <%= missionary.serviceEndDate ? new Date(missionary.serviceEndDate).getFullYear() : 'Present' %>
-                        </div>
-                        <% } %>
-                        
-                        <% if (missionary.currentCity || missionary.currentState) { %>
-                        <div class="missionary-info">
-                            <i class="bi bi-geo-alt"></i> 
-                            <%= missionary.currentCity %><%= missionary.currentCity && missionary.currentState ? ', ' : '' %><%= missionary.currentState %>
-                        </div>
-                        <% } %>
-                        
-                        <% if (missionary.email) { %>
-                        <div class="missionary-info">
-                            <i class="bi bi-envelope"></i> <%= missionary.email %>
-                        </div>
-                        <% } %>
-                        
-                        <% if (missionary.spouse && missionary.spouse.name) { %>
-                        <div class="missionary-info">
-                            <i class="bi bi-heart"></i> Spouse: <%= missionary.spouse.name %>
-                        </div>
-                        <% } %>
-                    </div>
-                </div>
-                <% }); %>
-            <% } %>
+                        </td>
+                        <td>
+                            <a href="/ebm/missionaries/<%= missionary._id %>" class="btn btn-sm btn-outline-primary" title="View full profile">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr id="expanded-<%= index %>" class="expanded-row" style="display: none;">
+                        <td colspan="7">
+                            <div class="expanded-content">
+                                <div class="row">
+                                    <!-- Personal Information -->
+                                    <div class="col-md-4">
+                                        <div class="detail-section">
+                                            <h6><i class="bi bi-person-badge"></i> Personal Information</h6>
+                                            <div class="detail-item">
+                                                <span class="detail-label">Full Name:</span>
+                                                <span class="detail-value">
+                                                    <%= missionary.firstName %> 
+                                                    <%= missionary.middleName || '' %> 
+                                                    <%= missionary.lastName %>
+                                                </span>
+                                            </div>
+                                            <% if (missionary.maidenName) { %>
+                                            <div class="detail-item">
+                                                <span class="detail-label">Maiden Name:</span>
+                                                <span class="detail-value"><%= missionary.maidenName %></span>
+                                            </div>
+                                            <% } %>
+                                            <div class="detail-item">
+                                                <span class="detail-label">Email:</span>
+                                                <span class="detail-value"><%= missionary.email || 'Not provided' %></span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">Phone:</span>
+                                                <span class="detail-value"><%= missionary.phone || 'Not provided' %></span>
+                                            </div>
+                                            <% if (missionary.spouse && missionary.spouse.name) { %>
+                                            <div class="detail-item">
+                                                <span class="detail-label">Spouse:</span>
+                                                <span class="detail-value">
+                                                    <i class="bi bi-heart-fill text-danger"></i> <%= missionary.spouse.name %>
+                                                </span>
+                                            </div>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Mission Service -->
+                                    <div class="col-md-4">
+                                        <div class="detail-section">
+                                            <h6><i class="bi bi-pin-map"></i> Mission Service</h6>
+                                            <div class="detail-item">
+                                                <span class="detail-label">Mission:</span>
+                                                <span class="detail-value"><%= missionary.missionName || 'Not specified' %></span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">Start Date:</span>
+                                                <span class="detail-value">
+                                                    <%= missionary.serviceStartDate ? new Date(missionary.serviceStartDate).toLocaleDateString() : 'Not provided' %>
+                                                </span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">End Date:</span>
+                                                <span class="detail-value">
+                                                    <%= missionary.serviceEndDate ? new Date(missionary.serviceEndDate).toLocaleDateString() : 'Not provided' %>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Current Information -->
+                                    <div class="col-md-4">
+                                        <div class="detail-section">
+                                            <h6><i class="bi bi-house-door"></i> Current Information</h6>
+                                            <div class="detail-item">
+                                                <span class="detail-label">City:</span>
+                                                <span class="detail-value"><%= missionary.currentCity || 'Not provided' %></span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">State:</span>
+                                                <span class="detail-value"><%= missionary.currentState || 'Not provided' %></span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">Country:</span>
+                                                <span class="detail-value"><%= missionary.currentCountry || 'Not provided' %></span>
+                                            </div>
+                                            <% if (missionary.notes) { %>
+                                            <div class="detail-item">
+                                                <span class="detail-label">Notes:</span>
+                                                <span class="detail-value"><%= missionary.notes %></span>
+                                            </div>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <% if (missionary.areasServed && missionary.areasServed.length > 0) { %>
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <div class="detail-section">
+                                            <h6><i class="bi bi-pin-map-fill"></i> Areas Served (<%= missionary.areasServed.length %>)</h6>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <% missionary.areasServed.forEach(area => { %>
+                                                    <a href="/ebm/areas/<%= area._id %>" class="badge bg-info text-decoration-none" style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                                        <i class="bi bi-geo-alt-fill"></i> <%= area.name %>
+                                                        <% if (area.city) { %>
+                                                            <small class="opacity-75"> - <%= area.city %></small>
+                                                        <% } %>
+                                                    </a>
+                                                <% }); %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% } %>
+                                
+                                <% if (missionary.companionships && missionary.companionships.length > 0) { %>
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <div class="detail-section">
+                                            <h6><i class="bi bi-people-fill"></i> Companions (<%= missionary.companionships.length %>)</h6>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <% missionary.companionships.forEach(comp => { %>
+                                                    <% if (comp.missionaries && comp.missionaries.length > 0) { %>
+                                                        <% comp.missionaries.forEach(m => { %>
+                                                            <% if (m.missionary && m.missionary._id && m.missionary._id.toString() !== missionary._id.toString()) { %>
+                                                                <a href="/ebm/missionaries?search=<%= m.missionary.lastName %>&expand=<%= m.missionary._id %>" class="badge bg-success text-decoration-none" style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                                                    <i class="bi bi-person-fill"></i> <%= m.missionary.firstName %> <%= m.missionary.lastName %>
+                                                                    <% if (comp.startDate) { %>
+                                                                        <small class="opacity-75"> (<%= new Date(comp.startDate).getFullYear() %>)</small>
+                                                                    <% } %>
+                                                                </a>
+                                                            <% } %>
+                                                        <% }); %>
+                                                    <% } %>
+                                                <% }); %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% } %>
+                                
+                                <div class="text-center mt-3">
+                                    <a href="/ebm/missionaries/<%= missionary._id %>" class="btn btn-primary">
+                                        <i class="bi bi-eye"></i> View Full Profile
+                                    </a>
+                                    <a href="/ebm/missionary-log/<%= missionary._id %>" class="btn btn-outline-info">
+                                        <i class="bi bi-journal-text"></i> View Missionary Log
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
         </div>
+        
+        <!-- Card View -->
+        <div id="cardView" class="row">
+            <% missionaries.forEach(missionary => { %>
+            <div class="col-md-6 col-lg-4">
+                <div class="missionary-card" onclick="window.location.href='/ebm/missionaries/<%= missionary._id %>'">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="missionary-name">
+                            <%= missionary.firstName %> <%= missionary.lastName %>
+                            <% if (missionary.maidenName) { %>
+                                <small class="text-muted">(<%= missionary.maidenName %>)</small>
+                            <% } %>
+                        </div>
+                        <span class="status-badge status-<%= missionary.dataStatus %>">
+                            <%= missionary.dataStatus %>
+                        </span>
+                    </div>
+                    
+                    <% if (missionary.missionName) { %>
+                    <div class="missionary-info">
+                        <i class="bi bi-pin-map"></i> <%= missionary.missionName %>
+                    </div>
+                    <% } %>
+                    
+                    <% if (missionary.serviceStartDate) { %>
+                    <div class="missionary-info">
+                        <i class="bi bi-calendar-event"></i> 
+                        <%= new Date(missionary.serviceStartDate).getFullYear() %> - 
+                        <%= missionary.serviceEndDate ? new Date(missionary.serviceEndDate).getFullYear() : 'Present' %>
+                    </div>
+                    <% } %>
+                    
+                    <% if (missionary.currentCity || missionary.currentState) { %>
+                    <div class="missionary-info">
+                        <i class="bi bi-geo-alt"></i> 
+                        <%= missionary.currentCity %><%= missionary.currentCity && missionary.currentState ? ', ' : '' %><%= missionary.currentState %>
+                    </div>
+                    <% } %>
+                    
+                    <% if (missionary.email) { %>
+                    <div class="missionary-info">
+                        <i class="bi bi-envelope"></i> <%= missionary.email %>
+                    </div>
+                    <% } %>
+                    
+                    <% if (missionary.spouse && missionary.spouse.name) { %>
+                    <div class="missionary-info">
+                        <i class="bi bi-heart"></i> Spouse: <%= missionary.spouse.name %>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+        <% } %>
     </div>
 
     <!-- Add Missionary Modal -->
@@ -364,6 +848,111 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // View switching
+        function switchView(view) {
+            const tableView = document.getElementById('tableView');
+            const cardView = document.getElementById('cardView');
+            const tableBtn = document.getElementById('tableViewBtn');
+            const cardBtn = document.getElementById('cardViewBtn');
+            
+            if (view === 'table') {
+                tableView.style.display = 'block';
+                cardView.style.display = 'none';
+                tableBtn.classList.add('active');
+                cardBtn.classList.remove('active');
+                localStorage.setItem('missionariesView', 'table');
+            } else {
+                tableView.style.display = 'none';
+                cardView.style.display = 'flex';
+                tableBtn.classList.remove('active');
+                cardBtn.classList.add('active');
+                localStorage.setItem('missionariesView', 'card');
+            }
+        }
+        
+        // Toggle expanded row details
+        function toggleRow(event, index) {
+            event.stopPropagation(); // Prevent row click navigation
+            
+            const expandedRow = document.getElementById(`expanded-${index}`);
+            const icon = document.getElementById(`icon-${index}`);
+            const mainRow = document.getElementById(`row-${index}`);
+            
+            if (expandedRow.style.display === 'none') {
+                // Expand
+                expandedRow.style.display = 'table-row';
+                icon.classList.remove('bi-plus-circle');
+                icon.classList.add('bi-dash-circle');
+                mainRow.classList.add('table-active');
+            } else {
+                // Collapse
+                expandedRow.style.display = 'none';
+                icon.classList.remove('bi-dash-circle');
+                icon.classList.add('bi-plus-circle');
+                mainRow.classList.remove('table-active');
+            }
+        }
+        
+        // Restore view preference on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedView = localStorage.getItem('missionariesView') || 'table';
+            switchView(savedView);
+            
+            // Auto-expand missionary if expand parameter is present
+            const urlParams = new URLSearchParams(window.location.search);
+            const expandId = urlParams.get('expand');
+            
+            if (expandId) {
+                // Find the missionary row by ID
+                const missionaries = <%- JSON.stringify(missionaries.map(m => ({ _id: m._id.toString(), index: missionaries.indexOf(m) }))) %>;
+                const missionaryData = missionaries.find(m => m._id === expandId);
+                
+                if (missionaryData) {
+                    const index = missionaryData.index;
+                    const mainRow = document.getElementById(`row-${index}`);
+                    const expandedRow = document.getElementById(`expanded-${index}`);
+                    const icon = document.getElementById(`icon-${index}`);
+                    
+                    if (mainRow && expandedRow && icon) {
+                        // Expand the row
+                        expandedRow.style.display = 'table-row';
+                        icon.classList.remove('bi-plus-circle');
+                        icon.classList.add('bi-dash-circle');
+                        mainRow.classList.add('table-active');
+                        
+                        // Scroll to the row after a short delay to ensure rendering is complete
+                        setTimeout(() => {
+                            mainRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 300);
+                    }
+                }
+            }
+        });
+        
+        // Table sorting
+        function sortTable(column) {
+            const currentSort = '<%= filters.sort || "lastName" %>';
+            const currentOrder = '<%= filters.order || "asc" %>';
+            const search = '<%= filters.search || "" %>';
+            const status = '<%= filters.status || "" %>';
+            
+            // Toggle order if clicking the same column
+            let newOrder = 'asc';
+            if (column === currentSort) {
+                newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+            }
+            
+            // Build URL with all current parameters
+            const params = new URLSearchParams();
+            if (search) params.set('search', search);
+            if (status) params.set('status', status);
+            params.set('sort', column);
+            params.set('order', newOrder);
+            
+            window.location.href = '/ebm/missionaries?' + params.toString();
+        }
+        
+        // Form submission
         async function submitMissionary() {
             const form = document.getElementById('addMissionaryForm');
             const formData = new FormData(form);

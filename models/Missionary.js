@@ -169,8 +169,11 @@ const missionarySchema = new mongoose.Schema({
         ref: 'MissionArea'
     }],
     
-    // Area Book - Original companion/area information from missionary
-    // This is the raw data that helps match companions with areas they served
+    // Missionary Log (formerly called "areabook" in database)
+    // This is the missionary's personal log/journal about their mission service
+    // Contains their own notes about companions, areas, and experiences
+    // Note: In the UI, this is now called "Missionary Log" to distinguish it from
+    // the "Areabook" which refers to the historical record of an area
     areabook: {
         type: String,
         trim: true,

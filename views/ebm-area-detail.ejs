@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Areabook</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .area-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .area-info {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .areabook-content {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .section-header {
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            color: #667eea;
+        }
+        .companionship-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .companionship-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .companionship-dates {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        .missionary-badge {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.25rem;
+            font-size: 0.95rem;
+            transition: transform 0.2s;
+        }
+        .missionary-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(17, 153, 142, 0.3);
+            color: white;
+        }
+        .role-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            margin-left: 0.5rem;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .info-item {
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+        .info-value {
+            color: #333;
+            font-size: 1rem;
+        }
+        .timeline-badge {
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .companionship-card.dragging {
+            opacity: 0.5;
+            cursor: move;
+        }
+        .companionship-card.drag-over {
+            border-left: 6px solid #ffc107;
+            background: #fff3cd;
+            transform: scale(1.02);
+        }
+        .drag-handle {
+            cursor: move;
+            color: #999;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .drag-handle:hover {
+            color: #667eea;
+        }
+        .merge-mode-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .toggle-merge-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="area-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="bi bi-book"></i> Areabook</h1>
+                    <h4><%= area.name %></h4>
+                    <% if (area.city || area.state) { %>
+                        <p class="mb-0"><i class="bi bi-geo-alt"></i> <%= area.city %><%= area.city && area.state ? ', ' : '' %><%= area.state %></p>
+                    <% } %>
+                </div>
+                <div>
+                    <a href="/ebm/areas" class="btn btn-light">
+                        <i class="bi bi-arrow-left"></i> Back to Areas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Area Information -->
+        <div class="area-info">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label"><i class="bi bi-pin-map"></i> Area Name</div>
+                    <div class="info-value"><%= area.name %></div>
+                </div>
+                <% if (area.city) { %>
+                <div class="info-item">
+                    <div class="info-label"><i class="bi bi-building"></i> City</div>
+                    <div class="info-value"><%= area.city %></div>
+                </div>
+                <% } %>
+                <% if (area.state) { %>
+                <div class="info-item">
+                    <div class="info-label"><i class="bi bi-map"></i> State</div>
+                    <div class="info-value"><%= area.state %></div>
+                </div>
+                <% } %>
+                <% if (area.country) { %>
+                <div class="info-item">
+                    <div class="info-label"><i class="bi bi-globe"></i> Country</div>
+                    <div class="info-value"><%= area.country %></div>
+                </div>
+                <% } %>
+                <% if (area.legacyAreaId) { %>
+                <div class="info-item">
+                    <div class="info-label"><i class="bi bi-hash"></i> Legacy ID</div>
+                    <div class="info-value"><%= area.legacyAreaId %></div>
+                </div>
+                <% } %>
+                <div class="info-item">
+                    <div class="info-label"><i class="bi bi-people"></i> Missionary History</div>
+                    <div class="info-value"><span class="timeline-badge"><%= companionships.length %> companionships</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Missionary History (The Areabook) -->
+        <div class="areabook-content">
+            <h5 class="section-header">
+                <i class="bi bi-journal-bookmark-fill"></i> Missionary History
+                <small class="text-muted" style="font-size: 0.85rem; font-weight: normal;">
+                    All missionaries who served in this area (sorted by service start date)
+                </small>
+            </h5>
+            
+            <div id="mergeBanner" class="merge-mode-banner" style="display: none;">
+                <h6 class="mb-2"><i class="bi bi-arrows-move"></i> Merge Mode Active</h6>
+                <p class="mb-0">Drag and drop one companionship onto another to merge them together</p>
+            </div>
+            
+            <% if (companionships && companionships.length > 0) { %>
+                <% companionships.forEach(comp => { %>
+                    <div class="companionship-card" 
+                         <% if (comp._id) { %>data-companionship-id="<%= comp._id %>"<% } %>
+                         <% if (comp.isUnassigned) { %>style="border-left-color: #6c757d;"<% } %>
+                         draggable="false">
+                        <% if (comp._id) { %>
+                        <span class="drag-handle" style="display: none;">
+                            <i class="bi bi-grip-vertical"></i>
+                        </span>
+                        <% } %>
+                        <div class="companionship-dates">
+                            <i class="bi bi-calendar-range"></i>
+                            <strong>
+                                <%= comp.startDate ? new Date(comp.startDate).toLocaleDateString() : 'Unknown' %>
+                                - 
+                                <%= comp.endDate ? new Date(comp.endDate).toLocaleDateString() : 'Unknown' %>
+                            </strong>
+                            <% if (comp.duration) { %>
+                                <span class="ms-2 text-muted">(<%= comp.duration %> weeks)</span>
+                            <% } %>
+                            <% if (comp.isUnassigned) { %>
+                                <span class="ms-2 badge bg-secondary">Not yet in companionship</span>
+                            <% } %>
+                        </div>
+                        
+                        <div class="d-flex flex-wrap gap-2">
+                            <% if (comp.missionaries && comp.missionaries.length > 0) { %>
+                                <% comp.missionaries.forEach(m => { %>
+                                    <% if (m.missionary) { %>
+                                        <a href="/ebm/missionaries?search=<%= m.missionary.lastName %>&expand=<%= m.missionary._id %>" class="missionary-badge">
+                                            <i class="bi bi-person-fill"></i> 
+                                            <%= m.missionary.firstName %> <%= m.missionary.lastName %>
+                                            <% if (m.role && m.role !== 'junior') { %>
+                                                <span class="role-badge"><%= m.role %></span>
+                                            <% } %>
+                                        </a>
+                                    <% } %>
+                                <% }); %>
+                            <% } else { %>
+                                <span class="text-muted">No missionary information available</span>
+                            <% } %>
+                        </div>
+                        
+                        <% if (comp.isDistrictLeadership || comp.isZoneLeadership || comp.isTraining) { %>
+                            <div class="mt-2">
+                                <% if (comp.isDistrictLeadership) { %>
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> District Leadership</span>
+                                <% } %>
+                                <% if (comp.isZoneLeadership) { %>
+                                    <span class="badge bg-danger"><i class="bi bi-star-fill"></i> Zone Leadership</span>
+                                <% } %>
+                                <% if (comp.isTraining) { %>
+                                    <span class="badge bg-info"><i class="bi bi-mortarboard-fill"></i> Training</span>
+                                <% } %>
+                            </div>
+                        <% } %>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="empty-state">
+                    <i class="bi bi-journal-x"></i>
+                    <p class="mb-0">No missionary history recorded yet for this area.</p>
+                    <small class="text-muted">Companionship information will appear here as it becomes available.</small>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="text-center mb-4">
+            <a href="/ebm/areas" class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-list"></i> View All Areas
+            </a>
+        </div>
+    </div>
+
+    <!-- Toggle Merge Mode Button -->
+    <button id="toggleMergeBtn" class="btn btn-lg btn-primary toggle-merge-btn" onclick="toggleMergeMode()">
+        <i class="bi bi-arrows-move"></i> Enable Merge Mode
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let mergeMode = false;
+        let draggedElement = null;
+
+        function toggleMergeMode() {
+            mergeMode = !mergeMode;
+            const btn = document.getElementById('toggleMergeBtn');
+            const banner = document.getElementById('mergeBanner');
+            const cards = document.querySelectorAll('.companionship-card');
+            const handles = document.querySelectorAll('.drag-handle');
+
+            if (mergeMode) {
+                btn.innerHTML = '<i class="bi bi-x-circle"></i> Disable Merge Mode';
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-warning');
+                banner.style.display = 'block';
+                
+                cards.forEach(card => {
+                    card.setAttribute('draggable', 'true');
+                    card.style.cursor = 'move';
+                });
+                
+                handles.forEach(handle => {
+                    handle.style.display = 'inline-block';
+                });
+            } else {
+                btn.innerHTML = '<i class="bi bi-arrows-move"></i> Enable Merge Mode';
+                btn.classList.remove('btn-warning');
+                btn.classList.add('btn-primary');
+                banner.style.display = 'none';
+                
+                cards.forEach(card => {
+                    card.setAttribute('draggable', 'false');
+                    card.style.cursor = 'default';
+                    card.classList.remove('drag-over');
+                });
+                
+                handles.forEach(handle => {
+                    handle.style.display = 'none';
+                });
+            }
+        }
+
+        // Drag and drop event handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.companionship-card');
+
+            cards.forEach(card => {
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragover', handleDragOver);
+                card.addEventListener('dragleave', handleDragLeave);
+                card.addEventListener('drop', handleDrop);
+                card.addEventListener('dragend', handleDragEnd);
+            });
+        });
+
+        function handleDragStart(e) {
+            if (!mergeMode) return;
+            
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+
+        function handleDragOver(e) {
+            if (!mergeMode) return;
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            
+            if (draggedElement !== this) {
+                this.classList.add('drag-over');
+            }
+            
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragLeave(e) {
+            if (!mergeMode) return;
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            if (!mergeMode) return;
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            if (draggedElement !== this) {
+                const sourceId = draggedElement.dataset.companionshipId;
+                const targetId = this.dataset.companionshipId;
+
+                if (confirm('Merge these two companionships together?')) {
+                    mergeCompanionships(sourceId, targetId);
+                }
+            }
+
+            this.classList.remove('drag-over');
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            if (!mergeMode) return;
+            this.classList.remove('dragging');
+            
+            document.querySelectorAll('.companionship-card').forEach(card => {
+                card.classList.remove('drag-over');
+            });
+        }
+
+        async function mergeCompanionships(sourceId, targetId) {
+            try {
+                const response = await fetch('/ebm/companionships/merge', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ sourceId, targetId })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Companionships merged successfully!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error merging companionships:', error);
+                alert('Error merging companionships. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

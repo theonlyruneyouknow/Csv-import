@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .edit-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .edit-card {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .section-header {
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            color: #667eea;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #555;
+        }
+        .required::after {
+            content: " *";
+            color: #dc3545;
+        }
+        .select2-container--default .select2-selection--multiple {
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            min-height: 38px;
+        }
+    </style>
+</head>
+<body>
+    <div class="edit-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="bi bi-pencil-square"></i> Edit Missionary</h1>
+                    <h4><%= missionary.firstName %> <%= missionary.lastName %></h4>
+                </div>
+                <div>
+                    <a href="/ebm/areas/normalize" class="btn btn-info me-2" target="_blank">
+                        <i class="bi bi-shuffle"></i> Normalize Areas
+                    </a>
+                    <a href="/ebm/missionaries/<%= missionary._id %>" class="btn btn-light">
+                        <i class="bi bi-arrow-left"></i> Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <form id="editMissionaryForm">
+            <!-- Personal Information -->
+            <div class="edit-card">
+                <h5 class="section-header"><i class="bi bi-person-badge"></i> Personal Information</h5>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label required">First Name</label>
+                        <input type="text" class="form-control" name="firstName" value="<%= missionary.firstName || '' %>" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Middle Name</label>
+                        <input type="text" class="form-control" name="middleName" value="<%= missionary.middleName || '' %>">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label required">Last Name</label>
+                        <input type="text" class="form-control" name="lastName" value="<%= missionary.lastName || '' %>" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Maiden Name</label>
+                        <input type="text" class="form-control" name="maidenName" value="<%= missionary.maidenName || '' %>">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Preferred Name</label>
+                        <input type="text" class="form-control" name="preferredName" value="<%= missionary.preferredName || '' %>">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="edit-card">
+                <h5 class="section-header"><i class="bi bi-envelope"></i> Contact Information</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" value="<%= missionary.email || '' %>">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Phone</label>
+                        <input type="tel" class="form-control" name="phone" value="<%= missionary.phone || '' %>">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mission Service -->
+            <div class="edit-card">
+                <h5 class="section-header"><i class="bi bi-pin-map"></i> Mission Service</h5>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">Mission Name</label>
+                        <input type="text" class="form-control" name="missionName" value="<%= missionary.missionName || '' %>">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Service Start Date</label>
+                        <input type="date" class="form-control" name="serviceStartDate" 
+                               value="<%= missionary.serviceStartDate ? missionary.serviceStartDate.toISOString().split('T')[0] : '' %>">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Service End Date</label>
+                        <input type="date" class="form-control" name="serviceEndDate" 
+                               value="<%= missionary.serviceEndDate ? missionary.serviceEndDate.toISOString().split('T')[0] : '' %>">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label mb-0">Areas Served</label>
+                            <button type="button" class="btn btn-success btn-sm" onclick="showAddAreaModal()">
+                                <i class="bi bi-plus-circle"></i> New Area
+                            </button>
+                        </div>
+                        <select class="form-control" name="areasServed" id="areasServed" multiple>
+                            <% allAreas.forEach(area => { %>
+                                <option value="<%= area._id %>" 
+                                        <%= missionary.areasServed.some(a => a._id.toString() === area._id.toString()) ? 'selected' : '' %>>
+                                    <%= area.name %><%= area.city ? ' - ' + area.city : '' %>
+                                </option>
+                            <% }); %>
+                        </select>
+                        <small class="text-muted">Select multiple areas. Click "New Area" if the area doesn't exist yet.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Location -->
+            <div class="edit-card">
+                <h5 class="section-header"><i class="bi bi-house-door"></i> Current Location</h5>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">City</label>
+                        <input type="text" class="form-control" name="currentCity" value="<%= missionary.currentCity || '' %>">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">State</label>
+                        <input type="text" class="form-control" name="currentState" value="<%= missionary.currentState || '' %>">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Country</label>
+                        <input type="text" class="form-control" name="currentCountry" value="<%= missionary.currentCountry || '' %>">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spouse Information -->
+            <div class="edit-card">
+                <h5 class="section-header"><i class="bi bi-heart"></i> Spouse Information</h5>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">Spouse Name</label>
+                        <input type="text" class="form-control" name="spouse.name" value="<%= missionary.spouse && missionary.spouse.name ? missionary.spouse.name : '' %>">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legacy Data -->
+            <div class="edit-card">
+                <h5 class="section-header"><i class="bi bi-database"></i> Legacy Data</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Legacy Missionary ID</label>
+                        <input type="text" class="form-control" name="legacyMissionaryId" value="<%= missionary.legacyMissionaryId || '' %>">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Legacy Full Name</label>
+                        <input type="text" class="form-control" name="legacyFullName" value="<%= missionary.legacyFullName || '' %>">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="edit-card">
+                <h5 class="section-header"><i class="bi bi-journal-text"></i> Notes</h5>
+                <div class="mb-3">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-control" name="notes" rows="4"><%= missionary.notes || '' %></textarea>
+                </div>
+            </div>
+
+            <!-- Mission Log / Areabook -->
+            <div class="edit-card">
+                <h5 class="section-header"><i class="bi bi-journal-text"></i> Personal Mission Log</h5>
+                <div class="mb-3">
+                    <label class="form-label">Mission Log</label>
+                    <textarea class="form-control" name="areabook" rows="6" placeholder="Companions, areas, and memories..."><%= missionary.areabook || '' %></textarea>
+                    <small class="text-muted">Personal notes about companions, areas, and mission experiences</small>
+                </div>
+            </div>
+
+            <!-- Companionships -->
+            <div class="edit-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="section-header mb-0"><i class="bi bi-people"></i> Companionships</h5>
+                    <button type="button" class="btn btn-success btn-sm" onclick="addCompanionship()">
+                        <i class="bi bi-plus-circle"></i> Add Companionship
+                    </button>
+                </div>
+                
+                <div id="companionshipsList">
+                    <% if (companionships && companionships.length > 0) { %>
+                        <% companionships.forEach((comp, index) => { %>
+                            <div class="card mb-3 companionship-card" data-companionship-id="<%= comp._id %>">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="mb-0">
+                                            <i class="bi bi-calendar3"></i> 
+                                            <%= comp.startDate ? new Date(comp.startDate).toLocaleDateString() : 'Unknown' %> - 
+                                            <%= comp.endDate ? new Date(comp.endDate).toLocaleDateString() : 'Present' %>
+                                        </h6>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="removeCompanionship('<%= comp._id %>')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Area:</strong> 
+                                        <% if (comp.area) { %>
+                                            <%= comp.area.name %><%= comp.area.city ? ', ' + comp.area.city : '' %>
+                                        <% } else { %>
+                                            <span class="text-muted">Not assigned</span>
+                                        <% } %>
+                                    </div>
+                                    <div>
+                                        <strong>Companions:</strong>
+                                        <% const companions = comp.missionaries.filter(m => m.missionary && m.missionary._id.toString() !== missionary._id.toString()); %>
+                                        <% if (companions.length > 0) { %>
+                                            <% companions.forEach((m, i) => { %>
+                                                <span class="badge bg-info"><%= m.missionary.firstName %> <%= m.missionary.lastName %> (<%= m.role %>)</span><% if (i < companions.length - 1) { %>, <% } %>
+                                            <% }); %>
+                                        <% } else { %>
+                                            <span class="text-muted">No other companions</span>
+                                        <% } %>
+                                    </div>
+                                    <% if (comp.isDistrictLeadership || comp.isZoneLeadership || comp.isTraining) { %>
+                                        <div class="mt-2">
+                                            <% if (comp.isDistrictLeadership) { %><span class="badge bg-primary">District Leadership</span> <% } %>
+                                            <% if (comp.isZoneLeadership) { %><span class="badge bg-warning text-dark">Zone Leadership</span> <% } %>
+                                            <% if (comp.isTraining) { %><span class="badge bg-success">Training</span> <% } %>
+                                        </div>
+                                    <% } %>
+                                    <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="editCompanionship('<%= comp._id %>')">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </button>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> No companionships recorded yet. Click "Add Companionship" to create one.
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="text-center mb-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-save"></i> Save Changes
+                </button>
+                <a href="/ebm/missionaries/<%= missionary._id %>" class="btn btn-outline-secondary btn-lg">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Add New Area Modal -->
+    <div class="modal fade" id="addAreaModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Area</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAreaForm">
+                        <div class="mb-3">
+                            <label class="form-label">Area Name *</label>
+                            <input type="text" class="form-control" id="newAreaName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">City *</label>
+                            <input type="text" class="form-control" id="newAreaCity" name="city" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">State/Region</label>
+                            <input type="text" class="form-control" id="newAreaState" name="state">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Country</label>
+                            <input type="text" class="form-control" id="newAreaCountry" name="country" value="England">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveNewArea()">Add Area</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add New Area Modal -->
+    <div class="modal fade" id="addAreaModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Area</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAreaForm">
+                        <div class="mb-3">
+                            <label class="form-label">Area Name *</label>
+                            <input type="text" class="form-control" id="newAreaName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">City *</label>
+                            <input type="text" class="form-control" id="newAreaCity" name="city" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">State/Region</label>
+                            <input type="text" class="form-control" id="newAreaState" name="state">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Country</label>
+                            <input type="text" class="form-control" id="newAreaCountry" name="country" value="England">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveNewArea()">Add Area</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Companionship Modal -->
+    <div class="modal fade" id="companionshipModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="companionshipModalTitle">Add Companionship</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="companionshipForm">
+                        <input type="hidden" id="companionship_id" name="_id">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="companionship_startDate" name="startDate" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="companionship_endDate" name="endDate">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Area</label>
+                            <select class="form-control" id="companionship_area" name="area">
+                                <option value="">-- Select Area --</option>
+                                <% allAreas.forEach(area => { %>
+                                    <option value="<%= area._id %>"><%= area.name %><%= area.city ? ' - ' + area.city : '' %></option>
+                                <% }); %>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Companions</label>
+                            <select class="form-control" id="companionship_companions" name="companions" multiple>
+                                <% allMissionaries.forEach(m => { %>
+                                    <option value="<%= m._id %>"><%= m.firstName %> <%= m.lastName %></option>
+                                <% }); %>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Leadership & Training</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="companionship_districtLeader" name="isDistrictLeadership">
+                                <label class="form-check-label" for="companionship_districtLeader">District Leadership</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="companionship_zoneLeader" name="isZoneLeadership">
+                                <label class="form-check-label" for="companionship_zoneLeader">Zone Leadership</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="companionship_training" name="isTraining">
+                                <label class="form-check-label" for="companionship_training">Training Companionship</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCompanionship()">Save Companionship</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        let companionshipModal;
+        let addAreaModal;
+        
+        // Initialize Select2 for areas
+        $(document).ready(function() {
+            addAreaModal = new bootstrap.Modal(document.getElementById('addAreaModal'));
+            $('#areasServed').select2({
+                placeholder: 'Select areas...',
+                allowClear: true,
+                width: '100%'
+            });
+            
+            $('#companionship_area').select2({
+                placeholder: 'Select area...',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('#companionshipModal')
+            });
+            
+            $('#companionship_companions').select2({
+                placeholder: 'Select companions...',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('#companionshipModal')
+            });
+            
+            companionshipModal = new bootstrap.Modal(document.getElementById('companionshipModal'));
+        });
+        
+        // Show add area modal
+        function showAddAreaModal() {
+            document.getElementById('addAreaForm').reset();
+            addAreaModal.show();
+        }
+        
+        // Save new area
+        async function saveNewArea() {
+            const form = document.getElementById('addAreaForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const data = {
+                name: document.getElementById('newAreaName').value.trim(),
+                city: document.getElementById('newAreaCity').value.trim(),
+                state: document.getElementById('newAreaState').value.trim(),
+                country: document.getElementById('newAreaCountry').value.trim(),
+                isActive: true
+            };
+            
+            try {
+                const response = await fetch('/ebm/areas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Add new option to select and select it
+                    const newOption = new Option(
+                        `${result.area.name} - ${result.area.city}`,
+                        result.area._id,
+                        true,
+                        true
+                    );
+                    $('#areasServed').append(newOption).trigger('change');
+                    
+                    addAreaModal.hide();
+                    alert('Area added successfully!');
+                } else {
+                    alert('Error: ' + (result.message || result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error saving area:', error);
+                alert('Error saving area. Please try again.');
+            }
+        }
+        
+        // Add new companionship
+        function addCompanionship() {
+            document.getElementById('companionshipModalTitle').textContent = 'Add Companionship';
+            document.getElementById('companionshipForm').reset();
+            document.getElementById('companionship_id').value = '';
+            $('#companionship_area').val(null).trigger('change');
+            $('#companionship_companions').val(null).trigger('change');
+            companionshipModal.show();
+        }
+        
+        // Edit existing companionship
+        async function editCompanionship(id) {
+            try {
+                const response = await fetch(`/ebm/companionships/${id}`);
+                const comp = await response.json();
+                
+                document.getElementById('companionshipModalTitle').textContent = 'Edit Companionship';
+                document.getElementById('companionship_id').value = comp._id;
+                document.getElementById('companionship_startDate').value = comp.startDate ? comp.startDate.split('T')[0] : '';
+                document.getElementById('companionship_endDate').value = comp.endDate ? comp.endDate.split('T')[0] : '';
+                document.getElementById('companionship_districtLeader').checked = comp.isDistrictLeadership || false;
+                document.getElementById('companionship_zoneLeader').checked = comp.isZoneLeadership || false;
+                document.getElementById('companionship_training').checked = comp.isTraining || false;
+                
+                $('#companionship_area').val(comp.area ? comp.area._id || comp.area : '').trigger('change');
+                
+                const companionIds = comp.missionaries
+                    .filter(m => m.missionary && m.missionary._id !== '<%= missionary._id %>')
+                    .map(m => m.missionary._id || m.missionary);
+                $('#companionship_companions').val(companionIds).trigger('change');
+                
+                companionshipModal.show();
+            } catch (error) {
+                console.error('Error loading companionship:', error);
+                alert('Error loading companionship data');
+            }
+        }
+        
+        // Save companionship
+        async function saveCompanionship() {
+            const form = document.getElementById('companionshipForm');
+            const formData = new FormData(form);
+            const data = {
+                startDate: formData.get('startDate'),
+                endDate: formData.get('endDate'),
+                area: formData.get('area') || null,
+                isDistrictLeadership: document.getElementById('companionship_districtLeader').checked,
+                isZoneLeadership: document.getElementById('companionship_zoneLeader').checked,
+                isTraining: document.getElementById('companionship_training').checked,
+                missionaries: [
+                    { missionary: '<%= missionary._id %>', role: 'senior' }
+                ]
+            };
+            
+            // Add selected companions
+            const selectedCompanions = $('#companionship_companions').val();
+            if (selectedCompanions) {
+                selectedCompanions.forEach(compId => {
+                    data.missionaries.push({ missionary: compId, role: 'junior' });
+                });
+            }
+            
+            const companionshipId = document.getElementById('companionship_id').value;
+            const method = companionshipId ? 'PUT' : 'POST';
+            const url = companionshipId ? `/ebm/companionships/${companionshipId}` : '/ebm/companionships';
+            
+            try {
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    companionshipModal.hide();
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + (result.message || result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error saving companionship:', error);
+                alert('Error saving companionship. Please try again.');
+            }
+        }
+        
+        // Remove companionship
+        async function removeCompanionship(id) {
+            if (!confirm('Are you sure you want to remove this companionship?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/ebm/companionships/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + (result.message || result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error removing companionship:', error);
+                alert('Error removing companionship. Please try again.');
+            }
+        };
+
+        // Handle form submission
+        document.getElementById('editMissionaryForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {};
+            
+            // Build data object
+            for (let [key, value] of formData.entries()) {
+                if (key === 'areasServed') {
+                    // Handle multiple select
+                    if (!data.areasServed) {
+                        data.areasServed = [];
+                    }
+                    data.areasServed.push(value);
+                } else if (key.includes('.')) {
+                    // Handle nested objects (e.g., spouse.name)
+                    const keys = key.split('.');
+                    if (!data[keys[0]]) {
+                        data[keys[0]] = {};
+                    }
+                    data[keys[0]][keys[1]] = value;
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            try {
+                const response = await fetch('/ebm/missionaries/<%= missionary._id %>', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Missionary updated successfully!');
+                    window.location.href = '/ebm/missionaries/<%= missionary._id %>';
+                } else {
+                    alert('Error: ' + (result.message || result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error updating missionary:', error);
+                alert('Error updating missionary. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

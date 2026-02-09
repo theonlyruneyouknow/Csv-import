@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .normalize-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .area-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #667eea;
+        }
+        .duplicate-group {
+            border-left-color: #dc3545;
+        }
+        .similar-group {
+            border-left-color: #ffc107;
+        }
+        .area-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            margin: 0.25rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        .merge-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="normalize-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="bi bi-shuffle"></i> Area Name Normalization</h1>
+                    <p class="mb-0">Find and merge duplicate or similar area names</p>
+                </div>
+                <div>
+                    <a href="/ebm/areas" class="btn btn-light">
+                        <i class="bi bi-arrow-left"></i> Back to Areas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Summary -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h2><%= totalAreas %></h2>
+                        <p class="text-muted mb-0">Total Areas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h2 class="text-danger"><%= duplicates.length %></h2>
+                        <p class="text-muted mb-0">Duplicate Groups</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h2 class="text-warning"><%= similar.length %></h2>
+                        <p class="text-muted mb-0">Similar Pairs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Duplicates Section -->
+        <% if (duplicates.length > 0) { %>
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Duplicate Area Names</h5>
+                    <small>These areas have identical names (case-insensitive)</small>
+                </div>
+                <div class="card-body">
+                    <% duplicates.forEach((group, index) => { %>
+                        <div class="area-card duplicate-group">
+                            <h6 class="text-danger"><strong>Group <%= index + 1 %>:</strong> "<%= group.areas[0].name %>" - <%= group.areas.length %> duplicates</h6>
+                            
+                            <div class="table-responsive mb-3">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Name</th>
+                                            <th>City</th>
+                                            <th>State</th>
+                                            <th>County</th>
+                                            <th>Legacy ID</th>
+                                            <th>Database ID</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% group.areas.forEach((area, i) => { %>
+                                            <tr>
+                                                <td><%= i + 1 %></td>
+                                                <td><strong><%= area.name %></strong></td>
+                                                <td><%= area.city || '-' %></td>
+                                                <td><%= area.state || '-' %></td>
+                                                <td><%= area.county || '-' %></td>
+                                                <td><%= area.legacyAreaId || '-' %></td>
+                                                <td><small class="text-muted"><%= area._id %></small></td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="merge-section">
+                                <label class="form-label"><strong>Select which record to keep (others will merge into it):</strong></label>
+                                <div class="btn-group" role="group">
+                                    <% group.areas.forEach((area, i) => { %>
+                                        <input type="radio" class="btn-check" name="keep-duplicate-<%= index %>" 
+                                               id="keep-dup-<%= index %>-<%= i %>" value="<%= area._id %>">
+                                        <label class="btn btn-outline-primary" for="keep-dup-<%= index %>-<%= i %>">
+                                            #<%= i + 1 %><%= area.legacyAreaId ? ' (ID: ' + area.legacyAreaId + ')' : '' %>
+                                        </label>
+                                    <% }); %>
+                                </div>
+                                <button class="btn btn-danger btn-sm ms-3" onclick="mergeDuplicates(<%= index %>)">
+                                    <i class="bi bi-shuffle"></i> Merge All Into Selected
+                                </button>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        <% } else { %>
+            <div class="alert alert-success">
+                <i class="bi bi-check-circle"></i> No duplicate area names found!
+            </div>
+        <% } %>
+
+        <!-- Similar Areas Section -->
+        <% if (similar.length > 0) { %>
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-question-circle"></i> Potentially Similar Areas</h5>
+                    <small>These areas are in the same city with similar names</small>
+                </div>
+                <div class="card-body">
+                    <% similar.forEach((pair, index) => { %>
+                        <div class="area-card similar-group">
+                            <h6 class="text-warning"><strong>Similar Pair <%= index + 1 %>:</strong></h6>
+                            
+                            <div class="table-responsive mb-3">
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Position</th>
+                                            <th>Name</th>
+                                            <th>City</th>
+                                            <th>State</th>
+                                            <th>County</th>
+                                            <th>Legacy ID</th>
+                                            <th>Database ID</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="table-light">
+                                            <td><strong>Area 1</strong></td>
+                                            <td><strong><%= pair.area1.name %></strong></td>
+                                            <td><%= pair.area1.city || '-' %></td>
+                                            <td><%= pair.area1.state || '-' %></td>
+                                            <td><%= pair.area1.county || '-' %></td>
+                                            <td><%= pair.area1.legacyAreaId || '-' %></td>
+                                            <td><small class="text-muted"><%= pair.area1._id %></small></td>
+                                        </tr>
+                                        <tr class="table-light">
+                                            <td><strong>Area 2</strong></td>
+                                            <td><strong><%= pair.area2.name %></strong></td>
+                                            <td><%= pair.area2.city || '-' %></td>
+                                            <td><%= pair.area2.state || '-' %></td>
+                                            <td><%= pair.area2.county || '-' %></td>
+                                            <td><%= pair.area2.legacyAreaId || '-' %></td>
+                                            <td><small class="text-muted"><%= pair.area2._id %></small></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="merge-section">
+                                <label class="form-label"><strong>Action:</strong></label>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-outline-success" onclick="mergeAreas('<%= pair.area1._id %>', '<%= pair.area2._id %>')">
+                                        <i class="bi bi-arrow-right"></i> Keep Area 1, Merge Area 2 Into It
+                                    </button>
+                                    <button class="btn btn-outline-primary" onclick="mergeAreas('<%= pair.area2._id %>', '<%= pair.area1._id %>')">
+                                        <i class="bi bi-arrow-left"></i> Keep Area 2, Merge Area 1 Into It
+                                    </button>
+                                    <button class="btn btn-outline-secondary" onclick="ignoreAreas(this)">
+                                        <i class="bi bi-x-circle"></i> Keep Both (Not Similar)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        <% } else { %>
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No similar area names detected.
+            </div>
+        <% } %>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Merge duplicate group
+        function mergeDuplicates(groupIndex) {
+            const selectedRadio = document.querySelector(`input[name="keep-duplicate-${groupIndex}"]:checked`);
+            
+            if (!selectedRadio) {
+                alert('Please select which area to keep');
+                return;
+            }
+            
+            const targetId = selectedRadio.value;
+            const duplicates = <%= JSON.stringify(duplicates) %>;
+            const group = duplicates[groupIndex];
+            
+            if (!confirm(`This will merge all ${group.areas.length} duplicate areas into the selected one. Continue?`)) {
+                return;
+            }
+            
+            // Merge all others into the target
+            const promises = group.areas
+                .filter(area => area._id !== targetId)
+                .map(area => mergeAreas(area._id, targetId, false));
+            
+            Promise.all(promises).then(() => {
+                alert('All duplicates merged successfully!');
+                window.location.reload();
+            }).catch(error => {
+                console.error('Error merging:', error);
+                alert('Error merging some areas. Check console for details.');
+            });
+        }
+        
+        // Merge two areas
+        async function mergeAreas(sourceId, targetId, showAlert = true) {
+            try {
+                const response = await fetch('/ebm/areas/merge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sourceId, targetId })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    if (showAlert) {
+                        alert('Areas merged successfully!');
+                        window.location.reload();
+                    }
+                    return result;
+                } else {
+                    throw new Error(result.error || 'Merge failed');
+                }
+            } catch (error) {
+                console.error('Error merging areas:', error);
+                if (showAlert) {
+                    alert('Error merging areas: ' + error.message);
+                }
+                throw error;
+            }
+        }
+        
+        // Ignore/dismiss a similar pair
+        function ignoreAreas(button) {
+            const card = button.closest('.area-card');
+            card.style.opacity = '0.3';
+            card.style.pointerEvents = 'none';
+        }
+    </script>
+</body>
+</html>

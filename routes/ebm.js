@@ -116,7 +116,7 @@ router.get('/dashboard', ensureEBMAccess, async (req, res) => {
 // List all missionaries
 router.get('/missionaries', ensureEBMAccess, async (req, res) => {
     try {
-        const { search, status, sort = 'lastName', order = 'asc' } = req.query;
+        const { search, status, sort = 'lastName', order = 'asc', yearFrom, yearTo } = req.query;
         
         let query = { isActive: true };
         
@@ -134,21 +134,98 @@ router.get('/missionaries', ensureEBMAccess, async (req, res) => {
             query.dataStatus = status;
         }
         
+        // Filter by service years
+        if (yearFrom || yearTo) {
+            const dateQuery = {};
+            
+            if (yearFrom) {
+                const fromDate = new Date(parseInt(yearFrom), 0, 1); // Jan 1st of yearFrom
+                dateQuery.$gte = fromDate;
+            }
+            
+            if (yearTo) {
+                const toDate = new Date(parseInt(yearTo), 11, 31); // Dec 31st of yearTo
+                dateQuery.$lte = toDate;
+            }
+            
+            // Match if either start date or end date falls within range
+            query.$or = query.$or || [];
+            const yearConditions = [
+                { serviceStartDate: dateQuery }
+            ];
+            
+            if (yearTo) {
+                yearConditions.push({ serviceEndDate: dateQuery });
+            }
+            
+            // If we already have a $or for search, we need to AND it properly
+            if (search) {
+                const searchOr = query.$or;
+                query.$and = [
+                    { $or: searchOr },
+                    { $or: yearConditions }
+                ];
+                delete query.$or;
+            } else {
+                query.$or = yearConditions;
+            }
+        }
+        
         const sortOrder = order === 'desc' ? -1 : 1;
         const missionaries = await Missionary.find(query)
             .sort({ [sort]: sortOrder })
             .populate('addedBy', 'username')
-            .populate('verifiedBy', 'username');
+            .populate('verifiedBy', 'username')
+            .populate({
+                path: 'areasServed',
+                select: 'name city legacyAreaId'
+            })
+            .populate({
+                path: 'companionships',
+                select: 'missionaries startDate endDate',
+                populate: {
+                    path: 'missionaries.missionary',
+                    select: 'firstName lastName'
+                }
+            });
         
         res.render('ebm-missionaries', {
             user: req.user,
             missionaries,
-            filters: { search, status, sort, order },
+            filters: { search, status, sort, order, yearFrom, yearTo },
             title: 'Missionaries'
         });
     } catch (error) {
         console.error('Error loading missionaries:', error);
         res.status(500).render('error', { message: 'Error loading missionaries' });
+    }
+});
+
+// Get missionary log (formerly called areabook - the missionary's personal log)
+router.get('/missionary-log/:id', ensureEBMAccess, async (req, res) => {
+    try {
+        const missionary = await Missionary.findById(req.params.id)
+            .populate('areasServed', 'name city state legacyAreaId')
+            .populate({
+                path: 'companionships',
+                populate: {
+                    path: 'missionaries.missionary',
+                    select: 'firstName lastName email'
+                }
+            });
+        
+        if (!missionary) {
+            return res.status(404).render('error', { message: 'Missionary not found' });
+        }
+        
+        res.render('ebm-missionary-log', {
+            user: req.user,
+            missionary,
+            title: `Missionary Log - ${missionary.firstName} ${missionary.lastName}`
+        });
+    } catch (error) {
+        console.error('Error loading missionary log:', error);
+        res.status(500).render('error', { message: 'Error loading missionary log' });
     }
 });
 
@@ -188,6 +265,49 @@ router.get('/missionaries/:id', ensureEBMAccess, async (req, res) => {
             message: 'Error loading missionary details',
             error: error.message 
         });
+    }
+});
+
+// Get missionary edit page
+router.get('/missionaries/:id/edit', ensureEBMAccess, async (req, res) => {
+    try {
+        const missionary = await Missionary.findById(req.params.id)
+            .populate('areasServed', 'name city legacyAreaId');
+        
+        if (!missionary) {
+            return res.status(404).render('error', { message: 'Missionary not found' });
+        }
+        
+        // Get all areas for selection
+        const allAreas = await MissionArea.find({ isActive: true })
+            .sort({ name: 1 })
+            .select('name city state legacyAreaId');
+        
+        // Get companionships for this missionary
+        const companionships = await Companionship.find({
+            'missionaries.missionary': missionary._id
+        })
+            .populate('area', 'name city')
+            .populate('missionaries.missionary', 'firstName lastName')
+            .sort({ startDate: -1 });
+        
+        // Get all missionaries for selection (excluding current one)
+        const allMissionaries = await Missionary.find({ _id: { $ne: missionary._id } })
+            .sort({ lastName: 1, firstName: 1 })
+            .select('firstName lastName serviceStartDate serviceEndDate')
+            .lean();
+        
+        res.render('ebm-missionary-edit', {
+            user: req.user,
+            missionary,
+            allAreas,
+            companionships,
+            allMissionaries,
+            title: `Edit ${missionary.firstName} ${missionary.lastName}`
+        });
+    } catch (error) {
+        console.error('Error loading missionary edit page:', error);
+        res.status(500).render('error', { message: 'Error loading edit page' });
     }
 });
 
@@ -329,6 +449,24 @@ router.post('/companionships', ensureEBMAccess, async (req, res) => {
     }
 });
 
+// Get single companionship
+router.get('/companionships/:id', ensureEBMAccess, async (req, res) => {
+    try {
+        const companionship = await Companionship.findById(req.params.id)
+            .populate('area', 'name city')
+            .populate('missionaries.missionary', 'firstName lastName');
+        
+        if (!companionship) {
+            return res.status(404).json({ success: false, error: 'Companionship not found' });
+        }
+        
+        res.json(companionship);
+    } catch (error) {
+        console.error('Error fetching companionship:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch companionship' });
+    }
+});
+
 // Update companionship
 router.put('/companionships/:id', ensureEBMAccess, async (req, res) => {
     try {
@@ -349,7 +487,43 @@ router.put('/companionships/:id', ensureEBMAccess, async (req, res) => {
     }
 });
 
+// Delete companionship
+router.delete('/companionships/:id', ensureEBMAccess, async (req, res) => {
+    try {
+        const companionship = await Companionship.findById(req.params.id);
+        
+        if (!companionship) {
+            return res.status(404).json({ success: false, error: 'Companionship not found' });
+        }
+        
+        await Companionship.findByIdAndDelete(req.params.id);
+        
+        res.json({ success: true, message: 'Companionship deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting companionship:', error);
+        res.status(500).json({ success: false, error: 'Failed to delete companionship' });
+    }
+});
+
 // ==================== AREAS ====================
+
+// Create new area (quick add)
+router.post('/areas', ensureEBMAccess, async (req, res) => {
+    try {
+        const areaData = {
+            ...req.body,
+            addedBy: req.user._id
+        };
+        
+        const area = new MissionArea(areaData);
+        await area.save();
+        
+        res.json({ success: true, area, message: 'Area created successfully' });
+    } catch (error) {
+        console.error('Error creating area:', error);
+        res.status(500).json({ success: false, error: 'Failed to create area' });
+    }
+});
 
 // List all areas
 router.get('/areas', ensureEBMAccess, async (req, res) => {
@@ -383,6 +557,128 @@ router.get('/areas', ensureEBMAccess, async (req, res) => {
     }
 });
 
+// Area normalization tool - MUST BE BEFORE /areas/:id
+router.get('/areas/normalize', ensureEBMAccess, async (req, res) => {
+    try {
+        const areas = await MissionArea.find({})
+            .sort({ name: 1 })
+            .select('name city state county legacyAreaId');
+        
+        // Group similar areas
+        const grouped = {};
+        areas.forEach(area => {
+            const key = area.name.toLowerCase().trim().replace(/\s+/g, ' ');
+            if (!grouped[key]) {
+                grouped[key] = [];
+            }
+            grouped[key].push(area);
+        });
+        
+        // Find duplicates (same normalized name)
+        const duplicates = Object.entries(grouped)
+            .filter(([key, areas]) => areas.length > 1)
+            .map(([key, areas]) => ({ key, areas }));
+        
+        // Find similar areas (Levenshtein distance or similar cities)
+        const similar = [];
+        const areasList = Object.values(grouped).flat();
+        for (let i = 0; i < areasList.length; i++) {
+            for (let j = i + 1; j < areasList.length; j++) {
+                const a = areasList[i];
+                const b = areasList[j];
+                if (a.city === b.city && a.name !== b.name) {
+                    const nameA = a.name.toLowerCase();
+                    const nameB = b.name.toLowerCase();
+                    // Check if names are very similar
+                    if (Math.abs(nameA.length - nameB.length) <= 2) {
+                        similar.push({ area1: a, area2: b });
+                    }
+                }
+            }
+        }
+        
+        res.render('ebm-areas-normalize', {
+            user: req.user,
+            duplicates,
+            similar,
+            totalAreas: areas.length,
+            title: 'Normalize Area Names'
+        });
+    } catch (error) {
+        console.error('Error loading area normalization:', error);
+        res.status(500).render('error', { message: 'Error loading normalization tool' });
+    }
+});
+
+// Merge areas - MUST BE BEFORE /areas/:id
+router.post('/areas/merge', ensureEBMAccess, async (req, res) => {
+    try {
+        const { sourceId, targetId } = req.body;
+        
+        console.log('Merge request:', { sourceId, targetId });
+        
+        if (!sourceId || !targetId || sourceId === targetId) {
+            return res.status(400).json({ success: false, error: 'Invalid area IDs' });
+        }
+        
+        const source = await MissionArea.findById(sourceId);
+        const target = await MissionArea.findById(targetId);
+        
+        console.log('Source area:', source ? source.name : 'NOT FOUND');
+        console.log('Target area:', target ? target.name : 'NOT FOUND');
+        
+        if (!source || !target) {
+            return res.status(404).json({ success: false, error: 'Area not found' });
+        }
+        
+        // Update all missionaries - do in two steps to avoid conflict
+        // First, add the target area
+        const missionaryAdd = await Missionary.updateMany(
+            { areasServed: sourceId },
+            { $addToSet: { areasServed: targetId } }
+        );
+        console.log('Added target area to missionaries:', missionaryAdd.modifiedCount);
+        
+        // Then, remove the source area
+        const missionaryRemove = await Missionary.updateMany(
+            { areasServed: sourceId },
+            { $pull: { areasServed: sourceId } }
+        );
+        console.log('Removed source area from missionaries:', missionaryRemove.modifiedCount);
+        
+        // Update all companionships
+        const companionshipUpdate = await Companionship.updateMany(
+            { area: sourceId },
+            { $set: { area: targetId } }
+        );
+        console.log('Updated companionships:', companionshipUpdate.modifiedCount);
+        
+        // Merge alternate names (initialize if undefined)
+        if (!target.alternateNames) {
+            target.alternateNames = [];
+        }
+        if (!target.alternateNames.includes(source.name)) {
+            target.alternateNames.push(source.name);
+        }
+        if (source.alternateNames) {
+            source.alternateNames.forEach(name => {
+                if (!target.alternateNames.includes(name)) {
+                    target.alternateNames.push(name);
+                }
+            });
+        }
+        
+        await target.save();
+        await MissionArea.findByIdAndDelete(sourceId);
+        
+        console.log('Merge completed successfully');
+        res.json({ success: true, message: 'Areas merged successfully' });
+    } catch (error) {
+        console.error('Error merging areas:', error);
+        res.status(500).json({ success: false, error: error.message || 'Failed to merge areas' });
+    }
+});
+
 // Get area details
 router.get('/areas/:id', ensureEBMAccess, async (req, res) => {
     try {
@@ -394,9 +690,69 @@ router.get('/areas/:id', ensureEBMAccess, async (req, res) => {
             return res.status(404).render('error', { message: 'Area not found' });
         }
         
+        // Fetch companionships with populated missionary data
         const companionships = await Companionship.find({ area: area._id })
-            .populate('missionaries.missionary', 'firstName lastName')
-            .sort({ startDate: -1 });
+            .populate({
+                path: 'missionaries.missionary',
+                select: 'firstName lastName serviceStartDate'
+            })
+            .lean();
+        
+        // Also get all missionaries who have this area in their areasServed
+        const missionariesInArea = await Missionary.find({ 
+            areasServed: area._id,
+            isActive: true 
+        })
+            .select('firstName lastName serviceStartDate serviceEndDate')
+            .sort('serviceStartDate')
+            .lean();
+        
+        // Create a map of missionaries already in companionships
+        const missionariesInCompanionships = new Set();
+        companionships.forEach(comp => {
+            comp.missionaries.forEach(m => {
+                if (m.missionary && m.missionary._id) {
+                    missionariesInCompanionships.add(m.missionary._id.toString());
+                }
+            });
+        });
+        
+        // Add missionaries not yet in companionships as individual entries
+        missionariesInArea.forEach(missionary => {
+            const missionaryIdStr = missionary._id.toString();
+            if (!missionariesInCompanionships.has(missionaryIdStr)) {
+                // Create a pseudo-companionship for display purposes
+                companionships.push({
+                    _id: null, // No actual companionship ID
+                    startDate: missionary.serviceStartDate,
+                    endDate: missionary.serviceEndDate,
+                    missionaries: [{
+                        missionary: missionary,
+                        role: 'missionary'
+                    }],
+                    isUnassigned: true // Flag to indicate this is not a real companionship
+                });
+            }
+        });
+        
+        // Sort companionships by the earliest service start date of missionaries in each companionship
+        companionships.sort((a, b) => {
+            const aEarliestDate = a.missionaries
+                .map(m => m.missionary?.serviceStartDate)
+                .filter(d => d)
+                .sort((d1, d2) => new Date(d1) - new Date(d2))[0];
+            
+            const bEarliestDate = b.missionaries
+                .map(m => m.missionary?.serviceStartDate)
+                .filter(d => d)
+                .sort((d1, d2) => new Date(d1) - new Date(d2))[0];
+            
+            if (!aEarliestDate && !bEarliestDate) return 0;
+            if (!aEarliestDate) return 1;
+            if (!bEarliestDate) return -1;
+            
+            return new Date(aEarliestDate) - new Date(bEarliestDate);
+        });
         
         res.render('ebm-area-detail', {
             user: req.user,
@@ -407,6 +763,84 @@ router.get('/areas/:id', ensureEBMAccess, async (req, res) => {
     } catch (error) {
         console.error('Error loading area:', error);
         res.status(500).render('error', { message: 'Error loading area details' });
+    }
+});
+
+// Merge companionships (drag and drop)
+router.post('/companionships/merge', ensureEBMAccess, async (req, res) => {
+    try {
+        const { sourceId, targetId } = req.body;
+        
+        if (!sourceId || !targetId) {
+            return res.status(400).json({ success: false, message: 'Source and target IDs required' });
+        }
+        
+        if (sourceId === targetId) {
+            return res.status(400).json({ success: false, message: 'Cannot merge a companionship with itself' });
+        }
+        
+        const source = await Companionship.findById(sourceId);
+        const target = await Companionship.findById(targetId);
+        
+        if (!source || !target) {
+            return res.status(404).json({ success: false, message: 'Companionship not found' });
+        }
+        
+        // Merge missionaries arrays, avoiding duplicates
+        const existingMissionaryIds = new Set(
+            target.missionaries.map(m => m.missionary.toString())
+        );
+        
+        source.missionaries.forEach(m => {
+            if (!existingMissionaryIds.has(m.missionary.toString())) {
+                target.missionaries.push(m);
+            }
+        });
+        
+        // Update dates to encompass both companionships
+        if (source.startDate && (!target.startDate || source.startDate < target.startDate)) {
+            target.startDate = source.startDate;
+        }
+        
+        if (source.endDate && (!target.endDate || source.endDate > target.endDate)) {
+            target.endDate = source.endDate;
+        }
+        
+        // Merge leadership flags
+        target.isDistrictLeadership = target.isDistrictLeadership || source.isDistrictLeadership;
+        target.isZoneLeadership = target.isZoneLeadership || source.isZoneLeadership;
+        target.isTraining = target.isTraining || source.isTraining;
+        
+        // Calculate new duration
+        if (target.startDate && target.endDate) {
+            const weeks = Math.round(
+                (target.endDate - target.startDate) / (7 * 24 * 60 * 60 * 1000)
+            );
+            target.duration = weeks;
+        }
+        
+        // Save merged companionship
+        await target.save();
+        
+        // Remove source companionship references from missionaries
+        await Missionary.updateMany(
+            { companionships: sourceId },
+            { $pull: { companionships: sourceId } }
+        );
+        
+        // Delete source companionship
+        await Companionship.findByIdAndDelete(sourceId);
+        
+        console.log(`✅ Merged companionship ${sourceId} into ${targetId}`);
+        
+        res.json({ 
+            success: true, 
+            message: 'Companionships merged successfully',
+            companionshipId: targetId
+        });
+    } catch (error) {
+        console.error('Error merging companionships:', error);
+        res.status(500).json({ success: false, message: 'Error merging companionships' });
     }
 });
 
