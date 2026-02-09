@@ -1,41 +1,59 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const fs = require('fs');
+const path = require('path');
 const Papa = require('papaparse');
 const Missionary = require('./models/Missionary');
 const MissionArea = require('./models/MissionArea');
 
-// CSV should have columns: a_id (alum_id), area_id, area_nam (area_name)
-// Example: 0,1,Banbury - This links alumId=0 to area_id=1 (Banbury)
+// CSV should have columns: a_id or alum_id (missionary ID), area_id (area ID), area_nam or area_name (area name)
+// Example: 18,1,"Banbury" - This links alumId=18 to area_id=1 (Banbury)
+
+// Create logs directory if it doesn't exist
+const logsDir = path.join(__dirname, 'logs');
+if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir);
+}
+
+// Create log file with timestamp
+const timestamp = new Date().toISOString().replace(/:/g, '-').replace(/\..+/, '');
+const logFilePath = path.join(logsDir, `missionary-areas-import-${timestamp}.log`);
+const logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
+
+// Helper function to log to both console and file
+function log(message) {
+    console.log(message);
+    logStream.write(message + '\n');
+}
 
 async function importMissionaryAreas(csvFilePath) {
     try {
-        console.log('🔍 Step 1: Connecting to MongoDB...');
+        log('🔍 Step 1: Connecting to MongoDB...');
         await mongoose.connect(process.env.MONGODB_URI);
-        console.log('✅ Connected to MongoDB');
+        log('✅ Connected to MongoDB');
 
-        console.log('🔍 Step 2: Reading CSV file...');
+        log('🔍 Step 2: Reading CSV file...');
         const csvContent = fs.readFileSync(csvFilePath, 'utf8');
-        console.log(`✅ Read ${csvContent.length} bytes from file`);
+        log(`✅ Read ${csvContent.length} bytes from file`);
 
-        console.log('🔍 Step 3: Parsing CSV data...');
+        log('🔍 Step 3: Parsing CSV data...');
         const parsed = Papa.parse(csvContent, {
             header: true,
             skipEmptyLines: true,
             transformHeader: (header) => header.trim()
         });
 
-        console.log(`✅ Parsed ${parsed.data.length} rows from CSV`);
+        log(`✅ Parsed ${parsed.data.length} rows from CSV`);
         
         if (parsed.data.length === 0) {
             throw new Error('No data found in CSV file');
         }
 
         // Show first record for validation
-        console.log('🔍 Step 4: Validating first record...');
-        console.log('First record:', JSON.stringify(parsed.data[0], null, 2));
+        log('🔍 Step 4: Validating first record...');
+        log('First record: ' + JSON.stringify(parsed.data[0], null, 2));
 
-        console.log('🔍 Step 5: Loading all missionaries and areas into memory...');
+        log('🔍 Step 5: Loading all missionaries and areas into memory...');
         const missionaries = await Missionary.find({}).select('_id legacyData.alumId firstName lastName areasServed');
         const areas = await MissionArea.find({}).select('_id legacyAreaId name');
         
@@ -54,9 +72,9 @@ async function importMissionaryAreas(csvFilePath) {
             }
         });
 
-        console.log(`✅ Loaded ${missionaries.length} missionaries and ${areas.length} areas`);
+        log(`✅ Loaded ${missionaries.length} missionaries and ${areas.length} areas`);
 
-        console.log('🔍 Step 6: Starting missionary-area linking process...');
+        log('🔍 Step 6: Starting missionary-area linking process...');
         
         let linked = 0;
         let alreadyLinked = 0;
@@ -70,27 +88,31 @@ async function importMissionaryAreas(csvFilePath) {
             const recordNum = i + 1;
 
             try {
+                // Handle both a_id and alum_id column names
+                const alumIdValue = row.alum_id || row.a_id;
+                const areaIdValue = row.area_id;
+                
                 // Skip if missing required IDs
-                if (!row.a_id || row.a_id === 'NULL' || row.a_id.trim() === '') {
+                if (!alumIdValue || alumIdValue === 'NULL' || alumIdValue.trim() === '') {
                     skipped++;
                     continue;
                 }
                 
-                if (!row.area_id || row.area_id === 'NULL' || row.area_id.trim() === '') {
+                if (!areaIdValue || areaIdValue === 'NULL' || areaIdValue.trim() === '') {
                     skipped++;
                     continue;
                 }
 
-                const alumId = row.a_id.trim();
-                const areaId = row.area_id.trim();
+                const alumId = alumIdValue.trim();
+                const areaId = areaIdValue.trim();
                 const areaName = row.area_nam || row.area_name || 'Unknown';
 
-                console.log(`📝 Record ${recordNum}: Linking alumId=${alumId} to area_id=${areaId} (${areaName})`);
+                log(`📝 Record ${recordNum}: Linking alumId=${alumId} to area_id=${areaId} (${areaName})`);
 
                 // Find missionary
                 const missionary = missionaryMap.get(alumId);
                 if (!missionary) {
-                    console.log(`   ⚠️  Missionary not found for alumId=${alumId}`);
+                    log(`   ⚠️  Missionary not found for alumId=${alumId}`);
                     notFoundMissionary++;
                     continue;
                 }
@@ -98,7 +120,7 @@ async function importMissionaryAreas(csvFilePath) {
                 // Find area
                 const area = areaMap.get(areaId);
                 if (!area) {
-                    console.log(`   ⚠️  Area not found for area_id=${areaId}`);
+                    log(`   ⚠️  Area not found for area_id=${areaId}`);
                     notFoundArea++;
                     continue;
                 }
@@ -109,21 +131,22 @@ async function importMissionaryAreas(csvFilePath) {
                 );
 
                 if (areaAlreadyLinked) {
-                    console.log(`   ↷ Already linked: ${missionary.firstName} ${missionary.lastName} ↔ ${area.name}`);
+                    log(`   ↷ Already linked: ${missionary.firstName} ${missionary.lastName} ↔ ${area.name}`);
                     alreadyLinked++;
                 } else {
                     // Add area to missionary
                     missionary.areasServed.push(area._id);
                     await missionary.save();
                     linked++;
-                    console.log(`   ✓ Linked: ${missionary.firstName} ${missionary.lastName} ↔ ${area.name}`);
+                    log(`   ✓ Linked: ${missionary.firstName} ${missionary.lastName} ↔ ${area.name}`);
                 }
 
             } catch (error) {
-                console.error(`❌ Error processing record ${recordNum}:`, error.message);
+                const errorMsg = `❌ Error processing record ${recordNum}: ${error.message}`;
+                log(errorMsg);
                 errors.push({
                     record: recordNum,
-                    alumId: row.a_id,
+                    alumId: row.alum_id || row.a_id,
                     areaId: row.area_id,
                     areaName: row.area_nam || row.area_name,
                     error: error.message
@@ -131,31 +154,34 @@ async function importMissionaryAreas(csvFilePath) {
             }
         }
 
-        console.log('\n' + '='.repeat(60));
-        console.log('📊 LINKING SUMMARY');
-        console.log('='.repeat(60));
-        console.log(`✓ Linked:               ${linked} new missionary-area connections`);
-        console.log(`↷ Already linked:       ${alreadyLinked} connections`);
-        console.log(`⊘ Skipped (blank):      ${skipped} records`);
-        console.log(`⚠️  Missionary not found: ${notFoundMissionary} records`);
-        console.log(`⚠️  Area not found:       ${notFoundArea} records`);
-        console.log(`✗ Errors:               ${errors.length} records`);
+        log('\n' + '='.repeat(60));
+        log('📊 LINKING SUMMARY');
+        log('='.repeat(60));
+        log(`✓ Linked:               ${linked} new missionary-area connections`);
+        log(`↷ Already linked:       ${alreadyLinked} connections`);
+        log(`⊘ Skipped (blank):      ${skipped} records`);
+        log(`⚠️  Missionary not found: ${notFoundMissionary} records`);
+        log(`⚠️  Area not found:       ${notFoundArea} records`);
+        log(`✗ Errors:               ${errors.length} records`);
         
         if (errors.length > 0) {
-            console.log('\n❌ ERRORS:');
+            log('\n❌ ERRORS:');
             errors.forEach(err => {
-                console.log(`   Record ${err.record} (alumId=${err.alumId}, area=${err.areaName}): ${err.error}`);
+                log(`   Record ${err.record} (alumId=${err.alumId}, area=${err.areaName}): ${err.error}`);
             });
         }
 
-        console.log('='.repeat(60) + '\n');
+        log('='.repeat(60) + '\n');
+        log(`📄 Full log saved to: ${logFilePath}`);
 
     } catch (error) {
-        console.error('❌ Fatal error:', error);
+        log('❌ Fatal error: ' + error.message);
+        log(error.stack);
         throw error;
     } finally {
         await mongoose.connection.close();
-        console.log('👋 Disconnected from MongoDB');
+        log('👋 Disconnected from MongoDB');
+        logStream.end();
     }
 }
 
@@ -175,10 +201,12 @@ if (!fs.existsSync(csvFilePath)) {
 
 importMissionaryAreas(csvFilePath)
     .then(() => {
-        console.log('✅ Import completed successfully');
+        console.log('\n✅ Import completed successfully');
+        console.log(`📄 Full log saved to: ${logFilePath}`);
         process.exit(0);
     })
     .catch((error) => {
-        console.error('❌ Import failed:', error);
+        console.error('❌ Import failed:', error.message);
+        console.log(`📄 Full log saved to: ${logFilePath}`);
         process.exit(1);
     });

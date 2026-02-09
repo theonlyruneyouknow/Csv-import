@@ -163,16 +163,24 @@ const missionarySchema = new mongoose.Schema({
         twitter: String
     },
     
-    // Companionships - References to Companionship documents
-    companionships: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Companionship'
-    }],
-    
     // Areas Served
     areasServed: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'MissionArea'
+    }],
+    
+    // Area Book - Original companion/area information from missionary
+    // This is the raw data that helps match companions with areas they served
+    areabook: {
+        type: String,
+        trim: true,
+        maxlength: 10000
+    },
+    
+    // Companionships - References to Companionship documents
+    companionships: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Companionship'
     }],
     
     // Data Quality & Tracking

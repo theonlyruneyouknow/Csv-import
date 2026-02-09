@@ -1,0 +1,20 @@
+==========================================================
+EBM AREAS IMPORT LOG
+Timestamp: 2026-02-07T07:05:03.972Z
+==========================================================
+
+INPUT DATA:
+  Total rows processed: 642
+
+RESULTS:
+{
+  "success": true,
+  "imported": 0,
+  "updated": 258,
+  "skipped": 384,
+  "message": "Successfully imported 0 new areas and updated 258 existing areas (skipped 384)"
+}
+
+==========================================================
+Log file: C:\Users\runet\Documents\GitHub\Csv import\logs\ebm-areas-import-2026-02-07T07-05-03.log
+==========================================================

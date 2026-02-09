@@ -1,0 +1,113 @@
+==========================================================
+EBM AREAS IMPORT LOG
+Timestamp: 2026-02-07T20:25:08.161Z
+==========================================================
+
+INPUT DATA:
+  Total rows processed: 36117
+
+RESULTS:
+{
+  "success": true,
+  "imported": 0,
+  "updated": 0,
+  "skipped": 36117,
+  "skippedDetails": [
+    {
+      "reason": "Missing or invalid a_id",
+      "row": {
+        "alum_area_id": "1",
+        "alum_id": "18",
+        "area_id": "1",
+        "area_sequence": "NULL"
+      }
+    },
+    {
+      "reason": "Missing or invalid a_id",
+      "row": {
+        "alum_area_id": "2",
+        "alum_id": "26",
+        "area_id": "1",
+        "area_sequence": "NULL"
+      }
+    },
+    {
+      "reason": "Missing or invalid a_id",
+      "row": {
+        "alum_area_id": "3",
+        "alum_id": "27",
+        "area_id": "1",
+        "area_sequence": "NULL"
+      }
+    },
+    {
+      "reason": "Missing or invalid a_id",
+      "row": {
+        "alum_area_id": "4",
+        "alum_id": "46",
+        "area_id": "1",
+        "area_sequence": "NULL"
+      }
+    },
+    {
+      "reason": "Missing or invalid a_id",
+      "row": {
+        "alum_area_id": "5",
+        "alum_id": "86",
+        "area_id": "1",
+        "area_sequence": "NULL"
+      }
+    },
+    {
+      "reason": "Missing or invalid a_id",
+      "row": {
+        "alum_area_id": "6",
+        "alum_id": "103",
+        "area_id": "1",
+        "area_sequence": "NULL"
+      }
+    },
+    {
+      "reason": "Missing or invalid a_id",
+      "row": {
+        "alum_area_id": "7",
+        "alum_id": "128",
+        "area_id": "1",
+        "area_sequence": "NULL"
+      }
+    },
+    {
+      "reason": "Missing or invalid a_id",
+      "row": {
+        "alum_area_id": "8",
+        "alum_id": "200",
+        "area_id": "1",
+        "area_sequence": "NULL"
+      }
+    },
+    {
+      "reason": "Missing or invalid a_id",
+      "row": {
+        "alum_area_id": "9",
+        "alum_id": "381",
+        "area_id": "1",
+        "area_sequence": "NULL"
+      }
+    },
+    {
+      "reason": "Missing or invalid a_id",
+      "row": {
+        "alum_area_id": "10",
+        "alum_id": "387",
+        "area_id": "1",
+        "area_sequence": "NULL"
+      }
+    }
+  ],
+  "errorDetails": [],
+  "message": "Successfully imported 0 new area variants and updated 0 existing variants (skipped 36117)"
+}
+
+==========================================================
+Log file: C:\Users\runet\Documents\GitHub\Csv import\logs\ebm-areas-import-2026-02-07T20-25-08.log
+==========================================================

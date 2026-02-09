@@ -5,10 +5,46 @@ const Companionship = require('../models/Companionship');
 const MissionArea = require('../models/MissionArea');
 const multer = require('multer');
 const Papa = require('papaparse');
+const fs = require('fs');
+const path = require('path');
 
 // Configure multer for file upload
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+
+// Create logs directory if it doesn't exist
+const logsDir = path.join(__dirname, '..', 'logs');
+if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir);
+}
+
+// Helper function to write import logs
+function writeImportLog(importType, result, data) {
+    const timestamp = new Date().toISOString().replace(/:/g, '-').replace(/\..+/, '');
+    const logFilePath = path.join(logsDir, `ebm-${importType}-import-${timestamp}.log`);
+    
+    const logContent = [
+        `==========================================================`,
+        `EBM ${importType.toUpperCase()} IMPORT LOG`,
+        `Timestamp: ${new Date().toISOString()}`,
+        `==========================================================`,
+        ``,
+        `INPUT DATA:`,
+        `  Total rows processed: ${data.length}`,
+        ``,
+        `RESULTS:`,
+        JSON.stringify(result, null, 2),
+        ``,
+        `==========================================================`,
+        `Log file: ${logFilePath}`,
+        `==========================================================`
+    ].join('\n');
+    
+    fs.writeFileSync(logFilePath, logContent, 'utf8');
+    console.log(`📄 Import log saved to: ${logFilePath}`);
+    
+    return logFilePath;
+}
 
 // Middleware to check if user has access to EBM Alumni module
 const ensureEBMAccess = (req, res, next) => {
@@ -520,12 +556,19 @@ router.post('/import', ensureEBMAccess, upload.single('csvFile'), async (req, re
             case 'missionary-areas':
                 result = await importMissionaryAreas(parsed.data, req.user);
                 break;
+            case 'areabook':
+                result = await importAreabook(parsed.data, req.user);
+                break;
             case 'companionships':
                 result = await importCompanionships(parsed.data, req.user);
                 break;
             default:
                 return res.status(400).json({ success: false, error: 'Invalid import type' });
         }
+
+        // Save log file
+        const logFilePath = writeImportLog(importType, result, parsed.data);
+        result.logFile = logFilePath;
 
         res.json(result);
 
@@ -610,6 +653,7 @@ async function importMissionaries(data, user) {
                     occupation: row.occupation || null,
                     work: row.work || null,
                     workUrl: row.work_url || null,
+                    areabook: row.areabook || row.area_book || row.area_companions || null,
                     notes: notesArray.join('\n') || null,
                     other: row.other || null,
                     legacyData: {
@@ -687,13 +731,34 @@ async function importAreas(data, user) {
     let updated = 0;
     let skipped = 0;
     let errors = [];
+    let skippedDetails = [];
+    let errorDetails = [];
 
     try {
+        console.log(`\n🔍 Starting areas import with ${data.length} rows`);
+        
+        // Show sample CSV structure
+        if (data.length > 0) {
+            console.log('📋 Sample CSV rows:');
+            for (let i = 0; i < Math.min(3, data.length); i++) {
+                console.log(`  Row ${i + 1}:`, {
+                    a_id: data[i].a_id,
+                    area_id: data[i].area_id,
+                    area_nam: data[i].area_nam,
+                    area_name: data[i].area_name,
+                    allKeys: Object.keys(data[i])
+                });
+            }
+        }
+
         for (const row of data) {
             try {
-                // Skip if no area_id
-                if (!row.area_id || row.area_id === 'NULL' || row.area_id.trim() === '') {
+                // Skip if no a_id (we're using a_id as primary identifier now)
+                if (!row.a_id || row.a_id === 'NULL' || row.a_id === '0' || row.a_id.trim() === '') {
                     skipped++;
+                    if (skippedDetails.length < 10) {
+                        skippedDetails.push({ reason: 'Missing or invalid a_id', row });
+                    }
                     continue;
                 }
 
@@ -703,38 +768,78 @@ async function importAreas(data, user) {
                 // Skip null or empty names
                 if (!areaName || areaName === 'NULL' || areaName === 'Null' || areaName.trim() === '') {
                     skipped++;
+                    if (skippedDetails.length < 10) {
+                        skippedDetails.push({ reason: 'Missing or NULL area name', row });
+                    }
                     continue;
                 }
 
-                // Check if area already exists by legacy ID
-                let area = await MissionArea.findOne({ legacyAreaId: row.area_id });
+                // Check if area already exists by a_id (specific variant)
+                let area = await MissionArea.findOne({ legacyAId: row.a_id });
 
                 if (area) {
-                    // Update existing area
+                    // Update existing area variant
                     area.name = areaName;
+                    area.legacyAreaId = row.area_id && row.area_id !== 'NULL' ? row.area_id : undefined;
                     area.lastEditedBy = user._id;
                     await area.save();
                     updated++;
+                    if (updated <= 5) {
+                        console.log(`   ↻ Updated: "${areaName}" (a_id: ${row.a_id}, area_id: ${row.area_id || 'NULL'})`);
+                    }
                 } else {
-                    // Create new area
+                    // Create new area variant
                     area = new MissionArea({
                         name: areaName,
                         city: areaName, // Default to same as name
-                        legacyAreaId: row.area_id,
+                        legacyAId: row.a_id,
+                        legacyAreaId: row.area_id && row.area_id !== 'NULL' ? row.area_id : undefined,
                         addedBy: user._id,
                         verified: false,
-                        isCurrentArea: true
+                        isCurrentArea: true,
+                        isCanonical: false // Mark as non-canonical by default
                     });
                     await area.save();
                     imported++;
+                    if (imported <= 5) {
+                        console.log(`   ✓ Created: "${areaName}" (a_id: ${row.a_id}, area_id: ${row.area_id || 'NULL'})`);
+                    }
                 }
 
             } catch (err) {
                 errors.push({
-                    name: row.area_nam || row.area_name || `area_id: ${row.area_id}`,
+                    name: row.area_nam || row.area_name || `a_id: ${row.a_id}`,
                     error: err.message
                 });
+                if (errorDetails.length < 10) {
+                    errorDetails.push({
+                        a_id: row.a_id,
+                        area_id: row.area_id,
+                        name: row.area_nam || row.area_name,
+                        error: err.message
+                    });
+                }
             }
+        }
+
+        console.log('\n📊 IMPORT SUMMARY:');
+        console.log(`✓ New area variants created: ${imported}`);
+        console.log(`↻ Existing variants updated: ${updated}`);
+        console.log(`⊘ Skipped: ${skipped}`);
+        console.log(`✗ Errors: ${errors.length}`);
+
+        if (skippedDetails.length > 0) {
+            console.log('\n📋 Sample skipped rows:');
+            skippedDetails.slice(0, 5).forEach((detail, i) => {
+                console.log(`  Row ${i + 1}:`, detail.reason, detail.row);
+            });
+        }
+
+        if (errorDetails.length > 0) {
+            console.log('\n📋 Sample errors:');
+            errorDetails.slice(0, 5).forEach((detail, i) => {
+                console.log(`  Error ${i + 1}:`, detail);
+            });
         }
 
         return {
@@ -743,7 +848,9 @@ async function importAreas(data, user) {
             updated,
             skipped,
             errors: errors.length > 0 ? errors : undefined,
-            message: `Successfully imported ${imported} new areas and updated ${updated} existing areas (skipped ${skipped})`
+            skippedDetails: skippedDetails.slice(0, 10),
+            errorDetails: errorDetails.slice(0, 10),
+            message: `Successfully imported ${imported} new area variants and updated ${updated} existing variants (skipped ${skipped})`
         };
     } catch (error) {
         throw new Error('Area import failed: ' + error.message);
@@ -758,57 +865,158 @@ async function importMissionaryAreas(data, user) {
     let notFoundArea = 0;
     let skipped = 0;
     let errors = [];
+    const skippedDetails = [];
+    const notFoundMissionaryDetails = [];
+    const notFoundAreaDetails = [];
 
     try {
+        console.log(`\n🔍 Starting missionary-area import with ${data.length} rows`);
+        
         // Load all missionaries and areas into memory
         const missionaries = await Missionary.find({}).select('_id legacyData.alumId firstName lastName areasServed');
-        const areas = await MissionArea.find({}).select('_id legacyAreaId name');
+        const areas = await MissionArea.find({}).select('_id legacyAId legacyAreaId name');
+        
+        console.log(`📊 Loaded ${missionaries.length} missionaries and ${areas.length} areas from database`);
         
         // Create lookup maps
         const missionaryMap = new Map();
         missionaries.forEach(m => {
             if (m.legacyData && m.legacyData.alumId) {
                 missionaryMap.set(m.legacyData.alumId, m);
+                missionaryMap.set(m.legacyData.alumId.toString(), m); // Also store as string
             }
         });
         
-        const areaMap = new Map();
+        // Create maps for both a_id (specific variant) and area_id (normalized group)
+        const areaByAIdMap = new Map();
+        const areaByAreaIdMap = new Map();
         areas.forEach(a => {
+            // Map by a_id (specific spelling variant)
+            if (a.legacyAId) {
+                areaByAIdMap.set(a.legacyAId, a);
+                areaByAIdMap.set(a.legacyAId.toString(), a);
+            }
+            // Map by area_id (normalized group) - for backwards compatibility
             if (a.legacyAreaId) {
-                areaMap.set(a.legacyAreaId, a);
+                // Store array of all variants for this area_id
+                const key = a.legacyAreaId.toString();
+                if (!areaByAreaIdMap.has(key)) {
+                    areaByAreaIdMap.set(key, []);
+                }
+                areaByAreaIdMap.get(key).push(a);
             }
         });
 
-        for (const row of data) {
+        console.log(`📊 Created lookup maps: ${missionaryMap.size} missionaries, ${areaByAIdMap.size} a_id variants, ${areaByAreaIdMap.size} area_id groups`);
+        
+        // Log first few rows to see what we're working with
+        if (data.length > 0) {
+            console.log('📋 Sample CSV rows:');
+            data.slice(0, 3).forEach((row, i) => {
+                console.log(`  Row ${i + 1}:`, {
+                    alum_id: row.alum_id,
+                    a_id: row.a_id,
+                    area_id: row.area_id,
+                    allKeys: Object.keys(row)
+                });
+            });
+        }
+
+        for (let i = 0; i < data.length; i++) {
+            const row = data[i];
             try {
-                // Support both column naming conventions: a_id OR alum_id
-                const alumIdValue = row.a_id || row.alum_id;
+                // Support both column naming conventions for missionary: alum_id OR a_id
+                const alumIdValue = row.alum_id || row.a_id;
+                // Support multiple possible column names for the specific area variant ID
+                const aIdValue = row.alum_area_id || row.area_a_id || row.missionary_a_id || row.a_id; // Specific variant ID if provided
+                const areaIdValue = row.area_id;  // Normalized group ID (fallback)
+                
+                // Debug first few rows
+                if (i < 5) {
+                    console.log(`\n📝 Row ${i + 1}:`, {
+                        alumIdValue,
+                        aIdValue,
+                        areaIdValue,
+                        rawRow: row
+                    });
+                }
                 
                 // Skip if missing required IDs
-                if (!alumIdValue || alumIdValue === 'NULL' || alumIdValue.trim() === '') {
+                if (!alumIdValue || alumIdValue === 'NULL' || alumIdValue === '' || (typeof alumIdValue === 'string' && alumIdValue.trim() === '')) {
                     skipped++;
+                    skippedDetails.push({
+                        row: i + 1,
+                        reason: 'Missing or NULL alum_id',
+                        data: { alum_id: alumIdValue, a_id: aIdValue, area_id: areaIdValue }
+                    });
+                    if (i < 5) console.log(`   ⊘ Skipped: Missing alum_id`);
                     continue;
                 }
                 
-                if (!row.area_id || row.area_id === 'NULL' || row.area_id.trim() === '') {
+                if ((!aIdValue || aIdValue === 'NULL' || aIdValue === '') && 
+                    (!areaIdValue || areaIdValue === 'NULL' || areaIdValue === '')) {
                     skipped++;
+                    skippedDetails.push({
+                        row: i + 1,
+                        reason: 'Missing both a_id and area_id',
+                        data: { alum_id: alumIdValue, a_id: aIdValue, area_id: areaIdValue }
+                    });
+                    if (i < 5) console.log(`   ⊘ Skipped: Missing both a_id and area_id`);
                     continue;
                 }
 
-                const alumId = alumIdValue.trim();
-                const areaId = row.area_id.trim();
+                const alumId = String(alumIdValue).trim();
+                
+                if (i < 5) {
+                    console.log(`   Searching for: alumId="${alumId}" (type: ${typeof alumId}), a_id="${aIdValue || 'N/A'}", area_id="${areaIdValue || 'N/A'}"`);
+                }
 
                 // Find missionary
                 const missionary = missionaryMap.get(alumId);
                 if (!missionary) {
                     notFoundMissionary++;
+                    notFoundMissionaryDetails.push({
+                        row: i + 1,
+                        alumId: alumId,
+                        aId: aIdValue,
+                        areaId: areaIdValue
+                    });
+                    if (i < 5) console.log(`   ⚠️  Missionary not found for alumId="${alumId}"`);
                     continue;
                 }
 
-                // Find area
-                const area = areaMap.get(areaId);
+                // Find area - prefer specific variant (a_id) over normalized group (area_id)
+                let area = null;
+                if (aIdValue && aIdValue !== 'NULL' && aIdValue.toString().trim() !== '') {
+                    // Look up by a_id (specific variant)
+                    const aId = String(aIdValue).trim();
+                    area = areaByAIdMap.get(aId);
+                    if (area && i < 5) {
+                        console.log(`   ✓ Found area by a_id: "${area.name}" (a_id: ${aId})`);
+                    }
+                }
+                
+                if (!area && areaIdValue && areaIdValue !== 'NULL' && areaIdValue.toString().trim() !== '') {
+                    // Fallback to area_id (normalized group) - use first variant
+                    const areaId = String(areaIdValue).trim();
+                    const variants = areaByAreaIdMap.get(areaId);
+                    if (variants && variants.length > 0) {
+                        area = variants[0]; // Use first variant (ideally should be canonical)
+                        if (i < 5) {
+                            console.log(`   ⚠️  Using area_id fallback: "${area.name}" (area_id: ${areaId}, ${variants.length} variants available)`);
+                        }
+                    }
+                }
+                
                 if (!area) {
                     notFoundArea++;
+                    notFoundAreaDetails.push({
+                        row: i + 1,
+                        alumId: alumId,
+                        aId: aIdValue,
+                        areaId: areaIdValue
+                    });
+                    if (i < 5) console.log(`   ⚠️  Area not found for a_id="${aIdValue || 'N/A'}", area_id="${areaIdValue || 'N/A'}"`);
                     continue;
                 }
 
@@ -819,11 +1027,13 @@ async function importMissionaryAreas(data, user) {
 
                 if (areaAlreadyLinked) {
                     alreadyLinked++;
+                    if (i < 5) console.log(`   ↷ Already linked: ${missionary.firstName} ${missionary.lastName} ↔ ${area.name}`);
                 } else {
                     // Add area to missionary
                     missionary.areasServed.push(area._id);
                     await missionary.save();
                     linked++;
+                    if (i < 5) console.log(`   ✓ Linked: ${missionary.firstName} ${missionary.lastName} ↔ ${area.name}`);
                 }
 
             } catch (err) {
@@ -834,6 +1044,36 @@ async function importMissionaryAreas(data, user) {
             }
         }
 
+        console.log('\n📊 IMPORT SUMMARY:');
+        console.log(`✓ Linked: ${linked}`);
+        console.log(`↷ Already linked: ${alreadyLinked}`);
+        console.log(`⊘ Skipped: ${skipped}`);
+        console.log(`⚠️  Missionaries not found: ${notFoundMissionary}`);
+        console.log(`⚠️  Areas not found: ${notFoundArea}`);
+        console.log(`✗ Errors: ${errors.length}`);
+        
+        // Log sample details if there were issues
+        if (skippedDetails.length > 0) {
+            console.log('\n📋 Sample skipped rows:');
+            skippedDetails.slice(0, 5).forEach(detail => {
+                console.log(`  Row ${detail.row}: ${detail.reason}`, detail.data);
+            });
+        }
+        
+        if (notFoundMissionaryDetails.length > 0) {
+            console.log('\n📋 Sample missionaries not found:');
+            notFoundMissionaryDetails.slice(0, 5).forEach(detail => {
+                console.log(`  Row ${detail.row}: alumId="${detail.alumId}" for area_id="${detail.areaId}"`);
+            });
+        }
+        
+        if (notFoundAreaDetails.length > 0) {
+            console.log('\n📋 Sample areas not found:');
+            notFoundAreaDetails.slice(0, 5).forEach(detail => {
+                console.log(`  Row ${detail.row}: areaId="${detail.areaId}" for alumId="${detail.alumId}"`);
+            });
+        }
+
         return {
             success: true,
             linked,
@@ -841,11 +1081,109 @@ async function importMissionaryAreas(data, user) {
             skipped,
             notFoundMissionary,
             notFoundArea,
+            skippedDetails: skippedDetails.slice(0, 10),
+            notFoundMissionaryDetails: notFoundMissionaryDetails.slice(0, 10),
+            notFoundAreaDetails: notFoundAreaDetails.slice(0, 10),
             errors: errors.length > 0 ? errors : undefined,
             message: `Successfully linked ${linked} new missionary-area connections (${alreadyLinked} already linked, ${skipped} skipped, ${notFoundMissionary} missionaries not found, ${notFoundArea} areas not found)`
         };
     } catch (error) {
         throw new Error('Missionary-Area linking failed: ' + error.message);
+    }
+}
+
+// Helper: Import Area Book (Companion/Area Notes)
+async function importAreabook(data, user) {
+    let updated = 0;
+    let skipped = 0;
+    let notFound = 0;
+    const errors = [];
+    const notFoundDetails = [];
+
+    try {
+        console.log(`\n🔍 Starting areabook import with ${data.length} rows`);
+
+        for (let i = 0; i < data.length; i++) {
+            const row = data[i];
+            
+            try {
+                // Get alum_id
+                const alumIdValue = row.alum_id || row.alumId || row.alumni_id;
+                
+                // Get areabook content
+                const areabookValue = row.areabook || row.area_book || row.area_companions || row.areaBook;
+                
+                // Skip if missing alum_id
+                if (!alumIdValue) {
+                    skipped++;
+                    continue;
+                }
+                
+                // Skip if areabook is empty
+                if (!areabookValue || areabookValue.trim() === '') {
+                    skipped++;
+                    continue;
+                }
+                
+                // Find missionary by alumId
+                const missionary = await Missionary.findOne({
+                    'legacyData.alumId': alumIdValue.toString()
+                });
+                
+                if (!missionary) {
+                    notFound++;
+                    notFoundDetails.push({
+                        row: i + 1,
+                        alumId: alumIdValue
+                    });
+                    continue;
+                }
+                
+                // Update areabook field
+                missionary.areabook = areabookValue.trim();
+                missionary.lastEditedBy = user._id;
+                await missionary.save();
+                
+                updated++;
+                
+                // Log progress every 100 records
+                if (updated % 100 === 0) {
+                    console.log(`✓ Updated ${updated} areabook records...`);
+                }
+                
+            } catch (err) {
+                errors.push({
+                    row: i + 1,
+                    alumId: row.alum_id || row.alumId,
+                    error: err.message
+                });
+            }
+        }
+
+        console.log(`\n📊 AREABOOK IMPORT SUMMARY:`);
+        console.log(`✓ Updated: ${updated}`);
+        console.log(`⊘ Skipped: ${skipped}`);
+        console.log(`⚠️  Missionaries not found: ${notFound}`);
+        console.log(`✗ Errors: ${errors.length}`);
+        
+        if (notFoundDetails.length > 0) {
+            console.log('\n📋 Sample missionaries not found:');
+            notFoundDetails.slice(0, 5).forEach(detail => {
+                console.log(`  Row ${detail.row}: alumId="${detail.alumId}"`);
+            });
+        }
+
+        return {
+            success: true,
+            updated,
+            skipped,
+            notFound,
+            notFoundDetails: notFoundDetails.slice(0, 10),
+            errors: errors.length > 0 ? errors : undefined,
+            message: `Successfully updated ${updated} areabook records (${skipped} skipped, ${notFound} missionaries not found)`
+        };
+    } catch (error) {
+        throw new Error('Areabook import failed: ' + error.message);
     }
 }
 

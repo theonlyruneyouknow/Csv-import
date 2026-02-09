@@ -1,0 +1,19 @@
+==========================================================
+EBM MISSIONARIES IMPORT LOG
+Timestamp: 2026-02-07T06:45:24.632Z
+==========================================================
+
+INPUT DATA:
+  Total rows processed: 9501
+
+RESULTS:
+{
+  "success": true,
+  "imported": 0,
+  "updated": 0,
+  "message": "Successfully imported 0 and updated 0 missionaries"
+}
+
+==========================================================
+Log file: C:\Users\runet\Documents\GitHub\Csv import\logs\ebm-missionaries-import-2026-02-07T06-45-24.log
+==========================================================

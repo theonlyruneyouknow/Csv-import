@@ -134,10 +134,31 @@ const missionAreaSchema = new mongoose.Schema({
     verifiedDate: Date,
     
     // Legacy SQL Database Reference
-    legacyAreaId: {
+    // a_id: Individual spelling variant ID (as entered by missionary)
+    legacyAId: {
         type: String,
         unique: true,
         sparse: true
+    },
+    // area_id: Normalized/grouped area ID (multiple a_ids → one area_id)
+    legacyAreaId: {
+        type: String,
+        sparse: true
+    },
+    
+    // Normalization fields
+    isCanonical: {
+        type: Boolean,
+        default: false,
+        index: true
+    },
+    canonicalAreaRef: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'MissionArea'
+    },
+    variantCount: {
+        type: Number,
+        default: 0
     },
     
     // System fields

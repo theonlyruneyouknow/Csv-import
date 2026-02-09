@@ -1,0 +1,22 @@
+==========================================================
+EBM MISSIONARY-AREAS IMPORT LOG
+Timestamp: 2026-02-07T06:31:32.437Z
+==========================================================
+
+INPUT DATA:
+  Total rows processed: 9501
+
+RESULTS:
+{
+  "success": true,
+  "linked": 0,
+  "alreadyLinked": 0,
+  "skipped": 1323,
+  "notFoundMissionary": 554,
+  "notFoundArea": 7624,
+  "message": "Successfully linked 0 new missionary-area connections (0 already linked, 1323 skipped, 554 missionaries not found, 7624 areas not found)"
+}
+
+==========================================================
+Log file: C:\Users\runet\Documents\GitHub\Csv import\logs\ebm-missionary-areas-import-2026-02-07T06-31-32.log
+==========================================================

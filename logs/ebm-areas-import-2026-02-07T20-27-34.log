@@ -1,0 +1,1126 @@
+==========================================================
+EBM AREAS IMPORT LOG
+Timestamp: 2026-02-07T20:27:34.169Z
+==========================================================
+
+INPUT DATA:
+  Total rows processed: 642
+
+RESULTS:
+{
+  "success": true,
+  "imported": 383,
+  "updated": 0,
+  "skipped": 1,
+  "errors": [
+    {
+      "name": "Banbury",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"1\" }"
+    },
+    {
+      "name": "Bedford",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"2\" }"
+    },
+    {
+      "name": "Bedford-Bloxton",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"2\" }"
+    },
+    {
+      "name": "Beeston",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"3\" }"
+    },
+    {
+      "name": "Beeston, Nottingham",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"3\" }"
+    },
+    {
+      "name": "Bicester",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"4\" }"
+    },
+    {
+      "name": "Bilston",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"5\" }"
+    },
+    {
+      "name": "Birmingham",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"6\" }"
+    },
+    {
+      "name": "Birmingham (other side)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"6\" }"
+    },
+    {
+      "name": "Birmingham (Sheldon ward)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"6\" }"
+    },
+    {
+      "name": "Birmingham area Deaf Programme",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"6\" }"
+    },
+    {
+      "name": "Birmingham Smethwick",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"6\" }"
+    },
+    {
+      "name": "Birmingham(Handsworth)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"6\" }"
+    },
+    {
+      "name": "Birmingham(sheldon)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"6\" }"
+    },
+    {
+      "name": "Birmingham, Harbourne Ward",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"6\" }"
+    },
+    {
+      "name": "Birmingham, New Oscott Ward, New Oscott",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"6\" }"
+    },
+    {
+      "name": "Birmingham, Sandwell",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"6\" }"
+    },
+    {
+      "name": "Bletchley",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"7\" }"
+    },
+    {
+      "name": "Bletchley (milton keynes)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"7\" }"
+    },
+    {
+      "name": "Bletchly",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"7\" }"
+    },
+    {
+      "name": "Bletchly B",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"7\" }"
+    },
+    {
+      "name": "Boston",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"8\" }"
+    },
+    {
+      "name": "Bretton, Peterboro",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"9\" }"
+    },
+    {
+      "name": "Bromsgrove",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"10\" }"
+    },
+    {
+      "name": "Bulwell, Nottingham",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"11\" }"
+    },
+    {
+      "name": "Burton On Trent",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"12\" }"
+    },
+    {
+      "name": "Burton-on-Trent",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"12\" }"
+    },
+    {
+      "name": "Burton-upon-Trent",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"12\" }"
+    },
+    {
+      "name": "Burton-upon-Trent ",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"12\" }"
+    },
+    {
+      "name": "Buxton",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"13\" }"
+    },
+    {
+      "name": "Cannock",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"14\" }"
+    },
+    {
+      "name": "Chelmsley Wood",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"15\" }"
+    },
+    {
+      "name": "Chelmsleywood",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"15\" }"
+    },
+    {
+      "name": "Coalville",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"16\" }"
+    },
+    {
+      "name": "Colby",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"17\" }"
+    },
+    {
+      "name": "Coleville",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"16\" }"
+    },
+    {
+      "name": "CONGELTON",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"18\" }"
+    },
+    {
+      "name": "Congleton",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"18\" }"
+    },
+    {
+      "name": "Connock",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"19\" }"
+    },
+    {
+      "name": "Corby",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"20\" }"
+    },
+    {
+      "name": "Coventry",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"21\" }"
+    },
+    {
+      "name": "Coventry (Riverside)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"21\" }"
+    },
+    {
+      "name": "COVENTRY-MERCIA",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"21\" }"
+    },
+    {
+      "name": "Covetry",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"21\" }"
+    },
+    {
+      "name": "Crew",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"22\" }"
+    },
+    {
+      "name": "Crewe",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"22\" }"
+    },
+    {
+      "name": "Daventry",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"23\" }"
+    },
+    {
+      "name": "De Monfort A (Leicester)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"24\" }"
+    },
+    {
+      "name": "DeMontfort",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"24\" }"
+    },
+    {
+      "name": "DeMontfort (Leicester)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"24\" }"
+    },
+    {
+      "name": "Derby",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"25\" }"
+    },
+    {
+      "name": "Dudley",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"26\" }"
+    },
+    {
+      "name": "EASTWOOD",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"27\" }"
+    },
+    {
+      "name": "Eastwood, Nottingham",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"27\" }"
+    },
+    {
+      "name": "Erdington",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"28\" }"
+    },
+    {
+      "name": "Erdinton",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"28\" }"
+    },
+    {
+      "name": "Evington",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"29\" }"
+    },
+    {
+      "name": "Grantham",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"30\" }"
+    },
+    {
+      "name": "Handsworth",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"31\" }"
+    },
+    {
+      "name": "Harborne",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"32\" }"
+    },
+    {
+      "name": "Harborne ward",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"32\" }"
+    },
+    {
+      "name": "Harbourne",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"32\" }"
+    },
+    {
+      "name": "Huntingdon",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"33\" }"
+    },
+    {
+      "name": "Huntington",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"33\" }"
+    },
+    {
+      "name": "Kettering",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"34\" }"
+    },
+    {
+      "name": "Kidderminster",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"35\" }"
+    },
+    {
+      "name": "Kiddermister",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"35\" }"
+    },
+    {
+      "name": "Kidsgrove",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"36\" }"
+    },
+    {
+      "name": "Kidsgrove, Newcastle",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"36\" }"
+    },
+    {
+      "name": "Leamington Spa (Warwick, Stratford-Upon-Avon)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"37\" }"
+    },
+    {
+      "name": "Leciester",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"38\" }"
+    },
+    {
+      "name": "LEICESTER",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"38\" }"
+    },
+    {
+      "name": "Leicester (Demontford)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"38\" }"
+    },
+    {
+      "name": "Leicester (Westcotes)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"38\" }"
+    },
+    {
+      "name": "Leicester(Evington ward)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"38\" }"
+    },
+    {
+      "name": "Leicester, Glenfield Ward",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"38\" }"
+    },
+    {
+      "name": "LEICESTER-DE MONTFORT",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"38\" }"
+    },
+    {
+      "name": "Leichester",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"38\" }"
+    },
+    {
+      "name": "Lichester",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"38\" }"
+    },
+    {
+      "name": "Lichfield",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"39\" }"
+    },
+    {
+      "name": "Liecester",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"38\" }"
+    },
+    {
+      "name": "Lincoln",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"40\" }"
+    },
+    {
+      "name": "Litchfield",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"39\" }"
+    },
+    {
+      "name": "Lougborough",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"40\" }"
+    },
+    {
+      "name": "Loughborough",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"40\" }"
+    },
+    {
+      "name": "Loughbough",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"40\" }"
+    },
+    {
+      "name": "Loughbourgh",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"40\" }"
+    },
+    {
+      "name": "Loughbourugh",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"40\" }"
+    },
+    {
+      "name": "Louhgborough",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"40\" }"
+    },
+    {
+      "name": "Maccelsfield",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"41\" }"
+    },
+    {
+      "name": "Macclesfield",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"41\" }"
+    },
+    {
+      "name": "March",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"42\" }"
+    },
+    {
+      "name": "March, Cambs",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"42\" }"
+    },
+    {
+      "name": "Mercia (Coventry)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"43\" }"
+    },
+    {
+      "name": "Milton K.",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"44\" }"
+    },
+    {
+      "name": "Milton Keans",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"44\" }"
+    },
+    {
+      "name": "Milton Keens",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"44\" }"
+    },
+    {
+      "name": "Milton Keynes",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"44\" }"
+    },
+    {
+      "name": "Milton Keynes, 1.ward",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"44\" }"
+    },
+    {
+      "name": "MTC",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"45\" }"
+    },
+    {
+      "name": "New Castle",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"46\" }"
+    },
+    {
+      "name": "New Castle Under-Lyme",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"46\" }"
+    },
+    {
+      "name": "New Castle upon Avon",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"46\" }"
+    },
+    {
+      "name": "New Castle-Underlyme",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"46\" }"
+    },
+    {
+      "name": "New Oscott",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"47\" }"
+    },
+    {
+      "name": "New Oscott (office)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"47\" }"
+    },
+    {
+      "name": "New Oscott, Birmingham",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"47\" }"
+    },
+    {
+      "name": "Newcastle",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"46\" }"
+    },
+    {
+      "name": "Newcastle (Kidsgrove),",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"46\" }"
+    },
+    {
+      "name": "Newcastle under lyme",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"46\" }"
+    },
+    {
+      "name": "Newcastle -Under-Lyme",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"46\" }"
+    },
+    {
+      "name": "Newcastle-U-Lyme",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"46\" }"
+    },
+    {
+      "name": "Newcastle-Under-Lyme",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"46\" }"
+    },
+    {
+      "name": "Newton, Wales",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"48\" }"
+    },
+    {
+      "name": "North Hampton",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"49\" }"
+    },
+    {
+      "name": "Northampton",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"49\" }"
+    },
+    {
+      "name": "Northamton",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"49\" }"
+    },
+    {
+      "name": "Northapton",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"49\" }"
+    },
+    {
+      "name": "Northfield Area",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"50\" }"
+    },
+    {
+      "name": "Northhampton",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"49\" }"
+    },
+    {
+      "name": "Notingham",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"51\" }"
+    },
+    {
+      "name": "Nottigham 1",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"51\" }"
+    },
+    {
+      "name": "Nottigham 4",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"51\" }"
+    },
+    {
+      "name": "Nottingham",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"51\" }"
+    },
+    {
+      "name": "Nottingham ",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"51\" }"
+    },
+    {
+      "name": "Nottingham (Beeston)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"51\" }"
+    },
+    {
+      "name": "Nottingham 2nd",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"51\" }"
+    },
+    {
+      "name": "Nottingham(2nd ward - Bulwell)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"51\" }"
+    },
+    {
+      "name": "Nottingham(Beeston)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"51\" }"
+    },
+    {
+      "name": "Nottingham(Bulworth)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"51\" }"
+    },
+    {
+      "name": "Nottinham",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"51\" }"
+    },
+    {
+      "name": "Notts 1",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"51\" }"
+    },
+    {
+      "name": "Notts 2",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"51\" }"
+    },
+    {
+      "name": "Nuneaton",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"52\" }"
+    },
+    {
+      "name": "Nuneaton (2)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"52\" }"
+    },
+    {
+      "name": "Office",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"53\" }"
+    },
+    {
+      "name": "Peterborogh",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"54\" }"
+    },
+    {
+      "name": "PETERBOROUGH",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"54\" }"
+    },
+    {
+      "name": "Peterborough, 1st? Ward",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"54\" }"
+    },
+    {
+      "name": "Peterbough",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"54\" }"
+    },
+    {
+      "name": "peterbourgh",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"54\" }"
+    },
+    {
+      "name": "Peterbrough",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"54\" }"
+    },
+    {
+      "name": "Petersborgh",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"54\" }"
+    },
+    {
+      "name": "REDDITCH",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"55\" }"
+    },
+    {
+      "name": "Church OFFICE",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"55\" }"
+    },
+    {
+      "name": "Rugby",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"56\" }"
+    },
+    {
+      "name": "Sandwell",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"57\" }"
+    },
+    {
+      "name": "Sheldon",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"58\" }"
+    },
+    {
+      "name": "Shrewbury",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"59\" }"
+    },
+    {
+      "name": "Shrewsberry",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"59\" }"
+    },
+    {
+      "name": "Shrewsbery",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"59\" }"
+    },
+    {
+      "name": "Shrewsburry",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"59\" }"
+    },
+    {
+      "name": "Shrewsbury",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"59\" }"
+    },
+    {
+      "name": "Skegness",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"60\" }"
+    },
+    {
+      "name": "Smethwick",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"61\" }"
+    },
+    {
+      "name": "Smethwyck",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"61\" }"
+    },
+    {
+      "name": "Solihul",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"62\" }"
+    },
+    {
+      "name": "Solihull",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"62\" }"
+    },
+    {
+      "name": "Sollihul",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"62\" }"
+    },
+    {
+      "name": "Sollihull",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"62\" }"
+    },
+    {
+      "name": "South Wigham, Leicester",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"63\" }"
+    },
+    {
+      "name": "Spalding",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"64\" }"
+    },
+    {
+      "name": "Stafford",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"65\" }"
+    },
+    {
+      "name": "Stamford",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"66\" }"
+    },
+    {
+      "name": "Starbridge",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"67\" }"
+    },
+    {
+      "name": "stoke on Trent",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"68\" }"
+    },
+    {
+      "name": "Stoke-England",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"68\" }"
+    },
+    {
+      "name": "STOKE-ON-TRENT",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"68\" }"
+    },
+    {
+      "name": "Stourbridge",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"67\" }"
+    },
+    {
+      "name": "Sutton",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"69\" }"
+    },
+    {
+      "name": "Sutton Coldfeild",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"69\" }"
+    },
+    {
+      "name": "Sutton Coldfield",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"69\" }"
+    },
+    {
+      "name": "SuttonColdfield",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"69\" }"
+    },
+    {
+      "name": "Tamworth",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"70\" }"
+    },
+    {
+      "name": "Telford",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"71\" }"
+    },
+    {
+      "name": "The Office",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"53\" }"
+    },
+    {
+      "name": "Wa1sall",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"72\" }"
+    },
+    {
+      "name": "Walsall",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"72\" }"
+    },
+    {
+      "name": "Warwick",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"73\" }"
+    },
+    {
+      "name": "Wednesfield",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"74\" }"
+    },
+    {
+      "name": "Wellingborough",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"75\" }"
+    },
+    {
+      "name": "Whovlerhamptom",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"76\" }"
+    },
+    {
+      "name": "Wolverhampton",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"76\" }"
+    },
+    {
+      "name": "Wolverhampton ",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"76\" }"
+    },
+    {
+      "name": "Wolverhamton",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"76\" }"
+    },
+    {
+      "name": "Woodbury",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"77\" }"
+    },
+    {
+      "name": "WOODSETTON",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"78\" }"
+    },
+    {
+      "name": "Llandudno",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"79\" }"
+    },
+    {
+      "name": "Bangor",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"80\" }"
+    },
+    {
+      "name": "Caernarfon",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"81\" }"
+    },
+    {
+      "name": "Wellington",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"82\" }"
+    },
+    {
+      "name": "Covington District",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"234\" }"
+    },
+    {
+      "name": "North Birmingham District",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"235\" }"
+    },
+    {
+      "name": "Newport District",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"236\" }"
+    },
+    {
+      "name": "Cwmbran",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"237\" }"
+    },
+    {
+      "name": "Wallsall",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"238\" }"
+    },
+    {
+      "name": "Hucknall",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"239\" }"
+    },
+    {
+      "name": "West Bromwich",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"240\" }"
+    },
+    {
+      "name": "Market Harborough",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"241\" }"
+    },
+    {
+      "name": "Rhyl",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"242\" }"
+    },
+    {
+      "name": "Northfield",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"243\" }"
+    },
+    {
+      "name": "Chester",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"244\" }"
+    },
+    {
+      "name": "Garden City",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"245\" }"
+    },
+    {
+      "name": "Colyn Bay",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"246\" }"
+    },
+    {
+      "name": "Hucknell",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"247\" }"
+    },
+    {
+      "name": "Selly Oak",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"248\" }"
+    },
+    {
+      "name": "Cottridge",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"249\" }"
+    },
+    {
+      "name": "Acocks Green",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"250\" }"
+    },
+    {
+      "name": "Wrexham",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"251\" }"
+    },
+    {
+      "name": "Harlech",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"252\" }"
+    },
+    {
+      "name": "Glenfield",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"253\" }"
+    },
+    {
+      "name": "West Bridgford",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"254\" }"
+    },
+    {
+      "name": "Bromwich",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"255\" }"
+    },
+    {
+      "name": "Long Eaton",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"256\" }"
+    },
+    {
+      "name": "Briarly Hill",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"257\" }"
+    },
+    {
+      "name": "Licester",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"258\" }"
+    },
+    {
+      "name": "Mansfield",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"259\" }"
+    },
+    {
+      "name": "Hoosen",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"260\" }"
+    },
+    {
+      "name": "Warsall",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"261\" }"
+    },
+    {
+      "name": "Castle Bromwich",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"262\" }"
+    },
+    {
+      "name": "TMT",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"263\" }"
+    },
+    {
+      "name": "Chemsley Wood",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"264\" }"
+    },
+    {
+      "name": "Petersbrough",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"265\" }"
+    },
+    {
+      "name": "Anglsey",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"266\" }"
+    },
+    {
+      "name": "Ilkeston",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"267\" }"
+    },
+    {
+      "name": "Cambridge",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"268\" }"
+    },
+    {
+      "name": "Ellesmere Port",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"269\" }"
+    },
+    {
+      "name": "Traveling TMT",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"270\" }"
+    },
+    {
+      "name": "Pelsall",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"271\" }"
+    },
+    {
+      "name": "Worchester",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"272\" }"
+    },
+    {
+      "name": "Worksop",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"273\" }"
+    },
+    {
+      "name": "Leister",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"274\" }"
+    },
+    {
+      "name": "Acock's Green",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"275\" }"
+    },
+    {
+      "name": "Mission Home",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"276\" }"
+    },
+    {
+      "name": "LTM",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"277\" }"
+    },
+    {
+      "name": "Hednesford",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"278\" }"
+    },
+    {
+      "name": "england london mission",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"279\" }"
+    },
+    {
+      "name": "SWANSEA",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"280\" }"
+    },
+    {
+      "name": "LLANELLI",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"281\" }"
+    },
+    {
+      "name": "NORWICH",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"282\" }"
+    },
+    {
+      "name": "CARDIFF",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"283\" }"
+    },
+    {
+      "name": "Norton Canes",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"284\" }"
+    },
+    {
+      "name": "Anglesey",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"285\" }"
+    },
+    {
+      "name": "Abertillary",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"286\" }"
+    },
+    {
+      "name": "Harlach",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"287\" }"
+    },
+    {
+      "name": "Cowlyn Bay",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"288\" }"
+    },
+    {
+      "name": "Sleaford",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"289\" }"
+    },
+    {
+      "name": "Heanor",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"290\" }"
+    },
+    {
+      "name": "Rushden",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"291\" }"
+    },
+    {
+      "name": "Thurmaston",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"292\" }"
+    },
+    {
+      "name": "RUNCORN",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"293\" }"
+    },
+    {
+      "name": "BIRKENHEAD",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"294\" }"
+    },
+    {
+      "name": "Halesowen",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"295\" }"
+    },
+    {
+      "name": "Leahall",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"296\" }"
+    },
+    {
+      "name": "Kings Cross",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"297\" }"
+    },
+    {
+      "name": "NEWARK",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"298\" }"
+    },
+    {
+      "name": "BEDWORTH",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"299\" }"
+    },
+    {
+      "name": "Connah's Quay",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"300\" }"
+    }
+  ],
+  "skippedDetails": [
+    {
+      "reason": "Missing or invalid a_id",
+      "row": {
+        "a_id": "0",
+        "area_id": "1",
+        "area_name": "Null"
+      }
+    }
+  ],
+  "errorDetails": [
+    {
+      "a_id": "1",
+      "area_id": "1",
+      "name": "Banbury",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"1\" }"
+    },
+    {
+      "a_id": "3",
+      "area_id": "2",
+      "name": "Bedford",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"2\" }"
+    },
+    {
+      "a_id": "4",
+      "area_id": "2",
+      "name": "Bedford-Bloxton",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"2\" }"
+    },
+    {
+      "a_id": "5",
+      "area_id": "3",
+      "name": "Beeston",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"3\" }"
+    },
+    {
+      "a_id": "6",
+      "area_id": "3",
+      "name": "Beeston, Nottingham",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"3\" }"
+    },
+    {
+      "a_id": "7",
+      "area_id": "4",
+      "name": "Bicester",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"4\" }"
+    },
+    {
+      "a_id": "8",
+      "area_id": "5",
+      "name": "Bilston",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"5\" }"
+    },
+    {
+      "a_id": "9",
+      "area_id": "6",
+      "name": "Birmingham",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"6\" }"
+    },
+    {
+      "a_id": "10",
+      "area_id": "6",
+      "name": "Birmingham (other side)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"6\" }"
+    },
+    {
+      "a_id": "11",
+      "area_id": "6",
+      "name": "Birmingham (Sheldon ward)",
+      "error": "E11000 duplicate key error collection: purchase-orders.missionareas index: legacyAreaId_1 dup key: { legacyAreaId: \"6\" }"
+    }
+  ],
+  "message": "Successfully imported 383 new area variants and updated 0 existing variants (skipped 1)"
+}
+
+==========================================================
+Log file: C:\Users\runet\Documents\GitHub\Csv import\logs\ebm-areas-import-2026-02-07T20-27-34.log
+==========================================================

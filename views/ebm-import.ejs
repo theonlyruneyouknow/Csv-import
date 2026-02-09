@@ -179,6 +179,7 @@
                         <option value="missionaries">Missionaries (Alumni Data)</option>
                         <option value="areas">Mission Areas</option>
                         <option value="missionary-areas">Missionary-Area Relationships</option>
+                        <option value="areabook">Area Book (Companion/Area Notes)</option>
                         <option value="companionships">Companionships</option>
                     </select>
                 </div>
@@ -190,7 +191,8 @@
                     <ul class="mb-0">
                         <li><strong>Required:</strong> firstname, lastname</li>
                         <li><strong>Recommended:</strong> alum_id, start_date, end_date, email, cur_city, cur_state</li>
-                        <li><strong>Optional:</strong> spouse, children, cur_add1, cur_add2, pmt_add1, occupation, homepage, etc.</li>
+                        <li><strong>Optional:</strong> spouse, children, cur_add1, cur_add2, pmt_add1, occupation, homepage, areabook (or area_book, area_companions), etc.</li>
+                        <li><strong>Note:</strong> The areabook field stores original companion/area information that helps match companions with areas served</li>
                     </ul>
                 </div>
 
@@ -212,6 +214,17 @@
                         <li><strong>Example:</strong> 1,18 (links alumId=1 to area_id=18)</li>
                         <li><strong>Optional:</strong> alum_area, area_sequ (ignored during import)</li>
                         <li><strong>Note:</strong> Make sure missionaries and areas are already imported</li>
+                    </ul>
+                </div>
+
+                <div class="instruction-box" id="areabookInstructions" style="display: none;">
+                    <h5><i class="fas fa-info-circle me-2"></i>Area Book CSV Format</h5>
+                    <p class="mb-2">Your CSV should include these columns:</p>
+                    <ul class="mb-0">
+                        <li><strong>Required:</strong> alum_id, areabook (or area_book, area_companions)</li>
+                        <li><strong>Example:</strong> 86,"Elder Jones - Coventry\nElder Smith - Birmingham"</li>
+                        <li><strong>Note:</strong> This updates only the areabook field with original companion/area information</li>
+                        <li><strong>Tip:</strong> The areabook field helps match companions with areas they served together</li>
                     </ul>
                 </div>
 
@@ -391,13 +404,38 @@
             <!-- Result Box -->
             <div class="result-box" id="resultBox">
                 <h5><i class="fas fa-check-circle me-2"></i>Import Successful!</h5>
-                <p id="resultText"></p>
+                <p id="resultText" style="white-space: pre-wrap;"></p>
+                <div id="detailedResults" class="mt-3" style="display: none;">
+                    <hr>
+                    <h6><i class="fas fa-chart-bar me-2"></i>Detailed Import Statistics</h6>
+                    <div id="detailedStatsContent" style="font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9rem; background: #f8f9fa; padding: 1rem; border-radius: 5px; white-space: pre-wrap;"></div>
+                </div>
             </div>
 
             <!-- Error Box -->
             <div class="error-box" id="errorBox">
                 <h5><i class="fas fa-exclamation-triangle me-2"></i>Import Error</h5>
-                <p id="errorText"></p>
+                <p id="errorText" style="white-space: pre-wrap;"></p>
+            </div>
+
+            <!-- Import Logs History -->
+            <div id="importLogsSection" class="mt-4" style="display: none;">
+                <h5 class="section-title"><i class="fas fa-history me-2"></i>Import History</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Type</th>
+                                <th>Results</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="importLogsTable">
+                            <!-- Logs will be added here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -425,6 +463,7 @@
             document.getElementById('missionariesInstructions').style.display = 'none';
             document.getElementById('areasInstructions').style.display = 'none';
             document.getElementById('missionaryAreasInstructions').style.display = 'none';
+            document.getElementById('areabookInstructions').style.display = 'none';
             document.getElementById('companionshipsInstructions').style.display = 'none';
             
             // Show relevant instruction box
@@ -434,6 +473,8 @@
                 document.getElementById('areasInstructions').style.display = 'block';
             } else if (importType === 'missionary-areas') {
                 document.getElementById('missionaryAreasInstructions').style.display = 'block';
+            } else if (importType === 'areabook') {
+                document.getElementById('areabookInstructions').style.display = 'block';
             } else if (importType === 'companionships') {
                 document.getElementById('companionshipsInstructions').style.display = 'block';
             }
@@ -494,55 +535,122 @@
                 hideProgress();
                 
                 if (result.success) {
-                    let message = result.message || 'Import completed successfully';
+                    // Build detailed message
+                    let summaryMessage = result.message || 'Import completed successfully';
+                    let detailedStats = '';
                     
                     // Add detailed stats based on import type
                     if (importType === 'missionaries') {
-                        message = `✅ Imported ${result.imported} new missionaries\n↻ Updated ${result.updated} existing missionaries`;
+                        summaryMessage = `✅ Imported ${result.imported} new missionaries\n↻ Updated ${result.updated} existing missionaries`;
+                        detailedStats = `MISSIONARIES IMPORT RESULTS
+${'='.repeat(60)}
+✓ New missionaries imported: ${result.imported}
+↻ Existing missionaries updated: ${result.updated}
+${result.errors && result.errors.length > 0 ? '✗ Errors encountered: ' + result.errors.length : ''}
+${'='.repeat(60)}`;
                     } else if (importType === 'areas') {
-                        message = `✅ Imported ${result.imported} new areas\n↻ Updated ${result.updated} existing areas\n⊘ Skipped ${result.skipped} blank/invalid records`;
+                        summaryMessage = `✅ Imported ${result.imported} new areas\n↻ Updated ${result.updated} existing areas\n⊘ Skipped ${result.skipped} blank/invalid records`;
+                        detailedStats = `MISSION AREAS IMPORT RESULTS
+${'='.repeat(60)}
+✓ New areas imported: ${result.imported}
+↻ Existing areas updated: ${result.updated}
+⊘ Skipped (blank/invalid): ${result.skipped}
+${result.errors && result.errors.length > 0 ? '✗ Errors encountered: ' + result.errors.length : ''}
+${'='.repeat(60)}`;
+
+                        // Add skipped details
+                        if (result.skippedDetails && result.skippedDetails.length > 0) {
+                            detailedStats += `\n\nSKIPPED RECORDS (showing first ${Math.min(5, result.skippedDetails.length)}):\n`;
+                            result.skippedDetails.slice(0, 5).forEach((detail, i) => {
+                                detailedStats += `${i + 1}. ${detail.reason} - area_id: ${detail.row.area_id}, name: ${detail.row.area_nam || detail.row.area_name || 'N/A'}\n`;
+                            });
+                        }
+
+                        // Add error details
+                        if (result.errorDetails && result.errorDetails.length > 0) {
+                            detailedStats += `\n\nERROR DETAILS (showing first ${Math.min(5, result.errorDetails.length)}):\n`;
+                            result.errorDetails.slice(0, 5).forEach((detail, i) => {
+                                detailedStats += `${i + 1}. area_id: ${detail.area_id}, name: ${detail.name || 'N/A'}\n   Error: ${detail.error}\n`;
+                            });
+                        }
                     } else if (importType === 'missionary-areas') {
-                        message = `✅ Linked ${result.linked} new missionary-area connections\n↷ Already linked: ${result.alreadyLinked}\n⊘ Skipped: ${result.skipped}`;
+                        summaryMessage = `✅ Linked ${result.linked} new missionary-area connections\n↷ Already linked: ${result.alreadyLinked}\n⊘ Skipped: ${result.skipped}`;
+                        detailedStats = `MISSIONARY-AREA RELATIONSHIPS IMPORT RESULTS
+${'='.repeat(60)}
+✓ New connections linked: ${result.linked}
+↷ Already linked: ${result.alreadyLinked}
+⊘ Skipped (blank/invalid): ${result.skipped}
+⚠️  Missionaries not found: ${result.notFoundMissionary || 0}
+⚠️  Areas not found: ${result.notFoundArea || 0}
+${result.errors && result.errors.length > 0 ? '✗ Errors encountered: ' + result.errors.length : ''}
+${'='.repeat(60)}`;
+                        
                         if (result.notFoundMissionary > 0) {
-                            message += `\n⚠️  Missionaries not found: ${result.notFoundMissionary}`;
+                            summaryMessage += `\n⚠️  Missionaries not found: ${result.notFoundMissionary}`;
                         }
                         if (result.notFoundArea > 0) {
-                            message += `\n⚠️  Areas not found: ${result.notFoundArea}`;
+                            summaryMessage += `\n⚠️  Areas not found: ${result.notFoundArea}`;
+                        }
+                    } else if (importType === 'areabook') {
+                        summaryMessage = `✅ Updated ${result.updated} missionary areabook records\n⊘ Skipped: ${result.skipped}`;
+                        detailedStats = `AREA BOOK IMPORT RESULTS\n${'='.repeat(60)}\n✓ Records updated: ${result.updated}\n⊘ Skipped (blank/invalid): ${result.skipped}\n⚠️  Missionaries not found: ${result.notFound || 0}\n${result.errors && result.errors.length > 0 ? '✗ Errors encountered: ' + result.errors.length : ''}\n${'='.repeat(60)}`;
+                        
+                        if (result.notFound > 0) {
+                            summaryMessage += `\n⚠️  Missionaries not found: ${result.notFound}`;
                         }
                     } else if (importType === 'companionships') {
-                        message = `✅ Created ${result.created} new companionships\n↷ Already exists: ${result.alreadyExists}\n⊘ Skipped: ${result.skipped}`;
+                        summaryMessage = `✅ Created ${result.created} new companionships\n↷ Already exists: ${result.alreadyExists}\n⊘ Skipped: ${result.skipped}`;
+                        detailedStats = `COMPANIONSHIPS IMPORT RESULTS
+${'='.repeat(60)}
+✓ New companionships created: ${result.created}
+↷ Already exist: ${result.alreadyExists}
+⊘ Skipped (blank/invalid): ${result.skipped}
+⚠️  First missionary not found: ${result.notFoundMissionary1 || 0}
+⚠️  Second missionary not found: ${result.notFoundMissionary2 || 0}
+⚠️  Areas not found: ${result.notFoundArea || 0}
+${result.errors && result.errors.length > 0 ? '✗ Errors encountered: ' + result.errors.length : ''}
+${'='.repeat(60)}`;
+                        
                         if (result.notFoundMissionary1 > 0) {
-                            message += `\n⚠️  First missionary not found: ${result.notFoundMissionary1}`;
+                            summaryMessage += `\n⚠️  First missionary not found: ${result.notFoundMissionary1}`;
                         }
                         if (result.notFoundMissionary2 > 0) {
-                            message += `\n⚠️  Second missionary not found: ${result.notFoundMissionary2}`;
+                            summaryMessage += `\n⚠️  Second missionary not found: ${result.notFoundMissionary2}`;
                         }
                         if (result.notFoundArea > 0) {
-                            message += `\n⚠️  Areas not found: ${result.notFoundArea}`;
+                            summaryMessage += `\n⚠️  Areas not found: ${result.notFoundArea}`;
                         }
                     }
                     
                     if (result.errors && result.errors.length > 0) {
-                        message += `\n\n❌ Errors (${result.errors.length}):\n`;
-                        result.errors.slice(0, 5).forEach(err => {
-                            message += `- ${err.name}: ${err.error}\n`;
+                        summaryMessage += `\n\n❌ Errors (${result.errors.length}):\n`;
+                        detailedStats += `\n\nERROR DETAILS:\n`;
+                        result.errors.slice(0, 10).forEach((err, index) => {
+                            summaryMessage += `${index + 1}. ${err.name}: ${err.error}\n`;
+                            detailedStats += `${index + 1}. ${err.name}: ${err.error}\n`;
                         });
-                        if (result.errors.length > 5) {
-                            message += `... and ${result.errors.length - 5} more errors`;
+                        if (result.errors.length > 10) {
+                            summaryMessage += `... and ${result.errors.length - 10} more errors`;
+                            detailedStats += `... and ${result.errors.length - 10} more errors\n`;
                         }
                     }
                     
-                    showResult(message);
+                    // Save to import history
+                    saveImportToHistory(importType, result, summaryMessage);
                     
-                    // Redirect to appropriate page after success
+                    showResult(summaryMessage, detailedStats);
+                    
+                    // Show import logs section
+                    loadImportHistory();
+                    
+                    // Redirect after a longer delay to allow reading results
                     setTimeout(() => {
                         if (importType === 'missionaries') {
                             window.location.href = '/ebm/missionaries';
                         } else {
-                            // For areas and missionary-areas, go to dashboard
                             window.location.href = '/ebm/dashboard';
                         }
-                    }, 3000);
+                    }, 5000);
                 } else {
                     showError(result.error || 'Import failed');
                 }
@@ -699,18 +807,87 @@
             document.getElementById('progressText').textContent = text;
         }
 
-        function showResult(text) {
+        function showResult(text, detailedStats) {
             document.getElementById('resultBox').style.display = 'block';
             document.getElementById('resultText').textContent = text;
-            setTimeout(() => {
-                window.location.href = '/ebm/missionaries';
-            }, 3000);
+            
+            if (detailedStats) {
+                document.getElementById('detailedResults').style.display = 'block';
+                document.getElementById('detailedStatsContent').textContent = detailedStats;
+            }
         }
 
         function showError(text) {
             hideProgress();
             document.getElementById('errorBox').style.display = 'block';
             document.getElementById('errorText').textContent = text;
+        }
+
+        function saveImportToHistory(importType, result, summary) {
+            const history = JSON.parse(localStorage.getItem('ebmImportHistory') || '[]');
+            
+            history.unshift({
+                timestamp: new Date().toISOString(),
+                importType: importType,
+                result: result,
+                summary: summary
+            });
+            
+            // Keep only last 20 imports
+            if (history.length > 20) {
+                history.splice(20);
+            }
+            
+            localStorage.setItem('ebmImportHistory', JSON.stringify(history));
+        }
+
+        function loadImportHistory() {
+            const history = JSON.parse(localStorage.getItem('ebmImportHistory') || '[]');
+            
+            if (history.length === 0) {
+                return;
+            }
+            
+            document.getElementById('importLogsSection').style.display = 'block';
+            const tbody = document.getElementById('importLogsTable');
+            
+            tbody.innerHTML = history.slice(0, 10).map((log, index) => {
+                const date = new Date(log.timestamp);
+                const dateStr = date.toLocaleString();
+                
+                let resultSummary = '';
+                if (log.importType === 'missionaries') {
+                    resultSummary = `Imported: ${log.result.imported}, Updated: ${log.result.updated}`;
+                } else if (log.importType === 'areas') {
+                    resultSummary = `Imported: ${log.result.imported}, Updated: ${log.result.updated}`;
+                } else if (log.importType === 'missionary-areas') {
+                    resultSummary = `Linked: ${log.result.linked}, Already: ${log.result.alreadyLinked}`;
+                } else if (log.importType === 'companionships') {
+                    resultSummary = `Created: ${log.result.created}, Already: ${log.result.alreadyExists}`;
+                }
+                
+                return `
+                    <tr>
+                        <td><small>${dateStr}</small></td>
+                        <td><span class="badge bg-primary">${log.importType}</span></td>
+                        <td><small>${resultSummary}</small></td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="viewImportDetails(${index})">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function viewImportDetails(index) {
+            const history = JSON.parse(localStorage.getItem('ebmImportHistory') || '[]');
+            const log = history[index];
+            
+            if (!log) return;
+            
+            alert(log.summary);
         }
 
         function downloadTemplate() {
@@ -727,6 +904,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Page loaded, initializing...');
             updateInstructions();
+            loadImportHistory();
         });
     </script>
 </body>

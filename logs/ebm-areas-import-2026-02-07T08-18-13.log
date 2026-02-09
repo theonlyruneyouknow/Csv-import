@@ -1,0 +1,103 @@
+==========================================================
+EBM AREAS IMPORT LOG
+Timestamp: 2026-02-07T08:18:13.873Z
+==========================================================
+
+INPUT DATA:
+  Total rows processed: 642
+
+RESULTS:
+{
+  "success": true,
+  "imported": 58,
+  "updated": 200,
+  "skipped": 384,
+  "skippedDetails": [
+    {
+      "reason": "Missing or NULL area name",
+      "row": {
+        "a_id": "0",
+        "area_id": "1",
+        "area_name": "Null"
+      }
+    },
+    {
+      "reason": "Missing or NULL area_id",
+      "row": {
+        "a_id": "301",
+        "area_id": "NULL",
+        "area_name": "Aberdare"
+      }
+    },
+    {
+      "reason": "Missing or NULL area_id",
+      "row": {
+        "a_id": "302",
+        "area_id": "NULL",
+        "area_name": "Aberystwyth"
+      }
+    },
+    {
+      "reason": "Missing or NULL area_id",
+      "row": {
+        "a_id": "303",
+        "area_id": "NULL",
+        "area_name": "Abram"
+      }
+    },
+    {
+      "reason": "Missing or NULL area_id",
+      "row": {
+        "a_id": "304",
+        "area_id": "NULL",
+        "area_name": "Acle"
+      }
+    },
+    {
+      "reason": "Missing or NULL area_id",
+      "row": {
+        "a_id": "305",
+        "area_id": "NULL",
+        "area_name": "Aldridge"
+      }
+    },
+    {
+      "reason": "Missing or NULL area_id",
+      "row": {
+        "a_id": "306",
+        "area_id": "NULL",
+        "area_name": "Alfreton"
+      }
+    },
+    {
+      "reason": "Missing or NULL area_id",
+      "row": {
+        "a_id": "307",
+        "area_id": "NULL",
+        "area_name": "Alsager"
+      }
+    },
+    {
+      "reason": "Missing or NULL area_id",
+      "row": {
+        "a_id": "308",
+        "area_id": "NULL",
+        "area_name": "Alston"
+      }
+    },
+    {
+      "reason": "Missing or NULL area_id",
+      "row": {
+        "a_id": "309",
+        "area_id": "NULL",
+        "area_name": "Alton"
+      }
+    }
+  ],
+  "errorDetails": [],
+  "message": "Successfully imported 58 new areas and updated 200 existing areas (skipped 384)"
+}
+
+==========================================================
+Log file: C:\Users\runet\Documents\GitHub\Csv import\logs\ebm-areas-import-2026-02-07T08-18-13.log
+==========================================================

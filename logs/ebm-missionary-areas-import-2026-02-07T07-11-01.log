@@ -1,0 +1,208 @@
+==========================================================
+EBM MISSIONARY-AREAS IMPORT LOG
+Timestamp: 2026-02-07T07:11:01.980Z
+==========================================================
+
+INPUT DATA:
+  Total rows processed: 9501
+
+RESULTS:
+{
+  "success": true,
+  "linked": 2943,
+  "alreadyLinked": 0,
+  "skipped": 1323,
+  "notFoundMissionary": 554,
+  "notFoundArea": 4681,
+  "skippedDetails": [
+    {
+      "row": 7554,
+      "reason": "Missing or NULL area_id",
+      "data": {
+        "alum_id": "1",
+        "area_id": "NULL"
+      }
+    },
+    {
+      "row": 7555,
+      "reason": "Missing or NULL area_id",
+      "data": {
+        "alum_id": "3",
+        "area_id": "NULL"
+      }
+    },
+    {
+      "row": 7556,
+      "reason": "Missing or NULL area_id",
+      "data": {
+        "alum_id": "8",
+        "area_id": "NULL"
+      }
+    },
+    {
+      "row": 7557,
+      "reason": "Missing or NULL area_id",
+      "data": {
+        "alum_id": "14",
+        "area_id": "NULL"
+      }
+    },
+    {
+      "row": 7558,
+      "reason": "Missing or NULL area_id",
+      "data": {
+        "alum_id": "19",
+        "area_id": "NULL"
+      }
+    },
+    {
+      "row": 7559,
+      "reason": "Missing or NULL area_id",
+      "data": {
+        "alum_id": "1022",
+        "area_id": "NULL"
+      }
+    },
+    {
+      "row": 7560,
+      "reason": "Missing or NULL area_id",
+      "data": {
+        "alum_id": "21",
+        "area_id": "NULL"
+      }
+    },
+    {
+      "row": 7561,
+      "reason": "Missing or NULL area_id",
+      "data": {
+        "alum_id": "22",
+        "area_id": "NULL"
+      }
+    },
+    {
+      "row": 7562,
+      "reason": "Missing or NULL area_id",
+      "data": {
+        "alum_id": "24",
+        "area_id": "NULL"
+      }
+    },
+    {
+      "row": 7563,
+      "reason": "Missing or NULL area_id",
+      "data": {
+        "alum_id": "25",
+        "area_id": "NULL"
+      }
+    }
+  ],
+  "notFoundMissionaryDetails": [
+    {
+      "row": 18,
+      "alumId": "621",
+      "areaId": "1"
+    },
+    {
+      "row": 22,
+      "alumId": "777",
+      "areaId": "1"
+    },
+    {
+      "row": 31,
+      "alumId": "942",
+      "areaId": "1"
+    },
+    {
+      "row": 41,
+      "alumId": "1398",
+      "areaId": "1"
+    },
+    {
+      "row": 45,
+      "alumId": "1329",
+      "areaId": "1"
+    },
+    {
+      "row": 84,
+      "alumId": "621",
+      "areaId": "2"
+    },
+    {
+      "row": 88,
+      "alumId": "777",
+      "areaId": "2"
+    },
+    {
+      "row": 97,
+      "alumId": "942",
+      "areaId": "2"
+    },
+    {
+      "row": 107,
+      "alumId": "1398",
+      "areaId": "2"
+    },
+    {
+      "row": 111,
+      "alumId": "1329",
+      "areaId": "2"
+    }
+  ],
+  "notFoundAreaDetails": [
+    {
+      "row": 2420,
+      "alumId": "16",
+      "areaId": "83"
+    },
+    {
+      "row": 2421,
+      "alumId": "18",
+      "areaId": "83"
+    },
+    {
+      "row": 2422,
+      "alumId": "1173",
+      "areaId": "83"
+    },
+    {
+      "row": 2423,
+      "alumId": "68",
+      "areaId": "83"
+    },
+    {
+      "row": 2424,
+      "alumId": "95",
+      "areaId": "83"
+    },
+    {
+      "row": 2426,
+      "alumId": "134",
+      "areaId": "83"
+    },
+    {
+      "row": 2427,
+      "alumId": "153",
+      "areaId": "83"
+    },
+    {
+      "row": 2428,
+      "alumId": "184",
+      "areaId": "83"
+    },
+    {
+      "row": 2429,
+      "alumId": "190",
+      "areaId": "83"
+    },
+    {
+      "row": 2430,
+      "alumId": "201",
+      "areaId": "83"
+    }
+  ],
+  "message": "Successfully linked 2943 new missionary-area connections (0 already linked, 1323 skipped, 554 missionaries not found, 4681 areas not found)"
+}
+
+==========================================================
+Log file: C:\Users\runet\Documents\GitHub\Csv import\logs\ebm-missionary-areas-import-2026-02-07T07-11-01.log
+==========================================================
