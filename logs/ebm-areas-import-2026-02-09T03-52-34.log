@@ -1,0 +1,31 @@
+==========================================================
+EBM AREAS IMPORT LOG
+Timestamp: 2026-02-09T03:52:34.454Z
+==========================================================
+
+INPUT DATA:
+  Total rows processed: 642
+
+RESULTS:
+{
+  "success": true,
+  "imported": 641,
+  "updated": 0,
+  "skipped": 1,
+  "skippedDetails": [
+    {
+      "reason": "Missing or invalid a_id",
+      "row": {
+        "a_id": "0",
+        "area_id": "1",
+        "area_name": "Null"
+      }
+    }
+  ],
+  "errorDetails": [],
+  "message": "Successfully imported 641 new area variants and updated 0 existing variants (skipped 1)"
+}
+
+==========================================================
+Log file: C:\Users\runet\Documents\GitHub\Csv import\logs\ebm-areas-import-2026-02-09T03-52-34.log
+==========================================================

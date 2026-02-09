@@ -1,0 +1,62 @@
+==========================================================
+EBM AREABOOK IMPORT LOG
+Timestamp: 2026-02-09T04:53:25.036Z
+==========================================================
+
+INPUT DATA:
+  Total rows processed: 3186
+
+RESULTS:
+{
+  "success": true,
+  "updated": 1250,
+  "skipped": 1861,
+  "notFound": 75,
+  "notFoundDetails": [
+    {
+      "row": 44,
+      "alumId": "44"
+    },
+    {
+      "row": 54,
+      "alumId": "53"
+    },
+    {
+      "row": 62,
+      "alumId": "60"
+    },
+    {
+      "row": 76,
+      "alumId": "74"
+    },
+    {
+      "row": 96,
+      "alumId": "93"
+    },
+    {
+      "row": 108,
+      "alumId": "2152"
+    },
+    {
+      "row": 132,
+      "alumId": "123"
+    },
+    {
+      "row": 141,
+      "alumId": "2343"
+    },
+    {
+      "row": 181,
+      "alumId": "172"
+    },
+    {
+      "row": 182,
+      "alumId": "173"
+    }
+  ],
+  "message": "Successfully updated 1250 areabook records (1861 skipped, 75 missionaries not found)"
+}
+
+==========================================================
+Log file: C:\Users\runet\Documents\GitHub\Csv import\logs\ebm-areabook-import-2026-02-09T04-53-25.log
+==========================================================

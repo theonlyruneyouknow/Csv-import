@@ -1,0 +1,127 @@
+==========================================================
+EBM MISSIONARY-AREAS IMPORT LOG
+Timestamp: 2026-02-09T03:19:01.682Z
+==========================================================
+
+INPUT DATA:
+  Total rows processed: 7290
+
+RESULTS:
+{
+  "success": true,
+  "linked": 0,
+  "alreadyLinked": 0,
+  "skipped": 0,
+  "notFoundMissionary": 428,
+  "notFoundArea": 6862,
+  "skippedDetails": [],
+  "notFoundMissionaryDetails": [
+    {
+      "row": 37,
+      "alumId": "8",
+      "aId": "0"
+    },
+    {
+      "row": 150,
+      "alumId": "28",
+      "aId": "0"
+    },
+    {
+      "row": 174,
+      "alumId": "44",
+      "aId": "264"
+    },
+    {
+      "row": 175,
+      "alumId": "44",
+      "aId": "125"
+    },
+    {
+      "row": 176,
+      "alumId": "44",
+      "aId": "64"
+    },
+    {
+      "row": 177,
+      "alumId": "44",
+      "aId": "265"
+    },
+    {
+      "row": 178,
+      "alumId": "44",
+      "aId": "167"
+    },
+    {
+      "row": 179,
+      "alumId": "44",
+      "aId": "266"
+    },
+    {
+      "row": 180,
+      "alumId": "45",
+      "aId": "0"
+    },
+    {
+      "row": 210,
+      "alumId": "53",
+      "aId": "99"
+    }
+  ],
+  "notFoundAreaDetails": [
+    {
+      "row": 1,
+      "alumId": "1",
+      "aId": "0"
+    },
+    {
+      "row": 2,
+      "alumId": "2",
+      "aId": "42"
+    },
+    {
+      "row": 3,
+      "alumId": "2",
+      "aId": "182"
+    },
+    {
+      "row": 4,
+      "alumId": "2",
+      "aId": "170"
+    },
+    {
+      "row": 5,
+      "alumId": "2",
+      "aId": "81"
+    },
+    {
+      "row": 6,
+      "alumId": "2",
+      "aId": "73"
+    },
+    {
+      "row": 7,
+      "alumId": "2",
+      "aId": "176"
+    },
+    {
+      "row": 8,
+      "alumId": "2",
+      "aId": "3"
+    },
+    {
+      "row": 9,
+      "alumId": "3",
+      "aId": "0"
+    },
+    {
+      "row": 10,
+      "alumId": "4",
+      "aId": "154"
+    }
+  ],
+  "message": "Successfully linked 0 new missionary-area connections (0 already linked, 0 skipped, 428 missionaries not found, 6862 areas not found)"
+}
+
+==========================================================
+Log file: C:\Users\runet\Documents\GitHub\Csv import\logs\ebm-missionary-areas-import-2026-02-09T03-19-01.log
+==========================================================
