@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Task = require('../models/Task');
 const PurchaseOrder = require('../models/PurchaseOrder');
+const AccomplishmentReport = require('../models/AccomplishmentReport');
 
 // Task dashboard - main view
 router.get('/', async (req, res) => {
@@ -94,7 +95,10 @@ router.post('/create', async (req, res) => {
             relatedSeeds,
             relatedContacts,
             tags,
-            estimatedHours
+            estimatedHours,
+            status,
+            completedAt,
+            completedBy
         } = req.body;
 
         // Convert PO numbers to PO ObjectIds
@@ -113,10 +117,13 @@ router.post('/create', async (req, res) => {
             description,
             priority,
             category,
+            status: status || 'pending',
             dueDate: new Date(dueDate),
             reminderDate: reminderDate ? new Date(reminderDate) : null,
             assignedTo,
             createdBy: 'User', // TODO: Replace with actual user system
+            completedAt: completedAt ? new Date(completedAt) : null,
+            completedBy: completedBy || null,
             relatedPOs: relatedPOs,
             relatedPONumbers: relatedPONumbers || [],
             relatedVendors: relatedVendors || [],
@@ -127,7 +134,16 @@ router.post('/create', async (req, res) => {
         });
 
         await task.save();
-        console.log('✅ Task created:', task.title);
+        
+        if (completedAt) {
+            console.log(`✅ Task created as COMPLETED: "${task.title}"`);
+            console.log(`   📅 Received completedAt: ${completedAt}`);
+            console.log(`   💾 Stored as: ${task.completedAt.toISOString()}`);
+            console.log(`   🌐 PT Display: ${task.completedAt.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })}`);
+        } else {
+            console.log(`✅ Task created: "${task.title}"`);
+        }
+        
         res.json({ success: true, task });
     } catch (error) {
         console.error('Create task error:', error);
@@ -483,6 +499,223 @@ router.post('/api/reminders/:id/dismiss', async (req, res) => {
         });
     } catch (error) {
         console.error('Dismiss reminder error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Export accomplishments (completed tasks)
+router.get('/api/export/accomplishments', async (req, res) => {
+    try {
+        const { startDate, endDate } = req.query;
+        
+        let dateFilter = {
+            status: 'completed',
+            archived: { $ne: true }
+        };
+        
+        // Add date range filter if provided
+        if (startDate && endDate) {
+            // Create dates in Pacific Time by parsing as local dates in PT context
+            // This automatically handles PST (-08:00) vs PDT (-07:00)
+            const startDateTime = `${startDate}T00:00:00`;
+            const endDateTime = `${endDate}T23:59:59`;
+            
+            // Convert to PT using toLocaleString, then back to Date for MongoDB
+            const ptStartString = new Date(startDateTime).toLocaleString('en-US', { 
+                timeZone: 'America/Los_Angeles',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            
+            const ptEndString = new Date(endDateTime).toLocaleString('en-US', { 
+                timeZone: 'America/Los_Angeles',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            
+            // Parse back to Date objects (these will be in server's local time but represent PT)
+            const start = new Date(`${startDate}T00:00:00`);
+            const end = new Date(`${endDate}T23:59:59.999`);
+            
+            console.log(`📅 Date filter - Start: ${startDate} (${start.toISOString()}) | End: ${endDate} (${end.toISOString()})`);
+            
+            dateFilter.completedAt = {
+                $gte: start,
+                $lte: end
+            };
+        }
+        
+        const completedTasks = await Task.find(dateFilter)
+            .select('title description category priority completedAt createdAt assignedTo')
+            .sort({ completedAt: -1 })
+            .lean();
+        
+        console.log(`🔍 Found ${completedTasks.length} completed tasks`);
+        if (completedTasks.length > 0) {
+            completedTasks.forEach(task => {
+                console.log(`   - "${task.title}" completed at ${task.completedAt.toISOString()} (PT: ${new Date(task.completedAt).toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })})`);
+            });
+        }
+        
+        // Generate markdown content
+        let reportContent = '# Task Accomplishments Report\n\n';
+        reportContent += `Generated on: ${new Date().toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles' })}\n`;
+        if (startDate && endDate) {
+            // Display dates in Pacific Time
+            const displayStart = new Date(startDate + 'T00:00:00-08:00').toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles' });
+            const displayEnd = new Date(endDate + 'T00:00:00-08:00').toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles' });
+            reportContent += `Period: ${displayStart} - ${displayEnd}\n`;
+        }
+        reportContent += `\nTotal Completed Tasks: ${completedTasks.length}\n\n`;
+        reportContent += '---\n\n';
+        
+        // Group by date (in Pacific Time)
+        const tasksByDate = {};
+        completedTasks.forEach(task => {
+            const completedDate = task.completedAt ? new Date(task.completedAt).toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles' }) : 'Unknown';
+            if (!tasksByDate[completedDate]) {
+                tasksByDate[completedDate] = [];
+            }
+            tasksByDate[completedDate].push(task);
+        });
+        
+        // Sort dates in reverse chronological order
+        const sortedDates = Object.keys(tasksByDate).sort((a, b) => {
+            if (a === 'Unknown') return 1;
+            if (b === 'Unknown') return -1;
+            return new Date(b) - new Date(a);
+        });
+        
+        sortedDates.forEach(date => {
+            reportContent += `## ${date}\n\n`;
+            tasksByDate[date].forEach(task => {
+                reportContent += `- **${task.title}**\n`;
+                if (task.description) {
+                    reportContent += `  - ${task.description}\n`;
+                }
+                if (task.category) {
+                    reportContent += `  - Category: ${task.category}\n`;
+                }
+                if (task.priority && task.priority !== 'medium') {
+                    reportContent += `  - Priority: ${task.priority}\n`;
+                }
+                reportContent += '\n';
+            });
+            reportContent += '\n';
+        });
+        
+        res.json({
+            success: true,
+            tasks: completedTasks,
+            count: completedTasks.length,
+            reportContent: reportContent,
+            startDate: startDate || null,
+            endDate: endDate || null
+        });
+    } catch (error) {
+        console.error('Export accomplishments error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Save accomplishment report
+router.post('/api/accomplishment-reports', async (req, res) => {
+    try {
+        const { startDate, endDate, tasks, reportContent, notes } = req.body;
+        const username = req.user ? req.user.username : 'unknown';
+        
+        const report = new AccomplishmentReport({
+            reportDate: new Date(),
+            startDate: new Date(startDate || Date.now()),
+            endDate: new Date(endDate || Date.now()),
+            generatedBy: username,
+            tasks: tasks,
+            reportContent: reportContent,
+            notes: notes || '',
+            totalTasks: tasks.length
+        });
+        
+        await report.save();
+        
+        res.json({
+            success: true,
+            message: 'Report saved successfully',
+            reportId: report._id
+        });
+    } catch (error) {
+        console.error('Save report error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get accomplishment reports
+router.get('/api/accomplishment-reports', async (req, res) => {
+    try {
+        const { date, startDate, endDate } = req.query;
+        
+        let filter = {};
+        
+        if (date) {
+            // Get reports for specific date
+            const targetDate = new Date(date);
+            const nextDay = new Date(targetDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            
+            filter.reportDate = {
+                $gte: targetDate,
+                $lt: nextDay
+            };
+        } else if (startDate && endDate) {
+            // Get reports within date range
+            filter.reportDate = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate)
+            };
+        }
+        
+        const reports = await AccomplishmentReport.find(filter)
+            .sort({ reportDate: -1 })
+            .limit(50)
+            .lean();
+        
+        res.json({
+            success: true,
+            reports: reports,
+            count: reports.length
+        });
+    } catch (error) {
+        console.error('Get reports error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get single accomplishment report
+router.get('/api/accomplishment-reports/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const report = await AccomplishmentReport.findById(id).lean();
+        
+        if (!report) {
+            return res.status(404).json({ error: 'Report not found' });
+        }
+        
+        res.json({
+            success: true,
+            report: report
+        });
+    } catch (error) {
+        console.error('Get report error:', error);
         res.status(500).json({ error: error.message });
     }
 });
