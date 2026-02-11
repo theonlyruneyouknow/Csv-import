@@ -250,7 +250,7 @@
                                 <option value="Supplies" ${po.poType === 'Supplies' ? 'selected' : ''}>Supplies</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             <label class="form-label mb-1"><small>NetSuite URL</small></label>
                             <input type="url" 
                                    class="form-control form-control-sm url-input" 
@@ -259,10 +259,42 @@
                                    placeholder="Paste NetSuite URL here..."
                                    value="${po.poUrl || ''}">
                         </div>
+                        <div class="col-md-1 text-end">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleLineItems(${index})" title="Toggle Line Items Data">
+                                📋
+                            </button>
+                        </div>
+                    </div>
+                    <div id="lineItemsSection_${index}" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
+                        <label class="form-label mb-2">
+                            <strong>📋 NetSuite Line Items Data</strong>
+                            <small class="text-muted">(Paste from NetSuite PO form)</small>
+                        </label>
+                        <textarea id="lineItems_${index}" 
+                                  name="lineItems_${index}"
+                                  class="form-control" 
+                                  rows="6"
+                                  style="font-family: 'Courier New', monospace; font-size: 12px;"
+                                  placeholder="Paste NetSuite line items here...
+
+Format example:
+Item	Vendor Name	Quantity	Description	Rate	Amount
+BR114 : BR114/OR.M		250	ASPABROC (ordering)	26.25	6,562.50"></textarea>
+                        <small class="text-muted d-block mt-1">💡 Paste the line items table from NetSuite (including headers)</small>
                     </div>
                 `;
                 container.appendChild(card);
             });
+        }
+
+        // Toggle line items textarea visibility
+        function toggleLineItems(index) {
+            const section = document.getElementById(`lineItemsSection_${index}`);
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
         }
 
         // Copy PO number to clipboard
@@ -328,18 +360,31 @@
             posData.forEach((po, index) => {
                 const url = document.getElementById(`url_${index}`).value;
                 const poType = document.getElementById(`type_${index}`).value;
+                const lineItemsData = document.getElementById(`lineItems_${index}`).value.trim();
 
-                if (url || poType) {
+                console.log(`🔍 PO ${po.poNumber}:`, {
+                    hasUrl: !!url,
+                    hasType: !!poType,
+                    hasLineItems: !!lineItemsData,
+                    lineItemsLength: lineItemsData.length,
+                    lineItemsPreview: lineItemsData.substring(0, 100)
+                });
+
+                if (url || poType || lineItemsData) {
                     updates.push({
                         poNumber: po.poNumber,
                         url: url,
-                        poType: poType
+                        poType: poType,
+                        lineItemsData: lineItemsData
                     });
                 }
             });
 
+            console.log('📦 Total updates to send:', updates.length);
+            console.log('📦 Updates data:', updates);
+
             if (updates.length === 0) {
-                alert('No updates to submit. Please enter URLs or select PO types.');
+                alert('No updates to submit. Please enter URLs, select PO types, or add line items.');
                 return;
             }
 
@@ -349,13 +394,16 @@
             submitBtn.innerHTML = '⏳ Updating...';
 
             try {
+                console.log('🚀 Sending request to /purchase-orders/bulk-update-urls-and-types');
                 const response = await fetch('/purchase-orders/bulk-update-urls-and-types', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ updates })
                 });
 
+                console.log('📨 Response status:', response.status);
                 const result = await response.json();
+                console.log('📨 Response data:', result);
 
                 if (result.success) {
                     // Show statistics

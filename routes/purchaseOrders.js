@@ -149,12 +149,23 @@ const ensureVendorExists = async (vendorData) => {
 router.post('/upload', upload.single('csvFile'), async (req, res) => {
   console.log('🚨 UPLOAD ENDPOINT HIT! File upload detected!');
   console.log('📁 Request file:', req.file ? req.file.originalname : 'NO FILE');
-  console.log('📁 Request body:', req.body);
+  console.log('📁 Request body keys:', Object.keys(req.body));
+  
+  // Get line items data from form
+  const lineItemsData = req.body.lineItemsData ? req.body.lineItemsData.trim() : '';
+  const hasLineItemsData = lineItemsData.length > 0;
+  
+  console.log('📋 Upload Options:');
+  console.log(`   - Line Items Data Provided: ${hasLineItemsData ? '✅ YES' : '❌ NO'}`);
+  if (hasLineItemsData) {
+    console.log(`   - Line Items Data Length: ${lineItemsData.length} characters`);
+    console.log(`   - Line Items Preview: ${lineItemsData.substring(0, 100)}...`);
+  }
 
   try {
     if (!req.file) {
       console.log('❌ No file uploaded!');
-      return res.status(400).send('No file uploaded');
+      return res.status(400).json({ success: false, error: 'No file uploaded' });
     }
 
     const fs = require('fs');
@@ -252,7 +263,7 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
       if (existingPO) {
         console.log(`   📝 PO ${poNumber} is EXISTING - will NOT apply default PO type (preserves existing type)`);
 
-        // Update existing PO - CSV status goes to nsStatus, preserve custom status
+        // Update existing PO - Build update data based on import options
         const updateData = {
           reportDate,
           date: row[1],
@@ -260,13 +271,27 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
           vendor: vendorString,
           vendorNumber: vendorData.vendorNumber,
           vendorName: vendorData.vendorName,
-          nsStatus: csvStatus, // CSV status ALWAYS goes to NS Status
           amount: parseFloat((row[5] || '0').replace(/[$,]/g, '')),
           location: row[6],
           updatedAt: new Date(),
-          notes: existingPO.notes, // Keep existing notes!
-          status: existingPO.status // Keep existing custom Status (not from CSV)!
+          notes: existingPO.notes // Keep existing notes!
         };
+
+        // Always import status from CSV
+        updateData.nsStatus = csvStatus; // CSV status goes to NS Status
+        console.log(`   ✅ Updating status to: "${csvStatus}"`);
+        
+        // Always preserve custom status field
+        updateData.status = existingPO.status; // Keep existing custom Status (not from CSV)!
+        
+        // Import ETA if available in CSV (column 7)
+        if (row[7]) {
+          const etaValue = row[7].trim();
+          if (etaValue && etaValue !== '' && etaValue !== 'N/A') {
+            updateData.eta = etaValue;
+            console.log(`   ✅ Updating ETA to: "${etaValue}"`);
+          }
+        }
 
         // 🔄 RESURRECTION LOGIC: If this PO was hidden (especially "Not in import"), unhide it
         if (existingPO.isHidden) {
@@ -316,23 +341,37 @@ router.post('/upload', upload.single('csvFile'), async (req, res) => {
       } else {
         console.log(`   🆕 PO ${poNumber} is NEW - WILL apply default PO type: "${defaultPoType || '(none)'}"`);
         
-        // Create new PO - CSV status goes to nsStatus, custom status starts empty, apply default PO type
-        const newPO = await PurchaseOrder.create({
+        // Create new PO - Build data based on import options
+        const newPOData = {
           reportDate,
           date: row[1],
           poNumber: poNumber,
           vendor: vendorString,
           vendorNumber: vendorData.vendorNumber,
           vendorName: vendorData.vendorName,
-          nsStatus: csvStatus, // CSV status goes to NS Status
-          status: '', // Custom status starts EMPTY
           poType: defaultPoType, // Auto-apply vendor's default PO type
           amount: parseFloat((row[5] || '0').replace(/[$,]/g, '')),
           location: row[6],
           notes: '',
           createdAt: new Date(),
           updatedAt: new Date()
-        });
+        };
+
+        // Always import status from CSV
+        newPOData.nsStatus = csvStatus; // CSV status goes to NS Status
+        newPOData.status = ''; // Custom status starts EMPTY
+        console.log(`   ✅ Setting NS Status to: "${csvStatus}"`);
+        
+        // Import ETA if available
+        if (row[7]) {
+          const etaValue = row[7].trim();
+          if (etaValue && etaValue !== '' && etaValue !== 'N/A') {
+            newPOData.eta = etaValue;
+            console.log(`   ✅ Setting ETA to: "${etaValue}"`);
+          }
+        }
+        
+        const newPO = await PurchaseOrder.create(newPOData);
         
         console.log(`   ✅ Created new PO ${poNumber} with PO Type: "${newPO.poType || '(empty)'}"`);
       }
@@ -5334,8 +5373,9 @@ router.get('/pos-needing-urls', async (req, res) => {
 router.post('/bulk-update-urls-and-types', async (req, res) => {
   try {
     console.log('🔗 Starting bulk URL and PO type update from form...');
+    console.log('📦 FULL REQUEST BODY:', JSON.stringify(req.body, null, 2));
     
-    const { updates } = req.body; // Array of { poNumber, url, poType }
+    const { updates } = req.body; // Array of { poNumber, url, poType, lineItemsData }
 
     if (!updates || !Array.isArray(updates)) {
       return res.status(400).json({
@@ -5345,14 +5385,27 @@ router.post('/bulk-update-urls-and-types', async (req, res) => {
     }
 
     console.log(`📋 Processing ${updates.length} PO updates`);
+    console.log('📋 Updates array:', updates.map(u => ({
+      poNumber: u.poNumber,
+      hasUrl: !!u.url,
+      hasType: !!u.poType,
+      hasLineItems: !!u.lineItemsData,
+      lineItemsLength: u.lineItemsData ? u.lineItemsData.length : 0
+    })));
 
     let updated = 0;
     let failed = 0;
+    let lineItemsProcessed = 0;
     const errors = [];
 
     for (const update of updates) {
       try {
-        const { poNumber, url, poType } = update;
+        const { poNumber, url, poType, lineItemsData } = update;
+
+        console.log(`\n🔍 Processing ${poNumber}:`);
+        console.log(`   URL: ${url ? url.substring(0, 50) : 'none'}`);
+        console.log(`   Type: ${poType || 'none'}`);
+        console.log(`   Line Items Data: ${lineItemsData ? `${lineItemsData.length} chars` : 'none'}`);
 
         if (!poNumber) {
           errors.push(`Missing PO number in update`);
@@ -5364,23 +5417,178 @@ router.post('/bulk-update-urls-and-types', async (req, res) => {
         if (url) updateData.poUrl = url.trim();
         if (poType) updateData.poType = poType;
 
-        if (Object.keys(updateData).length === 0) {
+        if (Object.keys(updateData).length === 0 && !lineItemsData) {
+          console.log(`   ⏭️ Skipping ${poNumber} - no updates`);
           continue; // Skip if no updates
         }
 
-        const result = await PurchaseOrder.findOneAndUpdate(
-          { poNumber: poNumber },
-          updateData,
-          { new: true }
-        );
+        // Update PO if we have URL or type changes
+        let result = null;
+        if (Object.keys(updateData).length > 0) {
+          result = await PurchaseOrder.findOneAndUpdate(
+            { poNumber: poNumber },
+            updateData,
+            { new: true }
+          );
 
-        if (result) {
-          updated++;
-          console.log(`✅ Updated ${poNumber}: URL=${!!url}, Type=${poType || 'unchanged'}`);
-        } else {
-          errors.push(`PO ${poNumber} not found`);
-          failed++;
+          if (result) {
+            updated++;
+            console.log(`✅ Updated ${poNumber}: URL=${!!url}, Type=${poType || 'unchanged'}`);
+          } else {
+            errors.push(`PO ${poNumber} not found`);
+            failed++;
+            continue;
+          }
         }
+
+        // Process line items if provided
+        if (lineItemsData && lineItemsData.trim().length > 0) {
+          console.log(`📋 Processing line items for ${poNumber}...`);
+          console.log(`   Raw data preview: ${lineItemsData.substring(0, 200)}`);
+          
+          try {
+            // Find the PO to get its ID
+            const po = await PurchaseOrder.findOne({ poNumber: poNumber });
+            if (!po) {
+              errors.push(`${poNumber}: PO not found for line items import`);
+              continue;
+            }
+
+            // Parse the pasted NetSuite data
+            const lines = lineItemsData.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            
+            console.log(`   Total lines: ${lines.length}`);
+            console.log(`   First 3 lines:`, lines.slice(0, 3));
+            
+            if (lines.length < 2) {
+              console.log(`   ❌ Insufficient data (only ${lines.length} lines)`);
+              errors.push(`${poNumber}: Insufficient line items data`);
+              continue;
+            }
+
+            // Detect format by examining headers
+            const headerLine = lines[0];
+            const isTabDelimited = headerLine.includes('\t');
+            console.log(`   Format: ${isTabDelimited ? 'Tab-delimited' : 'Not tab-delimited'}`);
+            
+            // Parse header to find column indices
+            let quantityCol = -1;
+            let descriptionCol = -1;
+            let rateCol = -1;
+            let amountCol = -1;
+            
+            if (isTabDelimited) {
+              const headers = headerLine.split('\t').map(h => h.trim().toLowerCase());
+              console.log(`   Headers detected:`, headers.slice(0, 6));
+              
+              // Find column positions
+              quantityCol = headers.indexOf('quantity');
+              descriptionCol = headers.indexOf('description');
+              rateCol = headers.indexOf('rate');
+              amountCol = headers.indexOf('amount');
+              
+              console.log(`   Column mapping: Quantity=${quantityCol}, Description=${descriptionCol}, Rate=${rateCol}, Amount=${amountCol}`);
+            }
+            
+            // Skip header lines - look for lines that contain actual data (have tabs and numbers)
+            let dataStartIndex = 0;
+            for (let i = 0; i < lines.length; i++) {
+              const line = lines[i];
+              // Check if this line looks like a data row (has tabs and some numbers/quantities)
+              if (line.includes('\t') && /\d+/.test(line) && !line.toLowerCase().startsWith('item')) {
+                dataStartIndex = i;
+                console.log(`   Data starts at line ${i}: ${line.substring(0, 50)}...`);
+                break;
+              }
+            }
+
+            // Parse data rows
+            const lineItems = [];
+            for (let i = dataStartIndex; i < lines.length; i++) {
+              const line = lines[i];
+              
+              if (!line || line.toLowerCase().includes('total') || line.length < 10) {
+                continue;
+              }
+
+              const values = line.split('\t').map(v => v.trim());
+              
+              console.log(`   Row ${i}: ${values.length} columns -`, values.slice(0, 4));
+              
+              if (values.length >= 3) {
+                const item = values[0] || '';
+                
+                // Use detected column positions, with fallbacks
+                let quantity = 0;
+                let description = '';
+                let rate = 0;
+                let amount = 0;
+                
+                if (quantityCol >= 0 && values[quantityCol]) {
+                  quantity = parseFloat(values[quantityCol].replace(/,/g, '')) || 0;
+                }
+                
+                if (descriptionCol >= 0 && values[descriptionCol]) {
+                  description = values[descriptionCol];
+                }
+                
+                if (rateCol >= 0 && values[rateCol]) {
+                  rate = parseFloat(values[rateCol].replace(/[$,]/g, '')) || 0;
+                }
+                
+                if (amountCol >= 0 && values[amountCol]) {
+                  amount = parseFloat(values[amountCol].replace(/[$,]/g, '')) || 0;
+                }
+
+                console.log(`     -> Quantity: ${quantity}, Description: ${description.substring(0, 30)}`);
+
+                if (quantity > 0 && description) {
+                  lineItems.push({ item, quantity, description, rate, amount });
+                }
+              }
+            }
+
+            console.log(`   Parsed ${lineItems.length} valid line items`);
+
+            if (lineItems.length > 0) {
+              // Delete existing line items
+              const deleteResult = await LineItem.deleteMany({ poId: po._id });
+              console.log(`   Deleted ${deleteResult.deletedCount} existing line items`);
+
+              // Create new line items
+              let imported = 0;
+              for (const item of lineItems) {
+                try {
+                  await LineItem.create({
+                    poId: po._id,
+                    poNumber: po.poNumber,
+                    memo: item.description,  // Required field
+                    itemDescription: item.description,
+                    quantity: item.quantity,
+                    quantityExpected: item.quantity,
+                    quantityReceived: 0,
+                    rate: item.rate,
+                    amount: item.amount,
+                    received: false,
+                    createdAt: new Date()
+                  });
+                  imported++;
+                } catch (itemError) {
+                  console.error(`   Error creating line item:`, itemError.message);
+                }
+              }
+
+              console.log(`   ✅ Imported ${imported} line items for ${poNumber}`);
+              lineItemsProcessed++;
+            } else {
+              console.log(`   ❌ No valid line items found after parsing`);
+            }
+          } catch (lineItemError) {
+            console.error(`   ❌ Error processing line items for ${poNumber}:`, lineItemError.message);
+            errors.push(`${poNumber} line items: ${lineItemError.message}`);
+          }
+        }
+
       } catch (error) {
         console.error(`❌ Error updating ${update.poNumber}:`, error.message);
         errors.push(`${update.poNumber}: ${error.message}`);
@@ -5388,13 +5596,14 @@ router.post('/bulk-update-urls-and-types', async (req, res) => {
       }
     }
 
-    console.log(`✅ Bulk update complete: ${updated} updated, ${failed} failed`);
+    console.log(`✅ Bulk update complete: ${updated} updated, ${failed} failed, ${lineItemsProcessed} with line items`);
 
     res.json({
       success: true,
-      message: `Updated ${updated} purchase orders`,
+      message: `Updated ${updated} purchase orders${lineItemsProcessed > 0 ? `, processed ${lineItemsProcessed} line items` : ''}`,
       updated,
       failed,
+      lineItemsProcessed,
       errors: errors.length > 0 ? errors : undefined
     });
 
