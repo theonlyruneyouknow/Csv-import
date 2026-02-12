@@ -5086,7 +5086,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         </div>
                         
                         <!-- Action Buttons -->
-                        <div style="display: flex; gap: 8px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
+                        <div style="display: flex; gap: 8px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6; flex-wrap: wrap;">
+                            <button onclick="copyAccomplishmentReport()" id="copyReportBtn" class="btn btn-sm btn-primary" style="font-weight: 500;" disabled>
+                                📋 Copy Report
+                            </button>
+                            <button onclick="emailAccomplishmentReport()" id="emailReportBtn" class="btn btn-sm btn-warning" style="font-weight: 500;" disabled>
+                                📧 Email Report
+                            </button>
                             <button onclick="saveAccomplishmentReport()" id="saveReportBtn" class="btn btn-sm btn-success" style="font-weight: 500;" disabled>
                                 💾 Save Report
                             </button>
@@ -13726,6 +13732,8 @@ Thank you`;
             document.getElementById('accomplishmentReportContent').innerHTML = '<p style="text-align: center; color: #6c757d;">Select a date range and click "Generate Report" to view accomplishments.</p>';
             document.getElementById('saveReportBtn').disabled = true;
             document.getElementById('downloadReportBtn').disabled = true;
+            document.getElementById('copyReportBtn').disabled = true;
+            document.getElementById('emailReportBtn').disabled = true;
             currentReportData = null;
         }
 
@@ -13774,6 +13782,8 @@ Thank you`;
                     // Enable action buttons
                     document.getElementById('saveReportBtn').disabled = data.tasks.length === 0;
                     document.getElementById('downloadReportBtn').disabled = data.tasks.length === 0;
+                    document.getElementById('copyReportBtn').disabled = data.tasks.length === 0;
+                    document.getElementById('emailReportBtn').disabled = data.tasks.length === 0;
                     
                     if (data.tasks.length > 0) {
                         showTrackingToast(`✅ Found ${data.tasks.length} completed tasks`, 'success');
@@ -13838,18 +13848,90 @@ Thank you`;
                 return;
             }
             
-            const blob = new Blob([currentReportData.reportContent], { type: 'text/markdown' });
+            const blob = new Blob([currentReportData.reportContent], { type: 'text/plain' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             const startDate = currentReportData.startDate || new Date().toISOString().split('T')[0];
-            a.download = `accomplishments_${startDate}.md`;
+            a.download = `accomplishments_${startDate}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
             
             showTrackingToast('📥 Report downloaded successfully!', 'success');
+        }
+
+        function copyAccomplishmentReport() {
+            if (!currentReportData || !currentReportData.reportContent) {
+                showTrackingToast('❌ No report to copy', 'error');
+                return;
+            }
+            
+            // Copy the report content to clipboard
+            navigator.clipboard.writeText(currentReportData.reportContent).then(() => {
+                showTrackingToast('📋 Report copied to clipboard!', 'success');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                // Fallback method
+                const textarea = document.createElement('textarea');
+                textarea.value = currentReportData.reportContent;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showTrackingToast('📋 Report copied to clipboard!', 'success');
+                } catch (err) {
+                    showTrackingToast('❌ Failed to copy report', 'error');
+                }
+                document.body.removeChild(textarea);
+            });
+        }
+
+        async function emailAccomplishmentReport() {
+            if (!currentReportData || !currentReportData.reportContent) {
+                showTrackingToast('❌ No report to email', 'error');
+                return;
+            }
+            
+            // Prompt for email address
+            const email = prompt('Enter email address to send report to:');
+            if (!email || !email.trim()) {
+                return;
+            }
+            
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email.trim())) {
+                showTrackingToast('❌ Invalid email address', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/tasks/api/email-accomplishments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email.trim(),
+                        startDate: currentReportData.startDate,
+                        endDate: currentReportData.endDate,
+                        reportContent: currentReportData.reportContent
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showTrackingToast(`✅ Report sent to ${email}!`, 'success');
+                } else {
+                    throw new Error(data.error || 'Failed to send email');
+                }
+            } catch (error) {
+                console.error('Error sending email:', error);
+                showTrackingToast('❌ Failed to send email: ' + error.message, 'error');
+            }
         }
 
         async function viewPastReports() {
