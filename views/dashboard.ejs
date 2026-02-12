@@ -786,6 +786,22 @@
             grid-template-columns: repeat(6, 1fr);
         }
 
+        #advancedFiltersRow {
+            grid-template-columns: repeat(4, 1fr);
+            background: #f0f0f5;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        #advancedFiltersToggle {
+            transition: all 0.2s ease;
+        }
+
+        #advancedFiltersToggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
         .filters.scrolled {
             padding: 8px 12px;
             top: 60px;
@@ -4762,7 +4778,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             <!-- Filters Section -->
             <div class="filters" id="filtersSection">
-                <!-- First Row: All Filter Controls -->
+                <!-- Main Filters Row -->
                 <div class="filter-row">
                     <div class="filter-group" style="position: relative;">
                         <label>Search Vendor, PO#, or Tracking#</label>
@@ -4826,13 +4842,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     </div>
 
                     <div class="filter-group">
-                        <label for="locationFilter">📍 Location</label>
-                        <select id="locationFilter">
-                            <option value="">All Locations</option>
-                        </select>
-                    </div>
-
-                    <div class="filter-group">
                         <label style="margin-bottom: 5px;">Show "Not my concern"</label>
                         <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
                             <input type="checkbox" id="showNotMyConcern" style="margin: 0;">
@@ -4849,34 +4858,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     </div>
 
                     <div class="filter-group">
-                        <label style="margin-bottom: 5px;">Missing URLs Only</label>
-                        <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
-                            <input type="checkbox" id="showOnlyMissingUrls" style="margin: 0;">
-                            <span style="font-size: 12px;">Show POs without URLs</span>
-                        </label>
-                    </div>
-
-                    <div class="filter-group">
-                        <label style="margin-bottom: 5px;">No Line Items</label>
-                        <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
-                            <input type="checkbox" id="showOnlyNoLineItems" style="margin: 0;">
-                            <span style="font-size: 12px;">Show POs without line items</span>
-                        </label>
-                    </div>
-
-                    <div class="filter-group">
                         <label style="margin-bottom: 5px;">Partial Receives</label>
                         <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
                             <input type="checkbox" id="showOnlyPartialReceives" style="margin: 0;">
-                            <span style="font-size: 12px;">Show POs with partial receives</span>
-                        </label>
-                    </div>
-
-                    <div class="filter-group">
-                        <label style="margin-bottom: 5px;">Missing ETA Only</label>
-                        <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
-                            <input type="checkbox" id="showOnlyMissingEta" style="margin: 0;">
-                            <span style="font-size: 12px;">Show POs without ETA</span>
+                            <span style="font-size: 12px;">Show partial receives</span>
                         </label>
                     </div>
 
@@ -4906,6 +4891,49 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                 </label>
                                 <% }) %>
                         </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label style="margin-bottom: 5px;">&nbsp;</label>
+                        <button onclick="toggleAdvancedFilters()" id="advancedFiltersToggle" 
+                            style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; margin-top: 4px;"
+                            title="Show/hide advanced filters">
+                            ⚙️ Advanced
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Advanced Filters Row (Initially Hidden) -->
+                <div class="filter-row" id="advancedFiltersRow" style="display: none; padding-top: 10px; border-top: 1px solid #dee2e6; margin-top: 10px;">
+                    <div class="filter-group">
+                        <label for="locationFilter">📍 Location</label>
+                        <select id="locationFilter">
+                            <option value="">All Locations</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label style="margin-bottom: 5px;">Missing URLs</label>
+                        <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
+                            <input type="checkbox" id="showOnlyMissingUrls" style="margin: 0;">
+                            <span style="font-size: 12px;">No URLs only</span>
+                        </label>
+                    </div>
+
+                    <div class="filter-group">
+                        <label style="margin-bottom: 5px;">No Line Items</label>
+                        <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
+                            <input type="checkbox" id="showOnlyNoLineItems" style="margin: 0;">
+                            <span style="font-size: 12px;">No items only</span>
+                        </label>
+                    </div>
+
+                    <div class="filter-group">
+                        <label style="margin-bottom: 5px;">Missing ETA</label>
+                        <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
+                            <input type="checkbox" id="showOnlyMissingEta" style="margin: 0;">
+                            <span style="font-size: 12px;">No ETA only</span>
+                        </label>
                     </div>
                 </div>
 
@@ -8622,6 +8650,22 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
         }
 
         // Tracking Functions
+        function toggleAdvancedFilters() {
+            const advancedRow = document.getElementById('advancedFiltersRow');
+            const toggleBtn = document.getElementById('advancedFiltersToggle');
+            const isCurrentlyVisible = advancedRow.style.display !== 'none';
+
+            if (isCurrentlyVisible) {
+                advancedRow.style.display = 'none';
+                toggleBtn.innerHTML = '⚙️ Advanced';
+                toggleBtn.style.background = '#6c757d';
+            } else {
+                advancedRow.style.display = 'grid';
+                toggleBtn.innerHTML = '⚙️ Hide Advanced';
+                toggleBtn.style.background = '#28a745';
+            }
+        }
+
         function toggleTaskViewer() {
             const taskViewerSection = document.getElementById('taskViewerSection');
             const btnText = document.getElementById('taskViewerText');
