@@ -4598,6 +4598,9 @@ Closed
 Expected Arrival Date
 History
 FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIESTA DEL SOL	24.78	M	157.32	157.32	100	100	2,478.00	 	8/6/2025	No Variances	 	 	History"></textarea>
+                        <p style="margin-top: 8px; font-size: 12px; color: #6c757d;">
+                            💡 Copy the line items table from NetSuite (including headers) and paste it here.
+                        </p>
                     </div>
 
                     <div class="form-group">
@@ -6373,6 +6376,20 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             debugLog('File picker opened');
         }
 
+        // Check auth status before critical operations
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/auth-status', {
+                    headers: { 'Accept': 'application/json' }
+                });
+                const data = await response.json();
+                return data.authenticated;
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                return false;
+            }
+        }
+
         // Handle file selection
         document.addEventListener('DOMContentLoaded', function() {
             debugLog('DOM Content Loaded - initializing event listeners');
@@ -6457,6 +6474,9 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 try {
                     const response = await fetch('/purchase-orders/upload', {
                         method: 'POST',
+                        headers: {
+                            'Accept': 'application/json'
+                        },
                         body: formData
                     });
 
@@ -6663,6 +6683,60 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             document.getElementById('targetPO').value = '';
             document.getElementById('addToExisting').checked = false;
         }
+
+        function clearLineItemsData() {
+            if (confirm('Clear all line items data from the text area?')) {
+                document.getElementById('netsuiteData').value = '';
+            }
+        }
+
+        function autoImportFromNetSuite() {
+            const targetPO = document.getElementById('targetPO');
+            const selectedPO = targetPO.value;
+            
+            // Get the PO number from the selected option
+            let poNumber = '';
+            if (selectedPO) {
+                const selectedOption = targetPO.options[targetPO.selectedIndex];
+                poNumber = selectedOption.text.split(' - ')[0]; // Extract "PO12061" from "PO12061 - Vendor Name"
+            }
+            
+            // Build NetSuite URL
+            let netsuiteUrl = 'https://td5930978.app.netsuite.com/app/accounting/transactions/purchord.nl';
+            
+            if (poNumber && poNumber.startsWith('PO')) {
+                // Try to construct a direct link to the PO
+                const poId = poNumber.replace('PO', '');
+                alert(`🔄 Opening NetSuite for ${poNumber}...\n\n` +
+                      `Instructions:\n` +
+                      `1. Find and open your PO in NetSuite\n` +
+                      `2. Scroll to the Items section\n` +
+                      `3. Select and copy the entire line items table (including headers)\n` +
+                      `4. Come back here and paste into the text area\n` +
+                      `5. Click "Preview Changes" or "Import Line Items"`);
+            } else {
+                alert(`🔄 Opening NetSuite Purchase Orders...\n\n` +
+                      `Instructions:\n` +
+                      `1. Search for and open your PO\n` +
+                      `2. Scroll to the Items section\n` +
+                      `3. Select and copy the entire line items table (including headers)\n` +
+                      `4. Come back here and paste into the text area\n` +
+                      `5. Click "Preview Changes" or "Import Line Items"`);
+            }
+            
+            // Open NetSuite in a new window
+            const netsuiteWindow = window.open(netsuiteUrl, '_blank', 'width=1200,height=800');
+            
+            if (!netsuiteWindow) {
+                alert('⚠️ Pop-up blocked!\n\nPlease allow pop-ups for this site and try again.');
+            }
+            
+            // Focus back on the textarea after a moment
+            setTimeout(() => {
+                document.getElementById('netsuiteData').focus();
+            }, 500);
+        }
+
 
         // Vendor Reconciliation Functions
         async function fixMainVendors() {
@@ -13820,6 +13894,65 @@ Thank you`;
                 showTrackingToast('❌ Failed to load past reports: ' + error.message, 'error');
             }
         }
+
+        // ============================================================
+        // SESSION KEEPALIVE - Prevent session timeout during active use
+        // ============================================================
+        (function initSessionKeepalive() {
+            let lastActivity = Date.now();
+            const KEEPALIVE_INTERVAL = 5 * 60 * 1000; // 5 minutes
+            const ACTIVITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes of inactivity before stopping
+            
+            // Track user activity
+            const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+            activityEvents.forEach(event => {
+                document.addEventListener(event, () => {
+                    lastActivity = Date.now();
+                }, { passive: true });
+            });
+            
+            // Keepalive function
+            async function sendKeepalive() {
+                const timeSinceActivity = Date.now() - lastActivity;
+                
+                // Only send keepalive if user has been active recently
+                if (timeSinceActivity < ACTIVITY_TIMEOUT) {
+                    try {
+                        const response = await fetch('/api/keepalive', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (!result.authenticated) {
+                            console.warn('⚠️ Session expired - user needs to log in again');
+                            // Optionally show a notification that session expired
+                            if (typeof showTrackingToast === 'function') {
+                                showTrackingToast('⏱️ Your session expired. Please refresh and log in again.', 'warning');
+                            }
+                        } else {
+                            console.log('✅ Session keepalive successful');
+                        }
+                    } catch (error) {
+                        console.error('❌ Keepalive failed:', error);
+                    }
+                } else {
+                    console.log('⏸️ User inactive - skipping keepalive');
+                }
+            }
+            
+            // Send initial keepalive after 1 minute
+            setTimeout(sendKeepalive, 60 * 1000);
+            
+            // Then send periodically
+            setInterval(sendKeepalive, KEEPALIVE_INTERVAL);
+            
+            console.log('✅ Session keepalive initialized (pinging every 5 minutes while active)');
+        })();
     </script>
 </body>
 

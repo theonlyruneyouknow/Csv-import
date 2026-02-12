@@ -1135,6 +1135,197 @@ app.get('/', (req, res) => {
     res.redirect('/purchase-orders');
 });
 
+// Session keepalive endpoint - refreshes session for active users
+app.post('/api/keepalive', (req, res) => {
+    if (req.isAuthenticated()) {
+        // Touch the session to refresh its expiration
+        req.session.touch();
+        res.json({ 
+            success: true, 
+            authenticated: true,
+            sessionID: req.sessionID ? req.sessionID.substring(0, 8) + '...' : null
+        });
+    } else {
+        res.status(401).json({ 
+            success: false, 
+            authenticated: false,
+            message: 'Session expired'
+        });
+    }
+});
+
+// Auth status check endpoint
+app.get('/api/auth-status', (req, res) => {
+    res.json({
+        authenticated: req.isAuthenticated(),
+        user: req.isAuthenticated() ? {
+            id: req.user._id,
+            username: req.user.username,
+            role: req.user.role
+        } : null
+    });
+});
+
+// NetSuite PO line items import endpoint
+app.post('/api/import-netsuite', ensureAuthenticated, async (req, res) => {
+    try {
+        const { data, targetPOId, addToExisting } = req.body;
+        const PurchaseOrder = require('./models/PurchaseOrder');
+        const LineItem = require('./models/LineItem');
+
+        if (!data || !data.trim()) {
+            return res.status(400).json({ success: false, error: 'No data provided' });
+        }
+
+        console.log('📋 Processing NetSuite line items import...');
+        console.log(`   Data length: ${data.length} characters`);
+        console.log(`   Target PO ID: ${targetPOId || 'auto-detect'}`);
+        console.log(`   Add to existing: ${addToExisting}`);
+
+        // Parse the pasted NetSuite data
+        const lines = data.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+        
+        if (lines.length < 2) {
+            return res.status(400).json({ success: false, error: 'Insufficient data. Please paste the line items table with headers.' });
+        }
+
+        // Detect format: headers in single line (tab-separated) or separate lines
+        const firstLine = lines[0];
+        const isTabDelimited = firstLine.includes('\t');
+        
+        let headers = [];
+        let dataStartIndex = 0;
+
+        if (isTabDelimited) {
+            // Format 1: Headers in single line, tab-delimited
+            headers = firstLine.split('\t').map(h => h.trim());
+            dataStartIndex = 1;
+            console.log('   Format: Tab-delimited (headers in single line)');
+        } else {
+            // Format 2: Each header on a separate line
+            // Look for common header patterns
+            const headerPatterns = ['Item', 'Vendor Name', 'Quantity', 'Description', 'Rate', 'Amount'];
+            let headerEndIndex = 0;
+            
+            for (let i = 0; i < Math.min(lines.length, 20); i++) {
+                if (headerPatterns.some(pattern => lines[i].toLowerCase().includes(pattern.toLowerCase()))) {
+                    headers.push(lines[i]);
+                    headerEndIndex = i + 1;
+                } else if (headers.length > 0) {
+                    // Found first data line after headers
+                    break;
+                }
+            }
+            
+            dataStartIndex = headerEndIndex;
+            console.log('   Format: Separate line headers');
+        }
+
+        console.log(`   Found ${headers.length} headers:`, headers);
+        console.log(`   Data starts at line ${dataStartIndex}`);
+
+        // Parse data rows
+        const lineItems = [];
+        for (let i = dataStartIndex; i < lines.length; i++) {
+            const line = lines[i];
+            
+            // Skip lines that look like totals or empty
+            if (!line || line.toLowerCase().includes('total') || line.length < 10) {
+                continue;
+            }
+
+            // Split by tabs if tab-delimited
+            const values = isTabDelimited ? line.split('\t') : [line];
+            
+            if (values.length >= 3) {
+                // Extract key fields (adjust indices based on your NetSuite format)
+                const item = values[0] || '';
+                const quantity = parseFloat((values[2] || '0').replace(/,/g, '')) || 0;
+                const description = values[3] || values[1] || '';
+                const rate = parseFloat((values[5] || values[4] || '0').replace(/[$,]/g, '')) || 0;
+                const amount = parseFloat((values[6] || values[5] || '0').replace(/[$,]/g, '')) || 0;
+
+                if (quantity > 0 && description) {
+                    lineItems.push({
+                        item,
+                        quantity,
+                        description,
+                        rate,
+                        amount
+                    });
+                }
+            }
+        }
+
+        console.log(`   Parsed ${lineItems.length} line items`);
+
+        if (lineItems.length === 0) {
+            return res.status(400).json({ success: false, error: 'No valid line items found in the data' });
+        }
+
+        // Find the target PO
+        let targetPO;
+        if (targetPOId) {
+            targetPO = await PurchaseOrder.findById(targetPOId);
+        } else {
+            // Auto-detect: look for PO number in the first item
+            const firstItem = lineItems[0].item;
+            const poMatch = firstItem.match(/PO\d+/i);
+            if (poMatch) {
+                const poNumber = poMatch[0].toUpperCase();
+                targetPO = await PurchaseOrder.findOne({ poNumber });
+                console.log(`   Auto-detected PO: ${poNumber}`);
+            }
+        }
+
+        if (!targetPO) {
+            return res.status(404).json({ success: false, error: 'Target purchase order not found' });
+        }
+
+        console.log(`   Target PO: ${targetPO.poNumber}`);
+
+        // Delete existing line items if not adding to existing
+        if (!addToExisting) {
+            const deleteResult = await LineItem.deleteMany({ poId: targetPO._id });
+            console.log(`   Deleted ${deleteResult.deletedCount} existing line items`);
+        }
+
+        // Create new line items
+        let imported = 0;
+        for (const item of lineItems) {
+            try {
+                await LineItem.create({
+                    poId: targetPO._id,
+                    poNumber: targetPO.poNumber,
+                    itemDescription: item.description,
+                    quantity: item.quantity,
+                    quantityExpected: item.quantity,
+                    quantityReceived: 0,
+                    rate: item.rate,
+                    amount: item.amount,
+                    received: false,
+                    createdAt: new Date()
+                });
+                imported++;
+            } catch (error) {
+                console.error(`   Error creating line item:`, error.message);
+            }
+        }
+
+        console.log(`✅ Successfully imported ${imported} line items for PO ${targetPO.poNumber}`);
+
+        res.json({
+            success: true,
+            imported,
+            poNumber: targetPO.poNumber
+        });
+
+    } catch (error) {
+        console.error('❌ NetSuite import error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Splash page route (can be accessed directly)
 app.get('/splash', (req, res) => {
     res.render('splash', {
