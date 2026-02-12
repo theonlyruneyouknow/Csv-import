@@ -5466,33 +5466,54 @@ router.post('/bulk-update-urls-and-types', async (req, res) => {
               continue;
             }
 
-            // Detect format by examining headers
+            // Detect format: either tab-delimited headers on one line, or each field on separate line
             const headerLine = lines[0];
             const isTabDelimited = headerLine.includes('\t');
-            console.log(`   Format: ${isTabDelimited ? 'Tab-delimited' : 'Not tab-delimited'}`);
+            console.log(`   Format: ${isTabDelimited ? 'Tab-delimited headers' : 'Multi-line headers'}`);
             
-            // Parse header to find column indices
+            // Parse headers to find column indices
             let quantityCol = -1;
             let descriptionCol = -1;
             let rateCol = -1;
             let amountCol = -1;
+            let headerEndIndex = 0;
             
             if (isTabDelimited) {
+              // Single row of tab-delimited headers
               const headers = headerLine.split('\t').map(h => h.trim().toLowerCase());
               console.log(`   Headers detected:`, headers.slice(0, 6));
               
-              // Find column positions
               quantityCol = headers.indexOf('quantity');
               descriptionCol = headers.indexOf('description');
               rateCol = headers.indexOf('rate');
               amountCol = headers.indexOf('amount');
+              headerEndIndex = 1;
+            } else {
+              // Each header on separate line - collect until we hit data
+              const headerNames = [];
+              for (let i = 0; i < Math.min(lines.length, 30); i++) {
+                const line = lines[i];
+                if (line.includes('\t') && /\d/.test(line)) {
+                  // Found data row, stop collecting headers
+                  headerEndIndex = i;
+                  break;
+                }
+                headerNames.push(line.trim().toLowerCase());
+              }
+              console.log(`   Multi-line headers (${headerNames.length}):`, headerNames.slice(0, 6));
               
-              console.log(`   Column mapping: Quantity=${quantityCol}, Description=${descriptionCol}, Rate=${rateCol}, Amount=${amountCol}`);
+              // Map header names to column indices
+              quantityCol = headerNames.indexOf('quantity');
+              descriptionCol = headerNames.indexOf('description');
+              rateCol = headerNames.indexOf('rate');
+              amountCol = headerNames.indexOf('amount');
             }
             
-            // Skip header lines - look for lines that contain actual data (have tabs and numbers)
-            let dataStartIndex = 0;
-            for (let i = 0; i < lines.length; i++) {
+            console.log(`   Column mapping: Quantity=${quantityCol}, Description=${descriptionCol}, Rate=${rateCol}, Amount=${amountCol}`);
+            
+            // Find where data starts (skip headers)
+            let dataStartIndex = headerEndIndex;
+            for (let i = headerEndIndex; i < lines.length; i++) {
               const line = lines[i];
               // Check if this line looks like a data row (has tabs and some numbers/quantities)
               if (line.includes('\t') && /\d+/.test(line) && !line.toLowerCase().startsWith('item')) {
