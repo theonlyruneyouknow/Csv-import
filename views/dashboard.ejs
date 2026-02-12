@@ -778,8 +778,18 @@
 
         .filter-row {
             display: grid;
-            grid-template-columns: repeat(10, 1fr);
             gap: 10px;
+        }
+
+        .filter-row-top {
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
+        }
+
+        .filter-row-checkboxes {
+            grid-template-columns: repeat(7, 1fr);
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #dee2e6;
         }
 
         .filter-row.actions-row {
@@ -4781,8 +4791,8 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
 
             <!-- Filters Section -->
             <div class="filters" id="filtersSection">
-                <!-- Main Filters Row -->
-                <div class="filter-row">
+                <!-- First Row: Search, Clear, Dropdowns, Advanced Toggle -->
+                <div class="filter-row filter-row-top">
                     <div class="filter-group" style="position: relative;">
                         <label>Search Vendor, PO#, or Tracking#</label>
                         <div class="search-input-wrapper">
@@ -4849,6 +4859,18 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         </select>
                     </div>
 
+                    <div class="filter-group" style="grid-column: -2 / -1;">
+                        <label style="margin-bottom: 5px;">&nbsp;</label>
+                        <button onclick="toggleAdvancedFilters()" id="advancedFiltersToggle" 
+                            style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; margin-top: 4px; width: 100%;"
+                            title="Show/hide advanced filters">
+                            ⚙️ Advanced
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Second Row: Checkbox Filters -->
+                <div class="filter-row filter-row-checkboxes">
                     <div class="filter-group">
                         <label style="margin-bottom: 5px;">Show "Not my concern"</label>
                         <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
@@ -4873,7 +4895,7 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                         </label>
                     </div>
 
-                    <div class="filter-group">
+                    <div class="filter-group" style="grid-column: span 4;">
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
                             <label style="margin: 0;">PO Type Filter</label>
                             <button class="btn btn-sm" onclick="selectAllPoTypes()"
@@ -4899,15 +4921,6 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                 </label>
                                 <% }) %>
                         </div>
-                    </div>
-
-                    <div class="filter-group" style="grid-column: -2 / -1;">
-                        <label style="margin-bottom: 5px;">&nbsp;</label>
-                        <button onclick="toggleAdvancedFilters()" id="advancedFiltersToggle" 
-                            style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; margin-top: 4px; width: 100%;"
-                            title="Show/hide advanced filters">
-                            ⚙️ Advanced
-                        </button>
                     </div>
                 </div>
 
