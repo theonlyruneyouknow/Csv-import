@@ -4865,6 +4865,14 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     </div>
 
                     <div class="filter-group">
+                        <label style="margin-bottom: 5px;">Partial Receives</label>
+                        <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
+                            <input type="checkbox" id="showOnlyPartialReceives" style="margin: 0;">
+                            <span style="font-size: 12px;">Show POs with partial receives</span>
+                        </label>
+                    </div>
+
+                    <div class="filter-group">
                         <label style="margin-bottom: 5px;">Missing ETA Only</label>
                         <label style="display: flex; align-items: center; gap: 5px; margin-top: 19px;">
                             <input type="checkbox" id="showOnlyMissingEta" style="margin: 0;">
@@ -10903,6 +10911,8 @@ Thank you`;
             const showOnlyMissingEta = showOnlyMissingEtaCheckbox ? showOnlyMissingEtaCheckbox.checked : false;
             const showOnlyNoLineItemsCheckbox = document.getElementById('showOnlyNoLineItems');
             const showOnlyNoLineItems = showOnlyNoLineItemsCheckbox ? showOnlyNoLineItemsCheckbox.checked : false;
+            const showOnlyPartialReceivesCheckbox = document.getElementById('showOnlyPartialReceives');
+            const showOnlyPartialReceives = showOnlyPartialReceivesCheckbox ? showOnlyPartialReceivesCheckbox.checked : false;
             const locationFilterEl = document.getElementById('locationFilter');
             const locationFilter = locationFilterEl ? locationFilterEl.value.trim() : '';
 
@@ -10927,6 +10937,7 @@ Thank you`;
             let hiddenHasUrlCount = 0;
             let hiddenMissingEtaCount = 0;
             let hiddenWithLineItemsCount = 0;
+            let hiddenNotPartialReceivesCount = 0;
             let hiddenLocationMismatchCount = 0;
             let hiddenPoTypeCount = 0;
 
@@ -10975,6 +10986,15 @@ Thank you`;
                 const hasLineItems = poData.lineItems && poData.lineItems.length > 0;
                 const shouldShowBasedOnLineItems = !showOnlyNoLineItems || !hasLineItems;
 
+                // Partial receives filter - only show POs with some (but not all) items received
+                let hasPartialReceives = false;
+                if (hasLineItems) {
+                    const totalItems = poData.lineItems.length;
+                    const receivedItems = poData.lineItems.filter(item => item.received).length;
+                    hasPartialReceives = receivedItems > 0 && receivedItems < totalItems;
+                }
+                const shouldShowBasedOnPartialReceives = !showOnlyPartialReceives || hasPartialReceives;
+
                 // Location filter - filter by line item locations (exact match)
                 const lineItemLocations = row.dataset.lineItemLocations || '';
                 const locationArray = lineItemLocations.split(',').map(loc => loc.trim());
@@ -11013,6 +11033,10 @@ Thank you`;
                     hiddenWithLineItemsCount++;
                 }
 
+                if (showOnlyPartialReceives && !hasPartialReceives) {
+                    hiddenNotPartialReceivesCount++;
+                }
+
                 if (locationFilter && !matchesLocation) {
                     hiddenLocationMismatchCount++;
                 }
@@ -11032,7 +11056,7 @@ Thank you`;
                 // Priority filter
                 const matchesPriority = priorityFilter === 'all' || (poData.priority && poData.priority.toString() === priorityFilter);
 
-                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowPendingSupervisorApproval && shouldShowBasedOnUrl && shouldShowBasedOnEta && shouldShowBasedOnLineItems && matchesLocation && matchesPoType) {
+                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowPendingSupervisorApproval && shouldShowBasedOnUrl && shouldShowBasedOnEta && shouldShowBasedOnLineItems && shouldShowBasedOnPartialReceives && matchesLocation && matchesPoType) {
                     row.classList.remove('hidden');
                     // Also show the corresponding notes row if it's expanded
                     const notesRow = document.getElementById(`notes-row-${index}`);
@@ -11208,6 +11232,7 @@ Thank you`;
             document.getElementById('showPendingSupervisorApproval').checked = false;
             document.getElementById('showOnlyMissingUrls').checked = false;
             document.getElementById('showOnlyNoLineItems').checked = false;
+            document.getElementById('showOnlyPartialReceives').checked = false;
             document.getElementById('showOnlyDropship').checked = false;
 
             // Update Pending Supervisor Approval button appearance
@@ -11225,6 +11250,7 @@ Thank you`;
             localStorage.removeItem('filter_showPendingSupervisorApproval');
             localStorage.removeItem('filter_showOnlyMissingUrls');
             localStorage.removeItem('filter_showOnlyNoLineItems');
+            localStorage.removeItem('filter_showOnlyPartialReceives');
 
             applyFilters();
         }
@@ -11270,7 +11296,7 @@ Thank you`;
         }
 
         function restoreFilterStates() {
-            const filters = ['showNotMyConcern', 'showPendingBill', 'showPendingSupervisorApproval', 'showOnlyMissingUrls', 'showOnlyDropship', 'showOnlyNoLineItems'];
+            const filters = ['showNotMyConcern', 'showPendingBill', 'showPendingSupervisorApproval', 'showOnlyMissingUrls', 'showOnlyDropship', 'showOnlyNoLineItems', 'showOnlyPartialReceives'];
 
             filters.forEach(filterId => {
                 const savedState = localStorage.getItem(`filter_${filterId}`);
@@ -11325,7 +11351,7 @@ Thank you`;
         restoreFilterStates();
 
         // Add event listeners to save state when checkboxes change
-        ['showNotMyConcern', 'showPendingBill', 'showPendingSupervisorApproval', 'showOnlyMissingUrls', 'showOnlyNoLineItems'].forEach(filterId => {
+        ['showNotMyConcern', 'showPendingBill', 'showPendingSupervisorApproval', 'showOnlyMissingUrls', 'showOnlyNoLineItems', 'showOnlyPartialReceives'].forEach(filterId => {
             const checkbox = document.getElementById(filterId);
             if (checkbox) {
                 checkbox.addEventListener('change', function () {
@@ -11556,6 +11582,7 @@ Thank you`;
         const showOnlyMissingUrls = document.getElementById('showOnlyMissingUrls');
         const showOnlyMissingEta = document.getElementById('showOnlyMissingEta');
         const showOnlyNoLineItems = document.getElementById('showOnlyNoLineItems');
+        const showOnlyPartialReceives = document.getElementById('showOnlyPartialReceives');
 
         // Declare searchTimeout outside the if block so it persists
         let searchTimeout;
@@ -11593,6 +11620,7 @@ Thank you`;
         if (showOnlyMissingUrls) showOnlyMissingUrls.addEventListener('change', applyFilters);
         if (showOnlyMissingEta) showOnlyMissingEta.addEventListener('change', applyFilters);
         if (showOnlyNoLineItems) showOnlyNoLineItems.addEventListener('change', applyFilters);
+        if (showOnlyPartialReceives) showOnlyPartialReceives.addEventListener('change', applyFilters);
 
         // Dynamic PO Type filter event listeners
         console.log('🎧 Setting up PO Type filter event listeners...');
