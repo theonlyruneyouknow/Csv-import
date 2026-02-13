@@ -129,7 +129,7 @@ router.post('/create', async (req, res) => {
             relatedVendors: relatedVendors || [],
             relatedSeeds: relatedSeeds || [],
             relatedContacts: relatedContacts || [],
-            tags: Array.isArray(tags) ? tags : (tags ? tags.split(',').map(tag => tag.trim()) : []),
+            tags: Array.isArray(tags) ? tags : (tags && typeof tags === 'string' ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : []),
             estimatedHours: estimatedHours || 0
         });
 

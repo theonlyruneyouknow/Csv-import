@@ -13829,7 +13829,7 @@ Thank you`;
                 dueDate: taskDueDate.toISOString(),
                 createdBy: '<%= user ? user.username : "unknown" %>',
                 assignedTo: assignedTo || '<%= user ? (user.firstName + " " + user.lastName) : "" %>',
-                tags: tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : []
+                tags: tags || ''
             };
             
             // Add completed fields if task is marked as completed (in Pacific Time)
