@@ -13536,33 +13536,14 @@ Thank you`;
                 });
             });
 
-            // Edit button handlers
-            document.querySelectorAll('.task-edit-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    openTaskEditModal(btn.getAttribute('data-task-id'));
-                });
-            });
+            // Edit button handlers - REMOVED (handled by event delegation above)
+            // Event delegation at line ~13180 handles .task-edit-btn clicks
 
-            // Archive button handlers
-            document.querySelectorAll('.task-archive-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    archiveTaskFromViewer(btn.getAttribute('data-task-id'), btn);
-                });
-            });
+            // Archive button handlers - REMOVED (handled by event delegation above)
+            // Event delegation at line ~13191 handles .task-archive-btn clicks
 
-            // Delete button handlers
-            document.querySelectorAll('.task-delete-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    deleteTaskFromViewer(
-                        btn.getAttribute('data-task-id'),
-                        btn.getAttribute('data-task-title'),
-                        btn
-                    );
-                });
-            });
+            // Delete button handlers - REMOVED (handled by event delegation above)
+            // Event delegation at line ~13199 handles .task-delete-btn clicks
         }
 
         // Initialize event listeners on page load
