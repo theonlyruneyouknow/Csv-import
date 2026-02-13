@@ -5062,11 +5062,18 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     
                     <!-- Quick Task Form (Hidden by default) -->
                     <div id="quickTaskForm" style="display: none; background: #f8f9fa; border: 2px solid #667eea; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
-                        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                             <h5 style="margin: 0; color: #2c3e50; font-weight: 600;">✨ Quick Add Task</h5>
-                            <button onclick="hideQuickTaskForm()" style="background: transparent; border: none; color: #6c757d; font-size: 1.2rem; cursor: pointer; padding: 0; margin-left: auto;">×</button>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <button onclick="toggleQuickTaskAdvanced()" id="quickTaskExpandBtn" type="button"
+                                    style="background: #6c757d; border: none; color: white; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s;">
+                                    ⚙️ More Options
+                                </button>
+                                <button onclick="hideQuickTaskForm()" style="background: transparent; border: none; color: #6c757d; font-size: 1.2rem; cursor: pointer; padding: 0;">×</button>
+                            </div>
                         </div>
                         <form onsubmit="saveQuickTask(event)" style="display: flex; flex-direction: column; gap: 12px;">
+                            <!-- Basic Fields (Always Visible) -->
                             <div>
                                 <input type="text" id="quickTaskTitle" placeholder="Task title / subject line..." required
                                        style="width: 100%; padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 0.95rem;">
@@ -5075,6 +5082,40 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                 <textarea id="quickTaskNote" placeholder="Quick note (optional)..." rows="2"
                                           style="width: 100%; padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 0.9rem; resize: vertical;"></textarea>
                             </div>
+                            
+                            <!-- Advanced Fields (Collapsible) -->
+                            <div id="quickTaskAdvancedFields" style="display: none; padding: 15px; background: white; border: 1px solid #dee2e6; border-radius: 6px; gap: 12px; flex-direction: column;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; color: #495057;">Due Date:</label>
+                                    <input type="date" id="quickTaskDueDate"
+                                           style="width: 100%; padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 0.9rem;">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; color: #495057;">Priority:</label>
+                                    <select id="quickTaskPriority" style="width: 100%; padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 0.9rem;">
+                                        <option value="low">Low</option>
+                                        <option value="medium" selected>Medium</option>
+                                        <option value="high">High</option>
+                                        <option value="critical">Critical</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; color: #495057;">Category:</label>
+                                    <input type="text" id="quickTaskCategory" placeholder="e.g., Follow-up, Order Issue, etc."
+                                           style="width: 100%; padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 0.9rem;">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; color: #495057;">Assigned To:</label>
+                                    <input type="text" id="quickTaskAssignedTo" placeholder="Person responsible"
+                                           style="width: 100%; padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 0.9rem;">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; color: #495057;">Tags (comma-separated):</label>
+                                    <input type="text" id="quickTaskTags" placeholder="urgent, follow-up, etc."
+                                           style="width: 100%; padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 0.9rem;">
+                                </div>
+                            </div>
+                            
                             <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
                                 <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem;">
                                     <input type="checkbox" id="quickTaskCompleted" style="width: 18px; height: 18px; cursor: pointer;">
@@ -13718,6 +13759,35 @@ Thank you`;
             document.getElementById('quickTaskTitle').value = '';
             document.getElementById('quickTaskNote').value = '';
             document.getElementById('quickTaskCompleted').checked = false;
+            // Reset advanced fields
+            document.getElementById('quickTaskDueDate').value = '';
+            document.getElementById('quickTaskPriority').value = 'medium';
+            document.getElementById('quickTaskCategory').value = '';
+            document.getElementById('quickTaskAssignedTo').value = '';
+            document.getElementById('quickTaskTags').value = '';
+            // Close advanced section
+            const advancedSection = document.getElementById('quickTaskAdvancedFields');
+            const expandBtn = document.getElementById('quickTaskExpandBtn');
+            if (advancedSection.style.display === 'flex') {
+                advancedSection.style.display = 'none';
+                expandBtn.innerHTML = '⚙️ More Options';
+                expandBtn.style.background = '#6c757d';
+            }
+        }
+
+        function toggleQuickTaskAdvanced() {
+            const advancedSection = document.getElementById('quickTaskAdvancedFields');
+            const expandBtn = document.getElementById('quickTaskExpandBtn');
+            
+            if (advancedSection.style.display === 'none' || advancedSection.style.display === '') {
+                advancedSection.style.display = 'flex';
+                expandBtn.innerHTML = '⚙️ Hide Options';
+                expandBtn.style.background = '#28a745';
+            } else {
+                advancedSection.style.display = 'none';
+                expandBtn.innerHTML = '⚙️ More Options';
+                expandBtn.style.background = '#6c757d';
+            }
         }
 
         async function saveQuickTask(event) {
@@ -13728,25 +13798,38 @@ Thank you`;
             const isCompleted = document.getElementById('quickTaskCompleted').checked;
             const position = document.querySelector('input[name="taskPosition"]:checked').value;
             
+            // Get advanced fields
+            const dueDate = document.getElementById('quickTaskDueDate').value;
+            const priority = document.getElementById('quickTaskPriority').value;
+            const category = document.getElementById('quickTaskCategory').value.trim();
+            const assignedTo = document.getElementById('quickTaskAssignedTo').value.trim();
+            const tags = document.getElementById('quickTaskTags').value.trim();
+            
             if (!title) {
                 showTrackingToast('❌ Please enter a task title', 'error');
                 return;
             }
             
-            // Calculate due date (default to today + 7 days) in Pacific Time
+            // Calculate due date - use provided date or default to today + 7 days in Pacific Time
             const ptNow = getPacificDate();
-            const dueDate = new Date(ptNow);
-            dueDate.setDate(dueDate.getDate() + 7);
+            let taskDueDate;
+            if (dueDate) {
+                taskDueDate = new Date(dueDate + 'T23:59:59');
+            } else {
+                taskDueDate = new Date(ptNow);
+                taskDueDate.setDate(taskDueDate.getDate() + 7);
+            }
             
             const taskData = {
                 title: title,
                 description: description,
-                priority: 'medium',
+                priority: priority || 'medium',
                 status: isCompleted ? 'completed' : 'pending',
-                category: 'general',
-                dueDate: dueDate.toISOString(),
+                category: category || 'general',
+                dueDate: taskDueDate.toISOString(),
                 createdBy: '<%= user ? user.username : "unknown" %>',
-                assignedTo: '<%= user ? (user.firstName + " " + user.lastName) : "" %>'
+                assignedTo: assignedTo || '<%= user ? (user.firstName + " " + user.lastName) : "" %>',
+                tags: tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : []
             };
             
             // Add completed fields if task is marked as completed (in Pacific Time)
