@@ -1,0 +1,2 @@
+# This file ensures the uploads/musicbox directory is tracked by git
+# Actual media files will be ignored per .gitignore

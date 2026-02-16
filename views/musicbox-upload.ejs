@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Media - MusicBox</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .upload-form {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-group label .required {
+            color: #e53e3e;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group small {
+            display: block;
+            color: #6c757d;
+            margin-top: 5px;
+            font-size: 0.875rem;
+        }
+
+        .file-upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9ff;
+        }
+
+        .file-upload-area:hover {
+            background: #eef1ff;
+            border-color: #764ba2;
+        }
+
+        .file-upload-area.dragover {
+            background: #e0e5ff;
+            border-color: #764ba2;
+        }
+
+        .file-upload-area .icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .file-upload-area .text {
+            color: #2d3748;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .file-upload-area .subtext {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .file-upload-area input[type="file"] {
+            display: none;
+        }
+
+        .file-selected {
+            margin-top: 20px;
+            padding: 15px;
+            background: #d4edda;
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            color: #155724;
+            display: none;
+        }
+
+        .file-selected.show {
+            display: block;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .progress-bar {
+            display: none;
+            margin-top: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar.show {
+            display: block;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📤 Upload Media</h1>
+            <p style="color: #6c757d;">Add new audio or video files to your MusicBox library</p>
+        </div>
+
+        <div class="upload-form">
+            <div id="alertBox" class="alert"></div>
+
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Media File <span class="required">*</span></label>
+                    <div class="file-upload-area" id="dropZone">
+                        <div class="icon">🎵</div>
+                        <div class="text">Drag & drop your media file here</div>
+                        <div class="subtext">or click to browse</div>
+                        <div class="subtext" style="margin-top: 10px; font-size: 0.8rem;">
+                            Supported: MP3, WAV, OGG, AAC, FLAC, MP4, AVI, MOV, WebM (max 500MB)
+                        </div>
+                        <input type="file" id="mediaFile" name="mediaFile" accept="audio/*,video/*" required>
+                    </div>
+                    <div class="file-selected" id="fileSelected"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="songName">Song Name <span class="required">*</span></label>
+                    <input type="text" id="songName" name="songName" required placeholder="Enter song name">
+                </div>
+
+                <div class="form-group">
+                    <label for="artist">Artist <span class="required">*</span></label>
+                    <input type="text" id="artist" name="artist" required placeholder="Enter artist name">
+                </div>
+
+                <div class="form-group">
+                    <label for="composer">Composer</label>
+                    <input type="text" id="composer" name="composer" placeholder="Enter composer name (optional)">
+                </div>
+
+                <div class="form-group">
+                    <label for="genre">Genre</label>
+                    <input type="text" id="genre" name="genre" placeholder="e.g., Rock, Jazz, Classical">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" placeholder="Add any notes or description about this recording"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="recordingDate">Recording Date</label>
+                    <input type="date" id="recordingDate" name="recordingDate">
+                    <small>When was this recorded?</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" name="location" placeholder="Where was this recorded?">
+                </div>
+
+                <div class="form-group">
+                    <label for="tags">Tags</label>
+                    <input type="text" id="tags" name="tags" placeholder="e.g., live, studio, acoustic">
+                    <small>Comma-separated tags for easier searching</small>
+                </div>
+
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-bar-fill" id="progressBarFill">0%</div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        📤 Upload Media
+                    </button>
+                    <a href="/musicbox" class="btn btn-secondary">
+                        ❌ Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('mediaFile');
+        const fileSelected = document.getElementById('fileSelected');
+        const uploadForm = document.getElementById('uploadForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressBarFill = document.getElementById('progressBarFill');
+        const alertBox = document.getElementById('alertBox');
+
+        // Click to browse
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Drag and drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                displaySelectedFile(files[0]);
+            }
+        });
+
+        // File selection
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                displaySelectedFile(e.target.files[0]);
+            }
+        });
+
+        function displaySelectedFile(file) {
+            const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            fileSelected.innerHTML = `
+                <strong>Selected File:</strong> ${file.name} (${fileSizeMB} MB)
+                <br>
+                <strong>Type:</strong> ${file.type}
+            `;
+            fileSelected.classList.add('show');
+        }
+
+        function showAlert(message, type) {
+            alertBox.className = `alert alert-${type} show`;
+            alertBox.textContent = message;
+            
+            // Auto-hide success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    alertBox.classList.remove('show');
+                }, 5000);
+            }
+        }
+
+        // Form submission
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(uploadForm);
+            
+            // Validate file
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showAlert('Please select a file to upload', 'error');
+                return;
+            }
+            
+            // Validate file size (500MB)
+            if (fileInput.files[0].size > 500 * 1024 * 1024) {
+                showAlert('File size must be less than 500MB', 'error');
+                return;
+            }
+            
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '⏳ Uploading...';
+            
+            // Show progress bar
+            progressBar.classList.add('show');
+            
+            try {
+                const xhr = new XMLHttpRequest();
+                
+                // Progress tracking
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percentComplete = Math.round((e.loaded / e.total) * 100);
+                        progressBarFill.style.width = percentComplete + '%';
+                        progressBarFill.textContent = percentComplete + '%';
+                    }
+                });
+                
+                // Upload complete
+                xhr.addEventListener('load', () => {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            showAlert('Media uploaded successfully!', 'success');
+                            setTimeout(() => {
+                                window.location.href = '/musicbox';
+                            }, 2000);
+                        } else {
+                            showAlert('Upload failed: ' + response.error, 'error');
+                            resetForm();
+                        }
+                    } else {
+                        const response = JSON.parse(xhr.responseText);
+                        showAlert('Upload failed: ' + (response.error || 'Unknown error'), 'error');
+                        resetForm();
+                    }
+                });
+                
+                // Error handling
+                xhr.addEventListener('error', () => {
+                    showAlert('Upload failed due to network error', 'error');
+                    resetForm();
+                });
+                
+                // Send request
+                xhr.open('POST', '/musicbox/upload');
+                xhr.send(formData);
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                showAlert('Upload failed: ' + error.message, 'error');
+                resetForm();
+            }
+        });
+        
+        function resetForm() {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '📤 Upload Media';
+            progressBar.classList.remove('show');
+            progressBarFill.style.width = '0%';
+            progressBarFill.textContent = '0%';
+        }
+    </script>
+</body>
+</html>

@@ -33,6 +33,7 @@ const ebmRoutes = require('./routes/ebm');
 const announcementRoutes = require('./routes/announcements');
 const emailClientRoutes = require('./email-client/enhancedEmailRoutes');
 const reportConfigRoutes = require('./routes/reportConfigs'); // NEW: Saved report configurations
+const musicboxRoutes = require('./routes/musicbox'); // NEW: Music and video library
 
 // Import authentication middleware
 const { ensureAuthenticated, ensureApproved, logPageView } = require('./middleware/auth');
@@ -804,6 +805,7 @@ app.use('/enhanced-vendors', ensureAuthenticated, ensureApproved, enhancedVendor
 app.use('/tasks', ensureAuthenticated, ensureApproved, taskRoutes);
 app.use('/receiving', ensureAuthenticated, ensureApproved, receivingRoutes);
 app.use('/email-templates', ensureAuthenticated, ensureApproved, emailTemplateRoutes);
+app.use('/musicbox', ensureAuthenticated, ensureApproved, musicboxRoutes);
 // Debug route without authentication (for Render troubleshooting)
 app.get('/statistics/debug/list-all', async (req, res) => {
     try {
