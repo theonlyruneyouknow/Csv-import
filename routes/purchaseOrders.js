@@ -2694,7 +2694,12 @@ router.post('/pre-purchase-orders', async (req, res) => {
     console.log('Request body:', req.body);
     console.log('Request headers:', req.headers);
 
-    const { vendor, items, status, priority, receiveDate, notes } = req.body;
+    const { 
+      orderNumber, vendor, poLink, date, enteredBy, 
+      productTeamNotes, approval, ynh, notesQuestions, 
+      response, followUp, 
+      items, status, priority, receiveDate, notes 
+    } = req.body;
 
     // Validation
     if (!vendor || !vendor.trim()) {
@@ -2703,7 +2708,17 @@ router.post('/pre-purchase-orders', async (req, res) => {
     }
 
     console.log('✅ Validation passed. Creating pre-purchase order with data:', {
+      orderNumber: orderNumber?.trim() || '',
       vendor: vendor.trim(),
+      poLink: poLink?.trim() || '',
+      date: date?.trim() || '',
+      enteredBy: enteredBy?.trim() || '',
+      productTeamNotes: productTeamNotes?.trim() || '',
+      approval: approval?.trim() || '',
+      ynh: ynh?.trim() || '',
+      notesQuestions: notesQuestions?.trim() || '',
+      response: response?.trim() || '',
+      followUp: followUp?.trim() || '',
       items: items?.trim() || '',
       status: status || 'Planning',
       priority: priority || 'Medium',
@@ -2713,12 +2728,23 @@ router.post('/pre-purchase-orders', async (req, res) => {
 
     // Create the pre-purchase order
     const prePO = await PrePurchaseOrder.create({
+      orderNumber: orderNumber?.trim() || '',
       vendor: vendor.trim(),
+      poLink: poLink?.trim() || '',
+      date: date?.trim() || '',
+      enteredBy: enteredBy?.trim() || '',
+      productTeamNotes: productTeamNotes?.trim() || '',
+      approval: approval?.trim() || '',
+      ynh: ynh?.trim() || '',
+      notesQuestions: notesQuestions?.trim() || '',
+      response: response?.trim() || '',
+      followUp: followUp?.trim() || '',
       items: items?.trim() || '',
       status: status || 'Planning',
       priority: priority || 'Medium',
       receiveDate: receiveDate ? new Date(receiveDate) : null,
-      notes: notes?.trim() || ''
+      notes: notes?.trim() || '',
+      createdBy: req.user?.username || 'System'
     });
 
     console.log(`✅ Successfully created pre-purchase order:`, {
@@ -2741,6 +2767,70 @@ router.post('/pre-purchase-orders', async (req, res) => {
   } catch (error) {
     console.error('❌ Pre-purchase order creation error:', error);
     console.error('Error stack:', error.stack);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Bulk import pre-purchase orders
+router.post('/pre-purchase-orders/bulk-import', async (req, res) => {
+  try {
+    console.log('📊 BULK IMPORT REQUEST RECEIVED');
+    const { items } = req.body;
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, error: 'No items provided for import' });
+    }
+
+    console.log(`📋 Processing ${items.length} items for bulk import...`);
+
+    const results = [];
+    let imported = 0;
+    let failed = 0;
+
+    for (const item of items) {
+      try {
+        if (!item.vendor || !item.vendor.trim()) {
+          console.log('⏭️ Skipping item without vendor');
+          failed++;
+          continue;
+        }
+
+        const prePO = await PrePurchaseOrder.create({
+          orderNumber: item.orderNumber || '',
+          vendor: item.vendor.trim(),
+          poLink: item.poLink || '',
+          date: item.date || '',
+          enteredBy: item.enteredBy || '',
+          productTeamNotes: item.productTeamNotes || '',
+          approval: item.approval || '',
+          ynh: item.ynh || '',
+          notesQuestions: item.notesQuestions || '',
+          response: item.response || '',
+          followUp: item.followUp || '',
+          status: 'Planning',
+          priority: item.ynh === 'H' ? 'High' : item.ynh === 'Y' ? 'Medium' : 'Low',
+          createdBy: req.user?.username || 'System'
+        });
+
+        results.push(prePO);
+        imported++;
+      } catch (err) {
+        console.error('Error importing item:', item.vendor, err.message);
+        failed++;
+      }
+    }
+
+    console.log(`✅ Bulk import complete: ${imported} imported, ${failed} failed`);
+
+    res.json({
+      success: true,
+      imported,
+      failed,
+      total: items.length,
+      message: `Imported ${imported} of ${items.length} pre-purchase orders`
+    });
+  } catch (error) {
+    console.error('❌ Bulk import error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

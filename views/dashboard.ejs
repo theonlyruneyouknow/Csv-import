@@ -1913,6 +1913,8 @@
         .pre-purchase-section {
             display: none;
             /* Hidden by default */
+            margin-top: 80px;
+            /* Space for fixed header */
             margin-bottom: 30px;
             padding: 20px;
             background: #f8f9fa;
@@ -4447,8 +4449,8 @@
                         ⚙️ Options <span class="dropdown-icon">▼</span>
                     </button>
                     <div id="optionsDropdown" class="nav-dropdown-content">
-                        <button class="nav-dropdown-item" onclick="togglePrePurchaseSection()">
-                            📋 Pre-Purchase Orders
+                        <button class="nav-dropdown-item" onclick="togglePendingSupervisorApproval()">
+                            📋 Pending Supervisor
                         </button>
                         <button class="nav-dropdown-item" onclick="openStatusModal()">
                             🏷️ Manage PO Status Options
@@ -4714,7 +4716,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                 <h2>📋 Pre-Purchase Orders<% if (prePurchaseOrders && prePurchaseOrders.length> 0) { %> (<%=
                             prePurchaseOrders.length %>)<% } %>
                 </h2>
-                <button class="add-pre-po-btn" onclick="addPrePurchaseOrder()">➕ Add Pre-PO</button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="add-pre-po-btn" onclick="addPrePurchaseOrder()">➕ Add Pre-PO</button>
+                    <button class="add-pre-po-btn" onclick="openBulkImportModal()" style="background: #007bff;">📊 Bulk Import</button>
+                </div>
             </div>
 
             <% if (prePurchaseOrders && prePurchaseOrders.length> 0) { %>
@@ -4975,6 +4980,13 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                     </div>
 
                     <div class="filter-group filter-actions">
+                        <button class="btn btn-sm btn-outline-warning" onclick="togglePrePurchaseSection()"
+                            id="prePurchaseToggleBtn" title="Show/Hide Pre-Purchase Orders" style="width: 100%;">
+                            📋 Pre-Purchase Orders
+                        </button>
+                    </div>
+
+                    <div class="filter-group filter-actions">
                         <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/purchase-orders/tracking-dashboard'"
                             id="bulkTrackingBtn" title="Manage shipment tracking" style="width: 100%;">
                             🚚 Update Tracking
@@ -5008,17 +5020,10 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                             📍 <span id="locationColumnText">Show Location</span>
                         </button>
                     </div>
-
-                    <!-- Pending Supervisor Approval toggle button -->
-                    <div class="filter-group filter-actions">
-                        <button class="btn btn-sm btn-outline-secondary" onclick="togglePendingSupervisorApproval()"
-                            id="togglePendingSupervisorBtn" title="Show/Hide Pending Supervisor Approval POs" style="width: 100%;">
-                            📋 <span id="pendingSupervisorText">Show Pending Supervisor</span>
-                        </button>
-                        <!-- Hidden checkbox for actual filter state -->
-                        <input type="checkbox" id="showPendingSupervisorApproval" style="display: none;">
-                    </div>
                 </div>
+                
+                <!-- Hidden checkbox for Pending Supervisor filter state -->
+                <input type="checkbox" id="showPendingSupervisorApproval" style="display: none;">
             </div>
             
             <!-- Task Reminder Notifications -->
@@ -12598,6 +12603,147 @@ Thank you`;
             }
         }
 
+        // Bulk Import Functions
+        function openBulkImportModal() {
+            document.getElementById('bulkImportData').value = '';
+            document.getElementById('bulkImportPreview').innerHTML = '';
+            openModal('bulkImportModal');
+        }
+
+        function previewBulkImport() {
+            const data = document.getElementById('bulkImportData').value.trim();
+            const preview = document.getElementById('bulkImportPreview');
+            
+            if (!data) {
+                preview.innerHTML = '<p style="color: #dc3545;">Please paste some data first.</p>';
+                return;
+            }
+
+            // Split by newlines (handle both \r\n and \n)
+            const lines = data.split(/\r?\n/).filter(line => line.trim());
+            const parsed = [];
+
+            lines.forEach((line, index) => {
+                // Split by actual tab character
+                const cols = line.split('\t');
+                if (cols.length >= 11) {
+                    parsed.push({
+                        orderNumber: cols[0]?.trim() || '',
+                        vendor: cols[1]?.trim() || '',
+                        poLink: cols[2]?.trim() || '',
+                        date: cols[3]?.trim() || '',
+                        enteredBy: cols[4]?.trim() || '',
+                        productTeamNotes: cols[5]?.trim() || '',
+                        approval: cols[6]?.trim() || '',
+                        ynh: cols[7]?.trim() || '',
+                        notesQuestions: cols[8]?.trim() || '',
+                        response: cols[9]?.trim() || '',
+                        followUp: cols[10]?.trim() || ''
+                    });
+                }
+            });
+
+            if (parsed.length === 0) {
+                preview.innerHTML = '<p style="color: #dc3545;">No valid data found. Make sure you have all 11 columns.</p>';
+                return;
+            }
+
+            let html = `<p style="color: #28a745;"><strong>✓ Found ${parsed.length} rows to import</strong></p>`;
+            html += '<table style="width: 100%; border-collapse: collapse; font-size: 11px;">';
+            html += '<thead><tr style="background: #f8f9fa;">';
+            html += '<th style="padding: 5px; border: 1px solid #dee2e6;">Order #</th>';
+            html += '<th style="padding: 5px; border: 1px solid #dee2e6;">Vendor</th>';
+            html += '<th style="padding: 5px; border: 1px solid #dee2e6;">Date</th>';
+            html += '<th style="padding: 5px; border: 1px solid #dee2e6;">Entered By</th>';
+            html += '<th style="padding: 5px; border: 1px solid #dee2e6;">Y/N/H</th>';
+            html += '</tr></thead><tbody>';
+
+            parsed.slice(0, 5).forEach(item => {
+                html += '<tr>';
+                html += `<td style="padding: 5px; border: 1px solid #dee2e6;">${item.orderNumber}</td>`;
+                html += `<td style="padding: 5px; border: 1px solid #dee2e6;">${item.vendor}</td>`;
+                html += `<td style="padding: 5px; border: 1px solid #dee2e6;">${item.date}</td>`;
+                html += `<td style="padding: 5px; border: 1px solid #dee2e6;">${item.enteredBy}</td>`;
+                html += `<td style="padding: 5px; border: 1px solid #dee2e6;">${item.ynh}</td>`;
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            if (parsed.length > 5) {
+                html += `<p style="color: #666; font-size: 12px; margin-top: 10px;">...and ${parsed.length - 5} more rows</p>`;
+            }
+            preview.innerHTML = html;
+        }
+
+        async function processBulkImport() {
+            const data = document.getElementById('bulkImportData').value.trim();
+            
+            if (!data) {
+                alert('Please paste data first.');
+                return;
+            }
+
+            // Split by newlines (handle both \r\n and \n)
+            const lines = data.split(/\r?\n/).filter(line => line.trim());
+            const parsed = [];
+
+            lines.forEach(line => {
+                // Split by actual tab character
+                const cols = line.split('\t');
+                if (cols.length >= 11 && cols[1]?.trim()) { // At least vendor is required
+                    parsed.push({
+                        orderNumber: cols[0]?.trim() || '',
+                        vendor: cols[1]?.trim(),
+                        poLink: cols[2]?.trim() || '',
+                        date: cols[3]?.trim() || '',
+                        enteredBy: cols[4]?.trim() || '',
+                        productTeamNotes: cols[5]?.trim() || '',
+                        approval: cols[6]?.trim() || '',
+                        ynh: cols[7]?.trim() || '',
+                        notesQuestions: cols[8]?.trim() || '',
+                        response: cols[9]?.trim() || '',
+                        followUp: cols[10]?.trim() || ''
+                    });
+                }
+            });
+
+            if (parsed.length === 0) {
+                alert('No valid data to import. Please check the format.');
+                return;
+            }
+
+            if (!confirm(`Import ${parsed.length} pre-purchase orders?`)) {
+                return;
+            }
+
+            const btn = document.getElementById('bulkImportBtn');
+            btn.disabled = true;
+            btn.textContent = 'Importing...';
+
+            try {
+                const response = await fetch('/purchase-orders/pre-purchase-orders/bulk-import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ items: parsed })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(`Successfully imported ${result.imported} pre-purchase orders!`);
+                    closeModal('bulkImportModal');
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error importing: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Import Pre-POs';
+            }
+        }
+
         function convertPrePurchaseOrder(id) {
             if (confirm('Are you sure you want to convert this pre-purchase order to an actual purchase order?')) {
                 fetch(`/purchase-orders/pre-purchase-orders/${id}/convert`, {
@@ -12791,12 +12937,44 @@ Thank you`;
     </script>
 
     <!-- Pre-Purchase Order Modals -->
+    <!-- Pre-Purchase Bulk Import Modal -->
+    <div id="bulkImportModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 1000px; max-height: 90vh; overflow-y: auto;">
+            <span class="close" onclick="closeModal('bulkImportModal')">&times;</span>
+            <h3>📊 Bulk Import Pre-Purchase Orders</h3>
+            <p style="color: #666; margin-bottom: 20px;">
+                Copy and paste from Excel/Google Sheets with these columns:<br>
+                <strong style="font-size: 11px;">Order Number | Vendor | Purchase Order Link | Date | Entered By | Product Team Notes | Approval | Y/N/H | Notes/Questions | Response | Follow-Up</strong>
+            </p>
+            
+            <div class="form-group">
+                <label for="bulkImportData">Paste Data Here:</label>
+                <textarea id="bulkImportData" rows="15" placeholder="Paste spreadsheet data here (tab-separated columns)..."
+                    style="width: 100%; font-family: monospace; font-size: 12px; padding: 10px;"></textarea>
+                <small style="color: #666;">Tip: In Excel/Google Sheets, select the rows and press Ctrl+C, then paste here.</small>
+            </div>
+            
+            <div id="bulkImportPreview" style="margin: 20px 0; max-height: 300px; overflow-y: auto;"></div>
+            
+            <div class="form-actions">
+                <button type="button" onclick="closeModal('bulkImportModal')">Cancel</button>
+                <button type="button" class="btn-info" onclick="previewBulkImport()">🔍 Preview</button>
+                <button type="button" class="btn-primary" onclick="processBulkImport()" id="bulkImportBtn">Import Pre-POs</button>
+            </div>
+        </div>
+    </div>
+
     <div id="prePurchaseOrderModal" class="modal" style="display: none;">
-        <div class="modal-content">
+        <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
             <span class="close" onclick="closeModal('prePurchaseOrderModal')">&times;</span>
             <h3 id="prePurchaseOrderModalTitle">Add Pre-Purchase Order</h3>
             <form id="prePurchaseOrderForm">
                 <input type="hidden" id="prePOId" name="id">
+
+                <div class="form-group">
+                    <label for="prePOOrderNumber">Order Number:</label>
+                    <input type="text" id="prePOOrderNumber" name="orderNumber">
+                </div>
 
                 <div class="form-group">
                     <label for="prePOVendor">Vendor: <span style="color: red;">*</span></label>
@@ -12804,38 +12982,53 @@ Thank you`;
                 </div>
 
                 <div class="form-group">
-                    <label for="prePOItems">Items:</label>
-                    <textarea id="prePOItems" name="items" rows="4"
-                        placeholder="Paste item information here (will be used for NetSuite CSV import)"></textarea>
+                    <label for="prePOLink">Purchase Order Link:</label>
+                    <input type="url" id="prePOLink" name="poLink" placeholder="https://...">
                 </div>
 
                 <div class="form-group">
-                    <label for="prePOStatus">Status:</label>
-                    <select id="prePOStatus" name="status">
-                        <option value="Planning" selected>Planning</option>
-                        <% statusOptions.forEach(option=> { %>
-                            <% if (option !=='Planning' ) { %>
-                                <option value="<%= option %>">
-                                    <%= option %>
-                                </option>
-                                <% } %>
-                                    <% }); %>
+                    <label for="prePODate">Date:</label>
+                    <input type="text" id="prePODate" name="date" placeholder="e.g., 2026-02-16">
+                </div>
+
+                <div class="form-group">
+                    <label for="prePOEnteredBy">Entered By:</label>
+                    <input type="text" id="prePOEnteredBy" name="enteredBy">
+                </div>
+
+                <div class="form-group">
+                    <label for="prePOProductTeamNotes">Product Team Notes:</label>
+                    <textarea id="prePOProductTeamNotes" name="productTeamNotes" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="prePOApproval">Approval:</label>
+                    <input type="text" id="prePOApproval" name="approval">
+                </div>
+
+                <div class="form-group">
+                    <label for="prePOYNH">Y/N/H (Yes/No/Hold):</label>
+                    <select id="prePOYNH" name="ynh">
+                        <option value="">-- Select --</option>
+                        <option value="Y">Yes (Y)</option>
+                        <option value="N">No (N)</option>
+                        <option value="H">Hold (H)</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="prePOPriority">Priority:</label>
-                    <select id="prePOPriority" name="priority">
-                        <option value="Low">Low</option>
-                        <option value="Medium" selected>Medium</option>
-                        <option value="High">High</option>
-                        <option value="Urgent">Urgent</option>
-                    </select>
+                    <label for="prePONotesQuestions">Notes/Questions:</label>
+                    <textarea id="prePONotesQuestions" name="notesQuestions" rows="3"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="prePOReceiveDate">Receive Date:</label>
-                    <input type="date" id="prePOReceiveDate" name="receiveDate">
+                    <label for="prePOResponse">Response:</label>
+                    <textarea id="prePOResponse" name="response" rows="2"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="prePOFollowUp">Follow-Up:</label>
+                    <textarea id="prePOFollowUp" name="followUp" rows="2"></textarea>
                 </div>
 
                 <div class="form-actions">

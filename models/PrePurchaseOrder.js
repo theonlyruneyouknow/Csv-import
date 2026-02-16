@@ -2,12 +2,66 @@
 const mongoose = require('mongoose');
 
 const prePurchaseOrderSchema = new mongoose.Schema({
+    // Core fields
+    orderNumber: {
+        type: String,
+        default: '',
+        trim: true
+    },
     vendor: {
         type: String,
         required: true,
         trim: true,
         index: true
     },
+    poLink: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    date: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    enteredBy: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    productTeamNotes: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    approval: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    ynh: {
+        type: String,
+        default: '',
+        trim: true,
+        enum: ['', 'Y', 'N', 'H', 'Yes', 'No', 'Hold']
+    },
+    notesQuestions: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    response: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    followUp: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    
+    // Legacy fields (keeping for backward compatibility)
     items: {
         type: String,
         default: '',
