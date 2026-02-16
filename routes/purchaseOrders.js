@@ -889,6 +889,39 @@ router.get('/debug/pre-pos-page', async (req, res) => {
   }
 });
 
+// Simple JSON route to check pre-purchase orders
+router.get('/debug/pre-pos-json', async (req, res) => {
+  try {
+    const all = await PrePurchaseOrder.find().sort({ createdAt: -1 });
+    const nonConverted = await PrePurchaseOrder.find({ convertedToPO: false }).sort({ createdAt: -1 });
+    
+    console.log(`📊 Total Pre-POs: ${all.length}`);
+    console.log(`📊 Non-converted Pre-POs: ${nonConverted.length}`);
+    
+    res.json({
+      totalCount: all.length,
+      nonConvertedCount: nonConverted.length,
+      all: all.map(p => ({
+        id: p._id,
+        vendor: p.vendor,
+        orderNumber: p.orderNumber,
+        ynh: p.ynh,
+        convertedToPO: p.convertedToPO,
+        createdAt: p.createdAt
+      })),
+      nonConverted: nonConverted.map(p => ({
+        id: p._id,
+        vendor: p.vendor,
+        orderNumber: p.orderNumber,
+        ynh: p.ynh
+      }))
+    });
+  } catch (error) {
+    console.error('Debug JSON error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Test route to create a sample pre-purchase order
 router.post('/debug/create-test-pre-po', async (req, res) => {
   try {
@@ -2690,9 +2723,11 @@ router.get('/api/purchase-orders', async (req, res) => {
 // Create new pre-purchase order
 router.post('/pre-purchase-orders', async (req, res) => {
   try {
-    console.log('🔍 PRE-PO CREATION REQUEST RECEIVED');
-    console.log('Request body:', req.body);
+    console.log('🔍 ========== PRE-PO CREATION REQUEST RECEIVED ==========');
+    console.log('📋 Request body:', JSON.stringify(req.body, null, 2));
     console.log('Request headers:', req.headers);
+    console.log('Request method:', req.method);
+    console.log('Request path:', req.path);
 
     const { 
       orderNumber, vendor, poLink, date, enteredBy, 
@@ -2838,13 +2873,28 @@ router.post('/pre-purchase-orders/bulk-import', async (req, res) => {
 // Update pre-purchase order
 router.put('/pre-purchase-orders/:id', async (req, res) => {
   try {
-    const { vendor, items, status, priority, receiveDate, notes } = req.body;
+    const { 
+      orderNumber, vendor, poLink, date, enteredBy, 
+      productTeamNotes, approval, ynh, notesQuestions, 
+      response, followUp,
+      items, status, priority, receiveDate, notes 
+    } = req.body;
 
     const updateData = {
       updatedAt: new Date()
     };
 
+    if (orderNumber !== undefined) updateData.orderNumber = orderNumber.trim();
     if (vendor !== undefined) updateData.vendor = vendor.trim();
+    if (poLink !== undefined) updateData.poLink = poLink.trim();
+    if (date !== undefined) updateData.date = date.trim();
+    if (enteredBy !== undefined) updateData.enteredBy = enteredBy.trim();
+    if (productTeamNotes !== undefined) updateData.productTeamNotes = productTeamNotes.trim();
+    if (approval !== undefined) updateData.approval = approval.trim();
+    if (ynh !== undefined) updateData.ynh = ynh.trim();
+    if (notesQuestions !== undefined) updateData.notesQuestions = notesQuestions.trim();
+    if (response !== undefined) updateData.response = response.trim();
+    if (followUp !== undefined) updateData.followUp = followUp.trim();
     if (items !== undefined) updateData.items = items.trim();
     if (status !== undefined) updateData.status = status;
     if (priority !== undefined) updateData.priority = priority;

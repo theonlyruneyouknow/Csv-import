@@ -4725,31 +4725,60 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
             <% if (prePurchaseOrders && prePurchaseOrders.length> 0) { %>
                 <div class="pre-purchase-orders">
                     <% prePurchaseOrders.forEach((prePO, index)=> { %>
-                        <div class="pre-po-card priority-<%= prePO.priority.toLowerCase() %>" data-id="<%= prePO._id %>"
-                            data-priority="<%= prePO.priority.toLowerCase() %>"
-                            data-receive-date="<%= prePO.receiveDate || '' %>" data-status="<%= prePO.status %>">
+                        <div class="pre-po-card" data-id="<%= prePO._id %>"
+                            data-order-number="<%= prePO.orderNumber || '' %>"
+                            data-vendor="<%= prePO.vendor %>"
+                            data-po-link="<%= prePO.poLink || '' %>"
+                            data-date="<%= prePO.date || '' %>"
+                            data-entered-by="<%= prePO.enteredBy || '' %>"
+                            data-product-team-notes="<%= prePO.productTeamNotes || '' %>"
+                            data-approval="<%= prePO.approval || '' %>"
+                            data-ynh="<%= prePO.ynh || '' %>"
+                            data-notes-questions="<%= prePO.notesQuestions || '' %>"
+                            data-response="<%= prePO.response || '' %>"
+                            data-follow-up="<%= prePO.followUp || '' %>">
                             <div class="pre-po-header">
-                                <div class="pre-po-title">📦 <strong>
-                                        <%= prePO.vendor %>
-                                    </strong></div>
-                                <div class="pre-po-priority <%= prePO.priority.toLowerCase() %>">
-                                    <%= prePO.priority %>
+                                <div class="pre-po-title">
+                                    <strong><%= prePO.vendor %></strong>
+                                    <% if (prePO.orderNumber) { %>
+                                        <span style="color: #666; font-size: 0.9em; margin-left: 8px;">#<%= prePO.orderNumber %></span>
+                                    <% } %>
                                 </div>
+                                <% if (prePO.ynh) { %>
+                                    <div class="pre-po-ynh" style="padding: 4px 12px; border-radius: 4px; font-weight: bold; 
+                                        background: <%= prePO.ynh === 'Y' ? '#d4edda' : prePO.ynh === 'N' ? '#f8d7da' : '#fff3cd' %>; 
+                                        color: <%= prePO.ynh === 'Y' ? '#155724' : prePO.ynh === 'N' ? '#721c24' : '#856404' %>;">
+                                        <%= prePO.ynh %>
+                                    </div>
+                                <% } %>
                             </div>
                             <div class="pre-po-body">
-                                <% if (prePO.items) { %>
-                                    <div class="pre-po-items">
-                                        <%= prePO.items.substring(0, 100) %>
-                                            <%= prePO.items.length> 100 ? '...' : '' %>
+                                <% if (prePO.date) { %>
+                                    <div style="margin-bottom: 8px;"><strong>📅 Date:</strong> <%= prePO.date %></div>
+                                <% } %>
+                                <% if (prePO.enteredBy) { %>
+                                    <div style="margin-bottom: 8px;"><strong>👤 Entered By:</strong> <%= prePO.enteredBy %></div>
+                                <% } %>
+                                <% if (prePO.productTeamNotes) { %>
+                                    <div style="margin-bottom: 8px;"><strong>📝 Product Team Notes:</strong> <%= prePO.productTeamNotes.substring(0, 100) %><%= prePO.productTeamNotes.length > 100 ? '...' : '' %></div>
+                                <% } %>
+                                <% if (prePO.approval) { %>
+                                    <div style="margin-bottom: 8px;"><strong>✓ Approval:</strong> <%= prePO.approval %></div>
+                                <% } %>
+                                <% if (prePO.notesQuestions) { %>
+                                    <div style="margin-bottom: 8px;"><strong>❓ Notes/Questions:</strong> <%= prePO.notesQuestions.substring(0, 100) %><%= prePO.notesQuestions.length > 100 ? '...' : '' %></div>
+                                <% } %>
+                                <% if (prePO.response) { %>
+                                    <div style="margin-bottom: 8px;"><strong>💬 Response:</strong> <%= prePO.response.substring(0, 100) %><%= prePO.response.length > 100 ? '...' : '' %></div>
+                                <% } %>
+                                <% if (prePO.followUp) { %>
+                                    <div style="margin-bottom: 8px;"><strong>🔔 Follow-Up:</strong> <%= prePO.followUp %></div>
+                                <% } %>
+                                <% if (prePO.poLink) { %>
+                                    <div style="margin-top: 8px;">
+                                        <a href="<%= prePO.poLink %>" target="_blank" style="color: #007bff; text-decoration: none;">🔗 View PO Link</a>
                                     </div>
-                                    <% } %>
-                                        <div class="pre-po-meta">
-                                            <span class="pre-po-status">📋 <%= prePO.status %></span>
-                                            <% if (prePO.receiveDate) { %>
-                                                <span class="pre-po-date">🗓️ <%= new
-                                                        Date(prePO.receiveDate).toLocaleDateString() %></span>
-                                                <% } %>
-                                        </div>
+                                <% } %>
                             </div>
                             <div class="pre-po-actions">
                                 <button class="edit-pre-po-btn" onclick="editPrePurchaseOrder('<%= prePO._id %>')">✏️
@@ -12511,28 +12540,20 @@ Thank you`;
                 return;
             }
 
-            // Get data from the card
-            const titleElement = card.querySelector('.pre-po-title strong');
-            const vendor = titleElement ? titleElement.textContent : '';
-            const itemsElement = card.querySelector('.pre-po-items');
-            const items = itemsElement ? itemsElement.textContent : '';
-            const priority = card.dataset.priority || 'medium';
-            const receiveDate = card.dataset.receiveDate || '';
-            const status = card.dataset.status || 'Planning';
-
+            // Get data from the card's data attributes
             document.getElementById('prePurchaseOrderModalTitle').textContent = 'Edit Pre-Purchase Order';
             document.getElementById('prePOId').value = id;
-            document.getElementById('prePOVendor').value = vendor;
-            document.getElementById('prePOItems').value = items;
-            document.getElementById('prePOStatus').value = status;
-            document.getElementById('prePOPriority').value = priority.charAt(0).toUpperCase() + priority.slice(1);
-
-            if (receiveDate) {
-                const date = new Date(receiveDate);
-                if (!isNaN(date.getTime())) {
-                    document.getElementById('prePOReceiveDate').value = date.toISOString().split('T')[0];
-                }
-            }
+            document.getElementById('prePOOrderNumber').value = card.dataset.orderNumber || '';
+            document.getElementById('prePOVendor').value = card.dataset.vendor || '';
+            document.getElementById('prePOLink').value = card.dataset.poLink || '';
+            document.getElementById('prePODate').value = card.dataset.date || '';
+            document.getElementById('prePOEnteredBy').value = card.dataset.enteredBy || '';
+            document.getElementById('prePOProductTeamNotes').value = card.dataset.productTeamNotes || '';
+            document.getElementById('prePOApproval').value = card.dataset.approval || '';
+            document.getElementById('prePOYNH').value = card.dataset.ynh || '';
+            document.getElementById('prePONotesQuestions').value = card.dataset.notesQuestions || '';
+            document.getElementById('prePOResponse').value = card.dataset.response || '';
+            document.getElementById('prePOFollowUp').value = card.dataset.followUp || '';
 
             openModal('prePurchaseOrderModal');
         }
@@ -12545,55 +12566,60 @@ Thank you`;
             document.getElementById(modalId).style.display = 'none';
         }
 
-        // Handle form submission - with null check
-        const prePurchaseOrderForm = document.getElementById('prePurchaseOrderForm');
-        if (prePurchaseOrderForm) {
-            prePurchaseOrderForm.addEventListener('submit', function (e) {
-                e.preventDefault();
+        // Handle form submission - wrapped in DOMContentLoaded to ensure form exists
+        document.addEventListener('DOMContentLoaded', function() {
+            const prePurchaseOrderForm = document.getElementById('prePurchaseOrderForm');
+            if (prePurchaseOrderForm) {
+                console.log('✅ Pre-purchase order form found, attaching submit handler');
+                prePurchaseOrderForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
 
-                console.log('🔍 Form submitted!');
+                    console.log('🔍 Pre-PO Form submitted!');
 
-                const formData = new FormData(this);
-                const data = {};
-                for (let [key, value] of formData.entries()) {
-                    if (value) data[key] = value;
-                }
+                    const formData = new FormData(this);
+                    const data = {};
+                    for (let [key, value] of formData.entries()) {
+                        if (value) data[key] = value;
+                    }
 
-                console.log('📝 Form data:', data);
+                    console.log('📝 Form data:', data);
 
-                const isEdit = data.id;
-                const url = isEdit ? `/purchase-orders/pre-purchase-orders/${data.id}` : '/purchase-orders/pre-purchase-orders';
-                const method = isEdit ? 'PUT' : 'POST';
+                    const isEdit = data.id;
+                    const url = isEdit ? `/purchase-orders/pre-purchase-orders/${data.id}` : '/purchase-orders/pre-purchase-orders';
+                    const method = isEdit ? 'PUT' : 'POST';
 
-                console.log(`🔗 Making ${method} request to ${url}`);
+                    console.log(`🔗 Making ${method} request to ${url}`);
 
-                fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                    .then(response => {
-                        console.log('📡 Response received:', response.status);
-                        return response.json();
+                    fetch(url, {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
                     })
-                    .then(result => {
-                        console.log('✅ Response data:', result);
-                        if (result.success) {
-                            alert('Pre-purchase order saved successfully!');
-                            closeModal('prePurchaseOrderModal');
-                            location.reload();
-                        } else {
-                            alert('Error saving pre-purchase order: ' + result.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('❌ Error:', error);
-                        alert('Error saving pre-purchase order: ' + error.message);
-                    });
-            });
-        }
+                        .then(response => {
+                            console.log('📡 Response received:', response.status);
+                            return response.json();
+                        })
+                        .then(result => {
+                            console.log('✅ Response data:', result);
+                            if (result.success) {
+                                alert('Pre-purchase order saved successfully!');
+                                closeModal('prePurchaseOrderModal');
+                                location.reload();
+                            } else {
+                                alert('Error saving pre-purchase order: ' + result.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('❌ Error:', error);
+                            alert('Error saving pre-purchase order: ' + error.message);
+                        });
+                });
+            } else {
+                console.error('❌ Pre-purchase order form not found!');
+            }
+        });
 
         // Close modal when clicking outside
         window.onclick = function (event) {
