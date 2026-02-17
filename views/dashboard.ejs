@@ -4753,6 +4753,16 @@ FL2948 : FL2948/OR.M	 	100	MEXICAN SUNFLOWER FIESTA DEL SOL : Min Germ; 70%	FIES
                                 <% } %>
                             </div>
                             <div class="pre-po-body">
+                                <!-- DEBUG: Show what data exists -->
+                                <div style="background: #fff3cd; padding: 8px; margin-bottom: 8px; font-size: 11px; border-radius: 4px;">
+                                    <strong>🔍 DEBUG DATA:</strong><br>
+                                    orderNumber: "<%= prePO.orderNumber %>" (type: <%= typeof prePO.orderNumber %>)<br>
+                                    date: "<%= prePO.date %>" (type: <%= typeof prePO.date %>)<br>
+                                    enteredBy: "<%= prePO.enteredBy %>" (type: <%= typeof prePO.enteredBy %>)<br>
+                                    ynh: "<%= prePO.ynh %>" (type: <%= typeof prePO.ynh %>)<br>
+                                    poLink: "<%= prePO.poLink %>" (type: <%= typeof prePO.poLink %>)<br>
+                                </div>
+                                
                                 <% if (prePO.date) { %>
                                     <div style="margin-bottom: 8px;"><strong>📅 Date:</strong> <%= prePO.date %></div>
                                 <% } %>
@@ -12558,6 +12568,70 @@ Thank you`;
             openModal('prePurchaseOrderModal');
         }
 
+        // NEW: Dedicated save function called by button click
+        function savePrePurchaseOrder() {
+            console.log('🚨🚨🚨 SAVE BUTTON CLICKED! 🚨🚨🚨');
+            
+            const form = document.getElementById('prePurchaseOrderForm');
+            if (!form) {
+                console.error('❌ Form not found!');
+                alert('Error: Form not found');
+                return;
+            }
+
+            // Collect ALL form data
+            const formData = new FormData(form);
+            console.log('🚨 FormData created');
+            const dataForServer = {};
+            
+            // Show EVERYTHING
+            let debugInfo = 'FORM DATA COLLECTED:\n\n';
+            for (let [key, value] of formData.entries()) {
+                debugInfo += `${key}: "${value}"\n`;
+                // Send ALL values, even empty ones
+                dataForServer[key] = value || '';
+            }
+            console.log('🚨 Data collected:', dataForServer);
+            
+            debugInfo += '\n\nDATA BEING SENT TO SERVER:\n';
+            debugInfo += JSON.stringify(dataForServer, null, 2);
+            
+            // Show in alert so user can see
+            alert(debugInfo);
+
+            const isEdit = dataForServer.id;
+            const url = isEdit ? `/purchase-orders/pre-purchase-orders/${dataForServer.id}` : '/purchase-orders/pre-purchase-orders';
+            const method = isEdit ? 'PUT' : 'POST';
+
+            console.log(`🔗 Making ${method} request to ${url}`);
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dataForServer)
+            })
+                .then(response => {
+                    console.log('📡 Response received:', response.status);
+                    return response.json();
+                })
+                .then(result => {
+                    console.log('✅ Response data:', result);
+                    if (result.success) {
+                        alert('Pre-purchase order saved successfully!');
+                        closeModal('prePurchaseOrderModal');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (result.error || result.message));
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error:', error);
+                    alert('Error saving: ' + error.message);
+                });
+        }
+
         function openModal(modalId) {
             document.getElementById(modalId).style.display = 'block';
         }
@@ -12566,60 +12640,96 @@ Thank you`;
             document.getElementById(modalId).style.display = 'none';
         }
 
-        // Handle form submission - wrapped in DOMContentLoaded to ensure form exists
-        document.addEventListener('DOMContentLoaded', function() {
-            const prePurchaseOrderForm = document.getElementById('prePurchaseOrderForm');
-            if (prePurchaseOrderForm) {
-                console.log('✅ Pre-purchase order form found, attaching submit handler');
-                prePurchaseOrderForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
+        // Handle form submission - attach immediately
+        (function() {
+            console.log('🔧 Pre-PO form handler script loading...');
+            
+            function attachFormHandler() {
+                const prePurchaseOrderForm = document.getElementById('prePurchaseOrderForm');
+                if (prePurchaseOrderForm) {
+                    console.log('✅ Pre-purchase order form found, attaching submit handler');
+                    
+                    prePurchaseOrderForm.onsubmit = function (e) {
+                        console.log('🚨🚨🚨 FORM SUBMIT EVENT FIRED! 🚨🚨🚨');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        console.log('🚨 Event prevented');
 
-                    console.log('🔍 Pre-PO Form submitted!');
+                        // Collect ALL form data
+                        const formData = new FormData(this);
+                        console.log('🚨 FormData created');
+                        const allData = {};
+                        const dataForServer = {};
+                        
+                        // Show EVERYTHING
+                        let debugInfo = 'FORM DATA COLLECTED:\n\n';
+                        for (let [key, value] of formData.entries()) {
+                            allData[key] = value;
+                            debugInfo += `${key}: "${value}"\n`;
+                            // Send ALL values, even empty ones
+                            dataForServer[key] = value || '';
+                        }
+                        console.log('🚨 Data collected:', dataForServer);
+                        
+                        debugInfo += '\n\nDATA BEING SENT TO SERVER:\n';
+                        debugInfo += JSON.stringify(dataForServer, null, 2);
+                        
+                        // Show in alert so user can see
+                        alert(debugInfo);
+                        console.log('📋 All form data:', allData);
+                        console.log('📤 Data being sent:', dataForServer);
 
-                    const formData = new FormData(this);
-                    const data = {};
-                    for (let [key, value] of formData.entries()) {
-                        if (value) data[key] = value;
-                    }
+                        const isEdit = dataForServer.id;
+                        const url = isEdit ? `/purchase-orders/pre-purchase-orders/${dataForServer.id}` : '/purchase-orders/pre-purchase-orders';
+                        const method = isEdit ? 'PUT' : 'POST';
 
-                    console.log('📝 Form data:', data);
+                        console.log(`🔗 Making ${method} request to ${url}`);
 
-                    const isEdit = data.id;
-                    const url = isEdit ? `/purchase-orders/pre-purchase-orders/${data.id}` : '/purchase-orders/pre-purchase-orders';
-                    const method = isEdit ? 'PUT' : 'POST';
-
-                    console.log(`🔗 Making ${method} request to ${url}`);
-
-                    fetch(url, {
-                        method: method,
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(data)
-                    })
-                        .then(response => {
-                            console.log('📡 Response received:', response.status);
-                            return response.json();
+                        fetch(url, {
+                            method: method,
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(dataForServer)
                         })
-                        .then(result => {
-                            console.log('✅ Response data:', result);
-                            if (result.success) {
-                                alert('Pre-purchase order saved successfully!');
-                                closeModal('prePurchaseOrderModal');
-                                location.reload();
-                            } else {
-                                alert('Error saving pre-purchase order: ' + result.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('❌ Error:', error);
-                            alert('Error saving pre-purchase order: ' + error.message);
-                        });
-                });
-            } else {
-                console.error('❌ Pre-purchase order form not found!');
+                            .then(response => {
+                                console.log('📡 Response received:', response.status);
+                                return response.json();
+                            })
+                            .then(result => {
+                                console.log('✅ Response data:', result);
+                                if (result.success) {
+                                    alert('Pre-purchase order saved successfully!');
+                                    closeModal('prePurchaseOrderModal');
+                                    location.reload();
+                                } else {
+                                    alert('Error: ' + (result.error || result.message));
+                                }
+                            })
+                            .catch(error => {
+                                console.error('❌ Error:', error);
+                                alert('Error saving: ' + error.message);
+                            });
+                        
+                        return false; // Extra prevention
+                    };
+                    
+                    console.log('✅ Submit handler attached via onsubmit');
+                } else {
+                    console.error('❌ Pre-purchase order form not found!');
+                }
             }
-        });
+            
+            // Try to attach immediately
+            if (document.readyState === 'loading') {
+                console.log('⏳ Document still loading, waiting for DOMContentLoaded...');
+                document.addEventListener('DOMContentLoaded', attachFormHandler);
+            } else {
+                console.log('✅ Document already loaded, attaching handler now');
+                attachFormHandler();
+            }
+        })();
 
         // Close modal when clicking outside
         window.onclick = function (event) {
@@ -13059,7 +13169,7 @@ Thank you`;
 
                 <div class="form-actions">
                     <button type="button" onclick="closeModal('prePurchaseOrderModal')">Cancel</button>
-                    <button type="submit" id="savePrePOBtn">Save</button>
+                    <button type="button" id="savePrePOBtn" onclick="savePrePurchaseOrder()">Save</button>
                 </div>
             </form>
         </div>

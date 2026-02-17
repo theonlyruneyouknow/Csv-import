@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test POST Request</title>
+</head>
+<body>
+    <h1>Test Pre-PO POST Request</h1>
+    <button onclick="testPost()">Send Test POST</button>
+    <div id="result" style="margin-top: 20px; padding: 10px; background: #f0f0f0;"></div>
+
+    <script>
+        async function testPost() {
+            const testData = {
+                orderNumber: 'HTMLTEST123',
+                vendor: 'HTML TEST VENDOR',
+                poLink: 'https://test.com/po',
+                date: '2026-02-16',
+                enteredBy: 'HTML Test',
+                productTeamNotes: 'Test notes from HTML',
+                approval: 'Pending',
+                ynh: 'Y',
+                notesQuestions: 'HTML test question?',
+                response: 'HTML test response',
+                followUp: 'HTML test follow up'
+            };
+
+            console.log('Sending data:', testData);
+
+            try {
+                const response = await fetch('http://localhost:3001/purchase-orders/pre-purchase-orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData),
+                    credentials: 'include' // Include cookies for authentication
+                });
+
+                const result = await response.json();
+                console.log('Response:', result);
+                
+                document.getElementById('result').innerHTML = `
+                    <h3>Response (${response.status}):</h3>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = `
+                    <h3 style="color: red;">Error:</h3>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -2511,6 +2511,18 @@ router.get('/', async (req, res) => {
       console.log('ALL Pre-purchase orders in database:');
       allPrePurchaseOrders.forEach((prePO, index) => {
         console.log(`  ${index + 1}. ID: ${prePO._id}, Vendor: ${prePO.vendor}, ConvertedToPO: ${prePO.convertedToPO}`);
+        console.log(`     📋 Full data:`, {
+          orderNumber: prePO.orderNumber,
+          poLink: prePO.poLink,
+          date: prePO.date,
+          enteredBy: prePO.enteredBy,
+          productTeamNotes: prePO.productTeamNotes,
+          approval: prePO.approval,
+          ynh: prePO.ynh,
+          notesQuestions: prePO.notesQuestions,
+          response: prePO.response,
+          followUp: prePO.followUp
+        });
       });
     } else {
       console.log('❌ No pre-purchase orders found in database at all');
@@ -2720,21 +2732,54 @@ router.get('/api/purchase-orders', async (req, res) => {
 
 // Pre-Purchase Order Management Routes
 
+// Test endpoint to verify requests are reaching the server
+router.post('/pre-purchase-orders/test', async (req, res) => {
+  console.log('🧪 TEST ENDPOINT HIT!');
+  console.log('🧪 Request body:', req.body);
+  res.json({ success: true, message: 'Test endpoint working!', receivedData: req.body });
+});
+
 // Create new pre-purchase order
 router.post('/pre-purchase-orders', async (req, res) => {
   try {
     console.log('🔍 ========== PRE-PO CREATION REQUEST RECEIVED ==========');
     console.log('📋 Request body:', JSON.stringify(req.body, null, 2));
+    console.log('📋 Request body keys:', Object.keys(req.body));
+    console.log('📋 Request body values:', Object.values(req.body));
     console.log('Request headers:', req.headers);
     console.log('Request method:', req.method);
     console.log('Request path:', req.path);
 
-    const { 
-      orderNumber, vendor, poLink, date, enteredBy, 
-      productTeamNotes, approval, ynh, notesQuestions, 
-      response, followUp, 
-      items, status, priority, receiveDate, notes 
-    } = req.body;
+    // Direct access without destructuring
+    const orderNumber = req.body.orderNumber;
+    const vendor = req.body.vendor;
+    const poLink = req.body.poLink;
+    const date = req.body.date;
+    const enteredBy = req.body.enteredBy;
+    const productTeamNotes = req.body.productTeamNotes;
+    const approval = req.body.approval;
+    const ynh = req.body.ynh;
+    const notesQuestions = req.body.notesQuestions;
+    const response = req.body.response;
+    const followUp = req.body.followUp;
+    const items = req.body.items;
+    const status = req.body.status;
+    const priority = req.body.priority;
+    const receiveDate = req.body.receiveDate;
+    const notes = req.body.notes;
+
+    console.log('📋 Individual fields:');
+    console.log('  orderNumber:', orderNumber);
+    console.log('  vendor:', vendor);
+    console.log('  poLink:', poLink);
+    console.log('  date:', date);
+    console.log('  enteredBy:', enteredBy);
+    console.log('  productTeamNotes:', productTeamNotes);
+    console.log('  approval:', approval);
+    console.log('  ynh:', ynh);
+    console.log('  notesQuestions:', notesQuestions);
+    console.log('  response:', response);
+    console.log('  followUp:', followUp);
 
     // Validation
     if (!vendor || !vendor.trim()) {
@@ -2742,45 +2787,30 @@ router.post('/pre-purchase-orders', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Vendor is required' });
     }
 
-    console.log('✅ Validation passed. Creating pre-purchase order with data:', {
-      orderNumber: orderNumber?.trim() || '',
+    const dataToSave = {
+      orderNumber: orderNumber || '',
       vendor: vendor.trim(),
-      poLink: poLink?.trim() || '',
-      date: date?.trim() || '',
-      enteredBy: enteredBy?.trim() || '',
-      productTeamNotes: productTeamNotes?.trim() || '',
-      approval: approval?.trim() || '',
-      ynh: ynh?.trim() || '',
-      notesQuestions: notesQuestions?.trim() || '',
-      response: response?.trim() || '',
-      followUp: followUp?.trim() || '',
-      items: items?.trim() || '',
+      poLink: poLink || '',
+      date: date || '',
+      enteredBy: enteredBy || '',
+      productTeamNotes: productTeamNotes || '',
+      approval: approval || '',
+      ynh: ynh || '',
+      notesQuestions: notesQuestions || '',
+      response: response || '',
+      followUp: followUp || '',
+      items: items || '',
       status: status || 'Planning',
       priority: priority || 'Medium',
       receiveDate: receiveDate ? new Date(receiveDate) : null,
-      notes: notes?.trim() || ''
-    });
+      notes: notes || '',
+      createdBy: req.user?.username || 'System'
+    };
+
+    console.log('✅ Data prepared for saving:', JSON.stringify(dataToSave, null, 2));
 
     // Create the pre-purchase order
-    const prePO = await PrePurchaseOrder.create({
-      orderNumber: orderNumber?.trim() || '',
-      vendor: vendor.trim(),
-      poLink: poLink?.trim() || '',
-      date: date?.trim() || '',
-      enteredBy: enteredBy?.trim() || '',
-      productTeamNotes: productTeamNotes?.trim() || '',
-      approval: approval?.trim() || '',
-      ynh: ynh?.trim() || '',
-      notesQuestions: notesQuestions?.trim() || '',
-      response: response?.trim() || '',
-      followUp: followUp?.trim() || '',
-      items: items?.trim() || '',
-      status: status || 'Planning',
-      priority: priority || 'Medium',
-      receiveDate: receiveDate ? new Date(receiveDate) : null,
-      notes: notes?.trim() || '',
-      createdBy: req.user?.username || 'System'
-    });
+    const prePO = await PrePurchaseOrder.create(dataToSave);
 
     console.log(`✅ Successfully created pre-purchase order:`, {
       id: prePO._id,
