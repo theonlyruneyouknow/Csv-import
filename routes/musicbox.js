@@ -97,10 +97,6 @@ router.get('/upload', (req, res) => {
 // Handle file upload
 router.post('/upload', upload.single('mediaFile'), async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'No file uploaded' });
-        }
-        
         const {
             songName,
             artist,
@@ -109,30 +105,37 @@ router.post('/upload', upload.single('mediaFile'), async (req, res) => {
             recordingDate,
             location,
             genre,
-            tags
+            tags,
+            isLinked,
+            externalUrl,
+            fileType: manualFileType
         } = req.body;
         
         // Validate required fields
         if (!songName || !artist) {
             // Delete uploaded file if validation fails
-            await fs.unlink(req.file.path).catch(console.error);
+            if (req.file) {
+                await fs.unlink(req.file.path).catch(console.error);
+            }
             return res.status(400).json({ error: 'Song name and artist are required' });
         }
         
-        // Determine file type
-        const fileType = req.file.mimetype.startsWith('audio/') ? 'audio' : 'video';
+        // Check if this is a linked file or uploaded file
+        const isExternalLink = isLinked === 'true';
+        
+        if (!isExternalLink && !req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+        
+        if (isExternalLink && (!externalUrl || typeof externalUrl !== 'string' || !externalUrl.trim())) {
+            return res.status(400).json({ error: 'External URL is required for linked files' });
+        }
         
         // Parse tags if provided
         const tagArray = tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
         
-        // Create database entry
-        const musicBoxEntry = new MusicBox({
-            filename: req.file.filename,
-            originalFilename: req.file.originalname,
-            filePath: req.file.path,
-            fileType: fileType,
-            mimeType: req.file.mimetype,
-            fileSize: req.file.size,
+        // Prepare database entry
+        const musicBoxData = {
             songName: songName.trim(),
             artist: artist.trim(),
             composer: composer?.trim() || '',
@@ -142,13 +145,31 @@ router.post('/upload', upload.single('mediaFile'), async (req, res) => {
             genre: genre?.trim() || '',
             tags: tagArray,
             uploadedBy: req.user.username
-        });
+        };
         
+        if (isExternalLink) {
+            // External link - no file upload
+            musicBoxData.isLinked = true;
+            musicBoxData.externalUrl = String(externalUrl).trim();
+            musicBoxData.fileType = manualFileType || 'audio'; // Use manual selection or default to audio
+        } else {
+            // Uploaded file
+            musicBoxData.isLinked = false;
+            musicBoxData.filename = req.file.filename;
+            musicBoxData.originalFilename = req.file.originalname;
+            musicBoxData.filePath = req.file.path;
+            musicBoxData.fileType = req.file.mimetype.startsWith('audio/') ? 'audio' : 'video';
+            musicBoxData.mimeType = req.file.mimetype;
+            musicBoxData.fileSize = req.file.size;
+        }
+        
+        // Create database entry
+        const musicBoxEntry = new MusicBox(musicBoxData);
         await musicBoxEntry.save();
         
         res.json({
             success: true,
-            message: 'Media uploaded successfully',
+            message: isExternalLink ? 'External link saved successfully' : 'Media uploaded successfully',
             mediaId: musicBoxEntry._id
         });
     } catch (error) {
@@ -159,7 +180,7 @@ router.post('/upload', upload.single('mediaFile'), async (req, res) => {
             await fs.unlink(req.file.path).catch(console.error);
         }
         
-        res.status(500).json({ error: error.message || 'Error uploading media' });
+        res.status(500).json({ error: error.message || 'Error saving media' });
     }
 });
 
@@ -192,6 +213,12 @@ router.get('/stream/:id', async (req, res) => {
         mediaItem.playCount += 1;
         await mediaItem.save();
         
+        // If this is an external link, redirect to it
+        if (mediaItem.isLinked && mediaItem.externalUrl) {
+            return res.redirect(mediaItem.externalUrl);
+        }
+        
+        // Otherwise, stream the local file
         const filePath = mediaItem.filePath;
         const stat = await fs.stat(filePath);
         const fileSize = stat.size;

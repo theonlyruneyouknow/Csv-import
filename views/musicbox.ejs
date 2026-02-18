@@ -410,7 +410,7 @@
                             <div class="favorite">⭐</div>
                         <% } %>
                         <div class="media-type">
-                            <%= item.fileType === 'audio' ? '🎧' : '🎬' %>
+                            <%= item.isLinked ? '🔗' : (item.fileType === 'audio' ? '🎧' : '🎬') %>
                         </div>
                         <div class="media-info">
                             <div class="song-name"><%= item.songName %></div>
@@ -419,6 +419,11 @@
                                 <div class="meta-item">✍️ <%= item.composer %></div>
                             <% } %>
                             <div class="meta">
+                                <% if (item.isLinked) { %>
+                                    <div class="meta-item" style="color: #667eea; font-weight: 500;">
+                                        🔗 External Link
+                                    </div>
+                                <% } %>
                                 <div class="meta-item">
                                     📅 <%= new Date(item.uploadedAt).toLocaleDateString() %>
                                 </div>
@@ -436,7 +441,7 @@
                             </div>
                             <div class="actions" onclick="event.stopPropagation()">
                                 <button class="btn btn-primary btn-small" onclick="playMedia('<%= item._id %>')">
-                                    ▶️ Play
+                                    <%= item.isLinked ? '🔗 Open' : '▶️ Play' %>
                                 </button>
                                 <button class="btn btn-secondary btn-small" onclick="toggleFavorite('<%= item._id %>')">
                                     <%= item.isFavorite ? '⭐' : '☆' %>
@@ -500,14 +505,84 @@
                 if (data.success) {
                     const item = data.mediaItem;
                     const mediaTag = item.fileType === 'audio' ? 'audio' : 'video';
+                    const isLinked = item.isLinked || false;
+                    
+                    // Check if URL is embeddable (YouTube, Vimeo, direct media files)
+                    let embedHtml = '';
+                    if (isLinked) {
+                        const url = item.externalUrl;
+                        const urlLower = url.toLowerCase();
+                        
+                        // YouTube embed
+                        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                            let videoId = '';
+                            if (url.includes('youtu.be/')) {
+                                videoId = url.split('youtu.be/')[1].split(/[?&]/)[0];
+                            } else if (url.includes('youtube.com')) {
+                                const urlParams = new URLSearchParams(url.split('?')[1]);
+                                videoId = urlParams.get('v');
+                            }
+                            if (videoId) {
+                                embedHtml = `
+                                    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin-bottom: 20px;">
+                                        <iframe src="https://www.youtube.com/embed/${videoId}" 
+                                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; border-radius: 10px;"
+                                                allowfullscreen></iframe>
+                                    </div>`;
+                            }
+                        }
+                        // Vimeo embed
+                        else if (url.includes('vimeo.com')) {
+                            const vimeoId = url.split('vimeo.com/')[1]?.split(/[?&/]/)[0];
+                            if (vimeoId) {
+                                embedHtml = `
+                                    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin-bottom: 20px;">
+                                        <iframe src="https://player.vimeo.com/video/${vimeoId}" 
+                                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; border-radius: 10px;"
+                                                allowfullscreen></iframe>
+                                    </div>`;
+                            }
+                        }
+                        // Direct media files (mp3, mp4, etc.)
+                        else if (urlLower.match(/\.(mp3|mp4|wav|ogg|webm|m4a)(\?|$)/)) {
+                            const tag = urlLower.match(/\.(mp4|webm)(\?|$)/) ? 'video' : 'audio';
+                            embedHtml = `
+                                <${tag} controls class="media-player" src="${item.externalUrl}" style="margin-bottom: 20px;">
+                                    Your browser does not support the ${tag} tag.
+                                </${tag}>`;
+                        }
+                        // Generic iframe for other URLs
+                        else {
+                            embedHtml = `
+                                <div style="position: relative; height: 400px; margin-bottom: 20px;">
+                                    <iframe src="${item.externalUrl}" 
+                                            style="width: 100%; height: 100%; border: 0; border-radius: 10px;"
+                                            sandbox="allow-scripts allow-same-origin"></iframe>
+                                </div>`;
+                        }
+                    }
                     
                     document.getElementById('modalContent').innerHTML = `
                         <h2>${item.songName}</h2>
                         <p style="color: #667eea; font-size: 1.2rem; margin-bottom: 20px;">${item.artist}</p>
                         
-                        <${mediaTag} controls class="media-player" src="/musicbox/stream/${item._id}">
-                            Your browser does not support the ${item.fileType} tag.
-                        </${mediaTag}>
+                        ${isLinked ? `
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                                    <p style="color: white; margin: 0;">🔗 External Link</p>
+                                    <a href="${item.externalUrl}" target="_blank" rel="noopener noreferrer" 
+                                       class="btn btn-primary" 
+                                       style="background: white; color: #667eea; padding: 8px 16px; font-size: 0.9rem;">
+                                        🌐 Open in New Tab
+                                    </a>
+                                </div>
+                            </div>
+                            ${embedHtml}
+                        ` : `
+                            <${mediaTag} controls class="media-player" src="/musicbox/stream/${item._id}">
+                                Your browser does not support the ${item.fileType} tag.
+                            </${mediaTag}>
+                        `}
                         
                         <div class="detail-grid">
                             <div class="detail-item">
@@ -538,10 +613,15 @@
                                 <label>Recording Date</label>
                                 <div class="value">${new Date(item.recordingDate).toLocaleDateString()}</div>
                             </div>` : ''}
+                            ${isLinked ? `
+                            <div class="detail-item">
+                                <label>External URL</label>
+                                <div class="value"><a href="${item.externalUrl}" target="_blank" rel="noopener noreferrer" style="color: #667eea;">${item.externalUrl}</a></div>
+                            </div>` : `
                             <div class="detail-item">
                                 <label>File Size</label>
                                 <div class="value">${item.formattedFileSize}</div>
-                            </div>
+                            </div>`}
                             <div class="detail-item">
                                 <label>Uploaded By</label>
                                 <div class="value">${item.uploadedBy}</div>

@@ -2,17 +2,25 @@ const mongoose = require('mongoose');
 
 const musicBoxSchema = new mongoose.Schema({
     // File information
+    isLinked: {
+        type: Boolean,
+        default: false
+    },
+    externalUrl: {
+        type: String,
+        default: null
+    },
     filename: {
         type: String,
-        required: true
+        required: function() { return !this.isLinked; }
     },
     originalFilename: {
         type: String,
-        required: true
+        required: function() { return !this.isLinked; }
     },
     filePath: {
         type: String,
-        required: true
+        required: function() { return !this.isLinked; }
     },
     fileType: {
         type: String,
@@ -21,11 +29,11 @@ const musicBoxSchema = new mongoose.Schema({
     },
     mimeType: {
         type: String,
-        required: true
+        required: function() { return !this.isLinked; }
     },
     fileSize: {
         type: Number,
-        required: true
+        required: function() { return !this.isLinked; }
     },
     duration: {
         type: Number, // in seconds

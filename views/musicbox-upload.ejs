@@ -251,7 +251,25 @@
             <div id="alertBox" class="alert"></div>
 
             <form id="uploadForm" enctype="multipart/form-data">
+                <div id="alertBox" class="alert"></div>
+
+                <!-- Upload Method Toggle -->
                 <div class="form-group">
+                    <label>Upload Method</label>
+                    <div style="display: flex; gap: 15px; margin-top: 10px;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="radio" name="uploadMethod" value="upload" checked style="margin-right: 8px; width: auto;">
+                            📤 Upload File
+                        </label>
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="radio" name="uploadMethod" value="link" style="margin-right: 8px; width: auto;">
+                            🔗 Link to External File
+                        </label>
+                    </div>
+                </div>
+
+                <!-- File Upload Section -->
+                <div class="form-group" id="uploadSection">
                     <label>Media File <span class="required">*</span></label>
                     <div class="file-upload-area" id="dropZone">
                         <div class="icon">🎵</div>
@@ -260,9 +278,26 @@
                         <div class="subtext" style="margin-top: 10px; font-size: 0.8rem;">
                             Supported: MP3, WAV, OGG, AAC, FLAC, MP4, AVI, MOV, WebM (max 500MB)
                         </div>
-                        <input type="file" id="mediaFile" name="mediaFile" accept="audio/*,video/*" required>
+                        <input type="file" id="mediaFile" name="mediaFile" accept="audio/*,video/*">
                     </div>
                     <div class="file-selected" id="fileSelected"></div>
+                </div>
+
+                <!-- External Link Section -->
+                <div class="form-group" id="linkSection" style="display: none;">
+                    <label>External File URL <span class="required">*</span></label>
+                    <input type="url" id="externalUrl" name="externalUrl" placeholder="https://example.com/path/to/file.mp3">
+                    <small>Enter the URL of the audio or video file you want to link to</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="fileType">Media Type <span class="required">*</span></label>
+                    <select id="fileType" name="fileType" required>
+                        <option value="">Select media type</option>
+                        <option value="audio">🎵 Audio</option>
+                        <option value="video">🎬 Video</option>
+                    </select>
+                    <small>Select whether this is an audio or video file</small>
                 </div>
 
                 <div class="form-group">
@@ -326,12 +361,36 @@
     <script>
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('mediaFile');
+        const externalUrlInput = document.getElementById('externalUrl');
         const fileSelected = document.getElementById('fileSelected');
         const uploadForm = document.getElementById('uploadForm');
         const submitBtn = document.getElementById('submitBtn');
         const progressBar = document.getElementById('progressBar');
         const progressBarFill = document.getElementById('progressBarFill');
         const alertBox = document.getElementById('alertBox');
+        const uploadSection = document.getElementById('uploadSection');
+        const linkSection = document.getElementById('linkSection');
+        const uploadMethodRadios = document.querySelectorAll('input[name="uploadMethod"]');
+
+        // Toggle between upload and link modes
+        uploadMethodRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const method = e.target.value;
+                if (method === 'upload') {
+                    uploadSection.style.display = 'block';
+                    linkSection.style.display = 'none';
+                    fileInput.required = true;
+                    externalUrlInput.required = false;
+                    submitBtn.innerHTML = '📤 Upload Media';
+                } else {
+                    uploadSection.style.display = 'none';
+                    linkSection.style.display = 'block';
+                    fileInput.required = false;
+                    externalUrlInput.required = true;
+                    submitBtn.innerHTML = '🔗 Link Media';
+                }
+            });
+        });
 
         // Click to browse
         dropZone.addEventListener('click', () => {
@@ -392,26 +451,80 @@
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const formData = new FormData(uploadForm);
+            const uploadMethod = document.querySelector('input[name="uploadMethod"]:checked').value;
             
-            // Validate file
-            if (!fileInput.files || fileInput.files.length === 0) {
-                showAlert('Please select a file to upload', 'error');
-                return;
-            }
-            
-            // Validate file size (500MB)
-            if (fileInput.files[0].size > 500 * 1024 * 1024) {
-                showAlert('File size must be less than 500MB', 'error');
-                return;
+            // Validation based on upload method
+            if (uploadMethod === 'upload') {
+                // Validate file
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    showAlert('Please select a file to upload', 'error');
+                    return;
+                }
+                
+                // Validate file size (500MB)
+                if (fileInput.files[0].size > 500 * 1024 * 1024) {
+                    showAlert('File size must be less than 500MB', 'error');
+                    return;
+                }
+            } else {
+                // Validate external URL
+                if (!externalUrlInput.value.trim()) {
+                    showAlert('Please enter an external URL', 'error');
+                    return;
+                }
+                
+                // Basic URL validation
+                try {
+                    new URL(externalUrlInput.value.trim());
+                } catch (err) {
+                    showAlert('Please enter a valid URL', 'error');
+                    return;
+                }
             }
             
             // Disable submit button
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '⏳ Uploading...';
+            submitBtn.innerHTML = '⏳ ' + (uploadMethod === 'upload' ? 'Uploading...' : 'Saving...');
             
             // Show progress bar
             progressBar.classList.add('show');
+            
+            if (uploadMethod === 'link') {
+                // Handle external link submission with fetch
+                const formData = new FormData(uploadForm);
+                
+                // Explicitly set the link-specific fields
+                formData.set('isLinked', 'true');
+                formData.set('externalUrl', externalUrlInput.value.trim());
+                
+                // Remove file input from FormData for link mode
+                formData.delete('mediaFile');
+                
+                try {
+                    const response = await fetch('/musicbox/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        showAlert('External link saved successfully!', 'success');
+                        setTimeout(() => {
+                            window.location.href = '/musicbox';
+                        }, 2000);
+                    } else {
+                        showAlert('Failed to save link: ' + (result.error || 'Unknown error'), 'error');
+                        resetForm();
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showAlert('Failed to save link: ' + error.message, 'error');
+                    resetForm();
+                }
+            } else {
+                // Handle file upload with XMLHttpRequest for progress tracking
+                const formData = new FormData(uploadForm);
             
             try {
                 const xhr = new XMLHttpRequest();
@@ -459,6 +572,7 @@
                 console.error('Upload error:', error);
                 showAlert('Upload failed: ' + error.message, 'error');
                 resetForm();
+            }
             }
         });
         
