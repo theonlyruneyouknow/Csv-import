@@ -111,6 +111,8 @@ const ensureApproved = (req, res, next) => {
     
     if (!req.isAuthenticated()) {
         console.log('❌ Not authenticated, redirecting to login');
+        // Store the original URL for redirect after login
+        req.session.returnTo = req.originalUrl;
         return res.redirect('/auth/login');
     }
 
