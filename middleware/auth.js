@@ -111,9 +111,18 @@ const ensureApproved = (req, res, next) => {
     
     if (!req.isAuthenticated()) {
         console.log('❌ Not authenticated, redirecting to login');
-        // Store the original URL for redirect after login
-        req.session.returnTo = req.originalUrl;
-        console.log('📍 Stored returnTo in session:', req.session.returnTo);
+        
+        // Only store returnTo for actual page requests, not API/AJAX calls
+        const isApiRequest = req.originalUrl.includes('/api/') || 
+                            req.xhr || 
+                            req.headers.accept?.includes('application/json');
+        
+        if (!isApiRequest) {
+            req.session.returnTo = req.originalUrl;
+            console.log('📍 Stored returnTo in session:', req.session.returnTo);
+        } else {
+            console.log('⚠️ Skipping returnTo for API request:', req.originalUrl);
+        }
         
         // Save session before redirect to ensure it persists
         req.session.save((err) => {
