@@ -113,7 +113,17 @@ const ensureApproved = (req, res, next) => {
         console.log('❌ Not authenticated, redirecting to login');
         // Store the original URL for redirect after login
         req.session.returnTo = req.originalUrl;
-        return res.redirect('/auth/login');
+        console.log('📍 Stored returnTo in session:', req.session.returnTo);
+        
+        // Save session before redirect to ensure it persists
+        req.session.save((err) => {
+            if (err) {
+                console.error('❌ Error saving session:', err);
+            }
+            console.log('✅ Session saved, redirecting to /auth/login');
+            return res.redirect('/auth/login');
+        });
+        return;
     }
 
     console.log('🔐 User:', req.user?.username);

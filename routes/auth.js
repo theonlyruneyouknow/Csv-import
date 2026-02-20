@@ -12,6 +12,8 @@ console.log('🔄 Auth routes file loaded');
 // Login page
 router.get('/login', ensureNotAuthenticated, (req, res) => {
     console.log('📨 GET /auth/login accessed');
+    console.log('📍 returnTo in session:', req.session.returnTo);
+    
     res.render('auth/login', { 
         message: req.flash('error'),
         messages: {
@@ -25,6 +27,9 @@ router.get('/login', ensureNotAuthenticated, (req, res) => {
 
 // Login POST
 router.post('/login', ensureNotAuthenticated, (req, res, next) => {
+    console.log('📨 POST /auth/login - Login attempt');
+    console.log('📍 returnTo in session before login:', req.session.returnTo);
+    
     passport.authenticate('local', (err, user, info) => {
         if (err) {
             return next(err);
@@ -41,6 +46,7 @@ router.post('/login', ensureNotAuthenticated, (req, res, next) => {
             }
             
             const returnTo = req.session.returnTo || '/';
+            console.log('✅ Login successful, redirecting to:', returnTo);
             delete req.session.returnTo;
             return res.redirect(returnTo);
         });
