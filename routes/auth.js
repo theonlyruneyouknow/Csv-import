@@ -40,12 +40,15 @@ router.post('/login', ensureNotAuthenticated, (req, res, next) => {
             return res.redirect('/auth/login');
         }
         
+        // CRITICAL: Save returnTo BEFORE req.logIn() because logIn regenerates session
+        const returnTo = req.session.returnTo || '/';
+        console.log('💾 Saved returnTo before logIn:', returnTo);
+        
         req.logIn(user, (err) => {
             if (err) {
                 return next(err);
             }
             
-            const returnTo = req.session.returnTo || '/';
             console.log('✅ Login successful, redirecting to:', returnTo);
             delete req.session.returnTo;
             return res.redirect(returnTo);
