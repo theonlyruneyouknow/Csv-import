@@ -6,8 +6,17 @@ const ensureAuthenticated = (req, res, next) => {
         return next();
     }
     
-    // Store the original URL for redirect after login
-    req.session.returnTo = req.originalUrl;
+    // Only store returnTo for actual page requests, not API/AJAX calls
+    const isApiRequest = req.originalUrl.includes('/api/') || 
+                        req.xhr || 
+                        req.headers.accept?.indexOf('json') > -1;
+    
+    if (!isApiRequest) {
+        req.session.returnTo = req.originalUrl;
+        console.log('📍 [ensureAuthenticated] Stored returnTo:', req.session.returnTo);
+    } else {
+        console.log('⚠️ [ensureAuthenticated] Skipping returnTo for API request:', req.originalUrl);
+    }
     
     if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
         return res.status(401).json({ error: 'Authentication required' });
