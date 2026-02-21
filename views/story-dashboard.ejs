@@ -328,6 +328,13 @@
             font-weight: bold;
             font-size: 14px;
             position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
         }
 
         .user-status-indicator {
@@ -339,6 +346,110 @@
             background: #28a745;
             border: 2px solid white;
             border-radius: 50%;
+        }
+
+        .user-dropdown {
+            position: relative;
+        }
+
+        .user-dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            min-width: 280px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            z-index: 1001;
+            border: 1px solid #dee2e6;
+            margin-top: 10px;
+        }
+
+        .user-dropdown-content.show {
+            display: block;
+        }
+
+        .user-dropdown-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            background: white;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar-large {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .user-dropdown-item {
+            padding: 14px 20px;
+            color: #495057;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+            font-size: 15px;
+            border: none;
+            background: white;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .user-dropdown-item:hover {
+            background: #f8f9fa;
+        }
+
+        .user-dropdown-item:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+
+        .user-dropdown-item.logout {
+            color: #dc3545;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .user-dropdown-item.logout:hover {
+            background: #fff5f5;
+        }
+
+        .dropdown-icon {
+            font-size: 18px;
+            width: 20px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e9ecef;
+            margin: 0;
+        }
+
+        .user-role {
+            color: #6c757d;
+            font-size: 0.875rem;
+            display: block;
+        }
+
+        .user-status {
+            color: #28a745;
+            font-size: 0.875rem;
+            display: block;
         }
     </style>
 </head>
@@ -374,37 +485,61 @@
                     </div>
                 </div>
 
-                <!-- User Info -->
+                <!-- User Info with Dropdown -->
                 <% if (typeof user !=='undefined' && user) { %>
-                    <div class="user-info"
-                        title="<%= user.firstName %> <%= user.lastName %> (<%= user.role %>) - Online">
-                        <div class="user-avatar">
-                            <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %>
+                    <div class="user-profile-section">
+                        <div class="user-dropdown">
+                            <div class="user-avatar" onclick="toggleUserDropdown()">
+                                <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %>
                                 <%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
-                                    <div class="user-status-indicator" title="Online"></div>
-                        </div>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <form action="/auth/logout" method="POST" style="margin: 0;">
-                                        <button type="submit" class="dropdown-item"
-                                            style="border: none; background: none; width: 100%; text-align: left;">
-                                            <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
+                            </div>
+                            <div id="userDropdown" class="user-dropdown-content">
+                                <div class="user-dropdown-header">
+                                    <div class="user-avatar-large">
+                                        <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : '' %>
+                                        <%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                                    </div>
+                                    <div class="user-info">
+                                        <strong><%= user.firstName %> <%= user.lastName %></strong>
+                                        <small class="user-role"><%= user.role %></small>
+                                        <small class="user-status">● Online</small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Other Modules -->
+                                <div class="user-dropdown-header" style="padding: 8px 15px; font-size: 12px; color: #6c757d;">
+                                    Other Modules
+                                </div>
+                                <a href="/purchase-orders" class="user-dropdown-item">
+                                    <span class="dropdown-icon">📦</span> Purchase Orders
+                                </a>
+                                <a href="/medicine/dashboard" class="user-dropdown-item">
+                                    <span class="dropdown-icon">💊</span> Medicine
+                                </a>
+                                <a href="/bulletin" class="user-dropdown-item">
+                                    <span class="dropdown-icon">📌</span> Bulletin
+                                </a>
+                                <a href="/musicbox" class="user-dropdown-item">
+                                    <span class="dropdown-icon">🎵</span> MusicBox
+                                </a>
+                                <a href="/grocery/dashboard" class="user-dropdown-item">
+                                    <span class="dropdown-icon">🛒</span> Grocery
+                                </a>
+                                
+                                <div class="dropdown-divider"></div>
+                                <form action="/auth/logout" method="POST" style="margin: 0;">
+                                    <button type="submit" class="user-dropdown-item logout" style="border: none; background: none; width: 100%; text-align: left;">
+                                        <span class="dropdown-icon">🚪</span> Logout
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                    <% } else { %>
-                        <div class="user-info">
-                            <a href="/auth/login" class="btn btn-primary btn-sm">Login</a>
-                        </div>
-                        <% } %>
+                <% } else { %>
+                    <div class="user-info">
+                        <a href="/auth/login" class="btn btn-primary btn-sm">Login</a>
+                    </div>
+                <% } %>
             </div>
         </div>
     </div>
@@ -732,7 +867,20 @@
                     content.classList.remove('show');
                 });
             }
+            // Close user dropdown when clicking outside
+            if (!event.target.closest('.user-dropdown')) {
+                const dropdown = document.getElementById('userDropdown');
+                if (dropdown) {
+                    dropdown.classList.remove('show');
+                }
+            }
         });
+
+        // Toggle user dropdown
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
     </script>
 </body>
 
