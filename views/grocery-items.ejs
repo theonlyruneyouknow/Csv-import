@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-box me-2"></i><%= title %></h2>
+            <div>
+                <a href="/grocery/dashboard" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+                <a href="/grocery/items/new" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add Item
+                </a>
+            </div>
+        </div>
+
+        <% if (items && items.length > 0) { %>
+            <div class="row">
+                <% items.forEach(item => { %>
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title"><%= item.name %></h6>
+                                <% if (item.brand) { %>
+                                    <p class="text-muted small mb-2"><%= item.brand %></p>
+                                <% } %>
+                                <span class="badge bg-secondary"><%= item.category.icon %> <%= item.category.name %></span>
+                                <div class="mt-2">
+                                    <a href="/grocery/items/<%= item._id %>" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-chart-line me-1"></i>View Prices
+                                    </a>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteItem('<%= item._id %>', '<%= item.name %>')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div class="alert alert-info">
+                No items added yet. <a href="/grocery/items/new">Add your first item</a>
+            </div>
+        <% } %>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function deleteItem(id, name) {
+            if (!confirm(`Delete ${name}?`)) return;
+            
+            try {
+                const res = await fetch(`/grocery/items/${id}`, { method: 'DELETE' });
+                if (res.ok) location.reload();
+                else alert('Error deleting item');
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+    </script>
+</body>
+</html>

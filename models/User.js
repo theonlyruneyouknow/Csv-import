@@ -63,6 +63,7 @@ const userSchema = new mongoose.Schema({
         accessOrganicVendors: { type: Boolean, default: false },
         accessBulletinManagement: { type: Boolean, default: false },
         accessEBMAlumni: { type: Boolean, default: false },
+        accessGroceryPrices: { type: Boolean, default: false },
         // Tool access permissions
         accessLineItemsManager: { type: Boolean, default: false },
         accessTrackingDashboard: { type: Boolean, default: false },
