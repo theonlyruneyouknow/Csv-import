@@ -270,13 +270,44 @@
 
         .user-info {
             display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .user-info strong {
+            font-size: 18px;
+            color: #212529;
+            font-weight: 600;
+            display: block;
+        }
+
+        .user-info .user-role {
+            color: #6c757d;
+            font-size: 14px;
+            display: block;
+        }
+
+        .user-info .user-status {
+            color: #28a745;
+            font-size: 13px;
+            display: block;
+            font-weight: 500;
+        }
+
+        .user-profile-section {
+            display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
+        }
+
+        .user-dropdown {
+            position: relative;
+            display: inline-block;
         }
 
         .user-avatar {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             background: #28a745;
             color: white;
@@ -284,8 +315,102 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 14px;
-            position: relative;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #dee2e6;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .user-dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 280px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            z-index: 1001;
+            border: 1px solid #dee2e6;
+            margin-top: 10px;
+        }
+
+        .user-dropdown-content.show {
+            display: block;
+        }
+
+        .user-dropdown-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            background: white;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar-large {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #28a745;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .user-dropdown-item {
+            padding: 14px 20px;
+            color: #495057;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+            font-size: 15px;
+            border: none;
+            background: white;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .user-dropdown-item:hover {
+            background: #f8f9fa;
+        }
+
+        .user-dropdown-item:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+
+        .user-dropdown-item.logout {
+            color: #dc3545;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .user-dropdown-item.logout:hover {
+            background: #fff5f5;
+        }
+
+        .dropdown-icon {
+            font-size: 18px;
+            width: 20px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e9ecef;
+            margin: 0;
         }
 
         .user-status-indicator {
@@ -308,61 +433,89 @@
             <h1 style="margin: 0; font-size: 1.5rem;">💊 Medicine Management</h1>
 
             <div class="d-flex align-items-center justify-content-between flex-grow-1">
-                <!-- Navigation Container -->
+                <!-- Medicine Module Navigation -->
                 <div class="navigation-container">
-                    <!-- Story Button -->
-                    <div class="nav-section">
-                        <a href="/story/dashboard" class="nav-accordion-btn" style="text-decoration: none;">
-                            📖 Story
-                        </a>
-                    </div>
-
-                    <!-- Medicine Button -->
+                    <!-- All Medicine -->
                     <div class="nav-section">
                         <a href="/medicine/dashboard" class="nav-accordion-btn active" style="text-decoration: none;">
-                            💊 Medicine
+                            💊 All Medicine
                         </a>
                     </div>
 
-                    <!-- Bulletin Button -->
+                    <!-- Add Medicine -->
                     <div class="nav-section">
-                        <a href="/bulletin" class="nav-accordion-btn" style="text-decoration: none;">
-                            📌 Bulletin
+                        <a href="/medicine/new" class="nav-accordion-btn" style="text-decoration: none;">
+                            ➕ Add Medicine
+                        </a>
+                    </div>
+
+                    <!-- Family Members -->
+                    <div class="nav-section">
+                        <a href="/medicine/family" class="nav-accordion-btn" style="text-decoration: none;">
+                            👨‍👩‍👧‍👦 Family Members
+                        </a>
+                    </div>
+
+                    <!-- Pharmacies -->
+                    <div class="nav-section">
+                        <a href="/medicine/pharmacies" class="nav-accordion-btn" style="text-decoration: none;">
+                            🏥 Pharmacies
                         </a>
                     </div>
                 </div>
 
-                <!-- User Info -->
+                <!-- User Info with Dropdown -->
                 <% if (typeof user !=='undefined' && user) { %>
-                    <div class="user-info"
-                        title="<%= user.firstName %> <%= user.lastName %> (<%= user.role %>) - Online">
-                        <div class="user-avatar">
-                            <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %>
+                    <div class="user-profile-section">
+                        <div class="user-dropdown">
+                            <div class="user-avatar" onclick="toggleUserDropdown()">
+                                <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %>
                                 <%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
-                                    <div class="user-status-indicator" title="Online"></div>
-                        </div>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <form action="/auth/logout" method="POST" style="margin: 0;">
-                                        <button type="submit" class="dropdown-item"
-                                            style="border: none; background: none; width: 100%; text-align: left;">
-                                            <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
+                            </div>
+                            <div id="userDropdown" class="user-dropdown-content">
+                                <div class="user-dropdown-header">
+                                    <div class="user-avatar-large">
+                                        <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : '' %>
+                                        <%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                                    </div>
+                                    <div class="user-info">
+                                        <strong><%= user.firstName %> <%= user.lastName %></strong>
+                                        <small class="user-role"><%= user.role %></small>
+                                        <small class="user-status">● Online</small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Other Modules -->
+                                <div class="user-dropdown-header" style="padding: 8px 15px; font-size: 12px; color: #6c757d;">
+                                    Other Modules
+                                </div>
+                                <a href="/purchase-orders" class="user-dropdown-item">
+                                    <span class="dropdown-icon">📦</span> Purchase Orders
+                                </a>
+                                <a href="/story/dashboard" class="user-dropdown-item">
+                                    <span class="dropdown-icon">📖</span> Story
+                                </a>
+                                <a href="/bulletin" class="user-dropdown-item">
+                                    <span class="dropdown-icon">📌</span> Bulletin
+                                </a>
+                                <a href="/musicbox" class="user-dropdown-item">
+                                    <span class="dropdown-icon">🎵</span> MusicBox
+                                </a>
+                                
+                                <div class="dropdown-divider"></div>
+                                <form action="/auth/logout" method="POST" style="margin: 0;">
+                                    <button type="submit" class="user-dropdown-item logout" style="border: none; background: none; width: 100%; text-align: left;">
+                                        <span class="dropdown-icon">🚪</span> Logout
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                    <% } else { %>
-                        <div class="user-info">
-                            <a href="/auth/login" class="btn btn-primary btn-sm">Login</a>
-                        </div>
-                        <% } %>
+                <% } else { %>
+                    <div class="user-info">
+                        <a href="/auth/login" class="btn btn-primary btn-sm">Login</a>
+                    </div>
+                <% } %>
             </div>
         </div>
     </div>
@@ -696,6 +849,22 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // User dropdown toggle
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            const dropdown = document.getElementById('userDropdown');
+            const userAvatar = event.target.closest('.user-avatar');
+            
+            if (!userAvatar && dropdown && !dropdown.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
         // Navigation functionality
         function toggleAccordion(accordionId) {
             const accordionContent = document.getElementById(accordionId);
@@ -711,15 +880,6 @@
             // Toggle the current accordion
             accordionContent.classList.toggle('show');
         }
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', function (event) {
-            if (!event.target.closest('.nav-section')) {
-                document.querySelectorAll('.nav-accordion-content').forEach(content => {
-                    content.classList.remove('show');
-                });
-            }
-        });
 
         // Medicine management functions
         function addNewMedicine() {
