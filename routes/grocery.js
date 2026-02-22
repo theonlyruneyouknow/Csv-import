@@ -294,6 +294,32 @@ router.get('/items/new', ensureGroceryAccess, async (req, res) => {
     }
 });
 
+router.get('/items/:id/edit', ensureGroceryAccess, async (req, res) => {
+    try {
+        const item = await GroceryItem.findOne({ _id: req.params.id, user: req.user._id })
+            .populate('category');
+        
+        if (!item) {
+            return res.status(404).render('error', { message: 'Item not found' });
+        }
+
+        const categories = await FoodCategory.find({ 
+            $or: [{ user: req.user._id }, { user: null }], 
+            isActive: true 
+        }).sort({ order: 1, name: 1 });
+
+        res.render('grocery-item-form', {
+            user: req.user,
+            item,
+            categories,
+            title: 'Edit Grocery Item'
+        });
+    } catch (error) {
+        console.error('Error loading item for edit:', error);
+        res.status(500).render('error', { message: 'Error loading item' });
+    }
+});
+
 router.post('/items', ensureGroceryAccess, async (req, res) => {
     try {
         const itemData = {
@@ -390,10 +416,21 @@ router.delete('/items/:id', ensureGroceryAccess, async (req, res) => {
 router.put('/items/:id', ensureGroceryAccess, async (req, res) => {
     try {
         const updateData = {
+            name: req.body.name,
+            brand: req.body.brand,
+            category: req.body.category,
+            group: req.body.group,
             brandType: req.body.brandType,
             sku: req.body.sku,
             barcode: req.body.barcode,
             upc: req.body.upc,
+            image: req.body.image || req.body.imageData,
+            size: {
+                value: req.body.sizeValue,
+                unit: req.body.sizeUnit
+            },
+            priority: req.body.priority,
+            purchaseFrequency: req.body.purchaseFrequency,
             storeSKUs: req.body.storeSKUs || [],
             updatedAt: new Date()
         };
@@ -401,7 +438,7 @@ router.put('/items/:id', ensureGroceryAccess, async (req, res) => {
         const item = await GroceryItem.findOneAndUpdate(
             { _id: req.params.id, user: req.user._id },
             updateData,
-            { new: true }
+            { new: true, runValidators: true }
         );
         
         if (!item) {

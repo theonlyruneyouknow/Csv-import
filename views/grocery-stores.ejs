@@ -42,9 +42,14 @@
                                         <%= store.location.city %><% if (store.location.state) { %>, <%= store.location.state %><% } %>
                                     </p>
                                 <% } %>
-                                <button class="btn btn-sm btn-danger" onclick="deleteStore('<%= store._id %>', '<%= store.name %>')">
-                                    <i class="fas fa-trash me-1"></i>Delete
-                                </button>
+                                <div class="mt-2">
+                                    <a href="/grocery/stores/<%= store._id %>/edit" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </a>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteStore('<%= store._id %>', '<%= store.name %>')">
+                                        <i class="fas fa-trash me-1"></i>Delete
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

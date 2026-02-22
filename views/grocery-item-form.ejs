@@ -21,12 +21,12 @@
                 <form id="itemForm" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label class="form-label">Item Name *</label>
-                        <input type="text" class="form-control" name="name" required>
+                        <input type="text" class="form-control" name="name" value="<%= item ? item.name : '' %>" required>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Brand</label>
-                        <input type="text" class="form-control" name="brand">
+                        <input type="text" class="form-control" name="brand" value="<%= item ? item.brand || '' : '' %>">
                     </div>
 
                     <div class="mb-3">
@@ -35,7 +35,7 @@
                             <select class="form-select" name="category" id="categorySelect" required>
                                 <option value="">Select a category...</option>
                                 <% categories.forEach(cat => { %>
-                                    <option value="<%= cat._id %>"><%= cat.icon %> <%= cat.name %></option>
+                                    <option value="<%= cat._id %>" <%= item && item.category && item.category._id.toString() === cat._id.toString() ? 'selected' : '' %>><%= cat.icon %> <%= cat.name %></option>
                                 <% }); %>
                             </select>
                             <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
@@ -46,7 +46,7 @@
 
                     <div class="mb-3">
                         <label class="form-label">Group</label>
-                        <input type="text" class="form-control" name="group" placeholder="e.g., Breakfast, Snacks, Dinner" list="groupSuggestions">
+                        <input type="text" class="form-control" name="group" value="<%= item ? item.group || '' : '' %>" placeholder="e.g., Breakfast, Snacks, Dinner" list="groupSuggestions">
                         <datalist id="groupSuggestions">
                             <option value="Breakfast">
                             <option value="Lunch">
@@ -63,18 +63,18 @@
                     <div class="mb-3">
                         <label class="form-label">Brand Type</label>
                         <select class="form-select" name="brandType">
-                            <option value="name-brand" selected>Name Brand</option>
-                            <option value="store-brand">Store Brand</option>
-                            <option value="generic">Generic</option>
-                            <option value="premium">Premium</option>
-                            <option value="organic">Organic</option>
+                            <option value="name-brand" <%= item && item.brandType === 'name-brand' ? 'selected' : !item ? 'selected' : '' %>>Name Brand</option>
+                            <option value="store-brand" <%= item && item.brandType === 'store-brand' ? 'selected' : '' %>>Store Brand</option>
+                            <option value="generic" <%= item && item.brandType === 'generic' ? 'selected' : '' %>>Generic</option>
+                            <option value="premium" <%= item && item.brandType === 'premium' ? 'selected' : '' %>>Premium</option>
+                            <option value="organic" <%= item && item.brandType === 'organic' ? 'selected' : '' %>>Organic</option>
                         </select>
                         <small class="form-text text-muted">Used for brand comparison and analysis</small>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">SKU</label>
-                        <input type="text" class="form-control" name="sku" placeholder="Product SKU">
+                        <input type="text" class="form-control" name="sku" value="<%= item ? item.sku || '' : '' %>" placeholder="Product SKU">
                     </div>
 
                     <div class="mb-3">
@@ -85,30 +85,30 @@
 
                     <div class="mb-3">
                         <label class="form-label">Image URL</label>
-                        <input type="url" class="form-control" name="image" id="imageUrl" placeholder="https://example.com/image.jpg">
-                        <div id="imagePreview" class="mt-2" style="display: none;">
-                            <img id="previewImg" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
+                        <input type="url" class="form-control" name="image" id="imageUrl" value="<%= item ? item.image || '' : '' %>" placeholder="https://example.com/image.jpg">
+                        <div id="imagePreview" class="mt-2" style="<%= item && item.image ? 'display: block;' : 'display: none;' %>">
+                            <img id="previewImg" src="<%= item && item.image ? item.image : '' %>" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Size Value</label>
-                            <input type="number" step="0.01" class="form-control" name="sizeValue">
+                            <input type="number" step="0.01" class="form-control" name="sizeValue" value="<%= item && item.size && item.size.value ? item.size.value : '' %>">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Size Unit</label>
                             <select class="form-select" name="sizeUnit">
                                 <option value="">Select unit...</option>
-                                <option value="oz">oz</option>
-                                <option value="lb">lb</option>
-                                <option value="g">g</option>
-                                <option value="kg">kg</option>
-                                <option value="ml">ml</option>
-                                <option value="l">l</option>
-                                <option value="gal">gal</option>
-                                <option value="count">count</option>
-                                <option value="each">each</option>
+                                <option value="oz" <%= item && item.size && item.size.unit === 'oz' ? 'selected' : '' %>>oz</option>
+                                <option value="lb" <%= item && item.size && item.size.unit === 'lb' ? 'selected' : '' %>>lb</option>
+                                <option value="g" <%= item && item.size && item.size.unit === 'g' ? 'selected' : '' %>>g</option>
+                                <option value="kg" <%= item && item.size && item.size.unit === 'kg' ? 'selected' : '' %>>kg</option>
+                                <option value="ml" <%= item && item.size && item.size.unit === 'ml' ? 'selected' : '' %>>ml</option>
+                                <option value="l" <%= item && item.size && item.size.unit === 'l' ? 'selected' : '' %>>l</option>
+                                <option value="gal" <%= item && item.size && item.size.unit === 'gal' ? 'selected' : '' %>>gal</option>
+                                <option value="count" <%= item && item.size && item.size.unit === 'count' ? 'selected' : '' %>>count</option>
+                                <option value="each" <%= item && item.size && item.size.unit === 'each' ? 'selected' : '' %>>each</option>
                             </select>
                         </div>
                     </div>
@@ -116,20 +116,20 @@
                     <div class="mb-3">
                         <label class="form-label">Priority</label>
                         <select class="form-select" name="priority">
-                            <option value="low">Low</option>
-                            <option value="medium" selected>Medium</option>
-                            <option value="high">High</option>
+                            <option value="low" <%= item && item.priority === 'low' ? 'selected' : '' %>>Low</option>
+                            <option value="medium" <%= item && item.priority === 'medium' ? 'selected' : !item ? 'selected' : '' %>>Medium</option>
+                            <option value="high" <%= item && item.priority === 'high' ? 'selected' : '' %>>High</option>
                         </select>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Purchase Frequency</label>
                         <select class="form-select" name="purchaseFrequency">
-                            <option value="weekly">Weekly</option>
-                            <option value="biweekly">Bi-weekly</option>
-                            <option value="monthly">Monthly</option>
-                            <option value="occasional" selected>Occasional</option>
-                            <option value="rare">Rare</option>
+                            <option value="weekly" <%= item && item.purchaseFrequency === 'weekly' ? 'selected' : '' %>>Weekly</option>
+                            <option value="biweekly" <%= item && item.purchaseFrequency === 'biweekly' ? 'selected' : '' %>>Bi-weekly</option>
+                            <option value="monthly" <%= item && item.purchaseFrequency === 'monthly' ? 'selected' : '' %>>Monthly</option>
+                            <option value="occasional" <%= item && item.purchaseFrequency === 'occasional' ? 'selected' : !item ? 'selected' : '' %>>Occasional</option>
+                            <option value="rare" <%= item && item.purchaseFrequency === 'rare' ? 'selected' : '' %>>Rare</option>
                         </select>
                     </div>
 
@@ -260,11 +260,19 @@
             const data = Object.fromEntries(formData);
 
             try {
+                <% if (item) { %>
+                const res = await fetch('/grocery/items/<%= item._id %>', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                <% } else { %>
                 const res = await fetch('/grocery/items', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
+                <% } %>
 
                 if (res.ok) {
                     window.location.href = '/grocery/items';
