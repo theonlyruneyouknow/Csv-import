@@ -8,6 +8,12 @@ const { ensureAuthenticated } = require('../middleware/auth');
 
 // Middleware to check if user has access to grocery module
 const ensureGroceryAccess = (req, res, next) => {
+    // Allow admin and manager roles automatic access
+    if (req.user.role === 'admin' || req.user.role === 'manager') {
+        return next();
+    }
+    
+    // Otherwise check permission
     if (!req.user.permissions.accessGroceryPrices) {
         return res.status(403).render('error', { 
             message: 'Access denied. You do not have permission to access Grocery Price Comparison.' 
