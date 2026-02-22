@@ -4555,12 +4555,18 @@
                                             <%= user.firstName %>
                                                 <%= user.lastName %>
                                         </strong>
-                                        <small class="user-role">Admin</small>
+                                        <small class="user-role"><%= user.role %></small>
                                         <small class="user-status">● Online</small>
                                     </div>
                                 </div>
+                                
+                                <!-- Admin Tools (only for admins) -->
+                                <% if (user.role === 'admin') { %>
+                                <div class="user-dropdown-header" style="padding: 8px 15px; font-size: 12px; color: #6c757d;">
+                                    Admin Tools
+                                </div>
                                 <a href="/auth/admin/users" class="user-dropdown-item">
-                                    <span class="dropdown-icon">�</span> User Management
+                                    <span class="dropdown-icon">👥</span> User Management
                                 </a>
                                 <a href="/auth/admin/audit-logs" class="user-dropdown-item">
                                     <span class="dropdown-icon">🔄</span> Audit Logs
@@ -4568,10 +4574,12 @@
                                 <a href="/auth/admin/test-email" class="user-dropdown-item">
                                     <span class="dropdown-icon">✉️</span> Test Email
                                 </a>
-                                <% if (user.email && (user.email.toLowerCase() === 'theonlyruneyouknow@gmail.com' || user.email.toLowerCase() === 'rlarsen@territorialseed.com')) { %>
                                 <div class="dropdown-divider"></div>
+                                <% } %>
+                                
+                                <!-- Other Modules -->
                                 <div class="user-dropdown-header" style="padding: 8px 15px; font-size: 12px; color: #6c757d;">
-                                    <span class="dropdown-icon">ᚱ</span> Rune Modules
+                                    Other Modules
                                 </div>
                                 <a href="/story/dashboard" class="user-dropdown-item">
                                     <span class="dropdown-icon">📖</span> Story
@@ -4582,7 +4590,14 @@
                                 <a href="/bulletin" class="user-dropdown-item">
                                     <span class="dropdown-icon">📌</span> Bulletin
                                 </a>
-                                <% } %>
+                                <a href="/musicbox" class="user-dropdown-item">
+                                    <span class="dropdown-icon">🎵</span> MusicBox
+                                </a>
+                                <a href="/grocery/dashboard" class="user-dropdown-item">
+                                    <span class="dropdown-icon">🛒</span> Grocery
+                                </a>
+                                
+                                <div class="dropdown-divider"></div>
                                 <form action="/auth/logout" method="POST" style="margin: 0;">
                                     <button type="submit" class="user-dropdown-item logout">
                                         <span class="dropdown-icon">🚪</span> Logout
