@@ -25,56 +25,44 @@ const ensureGroceryAccess = (req, res, next) => {
 // ===== DASHBOARD =====
 router.get('/dashboard', ensureGroceryAccess, async (req, res) => {
     try {
-        const [stores, items, recentPrices, categories, stats] = await Promise.all([
-            // User's stores
+        const [stores, items, categories, allPrices] = await Promise.all([
             Store.find({ user: req.user._id, isActive: true })
-                .sort({ isFavorite: -1, name: 1 })
-                .limit(10),
+                .sort({ isFavorite: -1, name: 1 }),
             
-            // User's high priority items
-            GroceryItem.find({ user: req.user._id, priority: 'high', isActive: true })
+            GroceryItem.find({ user: req.user._id, isActive: true })
                 .populate('category')
-                .sort({ name: 1 })
-                .limit(10),
+                .sort({ name: 1 }),
             
-            // Recent price updates
+            FoodCategory.find({ 
+                $or: [{ user: req.user._id }, { user: null }], 
+                isActive: true 
+            }).sort({ order: 1, name: 1 }),
+            
+            // Get most recent price for each item-store combination
             FoodPrice.find({ user: req.user._id })
                 .populate('item')
                 .populate('store')
                 .sort({ priceDate: -1 })
-                .limit(10),
-            
-            // Categories count
-            FoodCategory.find({ $or: [{ user: req.user._id }, { user: null }], isActive: true })
-                .sort({ order: 1, name: 1 }),
-            
-            // Statistics
-            Promise.all([
-                Store.countDocuments({ user: req.user._id, isActive: true }),
-                GroceryItem.countDocuments({ user: req.user._id, isActive: true }),
-                FoodPrice.countDocuments({ user: req.user._id }),
-                FoodPrice.find({ user: req.user._id, isOnSale: true })
-                    .populate('item')
-                    .populate('store')
-                    .sort({ priceDate: -1 })
-                    .limit(5)
-            ])
         ]);
 
-        const [storeCount, itemCount, priceCount, activeSales] = stats;
+        // Group prices by item-store to get latest price for each combination
+        const priceMap = new Map();
+        allPrices.forEach(price => {
+            if (price.item && price.store) {
+                const key = `${price.item._id}-${price.store._id}`;
+                if (!priceMap.has(key)) {
+                    priceMap.set(key, price);
+                }
+            }
+        });
+        const prices = Array.from(priceMap.values());
 
-        res.render('grocery-dashboard', {
+        res.render('grocery-dashboard-new', {
             user: req.user,
             stores,
             items,
-            recentPrices,
             categories,
-            activeSales,
-            stats: {
-                storeCount,
-                itemCount,
-                priceCount
-            },
+            prices,
             title: 'Grocery Price Comparison'
         });
     } catch (error) {
@@ -317,6 +305,86 @@ router.get('/items/:id/edit', ensureGroceryAccess, async (req, res) => {
     } catch (error) {
         console.error('Error loading item for edit:', error);
         res.status(500).render('error', { message: 'Error loading item' });
+    }
+});
+
+// Create store brand variant
+router.post('/items/:id/create-store-brand', ensureGroceryAccess, async (req, res) => {
+    try {
+        const originalItem = await GroceryItem.findOne({ _id: req.params.id, user: req.user._id });
+        
+        if (!originalItem) {
+            return res.status(404).json({ error: 'Original item not found' });
+        }
+
+        // Create store brand version
+        const storeBrandData = {
+            name: req.body.name,
+            brand: req.body.brand || 'Store Brand',
+            category: originalItem.category,
+            group: originalItem.group,
+            brandType: 'store-brand',
+            size: originalItem.size,
+            priority: originalItem.priority,
+            purchaseFrequency: originalItem.purchaseFrequency,
+            equivalentItems: [originalItem._id],
+            user: req.user._id
+        };
+
+        const storeBrandItem = new GroceryItem(storeBrandData);
+        await storeBrandItem.save();
+
+        // Link back to original item
+        if (!originalItem.equivalentItems) {
+            originalItem.equivalentItems = [];
+        }
+        originalItem.equivalentItems.push(storeBrandItem._id);
+        await originalItem.save();
+
+        res.json({ success: true, item: storeBrandItem });
+    } catch (error) {
+        console.error('Error creating store brand:', error);
+        res.status(500).json({ error: 'Error creating store brand' });
+    }
+});
+
+// Create store brand variant of an item
+router.post('/items/:id/create-store-brand', ensureGroceryAccess, async (req, res) => {
+    try {
+        const originalItem = await GroceryItem.findOne({ _id: req.params.id, user: req.user._id });
+        
+        if (!originalItem) {
+            return res.status(404).json({ error: 'Original item not found' });
+        }
+
+        // Create store brand version
+        const storeBrandData = {
+            name: req.body.name,
+            brand: req.body.brand || 'Store Brand',
+            category: originalItem.category,
+            group: originalItem.group,
+            brandType: 'store-brand',
+            size: originalItem.size,
+            priority: originalItem.priority,
+            purchaseFrequency: originalItem.purchaseFrequency,
+            equivalentItems: [originalItem._id],
+            user: req.user._id
+        };
+
+        const storeBrandItem = new GroceryItem(storeBrandData);
+        await storeBrandItem.save();
+
+        // Link back to original item
+        if (!originalItem.equivalentItems) {
+            originalItem.equivalentItems = [];
+        }
+        originalItem.equivalentItems.push(storeBrandItem._id);
+        await originalItem.save();
+
+        res.json({ success: true, item: storeBrandItem });
+    } catch (error) {
+        console.error('Error creating store brand:', error);
+        res.status(500).json({ error: 'Error creating store brand' });
     }
 });
 

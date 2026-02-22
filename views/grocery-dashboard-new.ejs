@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: white;
+            border-bottom: 2px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h2 {
+            margin: 0;
+            color: #ff6b6b;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .price-grid-container {
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .price-grid {
+            display: table;
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .grid-header {
+            display: table-header-group;
+            position: sticky;
+            top: 72px;
+            z-index: 100;
+            background: white;
+        }
+
+        .grid-row {
+            display: table-row;
+        }
+
+        .grid-row:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .grid-row:hover {
+            background-color: #e9ecef;
+        }
+
+        .grid-cell {
+            display: table-cell;
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+
+        .grid-header .grid-cell {
+            background: #ff6b6b;
+            color: white;
+            font-weight: 600;
+            padding: 15px 12px;
+            border-bottom: 2px solid #ee5a6f;
+            position: sticky;
+            top: 72px;
+        }
+
+        .item-column {
+            position: sticky;
+            left: 0;
+            background: white;
+            z-index: 50;
+            min-width: 250px;
+            max-width: 250px;
+            border-right: 2px solid #dee2e6;
+            font-weight: 500;
+        }
+
+        .grid-header .item-column {
+            z-index: 101;
+        }
+
+        .grid-row:nth-child(even) .item-column {
+            background-color: #f8f9fa;
+        }
+
+        .grid-row:hover .item-column {
+            background-color: #e9ecef;
+        }
+
+        .store-column {
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .price-cell {
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .price-cell:hover {
+            background-color: #fff3cd !important;
+        }
+
+        .price-display {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #28a745;
+        }
+
+        .price-empty {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .price-sale {
+            color: #dc3545;
+        }
+
+        .item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #212529;
+        }
+
+        .item-brand {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .item-details {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+
+        .brand-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+
+        .badge-name-brand { background: #007bff; color: white; }
+        .badge-store-brand { background: #28a745; color: white; }
+        .badge-generic { background: #6c757d; color: white; }
+        .badge-premium { background: #ffc107; color: #333; }
+        .badge-organic { background: #20c997; color: white; }
+
+        .action-buttons {
+            display: none;
+            position: absolute;
+            top: 50%;
+            right: 5px;
+            transform: translateY(-50%);
+            gap: 5px;
+        }
+
+        .price-cell:hover .action-buttons {
+            display: flex;
+        }
+
+        .btn-icon {
+            padding: 2px 6px;
+            font-size: 0.75rem;
+        }
+
+        .add-store-brand-btn {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            margin-top: 3px;
+        }
+
+        /* User Dropdown */
+        .user-dropdown {
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ff6b6b;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+        }
+
+        .user-dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            min-width: 280px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            z-index: 1001;
+            border: 1px solid #dee2e6;
+            margin-top: 10px;
+        }
+
+        .user-dropdown-content.show {
+            display: block;
+        }
+
+        .user-dropdown-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            background: white;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar-large {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #ff6b6b;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .user-dropdown-item {
+            padding: 14px 20px;
+            color: #495057;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+            font-size: 15px;
+            border: none;
+            background: white;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .user-dropdown-item:hover {
+            background: #f8f9fa;
+        }
+
+        .user-dropdown-item.logout {
+            color: #dc3545;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .dropdown-icon {
+            font-size: 18px;
+            width: 20px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e9ecef;
+            margin: 0;
+        }
+
+        .user-role {
+            color: #6c757d;
+            font-size: 0.875rem;
+            display: block;
+        }
+
+        .user-status {
+            color: #28a745;
+            font-size: 0.875rem;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h2><i class="fas fa-shopping-cart me-2"></i>Grocery Price Manager</h2>
+        <div class="header-actions">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                <i class="fas fa-plus me-1"></i>Add Item
+            </button>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addStoreModal">
+                <i class="fas fa-store me-1"></i>Add Store
+            </button>
+            <a href="/grocery/comparison" class="btn btn-info">
+                <i class="fas fa-chart-bar me-1"></i>Analytics
+            </a>
+            
+            <!-- User Dropdown -->
+            <% if (typeof user !== 'undefined' && user) { %>
+                <div class="user-dropdown">
+                    <div class="user-avatar" onclick="toggleUserDropdown()">
+                        <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %>
+                        <%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                    </div>
+                    <div id="userDropdown" class="user-dropdown-content">
+                        <div class="user-dropdown-header">
+                            <div class="user-avatar-large">
+                                <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : '' %>
+                                <%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                            </div>
+                            <div class="user-info">
+                                <strong><%= user.firstName %> <%= user.lastName %></strong>
+                                <small class="user-role"><%= user.role %></small>
+                                <small class="user-status">● Online</small>
+                            </div>
+                        </div>
+                        
+                        <% if (user.role === 'admin' || user.role === 'manager') { %>
+                        <div class="user-dropdown-header" style="padding: 8px 15px; font-size: 12px; color: #6c757d;">
+                            Admin Tools
+                        </div>
+                        <a href="/auth/admin/users" class="user-dropdown-item">
+                            <span class="dropdown-icon">👥</span> User Management
+                        </a>
+                        <a href="/auth/admin/audit-logs" class="user-dropdown-item">
+                            <span class="dropdown-icon">🔄</span> Audit Logs
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <% } %>
+                        
+                        <div class="user-dropdown-header" style="padding: 8px 15px; font-size: 12px; color: #6c757d;">
+                            Other Modules
+                        </div>
+                        <a href="/purchase-orders" class="user-dropdown-item">
+                            <span class="dropdown-icon">📦</span> Purchase Orders
+                        </a>
+                        <a href="/story/dashboard" class="user-dropdown-item">
+                            <span class="dropdown-icon">📖</span> Story
+                        </a>
+                        <a href="/medicine/dashboard" class="user-dropdown-item">
+                            <span class="dropdown-icon">💊</span> Medicine
+                        </a>
+                        <a href="/bulletin" class="user-dropdown-item">
+                            <span class="dropdown-icon">📌</span> Bulletin
+                        </a>
+                        <a href="/musicbox" class="user-dropdown-item">
+                            <span class="dropdown-icon">🎵</span> MusicBox
+                        </a>
+                        
+                        <div class="dropdown-divider"></div>
+                        <form action="/auth/logout" method="POST" style="margin: 0;">
+                            <button type="submit" class="user-dropdown-item logout">
+                                <span class="dropdown-icon">🚪</span> Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Price Grid -->
+    <div class="price-grid-container">
+        <div class="price-grid">
+            <!-- Header Row -->
+            <div class="grid-header">
+                <div class="grid-row">
+                    <div class="grid-cell item-column">
+                        <strong>Item</strong>
+                    </div>
+                    <% if (stores && stores.length > 0) { %>
+                        <% stores.forEach(store => { %>
+                            <div class="grid-cell store-column">
+                                <strong><%= store.name %></strong>
+                                <% if (store.chain) { %>
+                                    <div style="font-size: 0.75rem; font-weight: normal; color: rgba(255,255,255,0.8);"><%= store.chain %></div>
+                                <% } %>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="grid-cell store-column">
+                            <em>No stores added</em>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Item Rows -->
+            <% if (items && items.length > 0) { %>
+                <% items.forEach(item => { %>
+                    <div class="grid-row">
+                        <div class="grid-cell item-column">
+                            <div class="item-info">
+                                <div class="item-name">
+                                    <%= item.name %>
+                                    <% if (item.brandType) { %>
+                                        <span class="brand-badge badge-<%= item.brandType %>"><%= item.brandType %></span>
+                                    <% } %>
+                                </div>
+                                <% if (item.brand) { %>
+                                    <div class="item-brand"><%= item.brand %></div>
+                                <% } %>
+                                <% if (item.size && item.size.value) { %>
+                                    <div class="item-details"><%= item.size.value %> <%= item.size.unit %></div>
+                                <% } %>
+                                <% if (item.brandType !== 'store-brand') { %>
+                                    <button class="btn btn-sm btn-outline-success add-store-brand-btn" onclick="addStoreBrand('<%= item._id %>', '<%= item.name %>')">
+                                        <i class="fas fa-plus"></i> Add Store Brand
+                                    </button>
+                                <% } %>
+                            </div>
+                        </div>
+                        
+                        <% if (stores && stores.length > 0) { %>
+                            <% stores.forEach(store => { %>
+                                <%
+                                    const itemPrice = prices.find(p => 
+                                        p.item && p.store && 
+                                        p.item._id.toString() === item._id.toString() && 
+                                        p.store._id.toString() === store._id.toString()
+                                    );
+                                %>
+                                <div class="grid-cell store-column price-cell" onclick="editPrice('<%= item._id %>', '<%= store._id %>', '<%= item.name %>', '<%= store.name %>', <%= itemPrice ? itemPrice.price : 'null' %>, <%= itemPrice ? itemPrice.isOnSale : false %>, '<%= itemPrice ? itemPrice._id : '' %>')">
+                                    <% if (itemPrice) { %>
+                                        <div class="price-display <%= itemPrice.isOnSale ? 'price-sale' : '' %>">
+                                            $<%= itemPrice.price.toFixed(2) %>
+                                            <% if (itemPrice.isOnSale) { %>
+                                                <i class="fas fa-tag" title="On Sale"></i>
+                                            <% } %>
+                                        </div>
+                                        <% if (itemPrice.priceDate) { %>
+                                            <div style="font-size: 0.7rem; color: #6c757d;">
+                                                <%= new Date(itemPrice.priceDate).toLocaleDateString() %>
+                                            </div>
+                                        <% } %>
+                                    <% } else { %>
+                                        <div class="price-empty">
+                                            <i class="fas fa-plus-circle"></i> Add
+                                        </div>
+                                    <% } %>
+                                </div>
+                            <% }); %>
+                        <% } %>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="grid-row">
+                    <div class="grid-cell" colspan="100">
+                        <div class="alert alert-info m-3">
+                            No items added yet. Click "Add Item" to get started.
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Price Edit Modal -->
+    <div class="modal fade" id="priceModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="priceModalTitle">Edit Price</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="priceForm">
+                        <input type="hidden" id="priceItemId">
+                        <input type="hidden" id="priceStoreId">
+                        <input type="hidden" id="priceId">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Item</label>
+                            <input type="text" class="form-control" id="priceItemName" readonly>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Store</label>
+                            <input type="text" class="form-control" id="priceStoreName" readonly>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Price *</label>
+                            <input type="number" step="0.01" class="form-control" id="priceValue" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="priceIsOnSale">
+                                <label class="form-check-label" for="priceIsOnSale">
+                                    On Sale
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="saleFields" style="display: none;">
+                            <div class="mb-3">
+                                <label class="form-label">Regular Price</label>
+                                <input type="number" step="0.01" class="form-control" id="priceRegularPrice">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Date</label>
+                            <input type="date" class="form-control" id="priceDate">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="deletePriceBtn" style="display: none;" onclick="deletePrice()">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="savePrice()">Save Price</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div class="modal fade" id="addItemModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Quick Add Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="quickItemForm">
+                        <div class="mb-3">
+                            <label class="form-label">Item Name *</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Brand</label>
+                            <input type="text" class="form-control" name="brand">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Brand Type</label>
+                            <select class="form-select" name="brandType">
+                                <option value="name-brand" selected>Name Brand</option>
+                                <option value="store-brand">Store Brand</option>
+                                <option value="generic">Generic</option>
+                            </select>
+                        </div>
+                        <p class="text-muted small">
+                            <i class="fas fa-info-circle"></i> You can add more details by editing the item later.
+                        </p>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="quickAddItem()">Add Item</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Store Modal -->
+    <div class="modal fade" id="addStoreModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Quick Add Store</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="quickStoreForm">
+                        <div class="mb-3">
+                            <label class="form-label">Store Name *</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Chain</label>
+                            <input type="text" class="form-control" name="chain" placeholder="e.g., Walmart, Kroger">
+                        </div>
+                        <p class="text-muted small">
+                            <i class="fas fa-info-circle"></i> You can add more details by editing the store later.
+                        </p>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="quickAddStore()">Add Store</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // User dropdown toggle
+        function toggleUserDropdown() {
+            document.getElementById('userDropdown').classList.toggle('show');
+        }
+
+        window.addEventListener('click', function(e) {
+            if (!e.target.matches('.user-avatar')) {
+                const dropdown = document.getElementById('userDropdown');
+                if (dropdown && dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+
+        // Price modal functions
+        function editPrice(itemId, storeId, itemName, storeName, currentPrice, isOnSale, priceId) {
+            document.getElementById('priceItemId').value = itemId;
+            document.getElementById('priceStoreId').value = storeId;
+            document.getElementById('priceItemName').value = itemName;
+            document.getElementById('priceStoreName').value = storeName;
+            document.getElementById('priceId').value = priceId || '';
+            document.getElementById('priceValue').value = currentPrice || '';
+            document.getElementById('priceIsOnSale').checked = isOnSale;
+            document.getElementById('priceDate').valueAsDate = new Date();
+            
+            document.getElementById('saleFields').style.display = isOnSale ? 'block' : 'none';
+            document.getElementById('deletePriceBtn').style.display = priceId ? 'block' : 'none';
+            document.getElementById('priceModalTitle').textContent = currentPrice ? 'Edit Price' : 'Add Price';
+            
+            new bootstrap.Modal(document.getElementById('priceModal')).show();
+        }
+
+        document.getElementById('priceIsOnSale').addEventListener('change', function() {
+            document.getElementById('saleFields').style.display = this.checked ? 'block' : 'none';
+        });
+
+        async function savePrice() {
+            const itemId = document.getElementById('priceItemId').value;
+            const storeId = document.getElementById('priceStoreId').value;
+            const priceId = document.getElementById('priceId').value;
+            const price = parseFloat(document.getElementById('priceValue').value);
+            const isOnSale = document.getElementById('priceIsOnSale').checked;
+            const regularPrice = document.getElementById('priceRegularPrice').value;
+            const priceDate = document.getElementById('priceDate').value;
+
+            if (!price) {
+                alert('Please enter a price');
+                return;
+            }
+
+            const data = {
+                item: itemId,
+                store: storeId,
+                price,
+                isOnSale,
+                regularPrice: regularPrice || null,
+                priceDate: priceDate || new Date().toISOString().split('T')[0]
+            };
+
+            try {
+                const url = priceId ? `/grocery/prices/${priceId}` : '/grocery/prices';
+                const method = priceId ? 'PUT' : 'POST';
+                
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    location.reload();
+                } else {
+                    alert('Error saving price');
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        async function deletePrice() {
+            const priceId = document.getElementById('priceId').value;
+            if (!priceId) return;
+
+            if (!confirm('Delete this price?')) return;
+
+            try {
+                const res = await fetch(`/grocery/prices/${priceId}`, { method: 'DELETE' });
+                if (res.ok) {
+                    location.reload();
+                } else {
+                    alert('Error deleting price');
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        // Quick add item
+        async function quickAddItem() {
+            const form = document.getElementById('quickItemForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            // Need a default category - use first available or create one
+            const categories = <%= JSON.stringify(categories) %>;
+            if (categories.length === 0) {
+                alert('Please create at least one category first');
+                return;
+            }
+            data.category = categories[0]._id;
+
+            try {
+                const res = await fetch('/grocery/items', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    location.reload();
+                } else {
+                    alert('Error adding item');
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        // Quick add store
+        async function quickAddStore() {
+            const form = document.getElementById('quickStoreForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const res = await fetch('/grocery/stores', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    location.reload();
+                } else {
+                    alert('Error adding store');
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        // Add store brand variant
+        async function addStoreBrand(itemId, itemName) {
+            const storeBrandName = prompt(`Enter store brand name for "${itemName}":`);
+            if (!storeBrandName) return;
+
+            try {
+                const res = await fetch(`/grocery/items/${itemId}/create-store-brand`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: storeBrandName })
+                });
+
+                if (res.ok) {
+                    location.reload();
+                } else {
+                    alert('Error creating store brand');
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+    </script>
+</body>
+</html>
