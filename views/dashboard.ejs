@@ -4560,8 +4560,8 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Admin Tools (only for admins) -->
-                                <% if (user.role === 'admin') { %>
+                                <!-- Admin Tools (only for admins and managers) -->
+                                <% if (user.role === 'admin' || user.role === 'manager') { %>
                                 <div class="user-dropdown-header" style="padding: 8px 15px; font-size: 12px; color: #6c757d;">
                                     Admin Tools
                                 </div>
