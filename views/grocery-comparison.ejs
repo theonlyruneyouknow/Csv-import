@@ -6,21 +6,282 @@
     <title><%= title %></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .comparison-table th {
+            background-color: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .best-price {
+            background-color: #d4edda;
+            font-weight: bold;
+        }
+        .savings-badge {
+            font-size: 0.85rem;
+        }
+        .brand-type-badge {
+            font-size: 0.75rem;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h2 class="mb-4"><i class="fas fa-balance-scale me-2"></i>Price Comparison</h2>
-        
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i>
-            Price comparison feature coming soon! You'll be able to compare prices across stores and see trends over time.
+    <div class="container-fluid mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-balance-scale me-2"></i>Price Comparison & Savings Analysis</h2>
+            <a href="/grocery/dashboard" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
         </div>
 
-        <a href="/grocery/dashboard" class="btn btn-primary">
-            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
-        </a>
+        <!-- Filter by Brand Type -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Filter by Brand Type</h5>
+                <div class="btn-group" role="group">
+                    <input type="checkbox" class="btn-check" id="filterNameBrand" checked autocomplete="off">
+                    <label class="btn btn-outline-primary" for="filterNameBrand">Name Brand</label>
+                    
+                    <input type="checkbox" class="btn-check" id="filterStoreBrand" checked autocomplete="off">
+                    <label class="btn btn-outline-success" for="filterStoreBrand">Store Brand</label>
+                    
+                    <input type="checkbox" class="btn-check" id="filterGeneric" checked autocomplete="off">
+                    <label class="btn btn-outline-info" for="filterGeneric">Generic</label>
+                    
+                    <input type="checkbox" class="btn-check" id="filterPremium" checked autocomplete="off">
+                    <label class="btn btn-outline-warning" for="filterPremium">Premium</label>
+                    
+                    <input type="checkbox" class="btn-check" id="filterOrganic" checked autocomplete="off">
+                    <label class="btn btn-outline-danger" for="filterOrganic">Organic</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Savings Summary -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="text-muted">Potential Monthly Savings</h6>
+                        <h3 class="text-success" id="potentialSavings">$0.00</h3>
+                        <small class="text-muted">By choosing best prices</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="text-muted">Name vs Store Brand</h6>
+                        <h3 class="text-primary" id="brandSavings">$0.00</h3>
+                        <small class="text-muted">Average difference</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="text-muted">Items Tracked</h6>
+                        <h3 class="text-info" id="itemsTracked">0</h3>
+                        <small class="text-muted">With price data</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="text-muted">Best Store</h6>
+                        <h3 class="text-warning" id="bestStore">-</h3>
+                        <small class="text-muted">Lowest average</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Price Comparison by Category</h5>
+                <div id="comparisonContent">
+                    <p class="text-muted">Loading comparison data...</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let allItems = [];
+        let allPrices = [];
+        let stores = [];
+
+        async function loadData() {
+            try {
+                // Load items with prices
+                const itemsRes = await fetch('/grocery/items/list');
+                const itemsData = await itemsRes.json();
+                allItems = itemsData.items || [];
+
+                // Load stores
+                const storesRes = await fetch('/grocery/stores/list');
+                const storesData = await storesRes.json();
+                stores = storesData.stores || [];
+
+                // Load all prices
+                const pricesRes = await fetch('/grocery/prices/all');
+                const pricesData = await pricesRes.json();
+                allPrices = pricesData.prices || [];
+
+                renderComparison();
+            } catch (err) {
+                console.error('Error loading data:', err);
+                document.getElementById('comparisonContent').innerHTML = 
+                    '<div class="alert alert-danger">Error loading comparison data</div>';
+            }
+        }
+
+        function renderComparison() {
+            // Group items by category
+            const categories = {};
+            allItems.forEach(item => {
+                const catName = item.category?.name || 'Uncategorized';
+                if (!categories[catName]) {
+                    categories[catName] = [];
+                }
+                categories[catName].push(item);
+            });
+
+            let html = '';
+            let totalSavings = 0;
+            let itemsWithPrices = 0;
+            let brandComparisons = [];
+            const storeAverages = {};
+
+            Object.keys(categories).sort().forEach(catName => {
+                const items = categories[catName];
+                
+                html += `<h6 class="mt-4 mb-3 text-primary">${items[0]?.category?.icon || '📦'} ${catName}</h6>`;
+                html += '<div class="table-responsive">';
+                html += '<table class="table table-sm table-bordered comparison-table">';
+                html += '<thead><tr><th>Item</th><th>Brand Type</th>';
+                
+                stores.forEach(store => {
+                    html += `<th class="text-center">${store.name}</th>`;
+                });
+                
+                html += '<th class="text-center">Best Price</th><th class="text-center">Savings</th></tr></thead><tbody>';
+
+                items.forEach(item => {
+                    const itemPrices = allPrices.filter(p => p.item === item._id);
+                    if (itemPrices.length === 0) return;
+
+                    itemsWithPrices++;
+                    
+                    html += '<tr>';
+                    html += `<td><strong>${item.name}</strong>`;
+                    if (item.brand) html += `<br><small class="text-muted">${item.brand}</small>`;
+                    if (item.size?.value) html += `<br><small>${item.size.value} ${item.size.unit}</small>`;
+                    html += '</td>';
+                    
+                    const brandTypeClass = {
+                        'name-brand': 'primary',
+                        'store-brand': 'success',
+                        'generic': 'info',
+                        'premium': 'warning',
+                        'organic': 'danger'
+                    }[item.brandType] || 'secondary';
+                    
+                    html += `<td><span class="badge bg-${brandTypeClass} brand-type-badge">${item.brandType || 'name-brand'}</span></td>`;
+
+                    const storePrices = {};
+                    let minPrice = Infinity;
+                    let maxPrice = 0;
+
+                    stores.forEach(store => {
+                        const storePrice = itemPrices.find(p => p.store === store._id);
+                        if (storePrice) {
+                            storePrices[store._id] = storePrice.price;
+                            minPrice = Math.min(minPrice, storePrice.price);
+                            maxPrice = Math.max(maxPrice, storePrice.price);
+                            
+                            if (!storeAverages[store._id]) {
+                                storeAverages[store._id] = { total: 0, count: 0, name: store.name };
+                            }
+                            storeAverages[store._id].total += storePrice.price;
+                            storeAverages[store._id].count++;
+                        }
+                    });
+
+                    stores.forEach(store => {
+                        const price = storePrices[store._id];
+                        if (price !== undefined) {
+                            const isBest = price === minPrice;
+                            html += `<td class="text-center ${isBest ? 'best-price' : ''}">$${price.toFixed(2)}`;
+                            if (isBest) html += ' <i class="fas fa-star text-warning"></i>';
+                            html += '</td>';
+                        } else {
+                            html += '<td class="text-center text-muted">-</td>';
+                        }
+                    });
+
+                    const savings = maxPrice - minPrice;
+                    totalSavings += savings;
+
+                    html += `<td class="text-center best-price">$${minPrice.toFixed(2)}</td>`;
+                    html += `<td class="text-center">`;
+                    if (savings > 0) {
+                        html += `<span class="badge bg-success savings-badge">Save $${savings.toFixed(2)}</span>`;
+                    } else {
+                        html += '-';
+                    }
+                    html += '</td>';
+                    html += '</tr>';
+
+                    // Track brand comparisons
+                    if (item.brandType === 'name-brand' || item.brandType === 'store-brand') {
+                        brandComparisons.push({ type: item.brandType, minPrice });
+                    }
+                });
+
+                html += '</tbody></table></div>';
+            });
+
+            document.getElementById('comparisonContent').innerHTML = html || '<p class="text-muted">No items with price data found.</p>';
+
+            // Update summary stats
+            document.getElementById('potentialSavings').textContent = '$' + totalSavings.toFixed(2);
+            document.getElementById('itemsTracked').textContent = itemsWithPrices;
+
+            // Calculate brand savings
+            const nameBrandAvg = brandComparisons.filter(b => b.type === 'name-brand')
+                .reduce((sum, b) => sum + b.minPrice, 0) / brandComparisons.filter(b => b.type === 'name-brand').length || 0;
+            const storeBrandAvg = brandComparisons.filter(b => b.type === 'store-brand')
+                .reduce((sum, b) => sum + b.minPrice, 0) / brandComparisons.filter(b => b.type === 'store-brand').length || 0;
+            
+            if (nameBrandAvg > 0 && storeBrandAvg > 0) {
+                document.getElementById('brandSavings').textContent = '$' + (nameBrandAvg - storeBrandAvg).toFixed(2);
+            }
+
+            // Find best store
+            let bestStoreData = null;
+            Object.values(storeAverages).forEach(store => {
+                const avg = store.total / store.count;
+                if (!bestStoreData || avg < bestStoreData.avg) {
+                    bestStoreData = { name: store.name, avg };
+                }
+            });
+            
+            if (bestStoreData) {
+                document.getElementById('bestStore').textContent = bestStoreData.name;
+            }
+        }
+
+        // Load data on page load
+        loadData();
+
+        // Filter handlers
+        ['filterNameBrand', 'filterStoreBrand', 'filterGeneric', 'filterPremium', 'filterOrganic'].forEach(id => {
+            document.getElementById(id).addEventListener('change', renderComparison);
+        });
+    </script>
 </body>
 </html>

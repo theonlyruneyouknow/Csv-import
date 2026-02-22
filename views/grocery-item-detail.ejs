@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .price-card {
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+        .price-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .price-card.best-price {
+            border-left-color: #28a745;
+            background-color: #f0fff4;
+        }
+        .store-badge {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+        }
+        .price-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .unit-price {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .item-image {
+            max-width: 300px;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-box me-2"></i><%= item.name %></h2>
+            <div>
+                <a href="/grocery/items" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Items
+                </a>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPriceModal">
+                    <i class="fas fa-plus me-2"></i>Add Price
+                </button>
+            </div>
+        </div>
+
+        <!-- Item Details -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <% if (item.image) { %>
+                    <img src="<%= item.image %>" alt="<%= item.name %>" class="item-image img-fluid">
+                <% } else { %>
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 300px; border-radius: 8px;">
+                        <i class="fas fa-image fa-4x text-muted"></i>
+                    </div>
+                <% } %>
+            </div>
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h4><%= item.name %></h4>
+                        <% if (item.brand) { %>
+                            <p class="text-muted mb-2"><strong>Brand:</strong> <%= item.brand %></p>
+                        <% } %>
+                        <p><span class="badge bg-secondary"><%= item.category.icon %> <%= item.category.name %></span></p>
+                        <% if (item.group) { %>
+                            <p><span class="badge bg-info"><%= item.group %></span></p>
+                        <% } %>
+                        <% if (item.brandType) { %>
+                            <p><strong>Brand Type:</strong> <span class="badge bg-primary"><%= item.brandType %></span></p>
+                        <% } %>
+                        <% if (item.size && item.size.value) { %>
+                            <p><strong>Size:</strong> <%= item.size.value %> <%= item.size.unit %></p>
+                        <% } %>
+                        <% if (item.sku) { %>
+                            <p><strong>SKU:</strong> <%= item.sku %></p>
+                        <% } %>
+                        <% if (item.barcode) { %>
+                            <p><strong>Barcode:</strong> <%= item.barcode %></p>
+                        <% } %>
+                        <% if (item.upc) { %>
+                            <p><strong>UPC:</strong> <%= item.upc %></p>
+                        <% } %>
+                        
+                        <!-- Store-specific SKUs -->
+                        <% if (item.storeSKUs && item.storeSKUs.length > 0) { %>
+                            <div class="mt-3">
+                                <strong>Store SKUs:</strong>
+                                <ul class="list-unstyled ms-3">
+                                    <% item.storeSKUs.forEach(storeSKU => { %>
+                                        <li>
+                                            <% if (storeSKU.store) { %>
+                                                <span class="badge bg-secondary"><%= storeSKU.store.name %></span>
+                                            <% } %>
+                                            <%= storeSKU.sku %>
+                                            <% if (storeSKU.notes) { %>
+                                                <small class="text-muted">(<%= storeSKU.notes %>)</small>
+                                            <% } %>
+                                        </li>
+                                    <% }); %>
+                                </ul>
+                            </div>
+                        <% } %>
+                        
+                        <button class="btn btn-sm btn-outline-primary mt-2" data-bs-toggle="modal" data-bs-target="#editItemModal">
+                            <i class="fas fa-edit me-1"></i>Edit Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Prices at Different Stores -->
+        <h3 class="mb-3">Current Prices</h3>
+        <div class="row mb-4" id="currentPrices">
+            <% if (prices && prices.length > 0) { %>
+                <% 
+                // Group prices by store and get the most recent price for each
+                const pricesByStore = {};
+                prices.forEach(price => {
+                    if (price.store) {
+                        const storeId = price.store._id.toString();
+                        if (!pricesByStore[storeId] || new Date(price.priceDate) > new Date(pricesByStore[storeId].priceDate)) {
+                            pricesByStore[storeId] = price;
+                        }
+                    }
+                });
+                
+                const currentPrices = Object.values(pricesByStore);
+                const lowestPrice = currentPrices.length > 0 ? Math.min(...currentPrices.map(p => p.price)) : 0;
+                %>
+                
+                <% currentPrices.forEach(price => { %>
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card price-card <%= price.price === lowestPrice ? 'best-price' : '' %>">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0"><%= price.store.name %></h5>
+                                    <% if (price.price === lowestPrice) { %>
+                                        <span class="badge bg-success">Best Price!</span>
+                                    <% } %>
+                                </div>
+                                <div class="price-value">$<%= price.price.toFixed(2) %></div>
+                                <% if (price.unitPrice && price.unitPrice.value) { %>
+                                    <div class="unit-price">
+                                        $<%= price.unitPrice.value.toFixed(3) %> per <%= price.unitPrice.unit %>
+                                    </div>
+                                <% } %>
+                                <% if (price.isOnSale) { %>
+                                    <div class="mt-2">
+                                        <span class="badge bg-danger">On Sale!</span>
+                                        <% if (price.regularPrice) { %>
+                                            <small class="text-muted">Regular: $<%= price.regularPrice.toFixed(2) %></small>
+                                        <% } %>
+                                    </div>
+                                <% } %>
+                                <small class="text-muted d-block mt-2">
+                                    Updated: <%= new Date(price.priceDate).toLocaleDateString() %>
+                                </small>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editPrice('<%= price._id %>', <%= price.price %>, <%= price.isOnSale %>, '<%= price.store._id %>')">
+                                        <i class="fas fa-edit"></i> Update
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deletePrice('<%= price._id %>')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        No prices added yet. Click "Add Price" to start tracking prices for this item.
+                    </div>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Price History Chart -->
+        <% if (prices && prices.length > 0) { %>
+            <h3 class="mb-3">Price History</h3>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Price Records -->
+            <h3 class="mb-3">All Price Records</h3>
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Store</th>
+                                    <th>Price</th>
+                                    <th>Unit Price</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% prices.forEach(price => { %>
+                                    <tr>
+                                        <td><%= new Date(price.priceDate).toLocaleDateString() %></td>
+                                        <td>
+                                            <% if (price.store) { %>
+                                                <%= price.store.name %>
+                                            <% } else { %>
+                                                <em>Unknown Store</em>
+                                            <% } %>
+                                        </td>
+                                        <td>$<%= price.price.toFixed(2) %></td>
+                                        <td>
+                                            <% if (price.unitPrice && price.unitPrice.value) { %>
+                                                $<%= price.unitPrice.value.toFixed(3) %> / <%= price.unitPrice.unit %>
+                                            <% } else { %>
+                                                -
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <% if (price.isOnSale) { %>
+                                                <span class="badge bg-danger">On Sale</span>
+                                            <% } else { %>
+                                                <span class="badge bg-secondary">Regular</span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="deletePrice('<%= price._id %>')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Add Price Modal -->
+    <div class="modal fade" id="addPriceModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Price for <%= item.name %></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addPriceForm">
+                        <input type="hidden" id="priceId" name="priceId">
+                        <div class="mb-3">
+                            <label class="form-label">Store *</label>
+                            <select class="form-select" name="store" id="storeSelect" required>
+                                <option value="">Select a store...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Price *</label>
+                            <input type="number" step="0.01" class="form-control" name="price" id="priceInput" required>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="isOnSale" id="isOnSale">
+                                <label class="form-check-label" for="isOnSale">
+                                    On Sale
+                                </label>
+                            </div>
+                        </div>
+                        <div id="saleFields" style="display: none;">
+                            <div class="mb-3">
+                                <label class="form-label">Regular Price</label>
+                                <input type="number" step="0.01" class="form-control" name="regularPrice">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Date</label>
+                            <input type="date" class="form-control" name="priceDate" id="priceDate">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" name="notes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="savePrice()">Save Price</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Item Modal -->
+    <div class="modal fade" id="editItemModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Item Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editItemForm">
+                        <div class="mb-3">
+                            <label class="form-label">Brand Type</label>
+                            <select class="form-select" name="brandType">
+                                <option value="name-brand" <%= item.brandType === 'name-brand' ? 'selected' : '' %>>Name Brand</option>
+                                <option value="store-brand" <%= item.brandType === 'store-brand' ? 'selected' : '' %>>Store Brand</option>
+                                <option value="generic" <%= item.brandType === 'generic' ? 'selected' : '' %>>Generic</option>
+                                <option value="premium" <%= item.brandType === 'premium' ? 'selected' : '' %>>Premium</option>
+                                <option value="organic" <%= item.brandType === 'organic' ? 'selected' : '' %>>Organic</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">SKU</label>
+                            <input type="text" class="form-control" name="sku" value="<%= item.sku || '' %>">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Barcode</label>
+                            <input type="text" class="form-control" name="barcode" value="<%= item.barcode || '' %>">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">UPC</label>
+                            <input type="text" class="form-control" name="upc" value="<%= item.upc || '' %>">
+                        </div>
+                        
+                        <h6 class="mt-4">Store-Specific SKUs</h6>
+                        <div id="storeSKUsContainer">
+                            <% if (item.storeSKUs && item.storeSKUs.length > 0) { %>
+                                <% item.storeSKUs.forEach((storeSKU, index) => { %>
+                                    <div class="row mb-2 store-sku-row">
+                                        <div class="col-md-4">
+                                            <select class="form-select" name="storeSKUs[<%= index %>][store]">
+                                                <option value="">Select store...</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" name="storeSKUs[<%= index %>][sku]" value="<%= storeSKU.sku %>" placeholder="SKU">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="text" class="form-control" name="storeSKUs[<%= index %>][notes]" value="<%= storeSKU.notes || '' %>" placeholder="Notes">
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-sm btn-danger" onclick="this.closest('.store-sku-row').remove()">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                <% }); %>
+                            <% } %>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addStoreSKURow()">
+                            <i class="fas fa-plus"></i> Add Store SKU
+                        </button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveItemDetails()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script>
+        let storeSKUCounter = <%= item.storeSKUs ? item.storeSKUs.length : 0 %>;
+        
+        // Load stores for dropdowns
+        async function loadStores() {
+            try {
+                const res = await fetch('/grocery/stores/list');
+                const data = await res.json();
+                
+                // Populate store select in add price form
+                const storeSelect = document.getElementById('storeSelect');
+                storeSelect.innerHTML = '<option value="">Select a store...</option>';
+                data.stores.forEach(store => {
+                    storeSelect.innerHTML += `<option value="${store._id}">${store.name}</option>`;
+                });
+                
+                // Populate store selects in edit item form
+                const storeSKUSelects = document.querySelectorAll('#editItemForm select[name*="storeSKUs"]');
+                storeSKUSelects.forEach(select => {
+                    const currentValue = select.value;
+                    select.innerHTML = '<option value="">Select store...</option>';
+                    data.stores.forEach(store => {
+                        const selected = currentValue === store._id ? 'selected' : '';
+                        select.innerHTML += `<option value="${store._id}" ${selected}>${store.name}</option>`;
+                    });
+                });
+            } catch (err) {
+                console.error('Error loading stores:', err);
+            }
+        }
+
+        // Toggle sale fields
+        document.getElementById('isOnSale').addEventListener('change', function() {
+            document.getElementById('saleFields').style.display = this.checked ? 'block' : 'none';
+        });
+
+        // Set default date to today
+        document.getElementById('priceDate').valueAsDate = new Date();
+
+        // Save price
+        async function savePrice() {
+            const form = document.getElementById('addPriceForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+            data.item = '<%= item._id %>';
+            
+            const priceId = document.getElementById('priceId').value;
+            const method = priceId ? 'PUT' : 'POST';
+            const url = priceId ? `/grocery/prices/${priceId}` : '/grocery/prices';
+
+            try {
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    location.reload();
+                } else {
+                    alert('Error saving price');
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        // Edit price
+        function editPrice(id, price, isOnSale, storeId) {
+            document.getElementById('priceId').value = id;
+            document.getElementById('priceInput').value = price;
+            document.getElementById('isOnSale').checked = isOnSale;
+            document.getElementById('storeSelect').value = storeId;
+            document.getElementById('saleFields').style.display = isOnSale ? 'block' : 'none';
+            
+            const modal = new bootstrap.Modal(document.getElementById('addPriceModal'));
+            modal.show();
+        }
+
+        // Delete price
+        async function deletePrice(id) {
+            if (!confirm('Delete this price record?')) return;
+            
+            try {
+                const res = await fetch(`/grocery/prices/${id}`, { method: 'DELETE' });
+                if (res.ok) location.reload();
+                else alert('Error deleting price');
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        // Add store SKU row
+        function addStoreSKURow() {
+            const container = document.getElementById('storeSKUsContainer');
+            const row = document.createElement('div');
+            row.className = 'row mb-2 store-sku-row';
+            row.innerHTML = `
+                <div class="col-md-4">
+                    <select class="form-select" name="storeSKUs[${storeSKUCounter}][store]">
+                        <option value="">Select store...</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control" name="storeSKUs[${storeSKUCounter}][sku]" placeholder="SKU">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="storeSKUs[${storeSKUCounter}][notes]" placeholder="Notes">
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-sm btn-danger" onclick="this.closest('.store-sku-row').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(row);
+            storeSKUCounter++;
+            loadStores(); // Reload stores to populate new dropdown
+        }
+
+        // Save item details
+        async function saveItemDetails() {
+            const form = document.getElementById('editItemForm');
+            const formData = new FormData(form);
+            const data = {};
+            
+            // Convert FormData to object, handling arrays
+            formData.forEach((value, key) => {
+                if (key.includes('[')) {
+                    // Handle array fields like storeSKUs
+                    const matches = key.match(/(\w+)\[(\d+)\]\[(\w+)\]/);
+                    if (matches) {
+                        const [, arrayName, index, field] = matches;
+                        if (!data[arrayName]) data[arrayName] = [];
+                        if (!data[arrayName][index]) data[arrayName][index] = {};
+                        data[arrayName][index][field] = value;
+                    }
+                } else {
+                    data[key] = value;
+                }
+            });
+            
+            // Clean up empty store SKUs
+            if (data.storeSKUs) {
+                data.storeSKUs = data.storeSKUs.filter(sku => sku.sku && sku.sku.trim());
+            }
+
+            try {
+                const res = await fetch('/grocery/items/<%= item._id %>', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    location.reload();
+                } else {
+                    alert('Error updating item');
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        // Initialize chart
+        <% if (prices && prices.length > 0) { %>
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        
+        // Organize data by store
+        const priceData = {};
+        <% prices.forEach(price => { %>
+            <% if (price.store) { %>
+                const storeName = '<%= price.store.name %>';
+                if (!priceData[storeName]) {
+                    priceData[storeName] = {
+                        label: storeName,
+                        data: [],
+                        borderColor: '#' + Math.floor(Math.random()*16777215).toString(16),
+                        tension: 0.1
+                    };
+                }
+                priceData[storeName].data.push({
+                    x: new Date('<%= price.priceDate %>'),
+                    y: <%= price.price %>
+                });
+            <% } %>
+        <% }); %>
+
+        const datasets = Object.values(priceData);
+        datasets.forEach(dataset => {
+            dataset.data.sort((a, b) => a.x - b.x);
+        });
+
+        new Chart(ctx, {
+            type: 'line',
+            data: { datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Price History by Store'
+                    },
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Price ($)'
+                        },
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+        <% } %>
+
+        // Load stores on page load
+        loadStores();
+    </script>
+</body>
+</html>

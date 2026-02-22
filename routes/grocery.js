@@ -84,6 +84,19 @@ router.get('/dashboard', ensureGroceryAccess, async (req, res) => {
 });
 
 // ===== STORES =====
+router.get('/stores/list', ensureGroceryAccess, async (req, res) => {
+    try {
+        const stores = await Store.find({ user: req.user._id, isActive: true })
+            .select('name chain location.city')
+            .sort({ name: 1 });
+        
+        res.json({ stores });
+    } catch (error) {
+        console.error('Error loading stores:', error);
+        res.status(500).json({ error: 'Error loading stores' });
+    }
+});
+
 router.get('/stores', ensureGroceryAccess, async (req, res) => {
     try {
         const stores = await Store.find({ user: req.user._id })
@@ -206,6 +219,20 @@ router.delete('/stores/:id', ensureGroceryAccess, async (req, res) => {
 });
 
 // ===== ITEMS =====
+router.get('/items/list', ensureGroceryAccess, async (req, res) => {
+    try {
+        const items = await GroceryItem.find({ user: req.user._id, isActive: true })
+            .populate('category')
+            .populate('storeSKUs.store')
+            .sort({ name: 1 });
+        
+        res.json({ items });
+    } catch (error) {
+        console.error('Error loading items:', error);
+        res.status(500).json({ error: 'Error loading items' });
+    }
+});
+
 router.get('/items', ensureGroceryAccess, async (req, res) => {
     try {
         const { category, search } = req.query;
@@ -359,7 +386,56 @@ router.delete('/items/:id', ensureGroceryAccess, async (req, res) => {
     }
 });
 
+// Update item details
+router.put('/items/:id', ensureGroceryAccess, async (req, res) => {
+    try {
+        const updateData = {
+            brandType: req.body.brandType,
+            sku: req.body.sku,
+            barcode: req.body.barcode,
+            upc: req.body.upc,
+            storeSKUs: req.body.storeSKUs || [],
+            updatedAt: new Date()
+        };
+
+        const item = await GroceryItem.findOneAndUpdate(
+            { _id: req.params.id, user: req.user._id },
+            updateData,
+            { new: true }
+        );
+        
+        if (!item) {
+            return res.status(404).json({ error: 'Item not found' });
+        }
+
+        res.json({ success: true, item });
+    } catch (error) {
+        console.error('Error updating item:', error);
+        res.status(500).json({ error: 'Error updating item' });
+    }
+});
+
 // ===== PRICES =====
+router.get('/prices/all', ensureGroceryAccess, async (req, res) => {
+    try {
+        const prices = await FoodPrice.find({ user: req.user._id })
+            .select('item store price priceDate isOnSale regularPrice')
+            .lean();
+        
+        // Convert ObjectIds to strings for easier comparison in frontend
+        const formattedPrices = prices.map(p => ({
+            ...p,
+            item: p.item.toString(),
+            store: p.store.toString()
+        }));
+        
+        res.json({ prices: formattedPrices });
+    } catch (error) {
+        console.error('Error loading prices:', error);
+        res.status(500).json({ error: 'Error loading prices' });
+    }
+});
+
 router.get('/prices', ensureGroceryAccess, async (req, res) => {
     try {
         const prices = await FoodPrice.find({ user: req.user._id })
@@ -394,6 +470,50 @@ router.post('/prices', ensureGroceryAccess, async (req, res) => {
     } catch (error) {
         console.error('Error adding price:', error);
         res.status(500).json({ error: 'Error adding price' });
+    }
+});
+
+// Update price
+router.put('/prices/:id', ensureGroceryAccess, async (req, res) => {
+    try {
+        const updateData = {
+            price: req.body.price,
+            isOnSale: req.body.isOnSale,
+            regularPrice: req.body.regularPrice,
+            priceDate: req.body.priceDate || new Date(),
+            notes: req.body.notes
+        };
+
+        const price = await FoodPrice.findOneAndUpdate(
+            { _id: req.params.id, user: req.user._id },
+            updateData,
+            { new: true }
+        );
+        
+        if (!price) {
+            return res.status(404).json({ error: 'Price not found' });
+        }
+
+        res.json({ success: true, price });
+    } catch (error) {
+        console.error('Error updating price:', error);
+        res.status(500).json({ error: 'Error updating price' });
+    }
+});
+
+// Delete price
+router.delete('/prices/:id', ensureGroceryAccess, async (req, res) => {
+    try {
+        const price = await FoodPrice.findOneAndDelete({ _id: req.params.id, user: req.user._id });
+        
+        if (!price) {
+            return res.status(404).json({ error: 'Price not found' });
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error deleting price:', error);
+        res.status(500).json({ error: 'Error deleting price' });
     }
 });
 

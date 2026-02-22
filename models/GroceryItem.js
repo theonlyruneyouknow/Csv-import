@@ -44,7 +44,35 @@ const groceryItemSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    sku: String,
+    
+    // SKU Management
+    sku: {
+        type: String,
+        trim: true // Default/primary SKU
+    },
+    
+    // Store-specific SKUs for tracking across different stores
+    storeSKUs: [{
+        store: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Store'
+        },
+        sku: String,
+        notes: String // e.g., "Store brand version", "Different size"
+    }],
+    
+    // Brand Type for comparison grouping
+    brandType: {
+        type: String,
+        enum: ['name-brand', 'store-brand', 'generic', 'premium', 'organic'],
+        default: 'name-brand'
+    },
+    
+    // Link to equivalent items (for comparing store brands to name brands)
+    equivalentItems: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'GroceryItem'
+    }],
     
     // Image
     image: String, // URL to product image

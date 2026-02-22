@@ -61,6 +61,23 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Brand Type</label>
+                        <select class="form-select" name="brandType">
+                            <option value="name-brand" selected>Name Brand</option>
+                            <option value="store-brand">Store Brand</option>
+                            <option value="generic">Generic</option>
+                            <option value="premium">Premium</option>
+                            <option value="organic">Organic</option>
+                        </select>
+                        <small class="form-text text-muted">Used for brand comparison and analysis</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">SKU</label>
+                        <input type="text" class="form-control" name="sku" placeholder="Product SKU">
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">Item Image</label>
                         <input type="file" class="form-control" id="imageFile" accept="image/*">
                         <small class="form-text text-muted">Or provide an image URL below</small>
