@@ -278,6 +278,11 @@ router.post('/items', ensureGroceryAccess, async (req, res) => {
             }
         };
 
+        // Handle image data (base64 or URL)
+        if (req.body.imageData) {
+            itemData.image = req.body.imageData;
+        }
+
         const item = new GroceryItem(itemData);
         await item.save();
 
@@ -285,6 +290,24 @@ router.post('/items', ensureGroceryAccess, async (req, res) => {
     } catch (error) {
         console.error('Error creating item:', error);
         res.status(500).json({ error: 'Error creating item' });
+    }
+});
+
+// Create new category
+router.post('/categories', ensureGroceryAccess, async (req, res) => {
+    try {
+        const categoryData = {
+            ...req.body,
+            user: req.user._id
+        };
+
+        const category = new FoodCategory(categoryData);
+        await category.save();
+
+        res.json({ success: true, category });
+    } catch (error) {
+        console.error('Error creating category:', error);
+        res.status(500).json({ error: 'Error creating category' });
     }
 });
 

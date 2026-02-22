@@ -20,6 +20,12 @@ const groceryItemSchema = new mongoose.Schema({
         required: true
     },
     
+    // Group (for organizing items, e.g., "Breakfast", "Snacks", "Dinner")
+    group: {
+        type: String,
+        trim: true
+    },
+    
     // Product Details
     size: {
         value: Number,
