@@ -5,7 +5,7 @@ const { ensureAuthenticated } = require('../middleware/auth');
 const crypto = require('crypto');
 
 // Get all circles user is part of
-router.get('/', ensureAuthenticated, async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const circles = await FamilyCircle.find({
             $or: [
@@ -27,7 +27,7 @@ router.get('/', ensureAuthenticated, async (req, res) => {
 });
 
 // Create new circle
-router.post('/', ensureAuthenticated, async (req, res) => {
+router.post('/', async (req, res) => {
     try {
         const { name, description, allowMemberInvites } = req.body;
         
@@ -45,7 +45,7 @@ router.post('/', ensureAuthenticated, async (req, res) => {
         });
         
         await circle.save();
-        res.redirect('/greatestjoy/circles');
+        res.redirect('/greatestjoy/familycircles');
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -53,7 +53,7 @@ router.post('/', ensureAuthenticated, async (req, res) => {
 });
 
 // View circle details
-router.get('/:id', ensureAuthenticated, async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
         const circle = await FamilyCircle.findById(req.params.id)
             .populate('createdBy', 'firstName lastName')
@@ -78,7 +78,7 @@ router.get('/:id', ensureAuthenticated, async (req, res) => {
             title: `${circle.name} - Greatest Joy`,
             user: req.user,
             circle,
-            isAdmin: !!isAdmin
+            userRole: isAdmin ? 'admin' : 'member'
         });
     } catch (err) {
         console.error(err);
@@ -87,7 +87,7 @@ router.get('/:id', ensureAuthenticated, async (req, res) => {
 });
 
 // Invite someone to circle
-router.post('/:id/invite', ensureAuthenticated, async (req, res) => {
+router.post('/:id/invite', async (req, res) => {
     try {
         const circle = await FamilyCircle.findById(req.params.id);
         
@@ -127,9 +127,9 @@ router.post('/:id/invite', ensureAuthenticated, async (req, res) => {
         await circle.save();
         
         // TODO: Send email with invite link
-        // const inviteLink = `${req.protocol}://${req.get('host')}/greatestjoy/circles/join/${inviteCode}`;
+        // const inviteLink = `${req.protocol}://${req.get('host')}/greatestjoy/familycircles/join/${inviteCode}`;
         
-        res.json({ success: true, message: 'Invitation sent' });
+        res.redirect(`/greatestjoy/familycircles/${circle._id}`);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Server Error' });
@@ -137,7 +137,7 @@ router.post('/:id/invite', ensureAuthenticated, async (req, res) => {
 });
 
 // Join circle with invite code
-router.get('/join/:code', ensureAuthenticated, async (req, res) => {
+router.get('/join/:code', async (req, res) => {
     try {
         const circle = await FamilyCircle.findOne({
             'invitations.inviteCode': req.params.code,
@@ -145,7 +145,13 @@ router.get('/join/:code', ensureAuthenticated, async (req, res) => {
         });
         
         if (!circle) {
-            return res.status(404).send('Invalid or expired invitation');
+            return res.render('join-circle', {
+                error: 'Invalid or expired invitation',
+                success: null,
+                circle: null,
+                inviteCode: null,
+                invitedBy: null
+            });
         }
         
         const invitation = circle.invitations.find(
@@ -153,10 +159,16 @@ router.get('/join/:code', ensureAuthenticated, async (req, res) => {
         );
         
         // Check if invitation expired
-        if (new Date() > invitation.expiresDate) {
+        if (new Date() > invitation.expiresAt) {
             invitation.status = 'expired';
             await circle.save();
-            return res.status(400).send('Invitation expired');
+            return res.render('join-circle', {
+                error: 'Invitation expired',
+                success: null,
+                circle: null,
+                inviteCode: null,
+                invitedBy: null
+            });
         }
         
         // Check if already a member
@@ -165,7 +177,55 @@ router.get('/join/:code', ensureAuthenticated, async (req, res) => {
         );
         
         if (isMember) {
-            return res.redirect(`/greatestjoy/circles/${circle._id}`);
+            return res.redirect(`/greatestjoy/familycircles/${circle._id}`);
+        }
+        
+        res.render('join-circle', {
+            circle,
+            inviteCode: req.params.code,
+            invitedBy: invitation.invitedBy,
+            error: null,
+            success: null
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
+// Accept invitation (POST)
+router.post('/join/:code', async (req, res) => {
+    try {
+        const circle = await FamilyCircle.findOne({
+            'invitations.inviteCode': req.params.code,
+            'invitations.status': 'pending'
+        });
+        
+        if (!circle) {
+            return res.render('join-circle', {
+                error: 'Invalid or expired invitation',
+                success: null,
+                circle: null,
+                inviteCode: null,
+                invitedBy: null
+            });
+        }
+        
+        const invitation = circle.invitations.find(
+            inv => inv.inviteCode === req.params.code
+        );
+        
+        // Check if invitation expired
+        if (new Date() > invitation.expiresAt) {
+            invitation.status = 'expired';
+            await circle.save();
+            return res.render('join-circle', {
+                error: 'Invitation expired',
+                success: null,
+                circle: null,
+                inviteCode: null,
+                invitedBy: null
+            });
         }
         
         // Add user to circle
@@ -177,7 +237,13 @@ router.get('/join/:code', ensureAuthenticated, async (req, res) => {
         invitation.status = 'accepted';
         await circle.save();
         
-        res.redirect(`/greatestjoy/circles/${circle._id}`);
+        res.render('join-circle', {
+            success: `Successfully joined ${circle.name}!`,
+            error: null,
+            circle: null,
+            inviteCode: null,
+            invitedBy: null
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -185,7 +251,7 @@ router.get('/join/:code', ensureAuthenticated, async (req, res) => {
 });
 
 // Remove member from circle
-router.delete('/:id/members/:memberId', ensureAuthenticated, async (req, res) => {
+router.delete('/:id/members/:memberId', async (req, res) => {
     try {
         const circle = await FamilyCircle.findById(req.params.id);
         
