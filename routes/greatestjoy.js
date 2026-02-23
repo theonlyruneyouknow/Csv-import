@@ -74,12 +74,18 @@ router.get('/upload', ensureAuthenticated, async (req, res) => {
         const children = await GreatestJoyMedia.distinct('child.name');
         const albums = await GreatestJoyMedia.distinct('album');
         
+        // Get family circles the user belongs to
+        const circles = await FamilyCircle.find({
+            'members.user': req.user._id
+        }).select('name members');
+        
         res.render('greatestjoy-upload', {
             title: 'Upload - Greatest Joy',
             user: req.user,
             media: null,
             children,
-            albums
+            albums,
+            circles
         });
     } catch (err) {
         console.error(err);
@@ -99,6 +105,8 @@ router.post('/upload', ensureAuthenticated, async (req, res) => {
             childName,
             childBirthDate,
             relationship,
+            peopleData, // JSON string of people array
+            circles, // Array of circle IDs
             captureDate,
             tags,
             location,
@@ -106,22 +114,43 @@ router.post('/upload', ensureAuthenticated, async (req, res) => {
             album
         } = req.body;
 
+        // Parse people data
+        let people = [];
+        if (peopleData) {
+            try {
+                people = JSON.parse(peopleData);
+            } catch (e) {
+                console.error('Error parsing people data:', e);
+            }
+        }
+
+        // Legacy: if no people data but childName exists, add as person
+        if (people.length === 0 && childName) {
+            people.push({
+                name: childName,
+                relationship: relationship || 'grandchild',
+                birthDate: childBirthDate
+            });
+        }
+
         const newMedia = new GreatestJoyMedia({
             title,
             description,
             mediaType,
             url,
             thumbnailUrl,
-            child: {
+            child: childName ? {
                 name: childName,
                 birthDate: childBirthDate,
                 relationship: relationship || 'grandchild'
-            },
+            } : undefined,
+            people,
+            circles: circles || [],
             uploadedBy: req.user._id,
             captureDate: captureDate || Date.now(),
             tags: tags ? tags.split(',').map(t => t.trim()) : [],
             location,
-            visibility: visibility || 'family',
+            visibility: visibility || 'circle',
             album
         });
 

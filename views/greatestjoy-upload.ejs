@@ -124,35 +124,45 @@
                 <img id="preview" class="preview-image" alt="Preview">
             </div>
 
+            <!-- People Tagging Section -->
             <div class="form-section">
-                <label class="form-label"><strong>Child's Name *</strong></label>
-                <input type="text" class="form-control" name="childName" 
-                       value="<%= media ? media.child.name : '' %>" 
-                       list="childrenList" required>
-                <datalist id="childrenList">
-                    <% if (children && children.length > 0) { %>
-                        <% children.forEach(child => { %>
-                            <option value="<%= child %>">
-                        <% }); %>
-                    <% } %>
-                </datalist>
+                <label class="form-label">
+                    <strong><i class="fas fa-users"></i> Tag People in This Photo/Video</strong>
+                </label>
+                <small class="text-muted d-block mb-3">
+                    Add family members who appear in or are related to this memory
+                </small>
+                
+                <div id="peopleContainer">
+                    <!-- Person entries will be added here -->
+                </div>
+                
+                <button type="button" class="btn btn-secondary btn-sm" onclick="addPerson()">
+                    <i class="fas fa-plus"></i> Add Person
+                </button>
+                <input type="hidden" name="peopleData" id="peopleData">
             </div>
 
-            <div class="row">
-                <div class="col-md-6 form-section">
-                    <label class="form-label"><strong>Birth Date</strong></label>
-                    <input type="date" class="form-control" name="childBirthDate" 
-                           value="<%= media && media.child.birthDate ? new Date(media.child.birthDate).toISOString().split('T')[0] : '' %>">
+            <!-- Family Circles Section -->
+            <% if (circles && circles.length > 0) { %>
+                <div class="form-section">
+                    <label class="form-label">
+                        <strong><i class="fas fa-users-cog"></i> Share with Family Circles</strong>
+                    </label>
+                    <small class="text-muted d-block mb-2">
+                        Select which family circles can see this memory
+                    </small>
+                    <% circles.forEach(circle => { %>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="circles" 
+                                   value="<%= circle._id %>" id="circle_<%= circle._id %>">
+                            <label class="form-check-label" for="circle_<%= circle._id %>">
+                                <%= circle.name %> (<%= circle.members.length %> members)
+                            </label>
+                        </div>
+                    <% }); %>
                 </div>
-
-                <div class="col-md-6 form-section">
-                    <label class="form-label"><strong>Relationship</strong></label>
-                    <select class="form-select" name="relationship">
-                        <option value="grandchild" <%= media && media.child.relationship === 'grandchild' ? 'selected' : '' %>>Grandchild</option>
-                        <option value="great-grandchild" <%= media && media.child.relationship === 'great-grandchild' ? 'selected' : '' %>>Great-Grandchild</option>
-                    </select>
-                </div>
-            </div>
+            <% } %>
 
             <div class="form-section">
                 <label class="form-label"><strong>Description</strong></label>
@@ -199,10 +209,14 @@
             <div class="form-section">
                 <label class="form-label"><strong>Visibility</strong></label>
                 <select class="form-select" name="visibility">
-                    <option value="family" <%= !media || media.visibility === 'family' ? 'selected' : '' %>>Family Only</option>
-                    <option value="private" <%= media && media.visibility === 'private' ? 'selected' : '' %>>Private</option>
+                    <option value="circle" <%= !media || media.visibility === 'circle' ? 'selected' : '' %>>Selected Circles Only</option>
+                    <option value="family" <%= media && media.visibility === 'family' ? 'selected' : '' %>>All Family</option>
+                    <option value="private" <%= media && media.visibility === 'private' ? 'selected' : '' %>>Private (Only Me)</option>
                     <option value="public" <%= media && media.visibility === 'public' ? 'selected' : '' %>>Public</option>
                 </select>
+                <small class="text-muted">
+                    Choose who can see this memory. "Selected Circles Only" shares with checked circles above.
+                </small>
             </div>
 
             <div class="d-grid gap-2">
@@ -248,7 +262,84 @@
             <% if (media && media.url) { %>
                 previewMedia();
             <% } %>
+
+            // Add initial person entry
+            addPerson();
         };
+
+        // Dynamic people tagging
+        let personCount = 0;
+        const relationshipTypes = [
+            'grandchild', 'great-grandchild', 'child', 'grandparent',
+            'great-grandparent', 'parent', 'sibling', 'spouse',
+            'aunt', 'uncle', 'cousin', 'niece', 'nephew',
+            'in-law', 'step-relative', 'friend', 'other'
+        ];
+
+        function addPerson() {
+            personCount++;
+            const container = document.getElementById('peopleContainer');
+            const personDiv = document.createElement('div');
+            personDiv.className = 'person-entry mb-3 p-3 border rounded';
+            personDiv.id = `person_${personCount}`;
+            personDiv.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0"><i class="fas fa-user"></i> Person ${personCount}</h6>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removePerson(${personCount})">
+                        <i class="fas fa-times"></i> Remove
+                    </button>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label">Name *</label>
+                        <input type="text" class="form-control person-name" required
+                               placeholder="e.g., Emma Smith">
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label">Relationship *</label>
+                        <select class="form-select person-relationship" required>
+                            ${relationshipTypes.map(rel => 
+                                `<option value="${rel}">${rel.split('-').map(w => 
+                                    w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label">Birth Date</label>
+                        <input type="date" class="form-control person-birthdate">
+                    </div>
+                </div>
+            `;
+            container.appendChild(personDiv);
+        }
+
+        function removePerson(id) {
+            const personDiv = document.getElementById(`person_${id}`);
+            if (personDiv) {
+                personDiv.remove();
+            }
+        }
+
+        // Before form submission, collect all people data
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const people = [];
+            document.querySelectorAll('.person-entry').forEach(entry => {
+                const name = entry.querySelector('.person-name').value;
+                const relationship = entry.querySelector('.person-relationship').value;
+                const birthDate = entry.querySelector('.person-birthdate').value;
+                
+                if (name) {
+                    people.push({
+                        name,
+                        relationship,
+                        birthDate: birthDate || null
+                    });
+                }
+            });
+            
+            document.getElementById('peopleData').value = JSON.stringify(people);
+        });
+
     </script>
 </body>
 </html>

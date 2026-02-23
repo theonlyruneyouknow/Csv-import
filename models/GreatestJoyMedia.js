@@ -23,10 +23,10 @@ const greatestJoyMediaSchema = new mongoose.Schema({
     thumbnailUrl: {
         type: String
     },
+    // Legacy single child field (kept for backwards compatibility)
     child: {
         name: {
             type: String,
-            required: true,
             trim: true
         },
         birthDate: {
@@ -38,6 +38,31 @@ const greatestJoyMediaSchema = new mongoose.Schema({
             default: 'grandchild'
         }
     },
+    // New: Multiple people can be tagged in media
+    people: [{
+        name: {
+            type: String,
+            required: true,
+            trim: true
+        },
+        relationship: {
+            type: String,
+            enum: [
+                'self', 'spouse', 'partner',
+                'parent', 'child', 'sibling',
+                'grandparent', 'grandchild',
+                'great-grandparent', 'great-grandchild',
+                'aunt', 'uncle', 'niece', 'nephew',
+                'cousin', 'friend', 'other'
+            ]
+        },
+        birthDate: Date
+    }],
+    // Family circles this media belongs to
+    circles: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'FamilyCircle'
+    }],
     uploadedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -79,8 +104,8 @@ const greatestJoyMediaSchema = new mongoose.Schema({
     }],
     visibility: {
         type: String,
-        enum: ['private', 'family', 'public'],
-        default: 'family'
+        enum: ['private', 'circle', 'family', 'public'],
+        default: 'circle'
     },
     album: {
         type: String,
@@ -92,6 +117,8 @@ const greatestJoyMediaSchema = new mongoose.Schema({
 
 // Index for searching
 greatestJoyMediaSchema.index({ 'child.name': 1, captureDate: -1 });
+greatestJoyMediaSchema.index({ 'people.name': 1 });
+greatestJoyMediaSchema.index({ circles: 1 });
 greatestJoyMediaSchema.index({ uploadedBy: 1, uploadDate: -1 });
 greatestJoyMediaSchema.index({ tags: 1 });
 greatestJoyMediaSchema.index({ album: 1 });
