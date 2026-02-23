@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const GreatestJoyMedia = require('../models/GreatestJoyMedia');
-const { ensureAuthenticated } = require('../config/auth');
+const { ensureAuthenticated } = require('../middleware/auth');
 
 // Dashboard - view all media
 router.get('/dashboard', ensureAuthenticated, async (req, res) => {
