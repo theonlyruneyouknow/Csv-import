@@ -1,0 +1,84 @@
+<% if (typeof user !== 'undefined' && user) { %>
+    <div class="user-dropdown">
+        <div class="user-avatar" onclick="toggleUserDropdown()">
+            <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %>
+            <%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+        </div>
+        <div id="userDropdown" class="user-dropdown-content">
+            <div class="user-dropdown-header">
+                <div class="user-avatar-large">
+                    <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : '' %>
+                    <%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
+                </div>
+                <div class="user-info">
+                    <div class="user-name"><%= user.firstName %> <%= user.lastName %></div>
+                    <div class="user-email"><%= user.email %></div>
+                </div>
+            </div>
+            <div class="user-dropdown-menu">
+                <a href="/po/dashboard" class="user-dropdown-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    Purchase Orders
+                </a>
+                <a href="/story/dashboard" class="user-dropdown-item">
+                    <i class="fas fa-book"></i>
+                    Stories
+                </a>
+                <a href="/medicine/dashboard" class="user-dropdown-item">
+                    <i class="fas fa-pills"></i>
+                    Medicine
+                </a>
+                <a href="/bulletin" class="user-dropdown-item">
+                    <i class="fas fa-bullhorn"></i>
+                    Bulletin Board
+                </a>
+                <a href="/musicbox" class="user-dropdown-item">
+                    <i class="fas fa-music"></i>
+                    Music Box
+                </a>
+                <a href="/grocery/dashboard" class="user-dropdown-item">
+                    <i class="fas fa-shopping-basket"></i>
+                    Grocery Manager
+                </a>
+                <a href="/greatestjoy/dashboard" class="user-dropdown-item">
+                    <i class="fas fa-heart"></i>
+                    Greatest Joy
+                </a>
+                <div class="user-dropdown-divider"></div>
+                <% if (user.role === 'admin' || user.role === 'manager') { %>
+                    <div class="admin-section">
+                        <i class="fas fa-shield-alt"></i> Admin Tools
+                    </div>
+                    <a href="/users" class="user-dropdown-item">
+                        <i class="fas fa-users"></i>
+                        User Management
+                    </a>
+                    <div class="user-dropdown-divider"></div>
+                <% } %>
+                <a href="/users/logout" class="user-dropdown-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </div>
+<% } %>
+
+<script>
+    function toggleUserDropdown() {
+        document.getElementById('userDropdown').classList.toggle('show');
+    }
+
+    // Close dropdown when clicking outside
+    window.onclick = function(event) {
+        if (!event.target.matches('.user-avatar')) {
+            const dropdowns = document.getElementsByClassName('user-dropdown-content');
+            for (let i = 0; i < dropdowns.length; i++) {
+                const openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+</script>

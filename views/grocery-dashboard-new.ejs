@@ -6,6 +6,9 @@
     <title><%= title %></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <%- include('partials/user-dropdown-styles') %>
+    
     <style>
         body {
             margin: 0;
@@ -209,111 +212,6 @@
             margin-top: 3px;
         }
 
-        /* User Dropdown */
-        .user-dropdown {
-            position: relative;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #ff6b6b;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .user-avatar:hover {
-            transform: scale(1.05);
-            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
-        }
-
-        .user-dropdown-content {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background-color: white;
-            min-width: 280px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            z-index: 1001;
-            border: 1px solid #dee2e6;
-            margin-top: 10px;
-        }
-
-        .user-dropdown-content.show {
-            display: block;
-        }
-
-        .user-dropdown-header {
-            padding: 20px;
-            border-bottom: 1px solid #e9ecef;
-            background: white;
-            border-radius: 8px 8px 0 0;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .user-avatar-large {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: #ff6b6b;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 24px;
-            flex-shrink: 0;
-        }
-
-        .user-dropdown-item {
-            padding: 14px 20px;
-            color: #495057;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s ease;
-            font-size: 15px;
-            border: none;
-            background: white;
-            width: 100%;
-            text-align: left;
-            cursor: pointer;
-        }
-
-        .user-dropdown-item:hover {
-            background: #f8f9fa;
-        }
-
-        .user-dropdown-item.logout {
-            color: #dc3545;
-            border-top: 1px solid #e9ecef;
-        }
-
-        .dropdown-icon {
-            font-size: 18px;
-            width: 20px;
-            display: inline-block;
-            text-align: center;
-        }
-
-        .dropdown-divider {
-            height: 1px;
-            background: #e9ecef;
-            margin: 0;
-        }
-
         .user-role {
             color: #6c757d;
             font-size: 0.875rem;
@@ -343,69 +241,7 @@
             </a>
             
             <!-- User Dropdown -->
-            <% if (typeof user !== 'undefined' && user) { %>
-                <div class="user-dropdown">
-                    <div class="user-avatar" onclick="toggleUserDropdown()">
-                        <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U' %>
-                        <%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
-                    </div>
-                    <div id="userDropdown" class="user-dropdown-content">
-                        <div class="user-dropdown-header">
-                            <div class="user-avatar-large">
-                                <%= user.firstName ? user.firstName.charAt(0).toUpperCase() : '' %>
-                                <%= user.lastName ? user.lastName.charAt(0).toUpperCase() : '' %>
-                            </div>
-                            <div class="user-info">
-                                <strong><%= user.firstName %> <%= user.lastName %></strong>
-                                <small class="user-role"><%= user.role %></small>
-                                <small class="user-status">● Online</small>
-                            </div>
-                        </div>
-                        
-                        <% if (user.role === 'admin' || user.role === 'manager') { %>
-                        <div class="user-dropdown-header" style="padding: 8px 15px; font-size: 12px; color: #6c757d;">
-                            Admin Tools
-                        </div>
-                        <a href="/auth/admin/users" class="user-dropdown-item">
-                            <span class="dropdown-icon">👥</span> User Management
-                        </a>
-                        <a href="/auth/admin/audit-logs" class="user-dropdown-item">
-                            <span class="dropdown-icon">🔄</span> Audit Logs
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <% } %>
-                        
-                        <div class="user-dropdown-header" style="padding: 8px 15px; font-size: 12px; color: #6c757d;">
-                            Other Modules
-                        </div>
-                        <a href="/purchase-orders" class="user-dropdown-item">
-                            <span class="dropdown-icon">📦</span> Purchase Orders
-                        </a>
-                        <a href="/story/dashboard" class="user-dropdown-item">
-                            <span class="dropdown-icon">📖</span> Story
-                        </a>
-                        <a href="/medicine/dashboard" class="user-dropdown-item">
-                            <span class="dropdown-icon">💊</span> Medicine
-                        </a>
-                        <a href="/bulletin" class="user-dropdown-item">
-                            <span class="dropdown-icon">📌</span> Bulletin
-                        </a>
-                        <a href="/musicbox" class="user-dropdown-item">
-                            <span class="dropdown-icon">🎵</span> MusicBox
-                        </a>
-                        <a href="/greatestjoy/dashboard" class="user-dropdown-item">
-                            <span class="dropdown-icon">❤️</span> Greatest Joy
-                        </a>
-                        
-                        <div class="dropdown-divider"></div>
-                        <form action="/auth/logout" method="POST" style="margin: 0;">
-                            <button type="submit" class="user-dropdown-item logout">
-                                <span class="dropdown-icon">🚪</span> Logout
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            <% } %>
+            <%- include('partials/user-dropdown') %>
         </div>
     </div>
 
@@ -652,20 +488,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // User dropdown toggle
-        function toggleUserDropdown() {
-            document.getElementById('userDropdown').classList.toggle('show');
-        }
-
-        window.addEventListener('click', function(e) {
-            if (!e.target.matches('.user-avatar')) {
-                const dropdown = document.getElementById('userDropdown');
-                if (dropdown && dropdown.classList.contains('show')) {
-                    dropdown.classList.remove('show');
-                }
-            }
-        });
-
         // Price modal functions
         function editPrice(itemId, storeId, itemName, storeName, currentPrice, isOnSale, priceId) {
             document.getElementById('priceItemId').value = itemId;
