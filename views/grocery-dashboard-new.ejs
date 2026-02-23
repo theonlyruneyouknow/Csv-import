@@ -25,6 +25,7 @@
             top: 0;
             z-index: 1000;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            height: 72px;
         }
 
         .header h2 {
@@ -39,6 +40,8 @@
 
         .price-grid-container {
             padding: 20px;
+            height: calc(100vh - 112px);
+            overflow-y: auto;
             overflow-x: auto;
         }
 
@@ -50,15 +53,21 @@
             background: white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             border-radius: 8px;
-            overflow: hidden;
         }
 
         .grid-header {
             display: table-header-group;
+        }
+
+        .grid-header .grid-row {
             position: sticky;
-            top: 72px;
+            top: 0;
             z-index: 100;
             background: white;
+        }
+
+        .grid-body {
+            display: table-row-group;
         }
 
         .grid-row {
@@ -86,8 +95,7 @@
             font-weight: 600;
             padding: 15px 12px;
             border-bottom: 2px solid #ee5a6f;
-            position: sticky;
-            top: 72px;
+            position: relative;
         }
 
         .item-column {
@@ -425,6 +433,7 @@
             </div>
 
             <!-- Item Rows -->
+            <div class="grid-body">
             <% if (items && items.length > 0) { %>
                 <% items.forEach(item => { %>
                     <div class="grid-row">
@@ -443,7 +452,10 @@
                                     <div class="item-details"><%= item.size.value %> <%= item.size.unit %></div>
                                 <% } %>
                                 <% if (item.brandType !== 'store-brand') { %>
-                                    <button class="btn btn-sm btn-outline-success add-store-brand-btn" onclick="addStoreBrand('<%= item._id %>', '<%= item.name %>')">
+                                    <button class="btn btn-sm btn-outline-success add-store-brand-btn" 
+                                            data-item-id="<%= item._id %>" 
+                                            data-item-name="<%= item.name.replace(/"/g, '&quot;') %>" 
+                                            onclick="addStoreBrandFromBtn(this)">
                                         <i class="fas fa-plus"></i> Add Store Brand
                                     </button>
                                 <% } %>
@@ -459,7 +471,15 @@
                                         p.store._id.toString() === store._id.toString()
                                     );
                                 %>
-                                <div class="grid-cell store-column price-cell" onclick="editPrice('<%= item._id %>', '<%= store._id %>', '<%= item.name %>', '<%= store.name %>', <%= itemPrice ? itemPrice.price : 'null' %>, <%= itemPrice ? itemPrice.isOnSale : false %>, '<%= itemPrice ? itemPrice._id : '' %>')">
+                                <div class="grid-cell store-column price-cell" 
+                                     data-item-id="<%= item._id %>" 
+                                     data-store-id="<%= store._id %>" 
+                                     data-item-name="<%= item.name.replace(/"/g, '&quot;') %>" 
+                                     data-store-name="<%= store.name.replace(/"/g, '&quot;') %>" 
+                                     data-price="<%= itemPrice ? itemPrice.price : '' %>" 
+                                     data-is-on-sale="<%= itemPrice ? itemPrice.isOnSale : false %>" 
+                                     data-price-id="<%= itemPrice ? itemPrice._id : '' %>" 
+                                     onclick="editPriceFromCell(this)">
                                     <% if (itemPrice) { %>
                                         <div class="price-display <%= itemPrice.isOnSale ? 'price-sale' : '' %>">
                                             $<%= itemPrice.price.toFixed(2) %>
@@ -491,6 +511,7 @@
                     </div>
                 </div>
             <% } %>
+            </div>
         </div>
     </div>
 
@@ -732,7 +753,7 @@
             const data = Object.fromEntries(formData);
 
             // Need a default category - use first available or create one
-            const categories = <%= JSON.stringify(categories) %>;
+            const categories = <%- JSON.stringify(categories) %>;
             if (categories.length === 0) {
                 alert('Please create at least one category first');
                 return;
@@ -777,6 +798,26 @@
             } catch (err) {
                 alert('Error: ' + err.message);
             }
+        }
+
+        // Edit price from cell click
+        function editPriceFromCell(cell) {
+            const itemId = cell.dataset.itemId;
+            const storeId = cell.dataset.storeId;
+            const itemName = cell.dataset.itemName;
+            const storeName = cell.dataset.storeName;
+            const price = cell.dataset.price ? parseFloat(cell.dataset.price) : null;
+            const isOnSale = cell.dataset.isOnSale === 'true';
+            const priceId = cell.dataset.priceId;
+            
+            editPrice(itemId, storeId, itemName, storeName, price, isOnSale, priceId);
+        }
+
+        // Add store brand from button
+        function addStoreBrandFromBtn(btn) {
+            const itemId = btn.dataset.itemId;
+            const itemName = btn.dataset.itemName;
+            addStoreBrand(itemId, itemName);
         }
 
         // Add store brand variant
