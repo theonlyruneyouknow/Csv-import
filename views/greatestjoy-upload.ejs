@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .upload-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .upload-title {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .preview-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #6a4193 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/greatestjoy/dashboard" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Gallery
+        </a>
+    </div>
+
+    <div class="upload-container">
+        <h2 class="upload-title">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <%= media ? 'Edit Memory' : 'Upload New Memory' %>
+        </h2>
+
+        <form action="<%= media ? `/greatestjoy/media/${media._id}?_method=PUT` : '/greatestjoy/upload' %>" method="POST">
+            <div class="form-section">
+                <label class="form-label"><strong>Title *</strong></label>
+                <input type="text" class="form-control" name="title" value="<%= media ? media.title : '' %>" required>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label"><strong>Media Type *</strong></label>
+                <select class="form-select" name="mediaType" id="mediaType" <%= media ? 'disabled' : '' %> required>
+                    <option value="photo" <%= media && media.mediaType === 'photo' ? 'selected' : '' %>>Photo</option>
+                    <option value="video" <%= media && media.mediaType === 'video' ? 'selected' : '' %>>Video</option>
+                </select>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label"><strong>Image/Video URL *</strong></label>
+                <input type="url" class="form-control" name="url" id="mediaUrl" 
+                       value="<%= media ? media.url : '' %>" 
+                       <%= media ? 'readonly' : '' %>
+                       placeholder="https://example.com/image.jpg" 
+                       onchange="previewMedia()" required>
+                <small class="text-muted">Enter the direct URL to the photo or video</small>
+            </div>
+
+            <div class="form-section" id="thumbnailSection" style="display: none;">
+                <label class="form-label"><strong>Video Thumbnail URL</strong></label>
+                <input type="url" class="form-control" name="thumbnailUrl" 
+                       value="<%= media && media.thumbnailUrl ? media.thumbnailUrl : '' %>" 
+                       placeholder="https://example.com/thumbnail.jpg">
+                <small class="text-muted">Optional: URL for video thumbnail image</small>
+            </div>
+
+            <div class="preview-container" id="previewContainer" style="display: none;">
+                <img id="preview" class="preview-image" alt="Preview">
+            </div>
+
+            <div class="form-section">
+                <label class="form-label"><strong>Child's Name *</strong></label>
+                <input type="text" class="form-control" name="childName" 
+                       value="<%= media ? media.child.name : '' %>" 
+                       list="childrenList" required>
+                <datalist id="childrenList">
+                    <% if (children && children.length > 0) { %>
+                        <% children.forEach(child => { %>
+                            <option value="<%= child %>">
+                        <% }); %>
+                    <% } %>
+                </datalist>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-section">
+                    <label class="form-label"><strong>Birth Date</strong></label>
+                    <input type="date" class="form-control" name="childBirthDate" 
+                           value="<%= media && media.child.birthDate ? new Date(media.child.birthDate).toISOString().split('T')[0] : '' %>">
+                </div>
+
+                <div class="col-md-6 form-section">
+                    <label class="form-label"><strong>Relationship</strong></label>
+                    <select class="form-select" name="relationship">
+                        <option value="grandchild" <%= media && media.child.relationship === 'grandchild' ? 'selected' : '' %>>Grandchild</option>
+                        <option value="great-grandchild" <%= media && media.child.relationship === 'great-grandchild' ? 'selected' : '' %>>Great-Grandchild</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label"><strong>Description</strong></label>
+                <textarea class="form-control" name="description" rows="3" 
+                          placeholder="Tell us about this special moment..."><%= media && media.description ? media.description : '' %></textarea>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label"><strong>Capture Date</strong></label>
+                <input type="date" class="form-control" name="captureDate" 
+                       value="<%= media && media.captureDate ? new Date(media.captureDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0] %>">
+            </div>
+
+            <div class="form-section">
+                <label class="form-label"><strong>Album</strong></label>
+                <input type="text" class="form-control" name="album" 
+                       value="<%= media && media.album ? media.album : '' %>" 
+                       list="albumsList" 
+                       placeholder="e.g., First Birthday, Summer 2025">
+                <datalist id="albumsList">
+                    <% if (albums && albums.length > 0) { %>
+                        <% albums.forEach(album => { %>
+                            <option value="<%= album %>">
+                        <% }); %>
+                    <% } %>
+                </datalist>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label"><strong>Location</strong></label>
+                <input type="text" class="form-control" name="location" 
+                       value="<%= media && media.location ? media.location : '' %>" 
+                       placeholder="e.g., Grandma's House, Zoo, Beach">
+            </div>
+
+            <div class="form-section">
+                <label class="form-label"><strong>Tags</strong></label>
+                <input type="text" class="form-control" name="tags" 
+                       value="<%= media && media.tags ? media.tags.join(', ') : '' %>" 
+                       placeholder="birthday, smile, family (comma separated)">
+            </div>
+
+            <div class="form-section">
+                <label class="form-label"><strong>Visibility</strong></label>
+                <select class="form-select" name="visibility">
+                    <option value="family" <%= !media || media.visibility === 'family' ? 'selected' : '' %>>Family Only</option>
+                    <option value="private" <%= media && media.visibility === 'private' ? 'selected' : '' %>>Private</option>
+                    <option value="public" <%= media && media.visibility === 'public' ? 'selected' : '' %>>Public</option>
+                </select>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save me-2"></i><%= media ? 'Update Memory' : 'Upload Memory' %>
+                </button>
+                <a href="/greatestjoy/dashboard" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function previewMedia() {
+            const url = document.getElementById('mediaUrl').value;
+            const preview = document.getElementById('preview');
+            const previewContainer = document.getElementById('previewContainer');
+            
+            if (url) {
+                preview.src = url;
+                previewContainer.style.display = 'block';
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        }
+
+        document.getElementById('mediaType').addEventListener('change', function() {
+            const thumbnailSection = document.getElementById('thumbnailSection');
+            if (this.value === 'video') {
+                thumbnailSection.style.display = 'block';
+            } else {
+                thumbnailSection.style.display = 'none';
+            }
+        });
+
+        // Show thumbnail section if editing video
+        window.onload = function() {
+            const mediaType = document.getElementById('mediaType').value;
+            if (mediaType === 'video') {
+                document.getElementById('thumbnailSection').style.display = 'block';
+            }
+            
+            // Show preview if editing
+            <% if (media && media.url) { %>
+                previewMedia();
+            <% } %>
+        };
+    </script>
+</body>
+</html>
