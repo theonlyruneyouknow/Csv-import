@@ -1,4 +1,5 @@
-const express = router = express.Router();
+const express = require('express');
+const router = express.Router();
 const FamilyCircle = require('../models/FamilyCircle');
 const { ensureAuthenticated } = require('../middleware/auth');
 const crypto = require('crypto');
