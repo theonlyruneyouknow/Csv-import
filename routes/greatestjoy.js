@@ -77,6 +77,7 @@ router.get('/upload', ensureAuthenticated, async (req, res) => {
         res.render('greatestjoy-upload', {
             title: 'Upload - Greatest Joy',
             user: req.user,
+            media: null,
             children,
             albums
         });
