@@ -11051,6 +11051,8 @@ Thank you`;
             console.log('🔄 applyFilters() called');
             const searchFilterEl = document.getElementById('searchFilter');
             const searchTerm = searchFilterEl ? searchFilterEl.value.trim().toLowerCase() : '';
+            const hasSearchTerm = searchTerm.length > 0;
+            
             const nsStatusFilterEl = document.getElementById('nsStatusFilter');
             const nsStatusFilter = nsStatusFilterEl ? nsStatusFilterEl.value : 'all';
             const statusFilterEl = document.getElementById('statusFilter');
@@ -11088,6 +11090,11 @@ Thank you`;
                 })();
             <% }) %>
                 console.log('🎯 PO Type Filters:', poTypeFilters);
+            
+            // Log when search overrides filters
+            if (hasSearchTerm) {
+                console.log('🔍 Search term present - ignoring all filters except search');
+            }
 
             const rows = document.querySelectorAll('#purchaseOrdersTable tbody tr[data-po]'); // Only main rows
             let visibleCount = 0;
@@ -11216,7 +11223,17 @@ Thank you`;
                 // Priority filter
                 const matchesPriority = priorityFilter === 'all' || (poData.priority && poData.priority.toString() === priorityFilter);
 
-                if (matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowPendingSupervisorApproval && shouldShowBasedOnUrl && shouldShowBasedOnEta && shouldShowBasedOnLineItems && shouldShowBasedOnPartialReceives && matchesLocation && matchesPoType) {
+                // If there's a search term, ONLY use the search filter and ignore all other filters
+                // This makes searching easier - you don't have to worry about filter settings
+                let shouldShow;
+                if (hasSearchTerm) {
+                    shouldShow = matchesSearch;
+                } else {
+                    // No search term - apply all filters normally
+                    shouldShow = matchesSearch && matchesNSStatus && matchesStatus && matchesNotes && matchesPriority && shouldShowNotMyConcern && shouldShowPendingBill && shouldShowPendingSupervisorApproval && shouldShowBasedOnUrl && shouldShowBasedOnEta && shouldShowBasedOnLineItems && shouldShowBasedOnPartialReceives && matchesLocation && matchesPoType;
+                }
+
+                if (shouldShow) {
                     row.classList.remove('hidden');
                     // Also show the corresponding notes row if it's expanded
                     const notesRow = document.getElementById(`notes-row-${index}`);
