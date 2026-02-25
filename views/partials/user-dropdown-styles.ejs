@@ -75,6 +75,27 @@
 
     .user-dropdown-menu {
         padding: 10px 0;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    /* Scrollbar styling for dropdown menu */
+    .user-dropdown-menu::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .user-dropdown-menu::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .user-dropdown-menu::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 4px;
+    }
+
+    .user-dropdown-menu::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
     }
 
     .user-dropdown-item {
