@@ -12,7 +12,63 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
         }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: white;
+            border-bottom: 2px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h2 {
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .user-profile-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
         .main-container {
             padding: 30px 20px;
             max-width: 1400px;
@@ -166,7 +222,24 @@
     </style>
 </head>
 <body>
-    <%- include('partials/user-dropdown') %>
+    <!-- Header -->
+    <div class="header">
+        <div>
+            <h2><i class="fas fa-users"></i> Family Circles</h2>
+        </div>
+        <div class="header-actions">
+            <a href="/greatestjoy/dashboard" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Back to Gallery
+            </a>
+            
+            <!-- User Dropdown -->
+            <% if (typeof user !== 'undefined' && user) { %>
+                <div class="user-profile-section">
+                    <%- include('partials/user-dropdown', { user: user }) %>
+                </div>
+            <% } %>
+        </div>
+    </div>
 
     <div class="main-container">
         <div class="page-header">
