@@ -335,6 +335,62 @@
             <% }); %>
         </div>
 
+        <!-- Family Member Profiles Section -->
+        <div class="section-card">
+            <div class="section-title">
+                <span><i class="fas fa-user-friends"></i> Family Member Profiles (<%= circle.familyMembers ? circle.familyMembers.length : 0 %>)</span>
+                <button class="btn btn-primary btn-custom" data-bs-toggle="modal" data-bs-target="#addFamilyMemberModal">
+                    <i class="fas fa-plus"></i> Add Family Member
+                </button>
+            </div>
+            
+            <% if (circle.familyMembers && circle.familyMembers.length > 0) { %>
+                <% circle.familyMembers.forEach(familyMember => { %>
+                    <div class="member-item">
+                        <div class="member-info">
+                            <div class="member-avatar">
+                                <%= familyMember.name.split(' ').map(n => n.charAt(0).toUpperCase()).join('').substring(0, 2) %>
+                            </div>
+                            <div class="member-details">
+                                <h5><%= familyMember.name %></h5>
+                                <div class="member-meta">
+                                    <i class="fas fa-heart"></i> <%= familyMember.relationship.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') %>
+                                    <% if (familyMember.gender && familyMember.gender !== 'prefer-not-to-say') { %>
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-<%= familyMember.gender === 'male' ? 'mars' : familyMember.gender === 'female' ? 'venus' : 'genderless' %>"></i> 
+                                        <%= familyMember.gender.charAt(0).toUpperCase() + familyMember.gender.slice(1) %>
+                                    <% } %>
+                                    <% if (familyMember.birthDate) { %>
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-birthday-cake"></i> <%= new Date(familyMember.birthDate).toLocaleDateString() %>
+                                    <% } %>
+                                </div>
+                                <% if (familyMember.notes) { %>
+                                    <div class="member-meta mt-1">
+                                        <i class="fas fa-sticky-note"></i> <%= familyMember.notes %>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary btn-sm btn-custom" 
+                                    onclick="editFamilyMember('<%= familyMember._id %>', '<%= familyMember.name %>', '<%= familyMember.relationship %>', '<%= familyMember.gender %>', '<%= familyMember.birthDate ? new Date(familyMember.birthDate).toISOString().split('T')[0] : '' %>', '<%= familyMember.notes || '' %>')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger-custom btn-sm btn-custom" 
+                                    onclick="removeFamilyMember('<%= familyMember._id %>', '<%= familyMember.name %>')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <p class="text-muted text-center py-4">
+                    <i class="fas fa-user-friends"></i> No family member profiles yet. Add your first family member!
+                </p>
+            <% } %>
+        </div>
+
         <!-- Invitations Section (Admin only) -->
         <% if (userRole === 'admin') { %>
             <div class="section-card">
@@ -377,6 +433,140 @@
                 <% } %>
             </div>
         <% } %>
+    </div>
+
+    <!-- Add Family Member Modal -->
+    <div class="modal fade" id="addFamilyMemberModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user-plus"></i> Add Family Member</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="/greatestjoy/familycircles/<%= circle._id %>/family-members" method="POST">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="name" name="name" required 
+                                   placeholder="e.g., Emma Johnson">
+                        </div>
+                        <div class="mb-3">
+                            <label for="relationship" class="form-label">Relationship *</label>
+                            <select class="form-select" id="relationship" name="relationship" required>
+                                <option value="">Select relationship...</option>
+                                <option value="grandchild">Grandchild</option>
+                                <option value="great-grandchild">Great-Grandchild</option>
+                                <option value="child">Child</option>
+                                <option value="grandparent">Grandparent</option>
+                                <option value="great-grandparent">Great-Grandparent</option>
+                                <option value="parent">Parent</option>
+                                <option value="sibling">Sibling</option>
+                                <option value="spouse">Spouse</option>
+                                <option value="aunt">Aunt</option>
+                                <option value="uncle">Uncle</option>
+                                <option value="cousin">Cousin</option>
+                                <option value="niece">Niece</option>
+                                <option value="nephew">Nephew</option>
+                                <option value="in-law">In-Law</option>
+                                <option value="step-relative">Step-Relative</option>
+                                <option value="friend">Friend</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="gender" class="form-label">Gender</label>
+                            <select class="form-select" id="gender" name="gender">
+                                <option value="prefer-not-to-say">Prefer not to say</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="birthDate" class="form-label">Birth Date</label>
+                            <input type="date" class="form-control" id="birthDate" name="birthDate">
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="2" 
+                                      placeholder="Additional information about this family member..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-custom">
+                            <i class="fas fa-save"></i> Add Family Member
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Family Member Modal -->
+    <div class="modal fade" id="editFamilyMemberModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Family Member</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editFamilyMemberForm" method="POST">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="edit_name" class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="edit_name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_relationship" class="form-label">Relationship *</label>
+                            <select class="form-select" id="edit_relationship" name="relationship" required>
+                                <option value="">Select relationship...</option>
+                                <option value="grandchild">Grandchild</option>
+                                <option value="great-grandchild">Great-Grandchild</option>
+                                <option value="child">Child</option>
+                                <option value="grandparent">Grandparent</option>
+                                <option value="great-grandparent">Great-Grandparent</option>
+                                <option value="parent">Parent</option>
+                                <option value="sibling">Sibling</option>
+                                <option value="spouse">Spouse</option>
+                                <option value="aunt">Aunt</option>
+                                <option value="uncle">Uncle</option>
+                                <option value="cousin">Cousin</option>
+                                <option value="niece">Niece</option>
+                                <option value="nephew">Nephew</option>
+                                <option value="in-law">In-Law</option>
+                                <option value="step-relative">Step-Relative</option>
+                                <option value="friend">Friend</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_gender" class="form-label">Gender</label>
+                            <select class="form-select" id="edit_gender" name="gender">
+                                <option value="prefer-not-to-say">Prefer not to say</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_birthDate" class="form-label">Birth Date</label>
+                            <input type="date" class="form-control" id="edit_birthDate" name="birthDate">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="edit_notes" name="notes" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-custom">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Invite Modal -->
@@ -427,6 +617,39 @@
                         window.location.reload();
                     } else {
                         alert('Failed to remove member');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    alert('An error occurred');
+                });
+            }
+        }
+
+        function editFamilyMember(id, name, relationship, gender, birthDate, notes) {
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_relationship').value = relationship;
+            document.getElementById('edit_gender').value = gender;
+            document.getElementById('edit_birthDate').value = birthDate;
+            document.getElementById('edit_notes').value = notes;
+            
+            document.getElementById('editFamilyMemberForm').action = 
+                `/greatestjoy/familycircles/<%= circle._id %>/family-members/${id}`;
+            
+            const modal = new bootstrap.Modal(document.getElementById('editFamilyMemberModal'));
+            modal.show();
+        }
+
+        function removeFamilyMember(memberId, memberName) {
+            if (confirm(`Are you sure you want to remove ${memberName} from the family member profiles?`)) {
+                fetch(`/greatestjoy/familycircles/<%= circle._id %>/family-members/${memberId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Failed to remove family member');
                     }
                 })
                 .catch(err => {

@@ -30,6 +30,43 @@ const familyCircleSchema = new mongoose.Schema({
             default: Date.now
         }
     }],
+    familyMembers: [{
+        name: {
+            type: String,
+            required: true,
+            trim: true
+        },
+        relationship: {
+            type: String,
+            enum: [
+                'grandchild', 'great-grandchild', 'child', 'grandparent',
+                'great-grandparent', 'parent', 'sibling', 'spouse',
+                'aunt', 'uncle', 'cousin', 'niece', 'nephew',
+                'in-law', 'step-relative', 'friend', 'other'
+            ],
+            required: true
+        },
+        gender: {
+            type: String,
+            enum: ['male', 'female', 'other', 'prefer-not-to-say'],
+            default: 'prefer-not-to-say'
+        },
+        birthDate: {
+            type: Date
+        },
+        notes: {
+            type: String,
+            trim: true
+        },
+        addedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        addedDate: {
+            type: Date,
+            default: Date.now
+        }
+    }],
     invitations: [{
         email: {
             type: String,

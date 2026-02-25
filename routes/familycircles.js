@@ -279,4 +279,106 @@ router.delete('/:id/members/:memberId', async (req, res) => {
     }
 });
 
+// Add family member profile
+router.post('/:id/family-members', async (req, res) => {
+    try {
+        const circle = await FamilyCircle.findById(req.params.id);
+        
+        if (!circle) {
+            return res.status(404).send('Circle not found');
+        }
+        
+        const isMember = circle.members.some(m => 
+            m.user.toString() === req.user._id.toString()
+        );
+        
+        if (!isMember) {
+            return res.status(403).send('Not authorized');
+        }
+        
+        const { name, relationship, gender, birthDate, notes } = req.body;
+        
+        circle.familyMembers.push({
+            name,
+            relationship,
+            gender: gender || 'prefer-not-to-say',
+            birthDate: birthDate || null,
+            notes: notes || '',
+            addedBy: req.user._id
+        });
+        
+        await circle.save();
+        res.redirect(`/greatestjoy/familycircles/${circle._id}`);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
+// Update family member profile
+router.post('/:id/family-members/:memberId', async (req, res) => {
+    try {
+        const circle = await FamilyCircle.findById(req.params.id);
+        
+        if (!circle) {
+            return res.status(404).send('Circle not found');
+        }
+        
+        const isMember = circle.members.some(m => 
+            m.user.toString() === req.user._id.toString()
+        );
+        
+        if (!isMember) {
+            return res.status(403).send('Not authorized');
+        }
+        
+        const familyMember = circle.familyMembers.id(req.params.memberId);
+        
+        if (!familyMember) {
+            return res.status(404).send('Family member not found');
+        }
+        
+        const { name, relationship, gender, birthDate, notes } = req.body;
+        
+        familyMember.name = name;
+        familyMember.relationship = relationship;
+        familyMember.gender = gender || 'prefer-not-to-say';
+        familyMember.birthDate = birthDate || null;
+        familyMember.notes = notes || '';
+        
+        await circle.save();
+        res.redirect(`/greatestjoy/familycircles/${circle._id}`);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
+// Delete family member profile
+router.delete('/:id/family-members/:memberId', async (req, res) => {
+    try {
+        const circle = await FamilyCircle.findById(req.params.id);
+        
+        if (!circle) {
+            return res.status(404).json({ error: 'Circle not found' });
+        }
+        
+        const isMember = circle.members.some(m => 
+            m.user.toString() === req.user._id.toString()
+        );
+        
+        if (!isMember) {
+            return res.status(403).json({ error: 'Not authorized' });
+        }
+        
+        circle.familyMembers.pull(req.params.memberId);
+        await circle.save();
+        
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server Error' });
+    }
+});
+
 module.exports = router;
