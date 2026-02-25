@@ -296,13 +296,26 @@ router.post('/:id/family-members', async (req, res) => {
             return res.status(403).send('Not authorized');
         }
         
-        const { name, relationship, gender, birthDate, notes } = req.body;
+        const { name, nickname, relationship, gender, birthDate, imageUrl, phone, email, facebook, instagram, twitter, linkedin, socialOther, notes } = req.body;
         
         circle.familyMembers.push({
             name,
+            nickname: nickname || '',
             relationship,
             gender: gender || 'prefer-not-to-say',
             birthDate: birthDate || null,
+            imageUrl: imageUrl || '',
+            contactInfo: {
+                phone: phone || '',
+                email: email || ''
+            },
+            socialMedia: {
+                facebook: facebook || '',
+                instagram: instagram || '',
+                twitter: twitter || '',
+                linkedin: linkedin || '',
+                other: socialOther || ''
+            },
             notes: notes || '',
             addedBy: req.user._id
         });
@@ -338,12 +351,25 @@ router.post('/:id/family-members/:memberId', async (req, res) => {
             return res.status(404).send('Family member not found');
         }
         
-        const { name, relationship, gender, birthDate, notes } = req.body;
+        const { name, nickname, relationship, gender, birthDate, imageUrl, phone, email, facebook, instagram, twitter, linkedin, socialOther, notes } = req.body;
         
         familyMember.name = name;
+        familyMember.nickname = nickname || '';
         familyMember.relationship = relationship;
         familyMember.gender = gender || 'prefer-not-to-say';
         familyMember.birthDate = birthDate || null;
+        familyMember.imageUrl = imageUrl || '';
+        familyMember.contactInfo = {
+            phone: phone || '',
+            email: email || ''
+        };
+        familyMember.socialMedia = {
+            facebook: facebook || '',
+            instagram: instagram || '',
+            twitter: twitter || '',
+            linkedin: linkedin || '',
+            other: socialOther || ''
+        };
         familyMember.notes = notes || '';
         
         await circle.save();

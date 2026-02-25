@@ -348,11 +348,21 @@
                 <% circle.familyMembers.forEach(familyMember => { %>
                     <div class="member-item">
                         <div class="member-info">
-                            <div class="member-avatar">
-                                <%= familyMember.name.split(' ').map(n => n.charAt(0).toUpperCase()).join('').substring(0, 2) %>
-                            </div>
+                            <% if (familyMember.imageUrl) { %>
+                                <img src="<%= familyMember.imageUrl %>" alt="<%= familyMember.name %>" 
+                                     class="member-avatar" style="width: 45px; height: 45px; object-fit: cover;">
+                            <% } else { %>
+                                <div class="member-avatar">
+                                    <%= familyMember.name.split(' ').map(n => n.charAt(0).toUpperCase()).join('').substring(0, 2) %>
+                                </div>
+                            <% } %>
                             <div class="member-details">
-                                <h5><%= familyMember.name %></h5>
+                                <h5>
+                                    <%= familyMember.name %>
+                                    <% if (familyMember.nickname) { %>
+                                        <span style="color: #999; font-weight: normal; font-size: 0.9rem;">(<%= familyMember.nickname %>)</span>
+                                    <% } %>
+                                </h5>
                                 <div class="member-meta">
                                     <i class="fas fa-heart"></i> <%= familyMember.relationship.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') %>
                                     <% if (familyMember.gender && familyMember.gender !== 'prefer-not-to-say') { %>
@@ -365,6 +375,43 @@
                                         <i class="fas fa-birthday-cake"></i> <%= new Date(familyMember.birthDate).toLocaleDateString() %>
                                     <% } %>
                                 </div>
+                                <% if (familyMember.contactInfo && (familyMember.contactInfo.phone || familyMember.contactInfo.email)) { %>
+                                    <div class="member-meta mt-1">
+                                        <% if (familyMember.contactInfo.phone) { %>
+                                            <i class="fas fa-phone"></i> <%= familyMember.contactInfo.phone %>
+                                        <% } %>
+                                        <% if (familyMember.contactInfo.phone && familyMember.contactInfo.email) { %>
+                                            <span class="mx-2">•</span>
+                                        <% } %>
+                                        <% if (familyMember.contactInfo.email) { %>
+                                            <i class="fas fa-envelope"></i> <%= familyMember.contactInfo.email %>
+                                        <% } %>
+                                    </div>
+                                <% } %>
+                                <% if (familyMember.socialMedia && (familyMember.socialMedia.facebook || familyMember.socialMedia.instagram || familyMember.socialMedia.twitter || familyMember.socialMedia.linkedin)) { %>
+                                    <div class="member-meta mt-1">
+                                        <% if (familyMember.socialMedia.facebook) { %>
+                                            <a href="<%= familyMember.socialMedia.facebook %>" target="_blank" class="text-decoration-none me-2">
+                                                <i class="fab fa-facebook"></i>
+                                            </a>
+                                        <% } %>
+                                        <% if (familyMember.socialMedia.instagram) { %>
+                                            <a href="<%= familyMember.socialMedia.instagram %>" target="_blank" class="text-decoration-none me-2">
+                                                <i class="fab fa-instagram"></i>
+                                            </a>
+                                        <% } %>
+                                        <% if (familyMember.socialMedia.twitter) { %>
+                                            <a href="<%= familyMember.socialMedia.twitter %>" target="_blank" class="text-decoration-none me-2">
+                                                <i class="fab fa-twitter"></i>
+                                            </a>
+                                        <% } %>
+                                        <% if (familyMember.socialMedia.linkedin) { %>
+                                            <a href="<%= familyMember.socialMedia.linkedin %>" target="_blank" class="text-decoration-none me-2">
+                                                <i class="fab fa-linkedin"></i>
+                                            </a>
+                                        <% } %>
+                                    </div>
+                                <% } %>
                                 <% if (familyMember.notes) { %>
                                     <div class="member-meta mt-1">
                                         <i class="fas fa-sticky-note"></i> <%= familyMember.notes %>
@@ -374,7 +421,23 @@
                         </div>
                         <div class="d-flex gap-2">
                             <button class="btn btn-outline-primary btn-sm btn-custom" 
-                                    onclick="editFamilyMember('<%= familyMember._id %>', '<%= familyMember.name %>', '<%= familyMember.relationship %>', '<%= familyMember.gender %>', '<%= familyMember.birthDate ? new Date(familyMember.birthDate).toISOString().split('T')[0] : '' %>', '<%= familyMember.notes || '' %>')">
+                                    onclick='editFamilyMember(<%= JSON.stringify({
+                                        id: familyMember._id,
+                                        name: familyMember.name,
+                                        nickname: familyMember.nickname || "",
+                                        relationship: familyMember.relationship,
+                                        gender: familyMember.gender,
+                                        birthDate: familyMember.birthDate ? new Date(familyMember.birthDate).toISOString().split("T")[0] : "",
+                                        imageUrl: familyMember.imageUrl || "",
+                                        phone: familyMember.contactInfo?.phone || "",
+                                        email: familyMember.contactInfo?.email || "",
+                                        facebook: familyMember.socialMedia?.facebook || "",
+                                        instagram: familyMember.socialMedia?.instagram || "",
+                                        twitter: familyMember.socialMedia?.twitter || "",
+                                        linkedin: familyMember.socialMedia?.linkedin || "",
+                                        socialOther: familyMember.socialMedia?.other || "",
+                                        notes: familyMember.notes || ""
+                                    }) %>)'>
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger-custom btn-sm btn-custom" 
@@ -444,11 +507,22 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form action="/greatestjoy/familycircles/<%= circle._id %>/family-members" method="POST">
-                    <div class="modal-body">
+                    <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                         <div class="mb-3">
                             <label for="name" class="form-label">Full Name *</label>
                             <input type="text" class="form-control" id="name" name="name" required 
                                    placeholder="e.g., Emma Johnson">
+                        </div>
+                        <div class="mb-3">
+                            <label for="nickname" class="form-label">Nickname / Preferred Name</label>
+                            <input type="text" class="form-control" id="nickname" name="nickname" 
+                                   placeholder="e.g., Emmy">
+                        </div>
+                        <div class="mb-3">
+                            <label for="imageUrl" class="form-label">Photo URL</label>
+                            <input type="url" class="form-control" id="imageUrl" name="imageUrl" 
+                                   placeholder="https://example.com/photo.jpg">
+                            <small class="text-muted">Paste a direct link to a photo</small>
                         </div>
                         <div class="mb-3">
                             <label for="relationship" class="form-label">Relationship *</label>
@@ -486,6 +560,52 @@
                             <label for="birthDate" class="form-label">Birth Date</label>
                             <input type="date" class="form-control" id="birthDate" name="birthDate">
                         </div>
+                        
+                        <hr class="my-4">
+                        <h6 class="mb-3"><i class="fas fa-address-book"></i> Contact Information</h6>
+                        
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                   placeholder="e.g., (555) 123-4567">
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   placeholder="e.g., emma@example.com">
+                        </div>
+                        
+                        <hr class="my-4">
+                        <h6 class="mb-3"><i class="fas fa-share-alt"></i> Social Media</h6>
+                        
+                        <div class="mb-3">
+                            <label for="facebook" class="form-label"><i class="fab fa-facebook"></i> Facebook</label>
+                            <input type="url" class="form-control" id="facebook" name="facebook" 
+                                   placeholder="https://facebook.com/username">
+                        </div>
+                        <div class="mb-3">
+                            <label for="instagram" class="form-label"><i class="fab fa-instagram"></i> Instagram</label>
+                            <input type="url" class="form-control" id="instagram" name="instagram" 
+                                   placeholder="https://instagram.com/username">
+                        </div>
+                        <div class="mb-3">
+                            <label for="twitter" class="form-label"><i class="fab fa-twitter"></i> Twitter</label>
+                            <input type="url" class="form-control" id="twitter" name="twitter" 
+                                   placeholder="https://twitter.com/username">
+                        </div>
+                        <div class="mb-3">
+                            <label for="linkedin" class="form-label"><i class="fab fa-linkedin"></i> LinkedIn</label>
+                            <input type="url" class="form-control" id="linkedin" name="linkedin" 
+                                   placeholder="https://linkedin.com/in/username">
+                        </div>
+                        <div class="mb-3">
+                            <label for="socialOther" class="form-label">Other Social Link</label>
+                            <input type="url" class="form-control" id="socialOther" name="socialOther" 
+                                   placeholder="https://...">
+                        </div>
+                        
+                        <hr class="my-4">
+                        
                         <div class="mb-3">
                             <label for="notes" class="form-label">Notes</label>
                             <textarea class="form-control" id="notes" name="notes" rows="2" 
@@ -512,10 +632,19 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="editFamilyMemberForm" method="POST">
-                    <div class="modal-body">
+                    <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                         <div class="mb-3">
                             <label for="edit_name" class="form-label">Full Name *</label>
                             <input type="text" class="form-control" id="edit_name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_nickname" class="form-label">Nickname / Preferred Name</label>
+                            <input type="text" class="form-control" id="edit_nickname" name="nickname">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_imageUrl" class="form-label">Photo URL</label>
+                            <input type="url" class="form-control" id="edit_imageUrl" name="imageUrl">
+                            <small class="text-muted">Paste a direct link to a photo</small>
                         </div>
                         <div class="mb-3">
                             <label for="edit_relationship" class="form-label">Relationship *</label>
@@ -553,6 +682,45 @@
                             <label for="edit_birthDate" class="form-label">Birth Date</label>
                             <input type="date" class="form-control" id="edit_birthDate" name="birthDate">
                         </div>
+                        
+                        <hr class="my-4">
+                        <h6 class="mb-3"><i class="fas fa-address-book"></i> Contact Information</h6>
+                        
+                        <div class="mb-3">
+                            <label for="edit_phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="edit_phone" name="phone">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="edit_email" name="email">
+                        </div>
+                        
+                        <hr class="my-4">
+                        <h6 class="mb-3"><i class="fas fa-share-alt"></i> Social Media</h6>
+                        
+                        <div class="mb-3">
+                            <label for="edit_facebook" class="form-label"><i class="fab fa-facebook"></i> Facebook</label>
+                            <input type="url" class="form-control" id="edit_facebook" name="facebook">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_instagram" class="form-label"><i class="fab fa-instagram"></i> Instagram</label>
+                            <input type="url" class="form-control" id="edit_instagram" name="instagram">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_twitter" class="form-label"><i class="fab fa-twitter"></i> Twitter</label>
+                            <input type="url" class="form-control" id="edit_twitter" name="twitter">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_linkedin" class="form-label"><i class="fab fa-linkedin"></i> LinkedIn</label>
+                            <input type="url" class="form-control" id="edit_linkedin" name="linkedin">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_socialOther" class="form-label">Other Social Link</label>
+                            <input type="url" class="form-control" id="edit_socialOther" name="socialOther">
+                        </div>
+                        
+                        <hr class="my-4">
+                        
                         <div class="mb-3">
                             <label for="edit_notes" class="form-label">Notes</label>
                             <textarea class="form-control" id="edit_notes" name="notes" rows="2"></textarea>
@@ -626,15 +794,24 @@
             }
         }
 
-        function editFamilyMember(id, name, relationship, gender, birthDate, notes) {
-            document.getElementById('edit_name').value = name;
-            document.getElementById('edit_relationship').value = relationship;
-            document.getElementById('edit_gender').value = gender;
-            document.getElementById('edit_birthDate').value = birthDate;
-            document.getElementById('edit_notes').value = notes;
+        function editFamilyMember(data) {
+            document.getElementById('edit_name').value = data.name || '';
+            document.getElementById('edit_nickname').value = data.nickname || '';
+            document.getElementById('edit_imageUrl').value = data.imageUrl || '';
+            document.getElementById('edit_relationship').value = data.relationship || '';
+            document.getElementById('edit_gender').value = data.gender || 'prefer-not-to-say';
+            document.getElementById('edit_birthDate').value = data.birthDate || '';
+            document.getElementById('edit_phone').value = data.phone || '';
+            document.getElementById('edit_email').value = data.email || '';
+            document.getElementById('edit_facebook').value = data.facebook || '';
+            document.getElementById('edit_instagram').value = data.instagram || '';
+            document.getElementById('edit_twitter').value = data.twitter || '';
+            document.getElementById('edit_linkedin').value = data.linkedin || '';
+            document.getElementById('edit_socialOther').value = data.socialOther || '';
+            document.getElementById('edit_notes').value = data.notes || '';
             
             document.getElementById('editFamilyMemberForm').action = 
-                `/greatestjoy/familycircles/<%= circle._id %>/family-members/${id}`;
+                `/greatestjoy/familycircles/<%= circle._id %>/family-members/${data.id}`;
             
             const modal = new bootstrap.Modal(document.getElementById('editFamilyMemberModal'));
             modal.show();

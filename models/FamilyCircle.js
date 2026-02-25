@@ -36,6 +36,10 @@ const familyCircleSchema = new mongoose.Schema({
             required: true,
             trim: true
         },
+        nickname: {
+            type: String,
+            trim: true
+        },
         relationship: {
             type: String,
             enum: [
@@ -53,6 +57,43 @@ const familyCircleSchema = new mongoose.Schema({
         },
         birthDate: {
             type: Date
+        },
+        imageUrl: {
+            type: String,
+            trim: true
+        },
+        contactInfo: {
+            phone: {
+                type: String,
+                trim: true
+            },
+            email: {
+                type: String,
+                trim: true,
+                lowercase: true
+            }
+        },
+        socialMedia: {
+            facebook: {
+                type: String,
+                trim: true
+            },
+            instagram: {
+                type: String,
+                trim: true
+            },
+            twitter: {
+                type: String,
+                trim: true
+            },
+            linkedin: {
+                type: String,
+                trim: true
+            },
+            other: {
+                type: String,
+                trim: true
+            }
         },
         notes: {
             type: String,
