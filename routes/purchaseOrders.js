@@ -5642,8 +5642,10 @@ router.post('/bulk-update-urls-and-types', async (req, res) => {
             console.log(`   Format: ${isTabDelimited ? 'Tab-delimited headers' : 'Multi-line headers'}`);
             
             // Parse headers to find column indices
+            let itemCol = -1;
             let quantityCol = -1;
             let descriptionCol = -1;
+            let vendorDescCol = -1;
             let rateCol = -1;
             let amountCol = -1;
             let headerEndIndex = 0;
@@ -5653,8 +5655,10 @@ router.post('/bulk-update-urls-and-types', async (req, res) => {
               const headers = headerLine.split('\t').map(h => h.trim().toLowerCase());
               console.log(`   Headers detected:`, headers.slice(0, 6));
               
+              itemCol = headers.indexOf('item');
               quantityCol = headers.indexOf('quantity');
               descriptionCol = headers.indexOf('description');
+              vendorDescCol = headers.indexOf('vendor desc');
               rateCol = headers.indexOf('rate');
               amountCol = headers.indexOf('amount');
               headerEndIndex = 1;
@@ -5673,13 +5677,15 @@ router.post('/bulk-update-urls-and-types', async (req, res) => {
               console.log(`   Multi-line headers (${headerNames.length}):`, headerNames.slice(0, 6));
               
               // Map header names to column indices
+              itemCol = headerNames.indexOf('item');
               quantityCol = headerNames.indexOf('quantity');
               descriptionCol = headerNames.indexOf('description');
+              vendorDescCol = headerNames.indexOf('vendor desc');
               rateCol = headerNames.indexOf('rate');
               amountCol = headerNames.indexOf('amount');
             }
             
-            console.log(`   Column mapping: Quantity=${quantityCol}, Description=${descriptionCol}, Rate=${rateCol}, Amount=${amountCol}`);
+            console.log(`   Column mapping: Item=${itemCol}, Quantity=${quantityCol}, Description=${descriptionCol}, Vendor Desc=${vendorDescCol}, Rate=${rateCol}, Amount=${amountCol}`);
             
             // Find where data starts (skip headers)
             let dataStartIndex = headerEndIndex;
@@ -5707,13 +5713,17 @@ router.post('/bulk-update-urls-and-types', async (req, res) => {
               console.log(`   Row ${i}: ${values.length} columns -`, values.slice(0, 4));
               
               if (values.length >= 3) {
-                const item = values[0] || '';
-                
                 // Use detected column positions, with fallbacks
+                let itemCode = '';
                 let quantity = 0;
                 let description = '';
+                let vendorDescription = '';
                 let rate = 0;
                 let amount = 0;
+                
+                if (itemCol >= 0 && values[itemCol]) {
+                  itemCode = values[itemCol];
+                }
                 
                 if (quantityCol >= 0 && values[quantityCol]) {
                   quantity = parseFloat(values[quantityCol].replace(/,/g, '')) || 0;
@@ -5721,6 +5731,10 @@ router.post('/bulk-update-urls-and-types', async (req, res) => {
                 
                 if (descriptionCol >= 0 && values[descriptionCol]) {
                   description = values[descriptionCol];
+                }
+                
+                if (vendorDescCol >= 0 && values[vendorDescCol]) {
+                  vendorDescription = values[vendorDescCol];
                 }
                 
                 if (rateCol >= 0 && values[rateCol]) {
@@ -5731,10 +5745,17 @@ router.post('/bulk-update-urls-and-types', async (req, res) => {
                   amount = parseFloat(values[amountCol].replace(/[$,]/g, '')) || 0;
                 }
 
-                console.log(`     -> Quantity: ${quantity}, Description: ${description.substring(0, 30)}`);
+                console.log(`     -> Item: ${itemCode}, Quantity: ${quantity}, Description: ${description.substring(0, 30)}`);
 
                 if (quantity > 0 && description) {
-                  lineItems.push({ item, quantity, description, rate, amount });
+                  lineItems.push({ 
+                    itemCode,  // Store the item code (SKU)
+                    quantity, 
+                    description, 
+                    vendorDescription,  // Add vendor description
+                    rate, 
+                    amount 
+                  });
                 }
               }
             }
@@ -5750,9 +5771,16 @@ router.post('/bulk-update-urls-and-types', async (req, res) => {
               let imported = 0;
               for (const item of lineItems) {
                 try {
+                  // Create notes array with vendor description if available
+                  const notesArray = [];
+                  if (item.vendorDescription) {
+                    notesArray.push(`Vendor Desc: ${item.vendorDescription}`);
+                  }
+                  
                   await LineItem.create({
                     poId: po._id,
                     poNumber: po.poNumber,
+                    sku: item.itemCode || '',  // Use itemCode as SKU
                     memo: item.description,  // Required field
                     itemDescription: item.description,
                     quantity: item.quantity,
@@ -5761,6 +5789,7 @@ router.post('/bulk-update-urls-and-types', async (req, res) => {
                     rate: item.rate,
                     amount: item.amount,
                     received: false,
+                    notes: notesArray.join('\n'),  // Store vendor description in notes
                     createdAt: new Date()
                   });
                   imported++;
