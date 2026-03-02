@@ -13,6 +13,13 @@ console.log('🔄 Auth routes file loaded');
 router.get('/login', ensureNotAuthenticated, (req, res) => {
     console.log('📨 GET /auth/login accessed');
     console.log('📍 returnTo in session:', req.session.returnTo);
+    console.log('📍 returnTo in query:', req.query.returnTo);
+    
+    // Capture returnTo from query parameter if it exists
+    if (req.query.returnTo) {
+        req.session.returnTo = req.query.returnTo;
+        console.log('💾 Stored returnTo from query parameter:', req.query.returnTo);
+    }
     
     res.render('auth/login', { 
         message: req.flash('error'),
@@ -29,6 +36,7 @@ router.get('/login', ensureNotAuthenticated, (req, res) => {
 router.post('/login', ensureNotAuthenticated, (req, res, next) => {
     console.log('📨 POST /auth/login - Login attempt');
     console.log('📍 returnTo in session before login:', req.session.returnTo);
+    console.log('📍 returnTo in request body:', req.body.returnTo);
     
     passport.authenticate('local', (err, user, info) => {
         if (err) {
@@ -40,16 +48,21 @@ router.post('/login', ensureNotAuthenticated, (req, res, next) => {
             return res.redirect('/auth/login');
         }
         
-        // CRITICAL: Save returnTo BEFORE req.logIn() because logIn regenerates session
-        const returnTo = req.session.returnTo || '/';
+        // CRITICAL: Save returnTo BEFORE req.logIn() because logIn can regenerate session
+        // Check both body (from hidden form field) and session
+        const returnTo = req.body.returnTo || req.session.returnTo || '/purchase-orders';
         console.log('💾 Saved returnTo before logIn:', returnTo);
+        console.log('📍 Source: body=' + req.body.returnTo + ', session=' + req.session.returnTo);
         
-        req.logIn(user, (err) => {
+        // Use keepSessionInfo to preserve session data during login
+        req.logIn(user, { keepSessionInfo: true }, (err) => {
             if (err) {
+                console.log('❌ Login error:', err);
                 return next(err);
             }
             
             console.log('✅ Login successful, redirecting to:', returnTo);
+            console.log('🔍 Final redirect URL:', returnTo);
             delete req.session.returnTo;
             return res.redirect(returnTo);
         });

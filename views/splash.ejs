@@ -201,11 +201,18 @@
             border-radius: 15px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            display: block;
         }
 
         .feature:hover {
             transform: translateY(-5px);
             background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
 
         .feature-icon {
@@ -348,7 +355,7 @@
             <div class="container">
                 <nav class="navbar">
                     <a class="navbar-brand" href="/">
-                        <i class="fas fa-boxes"></i>
+                        <i class="fas fa-home"></i>
                         TSC Management System
                     </a>
                 </nav>
@@ -360,18 +367,40 @@
             <div class="container">
                 <div class="hero-content">
                     <div class="hero-icon">
-                        <i class="fas fa-clipboard-list"></i>
+                        <i class="fas fa-th-large"></i>
                     </div>
                     
-                    <h1 class="hero-title">Purchase Order Management</h1>
-                    <p class="hero-subtitle">Streamline Your Business Operations</p>
+                    <h1 class="hero-title">TSC Management Portal</h1>
+                    <p class="hero-subtitle">All Your Tools, One Place</p>
                     
                     <p class="hero-description">
-                        Welcome to TSC's comprehensive purchase order management system. 
-                        Efficiently manage your orders, track inventory, and collaborate with your team 
-                        in a secure, user-friendly environment.
+                        Welcome to TSC's comprehensive management system. Access all your ministry tools, 
+                        from purchase orders to food management, hymns to family resources, all in one secure platform.
                     </p>
                     
+                    <!-- Module Navigation Dropdown -->
+                    <div style="max-width: 500px; margin: 0 auto 2rem auto;">
+                        <label for="moduleSelector" style="display: block; margin-bottom: 0.5rem; color: white; font-weight: 600;">
+                            <i class="fas fa-compass"></i> Explore Our Modules:
+                        </label>
+                        <select id="moduleSelector" class="form-select" style="font-size: 1.1rem; padding: 0.75rem; border-radius: 10px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.9);">
+                            <option value="">-- Select a Module to Learn More --</option>
+                            <option value="pod">📦 Purchase Orders (P.O.D.)</option>
+                            <option value="food">🍽️ Food Management</option>
+                            <option value="story">📖 Story Resources</option>
+                            <option value="medicine">💊 Medicine Management</option>
+                            <option value="bulletin">📋 Bulletin Board</option>
+                            <option value="hymns">🎵 Hymn Search</option>
+                            <option value="ebm">🌟 Elder Brother Mission</option>
+                            <option value="grocery">🛒 Grocery Management</option>
+                            <option value="greatestjoy">💫 Greatest Joy</option>
+                            <option value="familycircles">👨‍👩‍👧 Family Circles</option>
+                            <option value="musicbox">🎼 Music Box Library</option>
+                            <option value="email">📧 Email Client</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Login/Registration Buttons -->
                     <div class="action-buttons">
                         <% if (typeof user !== 'undefined' && user) { %>
                             <!-- User is logged in -->
@@ -396,71 +425,152 @@
                         <% } %>
                     </div>
                     
-                    <!-- Features Grid -->
-                    <div class="features">
-                        <div class="feature">
-                            <div class="feature-icon">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <h3 class="feature-title">Real-time Tracking</h3>
-                            <p class="feature-text">Monitor your purchase orders and inventory in real-time</p>
-                        </div>
-                        
-                        <div class="feature">
-                            <div class="feature-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <h3 class="feature-title">Team Collaboration</h3>
-                            <p class="feature-text">Work together seamlessly with role-based access control</p>
-                        </div>
-                        
-                        <div class="feature">
-                            <div class="feature-icon">
-                                <i class="fas fa-shield-alt"></i>
-                            </div>
-                            <h3 class="feature-title">Secure & Reliable</h3>
-                            <p class="feature-text">Enterprise-grade security with comprehensive audit trails</p>
-                        </div>
+                    <!-- Module Details (shown when selected) -->
+                    <div id="moduleDetails" style="display: none; margin-top: 2rem; padding: 1.5rem; background: rgba(255,255,255,0.15); border-radius: 15px; border: 2px solid rgba(255,255,255,0.3);">
+                        <!-- Content will be dynamically inserted -->
                     </div>
                 </div>
             </div>
         </main>
 
-        <!-- Temporary Food Module Test Section -->
-        <section style="background: rgba(255,255,255,0.1); padding: 2rem 0; margin: 2rem 0;">
+        <!-- All Modules Overview -->
+        <section style="background: rgba(0,0,0,0.2); padding: 3rem 0; position: relative; z-index: 10;">
             <div class="container">
-                <h3 style="color: white; text-align: center; margin-bottom: 1.5rem;">
-                    <i class="fas fa-utensils"></i> 🚨 EMERGENCY Food Module Test Links
-                </h3>
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <div style="background: rgba(255,0,0,0.3); padding: 1rem; border-radius: 10px; margin-bottom: 1rem; border: 2px solid #ff6b6b;">
-                            <h5 style="color: #ffd700;">🚨 EMERGENCY TESTS (Bypass ALL middleware)</h5>
-                            <p><a href="/emergency-test" style="color: white; font-weight: bold; font-size: 1.2em;">🔧 EMERGENCY: Basic Route Test</a></p>
-                            <p><a href="/emergency-food" style="color: white; font-weight: bold; font-size: 1.2em;">🍽️ EMERGENCY: Food Dashboard</a></p>
-                        </div>
+                <h2 style="color: white; text-align: center; margin-bottom: 2rem; font-size: 2.5rem;">
+                    <i class="fas fa-box-open"></i> Available Modules
+                </h2>
+                
+                <div class="row g-4">
+                    <!-- Purchase Orders -->
+                    <div class="col-md-6 col-lg-4">
+                        <a href="/auth/login?returnTo=/purchase-orders" class="feature" style="height: 100%; background: rgba(255,255,255,0.1);">
+                            <div class="feature-icon" style="color: #667eea;">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                            <h3 class="feature-title">Purchase Orders (P.O.D.)</h3>
+                            <p class="feature-text">Manage purchase orders, track inventory, vendor management, and receiving operations.</p>
+                        </a>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
-                            <h5 style="color: #ffd700;">Dashboard & Shopping</h5>
-                            <p><a href="/simple-test" style="color: white;">🔧 Simple Test Route (Check if routing works)</a></p>
-                            <p><a href="/food-debug" style="color: white;">🍽️ Food Dashboard Test</a></p>
-                            <p><a href="/food-test-shopping-new" style="color: white;">Shopping List Creation</a></p>
-                            <p><a href="/food-test-shopping-list" style="color: white;">View Shopping Lists</a></p>
-                        </div>
+                    
+                    <!-- Food Management -->
+                    <div class="col-md-6 col-lg-4">
+                        <a href="/auth/login?returnTo=/food-dashboard" class="feature" style="height: 100%; background: rgba(255,255,255,0.1);">
+                            <div class="feature-icon" style="color: #dc3545;">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <h3 class="feature-title">Food Management</h3>
+                            <p class="feature-text">Recipes, meal planning, pantry tracking, and shopping list management in one place.</p>
+                        </a>
                     </div>
-                    <div class="col-md-6">
-                        <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
-                            <h5 style="color: #ffd700;">Recipes & Planning</h5>
-                            <p><a href="/food-test-recipes-new" style="color: white;">Create Recipe</a></p>
-                            <p><a href="/food-test-recipes-list" style="color: white;">View Recipes</a></p>
-                            <p><a href="/food-test-meal-plans-new" style="color: white;">Create Meal Plan</a></p>
-                            <p><a href="/food-test-meal-plans-list" style="color: white;">View Meal Plans</a></p>
-                            <p><a href="/food-test-pantry-add" style="color: white;">Add Pantry Items</a></p>
-                            <p><a href="/food-test-pantry-list" style="color: white;">View Pantry</a></p>
-                        </div>
+                    
+                    <!-- Story Resources -->
+                    <div class="col-md-6 col-lg-4">
+                        <a href="/auth/login?returnTo=/story/dashboard" class="feature" style="height: 100%; background: rgba(255,255,255,0.1);">
+                            <div class="feature-icon" style="color: #ff6b6b;">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                            <h3 class="feature-title">Story Resources</h3>
+                            <p class="feature-text">Access and manage teaching stories, illustrations, and educational narratives.</p>
+                        </a>
+                    </div>
+                    
+                    <!-- Medicine Management -->
+                    <div class="col-md-6 col-lg-4">
+                        <a href="/auth/login?returnTo=/medicine/dashboard" class="feature" style="height: 100%; background: rgba(255,255,255,0.1);">
+                            <div class="feature-icon" style="color: #28a745;">
+                                <i class="fas fa-pills"></i>
+                            </div>
+                            <h3 class="feature-title">Medicine Management</h3>
+                            <p class="feature-text">Track medications, dosages, prescriptions, and medical supply inventory.</p>
+                        </a>
+                    </div>
+                    
+                    <!-- Bulletin Board -->
+                    <div class="col-md-6 col-lg-4">
+                        <a href="/bulletin" class="feature" style="height: 100%; background: rgba(255,255,255,0.1);">
+                            <div class="feature-icon" style="color: #ffc107;">
+                                <i class="fas fa-clipboard"></i>
+                            </div>
+                            <h3 class="feature-title">Bulletin Board</h3>
+                            <p class="feature-text">Post announcements, share updates, and keep everyone informed.</p>
+                        </a>
+                    </div>
+                    
+                    <!-- Hymn Search -->
+                    <div class="col-md-6 col-lg-4">
+                        <a href="/hymns" class="feature" style="height: 100%; background: rgba(255,255,255,0.1);">
+                            <div class="feature-icon" style="color: #17a2b8;">
+                                <i class="fas fa-music"></i>
+                            </div>
+                            <h3 class="feature-title">Hymn Search</h3>
+                            <p class="feature-text">Search and browse hymns by title, number, lyrics, or theme for worship services.</p>
+                        </a>
+                    </div>
+                    
+                    <!-- EBM -->
+                    <div class="col-md-6 col-lg-4">
+                        <a href="/auth/login?returnTo=/ebm/dashboard" class="feature" style="height: 100%; background: rgba(255,255,255,0.1);">
+                            <div class="feature-icon" style="color: #e83e8c;">
+                                <i class="fas fa-hands-helping"></i>
+                            </div>
+                            <h3 class="feature-title">Elder Brother Mission</h3>
+                            <p class="feature-text">Missionary area tracking, companionships, and mission field management tools.</p>
+                        </a>
+                    </div>
+                    
+                    <!-- Grocery Management -->
+                    <div class="col-md-6 col-lg-4">
+                        <a href="/auth/login?returnTo=/grocery/dashboard" class="feature" style="height: 100%; background: rgba(255,255,255,0.1);">
+                            <div class="feature-icon" style="color: #20c997;">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <h3 class="feature-title">Grocery Management</h3>
+                            <p class="feature-text">Organize grocery shopping, track expenses, and manage household supplies.</p>
+                        </a>
+                    </div>
+                    
+                    <!-- Greatest Joy -->
+                    <div class="col-md-6 col-lg-4">
+                        <a href="/auth/login?returnTo=/greatestjoy/dashboard" class="feature" style="height: 100%; background: rgba(255,255,255,0.1);">
+                            <div class="feature-icon" style="color: #fd7e14;">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <h3 class="feature-title">Greatest Joy</h3>
+                            <p class="feature-text">Ministry resources, teaching materials, and spiritual growth tools.</p>
+                        </a>
+                    </div>
+                    
+                    <!-- Family Circles -->
+                    <div class="col-md-6 col-lg-4">
+                        <a href="/auth/login?returnTo=/greatestjoy/familycircles" class="feature" style="height: 100%; background: rgba(255,255,255,0.1);">
+                            <div class="feature-icon" style="color: #6f42c1;">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h3 class="feature-title">Family Circles</h3>
+                            <p class="feature-text">Family ministry coordination, group activities, and relationship building.</p>
+                        </a>
+                    </div>
+                    
+                    <!-- Music Box -->
+                    <div class="col-md-6 col-lg-4">
+                        <a href="/auth/login?returnTo=/musicbox" class="feature" style="height: 100%; background: rgba(255,255,255,0.1);">
+                            <div class="feature-icon" style="color: #3498db;">
+                                <i class="fas fa-compact-disc"></i>
+                            </div>
+                            <h3 class="feature-title">Music Box Library</h3>
+                            <p class="feature-text">Access music and video resources, organize media collections.</p>
+                        </a>
+                    </div>
+                    
+                    <!-- Email Client -->
+                    <div class="col-md-6 col-lg-4">
+                        <a href="/auth/login?returnTo=/email-client" class="feature" style="height: 100%; background: rgba(255,255,255,0.1);">
+                            <div class="feature-icon" style="color: #95a5a6;">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <h3 class="feature-title">Email Client</h3>
+                            <p class="feature-text">Integrated email communication system for team coordination.</p>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -472,9 +582,8 @@
                 <p>&copy; <%= new Date().getFullYear() %> TSC Management System. All rights reserved.</p>
                 <p>
                     <small>
-                        <i class="fas fa-envelope me-2"></i>
-                        Need help? Contact support at 
-                        <a href="mailto:support@tsc.com" style="color: #ffd700;">support@tsc.com</a>
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Secure, reliable, and built for ministry excellence
                     </small>
                 </p>
             </div>
@@ -483,6 +592,217 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Module details data
+        const moduleDetails = {
+            pod: {
+                title: '📦 Purchase Orders (P.O.D.)',
+                description: 'Comprehensive purchase order management system for tracking orders, managing vendors, and monitoring inventory.',
+                features: [
+                    '✅ Create and manage purchase orders',
+                    '✅ Vendor database and contact management',
+                    '✅ Real-time order tracking and status updates',
+                    '✅ Receiving and inventory management',
+                    '✅ Advanced reporting and analytics',
+                    '✅ Role-based access control'
+                ],
+                loginRequired: true,
+                url: '/purchase-orders'
+            },
+            food: {
+                title: '🍽️ Food Management',
+                description: 'Complete food management solution for recipes, meal planning, pantry tracking, and shopping lists.',
+                features: [
+                    '✅ Recipe collection and organization',
+                    '✅ Meal planning and scheduling',
+                    '✅ Pantry inventory tracking',
+                    '✅ Shopping list generation',
+                    '✅ Expiration date monitoring',
+                    '✅ Nutrition information tracking'
+                ],
+                loginRequired: true,
+                url: '/food-dashboard'
+            },
+            story: {
+                title: '📖 Story Resources',
+                description: 'Teaching stories, illustrations, and educational narratives for ministry and education.',
+                features: [
+                    '✅ Searchable story database',
+                    '✅ Categorized by theme and topic',
+                    '✅ Easy access for teaching preparation',
+                    '✅ Bookmark favorite stories'
+                ],
+                loginRequired: true,
+                url: '/story/dashboard'
+            },
+            medicine: {
+                title: '💊 Medicine Management',
+                description: 'Track medications, prescriptions, dosages, and medical supply inventory.',
+                features: [
+                    '✅ Medication tracking and reminders',
+                    '✅ Prescription management',
+                    '✅ Dosage scheduling',
+                    '✅ Medical supply inventory',
+                    '✅ Refill notifications'
+                ],
+                loginRequired: true,
+                url: '/medicine/dashboard'
+            },
+            bulletin: {
+                title: '📋 Bulletin Board',
+                description: 'Share announcements, updates, and important information with your community.',
+                features: [
+                    '✅ Post announcements and updates',
+                    '✅ Categorize posts by topic',
+                    '✅ Schedule future posts',
+                    '✅ Comment and discussion features'
+                ],
+                loginRequired: false,
+                url: '/bulletin'
+            },
+            hymns: {
+                title: '🎵 Hymn Search',
+                description: 'Comprehensive hymn database searchable by title, number, lyrics, or theme.',
+                features: [
+                    '✅ Search by hymn number or title',
+                    '✅ Lyrics and melody information',
+                    '✅ Filter by theme or occasion',
+                    '✅ Create worship service playlists'
+                ],
+                loginRequired: false,
+                url: '/hymns'
+            },
+            ebm: {
+                title: '🌟 Elder Brother Mission',
+                description: 'Missionary area tracking, companionship management, and mission field coordination.',
+                features: [
+                    '✅ Missionary area assignments',
+                    '✅ Companionship tracking',
+                    '✅ Mission field statistics',
+                    '✅ Contact and resource management'
+                ],
+                loginRequired: true,
+                url: '/ebm/dashboard'
+            },
+            grocery: {
+                title: '🛒 Grocery Management',
+                description: 'Organize grocery shopping, track expenses, and manage household supplies efficiently.',
+                features: [
+                    '✅ Shopping list management',
+                    '✅ Expense tracking',
+                    '✅ Store location preferences',
+                    '✅ Budget monitoring',
+                    '✅ Receipt storage'
+                ],
+                loginRequired: true,
+                url: '/grocery/dashboard'
+            },
+            greatestjoy: {
+                title: '💫 Greatest Joy',
+                description: 'Ministry resources, teaching materials, and spiritual growth tools.',
+                features: [
+                    '✅ Teaching resources library',
+                    '✅ Ministry planning tools',
+                    '✅ Spiritual growth materials',
+                    '✅ Resource sharing capabilities'
+                ],
+                loginRequired: true,
+                url: '/greatestjoy/dashboard'
+            },
+            familycircles: {
+                title: '👨‍👩‍👧 Family Circles',
+                description: 'Family ministry coordination, group activities, and relationship building.',
+                features: [
+                    '✅ Family group management',
+                    '✅ Activity planning and scheduling',
+                    '✅ Communication tools',
+                    '✅ Event coordination'
+                ],
+                loginRequired: true,
+                url: '/greatestjoy/familycircles'
+            },
+            musicbox: {
+                title: '🎼 Music Box Library',
+                description: 'Music and video resource library for worship and ministry.',
+                features: [
+                    '✅ Music collection management',
+                    '✅ Video resource library',
+                    '✅ Playlist creation',
+                    '✅ Media categorization',
+                    '✅ Easy search and access'
+                ],
+                loginRequired: true,
+                url: '/musicbox'
+            },
+            email: {
+                title: '📧 Email Client',
+                description: 'Integrated email communication system for team coordination and ministry outreach.',
+                features: [
+                    '✅ Send and receive emails',
+                    '✅ Email templates',
+                    '✅ Contact management',
+                    '✅ Email scheduling',
+                    '✅ Thread organization'
+                ],
+                loginRequired: true,
+                url: '/email-client'
+            }
+        };
+
+        // Handle module selector change
+        document.getElementById('moduleSelector').addEventListener('change', function() {
+            const selectedModule = this.value;
+            const detailsDiv = document.getElementById('moduleDetails');
+            
+            if (!selectedModule) {
+                detailsDiv.style.display = 'none';
+                return;
+            }
+            
+            const module = moduleDetails[selectedModule];
+            if (!module) return;
+            
+            const loginBadge = module.loginRequired 
+                ? '<span style="background: rgba(255,193,7,0.3); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.9rem; border: 1px solid #ffc107;"><i class="fas fa-lock"></i> Login Required</span>'
+                : '<span style="background: rgba(40,167,69,0.3); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.9rem; border: 1px solid #28a745;"><i class="fas fa-unlock"></i> Public Access</span>';
+            
+            const moduleUrl = module.loginRequired ? `/auth/login?returnTo=${module.url}` : module.url;
+            
+            detailsDiv.innerHTML = `
+                <div style="text-align: left;">
+                    <h3 style="color: #ffd700; margin-bottom: 0.5rem; font-size: 1.8rem;">
+                        ${module.title}
+                    </h3>
+                    <div style="margin-bottom: 1rem;">
+                        ${loginBadge}
+                    </div>
+                    <p style="color: white; margin-bottom: 1rem; font-size: 1.1rem;">
+                        ${module.description}
+                    </p>
+                    <h4 style="color: white; margin-bottom: 0.5rem; font-size: 1.2rem;">
+                        <i class="fas fa-star"></i> Key Features:
+                    </h4>
+                    <ul style="color: white; text-align: left; font-size: 1rem; line-height: 1.8;">
+                        ${module.features.map(feature => `<li>${feature}</li>`).join('')}
+                    </ul>
+                    ${module.loginRequired 
+                        ? '<p style="color: #ffd700; margin-top: 1rem;"><i class="fas fa-info-circle"></i> Please sign in to access this module.</p>'
+                        : '<p style="color: #4ade80; margin-top: 1rem;"><i class="fas fa-info-circle"></i> This module is accessible without login.</p>'
+                    }
+                    <div style="text-align: center; margin-top: 1.5rem;">
+                        <a href="${moduleUrl}" class="btn btn-primary-hero" style="display: inline-block; text-decoration: none;">
+                            <i class="fas fa-arrow-right me-2"></i>
+                            Go to ${module.title.split(' ')[1] || 'Module'}
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            detailsDiv.style.display = 'block';
+            
+            // Smooth scroll to details
+            detailsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+        
         // Add loading state to login button
         document.addEventListener('DOMContentLoaded', function() {
             const loginBtn = document.getElementById('loginBtn');

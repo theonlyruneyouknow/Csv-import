@@ -157,6 +157,11 @@
             <% } %>
             
             <form action="/auth/login" method="POST">
+                <!-- Preserve returnTo across form submission -->
+                <% if (typeof returnTo !== 'undefined' && returnTo) { %>
+                    <input type="hidden" name="returnTo" value="<%= returnTo %>">
+                <% } %>
+                
                 <div class="form-floating">
                     <input type="text" class="form-control" id="username" name="username" placeholder="Username or Email" required>
                     <label for="username"><i class="fas fa-user me-2"></i>Username or Email</label>

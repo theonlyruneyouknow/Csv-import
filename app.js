@@ -10,6 +10,7 @@ const cron = require('node-cron');
 const fs = require('fs');
 const path = require('path');
 const XLSX = require('xlsx');
+const multer = require('multer');
 
 // Import routes
 const purchaseOrderRoutes = require('./routes/purchaseOrders');
@@ -178,6 +179,257 @@ app.get('/food/pantry', (req, res) => {
     console.log('🚨 /food/pantry accessed');
     const mockUser = { username: 'test', firstName: 'Test', lastName: 'User' };
     res.render('pantry-list', { user: mockUser });
+});
+
+// Configure multer for recipe image uploads
+const recipeStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadDir = path.join(__dirname, 'public', 'uploads', 'recipes');
+        // Create directory if it doesn't exist
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'recipe-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const recipeUpload = multer({
+    storage: recipeStorage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: function (req, file, cb) {
+        const allowedTypes = /jpeg|jpg|png|gif/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+        
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Only image files (JPEG, PNG, GIF) are allowed!'));
+        }
+    }
+});
+
+// Recipe API Routes
+app.post('/api/recipes', recipeUpload.single('image'), async (req, res) => {
+    try {
+        console.log('📝 Creating new recipe...');
+        console.log('Body:', req.body);
+        console.log('File:', req.file);
+
+        const Recipe = require('./models/Recipe');
+        
+        // Parse JSON fields
+        const ingredients = req.body.ingredients ? JSON.parse(req.body.ingredients) : [];
+        const instructions = req.body.instructions ? JSON.parse(req.body.instructions) : [];
+        const tags = req.body.tags ? JSON.parse(req.body.tags) : [];
+
+        // Prepare image URL
+        let imageUrl = req.body.imageUrl || '';
+        if (req.file) {
+            imageUrl = '/uploads/recipes/' + req.file.filename;
+        }
+
+        // Create recipe object
+        const recipeData = {
+            title: req.body.title,
+            description: req.body.description || '',
+            category: req.body.category || 'Other',
+            cuisine: req.body.cuisine || '',
+            difficulty: req.body.difficulty || 'Medium',
+            servings: parseInt(req.body.servings) || 4,
+            prepTime: parseInt(req.body.prepTime) || 0,
+            cookTime: parseInt(req.body.cookTime) || 0,
+            source: req.body.source || '',
+            tags: tags,
+            imageUrl: imageUrl,
+            notes: req.body.notes || '',
+            isFavorite: req.body.isFavorite === 'true',
+            isPublic: req.body.isPublic === 'true',
+            // For now, we'll store ingredients as plain text strings
+            // In the future, these could be linked to FoodItem objects
+            ingredients: ingredients.map((ing, index) => ({
+                name: ing,
+                order: index + 1
+            })),
+            instructions: instructions,
+            nutritionInfo: {
+                calories: parseInt(req.body.calories) || 0,
+                protein: parseInt(req.body.protein) || 0,
+                carbs: parseInt(req.body.carbs) || 0,
+                fat: parseInt(req.body.fat) || 0
+            },
+            // Use mock user for now - in production, use req.user._id
+            createdBy: new mongoose.Types.ObjectId()
+        };
+
+        const recipe = new Recipe(recipeData);
+        await recipe.save();
+
+        console.log('✅ Recipe created successfully:', recipe._id);
+        res.json({ 
+            success: true, 
+            message: 'Recipe created successfully!',
+            recipeId: recipe._id 
+        });
+
+    } catch (error) {
+        console.error('❌ Error creating recipe:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: error.message || 'Error creating recipe' 
+        });
+    }
+});
+
+// Get all recipes
+app.get('/api/recipes', async (req, res) => {
+    try {
+        const Recipe = require('./models/Recipe');
+        const recipes = await Recipe.find().sort({ createdAt: -1 });
+        res.json({ success: true, recipes });
+    } catch (error) {
+        console.error('❌ Error fetching recipes:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error fetching recipes' 
+        });
+    }
+});
+
+// Get single recipe
+app.get('/api/recipes/:id', async (req, res) => {
+    try {
+        const Recipe = require('./models/Recipe');
+        const recipe = await Recipe.findById(req.params.id);
+        
+        if (!recipe) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Recipe not found' 
+            });
+        }
+        
+        res.json({ success: true, recipe });
+    } catch (error) {
+        console.error('❌ Error fetching recipe:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error fetching recipe' 
+        });
+    }
+});
+
+// Update recipe
+app.put('/api/recipes/:id', recipeUpload.single('image'), async (req, res) => {
+    try {
+        const Recipe = require('./models/Recipe');
+        const recipe = await Recipe.findById(req.params.id);
+        
+        if (!recipe) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Recipe not found' 
+            });
+        }
+
+        // Parse JSON fields
+        const ingredients = req.body.ingredients ? JSON.parse(req.body.ingredients) : recipe.ingredients;
+        const instructions = req.body.instructions ? JSON.parse(req.body.instructions) : recipe.instructions;
+        const tags = req.body.tags ? JSON.parse(req.body.tags) : recipe.tags;
+
+        // Handle image update
+        let imageUrl = recipe.imageUrl;
+        if (req.file) {
+            imageUrl = '/uploads/recipes/' + req.file.filename;
+        } else if (req.body.imageUrl) {
+            imageUrl = req.body.imageUrl;
+        }
+
+        // Update recipe fields
+        Object.assign(recipe, {
+            title: req.body.title || recipe.title,
+            description: req.body.description || recipe.description,
+            category: req.body.category || recipe.category,
+            cuisine: req.body.cuisine || recipe.cuisine,
+            difficulty: req.body.difficulty || recipe.difficulty,
+            servings: parseInt(req.body.servings) || recipe.servings,
+            prepTime: parseInt(req.body.prepTime) || recipe.prepTime,
+            cookTime: parseInt(req.body.cookTime) || recipe.cookTime,
+            source: req.body.source || recipe.source,
+            tags: tags,
+            imageUrl: imageUrl,
+            notes: req.body.notes || recipe.notes,
+            isFavorite: req.body.isFavorite === 'true',
+            isPublic: req.body.isPublic === 'true',
+            ingredients: ingredients.map((ing, index) => ({
+                name: ing,
+                order: index + 1
+            })),
+            instructions: instructions,
+            nutritionInfo: {
+                calories: parseInt(req.body.calories) || recipe.nutritionInfo.calories,
+                protein: parseInt(req.body.protein) || recipe.nutritionInfo.protein,
+                carbs: parseInt(req.body.carbs) || recipe.nutritionInfo.carbs,
+                fat: parseInt(req.body.fat) || recipe.nutritionInfo.fat
+            }
+        });
+
+        await recipe.save();
+        
+        console.log('✅ Recipe updated successfully:', recipe._id);
+        res.json({ 
+            success: true, 
+            message: 'Recipe updated successfully!',
+            recipe 
+        });
+
+    } catch (error) {
+        console.error('❌ Error updating recipe:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: error.message || 'Error updating recipe' 
+        });
+    }
+});
+
+// Delete recipe
+app.delete('/api/recipes/:id', async (req, res) => {
+    try {
+        const Recipe = require('./models/Recipe');
+        const recipe = await Recipe.findByIdAndDelete(req.params.id);
+        
+        if (!recipe) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Recipe not found' 
+            });
+        }
+
+        // Delete associated image file if it exists
+        if (recipe.imageUrl && recipe.imageUrl.startsWith('/uploads/')) {
+            const imagePath = path.join(__dirname, 'public', recipe.imageUrl);
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
+        }
+        
+        console.log('✅ Recipe deleted successfully:', recipe._id);
+        res.json({ 
+            success: true, 
+            message: 'Recipe deleted successfully!' 
+        });
+
+    } catch (error) {
+        console.error('❌ Error deleting recipe:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error deleting recipe' 
+        });
+    }
 });
 
 // Connect to MongoDB with proper error handling
@@ -1452,14 +1704,67 @@ app.get('/test-email-templates', (req, res) => {
 // Food dashboard route
 app.get('/food-dashboard', ensureAuthenticated, ensureApproved, async (req, res) => {
     try {
+        const FoodItem = require('./models/FoodItem');
+        const Recipe = require('./models/Recipe');
+        const MealPlan = require('./models/MealPlan');
+        const ShoppingList = require('./models/ShoppingList');
+
         // Get basic stats for the dashboard
+        const recipes = await Recipe.countDocuments();
+        const favoriteRecipes = await Recipe.countDocuments({ isFavorite: true });
+        
+        // Shopping lists stats
+        const activeLists = await ShoppingList.countDocuments({ 
+            status: { $in: ['Planning', 'Ready', 'Shopping'] } 
+        });
+        const shoppingLists = await ShoppingList.find({ 
+            status: { $in: ['Planning', 'Ready', 'Shopping'] } 
+        });
+        const itemsPending = shoppingLists.reduce((total, list) => {
+            return total + list.items.filter(item => !item.isPurchased).length;
+        }, 0);
+        const estimatedCost = shoppingLists.reduce((total, list) => {
+            return total + (list.totalEstimatedCost || 0);
+        }, 0);
+
+        // Meal plan stats
+        const mealPlans = await MealPlan.countDocuments();
+        const activeMealPlans = await MealPlan.find({ 
+            endDate: { $gte: new Date() } 
+        });
+        const mealsPlanned = activeMealPlans.reduce((total, plan) => {
+            return total + (plan.meals ? plan.meals.length : 0);
+        }, 0);
+        
+        // Calculate days ahead for meal plans
+        let maxDaysAhead = 0;
+        activeMealPlans.forEach(plan => {
+            if (plan.endDate) {
+                const daysAhead = Math.ceil((plan.endDate - new Date()) / (1000 * 60 * 60 * 24));
+                if (daysAhead > maxDaysAhead) maxDaysAhead = daysAhead;
+            }
+        });
+
         const stats = {
-            foodItems: 0,
-            recipes: 0,
-            mealPlans: 0,
-            pantryItems: 0,
-            expiringSoon: 0,
-            lowStock: 0
+            foodItems: await FoodItem.countDocuments(),
+            recipes: recipes,
+            mealPlans: mealPlans,
+            pantryItems: await FoodItem.countDocuments({ quantity: { $gt: 0 } }),
+            expiringSoon: await FoodItem.countDocuments({
+                expirationDate: {
+                    $lte: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+                }
+            }),
+            lowStock: await FoodItem.countDocuments({
+                quantity: { $lt: 5, $gt: 0 }
+            }),
+            favoriteRecipes: favoriteRecipes,
+            recentCooks: 0, // Can be implemented later with a RecentCook model
+            activeLists: activeLists,
+            itemsPending: itemsPending,
+            estimatedCost: Math.round(estimatedCost),
+            mealsPlanned: mealsPlanned,
+            daysAhead: maxDaysAhead
         };
 
         res.render('food-dashboard', {

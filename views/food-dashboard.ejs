@@ -513,15 +513,15 @@
                 </p>
                 <div class="module-stats">
                     <div class="stat-item">
-                        <div class="stat-number">3</div>
+                        <div class="stat-number"><%= stats.activeLists || 0 %></div>
                         <div class="stat-label">Active Lists</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">24</div>
+                        <div class="stat-number"><%= stats.itemsPending || 0 %></div>
                         <div class="stat-label">Items Pending</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">$127</div>
+                        <div class="stat-number">$<%= stats.estimatedCost || 0 %></div>
                         <div class="stat-label">Est. Cost</div>
                     </div>
                 </div>
@@ -548,15 +548,15 @@
                 </p>
                 <div class="module-stats">
                     <div class="stat-item">
-                        <div class="stat-number">156</div>
+                        <div class="stat-number"><%= stats.pantryItems || 0 %></div>
                         <div class="stat-label">Items Stored</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">8</div>
+                        <div class="stat-number"><%= stats.expiringSoon || 0 %></div>
                         <div class="stat-label">Expiring Soon</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">12</div>
+                        <div class="stat-number"><%= stats.lowStock || 0 %></div>
                         <div class="stat-label">Low Stock</div>
                     </div>
                 </div>
@@ -583,15 +583,15 @@
                 </p>
                 <div class="module-stats">
                     <div class="stat-item">
-                        <div class="stat-number">2</div>
+                        <div class="stat-number"><%= stats.mealPlans || 0 %></div>
                         <div class="stat-label">Active Plans</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">14</div>
+                        <div class="stat-number"><%= stats.mealsPlanned || 0 %></div>
                         <div class="stat-label">Meals Planned</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">7</div>
+                        <div class="stat-number"><%= stats.daysAhead || 0 %></div>
                         <div class="stat-label">Days Ahead</div>
                     </div>
                 </div>
@@ -618,15 +618,15 @@
                 </p>
                 <div class="module-stats">
                     <div class="stat-item">
-                        <div class="stat-number">42</div>
+                        <div class="stat-number"><%= stats.recipes || 0 %></div>
                         <div class="stat-label">Recipes</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">8</div>
+                        <div class="stat-number"><%= stats.favoriteRecipes || 0 %></div>
                         <div class="stat-label">Favorites</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">3</div>
+                        <div class="stat-number"><%= stats.recentCooks || 0 %></div>
                         <div class="stat-label">Recent Cooks</div>
                     </div>
                 </div>
