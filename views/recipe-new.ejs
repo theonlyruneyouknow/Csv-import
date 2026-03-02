@@ -92,32 +92,209 @@
             padding: 30px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             border: 1px solid #dee2e6;
-            text-align: center;
         }
 
-        .coming-soon {
-            color: #666;
-            font-size: 1.2em;
-            margin: 40px 0;
+        .import-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 2px dashed #dee2e6;
+        }
+
+        .import-section h3 {
+            color: #dc3545;
+            margin-bottom: 15px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .form-section h3 {
+            color: #495057;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #dc3545;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .ingredient-item, .instruction-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+
+        .ingredient-item input, .ingredient-item select {
+            flex: 1;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
 
         .btn-primary {
             background: #dc3545;
             color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 500;
-            text-decoration: none;
-            display: inline-block;
-            margin: 10px;
         }
 
         .btn-primary:hover {
             background: #c82333;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
             color: white;
-            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 5px 10px;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-sm {
+            padding: 5px 15px;
+            font-size: 14px;
+        }
+
+        .image-preview {
+            max-width: 300px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .col {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-weight: 500;
+            color: #6c757d;
+        }
+
+        .tab.active {
+            color: #dc3545;
+            border-bottom: 3px solid #dc3545;
+            margin-bottom: -2px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .helper-text {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -153,33 +330,584 @@
         </div>
 
         <div class="main-content">
-            <h2><i class="fas fa-construction"></i> Recipe Creator</h2>
-            <p class="coming-soon">The recipe creation form is coming soon! It will include:</p>
-            
-            <div style="text-align: left; max-width: 500px; margin: 0 auto;">
-                <ul style="font-size: 1.1em; line-height: 1.6;">
-                    <li>📝 Recipe details (name, description, cuisine)</li>
-                    <li>⏱️ Prep and cooking time estimation</li>
-                    <li>🍽️ Serving size and difficulty level</li>
-                    <li>🥕 Ingredient list with quantities</li>
-                    <li>👨‍🍳 Step-by-step instructions</li>
-                    <li>📸 Photo upload capability</li>
-                    <li>🏷️ Category and tag system</li>
-                    <li>🍎 Nutritional information</li>
-                    <li>⭐ Rating and favorite system</li>
-                </ul>
+            <!-- Import Section -->
+            <div class="import-section">
+                <h3><i class="fas fa-link"></i> Quick Import from URL</h3>
+                <div class="form-group">
+                    <label for="importUrl">Paste Recipe URL (from popular recipe sites):</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="url" id="importUrl" class="form-control" 
+                               placeholder="https://www.example.com/recipe/...">
+                        <button type="button" class="btn btn-secondary" onclick="importFromUrl()">
+                            <i class="fas fa-download"></i> Import
+                        </button>
+                    </div>
+                    <div class="helper-text">
+                        <i class="fas fa-info-circle"></i> This will attempt to extract recipe details from the URL
+                    </div>
+                </div>
             </div>
 
-            <div style="margin-top: 30px;">
-                <a href="/food/recipes" class="btn-primary">
-                    <i class="fas fa-arrow-left"></i> Back to Recipes
-                </a>
-                <a href="/food-dashboard" class="btn-primary" style="background: #6c757d;">
-                    <i class="fas fa-home"></i> Food Dashboard
-                </a>
-            </div>
+            <!-- Recipe Form -->
+            <form id="recipeForm" enctype="multipart/form-data">
+                <!-- Basic Details Section -->
+                <div class="form-section">
+                    <h3><i class="fas fa-info-circle"></i> Basic Details</h3>
+                    
+                    <div class="form-group">
+                        <label for="title">Recipe Title *</label>
+                        <input type="text" id="title" name="title" class="form-control" 
+                               placeholder="e.g., Chocolate Chip Cookies" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" class="form-control" 
+                                  placeholder="Brief description of this recipe..."></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="category">Category</label>
+                                <select id="category" name="category" class="form-control">
+                                    <option value="Other">Other</option>
+                                    <option value="Breakfast">Breakfast</option>
+                                    <option value="Lunch">Lunch</option>
+                                    <option value="Dinner">Dinner</option>
+                                    <option value="Snack">Snack</option>
+                                    <option value="Dessert">Dessert</option>
+                                    <option value="Appetizer">Appetizer</option>
+                                    <option value="Side Dish">Side Dish</option>
+                                    <option value="Beverage">Beverage</option>
+                                    <option value="Sauce">Sauce</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="cuisine">Cuisine Type</label>
+                                <input type="text" id="cuisine" name="cuisine" class="form-control" 
+                                       placeholder="e.g., Italian, Mexican, Asian">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="difficulty">Difficulty</label>
+                                <select id="difficulty" name="difficulty" class="form-control">
+                                    <option value="Easy">Easy</option>
+                                    <option value="Medium" selected>Medium</option>
+                                    <option value="Hard">Hard</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="servings">Servings</label>
+                                <input type="number" id="servings" name="servings" class="form-control" 
+                                       value="4" min="1">
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="prepTime">Prep Time (min)</label>
+                                <input type="number" id="prepTime" name="prepTime" class="form-control" 
+                                       value="0" min="0">
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="cookTime">Cook Time (min)</label>
+                                <input type="number" id="cookTime" name="cookTime" class="form-control" 
+                                       value="0" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="source">Source (optional)</label>
+                        <input type="text" id="source" name="source" class="form-control" 
+                               placeholder="e.g., Grandma's Cookbook, Food Network">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tags">Tags (comma-separated)</label>
+                        <input type="text" id="tags" name="tags" class="form-control" 
+                               placeholder="e.g., quick, healthy, vegetarian">
+                        <div class="helper-text">
+                            Separate tags with commas
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Upload Section -->
+                <div class="form-section">
+                    <h3><i class="fas fa-camera"></i> Recipe Image</h3>
+                    
+                    <div class="tabs">
+                        <button type="button" class="tab active" onclick="switchTab('upload')">
+                            <i class="fas fa-upload"></i> Upload Image
+                        </button>
+                        <button type="button" class="tab" onclick="switchTab('url')">
+                            <i class="fas fa-link"></i> Image URL
+                        </button>
+                    </div>
+
+                    <div id="upload-tab" class="tab-content active">
+                        <div class="form-group">
+                            <label for="imageFile">Upload Image File</label>
+                            <input type="file" id="imageFile" name="imageFile" 
+                                   class="form-control" accept="image/*" 
+                                   onchange="previewImage(event)">
+                            <div class="helper-text">
+                                <i class="fas fa-info-circle"></i> Accepts JPG, PNG, GIF (max 5MB)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="url-tab" class="tab-content">
+                        <div class="form-group">
+                            <label for="imageUrl">Image URL</label>
+                            <input type="url" id="imageUrl" name="imageUrl" 
+                                   class="form-control" 
+                                   placeholder="https://example.com/image.jpg"
+                                   onchange="previewImageUrl()">
+                        </div>
+                    </div>
+
+                    <div id="imagePreview" style="display: none; text-align: center;">
+                        <img id="previewImg" class="image-preview" alt="Recipe Preview">
+                    </div>
+                </div>
+
+                <!-- Ingredients Section -->
+                <div class="form-section">
+                    <h3><i class="fas fa-list"></i> Ingredients</h3>
+                    
+                    <div class="tabs">
+                        <button type="button" class="tab active" onclick="switchIngredientsTab('paste')">
+                            <i class="fas fa-paste"></i> Paste List
+                        </button>
+                        <button type="button" class="tab" onclick="switchIngredientsTab('manual')">
+                            <i class="fas fa-plus"></i> Add Manually
+                        </button>
+                    </div>
+
+                    <div id="paste-ingredients-tab" class="tab-content active">
+                        <div class="form-group">
+                            <label for="ingredientsPaste">Paste Ingredients (one per line)</label>
+                            <textarea id="ingredientsPaste" class="form-control" rows="8" 
+                                      placeholder="2 cups flour&#10;1 tsp salt&#10;1/2 cup sugar&#10;3 eggs&#10;..."></textarea>
+                            <button type="button" class="btn btn-secondary btn-sm" 
+                                    style="margin-top: 10px;" onclick="parseIngredients()">
+                                <i class="fas fa-magic"></i> Parse Ingredients
+                            </button>
+                            <div class="helper-text">
+                                <i class="fas fa-info-circle"></i> Enter ingredients one per line (e.g., "2 cups flour")
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="manual-ingredients-tab" class="tab-content">
+                        <div id="ingredientsList"></div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="addIngredient()">
+                            <i class="fas fa-plus"></i> Add Ingredient
+                        </button>
+                    </div>
+
+                    <div id="ingredientsSummary" style="margin-top: 20px; display: none;">
+                        <div class="alert alert-info">
+                            <strong><i class="fas fa-check-circle"></i> Ingredients Added:</strong>
+                            <div id="ingredientsPreview"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions Section -->
+                <div class="form-section">
+                    <h3><i class="fas fa-tasks"></i> Instructions</h3>
+                    
+                    <div class="tabs">
+                        <button type="button" class="tab active" onclick="switchInstructionsTab('paste')">
+                            <i class="fas fa-paste"></i> Paste Steps
+                        </button>
+                        <button type="button" class="tab" onclick="switchInstructionsTab('manual')">
+                            <i class="fas fa-plus"></i> Add Manually
+                        </button>
+                    </div>
+
+                    <div id="paste-instructions-tab" class="tab-content active">
+                        <div class="form-group">
+                            <label for="instructionsPaste">Paste Instructions (one step per line)</label>
+                            <textarea id="instructionsPaste" class="form-control" rows="10" 
+                                      placeholder="Preheat oven to 350°F&#10;Mix flour and sugar in a bowl&#10;Add eggs and mix well&#10;..."></textarea>
+                            <button type="button" class="btn btn-secondary btn-sm" 
+                                    style="margin-top: 10px;" onclick="parseInstructions()">
+                                <i class="fas fa-magic"></i> Parse Instructions
+                            </button>
+                            <div class="helper-text">
+                                <i class="fas fa-info-circle"></i> Enter each instruction step on a new line
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="manual-instructions-tab" class="tab-content">
+                        <div id="instructionsList"></div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="addInstruction()">
+                            <i class="fas fa-plus"></i> Add Step
+                        </button>
+                    </div>
+
+                    <div id="instructionsSummary" style="margin-top: 20px; display: none;">
+                        <div class="alert alert-info">
+                            <strong><i class="fas fa-check-circle"></i> Instructions Added:</strong>
+                            <div id="instructionsPreview"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nutrition Info Section (Optional) -->
+                <div class="form-section">
+                    <h3><i class="fas fa-heartbeat"></i> Nutrition Information (Optional)</h3>
+                    
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="calories">Calories</label>
+                                <input type="number" id="calories" name="calories" class="form-control" 
+                                       value="0" min="0">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="protein">Protein (g)</label>
+                                <input type="number" id="protein" name="protein" class="form-control" 
+                                       value="0" min="0">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="carbs">Carbs (g)</label>
+                                <input type="number" id="carbs" name="carbs" class="form-control" 
+                                       value="0" min="0">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="fat">Fat (g)</label>
+                                <input type="number" id="fat" name="fat" class="form-control" 
+                                       value="0" min="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Options -->
+                <div class="form-section">
+                    <h3><i class="fas fa-cog"></i> Additional Options</h3>
+                    
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" name="notes" class="form-control" 
+                                  placeholder="Any additional notes or tips..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="isFavorite" name="isFavorite"> 
+                            Mark as Favorite
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="isPublic" name="isPublic"> 
+                            Make Public (share with others)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Recipe
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='/food/recipes'">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
         </div>
-    </div>
+
+        <script>
+            let ingredientsData = [];
+            let instructionsData = [];
+
+            // Tab switching for image upload
+            function switchTab(tab) {
+                document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+                event.target.closest('.tab').classList.add('active');
+                
+                if (tab === 'upload') {
+                    document.getElementById('upload-tab').classList.add('active');
+                    document.getElementById('url-tab').classList.remove('active');
+                    document.getElementById('imageUrl').value = '';
+                } else {
+                    document.getElementById('url-tab').classList.add('active');
+                    document.getElementById('upload-tab').classList.remove('active');
+                    document.getElementById('imageFile').value = '';
+                }
+            }
+
+            // Tab switching for ingredients
+            function switchIngredientsTab(tab) {
+                const tabs = event.target.closest('.tabs').querySelectorAll('.tab');
+                tabs.forEach(t => t.classList.remove('active'));
+                event.target.closest('.tab').classList.add('active');
+                
+                if (tab === 'paste') {
+                    document.getElementById('paste-ingredients-tab').classList.add('active');
+                    document.getElementById('manual-ingredients-tab').classList.remove('active');
+                } else {
+                    document.getElementById('manual-ingredients-tab').classList.add('active');
+                    document.getElementById('paste-ingredients-tab').classList.remove('active');
+                }
+            }
+
+            // Tab switching for instructions
+            function switchInstructionsTab(tab) {
+                const tabs = event.target.closest('.tabs').querySelectorAll('.tab');
+                tabs.forEach(t => t.classList.remove('active'));
+                event.target.closest('.tab').classList.add('active');
+                
+                if (tab === 'paste') {
+                    document.getElementById('paste-instructions-tab').classList.add('active');
+                    document.getElementById('manual-instructions-tab').classList.remove('active');
+                } else {
+                    document.getElementById('manual-instructions-tab').classList.add('active');
+                    document.getElementById('paste-instructions-tab').classList.remove('active');
+                }
+            }
+
+            // Image preview from file
+            function previewImage(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('previewImg').src = e.target.result;
+                        document.getElementById('imagePreview').style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            // Image preview from URL
+            function previewImageUrl() {
+                const url = document.getElementById('imageUrl').value;
+                if (url) {
+                    document.getElementById('previewImg').src = url;
+                    document.getElementById('imagePreview').style.display = 'block';
+                }
+            }
+
+            // Parse pasted ingredients
+            function parseIngredients() {
+                const text = document.getElementById('ingredientsPaste').value;
+                const lines = text.split('\n').filter(line => line.trim());
+                
+                ingredientsData = lines.map(line => line.trim());
+                
+                if (ingredientsData.length > 0) {
+                    document.getElementById('ingredientsPreview').innerHTML = 
+                        '<ul style="margin: 10px 0; padding-left: 20px;">' + 
+                        ingredientsData.map(ing => `<li>${ing}</li>`).join('') + 
+                        '</ul>';
+                    document.getElementById('ingredientsSummary').style.display = 'block';
+                }
+            }
+
+            // Add ingredient manually
+            function addIngredient() {
+                const list = document.getElementById('ingredientsList');
+                const index = list.children.length;
+                
+                const html = `
+                    <div class="ingredient-item">
+                        <input type="text" placeholder="Ingredient name" class="form-control" 
+                               data-index="${index}">
+                        <button type="button" class="btn btn-danger btn-sm" 
+                                onclick="removeIngredient(this)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                list.insertAdjacentHTML('beforeend', html);
+            }
+
+            // Remove ingredient
+            function removeIngredient(btn) {
+                btn.parentElement.remove();
+            }
+
+            // Parse pasted instructions
+            function parseInstructions() {
+                const text = document.getElementById('instructionsPaste').value;
+                const lines = text.split('\n').filter(line => line.trim());
+                
+                instructionsData = lines.map((line, index) => ({
+                    step: index + 1,
+                    instruction: line.trim()
+                }));
+                
+                if (instructionsData.length > 0) {
+                    document.getElementById('instructionsPreview').innerHTML = 
+                        '<ol style="margin: 10px 0; padding-left: 20px;">' + 
+                        instructionsData.map(inst => `<li>${inst.instruction}</li>`).join('') + 
+                        '</ol>';
+                    document.getElementById('instructionsSummary').style.display = 'block';
+                }
+            }
+
+            // Add instruction manually
+            function addInstruction() {
+                const list = document.getElementById('instructionsList');
+                const index = list.children.length + 1;
+                
+                const html = `
+                    <div class="instruction-item">
+                        <span style="font-weight: bold; min-width: 50px;">${index}.</span>
+                        <input type="text" placeholder="Instruction step" class="form-control">
+                        <button type="button" class="btn btn-danger btn-sm" 
+                                onclick="removeInstruction(this)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                list.insertAdjacentHTML('beforeend', html);
+            }
+
+            // Remove instruction
+            function removeInstruction(btn) {
+                btn.parentElement.remove();
+                updateInstructionNumbers();
+            }
+
+            // Update instruction numbers
+            function updateInstructionNumbers() {
+                const items = document.querySelectorAll('#instructionsList .instruction-item');
+                items.forEach((item, index) => {
+                    item.querySelector('span').textContent = `${index + 1}.`;
+                });
+            }
+
+            // Import recipe from URL (placeholder for future API integration)
+            async function importFromUrl() {
+                const url = document.getElementById('importUrl').value;
+                if (!url) {
+                    alert('Please enter a URL');
+                    return;
+                }
+                
+                alert('URL import feature coming soon! This will scrape recipe details from popular recipe sites.');
+                // TODO: Implement backend API to scrape recipe data
+            }
+
+            // Form submission
+            document.getElementById('recipeForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData();
+                
+                // Basic details
+                formData.append('title', document.getElementById('title').value);
+                formData.append('description', document.getElementById('description').value);
+                formData.append('category', document.getElementById('category').value);
+                formData.append('cuisine', document.getElementById('cuisine').value);
+                formData.append('difficulty', document.getElementById('difficulty').value);
+                formData.append('servings', document.getElementById('servings').value);
+                formData.append('prepTime', document.getElementById('prepTime').value);
+                formData.append('cookTime', document.getElementById('cookTime').value);
+                formData.append('source', document.getElementById('source').value);
+                
+                // Tags
+                const tags = document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t);
+                formData.append('tags', JSON.stringify(tags));
+                
+                // Image
+                const imageFile = document.getElementById('imageFile').files[0];
+                if (imageFile) {
+                    formData.append('image', imageFile);
+                } else {
+                    formData.append('imageUrl', document.getElementById('imageUrl').value);
+                }
+                
+                // Ingredients
+                if (ingredientsData.length > 0) {
+                    formData.append('ingredients', JSON.stringify(ingredientsData));
+                } else {
+                    const manualIngredients = [];
+                    document.querySelectorAll('#ingredientsList input').forEach(input => {
+                        if (input.value.trim()) {
+                            manualIngredients.push(input.value.trim());
+                        }
+                    });
+                    formData.append('ingredients', JSON.stringify(manualIngredients));
+                }
+                
+                // Instructions
+                if (instructionsData.length > 0) {
+                    formData.append('instructions', JSON.stringify(instructionsData));
+                } else {
+                    const manualInstructions = [];
+                    document.querySelectorAll('#instructionsList input').forEach((input, index) => {
+                        if (input.value.trim()) {
+                            manualInstructions.push({
+                                step: index + 1,
+                                instruction: input.value.trim()
+                            });
+                        }
+                    });
+                    formData.append('instructions', JSON.stringify(manualInstructions));
+                }
+                
+                // Nutrition
+                formData.append('calories', document.getElementById('calories').value);
+                formData.append('protein', document.getElementById('protein').value);
+                formData.append('carbs', document.getElementById('carbs').value);
+                formData.append('fat', document.getElementById('fat').value);
+                
+                // Additional options
+                formData.append('notes', document.getElementById('notes').value);
+                formData.append('isFavorite', document.getElementById('isFavorite').checked);
+                formData.append('isPublic', document.getElementById('isPublic').checked);
+                
+                try {
+                    const response = await fetch('/api/recipes', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        alert('Recipe saved successfully!');
+                        window.location.href = '/food/recipes';
+                    } else {
+                        const error = await response.json();
+                        alert('Error saving recipe: ' + (error.message || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error saving recipe. Please try again.');
+                }
+            });
+        </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

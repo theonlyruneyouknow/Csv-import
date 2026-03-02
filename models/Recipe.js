@@ -3,20 +3,26 @@ const mongoose = require('mongoose');
 
 // Ingredient schema for recipes
 const ingredientSchema = new mongoose.Schema({
+  // Option 1: Reference to FoodItem (for future integration)
   foodItem: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'FoodItem',
-    required: true
+    required: false
+  },
+  // Option 2: Plain text ingredient (for simple recipe creation)
+  name: {
+    type: String,
+    required: false
   },
   quantity: {
     type: Number,
-    required: true,
+    required: false,
     min: 0
   },
   unit: {
     type: String,
-    enum: ['piece', 'lb', 'oz', 'kg', 'g', 'cup', 'tsp', 'tbsp', 'ml', 'l', 'can', 'package', 'box'],
-    required: true
+    enum: ['piece', 'lb', 'oz', 'kg', 'g', 'cup', 'tsp', 'tbsp', 'ml', 'l', 'can', 'package', 'box', ''],
+    required: false
   },
   preparation: {
     type: String,
@@ -25,6 +31,10 @@ const ingredientSchema = new mongoose.Schema({
   optional: {
     type: Boolean,
     default: false
+  },
+  order: {
+    type: Number,
+    default: 0
   }
 });
 
