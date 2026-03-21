@@ -611,4 +611,25 @@ router.delete('/items/:id', async (req, res) => {
     }
 });
 
+// Create new category
+router.post('/categories', async (req, res) => {
+    try {
+        const categoryData = {
+            name: req.body.name,
+            icon: req.body.icon || '🛒',
+            color: req.body.color || '#6c757d',
+            user: req.user._id,
+            isActive: true
+        };
+
+        const category = new FoodCategory(categoryData);
+        await category.save();
+
+        res.json({ success: true, category });
+    } catch (error) {
+        console.error('Error creating category:', error);
+        res.status(500).json({ success: false, error: 'Error creating category' });
+    }
+});
+
 module.exports = router;

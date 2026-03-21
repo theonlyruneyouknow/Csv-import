@@ -1,0 +1,106 @@
+{
+  "produce": [
+    { "name": "Bananas", "category": "Produce", "tags": ["fruit", "fresh"], "priority": "high", "purchaseFrequency": "weekly" },
+    { "name": "Apples", "category": "Produce", "tags": ["fruit", "fresh"], "priority": "high", "purchaseFrequency": "weekly" },
+    { "name": "Oranges", "category": "Produce", "tags": ["fruit", "fresh", "citrus"], "priority": "medium", "purchaseFrequency": "weekly" },
+    { "name": "Strawberries", "category": "Produce", "tags": ["fruit", "fresh", "berries"], "priority": "medium", "purchaseFrequency": "weekly" },
+    { "name": "Blueberries", "category": "Produce", "tags": ["fruit", "fresh", "berries"], "priority": "medium", "purchaseFrequency": "weekly" },
+    { "name": "Grapes", "category": "Produce", "tags": ["fruit", "fresh"], "priority": "medium", "purchaseFrequency": "biweekly" },
+    { "name": "Lettuce", "category": "Produce", "tags": ["vegetable", "salad", "leafy-greens"], "priority": "high", "purchaseFrequency": "weekly" },
+    { "name": "Tomatoes", "category": "Produce", "tags": ["vegetable", "fresh"], "priority": "high", "purchaseFrequency": "weekly" },
+    { "name": "Carrots", "category": "Produce", "tags": ["vegetable", "fresh", "root-vegetable"], "priority": "high", "purchaseFrequency": "biweekly" },
+    { "name": "Onions", "category": "Produce", "tags": ["vegetable", "fresh", "cooking"], "priority": "high", "purchaseFrequency": "biweekly" },
+    { "name": "Potatoes", "category": "Produce", "tags": ["vegetable", "fresh", "starchy"], "priority": "high", "purchaseFrequency": "biweekly" },
+    { "name": "Broccoli", "category": "Produce", "tags": ["vegetable", "fresh", "cruciferous"], "priority": "medium", "purchaseFrequency": "weekly" },
+    { "name": "Spinach", "category": "Produce", "tags": ["vegetable", "leafy-greens", "fresh"], "priority": "medium", "purchaseFrequency": "weekly" },
+    { "name": "Bell Peppers", "category": "Produce", "tags": ["vegetable", "fresh", "cooking"], "priority": "medium", "purchaseFrequency": "weekly" },
+    { "name": "Cucumbers", "category": "Produce", "tags": ["vegetable", "fresh", "salad"], "priority": "medium", "purchaseFrequency": "weekly" },
+    { "name": "Garlic", "category": "Produce", "tags": ["vegetable", "seasoning", "cooking"], "priority": "medium", "purchaseFrequency": "monthly" }
+  ],
+  "dairy": [
+    { "name": "Milk", "category": "Dairy", "tags": ["dairy", "beverage"], "priority": "high", "purchaseFrequency": "weekly" },
+    { "name": "Eggs", "category": "Dairy", "tags": ["protein", "breakfast"], "priority": "high", "purchaseFrequency": "weekly" },
+    { "name": "Butter", "category": "Dairy", "tags": ["dairy", "cooking", "baking"], "priority": "high", "purchaseFrequency": "biweekly" },
+    { "name": "Cheddar Cheese", "category": "Dairy", "tags": ["dairy", "cheese"], "priority": "medium", "purchaseFrequency": "biweekly" },
+    { "name": "Mozzarella Cheese", "category": "Dairy", "tags": ["dairy", "cheese"], "priority": "medium", "purchaseFrequency": "biweekly" },
+    { "name": "Greek Yogurt", "category": "Dairy", "tags": ["dairy", "yogurt", "protein"], "priority": "medium", "purchaseFrequency": "weekly" },
+    { "name": "Sour Cream", "category": "Dairy", "tags": ["dairy", "condiment"], "priority": "low", "purchaseFrequency": "monthly" },
+    { "name": "Cream Cheese", "category": "Dairy", "tags": ["dairy", "cheese", "spread"], "priority": "low", "purchaseFrequency": "monthly" }
+  ],
+  "meat": [
+    { "name": "Chicken Breast", "category": "Meat", "tags": ["poultry", "protein", "fresh"], "priority": "high", "purchaseFrequency": "weekly" },
+    { "name": "Ground Beef", "category": "Meat", "tags": ["beef", "protein", "fresh"], "priority": "high", "purchaseFrequency": "weekly" },
+    { "name": "Ground Turkey", "category": "Meat", "tags": ["poultry", "protein", "fresh"], "priority": "medium", "purchaseFrequency": "biweekly" },
+    { "name": "Pork Chops", "category": "Meat", "tags": ["pork", "protein", "fresh"], "priority": "medium", "purchaseFrequency": "biweekly" },
+    { "name": "Bacon", "category": "Meat", "tags": ["pork", "breakfast"], "priority": "medium", "purchaseFrequency": "biweekly" },
+    { "name": "Sausage", "category": "Meat", "tags": ["pork", "breakfast"], "priority": "medium", "purchaseFrequency": "biweekly" }
+  ],
+  "seafood": [
+    { "name": "Salmon", "category": "Seafood", "tags": ["fish", "protein", "omega-3"], "priority": "medium", "purchaseFrequency": "biweekly" },
+    { "name": "Shrimp", "category": "Seafood", "tags": ["shellfish", "protein"], "priority": "medium", "purchaseFrequency": "monthly" },
+    { "name": "Tuna", "category": "Seafood", "tags": ["fish", "protein"], "priority": "low", "purchaseFrequency": "monthly" }
+  ],
+  "pantry": [
+    { "name": "White Rice", "category": "Pantry", "tags": ["grain", "staple", "side-dish"], "priority": "high", "purchaseFrequency": "monthly" },
+    { "name": "Brown Rice", "category": "Pantry", "tags": ["grain", "staple", "whole-grain"], "priority": "medium", "purchaseFrequency": "monthly" },
+    { "name": "Pasta", "category": "Pantry", "tags": ["grain", "staple", "italian"], "priority": "high", "purchaseFrequency": "monthly" },
+    { "name": "All-Purpose Flour", "category": "Pantry", "tags": ["baking", "staple"], "priority": "medium", "purchaseFrequency": "monthly" },
+    { "name": "White Sugar", "category": "Pantry", "tags": ["baking", "sweetener"], "priority": "medium", "purchaseFrequency": "monthly" },
+    { "name": "Brown Sugar", "category": "Pantry", "tags": ["baking", "sweetener"], "priority": "low", "purchaseFrequency": "monthly" },
+    { "name": "Olive Oil", "category": "Pantry", "tags": ["oil", "cooking", "healthy"], "priority": "high", "purchaseFrequency": "monthly" },
+    { "name": "Vegetable Oil", "category": "Pantry", "tags": ["oil", "cooking"], "priority": "medium", "purchaseFrequency": "monthly" },
+    { "name": "Canned Tomatoes", "category": "Pantry", "tags": ["canned", "cooking"], "priority": "medium", "purchaseFrequency": "monthly" },
+    { "name": "Chicken Broth", "category": "Pantry", "tags": ["broth", "cooking"], "priority": "medium", "purchaseFrequency": "monthly" },
+    { "name": "Black Beans", "category": "Pantry", "tags": ["canned", "beans", "protein"], "priority": "medium", "purchaseFrequency": "monthly" },
+    { "name": "Peanut Butter", "category": "Pantry", "tags": ["spread", "protein"], "priority": "high", "purchaseFrequency": "monthly" },
+    { "name": "Honey", "category": "Pantry", "tags": ["sweetener", "natural"], "priority": "low", "purchaseFrequency": "monthly" },
+    { "name": "Oats", "category": "Pantry", "tags": ["grain", "breakfast", "whole-grain"], "priority": "medium", "purchaseFrequency": "monthly" }
+  ],
+  "frozen": [
+    { "name": "Frozen Vegetables Mix", "category": "Frozen", "tags": ["frozen", "vegetable", "convenient"], "priority": "medium", "purchaseFrequency": "biweekly" },
+    { "name": "Frozen Broccoli", "category": "Frozen", "tags": ["frozen", "vegetable"], "priority": "medium", "purchaseFrequency": "monthly" },
+    { "name": "Frozen Berries", "category": "Frozen", "tags": ["frozen", "fruit", "smoothie"], "priority": "medium", "purchaseFrequency": "monthly" },
+    { "name": "Ice Cream", "category": "Frozen", "tags": ["frozen", "dessert", "treat"], "priority": "low", "purchaseFrequency": "biweekly" },
+    { "name": "Frozen Pizza", "category": "Frozen", "tags": ["frozen", "convenient", "meal"], "priority": "low", "purchaseFrequency": "occasional" }
+  ],
+  "bakery": [
+    { "name": "Whole Wheat Bread", "category": "Bakery", "tags": ["bread", "whole-grain"], "priority": "high", "purchaseFrequency": "weekly" },
+    { "name": "White Bread", "category": "Bakery", "tags": ["bread"], "priority": "high", "purchaseFrequency": "weekly" },
+    { "name": "Hamburger Buns", "category": "Bakery", "tags": ["bread", "buns"], "priority": "medium", "purchaseFrequency": "occasional" },
+    { "name": "Tortillas", "category": "Bakery", "tags": ["bread", "mexican"], "priority": "medium", "purchaseFrequency": "biweekly" }
+  ],
+  "beverages": [
+    { "name": "Orange Juice", "category": "Beverages", "tags": ["juice", "breakfast", "beverage"], "priority": "medium", "purchaseFrequency": "weekly" },
+    { "name": "Coffee", "category": "Beverages", "tags": ["coffee", "hot-beverage"], "priority": "high", "purchaseFrequency": "biweekly" },
+    { "name": "Tea", "category": "Beverages", "tags": ["tea", "hot-beverage"], "priority": "medium", "purchaseFrequency": "monthly" },
+    { "name": "Bottled Water", "category": "Beverages", "tags": ["water", "beverage"], "priority": "medium", "purchaseFrequency": "biweekly" },
+    { "name": "Soda", "category": "Beverages", "tags": ["carbonated", "beverage"], "priority": "low", "purchaseFrequency": "occasional" }
+  ],
+  "snacks": [
+    { "name": "Potato Chips", "category": "Snacks", "tags": ["snack", "salty"], "priority": "low", "purchaseFrequency": "biweekly" },
+    { "name": "Crackers", "category": "Snacks", "tags": ["snack", "salty"], "priority": "medium", "purchaseFrequency": "monthly" },
+    { "name": "Granola Bars", "category": "Snacks", "tags": ["snack", "breakfast", "portable"], "priority": "medium", "purchaseFrequency": "biweekly" },
+    { "name": "Nuts", "category": "Snacks", "tags": ["snack", "protein", "healthy"], "priority": "medium", "purchaseFrequency": "monthly" },
+    { "name": "Popcorn", "category": "Snacks", "tags": ["snack"], "priority": "low", "purchaseFrequency": "monthly" }
+  ],
+  "condiments": [
+    { "name": "Ketchup", "category": "Condiments", "tags": ["condiment", "sauce"], "priority": "medium", "purchaseFrequency": "monthly" },
+    { "name": "Mustard", "category": "Condiments", "tags": ["condiment", "sauce"], "priority": "medium", "purchaseFrequency": "monthly" },
+    { "name": "Mayonnaise", "category": "Condiments", "tags": ["condiment", "sauce"], "priority": "high", "purchaseFrequency": "monthly" },
+    { "name": "Soy Sauce", "category": "Condiments", "tags": ["condiment", "sauce", "asian"], "priority": "medium", "purchaseFrequency": "monthly" },
+    { "name": "Hot Sauce", "category": "Condiments", "tags": ["condiment", "sauce", "spicy"], "priority": "low", "purchaseFrequency": "monthly" },
+    { "name": "Ranch Dressing", "category": "Condiments", "tags": ["condiment", "dressing", "salad"], "priority": "medium", "purchaseFrequency": "monthly" },
+    { "name": "Italian Dressing", "category": "Condiments", "tags": ["condiment", "dressing", "salad"], "priority": "low", "purchaseFrequency": "monthly" }
+  ],
+  "spices": [
+    { "name": "Salt", "category": "Spices", "tags": ["spice", "seasoning", "basic"], "priority": "high", "purchaseFrequency": "rare" },
+    { "name": "Black Pepper", "category": "Spices", "tags": ["spice", "seasoning", "basic"], "priority": "high", "purchaseFrequency": "rare" },
+    { "name": "Garlic Powder", "category": "Spices", "tags": ["spice", "seasoning"], "priority": "medium", "purchaseFrequency": "rare" },
+    { "name": "Onion Powder", "category": "Spices", "tags": ["spice", "seasoning"], "priority": "medium", "purchaseFrequency": "rare" },
+    { "name": "Paprika", "category": "Spices", "tags": ["spice", "seasoning"], "priority": "medium", "purchaseFrequency": "rare" },
+    { "name": "Cumin", "category": "Spices", "tags": ["spice", "seasoning"], "priority": "medium", "purchaseFrequency": "rare" },
+    { "name": "Cinnamon", "category": "Spices", "tags": ["spice", "baking"], "priority": "medium", "purchaseFrequency": "rare" },
+    { "name": "Italian Seasoning", "category": "Spices", "tags": ["spice", "seasoning", "blend"], "priority": "medium", "purchaseFrequency": "rare" },
+    { "name": "Chili Powder", "category": "Spices", "tags": ["spice", "seasoning"], "priority": "medium", "purchaseFrequency": "rare" }
+  ]
+}

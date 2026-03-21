@@ -128,11 +128,11 @@ const groceryItemSchema = new mongoose.Schema({
         default: 'medium'
     },
     
-    // User Association
+    // User Association (optional - null means universal/system-wide item)
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        default: null // null = universal item available to all users
     },
     
     // Status

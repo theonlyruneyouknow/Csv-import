@@ -125,6 +125,13 @@ const mealPlanSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
+  },
+  
+  // Household for collaboration
+  household: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Household',
+    required: true
   }
 });
 
@@ -142,6 +149,7 @@ mealPlanSchema.pre('save', function(next) {
 
 // Create indexes
 mealPlanSchema.index({ startDate: 1, endDate: 1 });
+mealPlanSchema.index({ household: 1 });
 mealPlanSchema.index({ createdBy: 1 });
 mealPlanSchema.index({ status: 1 });
 mealPlanSchema.index({ isTemplate: 1 });

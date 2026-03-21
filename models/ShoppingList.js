@@ -132,6 +132,13 @@ const shoppingListSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
+  },
+  
+  // Household for collaboration
+  household: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Household',
+    required: true
   }
 });
 
@@ -164,6 +171,7 @@ shoppingListSchema.pre('save', function(next) {
 });
 
 // Create indexes
+shoppingListSchema.index({ household: 1 });
 shoppingListSchema.index({ createdBy: 1 });
 shoppingListSchema.index({ status: 1 });
 shoppingListSchema.index({ shoppingDate: 1 });

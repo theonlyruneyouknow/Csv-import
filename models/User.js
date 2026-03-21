@@ -143,6 +143,13 @@ const userSchema = new mongoose.Schema({
     },
     invitationAcceptedAt: {
         type: Date
+    },
+    
+    // Household for food management collaboration
+    household: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Household',
+        default: null
     }
 }, {
     timestamps: true

@@ -144,6 +144,13 @@ const recipeSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
+  },
+  
+  // Household for collaboration
+  household: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Household',
+    required: true
   }
 });
 
@@ -157,6 +164,7 @@ recipeSchema.pre('save', function(next) {
 // Create indexes for better search performance
 recipeSchema.index({ title: 'text', description: 'text', tags: 'text' });
 recipeSchema.index({ category: 1 });
+recipeSchema.index({ household: 1 });
 recipeSchema.index({ createdBy: 1 });
 recipeSchema.index({ isFavorite: 1 });
 

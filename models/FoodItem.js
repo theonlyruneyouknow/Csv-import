@@ -69,6 +69,13 @@ const foodItemSchema = new mongoose.Schema({
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
+  },
+  
+  // Household for pantry collaboration
+  household: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Household',
+    required: true
   }
 });
 
