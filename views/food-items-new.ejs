@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Add New Food Item</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 98%;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 900px;
+            }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #6f42c1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #5a6268;
+            color: white;
+        }
+
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section h3 {
+            color: #6f42c1;
+            border-bottom: 2px solid #6f42c1;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .form-group label .required {
+            color: #dc3545;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #6f42c1;
+            box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group small {
+            display: block;
+            color: #6c757d;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .size-inputs {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #6f42c1;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a32a3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column-reverse;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <i class="fas fa-<%= isVariation ? 'code-branch' : (isDuplicate ? 'copy' : 'plus') %>"></i>
+                <%= isVariation ? 'Add Variation' : (isDuplicate ? 'Duplicate Item' : 'Add New Food Item') %>
+            </h1>
+            <a href="/food/items" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                Back to Items
+            </a>
+        </div>
+
+        <% if (isVariation && preSelectedParent) { %>
+        <div style="background: #e7f3ff; border-left: 4px solid #0066cc; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+            <strong><i class="fas fa-info-circle"></i> Adding variation for:</strong> 
+            <%= preSelectedParent.name %><%= preSelectedParent.brand ? ' - ' + preSelectedParent.brand : '' %>
+        </div>
+        <% } %>
+
+        <% if (isDuplicate && duplicateFrom) { %>
+        <div style="background: #fff8e1; border-left: 4px solid #f57c00; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+            <strong><i class="fas fa-info-circle"></i> Duplicating:</strong> 
+            <%= duplicateFrom.name %><%= duplicateFrom.brand ? ' - ' + duplicateFrom.brand : '' %>
+        </div>
+        <% } %>
+
+        <div class="form-container">
+            <form action="/food/items" method="POST">
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
+                    
+                    <div class="form-group">
+                        <label for="name">Item Name <span class="required">*</span></label>
+                        <input type="text" id="name" name="name" required 
+                               value="<%= isDuplicate && duplicateFrom ? duplicateFrom.name : (isVariation && preSelectedParent ? preSelectedParent.name : '') %>"
+                               placeholder="e.g., Organic Bananas, Whole Wheat Bread">
+                        <small>Enter the name of the food item</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="brand">Brand</label>
+                            <input type="text" id="brand" name="brand" 
+                                   value="<%= isDuplicate && duplicateFrom ? (duplicateFrom.brand || '') : '' %>"
+                                   placeholder="e.g., Kirkland, Great Value">
+                            <small>Optional brand name</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="category">Category <span class="required">*</span></label>
+                            <select id="category" name="category" required>
+                                <option value="">Select a category</option>
+                                <% categories.forEach(cat => { %>
+                                <option value="<%= cat._id %>" 
+                                        <%= (isDuplicate && duplicateFrom && duplicateFrom.category && String(duplicateFrom.category._id) === String(cat._id)) || (isVariation && preSelectedParent && preSelectedParent.category && String(preSelectedParent.category._id) === String(cat._id)) ? 'selected' : '' %>>
+                                    <%= cat.icon %> <%= cat.name %>
+                                </option>
+                                <% }); %>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Package Size</label>
+                        <div class="size-inputs">
+                            <input type="number" step="0.01" name="sizeValue" 
+                                   value="<%= isDuplicate && duplicateFrom && duplicateFrom.size && duplicateFrom.size.value || '' %>"
+                                   placeholder="e.g., 16, 2.5, 0.5">
+                            <select name="sizeUnit" id="sizeUnit" onchange="toggleCustomUnit()">
+                                <option value="">Unit</option>
+                                <optgroup label="Volume - US">
+                                    <option value="gal" <%= isDuplicate && duplicateFrom && duplicateFrom.size && duplicateFrom.size.unit === 'gal' ? 'selected' : '' %>>gallon</option>
+                                    <option value="half gal" <%= isDuplicate && duplicateFrom && duplicateFrom.size && duplicateFrom.size.unit === 'half gal' ? 'selected' : '' %>>half gallon</option>
+                                    <option value="qt" <%= isDuplicate && duplicateFrom && duplicateFrom.size && duplicateFrom.size.unit === 'qt' ? 'selected' : '' %>>quart</option>
+                                    <option value="pt" <%= isDuplicate && duplicateFrom && duplicateFrom.size && duplicateFrom.size.unit === 'pt' ? 'selected' : '' %>>pint</option>
+                                    <option value="cup" <%= isDuplicate && duplicateFrom && duplicateFrom.size && duplicateFrom.size.unit === 'cup' ? 'selected' : '' %>>cup</option>
+                                    <option value="fl oz" <%= isDuplicate && duplicateFrom && duplicateFrom.size && duplicateFrom.size.unit === 'fl oz' ? 'selected' : '' %>>fluid ounce</option>
+                                </optgroup>
+                                <optgroup label="Volume - Metric">
+                                    <option value="l" <%= isDuplicate && duplicateFrom && duplicateFrom.size && duplicateFrom.size.unit === 'l' ? 'selected' : '' %>>liter</option>
+                                    <option value="ml" <%= isDuplicate && duplicateFrom && duplicateFrom.size && duplicateFrom.size.unit === 'ml' ? 'selected' : '' %>>milliliter</option>
+                                </optgroup>
+                                <optgroup label="Weight - US">
+                                    <option value="lb" <%= isDuplicate && duplicateFrom && duplicateFrom.size && duplicateFrom.size.unit === 'lb' ? 'selected' : '' %>>pound</option>
+                                    <option value="oz" <%= isDuplicate && duplicateFrom && duplicateFrom.size && duplicateFrom.size.unit === 'oz' ? 'selected' : '' %>>ounce</option>
+                                </optgroup>
+                                <optgroup label="Weight - Metric">
+                                    <option value="kg" <%= isDuplicate && duplicateFrom && duplicateFrom.size && duplicateFrom.size.unit === 'kg' ? 'selected' : '' %>>kilogram</option>
+                                    <option value="g" <%= isDuplicate && duplicateFrom && duplicateFrom.size && duplicateFrom.size.unit === 'g' ? 'selected' : '' %>>gram</option>
+                                </optgroup>
+                                <optgroup label="Count">
+                                    <option value="count" <%= isDuplicate && duplicateFrom && duplicateFrom.size && duplicateFrom.size.unit === 'count' ? 'selected' : '' %>>count</option>
+                                    <option value="each" <%= isDuplicate && duplicateFrom && duplicateFrom.size && duplicateFrom.size.unit === 'each' ? 'selected' : '' %>>each</option>
+                                    <option value="dozen" <%= isDuplicate && duplicateFrom && duplicateFrom.size && duplicateFrom.size.unit === 'dozen' ? 'selected' : '' %>>dozen</option>
+                                    <option value="pack" <%= isDuplicate && duplicateFrom && duplicateFrom.size && duplicateFrom.size.unit === 'pack' ? 'selected' : '' %>>pack</option>
+                                </optgroup>
+                                <option value="custom">✏️ Custom Unit...</option>
+                            </select>
+                            <input type="text" id="customUnit" name="customUnit" 
+                                   style="display: none; margin-left: 5px;" 
+                                   placeholder="Enter custom unit"
+                                   class="form-control">
+                        </div>
+                        <small>Optional package or serving size (e.g., 0.5 half gal, 1 gal, 64 fl oz)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" 
+                                  placeholder="Brief description of the item..."><%= isDuplicate && duplicateFrom ? (duplicateFrom.description || '') : '' %></textarea>
+                    </div>
+                </div>
+
+                <!-- Parent-Child Relationships & Variations -->
+                <div class="form-section">
+                    <h3><i class="fas fa-sitemap"></i> Item Relationships</h3>
+                    
+                    <div class="form-group" <%= isVariation ? 'style="display:none;"' : '' %>>
+                        <label for="isParent" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="isParent" name="isParent" value="true" 
+                                   <%= isDuplicate && duplicateFrom && duplicateFrom.isParent ? 'checked' : '' %>
+                                   style="width: auto;">
+                            <span>This is a parent item (has variations)</span>
+                        </label>
+                        <small>Check this if this item has multiple variations (e.g., "Milk" as parent for different types/sizes)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="parentItem">Parent Item</label>
+                        <select id="parentItem" name="parentItem" <%= isVariation ? 'disabled' : '' %>>
+                            <option value="">None - This is a standalone or parent item</option>
+                            <% if (parentItems && parentItems.length > 0) { %>
+                                <% parentItems.forEach(parent => { %>
+                                <option value="<%= parent._id %>"
+                                        <%= (isVariation && preSelectedParent && String(preSelectedParent._id) === String(parent._id)) || (isDuplicate && duplicateFrom && duplicateFrom.parentItem && String(duplicateFrom.parentItem) === String(parent._id)) ? 'selected' : '' %>>
+                                    <%= parent.name %><%= parent.brand ? ' - ' + parent.brand : '' %>
+                                </option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                        <small>If this is a variation, select the parent item (e.g., select "Milk" for "2% Milk - Gallon")</small>
+                    </div>
+
+                    <div class="form-row" id="variationFields" style="display: <%= isVariation || (isDuplicate && duplicateFrom && duplicateFrom.parentItem) ? 'flex' : 'none' %>;">
+                        <div class="form-group">
+                            <label for="variationType">Variation Type</label>
+                            <select id="variationType" name="variationType">
+                                <option value="">Select type...</option>
+                                <option value="size" <%= isDuplicate && duplicateFrom && duplicateFrom.variation && duplicateFrom.variation.type === 'size' ? 'selected' : '' %>>Size</option>
+                                <option value="fat-content" <%= isDuplicate && duplicateFrom && duplicateFrom.variation && duplicateFrom.variation.type === 'fat-content' ? 'selected' : '' %>>Fat Content</option>
+                                <option value="type" <%= isDuplicate && duplicateFrom && duplicateFrom.variation && duplicateFrom.variation.type === 'type' ? 'selected' : '' %>>Type</option>
+                                <option value="flavor" <%= isDuplicate && duplicateFrom && duplicateFrom.variation && duplicateFrom.variation.type === 'flavor' ? 'selected' : '' %>>Flavor</option>
+                                <option value="concentration" <%= isDuplicate && duplicateFrom && duplicateFrom.variation && duplicateFrom.variation.type === 'concentration' ? 'selected' : '' %>>Concentration</option>
+                                <option value="other" <%= isDuplicate && duplicateFrom && duplicateFrom.variation && duplicateFrom.variation.type === 'other' ? 'selected' : '' %>>Other</option>
+                            </select>
+                            <small>What makes this variation different?</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="variationValue">Variation Value</label>
+                            <input type="text" id="variationValue" name="variationValue" 
+                                   value="<%= isDuplicate && duplicateFrom && duplicateFrom.variation && duplicateFrom.variation.value || '' %>"
+                                   placeholder="e.g., Gallon, 2%, Whole, Sugar-Free">
+                            <small>Specific variation detail</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Usage & Management -->
+                <div class="form-section">
+                    <h3><i class="fas fa-chart-line"></i> Usage & Management</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="purchaseFrequency">Purchase Frequency</label>
+                            <select id="purchaseFrequency" name="purchaseFrequency">
+                                <option value="occasional" <%= isDuplicate && duplicateFrom && duplicateFrom.purchaseFrequency === 'occasional' ? 'selected' : (!isDuplicate ? 'selected' : '') %>>Occasional</option>
+                                <option value="weekly" <%= isDuplicate && duplicateFrom && duplicateFrom.purchaseFrequency === 'weekly' ? 'selected' : '' %>>Weekly</option>
+                                <option value="biweekly" <%= isDuplicate && duplicateFrom && duplicateFrom.purchaseFrequency === 'biweekly' ? 'selected' : '' %>>Biweekly</option>
+                                <option value="monthly" <%= isDuplicate && duplicateFrom && duplicateFrom.purchaseFrequency === 'monthly' ? 'selected' : '' %>>Monthly</option>
+                                <option value="rare" <%= isDuplicate && duplicateFrom && duplicateFrom.purchaseFrequency === 'rare' ? 'selected' : '' %>>Rare</option>
+                            </select>
+                            <small>How often do you typically buy this?</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="priority">Priority</label>
+                            <select id="priority" name="priority">
+                                <option value="medium" <%= isDuplicate && duplicateFrom && duplicateFrom.priority === 'medium' ? 'selected' : (!isDuplicate ? 'selected' : '') %>>Medium</option>
+                                <option value="high" <%= isDuplicate && duplicateFrom && duplicateFrom.priority === 'high' ? 'selected' : '' %>>High</option>
+                                <option value="low" <%= isDuplicate && duplicateFrom && duplicateFrom.priority === 'low' ? 'selected' : '' %>>Low</option>
+                            </select>
+                            <small>Importance for price tracking</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tags">Tags</label>
+                        <input type="text" id="tags" name="tags" 
+                               value="<%= isDuplicate && duplicateFrom && duplicateFrom.tags ? duplicateFrom.tags.join(', ') : '' %>"
+                               placeholder="e.g., organic, gluten-free, snack">
+                        <small>Comma-separated tags for easier searching</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" name="notes" 
+                                  placeholder="Any additional notes about this item..."><%= isDuplicate && duplicateFrom ? (duplicateFrom.notes || '') : '' %></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="/food/items" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Save Item
+                    </button>
+                </div>
+                
+                <!-- Note: When select is disabled, we need hidden field for parent -->
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Custom unit toggle
+        function toggleCustomUnit() {
+            const sizeUnit = document.getElementById('sizeUnit');
+            const customUnit = document.getElementById('customUnit');
+            
+            if (sizeUnit.value === 'custom') {
+                customUnit.style.display = 'inline-block';
+                customUnit.required = true;
+                customUnit.focus();
+            } else {
+                customUnit.style.display = 'none';
+                customUnit.required = false;
+                customUnit.value = '';
+            }
+        }
+
+        // Handle form submission with custom units
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const sizeUnit = document.getElementById('sizeUnit');
+            const customUnit = document.getElementById('customUnit');
+            
+            // If custom unit is selected, use the custom value instead
+            if (sizeUnit.value === 'custom' && customUnit.value.trim()) {
+                sizeUnit.value = customUnit.value.trim();
+            }
+            
+            // Enable parent select if it was disabled (so value gets submitted)
+            const parentSelect = document.getElementById('parentItem');
+            if (parentSelect && parentSelect.disabled) {
+                parentSelect.disabled = false;
+            }
+        });
+        
+        // Show/hide variation fields when parent item is selected
+        document.getElementById('parentItem').addEventListener('change', function() {
+            const variationFields = document.getElementById('variationFields');
+            if (this.value) {
+                variationFields.style.display = 'flex';
+            } else {
+                variationFields.style.display = 'none';
+            }
+        });
+
+        // Prevent selecting both isParent and parentItem
+        document.getElementById('isParent').addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById('parentItem').value = '';
+                document.getElementById('variationFields').style.display = 'none';
+            }
+        });
+
+        document.getElementById('parentItem').addEventListener('change', function() {
+            if (this.value) {
+                document.getElementById('isParent').checked = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

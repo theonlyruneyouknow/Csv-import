@@ -9,13 +9,20 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             background-color: #f8f9fa;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 98%;
             margin: 0 auto;
+            padding: 10px;
+        }
+
+        @media (min-width: 1400px) {
+            .container {
+                max-width: 1200px;
+            }
         }
 
         .header {
@@ -224,6 +231,94 @@
                 flex-direction: column;
             }
         }
+
+        /* Autocomplete Styles */
+        .autocomplete-wrapper {
+            position: relative;
+        }
+
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .autocomplete-suggestions.active {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f8f9fa;
+            transition: background-color 0.2s;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.selected {
+            background-color: #e9ecef;
+        }
+
+        .autocomplete-item-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .autocomplete-item-brand {
+            font-size: 0.9em;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        .autocomplete-item-category {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .item-name-input {
+            position: relative;
+        }
+
+        .db-indicator {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #28a745;
+            font-size: 1.1em;
+        }
+
+        .quick-add-from-db {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .quick-add-from-db:hover {
+            background: #138496;
+        }
     </style>
 </head>
 
@@ -306,17 +401,24 @@
                             <div class="row">
                                 <div class="col-md-3">
                                     <label class="form-label">Item Name *</label>
-                                    <input type="text" class="form-control" name="items[0][name]" required 
-                                           placeholder="e.g., Bananas">
+                                    <div class="autocomplete-wrapper">
+                                        <input type="text" class="form-control item-name-autocomplete" 
+                                               name="items[0][name]" required 
+                                               placeholder="Start typing to search..."
+                                               autocomplete="off"
+                                               data-item-index="0">
+                                        <div class="autocomplete-suggestions" id="suggestions-0"></div>
+                                        <input type="hidden" name="items[0][foodItemId]" class="food-item-id">
+                                    </div>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Quantity *</label>
-                                    <input type="number" class="form-control" name="items[0][quantity]" 
+                                    <input type="number" class="form-control quantity-input" name="items[0][quantity]" 
                                            min="0.1" step="0.1" value="1" required>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Unit</label>
-                                    <select class="form-control" name="items[0][unit]">
+                                    <select class="form-control unit-select" name="items[0][unit]">
                                         <option value="piece">Piece</option>
                                         <option value="lb">Pound</option>
                                         <option value="oz">Ounce</option>
@@ -330,12 +432,12 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Est. Price</label>
-                                    <input type="number" class="form-control" name="items[0][estimatedPrice]" 
+                                    <input type="number" class="form-control price-input" name="items[0][estimatedPrice]" 
                                            min="0" step="0.01" placeholder="0.00">
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Priority</label>
-                                    <select class="form-control" name="items[0][priority]">
+                                    <select class="form-control priority-select" name="items[0][priority]">
                                         <option value="Low">Low</option>
                                         <option value="Medium" selected>Medium</option>
                                         <option value="High">High</option>
@@ -351,20 +453,7 @@
                             <div class="row mt-2">
                                 <div class="col-md-4">
                                     <label class="form-label">Category</label>
-                                    <select class="form-control" name="items[0][category]">
-                                        <option value="Produce">Produce</option>
-                                        <option value="Dairy">Dairy</option>
-                                        <option value="Meat">Meat</option>
-                                        <option value="Seafood">Seafood</option>
-                                        <option value="Pantry">Pantry</option>
-                                        <option value="Frozen">Frozen</option>
-                                        <option value="Bakery">Bakery</option>
-                                        <option value="Beverages">Beverages</option>
-                                        <option value="Snacks">Snacks</option>
-                                        <option value="Condiments">Condiments</option>
-                                        <option value="Spices">Spices</option>
-                                        <option value="Other">Other</option>
-                                    </select>
+                                    <input type="text" class="form-control category-input" name="items[0][category]" readonly>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Aisle/Location</label>
@@ -404,6 +493,153 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let itemIndex = 1;
+        let searchTimeout = null;
+        let selectedIndex = -1;
+
+        // Initialize autocomplete for first item
+        initializeAutocomplete(0);
+
+        function initializeAutocomplete(index) {
+            const input = document.querySelector(`input[data-item-index="${index}"]`);
+            if (!input) return;
+
+            const suggestionsDiv = document.getElementById(`suggestions-${index}`);
+            const itemRow = input.closest('.item-row');
+
+            input.addEventListener('input', function() {
+                const query = this.value.trim();
+                
+                clearTimeout(searchTimeout);
+                
+                if (query.length < 2) {
+                    suggestionsDiv.classList.remove('active');
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    searchItems(query, suggestionsDiv, itemRow);
+                }, 300);
+            });
+
+            input.addEventListener('keydown', function(e) {
+                const items = suggestionsDiv.querySelectorAll('.autocomplete-item');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                    updateSelection(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, -1);
+                    updateSelection(items);
+                } else if (e.key === 'Enter' && selectedIndex >= 0) {
+                    e.preventDefault();
+                    items[selectedIndex].click();
+                } else if (e.key === 'Escape') {
+                    suggestionsDiv.classList.remove('active');
+                    selectedIndex = -1;
+                }
+            });
+
+            // Close suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!input.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                    suggestionsDiv.classList.remove('active');
+                    selectedIndex = -1;
+                }
+            });
+        }
+
+        function updateSelection(items) {
+            items.forEach((item, index) => {
+                if (index === selectedIndex) {
+                    item.classList.add('selected');
+                    item.scrollIntoView({ block: 'nearest' });
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+
+        async function searchItems(query, suggestionsDiv, itemRow) {
+            try {
+                const response = await fetch(`/food/api/items/search?q=${encodeURIComponent(query)}`);
+                const items = await response.json();
+
+                if (items.length === 0) {
+                    suggestionsDiv.innerHTML = '<div class="autocomplete-item" style="cursor: default; color: #999;">No items found in your database</div>';
+                    suggestionsDiv.classList.add('active');
+                    return;
+                }
+
+                suggestionsDiv.innerHTML = items.map(item => `
+                    <div class="autocomplete-item" data-item='${JSON.stringify(item)}'>
+                        <div class="autocomplete-item-name">
+                            ${item.name}
+                            ${item.brand ? `<span class="autocomplete-item-brand">(${item.brand})</span>` : ''}
+                        </div>
+                        <div class="autocomplete-item-category">
+                            ${item.categoryIcon} ${item.category}
+                        </div>
+                    </div>
+                `).join('');
+
+                suggestionsDiv.classList.add('active');
+                selectedIndex = -1;
+
+                // Add click handlers
+                suggestionsDiv.querySelectorAll('.autocomplete-item').forEach(div => {
+                    if (div.dataset.item) {
+                        div.addEventListener('click', function() {
+                            const item = JSON.parse(this.dataset.item);
+                            fillItemData(itemRow, item);
+                            suggestionsDiv.classList.remove('active');
+                            selectedIndex = -1;
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error('Error searching items:', error);
+            }
+        }
+
+        function fillItemData(itemRow, item) {
+            // Fill name
+            const nameInput = itemRow.querySelector('.item-name-autocomplete');
+            nameInput.value = item.displayName;
+
+            // Store item ID
+            const idInput = itemRow.querySelector('.food-item-id');
+            idInput.value = item.id;
+
+            // Fill category
+            const categoryInput = itemRow.querySelector('.category-input');
+            categoryInput.value = item.category;
+
+            // Set priority
+            const prioritySelect = itemRow.querySelector('.priority-select');
+            const priorityMap = { 'low': 'Low', 'medium': 'Medium', 'high': 'High' };
+            if (priorityMap[item.priority]) {
+                prioritySelect.value = priorityMap[item.priority];
+            }
+
+            // Set unit if size is available
+            if (item.size && item.size.unit) {
+                const unitSelect = itemRow.querySelector('.unit-select');
+                const unitValue = item.size.unit.toLowerCase();
+                // Try to match the unit
+                const options = Array.from(unitSelect.options);
+                const matchingOption = options.find(opt => opt.value === unitValue);
+                if (matchingOption) {
+                    unitSelect.value = unitValue;
+                }
+            }
+
+            // Focus on quantity for easy editing
+            const quantityInput = itemRow.querySelector('.quantity-input');
+            quantityInput.focus();
+            quantityInput.select();
+        }
 
         function addItem() {
             const container = document.getElementById('itemsContainer');
@@ -415,17 +651,25 @@
                 <div class="row">
                     <div class="col-md-3">
                         <label class="form-label">Item Name *</label>
-                        <input type="text" class="form-control" name="items[${itemIndex}][name]" required 
-                               placeholder="e.g., Bananas">
+                        <div class="autocomplete-wrapper">
+                            <input type="text" class="form-control item-name-autocomplete" 
+                                   name="items[${itemIndex}][name]" 
+                                   data-item-index="${itemIndex}"
+                                   required 
+                                   placeholder="Start typing to search..."
+                                   autocomplete="off">
+                            <div class="autocomplete-suggestions" id="suggestions-${itemIndex}"></div>
+                            <input type="hidden" class="food-item-id" name="items[${itemIndex}][foodItemId]">
+                        </div>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Quantity *</label>
-                        <input type="number" class="form-control" name="items[${itemIndex}][quantity]" 
+                        <input type="number" class="form-control quantity-input" name="items[${itemIndex}][quantity]" 
                                min="0.1" step="0.1" value="1" required>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Unit</label>
-                        <select class="form-control" name="items[${itemIndex}][unit]">
+                        <select class="form-control unit-select" name="items[${itemIndex}][unit]">
                             <option value="piece">Piece</option>
                             <option value="lb">Pound</option>
                             <option value="oz">Ounce</option>
@@ -444,7 +688,7 @@
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Priority</label>
-                        <select class="form-control" name="items[${itemIndex}][priority]">
+                        <select class="form-control priority-select" name="items[${itemIndex}][priority]">
                             <option value="Low">Low</option>
                             <option value="Medium" selected>Medium</option>
                             <option value="High">High</option>
@@ -460,20 +704,8 @@
                 <div class="row mt-2">
                     <div class="col-md-4">
                         <label class="form-label">Category</label>
-                        <select class="form-control" name="items[${itemIndex}][category]">
-                            <option value="Produce">Produce</option>
-                            <option value="Dairy">Dairy</option>
-                            <option value="Meat">Meat</option>
-                            <option value="Seafood">Seafood</option>
-                            <option value="Pantry">Pantry</option>
-                            <option value="Frozen">Frozen</option>
-                            <option value="Bakery">Bakery</option>
-                            <option value="Beverages">Beverages</option>
-                            <option value="Snacks">Snacks</option>
-                            <option value="Condiments">Condiments</option>
-                            <option value="Spices">Spices</option>
-                            <option value="Other">Other</option>
-                        </select>
+                        <input type="text" class="form-control category-input" name="items[${itemIndex}][category]" 
+                               placeholder="e.g., Produce">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Aisle/Location</label>
@@ -489,6 +721,10 @@
             `;
             
             container.appendChild(newItem);
+            
+            // Initialize autocomplete for the new item
+            initializeAutocomplete(itemIndex);
+            
             itemIndex++;
             updateRemoveButtons();
         }

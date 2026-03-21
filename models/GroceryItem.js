@@ -30,8 +30,8 @@ const groceryItemSchema = new mongoose.Schema({
     size: {
         value: Number,
         unit: {
-            type: String,
-            enum: ['oz', 'lb', 'g', 'kg', 'ml', 'l', 'gal', 'count', 'each']
+            type: String
+            // Removed enum to allow custom units (half gal, qt, pt, etc.)
         }
     },
     
@@ -73,6 +73,28 @@ const groceryItemSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'GroceryItem'
     }],
+    
+    // Parent-Child Relationship (for variations like different milk types/sizes)
+    parentItem: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'GroceryItem',
+        default: null
+    },
+    
+    // Is this a parent item (can have children)?
+    isParent: {
+        type: Boolean,
+        default: false
+    },
+    
+    // Variation details (to distinguish from parent/siblings)
+    variation: {
+        type: {
+            type: String,
+            enum: ['size', 'flavor', 'type', 'concentration', 'fat-content', 'other']
+        },
+        value: String // e.g., "Gallon", "2%", "Whole", "Low-Fat"
+    },
     
     // Image
     image: String, // URL to product image
@@ -149,10 +171,18 @@ groceryItemSchema.virtual('displayName').get(function() {
     return name;
 });
 
+// Virtual for getting child items
+groceryItemSchema.virtual('childItems', {
+    ref: 'GroceryItem',
+    localField: '_id',
+    foreignField: 'parentItem'
+});
+
 // Index for search
 groceryItemSchema.index({ name: 'text', brand: 'text', tags: 'text' });
 groceryItemSchema.index({ user: 1, category: 1, isActive: 1 });
 groceryItemSchema.index({ barcode: 1 });
+groceryItemSchema.index({ parentItem: 1 });
 
 // Ensure virtuals are included in JSON
 groceryItemSchema.set('toJSON', { virtuals: true });

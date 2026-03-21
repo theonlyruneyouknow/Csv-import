@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Food Items Database</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 98%;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        @media (min-width: 1600px) {
+            .container {
+                max-width: 1400px;
+            }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #6f42c1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #5a6268;
+            color: white;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .filter-box select {
+            padding: 10px 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 14px;
+            min-width: 150px;
+        }
+
+        .add-button {
+            background: #6f42c1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .add-button:hover {
+            background: #5a32a3;
+            color: white;
+        }
+
+        .suggestions-button {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .suggestions-button:hover {
+            background: #138496;
+            color: white;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 5px;
+            background: #f8f9fa;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+
+        .view-button {
+            background: transparent;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .view-button:hover {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .view-button.active {
+            background: #6f42c1;
+            color: white;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-number {
+            font-weight: bold;
+            color: #6f42c1;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .items-list {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .items-list.active {
+            display: block;
+        }
+
+        .items-grid.hidden {
+            display: none;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .items-table thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .items-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .items-table tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s ease;
+        }
+
+        .items-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .items-table td {
+            padding: 15px;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        .table-item-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .table-item-brand {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .table-category {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .item-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #dee2e6;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .item-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+        }
+
+        .item-brand {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 2px;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .action-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .edit-icon {
+            background: #007bff;
+            color: white;
+        }
+
+        .edit-icon:hover {
+            background: #0056b3;
+        }
+
+        .delete-icon {
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete-icon:hover {
+            background: #c82333;
+        }
+
+        .duplicate-icon {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .duplicate-icon:hover {
+            background: #138496;
+        }
+
+        .add-var-icon {
+            background: #28a745;
+            color: white;
+        }
+
+        .add-var-icon:hover {
+            background: #218838;
+        }
+
+        .expand-icon {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .expand-icon:hover {
+            background: #e0a800;
+        }
+
+        .child-items-container {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #e7f3ff;
+        }
+
+        .child-items-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .child-item-card {
+            background: #f8f9fa;
+            border-left: 3px solid #0066cc;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .child-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .child-item-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .child-item-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .action-icon-sm {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .item-category {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .item-details {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .item-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85em;
+            color: #999;
+            padding-top: 10px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .priority-badge {
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        .priority-high {
+            background: #ffe5e5;
+            color: #dc3545;
+        }
+
+        .priority-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .priority-low {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        /* Parent-Child Relationship Styles */
+        .parent-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #e7f3ff;
+            color: #0066cc;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .child-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f0f0f0;
+            color: #666;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.75em;
+            margin-top: 4px;
+        }
+
+        .variation-badge {
+            display: inline-block;
+            background: #fff8e1;
+            color: #f57c00;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            font-weight: 500;
+            margin-left: 6px;
+        }
+
+        .table-child-row td:first-child {
+            padding-left: 35px;
+            position: relative;
+        }
+
+        .table-child-row td:first-child::before {
+            content: '└─';
+            position: absolute;
+            left: 15px;
+            color: #ccc;
+            font-weight: bold;
+        }
+
+        .no-items {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .no-items i {
+            font-size: 64px;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .items-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box, .filter-box select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <i class="fas fa-database"></i>
+                Food Items Database
+            </h1>
+            <a href="/food-dashboard" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                Back to Dashboard
+            </a>
+        </div>
+
+        <div class="controls">
+            <div class="controls-row">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search items by name, brand, or description...">
+                </div>
+                <div class="filter-box">
+                    <select id="categoryFilter">
+                        <option value="">All Categories</option>
+                        <% categories.forEach(cat => { %>
+                        <option value="<%= cat._id %>"><%= cat.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="filter-box">
+                    <select id="priorityFilter">
+                        <option value="">All Priorities</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+                <div class="view-toggle">
+                    <button class="view-button active" id="gridViewBtn" onclick="switchView('grid')">
+                        <i class="fas fa-th"></i>
+                        Grid
+                    </button>
+                    <button class="view-button" id="listViewBtn" onclick="switchView('list')">
+                        <i class="fas fa-list"></i>
+                        List
+                    </button>
+                </div>
+                <a href="/food/items/suggestions" class="suggestions-button">
+                    <i class="fas fa-lightbulb"></i>
+                    Browse Suggestions
+                </a>
+                <a href="/food/items/new" class="add-button">
+                    <i class="fas fa-plus"></i>
+                    Add New Item
+                </a>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span>Total Items:</span>
+                    <span class="stat-number" id="totalCount"><%= items.length %></span>
+                </div>
+                <div class="stat-item">
+                    <span>Displayed:</span>
+                    <span class="stat-number" id="displayedCount"><%= items.length %></span>
+                </div>
+            </div>
+        </div>
+
+        <% if (items.length === 0) { %>
+        <div class="no-items">
+            <i class="fas fa-database"></i>
+            <h3>No Items Yet</h3>
+            <p>Start building your food items database by adding items manually or browsing our suggestions.</p>
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+                <a href="/food/items/suggestions" class="suggestions-button">
+                    <i class="fas fa-lightbulb"></i>
+                    Browse Suggested Items
+                </a>
+                <a href="/food/items/new" class="add-button">
+                    <i class="fas fa-plus"></i>
+                    Add Custom Item
+                </a>
+            </div>
+        </div>
+        <% } else { %>
+        <div class="items-grid" id="itemsGrid">
+            <% items.forEach(item => { %>
+            <div class="item-card" data-item-id="<%= item._id %>" 
+                 data-category="<%= item.category ? item.category._id : '' %>"
+                 data-priority="<%= item.priority || 'medium' %>"
+                 data-name="<%= item.name.toLowerCase() %>"
+                 data-brand="<%= item.brand ? item.brand.toLowerCase() : '' %>">
+                <div class="item-header">
+                    <div>
+                        <h3 class="item-name">
+                            <%= item.name %>
+                            <% if (item.isParent) { %>
+                            <span class="parent-badge">
+                                <i class="fas fa-layer-group"></i> Parent
+                            </span>
+                            <% } %>
+                            <% if (item.variation && item.variation.value) { %>
+                            <span class="variation-badge"><%= item.variation.value %></span>
+                            <% } %>
+                        </h3>
+                        <% if (item.brand) { %>
+                        <div class="item-brand"><%= item.brand %></div>
+                        <% } %>
+                        <% if (item.parentItem) { %>
+                        <div class="child-indicator">
+                            <i class="fas fa-level-up-alt fa-rotate-90"></i>
+                            Variant of: <%= item.parentItem.name %>
+                        </div>
+                        <% } %>
+                    </div>
+                    <div class="item-actions">
+                        <% if (item.isParent && item.children && item.children.length > 0) { %>
+                        <button class="action-icon expand-icon" onclick="toggleChildren('<%= item._id %>')" title="Show/Hide Variations">
+                            <i class="fas fa-chevron-down" id="expand-icon-<%= item._id %>"></i>
+                        </button>
+                        <% } %>
+                        <% if (item.isParent) { %>
+                        <button class="action-icon add-var-icon" onclick="addVariation('<%= item._id %>')" title="Add Variation">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <% } %>
+                        <button class="action-icon duplicate-icon" onclick="duplicateItem('<%= item._id %>')" title="Duplicate">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="action-icon edit-icon" onclick="editItem('<%= item._id %>')" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-icon delete-icon" onclick="deleteItem('<%= item._id %>', '<%= item.name %>')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <% if (item.category) { %>
+                <span class="item-category" style="background: <%= item.category.color %>20; color: <%= item.category.color %>;">
+                    <%= item.category.icon %> <%= item.category.name %>
+                </span>
+                <% } %>
+
+                <div class="item-details">
+                    <% if (item.size && item.size.value) { %>
+                    <div><strong>Size:</strong> <%= item.size.value %> <%= item.size.unit %></div>
+                    <% } %>
+                    <% if (item.description) { %>
+                    <div><%= item.description %></div>
+                    <% } %>
+                </div>
+
+                <div class="item-meta">
+                    <span class="priority-badge priority-<%= item.priority || 'medium' %>">
+                        <%= (item.priority || 'medium').toUpperCase() %>
+                    </span>
+                    <span><%= item.purchaseFrequency || 'occasional' %></span>
+                </div>
+
+                <!-- Child Items -->
+                <% if (item.isParent && item.children && item.children.length > 0) { %>
+                <div class="child-items-container" id="children-<%= item._id %>" style="display: none;">
+                    <div style="font-weight: 600; color: #666; margin-bottom: 8px; font-size: 0.85em;">
+                        <i class="fas fa-layer-group"></i> <%= item.children.length %> Variation<%= item.children.length !== 1 ? 's' : '' %>
+                    </div>
+                    <div class="child-items-grid">
+                        <% item.children.forEach(child => { %>
+                        <div class="child-item-card">
+                            <div class="child-item-header">
+                                <div>
+                                    <div class="child-item-name">
+                                        <%= child.name %>
+                                        <% if (child.variation && child.variation.value) { %>
+                                        <span class="variation-badge"><%= child.variation.value %></span>
+                                        <% } %>
+                                    </div>
+                                    <% if (child.brand) { %>
+                                    <div style="color: #999; font-size: 0.85em;"><%= child.brand %></div>
+                                    <% } %>
+                                    <% if (child.size && child.size.value) { %>
+                                    <div style="color: #666; font-size: 0.85em; margin-top: 4px;">
+                                        <%= child.size.value %> <%= child.size.unit %>
+                                    </div>
+                                    <% } %>
+                                </div>
+                                <div class="child-item-actions">
+                                    <button class="action-icon-sm duplicate-icon" onclick="duplicateItem('<%= child._id %>')" title="Duplicate">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button class="action-icon-sm edit-icon" onclick="editItem('<%= child._id %>')" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-icon-sm delete-icon" onclick="deleteItem('<%= child._id %>', '<%= child.name %>')" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <% }); %>
+                    </div>
+                </div>
+                <% } %>
+            </div>
+            <% }); %>
+        </div>
+
+        <!-- List View -->
+        <div class="items-list" id="itemsList">
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Category</th>
+                        <th>Size</th>
+                        <th>Priority</th>
+                        <th>Frequency</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="itemsTableBody">
+                    <% items.filter(item => !item.parentItem).forEach(item => { %>
+                    <tr class="table-row" 
+                        data-item-id="<%= item._id %>" 
+                        data-category="<%= item.category ? item.category._id : '' %>"
+                        data-priority="<%= item.priority || 'medium' %>"
+                        data-name="<%= item.name.toLowerCase() %>"
+                        data-brand="<%= item.brand ? item.brand.toLowerCase() : '' %>">
+                        <td>
+                            <div class="table-item-name">
+                                <%= item.name %>
+                                <% if (item.isParent) { %>
+                                <span class="parent-badge">
+                                    <i class="fas fa-layer-group"></i> Parent
+                                </span>
+                                <% } %>
+                                <% if (item.variation && item.variation.value) { %>
+                                <span class="variation-badge"><%= item.variation.value %></span>
+                                <% } %>
+                            </div>
+                            <% if (item.brand) { %>
+                            <div class="table-item-brand"><%= item.brand %></div>
+                            <% } %>
+                            <% if (item.parentItem) { %>
+                            <div class="child-indicator" style="margin-top: 4px;">
+                                <i class="fas fa-level-up-alt fa-rotate-90"></i>
+                                <%= item.parentItem.name %>
+                            </div>
+                            <% } %>
+                        </td>
+                        <td>
+                            <% if (item.category) { %>
+                            <span class="table-category" style="background: <%= item.category.color %>20; color: <%= item.category.color %>;">
+                                <%= item.category.icon %> <%= item.category.name %>
+                            </span>
+                            <% } else { %>
+                            <span style="color: #999;">—</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <% if (item.size && item.size.value) { %>
+                            <%= item.size.value %> <%= item.size.unit %>
+                            <% } else { %>
+                            <span style="color: #999;">—</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <span class="priority-badge priority-<%= item.priority || 'medium' %>">
+                                <%= (item.priority || 'medium').toUpperCase() %>
+                            </span>
+                        </td>
+                        <td style="color: #666;">
+                            <%= item.purchaseFrequency || 'occasional' %>
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <% if (item.isParent && item.children && item.children.length > 0) { %>
+                                <button class="action-icon expand-icon" onclick="toggleChildrenTable('<%= item._id %>')" title="Show/Hide Variations">
+                                    <i class="fas fa-chevron-down" id="expand-table-icon-<%= item._id %>"></i>
+                                </button>
+                                <% } %>
+                                <% if (item.isParent) { %>
+                                <button class="action-icon add-var-icon" onclick="addVariation('<%= item._id %>')" title="Add Variation">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <% } %>
+                                <button class="action-icon duplicate-icon" onclick="duplicateItem('<%= item._id %>')" title="Duplicate">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="action-icon edit-icon" onclick="editItem('<%= item._id %>')" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-icon delete-icon" onclick="deleteItem('<%= item._id %>', '<%= item.name %>')" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Child items rows -->
+                    <% if (item.isParent && item.children && item.children.length > 0) { %>
+                        <% item.children.forEach(child => { %>
+                        <tr class="table-row table-child-row child-row-<%= item._id %>" 
+                            data-item-id="<%= child._id %>" 
+                            data-category="<%= child.category ? child.category._id : '' %>"
+                            data-priority="<%= child.priority || 'medium' %>"
+                            data-name="<%= child.name.toLowerCase() %>"
+                            data-brand="<%= child.brand ? child.brand.toLowerCase() : '' %>"
+                            style="display: none;">
+                            <td>
+                                <div class="table-item-name">
+                                    <%= child.name %>
+                                    <% if (child.variation && child.variation.value) { %>
+                                    <span class="variation-badge"><%= child.variation.value %></span>
+                                    <% } %>
+                                </div>
+                                <% if (child.brand) { %>
+                                <div class="table-item-brand"><%= child.brand %></div>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (child.category) { %>
+                                <span class="table-category" style="background: <%= child.category.color %>20; color: <%= child.category.color %>;">
+                                    <%= child.category.icon %> <%= child.category.name %>
+                                </span>
+                                <% } else { %>
+                                <span style="color: #999;">—</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (child.size && child.size.value) { %>
+                                <%= child.size.value %> <%= child.size.unit %>
+                                <% } else { %>
+                                <span style="color: #999;">—</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <span class="priority-badge priority-<%= child.priority || 'medium' %>">
+                                    <%= (child.priority || 'medium').toUpperCase() %>
+                                </span>
+                            </td>
+                            <td style="color: #666;">
+                                <%= child.purchaseFrequency || 'occasional' %>
+                            </td>
+                            <td>
+                                <div class="table-actions">
+                                    <button class="action-icon duplicate-icon" onclick="duplicateItem('<%= child._id %>')" title="Duplicate">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button class="action-icon edit-icon" onclick="editItem('<%= child._id %>')" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-icon delete-icon" onclick="deleteItem('<%= child._id %>', '<%= child.name %>')" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    <% } %>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+        <% } %>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const priorityFilter = document.getElementById('priorityFilter');
+        const itemsGrid = document.getElementById('itemsGrid');
+        const itemsList = document.getElementById('itemsList');
+        const displayedCount = document.getElementById('displayedCount');
+        let currentView = 'grid';
+
+        function filterItems() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedCategory = categoryFilter.value;
+            const selectedPriority = priorityFilter.value;
+            let visibleCount = 0;
+
+            // Filter grid cards
+            if (itemsGrid) {
+                const itemCards = itemsGrid.querySelectorAll('.item-card');
+                itemCards.forEach(card => {
+                    const name = card.dataset.name;
+                    const brand = card.dataset.brand;
+                    const category = card.dataset.category;
+                    const priority = card.dataset.priority;
+
+                    const matchesSearch = !searchTerm || name.includes(searchTerm) || brand.includes(searchTerm);
+                    const matchesCategory = !selectedCategory || category === selectedCategory;
+                    const matchesPriority = !selectedPriority || priority === selectedPriority;
+
+                    if (matchesSearch && matchesCategory && matchesPriority) {
+                        card.style.display = '';
+                        if (currentView === 'grid') visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+
+            // Filter list rows
+            if (itemsList) {
+                const tableRows = itemsList.querySelectorAll('.table-row');
+                tableRows.forEach(row => {
+                    const name = row.dataset.name;
+                    const brand = row.dataset.brand;
+                    const category = row.dataset.category;
+                    const priority = row.dataset.priority;
+
+                    const matchesSearch = !searchTerm || name.includes(searchTerm) || brand.includes(searchTerm);
+                    const matchesCategory = !selectedCategory || category === selectedCategory;
+                    const matchesPriority = !selectedPriority || priority === selectedPriority;
+
+                    if (matchesSearch && matchesCategory && matchesPriority) {
+                        row.style.display = '';
+                        if (currentView === 'list') visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+
+            displayedCount.textContent = visibleCount;
+        }
+
+        function switchView(view) {
+            currentView = view;
+            const gridBtn = document.getElementById('gridViewBtn');
+            const listBtn = document.getElementById('listViewBtn');
+
+            if (view === 'grid') {
+                if (itemsGrid) itemsGrid.classList.remove('hidden');
+                if (itemsList) itemsList.classList.remove('active');
+                gridBtn.classList.add('active');
+                listBtn.classList.remove('active');
+            } else {
+                if (itemsGrid) itemsGrid.classList.add('hidden');
+                if (itemsList) itemsList.classList.add('active');
+                listBtn.classList.add('active');
+                gridBtn.classList.remove('active');
+            }
+            
+            filterItems(); // Update count for current view
+        }
+
+        searchInput.addEventListener('input', filterItems);
+        categoryFilter.addEventListener('change', filterItems);
+        priorityFilter.addEventListener('change', filterItems);
+
+        function editItem(itemId) {
+            window.location.href = `/food/items/${itemId}/edit`;
+        }
+
+        function duplicateItem(itemId) {
+            window.location.href = `/food/items/${itemId}/duplicate`;
+        }
+
+        function addVariation(parentId) {
+            window.location.href = `/food/items/new-variation/${parentId}`;
+        }
+
+        function toggleChildren(itemId) {
+            const container = document.getElementById(`children-${itemId}`);
+            const icon = document.getElementById(`expand-icon-${itemId}`);
+            
+            if (container.style.display === 'none') {
+                container.style.display = 'block';
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            } else {
+                container.style.display = 'none';
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            }
+        }
+
+        function toggleChildrenTable(itemId) {
+            const childRows = document.querySelectorAll(`.child-row-${itemId}`);
+            const icon = document.getElementById(`expand-table-icon-${itemId}`);
+            
+            childRows.forEach(row => {
+                if (row.style.display === 'none') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            if (icon.classList.contains('fa-chevron-down')) {
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            } else {
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            }
+        }
+
+        async function deleteItem(itemId, itemName) {
+            if (!confirm(`Are you sure you want to delete "${itemName}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/food/items/${itemId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Remove the card from the display
+// Remove from both grid and list views
+                const cards = document.querySelectorAll(`[data-item-id="${itemId}"]`);
+                cards.forEach(card => card.remove());
+                    
+                    // Update counts
+                    const totalCount = document.getElementById('totalCount');
+                    totalCount.textContent = parseInt(totalCount.textContent) - 1;
+                    filterItems();
+                    
+                    alert('Item deleted successfully!');
+                } else {
+                    alert('Error deleting item: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error deleting item:', error);
+                alert('Error deleting item. Please try again.');
+            }
+        }
+    </script>
+</body>
+
+</html>
