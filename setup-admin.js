@@ -1,164 +1,169 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
-// Define User schema directly here
-const userSchema = new mongoose.Schema({
-    username: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
-        minlength: 3,
-        maxlength: 50
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-        lowercase: true,
-        trim: true
-    },
-    password: {
-        type: String,
-        required: true,
-        minlength: 6
-    },
-    firstName: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    lastName: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    role: {
-        type: String,
-        enum: ['admin', 'manager', 'user', 'viewer'],
-        default: 'user'
-    },
-    status: {
-        type: String,
-        enum: ['pending', 'approved', 'suspended', 'rejected'],
-        default: 'pending'
-    },
-    permissions: {
-        viewDashboard: { type: Boolean, default: true },
-        editLineItems: { type: Boolean, default: false },
-        managePOs: { type: Boolean, default: false },
-        manageUsers: { type: Boolean, default: false },
-        viewReports: { type: Boolean, default: false },
-        manageDropship: { type: Boolean, default: false },
-        manageOrganicVendors: { type: Boolean, default: false }
-    },
-    emailVerified: {
-        type: Boolean,
-        default: false
-    },
-    approvedAt: {
-        type: Date
-    }
-}, {
-    timestamps: true
-});
+// Import models
+const User = require('./models/User');
+const Household = require('./models/Household');
 
-// Hash password before saving
-userSchema.pre('save', async function(next) {
-    if (!this.isModified('password')) return next();
-    
-    const saltRounds = 12;
-    this.password = await bcrypt.hash(this.password, saltRounds);
-    next();
-});
-
-// Set default permissions based on role
-userSchema.methods.setDefaultPermissions = function() {
-    if (this.role === 'admin') {
-        this.permissions = {
-            viewDashboard: true,
-            editLineItems: true,
-            managePOs: true,
-            manageUsers: true,
-            viewReports: true,
-            manageDropship: true,
-            manageOrganicVendors: true
-        };
-    } else if (this.role === 'manager') {
-        this.permissions = {
-            viewDashboard: true,
-            editLineItems: true,
-            managePOs: true,
-            manageUsers: false,
-            viewReports: true,
-            manageDropship: true,
-            manageOrganicVendors: true
-        };
-    }
-};
-
-const User = mongoose.model('User', userSchema);
-
-async function createAdminUser() {
+async function setupAdmin() {
     try {
-        await mongoose.connect(process.env.MONGODB_URI, {
+        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/purchase-orders', {
             useNewUrlParser: true,
             useUnifiedTopology: true
         });
         
-        console.log('✅ Connected to MongoDB');
+        console.log('\n✅ Connected to MongoDB');
+        console.log('🔧 Admin Setup Tool\n');
         
-        // Check if admin user already exists
-        const existingAdmin = await User.findOne({ 
+        // Get username or email from command line
+        const identifier = process.argv[2];
+        
+        if (!identifier) {
+            console.log('Usage: node setup-admin.js <username or email>');
+            console.log('Example: node setup-admin.js myusername');
+            console.log('         node setup-admin.js user@example.com');
+            console.log('\nAvailable users:');
+            
+            const allUsers = await User.find({}).select('username email role status firstName lastName');
+            if (allUsers.length === 0) {
+                console.log('   No users found in database.');
+            } else {
+                allUsers.forEach(u => {
+                    console.log(`   ${u.username} (${u.email})`);
+                    console.log(`      ${u.firstName} ${u.lastName} - Role: ${u.role}, Status: ${u.status}`);
+                });
+            }
+            
+            await mongoose.disconnect();
+            process.exit(1);
+        }
+        
+        // Find user by username or email
+        const user = await User.findOne({
             $or: [
-                { username: 'admin' },
-                { email: 'admin@tsc.com' }
+                { username: identifier },
+                { email: identifier.toLowerCase() }
             ]
         });
         
-        if (existingAdmin) {
-            console.log('ℹ️  Admin user already exists:', existingAdmin.username);
-            console.log('📧 Email:', existingAdmin.email);
-            console.log('🛡️  Role:', existingAdmin.role);
-            console.log('✅ Status:', existingAdmin.status);
+        if (!user) {
+            console.log(`❌ User not found: ${identifier}\n`);
+            console.log('Available users:');
+            const allUsers = await User.find({}).select('username email role status');
+            allUsers.forEach(u => {
+                console.log(`   ${u.username} (${u.email}) - Role: ${u.role}, Status: ${u.status}`);
+            });
             await mongoose.disconnect();
-            return;
+            process.exit(1);
         }
         
-        // Create admin user
-        const adminUser = new User({
-            username: 'admin',
-            email: 'admin@tsc.com',
-            password: 'admin123', // Will be hashed automatically
-            firstName: 'System',
-            lastName: 'Administrator',
-            role: 'admin',
-            status: 'approved',
-            emailVerified: true,
-            approvedAt: new Date()
-        });
+        console.log(`\n✓ Found user: ${user.username} (${user.email})`);
+        console.log(`  Name: ${user.firstName} ${user.lastName}`);
+        console.log(`  Current role: ${user.role}`);
+        console.log(`  Current status: ${user.status}`);
         
-        // Set admin permissions
-        adminUser.setDefaultPermissions();
+        // Update to admin
+        user.role = 'admin';
+        user.status = 'approved';
+        user.emailVerified = true;
         
-        await adminUser.save();
+        // Enable ALL permissions
+        if (user.permissions) {
+            Object.keys(user.permissions).forEach(key => {
+                user.permissions[key] = true;
+            });
+        }
         
-        console.log('✅ Admin user created successfully!');
-        console.log('📧 Email:', adminUser.email);
-        console.log('👤 Username:', adminUser.username);
-        console.log('🔑 Password: admin123');
-        console.log('🛡️  Role:', adminUser.role);
-        console.log('✅ Status:', adminUser.status);
+        await user.save();
+        
+        console.log('\n✅ User promoted to administrator!');
+        console.log(`   Role: ${user.role}`);
+        console.log(`   Status: ${user.status}`);
+        console.log('   All permissions enabled ✓');
+        
+        // Check/create household for food management
+        if (!user.household) {
+            console.log('\n🏠 Setting up household for food management...');
+            
+            const household = new Household({
+                name: `${user.firstName}'s Household`,
+                description: 'Administrator household for testing and management',
+                type: 'individual',
+                createdBy: user._id,
+                members: [{
+                    user: user._id,
+                    role: 'owner',
+                    canManageShopping: true,
+                    canManagePantry: true,
+                    canManageRecipes: true,
+                    canManageMealPlans: true,
+                    canInviteMembers: true
+                }]
+            });
+            
+            await household.save();
+            
+            user.household = household._id;
+            await user.save();
+            
+            console.log(`✅ Household created: "${household.name}"`);
+            console.log('   You now have full access to food management features!');
+        } else {
+            const household = await Household.findById(user.household);
+            if (household) {
+                console.log(`\n✓ Already member of household: "${household.name}"`);
+                
+                // Ensure user is owner with all permissions
+                const memberIndex = household.members.findIndex(
+                    m => m.user.toString() === user._id.toString()
+                );
+                
+                if (memberIndex !== -1) {
+                    household.members[memberIndex].role = 'owner';
+                    household.members[memberIndex].canManageShopping = true;
+                    household.members[memberIndex].canManagePantry = true;
+                    household.members[memberIndex].canManageRecipes = true;
+                    household.members[memberIndex].canManageMealPlans = true;
+                    household.members[memberIndex].canInviteMembers = true;
+                    await household.save();
+                    console.log('   Household permissions updated to owner with all access ✓');
+                } else {
+                    // Add user as owner if not in members
+                    household.members.push({
+                        user: user._id,
+                        role: 'owner',
+                        canManageShopping: true,
+                        canManagePantry: true,
+                        canManageRecipes: true,
+                        canManageMealPlans: true,
+                        canInviteMembers: true
+                    });
+                    await household.save();
+                    console.log('   Added as owner to household ✓');
+                }
+            } else {
+                console.log('\n⚠️  User has invalid household reference');
+            }
+        }
+        
+        console.log('\n🎉 Setup complete! You can now:');
+        console.log('   • Access all system features as administrator');
+        console.log('   • Manage household and food features');
+        console.log('   • Create and approve other users');
+        console.log('   • Test all functionality');
+        console.log('   • Create universal food items (user: null)');
+        console.log('   • Manage shopping lists, pantry, recipes, and meal plans\n');
         
         await mongoose.disconnect();
-        console.log('✅ Disconnected from MongoDB');
+        console.log('✅ Disconnected from MongoDB\n');
+        process.exit(0);
         
     } catch (error) {
-        console.error('❌ Error creating admin user:', error);
+        console.error('\n❌ Error:', error.message);
+        console.error(error.stack);
         await mongoose.disconnect();
         process.exit(1);
     }
 }
 
-createAdminUser();
+setupAdmin();
