@@ -46,14 +46,29 @@ router.get('/', ensureAuthenticated, async (req, res) => {
         console.log('🌍 Loading World Seed Partnership Dashboard...');
         
         // Get filter parameters
+        const viewMode = req.query.view || 'all'; // international, domestic, or all
         const statusFilter = req.query.status;
         const typeFilter = req.query.type;
         const regionFilter = req.query.region;
         const countryFilter = req.query.country;
         const searchTerm = req.query.search;
+        const excludedGroups = req.query.exclude ? req.query.exclude.split(',') : [];
         
-        // Build query
+        // Build query  
         let query = { isActive: true };
+        
+        // Apply view mode filter
+        if (viewMode === 'international') {
+            query.isDomestic = false;
+        } else if (viewMode === 'domestic') {
+            query.isDomestic = true;
+        }
+        // 'all' = no isDomestic filter
+        
+        // Apply exclusion groups filter
+        if (excludedGroups.length > 0) {
+            query.exclusionGroups = { $nin: excludedGroups };
+        }
         
         if (statusFilter && statusFilter !== 'all') {
             query.status = statusFilter;
@@ -72,6 +87,7 @@ router.get('/', ensureAuthenticated, async (req, res) => {
                 { companyName: { $regex: searchTerm, $options: 'i' } },
                 { partnerCode: { $regex: searchTerm, $options: 'i' } },
                 { country: { $regex: searchTerm, $options: 'i' } },
+                { state: { $regex: searchTerm, $options: 'i' } },
                 { tags: { $regex: searchTerm, $options: 'i' } }
             ];
         }
@@ -82,17 +98,23 @@ router.get('/', ensureAuthenticated, async (req, res) => {
             .sort({ priority: 1, companyName: 1 });
         
         // Calculate statistics
+        const allPartnersCount = await SeedPartner.countDocuments({ isActive: true });
+        const domesticCount = await SeedPartner.countDocuments({ isActive: true, isDomestic: true });
+        const internationalCount = await SeedPartner.countDocuments({ isActive: true, isDomestic: false });
+        
         const stats = {
             total: partners.length,
-            international: partners.filter(p => p.partnershipType === 'International Supplier' || p.partnershipType === 'International Client').length,
-            domestic: partners.filter(p => p.partnershipType === 'Domestic Supplier' || p.partnershipType === 'Domestic Client').length,
+            allPartnersTotal: allPartnersCount,
+            domestic: domesticCount,
+            international: internationalCount,
             active: partners.filter(p => p.status === 'Active').length,
             prospective: partners.filter(p => p.status === 'Prospective').length,
             onHold: partners.filter(p => p.status === 'On Hold').length,
             totalOrderValue: partners.reduce((sum, p) => sum + (p.totalOrderValue || 0), 0),
             byRegion: {},
             byCountry: {},
-            bySeedType: {}
+            bySeedType: {},
+            byExclusionGroup: {}
         };
         
         // Group by region
@@ -106,6 +128,13 @@ router.get('/', ensureAuthenticated, async (req, res) => {
                     stats.bySeedType[seedType] = (stats.bySeedType[seedType] || 0) + 1;
                 });
             }
+            
+            // Count exclusion groups
+            if (partner.exclusionGroups && partner.exclusionGroups.length > 0) {
+                partner.exclusionGroups.forEach(group => {
+                    stats.byExclusionGroup[group] = (stats.byExclusionGroup[group] || 0) + 1;
+                });
+            }
         });
         
         // Get unique values for filters
@@ -114,7 +143,10 @@ router.get('/', ensureAuthenticated, async (req, res) => {
         const uniqueRegions = [...new Set(partners.map(p => p.region))].sort();
         const uniqueCountries = [...new Set(partners.map(p => p.country))].sort();
         
-        console.log(`✅ Loaded ${partners.length} seed partners`);
+        // Get available exclusion groups from all partners
+        const availableExclusionGroups = ['Non-Alternative', 'Inactive', 'Low Priority', 'Out of Stock', 'Price Too High', 'Quality Issues', 'Slow Response', 'Compliance Issues'];
+        
+        console.log(`✅ Loaded ${partners.length} seed partners (View: ${viewMode})`);
         
         res.render('seed-partnership-dashboard', {
             partners,
@@ -123,12 +155,15 @@ router.get('/', ensureAuthenticated, async (req, res) => {
             uniqueTypes,
             uniqueRegions,
             uniqueCountries,
+            availableExclusionGroups,
             currentFilters: {
+                view: viewMode,
                 status: statusFilter || 'all',
                 type: typeFilter || 'all',
                 region: regionFilter || 'all',
                 country: countryFilter || 'all',
-                search: searchTerm || ''
+                search: searchTerm || '',
+                exclude: excludedGroups
             },
             user: req.user
         });

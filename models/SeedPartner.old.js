@@ -1,7 +1,7 @@
-// models/SeedPartner.js - UNIFIED MODEL
+// models/SeedPartner.js
 const mongoose = require('mongoose');
 
-// Unified Seed Partnership Schema - International & Domestic
+// World Seed Partnership - Partner Company Schema
 const seedPartnerSchema = new mongoose.Schema({
     // Basic Partner Information
     companyName: {
@@ -18,58 +18,6 @@ const seedPartnerSchema = new mongoose.Schema({
         unique: true
     },
     
-    // Geographic Classification
-    isDomestic: {
-        type: Boolean,
-        default: false,
-        index: true
-    },
-    
-    // Country and Region (Required for all)
-    country: {
-        type: String,
-        required: true,
-        default: 'United States'
-    },
-    region: {
-        type: String,
-        enum: [
-            // World Regions (International)
-            'North America', 'South America', 'Europe', 'Asia', 'Africa', 'Australia/Oceania', 'Middle East',
-            // US Regions (Domestic)
-            'Northeast', 'Southeast', 'Midwest', 'Southwest', 'West', 'Pacific', 'Mountain'
-        ],
-        required: true
-    },
-    
-    // US-Specific Fields (Optional - only for domestic partners)
-    state: {
-        type: String,
-        enum: [
-            '', // Allow empty for non-US partners
-            'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
-            'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia',
-            'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
-            'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland',
-            'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri',
-            'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey',
-            'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio',
-            'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina',
-            'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-            'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
-        ]
-    },
-    stateCode: {
-        type: String,
-        uppercase: true,
-        maxlength: 2,
-        sparse: true // Allows null/undefined
-    },
-    city: {
-        type: String,
-        trim: true
-    },
-    
     // Partnership Type
     partnershipType: {
         type: String,
@@ -84,34 +32,16 @@ const seedPartnerSchema = new mongoose.Schema({
         default: 'Prospective'
     },
     
-    // Exclusion Groups (NEW - for filtering)
-    exclusionGroups: [{
+    // Country and Region
+    country: {
         type: String,
-        enum: [
-            'Non-Alternative',
-            'Inactive',
-            'Low Priority',
-            'Out of Stock',
-            'Price Too High',
-            'Quality Issues',
-            'Slow Response',
-            'Compliance Issues',
-            'Archived',
-            'Custom'
-        ]
-    }],
-    
-    // Priority Level
-    priority: {
-        type: Number,
-        min: 1,
-        max: 5,
-        default: 3
+        required: true,
+        default: 'United States'
     },
-    
-    isActive: {
-        type: Boolean,
-        default: true
+    region: {
+        type: String,
+        enum: ['North America', 'South America', 'Europe', 'Asia', 'Africa', 'Australia/Oceania', 'Middle East'],
+        required: true
     },
     
     // Seed Specializations
@@ -130,16 +60,24 @@ const seedPartnerSchema = new mongoose.Schema({
             'Native Seeds',
             'Wildflower Seeds',
             'Lawn & Turf Seeds',
-            'Regional Specialty Seeds',
             'Other'
         ]
     }],
     
     // Detailed Seed Offerings - Crop Level
     seedOfferings: {
-        vegetables: [{ type: String }],
-        flowers: [{ type: String }],
-        herbs: [{ type: String }]
+        vegetables: [{
+            type: String,
+            // Common vegetable crops
+        }],
+        flowers: [{
+            type: String,
+            // Common flower types
+        }],
+        herbs: [{
+            type: String,
+            // Common herb types
+        }]
     },
     
     // Certifications and Compliance
@@ -155,8 +93,6 @@ const seedPartnerSchema = new mongoose.Schema({
                 'Non-GMO Project',
                 'OMRI Listed',
                 'ISO 9001',
-                'State Seed License',
-                'Safe Seed Pledge',
                 'Other'
             ]
         },
@@ -182,11 +118,6 @@ const seedPartnerSchema = new mongoose.Schema({
         preferredLanguage: {
             type: String,
             default: 'English'
-        },
-        preferredContactMethod: {
-            type: String,
-            enum: ['Email', 'Phone', 'Mobile', 'Text', 'WhatsApp'],
-            default: 'Email'
         }
     },
     
@@ -208,7 +139,7 @@ const seedPartnerSchema = new mongoose.Schema({
         mobile: String,
         role: {
             type: String,
-            enum: ['Sales', 'Procurement', 'Customer Service', 'Quality Control', 'Logistics', 'Finance', 'Management', 'Technical', 'Technical Support', 'Other']
+            enum: ['Sales', 'Procurement', 'Quality Control', 'Logistics', 'Finance', 'Management', 'Technical', 'Other']
         }
     }],
     
@@ -219,8 +150,6 @@ const seedPartnerSchema = new mongoose.Schema({
         city: String,
         state: String,
         postalCode: String,
-        zipCode: String, // Alias for US partners
-        county: String,
         country: String
     },
     
@@ -231,11 +160,9 @@ const seedPartnerSchema = new mongoose.Schema({
         city: String,
         state: String,
         postalCode: String,
-        zipCode: String,
         country: String,
         portOfEntry: String, // For international shipments
-        customsBroker: String,
-        specialInstructions: String
+        customsBroker: String
     },
     
     // Business Details
@@ -245,15 +172,9 @@ const seedPartnerSchema = new mongoose.Schema({
         yearEstablished: Number,
         numberOfEmployees: String,
         annualRevenue: String,
-        businessType: {
-            type: String,
-            enum: ['Family-Owned', 'Corporation', 'LLC', 'Partnership', 'Sole Proprietorship', 'Cooperative', 'Other']
-        },
         website: String,
         linkedIn: String,
-        facebook: String,
-        instagram: String,
-        companyProfile: String
+        companyProfile: String // Detailed description
     },
     
     // Financial Terms
@@ -264,7 +185,7 @@ const seedPartnerSchema = new mongoose.Schema({
         },
         paymentTerms: {
             type: String,
-            enum: ['NET 30', 'NET 60', 'NET 90', 'Prepayment', 'COD', 'Letter of Credit', 'Credit Card', 'Custom'],
+            enum: ['NET 30', 'NET 60', 'NET 90', 'Prepayment', 'COD', 'Letter of Credit', 'Custom'],
             default: 'NET 30'
         },
         creditLimit: Number,
@@ -281,16 +202,15 @@ const seedPartnerSchema = new mongoose.Schema({
         }
     },
     
-    // Import/Export Details (primarily for international)
+    // Import/Export Details
     tradeDetails: {
         importLicenseNumber: String,
         exportLicenseNumber: String,
         customsBroker: String,
         preferredShippingMethod: {
             type: String,
-            enum: ['Air Freight', 'Sea Freight', 'Ground', 'Express Courier', 'UPS', 'FedEx', 'USPS', 'DHL', 'Regional Carrier', 'Own Fleet', 'Other']
+            enum: ['Air Freight', 'Sea Freight', 'Ground', 'Express Courier', 'Other']
         },
-        preferredCarrier: String,
         incoterms: {
             type: String,
             enum: ['EXW', 'FCA', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP', 'FAS', 'FOB', 'CFR', 'CIF', 'Other'],
@@ -298,12 +218,7 @@ const seedPartnerSchema = new mongoose.Schema({
         },
         averageLeadTime: Number, // in days
         minimumOrderQuantity: String,
-        maximumOrderQuantity: String,
-        freeShippingThreshold: Number,
-        bulkDiscountsAvailable: {
-            type: Boolean,
-            default: false
-        }
+        maximumOrderQuantity: String
     },
     
     // Quality and Compliance
@@ -312,11 +227,6 @@ const seedPartnerSchema = new mongoose.Schema({
         purityRate: Number, // Average percentage
         lastQualityAuditDate: Date,
         qualityRating: {
-            type: Number,
-            min: 1,
-            max: 5
-        },
-        customerSatisfactionRating: {
             type: Number,
             min: 1,
             max: 5
@@ -391,97 +301,6 @@ const seedPartnerSchema = new mongoose.Schema({
         notes: String
     }],
     
-    // Information Sources & References (from US model)
-    references: [{
-        sourceType: {
-            type: String,
-            enum: [
-                'Company Website',
-                'USDA Database',
-                'State Agriculture Department',
-                'Industry Directory',
-                'Direct Contact',
-                'Trade Show',
-                'Referral',
-                'Online Research',
-                'LinkedIn',
-                'Better Business Bureau',
-                'Customer Review',
-                'Industry Publication',
-                'International Database',
-                'Embassy/Trade Office',
-                'Other'
-            ]
-        },
-        sourceUrl: String,
-        sourceDescription: String,
-        dateCollected: {
-            type: Date,
-            default: Date.now
-        },
-        collectedBy: String,
-        reliability: {
-            type: String,
-            enum: ['High', 'Medium', 'Low', 'Unknown'],
-            default: 'Unknown'
-        },
-        notes: String
-    }],
-    
-    // Verified Information Tracking (from US model)
-    verifiedInformation: {
-        companyNameVerified: {
-            isVerified: { type: Boolean, default: false },
-            verifiedDate: Date,
-            verifiedBy: String,
-            verificationMethod: String,
-            notes: String
-        },
-        addressVerified: {
-            isVerified: { type: Boolean, default: false },
-            verifiedDate: Date,
-            verifiedBy: String,
-            verificationMethod: String,
-            notes: String
-        },
-        contactInfoVerified: {
-            isVerified: { type: Boolean, default: false },
-            verifiedDate: Date,
-            verifiedBy: String,
-            verificationMethod: String,
-            notes: String
-        },
-        websiteVerified: {
-            isVerified: { type: Boolean, default: false },
-            verifiedDate: Date,
-            verifiedBy: String,
-            verificationMethod: String,
-            notes: String
-        },
-        businessLicenseVerified: {
-            isVerified: { type: Boolean, default: false },
-            verifiedDate: Date,
-            verifiedBy: String,
-            verificationMethod: String,
-            licenseNumber: String,
-            notes: String
-        },
-        seedOfferingsVerified: {
-            isVerified: { type: Boolean, default: false },
-            verifiedDate: Date,
-            verifiedBy: String,
-            verificationMethod: String,
-            notes: String
-        },
-        lastFullVerification: Date,
-        overallVerificationScore: {
-            type: Number,
-            min: 0,
-            max: 100,
-            default: 0
-        }
-    },
-    
     // Notes and Communication Log
     notes: {
         type: String,
@@ -493,11 +312,11 @@ const seedPartnerSchema = new mongoose.Schema({
             type: Date,
             default: Date.now
         },
-        type: {
-            type: String,
-            enum: ['Email', 'Phone Call', 'Meeting', 'WhatsApp', 'Video Call', 'In-Person', 'Trade Show', 'Other']
-        },
         contactPerson: String,
+        method: {
+            type: String,
+            enum: ['Email', 'Phone', 'Video Call', 'In Person', 'WhatsApp', 'Other']
+        },
         subject: String,
         summary: String,
         followUpRequired: {
@@ -505,31 +324,67 @@ const seedPartnerSchema = new mongoose.Schema({
             default: false
         },
         followUpDate: Date,
-        attachments: [String]
+        loggedBy: String
     }],
     
-    // Tags for easy searching and grouping
+    // Internal Notes (Private)
+    internalNotes: {
+        type: String,
+        default: ''
+    },
+    
+    // Tags for easy filtering
     tags: [String],
+    
+    // Priority Level
+    priority: {
+        type: Number,
+        min: 1,
+        max: 5,
+        default: 3
+    },
+    
+    // Personal Notes
+    personalNotes: {
+        type: String,
+        trim: true
+    },
+    
+    // Assigned Team Member
+    assignedTo: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    
+    // Active/Inactive Status
+    isActive: {
+        type: Boolean,
+        default: true
+    },
     
     // Metadata
     createdBy: String,
-    lastModifiedBy: String
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
+    },
+    lastUpdatedBy: String
 }, {
-    timestamps: true, // Adds createdAt and updatedAt
-    collection: 'seedpartners' // Unified collection name
+    timestamps: true
 });
 
 // Indexes for efficient queries
 seedPartnerSchema.index({ companyName: 1 });
 seedPartnerSchema.index({ partnerCode: 1 });
 seedPartnerSchema.index({ country: 1 });
-seedPartnerSchema.index({ isDomestic: 1 });
-seedPartnerSchema.index({ state: 1 });
 seedPartnerSchema.index({ partnershipType: 1 });
 seedPartnerSchema.index({ status: 1 });
 seedPartnerSchema.index({ isActive: 1 });
 seedPartnerSchema.index({ priority: 1 });
-seedPartnerSchema.index({ exclusionGroups: 1 });
 
 // Virtual for full address
 seedPartnerSchema.virtual('fullAddress').get(function() {
@@ -540,15 +395,10 @@ seedPartnerSchema.virtual('fullAddress').get(function() {
     if (addr.street2) parts.push(addr.street2);
     if (addr.city) parts.push(addr.city);
     if (addr.state) parts.push(addr.state);
-    if (addr.postalCode || addr.zipCode) parts.push(addr.postalCode || addr.zipCode);
+    if (addr.postalCode) parts.push(addr.postalCode);
     if (addr.country && addr.country !== 'United States') parts.push(addr.country);
     
     return parts.join(', ');
-});
-
-// Virtual to check if partner is domestic
-seedPartnerSchema.virtual('isUSPartner').get(function() {
-    return this.country === 'United States' || this.isDomestic === true;
 });
 
 // Method to calculate days since last order
@@ -568,12 +418,6 @@ seedPartnerSchema.methods.getExpiringCertifications = function() {
     return this.certifications.filter(cert => {
         return cert.expiryDate && cert.expiryDate <= thirtyDaysFromNow;
     });
-};
-
-// Method to check if partner should be excluded based on groups
-seedPartnerSchema.methods.shouldBeExcluded = function(selectedGroups) {
-    if (!selectedGroups || selectedGroups.length === 0) return false;
-    return this.exclusionGroups.some(group => selectedGroups.includes(group));
 };
 
 module.exports = mongoose.model('SeedPartner', seedPartnerSchema);

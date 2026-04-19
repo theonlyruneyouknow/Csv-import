@@ -556,16 +556,28 @@
                     <span>←</span>
                     <span>P.O.D.</span>
                 </a>
-                <a href="/us-seed-partners" class="pod-button" style="background: linear-gradient(135deg, #1e3c72, #2a5298);">
-                    <i class="fas fa-flag-usa"></i>
-                    <span>US Partners</span>
-                </a>
                 <a href="/seed-partners/catalog" class="pod-button" style="background: linear-gradient(135deg, #28a745, #558b2f);">
                     <i class="fas fa-leaf"></i>
                     <span>Seed Catalog</span>
                 </a>
                 <a href="/seed-partners/new" class="btn btn-primary-custom">
                     <i class="fas fa-plus"></i> Add New Partner
+                </a>
+            </div>
+        </div>
+
+        <!-- View Selector Tabs -->
+        <div class="filters-section" style="margin-bottom: 15px; padding: 15px;">
+            <div style="display: flex; gap: 10px; justify-content: center; align-items: center;">
+                <span style="font-weight: 600; color: #666; margin-right: 10px;">View:</span>
+                <a href="/seed-partners?view=all" class="btn <%= currentFilters.view === 'all' ? 'btn-primary' : 'btn-secondary' %>" style="min-width: 150px;">
+                    <i class="fas fa-globe"></i> All Partners (<%= stats.allPartnersTotal %>)
+                </a>
+                <a href="/seed-partners?view=international" class="btn <%= currentFilters.view === 'international' ? 'btn-primary' : 'btn-secondary' %>" style="min-width: 150px;">
+                    <i class="fas fa-earth-americas"></i> International (<%= stats.international %>)
+                </a>
+                <a href="/seed-partners?view=domestic" class="btn <%= currentFilters.view === 'domestic' ? 'btn-primary' : 'btn-secondary' %>" style="min-width: 150px;">
+                    <i class="fas fa-flag-usa"></i> Domestic (<%= stats.domestic %>)
                 </a>
             </div>
         </div>
@@ -611,6 +623,7 @@
                 <a href="/seed-partners" class="btn btn-sm btn-secondary">Clear All</a>
             </div>
             <form method="GET" action="/seed-partners">
+                <input type="hidden" name="view" value="<%= currentFilters.view %>" />
                 <div class="filters-grid">
                     <div class="filter-group">
                         <label>Status</label>
@@ -661,16 +674,28 @@
             </form>
         </div>
 
+        <!-- Exclusion Groups Filter -->
+        <div class="filters-section" style="margin-top: 15px; padding: 15px;">
+            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
+                    <input type="checkbox" id="showExcluded" style="cursor: pointer;" />
+                    <span style="font-weight: 600; font-size: 14px; color: #666;">Show Excluded Partners</span>
+                </label>
+                <div style="flex: 1; min-width: 300px;">
+                    <select id="exclusionGroupsFilter" multiple style="width: 100%; height: 100px;">
+                        <% availableExclusionGroups.forEach(function(group) { %>
+                            <option value="<%= group %>"><%= group %> (<%= stats.byExclusionGroup[group] || 0 %>)</option>
+                        <% }) %>
+                    </select>
+                    <small style="color: #999; display: block; margin-top: 5px;">Select groups to hide (Ctrl/Cmd+Click for multiple)</small>
+                </div>
+            </div>
+        </div>
+
         <!-- Partners Table -->
         <div class="partners-section">
             <div class="table-header">
                 <h2><i class="fas fa-building"></i> Partner Companies (<span id="visibleCount"><%= partners.length %></span>)</h2>
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
-                        <input type="checkbox" id="showNonAlternative" style="cursor: pointer;" />
-                        <span style="font-size: 14px; color: #666;">Show Non-Alternative (<span id="nonAltCount">0</span>)</span>
-                    </label>
-                </div>
             </div>
 
             <% if (partners.length === 0) { %>
@@ -690,6 +715,9 @@
                                 <th style="width: 40px;"></th>
                                 <th>Priority</th>
                                 <th>Company Name</th>
+                                <% if (currentFilters.view === 'domestic') { %>
+                                    <th>State/City</th>
+                                <% } %>
                                 <th>Country/Region</th>
                                 <th>Type</th>
                                 <th>Status</th>
@@ -701,7 +729,10 @@
                         </thead>
                         <tbody>
                             <% partners.forEach((partner, index) => { %>
-                                <tr data-status="<%= partner.status %>" class="partner-main-row">
+                                <tr data-status="<%= partner.status %>" 
+                                    data-exclusion-groups="<%= (partner.exclusionGroups || []).join(',') %>" 
+                                    data-partner-id="<%= partner._id %>"
+                                    class="partner-main-row">
                                     <td>
                                         <i class="fas fa-chevron-right expand-btn" onclick="toggleExpand('<%= partner._id %>')" title="Show more details"></i>
                                     </td>
@@ -726,6 +757,18 @@
                                             <%= partner.partnerCode %>
                                         </div>
                                     </td>
+                                    <% if (currentFilters.view === 'domestic') { %>
+                                        <td>
+                                            <% if (partner.state) { %>
+                                                <div style="font-weight: 600; color: #667eea;"><%= partner.stateCode || partner.state %></div>
+                                                <% if (partner.city) { %>
+                                                    <div style="font-size: 11px; color: #999;"><%= partner.city %></div>
+                                                <% } %>
+                                            <% } else { %>
+                                                <span style="color: #999;">N/A</span>
+                                            <% } %>
+                                        </td>
+                                    <% } %>
                                     <td>
                                         <div><%= partner.country %></div>
                                         <div style="font-size: 11px; color: #999;"><%= partner.region %></div>
@@ -797,7 +840,10 @@
                                     </td>
                                 </tr>
                                 <!-- Expandable Row -->
-                                <tr class="expandable-row" id="expand-<%= partner._id %>" data-status="<%= partner.status %>">
+                                <tr class="expandable-row" id="expand-<%= partner._id %>" 
+                                    data-status="<%= partner.status %>" 
+                                    data-exclusion-groups="<%= (partner.exclusionGroups || []).join(',') %>"
+                                    data-partner-id="<%= partner._id %>">
                                     <td colspan="10">
                                         <div class="expanded-content">
                                             <div class="details-grid">
@@ -1083,31 +1129,75 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Initialize toggle state from localStorage (default: hide Non-Alternative)
-        const showNonAltCheckbox = document.getElementById('showNonAlternative');
-        const savedState = localStorage.getItem('showNonAlternative');
-        showNonAltCheckbox.checked = savedState === 'true';
+        // Initialize exclusion toggle from localStorage (default: hide excluded)
+        const showExcludedCheckbox = document.getElementById('showExcluded');
+        const exclusionGroupsFilter = document.getElementById('exclusionGroupsFilter');
+        const savedExcludedState = localStorage.getItem('showExcluded');
+        const savedSelectedGroups = localStorage.getItem('selectedExclusionGroups');
+        
+        showExcludedCheckbox.checked = savedExcludedState === 'true';
+        
+        // Restore selected exclusion groups
+        if (savedSelectedGroups) {
+            const groups = JSON.parse(savedSelectedGroups);
+            Array.from(exclusionGroupsFilter.options).forEach(option => {
+                if (groups.includes(option.value)) {
+                    option.selected = true;
+                }
+            });
+        }
         
         // Apply filter on page load
         document.addEventListener('DOMContentLoaded', function() {
-            applyNonAlternativeFilter();
+            applyExclusionFilter();
         });
         
-        // Toggle Non-Alternative partners visibility
-        showNonAltCheckbox.addEventListener('change', function() {
-            localStorage.setItem('showNonAlternative', this.checked);
-            applyNonAlternativeFilter();
+        // Toggle excluded partners visibility
+        showExcludedCheckbox.addEventListener('change', function() {
+            localStorage.setItem('showExcluded', this.checked);
+            applyExclusionFilter();
         });
         
-        function applyNonAlternativeFilter() {
-            const showNonAlt = showNonAltCheckbox.checked;
-            const allRows = document.querySelectorAll('tr[data-status]');
+        // Handle exclusion groups selection
+        exclusionGroupsFilter.addEventListener('change', function() {
+            const selectedGroups = Array.from(this.selectedOptions).map(opt => opt.value);
+            localStorage.setItem('selectedExclusionGroups', JSON.stringify(selectedGroups));
+            applyExclusionFilter();
+        });
+        
+        function applyExclusionFilter() {
+            const showExcluded = showExcludedCheckbox.checked;
+            const selectedGroups = Array.from(exclusionGroupsFilter.selectedOptions).map(opt => opt.value);
+            const allRows = document.querySelectorAll('.partner-main-row, .expandable-row');
             let visibleCount = 0;
-            let nonAltCount = 0;
-            let hiddenCount = 0;
             
             allRows.forEach(row => {
-                const status = row.dataset.status;
+                const exclusionGroupsStr = row.dataset.exclusionGroups || '';
+                const partnerGroups = exclusionGroupsStr ? exclusionGroupsStr.split(',') : [];
+                
+                // Check if this partner has any of the selected exclusion groups
+                const hasSelectedGroup = selectedGroups.some(group => partnerGroups.includes(group));
+                
+                // Hide if: exclusion filtering is active (!showExcluded) AND partner has a selected exclusion group
+                const shouldHide = selectedGroups.length > 0 && !showExcluded && hasSelectedGroup;
+                
+                if (shouldHide) {
+                    row.style.display = 'none';
+                } else {
+                    row.style.display = '';
+                }
+                
+                // Count visible main rows only
+                if (row.classList.contains('partner-main-row') && row.style.display !== 'none') {
+                    visibleCount++;
+                }
+            });
+            
+            // Update visible count
+            document.getElementById('visibleCount').textContent = visibleCount;
+        }
+        
+        // Toggle expand/collapse row
                 const isNonAlt = status === 'Non-Alternative';
                 
                 if (isNonAlt) {
