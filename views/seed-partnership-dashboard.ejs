@@ -664,7 +664,13 @@
         <!-- Partners Table -->
         <div class="partners-section">
             <div class="table-header">
-                <h2><i class="fas fa-building"></i> Partner Companies (<%= partners.length %>)</h2>
+                <h2><i class="fas fa-building"></i> Partner Companies (<span id="visibleCount"><%= partners.length %></span>)</h2>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="showNonAlternative" style="cursor: pointer;" />
+                        <span style="font-size: 14px; color: #666;">Show Non-Alternative (<span id="nonAltCount">0</span>)</span>
+                    </label>
+                </div>
             </div>
 
             <% if (partners.length === 0) { %>
@@ -695,7 +701,7 @@
                         </thead>
                         <tbody>
                             <% partners.forEach((partner, index) => { %>
-                                <tr>
+                                <tr data-status="<%= partner.status %>" class="partner-main-row">
                                     <td>
                                         <i class="fas fa-chevron-right expand-btn" onclick="toggleExpand('<%= partner._id %>')" title="Show more details"></i>
                                     </td>
@@ -791,7 +797,7 @@
                                     </td>
                                 </tr>
                                 <!-- Expandable Row -->
-                                <tr class="expandable-row" id="expand-<%= partner._id %>">
+                                <tr class="expandable-row" id="expand-<%= partner._id %>" data-status="<%= partner.status %>">
                                     <td colspan="10">
                                         <div class="expanded-content">
                                             <div class="details-grid">
@@ -1077,6 +1083,56 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Initialize toggle state from localStorage (default: hide Non-Alternative)
+        const showNonAltCheckbox = document.getElementById('showNonAlternative');
+        const savedState = localStorage.getItem('showNonAlternative');
+        showNonAltCheckbox.checked = savedState === 'true';
+        
+        // Apply filter on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            applyNonAlternativeFilter();
+        });
+        
+        // Toggle Non-Alternative partners visibility
+        showNonAltCheckbox.addEventListener('change', function() {
+            localStorage.setItem('showNonAlternative', this.checked);
+            applyNonAlternativeFilter();
+        });
+        
+        function applyNonAlternativeFilter() {
+            const showNonAlt = showNonAltCheckbox.checked;
+            const allRows = document.querySelectorAll('tr[data-status]');
+            let visibleCount = 0;
+            let nonAltCount = 0;
+            let hiddenCount = 0;
+            
+            allRows.forEach(row => {
+                const status = row.dataset.status;
+                const isNonAlt = status === 'Non-Alternative';
+                
+                if (isNonAlt) {
+                    nonAltCount++;
+                    if (!showNonAlt) {
+                        row.style.display = 'none';
+                        hiddenCount++;
+                    } else {
+                        row.style.display = '';
+                    }
+                } else {
+                    row.style.display = '';
+                }
+                
+                // Count visible main rows only
+                if (row.classList.contains('partner-main-row') && row.style.display !== 'none') {
+                    visibleCount++;
+                }
+            });
+            
+            // Update counts
+            document.getElementById('visibleCount').textContent = visibleCount;
+            document.getElementById('nonAltCount').textContent = nonAltCount;
+        }
+        
         // Toggle expand/collapse row
         function toggleExpand(partnerId) {
             const expandRow = document.getElementById('expand-' + partnerId);
