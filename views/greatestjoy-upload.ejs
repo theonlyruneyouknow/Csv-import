@@ -143,19 +143,32 @@
 
             <div class="form-section">
                 <label class="form-label"><strong>Image/Video URL *</strong></label>
-                <input type="url" class="form-control" name="url" id="mediaUrl" 
-                       value="<%= media ? media.url : '' %>" 
-                       <%= media ? 'readonly' : '' %>
-                       placeholder="https://example.com/image.jpg or https://youtu.be/..." 
-                       onchange="previewMedia()" required>
-                <small class="text-muted">
-                    <strong>How to get shareable links:</strong><br>
-                    📸 <strong>Google Photos:</strong> Open photo → Share → Create link → Copy<br>
-                    ☁️ <strong>iCloud:</strong> Select photo → Share → Copy iCloud Link<br>
-                    📁 <strong>OneDrive/Dropbox:</strong> Right-click → Share → Copy link<br>
-                    🎥 <strong>YouTube:</strong> Click Share button → Copy link<br>
-                    💡 <strong>Tip:</strong> Make sure the link points directly to the image/video file or is a shareable public link
-                </small>
+                <div class="input-group">
+                    <input type="url" class="form-control" name="url" id="mediaUrl" 
+                           value="<%= media ? media.url : '' %>" 
+                           <%= media && media.sourceType === 'local' ? 'readonly' : '' %>
+                           placeholder="https://example.com/image.jpg or https://youtu.be/..." 
+                           onchange="previewMedia()" required>
+                    <% if (!media || (media && media.sourceType !== 'local')) { %>
+                        <button type="button" class="btn btn-outline-secondary" onclick="fetchUrlMetadata()" id="fetchMetadataBtn">
+                            <i class="fas fa-magic"></i> Auto-fill from URL
+                        </button>
+                    <% } %>
+                </div>
+                <% if (media && media.sourceType === 'local') { %>
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i> Local uploaded files cannot change their URL
+                    </small>
+                <% } else { %>
+                    <small class="text-muted">
+                        <strong>How to get shareable links:</strong><br>
+                        📸 <strong>Google Photos:</strong> Open photo → Share → Create link → Copy<br>
+                        ☁️ <strong>iCloud:</strong> Select photo → Share → Copy iCloud Link<br>
+                        📁 <strong>OneDrive/Dropbox:</strong> Right-click → Share → Copy link<br>
+                        🎥 <strong>YouTube:</strong> Click Share button → Copy link<br>
+                        💡 <strong>Tip:</strong> Click "Auto-fill" to detect media type and extract album/title info from the URL
+                    </small>
+                <% } %>
             </div>
 
             <div class="form-section" id="thumbnailSection" style="display: none;">
@@ -253,6 +266,13 @@
                        value="<%= media && media.tags ? media.tags.join(', ') : '' %>" 
                        placeholder="birthday, smile, first steps, family fun">
                 <small class="text-muted">Add tags separated by commas to help organize and search your memories</small>
+            </div>
+
+            <div class="form-section">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Tip:</strong> After uploading, click on any photo to add voice recordings and written stories that preserve the memories behind each image!
+                </div>
             </div>
 
             <div class="form-section">
@@ -388,6 +408,254 @@
             
             document.getElementById('peopleData').value = JSON.stringify(people);
         });
+
+        // Fetch metadata from URL
+        async function fetchUrlMetadata() {
+            const urlInput = document.getElementById('mediaUrl');
+            const titleInput = document.querySelector('input[name="title"]');
+            const albumInput = document.querySelector('input[name="album"]');
+            const mediaTypeSelect = document.getElementById('mediaType');
+            const fetchBtn = document.getElementById('fetchMetadataBtn');
+            
+            const url = urlInput.value.trim();
+            if (!url) {
+                alert('Please enter a URL first');
+                return;
+            }
+            
+            // Show loading state
+            fetchBtn.disabled = true;
+            fetchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Detecting...';
+            
+            try {
+                // Check if it's a Google Photos shareable album link
+                if (url.includes('photos.app.goo.gl') || url.includes('photos.google.com/share') || 
+                    (url.includes('photos.google.com') && url.includes('/album/'))) {
+                    
+                    // Ask user what they want to do
+                    const choice = confirm(
+                        'This is a Google Photos album link!\\n\\n' +
+                        'Click OK to use Cloud Import (recommended - better integration)\\n' +
+                        'Click Cancel to extract images from this album link'
+                    );
+                    
+                    if (choice) {
+                        // Redirect to cloud import
+                        window.location.href = '/greatestjoy/cloud-import';
+                        return;
+                    }
+                    
+                    // Try to parse the album
+                    fetchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Parsing album...';
+                    
+                    try {
+                        const response = await fetch('/greatestjoy/parse-album-url', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success && data.images && data.images.length > 0) {
+                            // Show album image selection modal
+                            showAlbumImageSelector(data.images, data.albumUrl);
+                            return;
+                        } else {
+                            alert(data.error || 'Could not extract images from album. Please use Cloud Import instead.');
+                        }
+                    } catch (e) {
+                        alert('Error parsing album: ' + e.message + '\\n\\nPlease use Cloud Import for authenticated access.');
+                    }
+                    
+                    fetchBtn.disabled = false;
+                    fetchBtn.innerHTML = '<i class=\"fas fa-magic\"></i> Auto-fill from URL';
+                    return;
+                }
+                
+                // Auto-detect media type from URL
+                const videoPatterns = [
+                    /youtube\.com\/watch/i,
+                    /youtu\.be\//i,
+                    /vimeo\.com/i,
+                    /\.(mp4|mov|avi|webm|mkv)($|\?)/i
+                ];
+                
+                const imagePatterns = [
+                    /\.(jpg|jpeg|png|gif|webp|bmp)($|\?)/i,
+                    /icloud\.com.*photos/i
+                ];
+                
+                // Detect media type
+                const isVideo = videoPatterns.some(pattern => pattern.test(url));
+                const isImage = imagePatterns.some(pattern => pattern.test(url));
+                
+                if (isVideo) {
+                    mediaTypeSelect.value = 'video';
+                    document.getElementById('thumbnailSection').style.display = 'block';
+                } else if (isImage) {
+                    mediaTypeSelect.value = 'photo';
+                }
+                
+                // Try to extract title or album from URL
+                let suggestedTitle = '';
+                let suggestedAlbum = '';
+                
+                // YouTube
+                if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                    // Extract video ID
+                    let videoId = '';
+                    if (url.includes('youtube.com/watch')) {
+                        const match = url.match(/[?&]v=([^&]+)/);
+                        if (match) videoId = match[1];
+                    } else if (url.includes('youtu.be/')) {
+                        const match = url.match(/youtu\\.be\\/([^?&]+)/);
+                        if (match) videoId = match[1];
+                    }
+                    
+                    if (videoId) {
+                        // Use YouTube oEmbed API to get video title
+                        try {
+                            const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+                            const data = await response.json();
+                            if (data.title) {
+                                suggestedTitle = data.title;
+                                suggestedAlbum = data.author_name || 'YouTube Videos';
+                            }
+                        } catch (e) {
+                            console.error('Failed to fetch YouTube metadata:', e);
+                        }
+                    }
+                }
+                
+                // Extract filename from URL path
+                else {
+                    try {
+                        const urlObj = new URL(url);
+                        const pathParts = urlObj.pathname.split('/');
+                        const filename = pathParts[pathParts.length - 1];
+                        if (filename) {
+                            // Remove extension and decode
+                            suggestedTitle = decodeURIComponent(filename.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '));
+                        }
+                    } catch (e) {
+                        console.error('Failed to parse URL:', e);
+                    }
+                }
+                
+                // Apply suggestions
+                if (suggestedTitle && !titleInput.value) {
+                    titleInput.value = suggestedTitle;
+                }
+                if (suggestedAlbum && !albumInput.value) {
+                    albumInput.value = suggestedAlbum;
+                }
+                
+                // Show success message
+                if (suggestedTitle || suggestedAlbum || isVideo || isImage) {
+                    const messages = [];
+                    if (isVideo) messages.push('Video detected');
+                    if (isImage) messages.push('Image detected');
+                    if (suggestedTitle) messages.push(`Title: "${suggestedTitle}"`);
+                    if (suggestedAlbum) messages.push(`Album: "${suggestedAlbum}"`);
+                    
+                    alert('Auto-detected:\n' + messages.join('\n'));
+                } else {
+                    alert('Could not auto-detect metadata. Please fill in manually.');
+                }
+                
+            } catch (error) {
+                console.error('Metadata fetch error:', error);
+                alert('Error detecting metadata: ' + error.message);
+            } finally {
+                // Reset button state
+                fetchBtn.disabled = false;
+                fetchBtn.innerHTML = '<i class="fas fa-magic"></i> Auto-fill from URL';
+            }
+        }
+
+        // Show album image selector modal
+        function showAlbumImageSelector(images, albumUrl) {
+            // Create modal HTML
+            const modal = document.createElement('div');
+            modal.id = 'albumSelectorModal';
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.8); z-index: 9999; display: flex;
+                align-items: center; justify-content: center; overflow-y: auto;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: white; border-radius: 12px; padding: 30px;
+                max-width: 900px; width: 90%; max-height: 80vh; overflow-y: auto;
+            `;
+            
+            modalContent.innerHTML = `
+                <h3 style="margin-bottom: 20px; color: #667eea;">
+                    <i class="fas fa-images"></i> Select Image from Album
+                </h3>
+                <p class="text-muted">Found ${images.length} image(s) in this Google Photos album. Click an image to use it:</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
+                    ${images.map((img, index) => `
+                        <div class="album-image-option" onclick="selectAlbumImage('${img.imageUrl}', '${img.title.replace(/'/g, "\\'")}', '${albumUrl}')" 
+                             style="cursor: pointer; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; transition: all 0.3s; position: relative;"
+                             onmouseover="this.style.borderColor='#667eea'; this.style.transform='scale(1.05)'"
+                             onmouseout="this.style.borderColor='#ddd'; this.style.transform='scale(1)'">
+                            <img src="${img.thumbnailUrl}" style="width: 100%; height: 200px; object-fit: cover;" alt="${img.title}">
+                            <div style="padding: 10px; background: #f8f9fa;">
+                                <small style="font-weight: 600;">${img.title}</small>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="closeAlbumSelector()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            `;
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+        }
+        
+        // Close album selector modal
+        function closeAlbumSelector() {
+            const modal = document.getElementById('albumSelectorModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        // Select an image from the album
+        function selectAlbumImage(imageUrl, title, albumUrl) {
+            const urlInput = document.getElementById('mediaUrl');
+            const titleInput = document.querySelector('input[name="title"]');
+            const albumInput = document.querySelector('input[name="album"]');
+            
+            // Set the URL to the direct image URL
+            urlInput.value = imageUrl;
+            
+            // Set title if empty
+            if (!titleInput.value.trim()) {
+                titleInput.value = title;
+            }
+            
+            // Suggest album name
+            if (!albumInput.value.trim()) {
+                albumInput.value = 'Google Photos Album';
+            }
+            
+            // Show preview
+            previewMedia();
+            
+            // Close modal
+            closeAlbumSelector();
+            
+            // Show success message
+            alert(`✅ Image selected successfully!\n\nDirect image URL has been set. You can now upload this memory.`);
+        }
 
     </script>
 </body>

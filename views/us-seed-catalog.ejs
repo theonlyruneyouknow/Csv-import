@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US Seed Catalog - Browse by Crop Type</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #28a745;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 28px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            color: white;
+        }
+
+        /* Statistics Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card.vegetables {
+            border-left: 4px solid #ff6b35;
+        }
+
+        .stat-card.flowers {
+            border-left: 4px solid #e91e63;
+        }
+
+        .stat-card.herbs {
+            border-left: 4px solid #558b2f;
+        }
+
+        .stat-card.total {
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-icon {
+            float: right;
+            font-size: 30px;
+            opacity: 0.3;
+        }
+
+        /* Main Catalog Section */
+        .catalog-section {
+            background: white;
+            padding: 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .tab-button:hover {
+            background: #e9ecef;
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #333;
+            border-bottom: 3px solid currentColor;
+        }
+
+        .tab-button.active.vegetables-tab {
+            color: #ff6b35;
+        }
+
+        .tab-button.active.flowers-tab {
+            color: #e91e63;
+        }
+
+        .tab-button.active.herbs-tab {
+            color: #558b2f;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Crop Types Grid */
+        .crops-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .crop-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .crop-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .crop-card.vegetables {
+            border-left-color: #ff6b35;
+        }
+
+        .crop-card.flowers {
+            border-left-color: #e91e63;
+        }
+
+        .crop-card.herbs {
+            border-left-color: #558b2f;
+        }
+
+        .crop-card.selected {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-left-width: 5px;
+        }
+
+        .crop-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .partner-count {
+            background: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        /* Partners List */
+        .partners-list {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #dee2e6;
+            display: none;
+        }
+
+        .partners-list.show {
+            display: block;
+        }
+
+        .partners-list h3 {
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .partner-item {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+            border-left: 4px solid #667eea;
+        }
+
+        .partner-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .partner-info {
+            flex: 1;
+        }
+
+        .partner-name {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 16px;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .partner-name:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .partner-meta {
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .partner-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-view {
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .btn-view:hover {
+            background: #5568d3;
+            color: white;
+        }
+
+        .btn-website {
+            background: #28a745;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .btn-website:hover {
+            background: #218838;
+            color: white;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge.prospective { background: #fff3cd; color: #856404; }
+        .badge.active { background: #d4edda; color: #155724; }
+        .badge.on-hold { background: #f8d7da; color: #721c24; }
+        .badge.inactive { background: #e2e3e5; color: #383d41; }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <i class="fas fa-leaf"></i>
+                US Seed Catalog Browser
+            </h1>
+            <div class="header-actions">
+                <a href="/us-seed-partners" class="btn-back">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to US Partners</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card vegetables">
+                <i class="fas fa-carrot stat-icon" style="color: #ff6b35;"></i>
+                <div class="stat-number"><%= stats.totalVegetables %></div>
+                <div class="stat-label">Vegetable Types</div>
+            </div>
+            <div class="stat-card flowers">
+                <i class="fas fa-flower stat-icon" style="color: #e91e63;"></i>
+                <div class="stat-number"><%= stats.totalFlowers %></div>
+                <div class="stat-label">Flower Types</div>
+            </div>
+            <div class="stat-card herbs">
+                <i class="fas fa-spa stat-icon" style="color: #558b2f;"></i>
+                <div class="stat-number"><%= stats.totalHerbs %></div>
+                <div class="stat-label">Herb Types</div>
+            </div>
+            <div class="stat-card total">
+                <i class="fas fa-building stat-icon" style="color: #667eea;"></i>
+                <div class="stat-number"><%= stats.totalPartners %></div>
+                <div class="stat-label">Total Partners</div>
+            </div>
+        </div>
+
+        <!-- Main Catalog Section -->
+        <div class="catalog-section">
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button class="tab-button vegetables-tab active" onclick="switchTab('vegetables')">
+                    <span>🥕</span>
+                    <span>Vegetables (<%= stats.totalVegetables %>)</span>
+                </button>
+                <button class="tab-button flowers-tab" onclick="switchTab('flowers')">
+                    <span>🌸</span>
+                    <span>Flowers (<%= stats.totalFlowers %>)</span>
+                </button>
+                <button class="tab-button herbs-tab" onclick="switchTab('herbs')">
+                    <span>🌿</span>
+                    <span>Herbs (<%= stats.totalHerbs %>)</span>
+                </button>
+            </div>
+
+            <!-- Vegetables Tab -->
+            <div id="vegetables-tab" class="tab-content active">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="search-vegetables" placeholder="Search vegetables... (e.g., Tomatoes, Carrots)" onkeyup="searchCrops('vegetables')">
+                </div>
+                <div class="crops-grid" id="vegetables-grid">
+                    <% sortedCatalog.vegetables.forEach(function(veg) { %>
+                        <div class="crop-card vegetables" onclick="showPartners('vegetables', '<%= veg %>')">
+                            <span class="crop-name"><%= veg %></span>
+                            <span class="partner-count"><%= catalog.vegetables[veg].length %></span>
+                        </div>
+                    <% }); %>
+                </div>
+                <div id="vegetables-partners" class="partners-list"></div>
+            </div>
+
+            <!-- Flowers Tab -->
+            <div id="flowers-tab" class="tab-content">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="search-flowers" placeholder="Search flowers... (e.g., Sunflowers, Marigolds)" onkeyup="searchCrops('flowers')">
+                </div>
+                <div class="crops-grid" id="flowers-grid">
+                    <% sortedCatalog.flowers.forEach(function(flower) { %>
+                        <div class="crop-card flowers" onclick="showPartners('flowers', '<%= flower %>')">
+                            <span class="crop-name"><%= flower %></span>
+                            <span class="partner-count"><%= catalog.flowers[flower].length %></span>
+                        </div>
+                    <% }); %>
+                </div>
+                <div id="flowers-partners" class="partners-list"></div>
+            </div>
+
+            <!-- Herbs Tab -->
+            <div id="herbs-tab" class="tab-content">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="search-herbs" placeholder="Search herbs... (e.g., Basil, Parsley)" onkeyup="searchCrops('herbs')">
+                </div>
+                <div class="crops-grid" id="herbs-grid">
+                    <% sortedCatalog.herbs.forEach(function(herb) { %>
+                        <div class="crop-card herbs" onclick="showPartners('herbs', '<%= herb %>')">
+                            <span class="crop-name"><%= herb %></span>
+                            <span class="partner-count"><%= catalog.herbs[herb].length %></span>
+                        </div>
+                    <% }); %>
+                </div>
+                <div id="herbs-partners" class="partners-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Store catalog data
+        const catalogData = <%- JSON.stringify(catalog) %>;
+        let currentCategory = 'vegetables';
+        let currentCrop = null;
+
+        // Switch between tabs
+        function switchTab(category) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.${category}-tab`).classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${category}-tab`).classList.add('active');
+
+            currentCategory = category;
+            
+            // Clear search
+            document.getElementById(`search-${category}`).value = '';
+            
+            // Hide partners list
+            document.querySelectorAll('.partners-list').forEach(list => list.classList.remove('show'));
+            
+            // Deselect all crop cards
+            document.querySelectorAll('.crop-card').forEach(card => card.classList.remove('selected'));
+        }
+
+        // Show partners for a specific crop
+        function showPartners(category, cropName) {
+            currentCrop = cropName;
+            const partners = catalogData[category][cropName];
+            const partnersList = document.getElementById(`${category}-partners`);
+
+            // Highlight selected crop
+            const grid = document.getElementById(`${category}-grid`);
+            grid.querySelectorAll('.crop-card').forEach(card => card.classList.remove('selected'));
+            event.target.closest('.crop-card').classList.add('selected');
+
+            // Build partners HTML
+            let html = `<h3><i class="fas fa-building"></i> ${partners.length} Partner${partners.length !== 1 ? 's' : ''} offering ${cropName}</h3>`;
+            
+            partners.forEach(partner => {
+                const statusClass = partner.status.toLowerCase().replace(' ', '-');
+                html += `
+                    <div class="partner-item">
+                        <div class="partner-info">
+                            <a href="/us-seed-partners/${partner._id}" class="partner-name">
+                                <i class="fas fa-building"></i> ${partner.companyName}
+                            </a>
+                            <div class="partner-meta">
+                                <span><i class="fas fa-code"></i> ${partner.partnerCode}</span>
+                                <span><i class="fas fa-flag-usa"></i> ${partner.state} (${partner.stateCode})</span>
+                                <span class="badge ${statusClass}">${partner.status}</span>
+                                <span><i class="fas fa-star" style="color: #f39c12;"></i> Priority ${partner.priority}</span>
+                            </div>
+                        </div>
+                        <div class="partner-actions">
+                            <a href="/us-seed-partners/${partner._id}" class="btn-view">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            ${partner.website ? `
+                                <a href="${partner.website}" target="_blank" class="btn-website">
+                                    <i class="fas fa-globe"></i> Website
+                                </a>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            partnersList.innerHTML = html;
+            partnersList.classList.add('show');
+
+            // Scroll to partners list
+            setTimeout(() => {
+                partnersList.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        // Search within crops
+        function searchCrops(category) {
+            const searchTerm = document.getElementById(`search-${category}`).value.toLowerCase();
+            const grid = document.getElementById(`${category}-grid`);
+            const cards = grid.querySelectorAll('.crop-card');
+
+            cards.forEach(card => {
+                const cropName = card.querySelector('.crop-name').textContent.toLowerCase();
+                if (cropName.includes(searchTerm)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

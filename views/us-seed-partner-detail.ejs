@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= partner.companyName %> - Partner Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .company-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .company-title h1 {
+            margin: 0 0 10px 0;
+            color: #667eea;
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .company-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge.active { background: #d4edda; color: #155724; }
+        .badge.prospective { background: #fff3cd; color: #856404; }
+        .badge.on-hold { background: #f8d7da; color: #721c24; }
+        .badge.inactive { background: #e2e3e5; color: #383d41; }
+        .badge.non-alternative { background: #ffeaa7; color: #d63031; }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-custom {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-back:hover {
+            background: #5a6268;
+            color: white;
+        }
+
+        .btn-edit {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #138496;
+            color: white;
+        }
+
+        .tabs {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+
+        .tab-nav {
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+            padding: 0 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            padding: 15px 25px;
+            font-weight: 600;
+            color: #6c757d;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .tab-button:hover {
+            color: #667eea;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            padding: 25px;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-card h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-row {
+            margin-bottom: 10px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 3px;
+        }
+
+        .info-value {
+            color: #333;
+            font-size: 14px;
+        }
+
+        .certifications-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .cert-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+
+        .cert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .cert-title {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .cert-verified {
+            color: #28a745;
+            font-size: 12px;
+        }
+
+        .communication-log {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+            margin-bottom: 15px;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .log-date {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .log-method {
+            background: #e9ecef;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+
+        .seed-types-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .seed-type-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .documents-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .document-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .doc-icon {
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .priority-display {
+            display: flex;
+            gap: 5px;
+        }
+
+        .priority-star {
+            color: #ffc107;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header-section">
+            <div class="company-header">
+                <div class="company-title">
+                    <h1>
+                        <i class="fas fa-building"></i>
+                        <%= partner.companyName %>
+                    </h1>
+                    <div class="company-meta">
+                        <span class="badge <%= partner.status.toLowerCase().replace(' ', '-') %>">
+                            <%= partner.status %>
+                        </span>
+                        <span class="badge" style="background: #d1ecf1; color: #0c5460;">
+                            <%= partner.partnerCode %>
+                        </span>
+                        <span class="badge" style="background: #e2e3e5; color: #383d41;">
+                            <i class="fas fa-globe"></i> <%= partner.country %>
+                        </span>
+                        <div class="priority-display">
+                            <% for(let i = 0; i < partner.priority; i++) { %>
+                                <i class="fas fa-star priority-star"></i>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <a href="/us-seed-partners" class="btn-custom btn-back">
+                        <i class="fas fa-arrow-left"></i> Back to US Dashboard
+                    </a>
+                    <a href="/us-seed-partners/catalog" class="btn-custom" style="background: linear-gradient(135deg, #28a745, #558b2f); color: white;">
+                        <i class="fas fa-leaf"></i> Seed Catalog
+                    </a>
+                    <a href="/us-seed-partners/<%= partner._id %>/edit" class="btn-custom btn-edit">
+                        <i class="fas fa-edit"></i> Edit Partner
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab-nav">
+                <button class="tab-button active" onclick="switchTab('overview')">
+                    <i class="fas fa-info-circle"></i> Overview
+                </button>
+                <button class="tab-button" onclick="switchTab('contact')">
+                    <i class="fas fa-address-book"></i> Contact Information
+                </button>
+                <button class="tab-button" onclick="switchTab('certifications')">
+                    <i class="fas fa-certificate"></i> Certifications
+                </button>
+                <button class="tab-button" onclick="switchTab('communications')">
+                    <i class="fas fa-comments"></i> Communications
+                </button>
+                <button class="tab-button" onclick="switchTab('documents')">
+                    <i class="fas fa-file-alt"></i> Documents
+                </button>
+                <button class="tab-button" onclick="switchTab('performance')">
+                    <i class="fas fa-chart-line"></i> Performance
+                </button>
+            </div>
+
+            <!-- Overview Tab -->
+            <div class="tab-content active" id="overview-tab">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3><i class="fas fa-handshake"></i> Partnership Details</h3>
+                        <div class="info-row">
+                            <div class="info-label">Partnership Type</div>
+                            <div class="info-value"><%= partner.partnershipType %></div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Region</div>
+                            <div class="info-value"><%= partner.region %></div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Partnership Start</div>
+                            <div class="info-value">
+                                <%= partner.partnershipStartDate ? new Date(partner.partnershipStartDate).toLocaleDateString() : 'Not set' %>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Last Order Date</div>
+                            <div class="info-value">
+                                <%= partner.lastOrderDate ? new Date(partner.lastOrderDate).toLocaleDateString() : 'No orders yet' %>
+                                <% if (daysSinceLastOrder !== null) { %>
+                                    (<%= daysSinceLastOrder %> days ago)
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <h3><i class="fas fa-seedling"></i> Seed Specializations</h3>
+                        <% if (partner.seedTypes && partner.seedTypes.length > 0) { %>
+                            <div class="seed-types-grid">
+                                <% partner.seedTypes.forEach(seedType => { %>
+                                    <span class="seed-type-badge"><%= seedType %></span>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <p style="color: #999;">No seed types specified</p>
+                        <% } %>
+                    </div>
+
+                    <!-- Detailed Seed Catalog -->
+                    <% if (partner.seedOfferings && (partner.seedOfferings.vegetables.length > 0 || partner.seedOfferings.flowers.length > 0 || partner.seedOfferings.herbs.length > 0)) { %>
+                        <div class="info-card" style="border-left: 4px solid #28a745;">
+                            <h3 style="color: #28a745;"><i class="fas fa-leaf"></i> Seed Catalog Offerings</h3>
+                            
+                            <% if (partner.seedOfferings.vegetables && partner.seedOfferings.vegetables.length > 0) { %>
+                                <div style="margin-bottom: 20px;">
+                                    <h4 style="color: #ff6b35; font-size: 16px; margin-bottom: 10px;">
+                                        🥕 Vegetables (<%= partner.seedOfferings.vegetables.length %>)
+                                    </h4>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                        <% partner.seedOfferings.vegetables.forEach(function(veg) { %>
+                                            <span style="background: #fff3e0; color: #e65100; padding: 5px 12px; border-radius: 12px; font-size: 12px; border: 1px solid #ffcc80;">
+                                                <%= veg %>
+                                            </span>
+                                        <% }); %>
+                                    </div>
+                                </div>
+                            <% } %>
+
+                            <% if (partner.seedOfferings.flowers && partner.seedOfferings.flowers.length > 0) { %>
+                                <div style="margin-bottom: 20px;">
+                                    <h4 style="color: #e91e63; font-size: 16px; margin-bottom: 10px;">
+                                        🌸 Flowers (<%= partner.seedOfferings.flowers.length %>)
+                                    </h4>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                        <% partner.seedOfferings.flowers.forEach(function(flower) { %>
+                                            <span style="background: #fce4ec; color: #c2185b; padding: 5px 12px; border-radius: 12px; font-size: 12px; border: 1px solid #f8bbd0;">
+                                                <%= flower %>
+                                            </span>
+                                        <% }); %>
+                                    </div>
+                                </div>
+                            <% } %>
+
+                            <% if (partner.seedOfferings.herbs && partner.seedOfferings.herbs.length > 0) { %>
+                                <div style="margin-bottom: 0;">
+                                    <h4 style="color: #558b2f; font-size: 16px; margin-bottom: 10px;">
+                                        🌿 Herbs (<%= partner.seedOfferings.herbs.length %>)
+                                    </h4>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                        <% partner.seedOfferings.herbs.forEach(function(herb) { %>
+                                            <span style="background: #e8f5e9; color: #2e7d32; padding: 5px 12px; border-radius: 12px; font-size: 12px; border: 1px solid #a5d6a7;">
+                                                <%= herb %>
+                                            </span>
+                                        <% }); %>
+                                    </div>
+                                </div>
+                            <% } %>
+                        </div>
+                    <% } %>
+
+                    <div class="info-card">
+                        <h3><i class="fas fa-dollar-sign"></i> Business Metrics</h3>
+                        <div class="info-row">
+                            <div class="info-label">Total Orders Placed</div>
+                            <div class="info-value"><%= partner.totalOrdersPlaced || 0 %></div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Total Order Value</div>
+                            <div class="info-value">$<%= (partner.totalOrderValue || 0).toLocaleString() %></div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Currency</div>
+                            <div class="info-value"><%= partner.financialTerms?.currency || 'USD' %></div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Payment Terms</div>
+                            <div class="info-value"><%= partner.financialTerms?.paymentTerms || 'Not set' %></div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <h3><i class="fas fa-building"></i> Business Details</h3>
+                        <div class="info-row">
+                            <div class="info-label">Website</div>
+                            <div class="info-value">
+                                <% if (partner.businessDetails?.website) { %>
+                                    <a href="<%= partner.businessDetails.website %>" target="_blank">
+                                        <%= partner.businessDetails.website %>
+                                    </a>
+                                <% } else { %>
+                                    Not provided
+                                <% } %>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Year Established</div>
+                            <div class="info-value"><%= partner.businessDetails?.yearEstablished || 'Not provided' %></div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Number of Employees</div>
+                            <div class="info-value"><%= partner.businessDetails?.numberOfEmployees || 'Not provided' %></div>
+                        </div>
+                    </div>
+                </div>
+
+                <% if (partner.businessDetails?.companyProfile) { %>
+                    <div class="info-card" style="margin-top: 20px;">
+                        <h3><i class="fas fa-file-alt"></i> Company Profile</h3>
+                        <p><%= partner.businessDetails.companyProfile %></p>
+                    </div>
+                <% } %>
+                
+                <% if (partner.personalNotes) { %>
+                    <div class="info-card" style="margin-top: 20px; background: #fff9e6; border-left: 4px solid #ffc107;">
+                        <h3><i class="fas fa-sticky-note"></i> Personal Notes</h3>
+                        <p style="white-space: pre-wrap;"><%= partner.personalNotes %></p>
+                    </div>
+                <% } %>
+
+                <% if (partner.notes) { %>
+                    <div class="info-card" style="margin-top: 20px;">
+                        <h3><i class="fas fa-sticky-note"></i> Notes</h3>
+                        <p><%= partner.notes %></p>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Contact Information Tab -->
+            <div class="tab-content" id="contact-tab">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3><i class="fas fa-user"></i> Primary Contact</h3>
+                        <% if (partner.primaryContact?.name) { %>
+                            <div class="info-row">
+                                <div class="info-label">Name</div>
+                                <div class="info-value"><%= partner.primaryContact.name %></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Title</div>
+                                <div class="info-value"><%= partner.primaryContact.title || 'Not specified' %></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Email</div>
+                                <div class="info-value">
+                                    <a href="mailto:<%= partner.primaryContact.email %>"><%= partner.primaryContact.email %></a>
+                                </div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Phone</div>
+                                <div class="info-value"><%= partner.primaryContact.phone || 'Not provided' %></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Mobile</div>
+                                <div class="info-value"><%= partner.primaryContact.mobile || 'Not provided' %></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">WhatsApp</div>
+                                <div class="info-value"><%= partner.primaryContact.whatsapp || 'Not provided' %></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Preferred Language</div>
+                                <div class="info-value"><%= partner.primaryContact.preferredLanguage || 'English' %></div>
+                            </div>
+                        <% } else { %>
+                            <p style="color: #999;">No primary contact information</p>
+                        <% } %>
+                    </div>
+
+                    <div class="info-card">
+                        <h3><i class="fas fa-map-marker-alt"></i> Company Address</h3>
+                        <% if (partner.address?.street) { %>
+                            <p>
+                                <%= partner.address.street %><br>
+                                <% if (partner.address.street2) { %>
+                                    <%= partner.address.street2 %><br>
+                                <% } %>
+                                <%= partner.address.city %>, <%= partner.address.state %> <%= partner.address.postalCode %><br>
+                                <%= partner.address.state %> <%= partner.address.zipCode %>
+                            </p>
+                        <% } else { %>
+                            <p style="color: #999;">No address information</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certifications Tab -->
+            <div class="tab-content" id="certifications-tab">
+                <% if (expiringCertifications.length > 0) { %>
+                    <div class="alert-warning">
+                        <strong><i class="fas fa-exclamation-triangle"></i> Warning:</strong>
+                        <%= expiringCertifications.length %> certification(s) expiring within 30 days!
+                    </div>
+                <% } %>
+
+                <% if (partner.certifications && partner.certifications.length > 0) { %>
+                    <div class="certifications-list">
+                        <% partner.certifications.forEach(cert => { %>
+                            <div class="cert-card">
+                                <div class="cert-header">
+                                    <div class="cert-title"><%= cert.certificationType %></div>
+                                    <% if (cert.verified) { %>
+                                        <div class="cert-verified">
+                                            <i class="fas fa-check-circle"></i> Verified
+                                        </div>
+                                    <% } %>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Certificate Number</div>
+                                    <div class="info-value"><%= cert.certificateNumber || 'Not provided' %></div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Issuing Authority</div>
+                                    <div class="info-value"><%= cert.issuingAuthority || 'Not provided' %></div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Issue Date</div>
+                                    <div class="info-value">
+                                        <%= cert.issueDate ? new Date(cert.issueDate).toLocaleDateString() : 'Not provided' %>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Expiry Date</div>
+                                    <div class="info-value">
+                                        <%= cert.expiryDate ? new Date(cert.expiryDate).toLocaleDateString() : 'Not provided' %>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <p style="text-align: center; color: #999; padding: 40px;">No certifications on file</p>
+                <% } %>
+            </div>
+
+            <!-- Communications Tab -->
+            <div class="tab-content" id="communications-tab">
+                <% if (partner.communicationLog && partner.communicationLog.length > 0) { %>
+                    <div class="communication-log">
+                        <% partner.communicationLog.reverse().forEach(log => { %>
+                            <div class="log-entry">
+                                <div class="log-header">
+                                    <div>
+                                        <strong><%= log.subject %></strong>
+                                        <div class="log-date">
+                                            <%= new Date(log.date).toLocaleDateString() %> - 
+                                            <%= log.contactPerson %>
+                                        </div>
+                                    </div>
+                                    <div class="log-method"><%= log.method %></div>
+                                </div>
+                                <p><%= log.summary %></p>
+                                <% if (log.followUpRequired) { %>
+                                    <div style="color: #f39c12; font-size: 13px; margin-top: 8px;">
+                                        <i class="fas fa-bell"></i> Follow-up required
+                                        <% if (log.followUpDate) { %>
+                                            by <%= new Date(log.followUpDate).toLocaleDateString() %>
+                                        <% } %>
+                                    </div>
+                                <% } %>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <p style="text-align: center; color: #999; padding: 40px;">No communication history</p>
+                <% } %>
+            </div>
+
+            <!-- Documents Tab -->
+            <div class="tab-content" id="documents-tab">
+                <% if (partner.documents && partner.documents.length > 0) { %>
+                    <div class="documents-grid">
+                        <% partner.documents.forEach(doc => { %>
+                            <div class="document-card">
+                                <div style="display: flex; align-items: center;">
+                                    <i class="fas fa-file-pdf doc-icon" style="color: #dc3545;"></i>
+                                    <div>
+                                        <strong><%= doc.documentType %></strong><br>
+                                        <small style="color: #999;"><%= doc.fileName %></small><br>
+                                        <small style="color: #999;">
+                                            Uploaded: <%= new Date(doc.uploadDate).toLocaleDateString() %>
+                                        </small>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-primary">
+                                        <i class="fas fa-download"></i> Download
+                                    </button>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <p style="text-align: center; color: #999; padding: 40px;">No documents uploaded</p>
+                <% } %>
+            </div>
+
+            <!-- Performance Tab -->
+            <div class="tab-content" id="performance-tab">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3><i class="fas fa-tachometer-alt"></i> Performance Metrics</h3>
+                        <div class="info-row">
+                            <div class="info-label">On-Time Delivery Rate</div>
+                            <div class="info-value">
+                                <%= partner.performanceMetrics?.onTimeDeliveryRate || 'Not tracked' %>%
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Quality Acceptance Rate</div>
+                            <div class="info-value">
+                                <%= partner.performanceMetrics?.qualityAcceptanceRate || 'Not tracked' %>%
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Responsiveness Rating</div>
+                            <div class="info-value">
+                                <% if (partner.performanceMetrics?.responsivenesRating) { %>
+                                    <%= partner.performanceMetrics.responsivenesRating %>/5
+                                <% } else { %>
+                                    Not rated
+                                <% } %>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Overall Rating</div>
+                            <div class="info-value">
+                                <% if (partner.performanceMetrics?.overallRating) { %>
+                                    <%= partner.performanceMetrics.overallRating %>/5
+                                <% } else { %>
+                                    Not rated
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <h3><i class="fas fa-check-circle"></i> Quality Metrics</h3>
+                        <div class="info-row">
+                            <div class="info-label">Germination Rate</div>
+                            <div class="info-value">
+                                <%= partner.qualityMetrics?.germinationRate || 'Not tracked' %>%
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Purity Rate</div>
+                            <div class="info-value">
+                                <%= partner.qualityMetrics?.purityRate || 'Not tracked' %>%
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Last Quality Audit</div>
+                            <div class="info-value">
+                                <%= partner.qualityMetrics?.lastQualityAuditDate ? 
+                                    new Date(partner.qualityMetrics.lastQualityAuditDate).toLocaleDateString() : 
+                                    'Never' %>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Quality Rating</div>
+                            <div class="info-value">
+                                <%= partner.qualityMetrics?.qualityRating || 'Not rated' %>/5
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Activate button
+            event.target.classList.add('active');
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

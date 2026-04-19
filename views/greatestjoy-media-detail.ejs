@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= media.title %> - Greatest Joy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <%- include('partials/user-dropdown-styles') %>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .content-container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 500px;
+            gap: 30px;
+        }
+
+        .media-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .media-img {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .stories-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .recording-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+
+        .recording-card audio {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .transcript-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid #dee2e6;
+        }
+
+        .story-card {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+
+        .add-recording-section {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .recording-controls button {
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        #recordingTime {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #dc3545;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+
+        @media (max-width: 992px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stories-section {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <a href="/greatestjoy/dashboard" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Back to Gallery
+            </a>
+        </div>
+        <div>
+            <% if (media.uploadedBy && media.uploadedBy._id.toString() === user._id.toString()) { %>
+                <a href="/greatestjoy/media/<%= media._id %>/edit" class="btn btn-outline-primary me-2">
+                    <i class="fas fa-edit me-1"></i>Edit
+                </a>
+            <% } %>
+            <% if (typeof user !== 'undefined' && user) { %>
+                <%- include('partials/user-dropdown', { user: user }) %>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="content-container">
+        <div class="main-grid">
+            <!-- Media Display Section -->
+            <div class="media-section">
+                <h2><%= media.title %></h2>
+                <p class="text-muted">
+                    <i class="fas fa-calendar"></i> <%= new Date(media.captureDate).toLocaleDateString() %>
+                    <% if (media.location) { %>
+                        | <i class="fas fa-map-marker-alt"></i> <%= media.location %>
+                    <% } %>
+                </p>
+
+                <% if (media.mediaType === 'photo') { %>
+                    <img src="<%= media.url %>" alt="<%= media.title %>" class="media-img" 
+                         onerror="handleImageError(this)">
+                <% } else { %>
+                    <video controls class="media-img">
+                        <source src="<%= media.url %>" onerror="handleVideoError(this)">
+                        Your browser does not support the video tag.
+                    </video>
+                <% } %>
+                
+                <!-- Source Information -->
+                <% if (media.sourceType && media.sourceType !== 'local') { %>
+                    <div class="alert alert-info mt-3" style="font-size: 0.9rem;">
+                        <% if (media.sourceType === 'google-photos-shared') { %>
+                            <i class="fab fa-google"></i> <strong>Shared from Google Photos</strong>
+                            <% if (media.album) { %>
+                                <span class="badge bg-secondary ms-2"><%= media.album %></span>
+                            <% } %>
+                            <br>
+                            <small>This photo is hosted in a Google Photos shared album and accessible to your Family Circle members.</small>
+                            <% if (media.googlePhotos && media.googlePhotos.shareableUrl) { %>
+                                <br><a href="<%= media.googlePhotos.shareableUrl %>" target="_blank" class="btn btn-sm btn-outline-primary mt-2">
+                                    <i class="fas fa-external-link-alt"></i> View Album in Google Photos
+                                </a>
+                            <% } %>
+                        <% } else if (media.sourceType === 'google-photos') { %>
+                            <i class="fab fa-google"></i> <strong>From Google Photos</strong>
+                            <% if (media.album) { %>
+                                <span class="badge bg-secondary ms-2"><%= media.album %></span>
+                            <% } %>
+                            <br>
+                            <small>This photo is linked from Google Photos (private).</small>
+                        <% } else if (media.sourceType === 'url') { %>
+                            <i class="fas fa-link"></i> <strong>Linked from URL</strong>
+                            <% if (media.album) { %>
+                                <span class="badge bg-secondary ms-2"><%= media.album %></span>
+                            <% } %>
+                            <br>
+                            <small>This media is linked from an external source.</small>
+                        <% } %>
+                    </div>
+                <% } else if (media.album) { %>
+                    <div class="mt-3">
+                        <h6><i class="fas fa-photo-video"></i> Album:</h6>
+                        <a href="/greatestjoy/album/<%= encodeURIComponent(media.album) %>" class="badge bg-secondary" style="font-size: 1rem; text-decoration: none;">
+                            <%= media.album %>
+                        </a>
+                    </div>
+                <% } %>
+                
+                <!-- Shared With -->
+                <% if (media.circles && media.circles.length > 0) { %>
+                    <div class="mt-3">
+                        <h6><i class="fas fa-share-alt"></i> Shared with:</h6>
+                        <% media.circles.forEach(circle => { %>
+                            <span class="badge bg-primary me-2">
+                                <i class="fas fa-users"></i> <%= circle.name %>
+                            </span>
+                        <% }); %>
+                    </div>
+                <% } %>
+
+                <% if (media.description) { %>
+                    <div class="mt-3">
+                        <h5>Description</h5>
+                        <p><%= media.description %></p>
+                    </div>
+                <% } %>
+
+                <% if (media.people && media.people.length > 0) { %>
+                    <div class="mt-3">
+                        <h5><i class="fas fa-users"></i> People in this photo</h5>
+                        <% media.people.forEach(person => { %>
+                            <span class="badge bg-secondary me-2">
+                                <%= person.name %> (<%= person.relationship %>)
+                            </span>
+                        <% }); %>
+                    </div>
+                <% } %>
+
+                <% if (media.tags && media.tags.length > 0) { %>
+                    <div class="mt-3">
+                        <h5><i class="fas fa-tags"></i> Tags</h5>
+                        <% media.tags.forEach(tag => { %>
+                            <span class="badge bg-info me-2"><%= tag %></span>
+                        <% }); %>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Stories & Recordings Section -->
+            <div class="stories-section">
+                <h3 class="section-title">
+                    <i class="fas fa-book-open"></i> Stories & Memories
+                </h3>
+
+                <!-- Add Voice Recording -->
+                <div class="add-recording-section">
+                    <h5><i class="fas fa-microphone"></i> Add Voice Recording</h5>
+                    <p class="text-muted small">Record the story behind this memory</p>
+                    
+                    <div class="recording-controls">
+                        <button type="button" id="startRecording" class="btn btn-danger btn-sm">
+                            <i class="fas fa-circle"></i> Start Recording
+                        </button>
+                        <button type="button" id="stopRecording" class="btn btn-secondary btn-sm" disabled>
+                            <i class="fas fa-stop"></i> Stop
+                        </button>
+                        <button type="button" id="playRecording" class="btn btn-primary btn-sm" disabled>
+                            <i class="fas fa-play"></i> Play
+                        </button>
+                        <div class="mt-2">
+                            <span id="recordingTime">0:00</span>
+                        </div>
+                    </div>
+
+                    <audio id="audioPlayback" controls class="w-100 mt-3" style="display: none;"></audio>
+
+                    <div class="mt-3">
+                        <input type="text" class="form-control mb-2" id="recordingTitle" 
+                               placeholder="Recording title (e.g., Grandpa's story about this day)">
+                        <textarea class="form-control mb-2" id="recordingTranscript" rows="4"
+                                  placeholder="Type or paste the transcript here..."></textarea>
+                        <button type="button" class="btn btn-success w-100" onclick="saveRecording()">
+                            <i class="fas fa-save"></i> Save Recording
+                        </button>
+                    </div>
+
+                    <div class="mt-3">
+                        <small class="text-muted">Or upload an audio file:</small>
+                        <input type="file" class="form-control mt-1" id="audioFile" accept="audio/*">
+                    </div>
+                </div>
+
+                <!-- Existing Voice Recordings -->
+                <% if (media.voiceRecordings && media.voiceRecordings.length > 0) { %>
+                    <h5 class="mt-4"><i class="fas fa-microphone-alt"></i> Voice Recordings</h5>
+                    <% media.voiceRecordings.forEach((recording, index) => { %>
+                        <div class="recording-card">
+                            <h6><%= recording.title || `Recording ${index + 1}` %></h6>
+                            <small class="text-muted">
+                                Recorded by <%= recording.recordedBy ? recording.recordedBy.firstName : 'Unknown' %>
+                                on <%= new Date(recording.recordedDate).toLocaleDateString() %>
+                            </small>
+                            <audio controls src="<%= recording.audioUrl %>"></audio>
+                            <% if (recording.transcript && recording.transcript.text) { %>
+                                <div class="transcript-box">
+                                    <strong>Transcript:</strong>
+                                    <p class="mb-0 mt-2"><%= recording.transcript.text %></p>
+                                </div>
+                            <% } %>
+                        </div>
+                    <% }); %>
+                <% } %>
+
+                <!-- Add Written Story -->
+                <div class="add-recording-section mt-4" style="background: #fff8e1;">
+                    <h5><i class="fas fa-pen"></i> Add Written Story</h5>
+                    <p class="text-muted small">Write down the memories and context</p>
+                    
+                    <input type="text" class="form-control mb-2" id="storyTitle" 
+                           placeholder="Story title">
+                    <textarea class="form-control mb-2" id="storyContent" rows="6"
+                              placeholder="Share the memories, context, and stories behind this photo..."></textarea>
+                    <button type="button" class="btn btn-warning w-100" onclick="saveStory()">
+                        <i class="fas fa-save"></i> Save Story
+                    </button>
+                </div>
+
+                <!-- Existing Stories -->
+                <% if (media.stories && media.stories.length > 0) { %>
+                    <h5 class="mt-4"><i class="fas fa-book"></i> Written Stories</h5>
+                    <% media.stories.forEach((story, index) => { %>
+                        <div class="story-card">
+                            <h6><%= story.title || `Story ${index + 1}` %></h6>
+                            <small class="text-muted">
+                                Written by <%= story.author ? story.author.firstName : 'Unknown' %>
+                                on <%= new Date(story.writtenDate).toLocaleDateString() %>
+                            </small>
+                            <p class="mt-2 mb-0"><%= story.content %></p>
+                        </div>
+                    <% }); %>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordingInterval;
+        let secondsRecorded = 0;
+        let audioBlob;
+
+        document.getElementById('startRecording').addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                secondsRecorded = 0;
+
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    document.getElementById('audioPlayback').src = audioUrl;
+                    document.getElementById('audioPlayback').style.display = 'block';
+                    document.getElementById('playRecording').disabled = false;
+                };
+
+                mediaRecorder.start();
+                document.getElementById('startRecording').disabled = true;
+                document.getElementById('stopRecording').disabled = false;
+
+                // Update timer
+                recordingInterval = setInterval(() => {
+                    secondsRecorded++;
+                    const minutes = Math.floor(secondsRecorded / 60);
+                    const seconds = secondsRecorded % 60;
+                    document.getElementById('recordingTime').textContent = 
+                        `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+            } catch (error) {
+                alert('Error accessing microphone: ' + error.message);
+            }
+        });
+
+        document.getElementById('stopRecording').addEventListener('click', () => {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                clearInterval(recordingInterval);
+                document.getElementById('startRecording').disabled = false;
+                document.getElementById('stopRecording').disabled = true;
+            }
+        });
+
+        document.getElementById('playRecording').addEventListener('click', () => {
+            document.getElementById('audioPlayback').play();
+        });
+
+        async function saveRecording() {
+            const title = document.getElementById('recordingTitle').value;
+            const transcript = document.getElementById('recordingTranscript').value;
+            const audioFile = document.getElementById('audioFile').files[0];
+
+            if (!audioBlob && !audioFile) {
+                alert('Please record audio or select an audio file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('transcript', transcript);
+            formData.append('audio', audioFile || audioBlob, 'recording.webm');
+
+            try {
+                const response = await fetch('/greatestjoy/media/<%= media._id %>/add-recording', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert('Recording saved successfully!');
+                    location.reload();
+                } else {
+                    alert('Error saving recording');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function saveStory() {
+            const title = document.getElementById('storyTitle').value;
+            const content = document.getElementById('storyContent').value;
+
+            if (!content.trim()) {
+                alert('Please write a story');
+                return;
+            }
+
+            try {
+                const response = await fetch('/greatestjoy/media/<%= media._id %>/add-story', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, content })
+                });
+
+                if (response.ok) {
+                    alert('Story saved successfully!');
+                    location.reload();
+                } else {
+                    alert('Error saving story');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Handle image loading errors
+        function handleImageError(img) {
+            console.error('Image failed to load:', img.src);
+            
+            // If it's a Google Photos shared album, try to provide helpful message
+            <% if (media.sourceType === 'google-photos-shared' && media.googlePhotos && media.googlePhotos.shareableUrl) { %>
+                const fallbackDiv = document.createElement('div');
+                fallbackDiv.className = 'alert alert-warning';
+                fallbackDiv.innerHTML = `
+                    <h5><i class="fas fa-exclamation-triangle"></i> Image Preview Unavailable</h5>
+                    <p>The direct image link is temporarily unavailable. This can happen with Google Photos links.</p>
+                    <a href="<%= media.googlePhotos.shareableUrl %>" target="_blank" class="btn btn-primary">
+                        <i class="fab fa-google"></i> View in Google Photos
+                    </a>
+                `;
+                img.parentNode.replaceChild(fallbackDiv, img);
+            <% } else { %>
+                const fallbackDiv = document.createElement('div');
+                fallbackDiv.className = 'alert alert-danger';
+                fallbackDiv.innerHTML = `
+                    <h5><i class="fas fa-exclamation-triangle"></i> Image Not Available</h5>
+                    <p>The image could not be loaded. The link may be broken or require authentication.</p>
+                    <p><small>Original URL: <%= media.url %></small></p>
+                `;
+                img.parentNode.replaceChild(fallbackDiv, img);
+            <% } %>
+        }
+        
+        // Handle video loading errors
+        function handleVideoError(video) {
+            console.error('Video failed to load:', video.src);
+            
+            const fallbackDiv = document.createElement('div');
+            fallbackDiv.className = 'alert alert-warning';
+            fallbackDiv.innerHTML = `
+                <h5><i class="fas fa-exclamation-triangle"></i> Video Preview Unavailable</h5>
+                <p>The video could not be loaded. Try opening it in a new tab:</p>
+                <a href="<%= media.url %>" target="_blank" class="btn btn-primary">
+                    <i class="fas fa-external-link-alt"></i> Open Video
+                </a>
+            `;
+            video.parentNode.replaceChild(fallbackDiv, video);
+        }
+    </script>
+</body>
+</html>

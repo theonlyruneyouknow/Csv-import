@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Household Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .household-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .household-info h1 {
+            margin: 0 0 10px 0;
+        }
+        
+        .section-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-card h3 {
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .member-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .member-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .member-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .member-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .member-email {
+            color: #999;
+            font-size: 0.9em;
+        }
+        
+        .member-badges {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .role-badge {
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+        
+        .role-owner {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .role-admin {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .role-member {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-invite {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .btn-invite:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .invitation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .invitation-status {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .back-button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .back-button:hover {
+            background: #5a6268;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="max-width: 900px;">
+        <div class="header">
+            <a href="/food/dashboard" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                Back to Food Dashboard
+            </a>
+        </div>
+        
+        <div class="household-info">
+            <h1><i class="fas fa-home"></i> <%= household.name %></h1>
+            <p><%= household.description || 'No description' %></p>
+            <div style="margin-top: 15px;">
+                <span style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 15px; font-size: 0.9em;">
+                    <i class="fas fa-users"></i> <%= household.members.length %> member<%= household.members.length !== 1 ? 's' : '' %>
+                </span>
+                <span style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 15px; font-size: 0.9em; margin-left: 10px;">
+                    <i class="fas fa-tag"></i> <%= household.type %>
+                </span>
+            </div>
+        </div>
+        
+        <!-- Members Section -->
+        <div class="section-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; border: none; padding: 0;"><i class="fas fa-users"></i> Household Members</h3>
+                <button class="btn-invite" onclick="showInviteModal()">
+                    <i class="fas fa-envelope"></i> Invite Member
+                </button>
+            </div>
+            
+            <% if (household.members && household.members.length > 0) { %>
+                <% household.members.forEach(member => { %>
+                    <div class="member-item">
+                        <div class="member-info">
+                            <div class="member-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="member-details">
+                                <div class="member-name"><%= member.user.firstName %> <%= member.user.lastName %></div>
+                                <div class="member-email"><%= member.user.email %></div>
+                                <div class="member-badges">
+                                    <span class="role-badge role-<%= member.role %>"><%= member.role.toUpperCase() %></span>
+                                    <% if (member.canManageShopping) { %><span class="role-badge" style="background: #28a745; color: white;">Shopping</span><% } %>
+                                    <% if (member.canManagePantry) { %><span class="role-badge" style="background: #17a2b8; color: white;">Pantry</span><% } %>
+                                    <% if (member.canManageRecipes) { %><span class="role-badge" style="background: #fd7e14; color: white;">Recipes</span><% } %>
+                                    <% if (member.canManageMealPlans) { %><span class="role-badge" style="background: #e83e8c; color: white;">Meal Plans</span><% } %>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <small style="color: #999;">Joined <%= new Date(member.joinedAt).toLocaleDateString() %></small>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <p style="color: #999;">No members yet.</p>
+            <% } %>
+        </div>
+        
+        <!-- Invitations Section -->
+        <% if (household.invitations && household.invitations.length > 0) { %>
+        <div class="section-card">
+            <h3><i class="fas fa-envelope"></i> Pending Invitations</h3>
+            <% household.invitations.filter(inv => inv.status === 'pending').forEach(invitation => { %>
+                <div class="invitation-item">
+                    <div>
+                        <div><strong><%= invitation.email %></strong></div>
+                        <small style="color: #999;">Sent <%= new Date(invitation.sentAt).toLocaleDateString() %> • Expires <%= new Date(invitation.expiresAt).toLocaleDateString() %></small>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span class="invitation-status status-pending">Pending</span>
+                        <button class="btn btn-sm btn-outline-primary" onclick="copyInviteCode('<%= invitation.inviteCode %>')">
+                            <i class="fas fa-copy"></i> Copy Code
+                        </button>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+        <% } %>
+        
+        <!-- Settings Section (for admins) -->
+        <% 
+        const userMember = household.members.find(m => m.user._id.toString() === user._id.toString());
+        const isOwnerOrAdmin = userMember && (userMember.role === 'owner' || userMember.role === 'admin');
+        %>
+        <% if (isOwnerOrAdmin) { %>
+        <div class="section-card">
+            <h3><i class="fas fa-cog"></i> Household Settings</h3>
+            <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                <p><strong>Type:</strong> <%= household.type %></p>
+                <p><strong>Created:</strong> <%= new Date(household.createdAt).toLocaleDateString() %></p>
+                <p style="margin: 0;"><strong>Shared Features:</strong> Shopping Lists, Pantry, Recipes, Meal Plans</p>
+            </div>
+        </div>
+        <% } %>
+    </div>
+    
+    <!-- Invite Modal -->
+    <div class="modal fade" id="inviteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Invite Household Member</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="alertContainer"></div>
+                    <form id="inviteForm">
+                        <div class="mb-3">
+                            <label class="form-label">Email Address *</label>
+                            <input type="email" class="form-control" id="inviteEmail" required>
+                            <small class="form-text text-muted">They'll receive an invitation code to join your household</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Personal Message (Optional)</label>
+                            <textarea class="form-control" id="inviteMessage" rows="3" placeholder="Add a personal message..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="sendInvite()">Send Invitation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let inviteModal;
+        
+        function showInviteModal() {
+            inviteModal = new bootstrap.Modal(document.getElementById('inviteModal'));
+            inviteModal.show();
+        }
+        
+        async function sendInvite() {
+            const email = document.getElementById('inviteEmail').value;
+            const message = document.getElementById('inviteMessage').value;
+            
+            if (!email) {
+                showAlert('Please enter an email address', 'danger');
+                return;
+            }
+            
+            try {
+                const res = await fetch('/household/invite', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, message })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    showAlert(`Invitation sent to ${email}!<br>Invite code: <strong>${data.inviteCode}</strong>`, 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    showAlert(data.error || 'Error sending invitation', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error sending invitation', 'danger');
+            }
+        }
+        
+        function copyInviteCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Invitation code copied to clipboard!');
+            });
+        }
+        
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `
+                <div class="alert alert-${type}">
+                    ${message}
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

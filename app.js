@@ -26,6 +26,7 @@ const shipmentRoutes = require('./routes/shipments'); // NEW: Shipment managemen
 const formRoutes = require('./routes/forms'); // NEW: Dynamic forms management
 const excelFileRoutes = require('./routes/excelFiles'); // NEW: SharePoint Excel integration
 const foodRoutes = require('./routes/food');
+const householdRoutes = require('./routes/household');
 const storyRoutes = require('./routes/story');
 const medicineRoutes = require('./routes/medicine');
 const bulletinRoutes = require('./routes/bulletin');
@@ -33,6 +34,7 @@ const hymnRoutes = require('./routes/hymns');
 const ebmRoutes = require('./routes/ebm');
 const groceryRoutes = require('./routes/grocery');
 const greatestjoyRoutes = require('./routes/greatestjoy');
+const greatestjoyOAuthRoutes = require('./routes/greatestjoy-oauth');
 const familycirclesRoutes = require('./routes/familycircles');
 const announcementRoutes = require('./routes/announcements');
 const emailClientRoutes = require('./email-client/enhancedEmailRoutes');
@@ -57,6 +59,16 @@ console.log('✅ Seed catalog routes loaded successfully');
 console.log('🔄 Loading dropshipment tracking routes...');
 const dropshipmentRoutes = require('./routes/dropshipments');
 console.log('✅ Dropshipment tracking routes loaded successfully');
+
+console.log('🔄 Loading Global Seed Partnership routes...');
+const SeedPartner = require('./models/SeedPartner'); // Register model
+const seedPartnerRoutes = require('./routes/seedPartners');
+console.log('✅ Global Seed Partnership routes loaded successfully');
+
+console.log('🔄 Loading US Seed Partnership routes...');
+const USSeedPartner = require('./models/USSeedPartner'); // Register model  
+const usSeedPartnerRoutes = require('./routes/usSeedPartners');
+console.log('✅ US Seed Partnership routes loaded successfully');
 
 const app = express();
 
@@ -1057,6 +1069,8 @@ app.use('/shipments', ensureAuthenticated, ensureApproved, shipmentRoutes); // N
 app.use('/organic-vendors', ensureAuthenticated, ensureApproved, organicVendorRoutes);
 app.use('/vendors', ensureAuthenticated, ensureApproved, vendorRoutes);
 app.use('/enhanced-vendors', ensureAuthenticated, ensureApproved, enhancedVendorRoutes);
+app.use('/seed-partners', ensureAuthenticated, ensureApproved, seedPartnerRoutes); // NEW: Global Seed Partnership
+app.use('/us-seed-partners', ensureAuthenticated, ensureApproved, usSeedPartnerRoutes); // NEW: US Seed Partnership
 app.use('/tasks', ensureAuthenticated, ensureApproved, taskRoutes);
 app.use('/receiving', ensureAuthenticated, ensureApproved, receivingRoutes);
 app.use('/email-templates', ensureAuthenticated, ensureApproved, emailTemplateRoutes);
@@ -1329,6 +1343,7 @@ app.get('/test-vendor-mapping', async (req, res) => {
 });
 
 app.use('/email-client', ensureAuthenticated, ensureApproved, emailClientRoutes);
+app.use('/household', ensureAuthenticated, ensureApproved, householdRoutes);
 app.use('/food', ensureAuthenticated, ensureApproved, foodRoutes);
 app.use('/story', ensureAuthenticated, ensureApproved, storyRoutes);
 app.use('/medicine', ensureAuthenticated, ensureApproved, medicineRoutes);
@@ -1336,6 +1351,7 @@ app.use('/bulletin', bulletinRoutes); // Temporarily remove auth for testing
 app.use('/hymns', hymnRoutes); // Remove authentication requirement for hymn search
 app.use('/ebm', ensureAuthenticated, ensureApproved, ebmRoutes);
 app.use('/grocery', ensureAuthenticated, ensureApproved, groceryRoutes);
+app.use('/greatestjoy', ensureAuthenticated, ensureApproved, greatestjoyOAuthRoutes); // OAuth routes (must come before general routes)
 app.use('/greatestjoy', ensureAuthenticated, ensureApproved, greatestjoyRoutes);
 app.use('/greatestjoy/familycircles', ensureAuthenticated, ensureApproved, familycirclesRoutes);
 app.use('/api/report-configs', reportConfigRoutes); // NEW: Saved report configurations

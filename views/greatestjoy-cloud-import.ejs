@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import from Cloud Service - Greatest Joy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <%- include('partials/user-dropdown-styles') %>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .import-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .service-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .service-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .service-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .service-card.connected {
+            border-color: #28a745;
+            background: #f0fff4;
+        }
+
+        .service-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+
+        .google-photos { color: #4285f4; }
+        .google-drive { color: #34a853; }
+        .icloud { color: #000000; }
+        .onedrive { color: #0078d4; }
+        .dropbox { color: #0061ff; }
+
+        .service-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .service-status {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .connected-badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            margin-top: 10px;
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .photo-browser {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .photo-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+
+        .photo-item.selected {
+            border-color: #667eea;
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .photo-checkbox {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+        }
+
+        .import-actions {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            padding: 20px;
+            border-top: 2px solid #e0e0e0;
+            margin: 0 -40px -40px -40px;
+            border-radius: 0 0 12px 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <a href="/greatestjoy/dashboard" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Back to Gallery
+            </a>
+        </div>
+        <% if (typeof user !== 'undefined' && user) { %>
+            <div>
+                <%- include('partials/user-dropdown', { user: user }) %>
+            </div>
+        <% } %>
+    </div>
+
+    <div class="import-container">
+        <h2 class="page-title">
+            <i class="fas fa-cloud-download-alt"></i> Import Photos from Cloud Service
+        </h2>
+
+        <div class="info-section">
+            <h5><i class="fas fa-info-circle"></i> How it works</h5>
+            <ol class="mb-0">
+                <li>Connect to your cloud photo service (Google Photos, Google Drive, etc.)</li>
+                <li>Browse and select the photos you want to import</li>
+                <li>Import them directly - no need to download and re-upload!</li>
+                <li>After import, click any photo to add stories and voice recordings</li>
+            </ol>
+        </div>
+
+        <!-- Service Selection -->
+        <h4 class="mb-3">Select a Cloud Service</h4>
+        <div class="service-cards">
+            <!-- Google Photos -->
+            <div class="service-card" onclick="connectService('google-photos')">
+                <div class="service-icon google-photos">
+                    <i class="fab fa-google"></i>
+                </div>
+                <div class="service-name">Google Photos</div>
+                <div class="service-status">
+                    <% if (services && services.googlePhotos) { %>
+                        <span class="connected-badge">✓ Connected</span>
+                        <small class="d-block mt-2"><%= services.googlePhotos.email %></small>
+                    <% } else { %>
+                        Click to connect
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Google Drive -->
+            <div class="service-card" onclick="connectService('google-drive')">
+                <div class="service-icon google-drive">
+                    <i class="fab fa-google-drive"></i>
+                </div>
+                <div class="service-name">Google Drive</div>
+                <div class="service-status">
+                    <% if (services && services.googleDrive) { %>
+                        <span class="connected-badge">✓ Connected</span>
+                        <small class="d-block mt-2"><%= services.googleDrive.email %></small>
+                    <% } else { %>
+                        Click to connect
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- iCloud Photos -->
+            <div class="service-card" onclick="connectService('icloud')">
+                <div class="service-icon icloud">
+                    <i class="fab fa-apple"></i>
+                </div>
+                <div class="service-name">iCloud Photos</div>
+                <div class="service-status">
+                    <% if (services && services.icloud) { %>
+                        <span class="connected-badge">✓ Connected</span>
+                    <% } else { %>
+                        Coming Soon
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- OneDrive -->
+            <div class="service-card" onclick="connectService('onedrive')">
+                <div class="service-icon onedrive">
+                    <i class="fab fa-microsoft"></i>
+                </div>
+                <div class="service-name">OneDrive</div>
+                <div class="service-status">
+                    <% if (services && services.onedrive) { %>
+                        <span class="connected-badge">✓ Connected</span>
+                    <% } else { %>
+                        Coming Soon
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Dropbox -->
+            <div class="service-card" onclick="connectService('dropbox')">
+                <div class="service-icon dropbox">
+                    <i class="fab fa-dropbox"></i>
+                </div>
+                <div class="service-name">Dropbox</div>
+                <div class="service-status">
+                    <% if (services && services.dropbox) { %>
+                        <span class="connected-badge">✓ Connected</span>
+                    <% } else { %>
+                        Coming Soon
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photo Browser (shown after connection) -->
+        <div id="photoBrowser" class="photo-browser">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4><i class="fas fa-images"></i> Select Photos to Import</h4>
+                <div>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="selectAll()">
+                        <i class="fas fa-check-double"></i> Select All
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="deselectAll()">
+                        <i class="fas fa-times"></i> Deselect All
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Filter by Album/Folder</label>
+                <select class="form-select" id="albumFilter" onchange="filterPhotos()">
+                    <option value="">All Photos</option>
+                </select>
+            </div>
+
+            <div id="photoGrid" class="photo-grid">
+                <!-- Photos will be loaded here -->
+            </div>
+
+            <!-- Sharing Options -->
+            <div class="card border-primary mb-4" style="display: none;" id="sharingOptions">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-share-alt"></i> Sharing & Privacy Options
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Who can see these photos?</strong></label>
+                        <select class="form-select" id="visibilitySelect" onchange="updateSharingInfo()">
+                            <option value="private">🔒 Private (Only me)</option>
+                            <option value="circle" selected>👨‍👩‍👧 Family Circles (Selected circles below)</option>
+                            <option value="family">👪 All Family (Anyone in my Family Circles)</option>
+                            <option value="public">🌍 Public (Anyone with the link)</option>
+                        </select>
+                    </div>
+
+                    <div id="circleSelector" class="mb-3">
+                        <label class="form-label"><strong>Select Family Circles to share with:</strong></label>
+                        <% if (circles && circles.length > 0) { %>
+                            <% circles.forEach(circle => { %>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" 
+                                           name="circles" value="<%= circle._id %>" 
+                                           id="circle_<%= circle._id %>" checked>
+                                    <label class="form-check-label" for="circle_<%= circle._id %>">
+                                        <%= circle.name %>
+                                        <% if (circle.description) { %>
+                                            <small class="text-muted">- <%= circle.description %></small>
+                                        <% } %>
+                                    </label>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> You're not part of any Family Circles yet. 
+                                <a href="/familycircles" target="_blank">Create or join one</a> to share photos with family!
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <div class="alert alert-success" id="sharingInfo">
+                        <i class="fas fa-shield-alt"></i> <strong>Secure Sharing:</strong> 
+                        A shared album will be created in your Google Photos that only Family Circle members can access. 
+                        No photos are downloaded to our servers - they remain safely in your Google Photos.
+                    </div>
+                </div>
+            </div>
+
+            <div class="import-actions">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <span id="selectionCount" class="text-muted">0 photos selected</span>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button class="btn btn-secondary" onclick="cancelImport()">
+                            Cancel
+                        </button>
+                        <button class="btn btn-primary" onclick="importSelected()">
+                            <i class="fas fa-download me-2"></i>Import Selected Photos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Upload Option -->
+        <div class="text-center mt-4 pt-4 border-top">
+            <p class="text-muted">Or upload files directly from your computer:</p>
+            <a href="/greatestjoy/bulk-upload" class="btn btn-outline-secondary">
+                <i class="fas fa-upload me-2"></i>Upload from Computer
+            </a>
+        </div>
+    </div>
+
+    <script>
+        let selectedPhotos = [];
+        let allPhotos = [];
+        let currentService = null;
+
+        async function connectService(service) {
+            if (service === 'icloud' || service === 'onedrive' || service === 'dropbox') {
+                alert('This service is coming soon! For now, please use Google Photos or Google Drive.');
+                return;
+            }
+
+            try {
+                // Redirect to OAuth flow
+                window.location.href = `/greatestjoy/oauth/connect/${service}`;
+            } catch (error) {
+                alert('Error connecting to service: ' + error.message);
+            }
+        }
+
+        async function loadPhotos(service) {
+            currentService = service;
+            
+            try {
+                const response = await fetch(`/greatestjoy/oauth/${service}/photos`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    allPhotos = data.photos;
+                    displayPhotos(allPhotos);
+                    loadAlbums(data.albums);
+                    document.getElementById('photoBrowser').style.display = 'block';
+                    document.getElementById('sharingOptions').style.display = 'block';
+                    updateSharingInfo();
+                } else {
+                    alert('Error loading photos: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function displayPhotos(photos) {
+            const grid = document.getElementById('photoGrid');
+            grid.innerHTML = '';
+            
+            photos.forEach(photo => {
+                const div = document.createElement('div');
+                div.className = 'photo-item';
+                div.dataset.photoId = photo.id;
+                div.innerHTML = `
+                    <img src="${photo.thumbnailUrl}" alt="${photo.title || 'Photo'}">
+                    <input type="checkbox" class="photo-checkbox" 
+                           onchange="togglePhoto('${photo.id}')">
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        function loadAlbums(albums) {
+            const select = document.getElementById('albumFilter');
+            select.innerHTML = '<option value="">All Photos</option>';
+            
+            albums.forEach(album => {
+                const option = document.createElement('option');
+                option.value = album.id;
+                option.textContent = `${album.title} (${album.count} photos)`;
+                select.appendChild(option);
+            });
+        }
+
+        function togglePhoto(photoId) {
+            const index = selectedPhotos.indexOf(photoId);
+            const photoDiv = document.querySelector(`[data-photo-id="${photoId}"]`);
+            
+            if (index > -1) {
+                selectedPhotos.splice(index, 1);
+                photoDiv.classList.remove('selected');
+            } else {
+                selectedPhotos.push(photoId);
+                photoDiv.classList.add('selected');
+            }
+            
+            updateSelectionCount();
+        }
+
+        function selectAll() {
+            document.querySelectorAll('.photo-checkbox').forEach(cb => {
+                cb.checked = true;
+                const photoId = cb.parentElement.dataset.photoId;
+                if (!selectedPhotos.includes(photoId)) {
+                    selectedPhotos.push(photoId);
+                }
+                cb.parentElement.classList.add('selected');
+            });
+            updateSelectionCount();
+        }
+
+        function deselectAll() {
+            document.querySelectorAll('.photo-checkbox').forEach(cb => {
+                cb.checked = false;
+                cb.parentElement.classList.remove('selected');
+            });
+            selectedPhotos = [];
+            updateSelectionCount();
+        }
+
+        function updateSelectionCount() {
+            document.getElementById('selectionCount').textContent = 
+                `${selectedPhotos.length} photo${selectedPhotos.length !== 1 ? 's' : ''} selected`;
+        }
+
+        async function filterPhotos() {
+            const albumId = document.getElementById('albumFilter').value;
+            
+            if (!albumId) {
+                displayPhotos(allPhotos);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/greatestjoy/oauth/${currentService}/photos?album=${albumId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayPhotos(data.photos);
+                }
+            } catch (error) {
+                alert('Error filtering photos: ' + error.message);
+            }
+        }
+
+        async function importSelected() {
+            if (selectedPhotos.length === 0) {
+                alert('Please select at least one photo to import');
+                return;
+            }
+            
+            // Get selected circles
+            const visibility = document.getElementById('visibilitySelect').value;
+            const selectedCircles = [];
+            
+            if (visibility === 'circle') {
+                document.querySelectorAll('input[name="circles"]:checked').forEach(cb => {
+                    selectedCircles.push(cb.value);
+                });
+                
+                if (selectedCircles.length === 0) {
+                    alert('Please select at least one Family Circle to share with, or change visibility to Private.');
+                    return;
+                }
+            }
+            
+            const sharingMsg = visibility === 'private' 
+                ? 'Photos will be private (only you can view them)' 
+                : visibility === 'circle'
+                    ? `Photos will be shared with ${selectedCircles.length} Family Circle(s) via Google Photos shared album`
+                    : visibility === 'family'
+                        ? 'Photos will be shared with all your Family Circles'
+                        : 'Photos will be public';
+            
+            const confirmed = confirm(
+                `Import ${selectedPhotos.length} photo(s)?\n\n${sharingMsg}\n\nThey will be added to your Greatest Joy gallery.`
+            );
+            if (!confirmed) return;
+            
+            const importBtn = document.querySelector('button[onclick="importSelected()"]');
+            const originalText = importBtn.innerHTML;
+            importBtn.disabled = true;
+            importBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Importing...';
+            
+            try {
+                // Get album info if filtering by album
+                const albumFilter = document.getElementById('albumFilter');
+                const albumId = albumFilter.value;
+                const albumTitle = albumId ? albumFilter.options[albumFilter.selectedIndex].text.split(' (')[0] : null;
+                
+                const response = await fetch('/greatestjoy/oauth/import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        service: currentService,
+                        photoIds: selectedPhotos,
+                        circles: selectedCircles,
+                        visibility: visibility,
+                        albumTitle: albumTitle  // Include album title if importing from specific album
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    let message = `Successfully imported ${data.imported} photo(s)!`;
+                    if (data.sharedAlbumUrl) {
+                        message += `\n\nShared album created in your Google Photos:\n${data.sharedAlbumUrl}`;
+                    }
+                    alert(message);
+                    window.location.href = '/greatestjoy/dashboard';
+                } else {
+                    alert('Error importing photos: ' + data.error);
+                    importBtn.disabled = false;
+                    importBtn.innerHTML = originalText;
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+                importBtn.disabled = false;
+                importBtn.innerHTML = originalText;
+            }
+        }
+
+        function cancelImport() {
+            if (confirm('Cancel import and return to gallery?')) {
+                window.location.href = '/greatestjoy/dashboard';
+            }
+        }
+        
+        function updateSharingInfo() {
+            const visibility = document.getElementById('visibilitySelect').value;
+            const circleSelector = document.getElementById('circleSelector');
+            const sharingInfo = document.getElementById('sharingInfo');
+            
+            // Show/hide circle selector
+            if (visibility === 'circle') {
+                circleSelector.style.display = 'block';
+                sharingInfo.innerHTML = `
+                    <i class="fas fa-shield-alt"></i> <strong>Secure Family Sharing:</strong> 
+                    A shared album will be created in your Google Photos. Only members of the selected Family Circles 
+                    can view these photos. Photos remain in your Google Photos - nothing is downloaded to our servers.
+                `;
+                sharingInfo.className = 'alert alert-success';
+            } else if (visibility === 'private') {
+                circleSelector.style.display = 'none';
+                sharingInfo.innerHTML = `
+                    <i class="fas fa-lock"></i> <strong>Private Mode:</strong> 
+                    These photos will only be visible to you. They will be linked directly from your Google Photos.
+                `;
+                sharingInfo.className = 'alert alert-info';
+            } else if (visibility === 'family') {
+                circleSelector.style.display = 'none';
+                sharingInfo.innerHTML = `
+                    <i class="fas fa-users"></i> <strong>All Family:</strong> 
+                    Shared albums will be created for all your Family Circles. All family members can view these photos.
+                `;
+                sharingInfo.className = 'alert alert-primary';
+            } else if (visibility === 'public') {
+                circleSelector.style.display = 'none';
+                sharingInfo.innerHTML = `
+                    <i class="fas fa-globe"></i> <strong>Public Access:</strong> 
+                    Anyone with access to Greatest Joy can view these photos. Use for public memories or events.
+                `;
+                sharingInfo.className = 'alert alert-warning';
+            }
+        }
+
+        // Check if we just connected a service
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const connectedService = urlParams.get('connected');
+            
+            if (connectedService) {
+                loadPhotos(connectedService);
+            }
+        };
+    </script>
+</body>
+</html>

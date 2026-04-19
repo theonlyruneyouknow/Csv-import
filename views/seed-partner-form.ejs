@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= isEdit ? 'Edit Partner' : 'New Partner' %> - Global Seed Partnership</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .form-header {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header h1 {
+            margin: 0;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            color: #333;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .required {
+            color: #dc3545;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-cancel:hover {
+            background: #5a6268;
+            color: white;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+        }
+
+        select.form-select,
+        input.form-control,
+        textarea.form-control {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 10px;
+        }
+
+        select.form-select:focus,
+        input.form-control:focus,
+        textarea.form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .seed-types-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .seed-type-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-header">
+            <h1>
+                <i class="fas fa-<%= isEdit ? 'edit' : 'plus' %>"></i>
+                <%= isEdit ? 'Edit Partner: ' + partner.companyName : 'Add New Partner Company' %>
+            </h1>
+        </div>
+
+        <form action="<%= isEdit ? `/seed-partners/${partner._id}/edit` : '/seed-partners/new' %>" method="POST">
+            
+            <!-- Top Action Buttons -->
+            <div class="top-actions">
+                <a href="/seed-partners" class="btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save"></i>
+                    <%= isEdit ? 'Update Partner' : 'Create Partner' %>
+                </button>
+            </div>
+
+            <!-- Basic Information -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Basic Information
+                </div>
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label">Company Name <span class="required">*</span></label>
+                        <input type="text" class="form-control" name="companyName" 
+                               value="<%= isEdit ? partner.companyName : '' %>" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Partner Code <span class="required">*</span></label>
+                        <input type="text" class="form-control" name="partnerCode" 
+                               value="<%= isEdit ? partner.partnerCode : '' %>" required
+                               placeholder="e.g., DSI-NL-001">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Partnership Type <span class="required">*</span></label>
+                        <select class="form-select" name="partnershipType" required>
+                            <option value="">Select Type</option>
+                            <option value="International Supplier" <%= isEdit && partner.partnershipType === 'International Supplier' ? 'selected' : '' %>>International Supplier</option>
+                            <option value="Domestic Supplier" <%= isEdit && partner.partnershipType === 'Domestic Supplier' ? 'selected' : '' %>>Domestic Supplier</option>
+                            <option value="International Client" <%= isEdit && partner.partnershipType === 'International Client' ? 'selected' : '' %>>International Client</option>
+                            <option value="Domestic Client" <%= isEdit && partner.partnershipType === 'Domestic Client' ? 'selected' : '' %>>Domestic Client</option>
+                            <option value="Both Supplier & Client" <%= isEdit && partner.partnershipType === 'Both Supplier & Client' ? 'selected' : '' %>>Both Supplier & Client</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Status <span class="required">*</span></label>
+                        <select class="form-select" name="status" required>
+                            <option value="Prospective" <%= isEdit && partner.status === 'Prospective' ? 'selected' : '' %>>Prospective</option>
+                            <option value="Active" <%= isEdit && partner.status === 'Active' ? 'selected' : '' %>>Active</option>
+                            <option value="On Hold" <%= isEdit && partner.status === 'On Hold' ? 'selected' : '' %>>On Hold</option>
+                            <option value="Inactive" <%= isEdit && partner.status === 'Inactive' ? 'selected' : '' %>>Inactive</option>
+                            <option value="Terminated" <%= isEdit && partner.status === 'Terminated' ? 'selected' : '' %>>Terminated</option>
+                            <option value="Non-Alternative" <%= isEdit && partner.status === 'Non-Alternative' ? 'selected' : '' %>>Non-Alternative</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Country <span class="required">*</span></label>
+                        <input type="text" class="form-control" name="country" 
+                               value="<%= isEdit ? partner.country : '' %>" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Region <span class="required">*</span></label>
+                        <select class="form-select" name="region" required>
+                            <option value="">Select Region</option>
+                            <option value="North America" <%= isEdit && partner.region === 'North America' ? 'selected' : '' %>>North America</option>
+                            <option value="South America" <%= isEdit && partner.region === 'South America' ? 'selected' : '' %>>South America</option>
+                            <option value="Europe" <%= isEdit && partner.region === 'Europe' ? 'selected' : '' %>>Europe</option>
+                            <option value="Asia" <%= isEdit && partner.region === 'Asia' ? 'selected' : '' %>>Asia</option>
+                            <option value="Africa" <%= isEdit && partner.region === 'Africa' ? 'selected' : '' %>>Africa</option>
+                            <option value="Australia/Oceania" <%= isEdit && partner.region === 'Australia/Oceania' ? 'selected' : '' %>>Australia/Oceania</option>
+                            <option value="Middle East" <%= isEdit && partner.region === 'Middle East' ? 'selected' : '' %>>Middle East</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Priority (1-5, where 1 is highest)</label>
+                    <input type="number" class="form-control" name="priority" min="1" max="5"
+                           value="<%= isEdit ? partner.priority : 3 %>">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Personal Notes</label>
+                    <textarea class="form-control" name="personalNotes" rows="3"
+                              placeholder="Add your personal notes about this company..."><%= isEdit && partner.personalNotes ? partner.personalNotes : '' %></textarea>
+                    <small class="form-text text-muted">Private notes for your reference about this partner</small>
+                </div>
+            </div>
+
+            <!-- Seed Specializations -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-seedling"></i>
+                    Seed Specializations
+                </div>
+                <div class="seed-types-checkboxes">
+                    <% 
+                    const seedTypeOptions = [
+                        'Vegetable Seeds', 'Flower Seeds', 'Herb Seeds', 'Grain Seeds',
+                        'Cover Crop Seeds', 'Organic Seeds', 'Hybrid Seeds', 'Heirloom Seeds',
+                        'GMO Seeds', 'Native Seeds', 'Wildflower Seeds', 'Lawn & Turf Seeds', 'Other'
+                    ];
+                    seedTypeOptions.forEach(seedType => { 
+                    %>
+                        <div class="seed-type-option">
+                            <input type="checkbox" name="seedTypes" value="<%= seedType %>" id="seed-<%= seedType.replace(/\s/g, '') %>"
+                                   <%= isEdit && partner.seedTypes && partner.seedTypes.includes(seedType) ? 'checked' : '' %>>
+                            <label for="seed-<%= seedType.replace(/\s/g, '') %>"><%= seedType %></label>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-address-book"></i>
+                    Primary Contact
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" name="primaryContactName" 
+                               value="<%= isEdit && partner.primaryContact ? partner.primaryContact.name : '' %>">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-control" name="primaryContactTitle" 
+                               value="<%= isEdit && partner.primaryContact ? partner.primaryContact.title : '' %>">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="primaryContactEmail" 
+                               value="<%= isEdit && partner.primaryContact ? partner.primaryContact.email : '' %>">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Phone</label>
+                        <input type="tel" class="form-control" name="primaryContactPhone" 
+                               value="<%= isEdit && partner.primaryContact ? partner.primaryContact.phone : '' %>">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Mobile</label>
+                        <input type="tel" class="form-control" name="primaryContactMobile" 
+                               value="<%= isEdit && partner.primaryContact ? partner.primaryContact.mobile : '' %>">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">WhatsApp</label>
+                        <input type="tel" class="form-control" name="primaryContactWhatsapp" 
+                               value="<%= isEdit && partner.primaryContact ? partner.primaryContact.whatsapp : '' %>">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Preferred Language</label>
+                    <input type="text" class="form-control" name="primaryContactLanguage" 
+                           value="<%= isEdit && partner.primaryContact ? partner.primaryContact.preferredLanguage : 'English' %>">
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Company Address
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Street Address</label>
+                    <input type="text" class="form-control" name="addressStreet" 
+                           value="<%= isEdit && partner.address ? partner.address.street : '' %>">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Street Address 2</label>
+                    <input type="text" class="form-control" name="addressStreet2" 
+                           value="<%= isEdit && partner.address ? partner.address.street2 : '' %>">
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">City</label>
+                        <input type="text" class="form-control" name="addressCity" 
+                               value="<%= isEdit && partner.address ? partner.address.city : '' %>">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">State/Province</label>
+                        <input type="text" class="form-control" name="addressState" 
+                               value="<%= isEdit && partner.address ? partner.address.state : '' %>">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Postal Code</label>
+                        <input type="text" class="form-control" name="addressPostalCode" 
+                               value="<%= isEdit && partner.address ? partner.address.postalCode : '' %>">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Details -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-building"></i>
+                    Business Details
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Website</label>
+                        <input type="url" class="form-control" name="website" 
+                               value="<%= isEdit && partner.businessDetails ? partner.businessDetails.website : '' %>">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Year Established</label>
+                        <input type="number" class="form-control" name="yearEstablished" min="1800" max="2025"
+                               value="<%= isEdit && partner.businessDetails ? partner.businessDetails.yearEstablished : '' %>">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Number of Employees</label>
+                    <input type="text" class="form-control" name="numberOfEmployees" 
+                           value="<%= isEdit && partner.businessDetails ? partner.businessDetails.numberOfEmployees : '' %>">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Company Profile</label>
+                    <textarea class="form-control" name="companyProfile" rows="4"><%= isEdit && partner.businessDetails ? partner.businessDetails.companyProfile : '' %></textarea>
+                </div>
+            </div>
+
+            <!-- Financial Terms -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-dollar-sign"></i>
+                    Financial Terms
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Currency</label>
+                        <input type="text" class="form-control" name="currency" 
+                               value="<%= isEdit && partner.financialTerms ? partner.financialTerms.currency : 'USD' %>">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Payment Terms</label>
+                        <select class="form-select" name="paymentTerms">
+                            <option value="">Select Terms</option>
+                            <option value="NET 30" <%= isEdit && partner.financialTerms && partner.financialTerms.paymentTerms === 'NET 30' ? 'selected' : '' %>>NET 30</option>
+                            <option value="NET 60" <%= isEdit && partner.financialTerms && partner.financialTerms.paymentTerms === 'NET 60' ? 'selected' : '' %>>NET 60</option>
+                            <option value="NET 90" <%= isEdit && partner.financialTerms && partner.financialTerms.paymentTerms === 'NET 90' ? 'selected' : '' %>>NET 90</option>
+                            <option value="Prepayment" <%= isEdit && partner.financialTerms && partner.financialTerms.paymentTerms === 'Prepayment' ? 'selected' : '' %>>Prepayment</option>
+                            <option value="COD" <%= isEdit && partner.financialTerms && partner.financialTerms.paymentTerms === 'COD' ? 'selected' : '' %>>COD</option>
+                            <option value="Letter of Credit" <%= isEdit && partner.financialTerms && partner.financialTerms.paymentTerms === 'Letter of Credit' ? 'selected' : '' %>>Letter of Credit</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Payment Method</label>
+                        <select class="form-select" name="preferredPaymentMethod">
+                            <option value="">Select Method</option>
+                            <option value="Wire Transfer" <%= isEdit && partner.financialTerms && partner.financialTerms.preferredPaymentMethod === 'Wire Transfer' ? 'selected' : '' %>>Wire Transfer</option>
+                            <option value="ACH" <%= isEdit && partner.financialTerms && partner.financialTerms.preferredPaymentMethod === 'ACH' ? 'selected' : '' %>>ACH</option>
+                            <option value="Check" <%= isEdit && partner.financialTerms && partner.financialTerms.preferredPaymentMethod === 'Check' ? 'selected' : '' %>>Check</option>
+                            <option value="Credit Card" <%= isEdit && partner.financialTerms && partner.financialTerms.preferredPaymentMethod === 'Credit Card' ? 'selected' : '' %>>Credit Card</option>
+                            <option value="Letter of Credit" <%= isEdit && partner.financialTerms && partner.financialTerms.preferredPaymentMethod === 'Letter of Credit' ? 'selected' : '' %>>Letter of Credit</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trade Details -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-shipping-fast"></i>
+                    Trade Details
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Shipping Method</label>
+                        <select class="form-select" name="preferredShippingMethod">
+                            <option value="">Select Method</option>
+                            <option value="Air Freight" <%= isEdit && partner.tradeDetails && partner.tradeDetails.preferredShippingMethod === 'Air Freight' ? 'selected' : '' %>>Air Freight</option>
+                            <option value="Sea Freight" <%= isEdit && partner.tradeDetails && partner.tradeDetails.preferredShippingMethod === 'Sea Freight' ? 'selected' : '' %>>Sea Freight</option>
+                            <option value="Ground" <%= isEdit && partner.tradeDetails && partner.tradeDetails.preferredShippingMethod === 'Ground' ? 'selected' : '' %>>Ground</option>
+                            <option value="Express Courier" <%= isEdit && partner.tradeDetails && partner.tradeDetails.preferredShippingMethod === 'Express Courier' ? 'selected' : '' %>>Express Courier</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Incoterms</label>
+                        <select class="form-select" name="incoterms">
+                            <option value="">Select Incoterms</option>
+                            <option value="FOB" <%= isEdit && partner.tradeDetails && partner.tradeDetails.incoterms === 'FOB' ? 'selected' : '' %>>FOB</option>
+                            <option value="CIF" <%= isEdit && partner.tradeDetails && partner.tradeDetails.incoterms === 'CIF' ? 'selected' : '' %>>CIF</option>
+                            <option value="DDP" <%= isEdit && partner.tradeDetails && partner.tradeDetails.incoterms === 'DDP' ? 'selected' : '' %>>DDP</option>
+                            <option value="DAP" <%= isEdit && partner.tradeDetails && partner.tradeDetails.incoterms === 'DAP' ? 'selected' : '' %>>DAP</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Lead Time (days)</label>
+                        <input type="number" class="form-control" name="averageLeadTime" 
+                               value="<%= isEdit && partner.tradeDetails ? partner.tradeDetails.averageLeadTime : '' %>">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Minimum Order Quantity</label>
+                    <input type="text" class="form-control" name="minimumOrderQuantity" 
+                           value="<%= isEdit && partner.tradeDetails ? partner.tradeDetails.minimumOrderQuantity : '' %>">
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-sticky-note"></i>
+                    Notes & Tags
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-control" name="notes" rows="4"><%= isEdit ? partner.notes : '' %></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tags (comma-separated)</label>
+                    <input type="text" class="form-control" name="tags" 
+                           value="<%= isEdit && partner.tags ? partner.tags.join(', ') : '' %>"
+                           placeholder="e.g., organic, high-priority, european-supplier">
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="/seed-partners" class="btn-cancel">Cancel</a>
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save"></i>
+                    <%= isEdit ? 'Update Partner' : 'Create Partner' %>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Seed Partnership Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 28px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pod-button {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .pod-button:hover {
+            background: linear-gradient(135deg, #218838, #1ea583);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            color: white;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Statistics Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card.total {
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-card.international {
+            border-left: 4px solid #3498db;
+        }
+
+        .stat-card.domestic {
+            border-left: 4px solid #2ecc71;
+        }
+
+        .stat-card.active {
+            border-left: 4px solid #27ae60;
+        }
+
+        .stat-card.prospective {
+            border-left: 4px solid #f39c12;
+        }
+
+        .stat-card.value {
+            border-left: 4px solid #9b59b6;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-icon {
+            float: right;
+            font-size: 30px;
+            opacity: 0.3;
+        }
+
+        /* Filters Section */
+        .filters-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 13px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        /* Partners Table */
+        .partners-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .table-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 22px;
+        }
+
+        .partners-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .partners-table thead {
+            background: #f8f9fa;
+        }
+
+        .partners-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #555;
+            border-bottom: 2px solid #dee2e6;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .partners-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+
+        .partners-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .partner-name {
+            font-weight: 600;
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .partner-name:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.prospective {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.on-hold {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge.inactive {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .badge.non-alternative {
+            background: #ffeaa7;
+            color: #d63031;
+        }
+
+        .badge.international {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .badge.domestic {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .priority-star {
+            color: #f39c12;
+        }
+
+        .seed-types {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .seed-type-tag {
+            background: #e9ecef;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            color: #495057;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm-custom {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-view {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #5568d3;
+            color: white;
+        }
+
+        .btn-edit {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #138496;
+            color: white;
+        }
+
+        /* Expandable Row Styles */
+        .expand-btn {
+            color: #667eea;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            font-size: 14px;
+        }
+
+        .expand-btn:hover {
+            color: #764ba2;
+        }
+
+        .expand-btn.expanded {
+            transform: rotate(90deg);
+        }
+
+        .expandable-row {
+            display: none;
+            background: #f8f9fa;
+        }
+
+        .expandable-row.show {
+            display: table-row;
+        }
+
+        .expanded-content {
+            padding: 20px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .detail-section {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .detail-section h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-item {
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+            display: block;
+            margin-bottom: 3px;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .detail-value {
+            color: #333;
+        }
+
+        .detail-value.editable {
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            display: inline-block;
+            min-width: 100px;
+        }
+
+        .detail-value.editable:hover {
+            background: #e9ecef;
+        }
+
+        .detail-value.editing {
+            background: white;
+            border: 2px solid #667eea;
+        }
+
+        .edit-input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 2px solid #667eea;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .inline-edit-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .btn-save {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #218838;
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #5a6268;
+        }
+
+        .personal-notes-display {
+            background: #fff9e6;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+            margin-top: 15px;
+            font-size: 13px;
+            white-space: pre-wrap;
+        }
+
+        .no-partners {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .no-partners i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        /* Region Distribution */
+        .region-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .region-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .region-count {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .region-name {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .partners-table {
+                font-size: 12px;
+            }
+
+            .partners-table th,
+            .partners-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <i class="fas fa-globe-americas"></i>
+                Global Seed Partnership
+            </h1>
+            <div class="header-actions">
+                <a href="/purchase-orders" class="pod-button">
+                    <span>←</span>
+                    <span>P.O.D.</span>
+                </a>
+                <a href="/us-seed-partners" class="pod-button" style="background: linear-gradient(135deg, #1e3c72, #2a5298);">
+                    <i class="fas fa-flag-usa"></i>
+                    <span>US Partners</span>
+                </a>
+                <a href="/seed-partners/catalog" class="pod-button" style="background: linear-gradient(135deg, #28a745, #558b2f);">
+                    <i class="fas fa-leaf"></i>
+                    <span>Seed Catalog</span>
+                </a>
+                <a href="/seed-partners/new" class="btn btn-primary-custom">
+                    <i class="fas fa-plus"></i> Add New Partner
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card total">
+                <i class="fas fa-handshake stat-icon"></i>
+                <div class="stat-number"><%= stats.total %></div>
+                <div class="stat-label">Total Partners</div>
+            </div>
+            <div class="stat-card international">
+                <i class="fas fa-globe stat-icon"></i>
+                <div class="stat-number"><%= stats.international %></div>
+                <div class="stat-label">International</div>
+            </div>
+            <div class="stat-card domestic">
+                <i class="fas fa-home stat-icon"></i>
+                <div class="stat-number"><%= stats.domestic %></div>
+                <div class="stat-label">Domestic</div>
+            </div>
+            <div class="stat-card active">
+                <i class="fas fa-check-circle stat-icon"></i>
+                <div class="stat-number"><%= stats.active %></div>
+                <div class="stat-label">Active</div>
+            </div>
+            <div class="stat-card prospective">
+                <i class="fas fa-clock stat-icon"></i>
+                <div class="stat-number"><%= stats.prospective %></div>
+                <div class="stat-label">Prospective</div>
+            </div>
+            <div class="stat-card value">
+                <i class="fas fa-dollar-sign stat-icon"></i>
+                <div class="stat-number">$<%= (stats.totalOrderValue / 1000).toFixed(0) %>K</div>
+                <div class="stat-label">Total Order Value</div>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters-section">
+            <div class="filters-header">
+                <h3 style="margin: 0;"><i class="fas fa-filter"></i> Filters</h3>
+                <a href="/seed-partners" class="btn btn-sm btn-secondary">Clear All</a>
+            </div>
+            <form method="GET" action="/seed-partners">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label>Status</label>
+                        <select name="status" class="form-select" onchange="this.form.submit()">
+                            <option value="all" <%= currentFilters.status === 'all' ? 'selected' : '' %>>All Statuses</option>
+                            <% uniqueStatuses.forEach(status => { %>
+                                <option value="<%= status %>" <%= currentFilters.status === status ? 'selected' : '' %>><%= status %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Partnership Type</label>
+                        <select name="type" class="form-select" onchange="this.form.submit()">
+                            <option value="all" <%= currentFilters.type === 'all' ? 'selected' : '' %>>All Types</option>
+                            <% uniqueTypes.forEach(type => { %>
+                                <option value="<%= type %>" <%= currentFilters.type === type ? 'selected' : '' %>><%= type %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Region</label>
+                        <select name="region" class="form-select" onchange="this.form.submit()">
+                            <option value="all" <%= currentFilters.region === 'all' ? 'selected' : '' %>>All Regions</option>
+                            <% uniqueRegions.forEach(region => { %>
+                                <option value="<%= region %>" <%= currentFilters.region === region ? 'selected' : '' %>><%= region %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Country</label>
+                        <select name="country" class="form-select" onchange="this.form.submit()">
+                            <option value="all" <%= currentFilters.country === 'all' ? 'selected' : '' %>>All Countries</option>
+                            <% uniqueCountries.forEach(country => { %>
+                                <option value="<%= country %>" <%= currentFilters.country === country ? 'selected' : '' %>><%= country %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Search</label>
+                        <input type="text" name="search" class="form-control" placeholder="Company name, code..." value="<%= currentFilters.search %>">
+                    </div>
+                    <div class="filter-group" style="display: flex; align-items: flex-end;">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Apply Filters
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Partners Table -->
+        <div class="partners-section">
+            <div class="table-header">
+                <h2><i class="fas fa-building"></i> Partner Companies (<%= partners.length %>)</h2>
+            </div>
+
+            <% if (partners.length === 0) { %>
+                <div class="no-partners">
+                    <i class="fas fa-users"></i>
+                    <h3>No Partners Found</h3>
+                    <p>Start building your global seed network by adding your first partner company.</p>
+                    <a href="/seed-partners/new" class="btn btn-primary-custom">
+                        <i class="fas fa-plus"></i> Add First Partner
+                    </a>
+                </div>
+            <% } else { %>
+                <div class="table-responsive">
+                    <table class="partners-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;"></th>
+                                <th>Priority</th>
+                                <th>Company Name</th>
+                                <th>Country/Region</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Seed Catalog</th>
+                                <th>Contact</th>
+                                <th>Last Order</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% partners.forEach((partner, index) => { %>
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-chevron-right expand-btn" onclick="toggleExpand('<%= partner._id %>')" title="Show more details"></i>
+                                    </td>
+                                    <td>
+                                        <% for(let i = 0; i < partner.priority; i++) { %>
+                                            <i class="fas fa-star priority-star"></i>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <% if (partner.businessDetails && partner.businessDetails.website) { %>
+                                                <a href="<%= partner.businessDetails.website %>" target="_blank" rel="noopener noreferrer" style="color: #667eea; font-size: 14px; display: inline-flex;" title="Visit website: <%= partner.businessDetails.website %>">
+                                                    <i class="fas fa-globe"></i>
+                                                </a>
+                                            <% } %>
+                                            <a href="/seed-partners/<%= partner._id %>" class="partner-name" style="display: inline-flex; align-items: center; gap: 8px;">
+                                                <i class="fas fa-building"></i>
+                                                <span><%= partner.companyName %></span>
+                                            </a>
+                                        </div>
+                                        <div style="font-size: 11px; color: #999; margin-top: 2px;">
+                                            <%= partner.partnerCode %>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div><%= partner.country %></div>
+                                        <div style="font-size: 11px; color: #999;"><%= partner.region %></div>
+                                    </td>
+                                    <td>
+                                        <span class="badge <%= partner.partnershipType.includes('International') ? 'international' : 'domestic' %>">
+                                            <%= partner.partnershipType.replace('Supplier', 'Sup').replace('Client', 'Cli') %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge <%= partner.status.toLowerCase().replace(' ', '-') %>">
+                                            <%= partner.status %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="seed-types">
+                                            <% if (partner.seedOfferings && (partner.seedOfferings.vegetables.length > 0 || partner.seedOfferings.flowers.length > 0 || partner.seedOfferings.herbs.length > 0)) { %>
+                                                <% if (partner.seedOfferings.vegetables && partner.seedOfferings.vegetables.length > 0) { %>
+                                                    <span class="seed-type-tag" style="background: #fff3e0; color: #e65100; border: 1px solid #ffcc80;">
+                                                        🥕 <%= partner.seedOfferings.vegetables.length %>
+                                                    </span>
+                                                <% } %>
+                                                <% if (partner.seedOfferings.flowers && partner.seedOfferings.flowers.length > 0) { %>
+                                                    <span class="seed-type-tag" style="background: #fce4ec; color: #c2185b; border: 1px solid #f8bbd0;">
+                                                        🌸 <%= partner.seedOfferings.flowers.length %>
+                                                    </span>
+                                                <% } %>
+                                                <% if (partner.seedOfferings.herbs && partner.seedOfferings.herbs.length > 0) { %>
+                                                    <span class="seed-type-tag" style="background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7;">
+                                                        🌿 <%= partner.seedOfferings.herbs.length %>
+                                                    </span>
+                                                <% } %>
+                                            <% } else { %>
+                                                <span style="color: #999; font-size: 12px;">No catalog</span>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <% if (partner.primaryContact && partner.primaryContact.name) { %>
+                                            <div style="font-size: 13px;"><%= partner.primaryContact.name %></div>
+                                            <% if (partner.primaryContact.email) { %>
+                                                <div style="font-size: 11px; color: #999;">
+                                                    <i class="fas fa-envelope"></i> <%= partner.primaryContact.email %>
+                                                </div>
+                                            <% } %>
+                                        <% } else { %>
+                                            <span style="color: #999; font-size: 12px;">No contact</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (partner.lastOrderDate) { %>
+                                            <%= new Date(partner.lastOrderDate).toLocaleDateString() %>
+                                            <div style="font-size: 11px; color: #999;">
+                                                (<%= partner.daysSinceLastOrder() %> days ago)
+                                            </div>
+                                        <% } else { %>
+                                            <span style="color: #999;">No orders</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="/seed-partners/<%= partner._id %>" class="btn-sm-custom btn-view">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            <a href="/seed-partners/<%= partner._id %>/edit" class="btn-sm-custom btn-edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Expandable Row -->
+                                <tr class="expandable-row" id="expand-<%= partner._id %>">
+                                    <td colspan="10">
+                                        <div class="expanded-content">
+                                            <div class="details-grid">
+                                                <!-- Basic Information -->
+                                                <div class="detail-section">
+                                                    <h4><i class="fas fa-info-circle"></i> Company Details</h4>
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Legal Name</span>
+                                                        <div class="detail-value editable" data-field="legalName" data-partner="<%= partner._id %>">
+                                                            <%= partner.legalName || 'Not specified' %>
+                                                        </div>
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Website</span>
+                                                        <div class="detail-value">
+                                                            <% if (partner.businessDetails && partner.businessDetails.website) { %>
+                                                                <a href="<%= partner.businessDetails.website %>" target="_blank" style="color: #667eea;">
+                                                                    <i class="fas fa-external-link-alt"></i> <%= partner.businessDetails.website %>
+                                                                </a>
+                                                            <% } else { %>
+                                                                Not specified
+                                                            <% } %>
+                                                        </div>
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Founded</span>
+                                                        <div class="detail-value editable" data-field="yearEstablished" data-partner="<%= partner._id %>">
+                                                            <%= (partner.businessDetails && partner.businessDetails.yearEstablished) || 'Not specified' %>
+                                                        </div>
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Company Size</span>
+                                                        <div class="detail-value">
+                                                            <%= (partner.businessDetails && partner.businessDetails.numberOfEmployees) || 'Not specified' %>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Contact Information -->
+                                                <div class="detail-section">
+                                                    <h4><i class="fas fa-address-book"></i> Contact & Location</h4>
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Full Address</span>
+                                                        <div class="detail-value">
+                                                            <% if (partner.address) { %>
+                                                                <%= partner.address.street || '' %><br>
+                                                                <%= partner.address.city || '' %>, <%= partner.address.state || '' %> <%= partner.address.postalCode || '' %><br>
+                                                                <%= partner.address.country || '' %>
+                                                            <% } else { %>
+                                                                Not specified
+                                                            <% } %>
+                                                        </div>
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Phone</span>
+                                                        <div class="detail-value">
+                                                            <%= partner.phone || 'Not specified' %>
+                                                        </div>
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Email</span>
+                                                        <div class="detail-value">
+                                                            <%= partner.email || 'Not specified' %>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Seed Specializations -->
+                                                <div class="detail-section">
+                                                    <h4><i class="fas fa-seedling"></i> Seed Specializations</h4>
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">All Seed Types</span>
+                                                        <div class="detail-value">
+                                                            <% if (partner.seedTypes && partner.seedTypes.length > 0) { %>
+                                                                <div class="seed-types">
+                                                                    <% partner.seedTypes.forEach(seedType => { %>
+                                                                        <span class="seed-type-tag"><%= seedType %></span>
+                                                                    <% }) %>
+                                                                </div>
+                                                            <% } else { %>
+                                                                Not specified
+                                                            <% } %>
+                                                        </div>
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Organic Certified</span>
+                                                        <div class="detail-value">
+                                                            <%= partner.organicCertified ? 'Yes' : 'No' %>
+                                                        </div>
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Certifications</span>
+                                                        <div class="detail-value">
+                                                            <% if (partner.certifications && partner.certifications.length > 0) { %>
+                                                                <%= partner.certifications.join(', ') %>
+                                                            <% } else { %>
+                                                                None listed
+                                                            <% } %>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Detailed Seed Offerings -->
+                                                <div class="detail-section" style="grid-column: 1 / -1; border-left-color: #28a745;">
+                                                    <h4 style="color: #28a745;"><i class="fas fa-leaf"></i> Seed Catalog Offerings</h4>
+                                                    
+                                                    <% if (partner.seedOfferings) { %>
+                                                        <% if (partner.seedOfferings.vegetables && partner.seedOfferings.vegetables.length > 0) { %>
+                                                            <div style="margin-bottom: 15px;">
+                                                                <strong style="color: #ff6b35; display: block; margin-bottom: 8px;">
+                                                                    🥕 Vegetables (<%= partner.seedOfferings.vegetables.length %>)
+                                                                </strong>
+                                                                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                                                    <% partner.seedOfferings.vegetables.forEach(function(veg) { %>
+                                                                        <span style="background: #fff3e0; color: #e65100; padding: 4px 10px; border-radius: 12px; font-size: 11px; border: 1px solid #ffcc80;">
+                                                                            <%= veg %>
+                                                                        </span>
+                                                                    <% }); %>
+                                                                </div>
+                                                            </div>
+                                                        <% } %>
+
+                                                        <% if (partner.seedOfferings.flowers && partner.seedOfferings.flowers.length > 0) { %>
+                                                            <div style="margin-bottom: 15px;">
+                                                                <strong style="color: #e91e63; display: block; margin-bottom: 8px;">
+                                                                    🌸 Flowers (<%= partner.seedOfferings.flowers.length %>)
+                                                                </strong>
+                                                                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                                                    <% partner.seedOfferings.flowers.forEach(function(flower) { %>
+                                                                        <span style="background: #fce4ec; color: #c2185b; padding: 4px 10px; border-radius: 12px; font-size: 11px; border: 1px solid #f8bbd0;">
+                                                                            <%= flower %>
+                                                                        </span>
+                                                                    <% }); %>
+                                                                </div>
+                                                            </div>
+                                                        <% } %>
+
+                                                        <% if (partner.seedOfferings.herbs && partner.seedOfferings.herbs.length > 0) { %>
+                                                            <div style="margin-bottom: 15px;">
+                                                                <strong style="color: #558b2f; display: block; margin-bottom: 8px;">
+                                                                    🌿 Herbs (<%= partner.seedOfferings.herbs.length %>)
+                                                                </strong>
+                                                                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                                                    <% partner.seedOfferings.herbs.forEach(function(herb) { %>
+                                                                        <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 12px; font-size: 11px; border: 1px solid #a5d6a7;">
+                                                                            <%= herb %>
+                                                                        </span>
+                                                                    <% }); %>
+                                                                </div>
+                                                            </div>
+                                                        <% } %>
+
+                                                        <% if ((!partner.seedOfferings.vegetables || partner.seedOfferings.vegetables.length === 0) && 
+                                                               (!partner.seedOfferings.flowers || partner.seedOfferings.flowers.length === 0) && 
+                                                               (!partner.seedOfferings.herbs || partner.seedOfferings.herbs.length === 0)) { %>
+                                                            <p style="color: #999; font-style: italic;">No detailed catalog available for this partner yet.</p>
+                                                        <% } %>
+                                                    <% } else { %>
+                                                        <p style="color: #999; font-style: italic;">No seed catalog data available.</p>
+                                                    <% } %>
+                                                </div>
+
+                                                <!-- Financial Terms -->
+                                                <div class="detail-section">
+                                                    <h4><i class="fas fa-dollar-sign"></i> Financial Terms</h4>
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Min Order Value</span>
+                                                        <div class="detail-value editable" data-field="minimumOrderValue" data-partner="<%= partner._id %>">
+                                                            <% if (partner.financialTerms && partner.financialTerms.minimumOrderValue) { %>
+                                                                $<%= partner.financialTerms.minimumOrderValue.toLocaleString() %>
+                                                            <% } else { %>
+                                                                Not specified
+                                                            <% } %>
+                                                        </div>
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Payment Terms</span>
+                                                        <div class="detail-value">
+                                                            <%= (partner.financialTerms && partner.financialTerms.paymentTerms) || 'Not specified' %>
+                                                        </div>
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Payment Method</span>
+                                                        <div class="detail-value">
+                                                            <%= (partner.financialTerms && partner.financialTerms.preferredPaymentMethod) || 'Not specified' %>
+                                                        </div>
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">Currency</span>
+                                                        <div class="detail-value">
+                                                            <%= (partner.financialTerms && partner.financialTerms.currency) || 'USD' %>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Personal Notes Section -->
+                                            <% if (partner.personalNotes) { %>
+                                                <div class="personal-notes-display">
+                                                    <strong><i class="fas fa-sticky-note"></i> Personal Notes:</strong><br>
+                                                    <%= partner.personalNotes %>
+                                                </div>
+                                            <% } %>
+
+                                            <!-- Inline Edit Form (Hidden by default) -->
+                                            <div id="edit-form-<%= partner._id %>" style="display: none; margin-top: 20px; padding: 20px; background: white; border-radius: 8px; border: 2px solid #667eea;">
+                                                <h4 style="color: #667eea; margin-bottom: 15px;">
+                                                    <i class="fas fa-edit"></i> Quick Edit
+                                                </h4>
+                                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                                                    <div>
+                                                        <label class="detail-label">Legal Name</label>
+                                                        <input type="text" class="edit-input" id="edit-legalName-<%= partner._id %>" value="<%= partner.legalName || '' %>">
+                                                    </div>
+                                                    <div>
+                                                        <label class="detail-label">Website</label>
+                                                        <input type="url" class="edit-input" id="edit-website-<%= partner._id %>" value="<%= (partner.businessDetails && partner.businessDetails.website) || '' %>" placeholder="https://example.com">
+                                                    </div>
+                                                    <div>
+                                                        <label class="detail-label">Year Established</label>
+                                                        <input type="number" class="edit-input" id="edit-yearEstablished-<%= partner._id %>" value="<%= (partner.businessDetails && partner.businessDetails.yearEstablished) || '' %>">
+                                                    </div>
+                                                    <div>
+                                                        <label class="detail-label">Priority (1-5)</label>
+                                                        <input type="number" class="edit-input" min="1" max="5" id="edit-priority-<%= partner._id %>" value="<%= partner.priority || 3 %>">
+                                                    </div>
+                                                    <div>
+                                                        <label class="detail-label">Status</label>
+                                                        <select class="edit-input" id="edit-status-<%= partner._id %>">
+                                                            <option value="Prospective" <%= partner.status === 'Prospective' ? 'selected' : '' %>>Prospective</option>
+                                                            <option value="Active" <%= partner.status === 'Active' ? 'selected' : '' %>>Active</option>
+                                                            <option value="On Hold" <%= partner.status === 'On Hold' ? 'selected' : '' %>>On Hold</option>
+                                                            <option value="Inactive" <%= partner.status === 'Inactive' ? 'selected' : '' %>>Inactive</option>
+                                                            <option value="Non-Alternative" <%= partner.status === 'Non-Alternative' ? 'selected' : '' %>>Non-Alternative</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div style="margin-top: 15px;">
+                                                    <label class="detail-label">Personal Notes</label>
+                                                    <textarea class="edit-input" id="edit-personalNotes-<%= partner._id %>" rows="3" style="resize: vertical;"><%= partner.personalNotes || '' %></textarea>
+                                                </div>
+                                                <div class="inline-edit-buttons">
+                                                    <button class="btn-sm-custom btn-save" onclick="saveInlineEdit('<%= partner._id %>')">
+                                                        <i class="fas fa-save"></i> Save Changes
+                                                    </button>
+                                                    <button class="btn-sm-custom btn-cancel" onclick="cancelInlineEdit('<%= partner._id %>')">
+                                                        <i class="fas fa-times"></i> Cancel
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <!-- Quick Edit Button -->
+                                            <div style="margin-top: 15px;">
+                                                <button class="btn-sm-custom btn-edit" onclick="showInlineEdit('<%= partner._id %>')">
+                                                    <i class="fas fa-pencil-alt"></i> Quick Edit
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Regional Distribution (Optional Visual) -->
+        <% if (Object.keys(stats.byRegion).length > 0) { %>
+            <div class="filters-section" style="margin-top: 25px;">
+                <h3><i class="fas fa-map-marked-alt"></i> Partners by Region</h3>
+                <div class="region-grid">
+                    <% Object.keys(stats.byRegion).sort((a, b) => stats.byRegion[b] - stats.byRegion[a]).forEach(region => { %>
+                        <div class="region-item">
+                            <div class="region-count"><%= stats.byRegion[region] %></div>
+                            <div class="region-name"><%= region %></div>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        <% } %>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle expand/collapse row
+        function toggleExpand(partnerId) {
+            const expandRow = document.getElementById('expand-' + partnerId);
+            const expandBtn = event.target;
+            
+            if (expandRow.classList.contains('show')) {
+                // Collapsing - just hide the row
+                expandRow.classList.remove('show');
+                expandBtn.classList.remove('expanded');
+            } else {
+                // Expanding - show the row first
+                expandRow.classList.add('show');
+                expandBtn.classList.add('expanded');
+                
+                // Gentle scroll only if row is way off screen
+                setTimeout(() => {
+                    const mainRow = expandBtn.closest('tr');
+                    if (mainRow) {
+                        const rect = mainRow.getBoundingClientRect();
+                        
+                        // Only scroll if the row is way down the page or above viewport
+                        if (rect.top > 300 || rect.top < -100) {
+                            const yOffset = -120;
+                            const y = mainRow.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                            
+                            window.scrollTo({
+                                top: Math.max(0, y),
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                }, 150);
+            }
+        }
+
+        // Show inline edit form
+        function showInlineEdit(partnerId) {
+            const editForm = document.getElementById('edit-form-' + partnerId);
+            editForm.style.display = 'block';
+            
+            // Immediately and aggressively scroll to show the entire Quick Edit form
+            setTimeout(() => {
+                // Position the Quick Edit header near the top to ensure buttons are visible
+                const scrollTarget = editForm.getBoundingClientRect().top + window.pageYOffset - 120;
+                
+                window.scrollTo({
+                    top: Math.max(0, scrollTarget),
+                    behavior: 'smooth'
+                });
+            }, 50);
+        }
+
+        // Cancel inline edit
+        function cancelInlineEdit(partnerId) {
+            const editForm = document.getElementById('edit-form-' + partnerId);
+            editForm.style.display = 'none';
+        }
+
+        // Save inline edit
+        async function saveInlineEdit(partnerId) {
+            const legalName = document.getElementById('edit-legalName-' + partnerId).value;
+            const website = document.getElementById('edit-website-' + partnerId).value;
+            const yearEstablished = document.getElementById('edit-yearEstablished-' + partnerId).value;
+            const priority = document.getElementById('edit-priority-' + partnerId).value;
+            const status = document.getElementById('edit-status-' + partnerId).value;
+            const personalNotes = document.getElementById('edit-personalNotes-' + partnerId).value;
+
+            const updateData = {
+                legalName: legalName,
+                website: website,
+                yearEstablished: yearEstablished ? parseInt(yearEstablished) : null,
+                priority: parseInt(priority),
+                status: status,
+                personalNotes: personalNotes
+            };
+
+            try {
+                const response = await fetch(`/seed-partners/${partnerId}/quick-update`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (response.ok) {
+                    // Show success message
+                    alert('Partner updated successfully!');
+                    // Reload the page to show updated data
+                    location.reload();
+                } else {
+                    const error = await response.json();
+                    alert('Error updating partner: ' + (error.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error updating partner. Please try again.');
+            }
+        }
+
+        // Editable field click handler (optional feature for future enhancement)
+        document.addEventListener('DOMContentLoaded', function() {
+            const editableFields = document.querySelectorAll('.detail-value.editable');
+            
+            editableFields.forEach(field => {
+                field.addEventListener('click', function() {
+                    // Future: implement direct field editing
+                    // For now, just show the edit form
+                    const partnerId = this.dataset.partner;
+                    showInlineEdit(partnerId);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

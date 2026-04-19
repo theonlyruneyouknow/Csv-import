@@ -144,6 +144,28 @@
             border-radius: 4px;
             font-size: 0.85rem;
         }
+        
+        .source-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(66, 133, 244, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .source-badge.google-photos-shared {
+            background: rgba(66, 133, 244, 0.95);
+        }
+        
+        .source-badge.local {
+            background: rgba(52, 168, 83, 0.9);
+        }
 
         .media-thumbnail-container {
             position: relative;
@@ -203,9 +225,28 @@
             <a href="/greatestjoy/familycircles" class="btn btn-outline-secondary">
                 <i class="fas fa-users me-1"></i>Family Circles
             </a>
-            <a href="/greatestjoy/upload" class="btn btn-primary">
-                <i class="fas fa-cloud-upload-alt me-1"></i>Upload
-            </a>
+            
+            <!-- Upload Dropdown -->
+            <div class="btn-group">
+                <a href="/greatestjoy/upload" class="btn btn-primary">
+                    <i class="fas fa-cloud-upload-alt me-1"></i>Upload
+                </a>
+                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                    <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="/greatestjoy/upload">
+                        <i class="fas fa-image me-2"></i>Single Photo/Video
+                    </a></li>
+                    <li><a class="dropdown-item" href="/greatestjoy/bulk-upload">
+                        <i class="fas fa-folder me-2"></i>Bulk Upload from Folder
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="/greatestjoy/cloud-import">
+                        <i class="fas fa-cloud me-2"></i>Import from Cloud Service
+                    </a></li>
+                </ul>
+            </div>
             
             <!-- User Dropdown -->
             <% if (typeof user !== 'undefined' && user) { %>
@@ -254,6 +295,21 @@
                         <% } else { %>
                             <img src="<%= item.thumbnailUrl || item.url %>" alt="<%= item.title %>" class="media-thumbnail">
                             <span class="video-badge"><i class="fas fa-play"></i> Video</span>
+                        <% } %>
+                        
+                        <!-- Source Type Badge -->
+                        <% if (item.sourceType === 'google-photos-shared') { %>
+                            <span class="source-badge google-photos-shared" title="Shared from Google Photos">
+                                <i class="fab fa-google"></i> Shared
+                            </span>
+                        <% } else if (item.sourceType === 'google-photos') { %>
+                            <span class="source-badge google-photos-shared" title="From Google Photos">
+                                <i class="fab fa-google"></i> Photos
+                            </span>
+                        <% } else if (item.sourceType === 'local') { %>
+                            <span class="source-badge local" title="Uploaded locally">
+                                <i class="fas fa-upload"></i> Local
+                            </span>
                         <% } %>
                     </div>
                     <div class="media-info">

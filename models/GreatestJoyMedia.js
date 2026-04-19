@@ -110,7 +110,69 @@ const greatestJoyMediaSchema = new mongoose.Schema({
     album: {
         type: String,
         trim: true
-    }
+    },
+    // Source tracking for external media (Google Photos, etc.)
+    sourceType: {
+        type: String,
+        enum: ['local', 'google-photos', 'google-photos-shared', 'google-drive', 'url'],
+        default: 'local'
+    },
+    sourceUrl: {
+        type: String,
+        trim: true
+    },
+    googlePhotos: {
+        mediaItemId: String,      // Original Google Photos media item ID
+        sharedAlbumId: String,    // Shared album ID (if created)
+        shareableUrl: String,     // Public shareable URL for the album
+        baseUrl: String,          // Google Photos base URL (temporary)
+        createdTime: Date         // Original creation time from Google
+    },
+    // Voice recordings and stories
+    voiceRecordings: [{
+        audioUrl: {
+            type: String,
+            required: true
+        },
+        duration: Number, // Duration in seconds
+        recordedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        recordedDate: {
+            type: Date,
+            default: Date.now
+        },
+        title: String,
+        transcript: {
+            text: String,
+            language: {
+                type: String,
+                default: 'en'
+            },
+            generatedDate: Date,
+            editedBy: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User'
+            }
+        }
+    }],
+    // Written stories and memories
+    stories: [{
+        title: String,
+        content: {
+            type: String,
+            required: true
+        },
+        author: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        writtenDate: {
+            type: Date,
+            default: Date.now
+        }
+    }]
 }, {
     timestamps: true
 });
