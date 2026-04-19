@@ -378,7 +378,7 @@ async function addGermanSeedCompanies() {
     
     console.log('\n📊 To view these partners, go to:');
     console.log('   http://localhost:3001/seed-partners?country=Germany');
-    console.log('\n🇩🇪 Germany is now represented in your global seed partnership database!');
+    console.log('\n🇩🇪 Germany is now represented in your world seed partnership database!');
     
   } catch (error) {
     console.error('❌ Error creating German seed companies:', error);

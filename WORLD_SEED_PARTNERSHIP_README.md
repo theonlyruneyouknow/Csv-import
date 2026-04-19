@@ -1,8 +1,8 @@
-# Global Seed Partnership Module
+# World Seed Partnership Module
 
 ## Overview
 
-The **Global Seed Partnership** module is a comprehensive system for managing international and domestic seed business partnerships. This module enables you to track potential suppliers, active clients, manage certifications, monitor communications, and build a global seed import/export network.
+The **World Seed Partnership** module is a comprehensive system for managing international and domestic seed business partnerships. This module enables you to track potential suppliers, active clients, manage certifications, monitor communications, and build a world seed import/export network.
 
 ## Features
 
@@ -210,7 +210,7 @@ Use the filters section to:
 
 ## Integration with PO Dashboard
 
-The Global Seed Partnership module is designed to work alongside your existing Purchase Order Dashboard (P.O.D.). Future enhancements may include:
+The World Seed Partnership module is designed to work alongside your existing Purchase Order Dashboard (P.O.D.). Future enhancements may include:
 
 - Direct PO creation from partner profiles
 - Automatic vendor linking

@@ -390,7 +390,7 @@ async function addBelgiumSeedCompanies() {
     
     console.log('\n📊 To view these partners, go to:');
     console.log('   http://localhost:3001/seed-partners?country=Belgium');
-    console.log('\n🇧🇪 Belgium is now represented in your global seed partnership database!');
+    console.log('\n🇧🇪 Belgium is now represented in your world seed partnership database!');
     console.log('\n💪 Small but mighty indeed - Belgium punches above its weight in seeds!');
     
   } catch (error) {

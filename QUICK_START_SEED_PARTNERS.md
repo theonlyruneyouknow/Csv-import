@@ -1,4 +1,4 @@
-# Quick Start Guide - Global Seed Partnership
+# Quick Start Guide - World Seed Partnership
 
 ## The module is ready! Here's how to access it:
 
@@ -35,7 +35,7 @@ node create-sample-seed-partners.js
 ## Quick Access Links
 
 - Login: http://localhost:3001/auth/login
-- Global Seed Partnership: http://localhost:3001/seed-partners
+- World Seed Partnership: http://localhost:3001/seed-partners
 - PO Dashboard: http://localhost:3001/purchase-orders
 - Vendors: http://localhost:3001/vendors
 

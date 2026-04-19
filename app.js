@@ -60,10 +60,10 @@ console.log('🔄 Loading dropshipment tracking routes...');
 const dropshipmentRoutes = require('./routes/dropshipments');
 console.log('✅ Dropshipment tracking routes loaded successfully');
 
-console.log('🔄 Loading Global Seed Partnership routes...');
+console.log('🔄 Loading World Seed Partnership routes...');
 const SeedPartner = require('./models/SeedPartner'); // Register model
 const seedPartnerRoutes = require('./routes/seedPartners');
-console.log('✅ Global Seed Partnership routes loaded successfully');
+console.log('✅ World Seed Partnership routes loaded successfully');
 
 console.log('🔄 Loading US Seed Partnership routes...');
 const USSeedPartner = require('./models/USSeedPartner'); // Register model  
@@ -1069,7 +1069,7 @@ app.use('/shipments', ensureAuthenticated, ensureApproved, shipmentRoutes); // N
 app.use('/organic-vendors', ensureAuthenticated, ensureApproved, organicVendorRoutes);
 app.use('/vendors', ensureAuthenticated, ensureApproved, vendorRoutes);
 app.use('/enhanced-vendors', ensureAuthenticated, ensureApproved, enhancedVendorRoutes);
-app.use('/seed-partners', ensureAuthenticated, ensureApproved, seedPartnerRoutes); // NEW: Global Seed Partnership
+app.use('/seed-partners', ensureAuthenticated, ensureApproved, seedPartnerRoutes); // NEW: World Seed Partnership
 app.use('/us-seed-partners', ensureAuthenticated, ensureApproved, usSeedPartnerRoutes); // NEW: US Seed Partnership
 app.use('/tasks', ensureAuthenticated, ensureApproved, taskRoutes);
 app.use('/receiving', ensureAuthenticated, ensureApproved, receivingRoutes);

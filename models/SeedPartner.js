@@ -1,7 +1,7 @@
 // models/SeedPartner.js
 const mongoose = require('mongoose');
 
-// Global Seed Partnership - Partner Company Schema
+// World Seed Partnership - Partner Company Schema
 const seedPartnerSchema = new mongoose.Schema({
     // Basic Partner Information
     companyName: {

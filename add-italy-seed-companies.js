@@ -383,7 +383,7 @@ async function addItalySeedCompanies() {
     
     console.log('\n📊 To view these partners, go to:');
     console.log('   http://localhost:3001/seed-partners?country=Italy');
-    console.log('\n🇮🇹 Italy is now represented in your global seed partnership database!');
+    console.log('\n🇮🇹 Italy is now represented in your world seed partnership database!');
     
   } catch (error) {
     console.error('❌ Error creating Italian seed companies:', error);

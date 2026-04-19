@@ -405,7 +405,7 @@ async function addFranceSeedCompanies() {
     
     console.log('\n📊 To view these partners, go to:');
     console.log('   http://localhost:3001/seed-partners?country=France');
-    console.log('\n🇫🇷 France is now represented in your global seed partnership database!');
+    console.log('\n🇫🇷 France is now represented in your world seed partnership database!');
     
   } catch (error) {
     console.error('❌ Error creating French seed companies:', error);

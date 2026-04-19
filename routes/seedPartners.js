@@ -43,7 +43,7 @@ const upload = multer({
 // ============================================
 router.get('/', ensureAuthenticated, async (req, res) => {
     try {
-        console.log('🌍 Loading Global Seed Partnership Dashboard...');
+        console.log('🌍 Loading World Seed Partnership Dashboard...');
         
         // Get filter parameters
         const statusFilter = req.query.status;

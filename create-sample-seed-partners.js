@@ -1,4 +1,4 @@
-// Script to create sample Global Seed Partnership data
+// Script to create sample World Seed Partnership data
 // Run with: node create-sample-seed-partners.js
 
 require('dotenv').config();
@@ -360,7 +360,7 @@ async function createSamplePartners() {
         });
 
         console.log('\n🎉 Sample data creation complete!');
-        console.log('\nYou can now view your Global Seed Partnership dashboard at:');
+        console.log('\nYou can now view your World Seed Partnership dashboard at:');
         console.log('http://localhost:3000/seed-partners');
 
     } catch (error) {

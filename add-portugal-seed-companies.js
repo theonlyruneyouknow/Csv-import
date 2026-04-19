@@ -366,7 +366,7 @@ async function addPortugalSeedCompanies() {
     
     console.log('\n📊 To view these partners, go to:');
     console.log('   http://localhost:3001/seed-partners?country=Portugal');
-    console.log('\n🇵🇹 Portugal is now represented in your global seed partnership database!');
+    console.log('\n🇵🇹 Portugal is now represented in your world seed partnership database!');
     
   } catch (error) {
     console.error('❌ Error creating Portuguese seed companies:', error);
