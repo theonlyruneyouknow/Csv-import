@@ -70,6 +70,11 @@ const USSeedPartner = require('./models/USSeedPartner'); // Register model
 const usSeedPartnerRoutes = require('./routes/usSeedPartners');
 console.log('✅ US Seed Partnership routes loaded successfully');
 
+console.log('🔄 Loading Staged Partners routes...');
+const StagedPartner = require('./models/StagedPartner'); // Register model
+const stagedPartnerRoutes = require('./routes/stagedPartners');
+console.log('✅ Staged Partners routes loaded successfully');
+
 const app = express();
 
 // URGENT DEBUG: Add test routes IMMEDIATELY after Express app creation
@@ -1071,6 +1076,7 @@ app.use('/vendors', ensureAuthenticated, ensureApproved, vendorRoutes);
 app.use('/enhanced-vendors', ensureAuthenticated, ensureApproved, enhancedVendorRoutes);
 app.use('/seed-partners', ensureAuthenticated, ensureApproved, seedPartnerRoutes); // NEW: World Seed Partnership
 app.use('/us-seed-partners', ensureAuthenticated, ensureApproved, usSeedPartnerRoutes); // NEW: US Seed Partnership
+app.use('/staged-partners', ensureAuthenticated, ensureApproved, stagedPartnerRoutes); // NEW: Partner Staging/Approval
 app.use('/tasks', ensureAuthenticated, ensureApproved, taskRoutes);
 app.use('/receiving', ensureAuthenticated, ensureApproved, receivingRoutes);
 app.use('/email-templates', ensureAuthenticated, ensureApproved, emailTemplateRoutes);

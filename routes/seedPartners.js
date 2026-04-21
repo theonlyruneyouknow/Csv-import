@@ -59,7 +59,7 @@ router.get('/', ensureAuthenticated, async (req, res) => {
         
         // Apply view mode filter
         if (viewMode === 'international') {
-            query.isDomestic = false;
+            query.isDomestic = { $ne: true };
         } else if (viewMode === 'domestic') {
             query.isDomestic = true;
         }
@@ -94,13 +94,12 @@ router.get('/', ensureAuthenticated, async (req, res) => {
         
         // Fetch partners
         const partners = await SeedPartner.find(query)
-            .populate('assignedTo')
             .sort({ priority: 1, companyName: 1 });
         
         // Calculate statistics
         const allPartnersCount = await SeedPartner.countDocuments({ isActive: true });
         const domesticCount = await SeedPartner.countDocuments({ isActive: true, isDomestic: true });
-        const internationalCount = await SeedPartner.countDocuments({ isActive: true, isDomestic: false });
+        const internationalCount = await SeedPartner.countDocuments({ isActive: true, isDomestic: { $ne: true } });
         
         const stats = {
             total: partners.length,
@@ -143,8 +142,14 @@ router.get('/', ensureAuthenticated, async (req, res) => {
         const uniqueRegions = [...new Set(partners.map(p => p.region))].sort();
         const uniqueCountries = [...new Set(partners.map(p => p.country))].sort();
         
-        // Get available exclusion groups from all partners
-        const availableExclusionGroups = ['Non-Alternative', 'Inactive', 'Low Priority', 'Out of Stock', 'Price Too High', 'Quality Issues', 'Slow Response', 'Compliance Issues'];
+        // Get available exclusion groups dynamically from all partners
+        const allExclusionGroups = new Set();
+        partners.forEach(partner => {
+            if (partner.exclusionGroups && Array.isArray(partner.exclusionGroups)) {
+                partner.exclusionGroups.forEach(group => allExclusionGroups.add(group));
+            }
+        });
+        const availableExclusionGroups = Array.from(allExclusionGroups).sort();
         
         console.log(`✅ Loaded ${partners.length} seed partners (View: ${viewMode})`);
         
@@ -182,7 +187,6 @@ router.get('/', ensureAuthenticated, async (req, res) => {
 router.get('/api/partners', ensureAuthenticated, async (req, res) => {
     try {
         const partners = await SeedPartner.find({ isActive: true })
-            .populate('assignedTo')
             .sort({ companyName: 1 });
         res.json({ success: true, partners });
     } catch (error) {
@@ -194,7 +198,7 @@ router.get('/api/partners', ensureAuthenticated, async (req, res) => {
 // Get single partner (API)
 router.get('/api/partners/:id', ensureAuthenticated, async (req, res) => {
     try {
-        const partner = await SeedPartner.findById(req.params.id).populate('assignedTo');
+        const partner = await SeedPartner.findById(req.params.id);
         if (!partner) {
             return res.status(404).json({ success: false, error: 'Partner not found' });
         }
@@ -400,7 +404,7 @@ router.post('/new', ensureAuthenticated, async (req, res) => {
 
 router.get('/:id', ensureAuthenticated, async (req, res) => {
     try {
-        const partner = await SeedPartner.findById(req.params.id).populate('assignedTo');
+        const partner = await SeedPartner.findById(req.params.id);
         
         if (!partner) {
             return res.status(404).send('Partner not found');
@@ -731,6 +735,83 @@ router.post('/:id/update-priority', ensureAuthenticated, async (req, res) => {
         
     } catch (error) {
         console.error('❌ Error updating priority:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================
+// EXCLUSION GROUPS MANAGEMENT
+// ============================================
+
+// Add exclusion group to partner
+router.post('/api/partners/:id/exclusion-groups', ensureAuthenticated, async (req, res) => {
+    try {
+        const { groupName } = req.body;
+        
+        if (!groupName || groupName.trim() === '') {
+            return res.status(400).json({ success: false, error: 'Group name is required' });
+        }
+        
+        const partner = await SeedPartner.findById(req.params.id);
+        if (!partner) {
+            return res.status(404).json({ success: false, error: 'Partner not found' });
+        }
+        
+        // Initialize exclusionGroups if it doesn't exist
+        if (!partner.exclusionGroups) {
+            partner.exclusionGroups = [];
+        }
+        
+        // Add group if not already present
+        if (!partner.exclusionGroups.includes(groupName)) {
+            partner.exclusionGroups.push(groupName);
+            await partner.save();
+        }
+        
+        res.json({ success: true, exclusionGroups: partner.exclusionGroups });
+    } catch (error) {
+        console.error('Error adding exclusion group:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Remove exclusion group from partner
+router.delete('/api/partners/:id/exclusion-groups/:groupName', ensureAuthenticated, async (req, res) => {
+    try {
+        const { groupName } = req.params;
+        
+        const partner = await SeedPartner.findById(req.params.id);
+        if (!partner) {
+            return res.status(404).json({ success: false, error: 'Partner not found' });
+        }
+        
+        if (partner.exclusionGroups) {
+            partner.exclusionGroups = partner.exclusionGroups.filter(g => g !== groupName);
+            await partner.save();
+        }
+        
+        res.json({ success: true, exclusionGroups: partner.exclusionGroups });
+    } catch (error) {
+        console.error('Error removing exclusion group:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get all available exclusion groups across all partners
+router.get('/api/exclusion-groups', ensureAuthenticated, async (req, res) => {
+    try {
+        const partners = await SeedPartner.find({ isActive: true });
+        const allGroups = new Set();
+        
+        partners.forEach(partner => {
+            if (partner.exclusionGroups && Array.isArray(partner.exclusionGroups)) {
+                partner.exclusionGroups.forEach(group => allGroups.add(group));
+            }
+        });
+        
+        res.json({ success: true, groups: Array.from(allGroups).sort() });
+    } catch (error) {
+        console.error('Error fetching exclusion groups:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });

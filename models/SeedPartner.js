@@ -33,13 +33,9 @@ const seedPartnerSchema = new mongoose.Schema({
     },
     region: {
         type: String,
-        enum: [
-            // World Regions (International)
-            'North America', 'South America', 'Europe', 'Asia', 'Africa', 'Australia/Oceania', 'Middle East',
-            // US Regions (Domestic)
-            'Northeast', 'Southeast', 'Midwest', 'Southwest', 'West', 'Pacific', 'Mountain'
-        ],
+        trim: true,
         required: true
+        // Removed enum to allow custom regions like "Pacific Northwest", "New England", etc.
     },
     
     // US-Specific Fields (Optional - only for domestic partners)
@@ -85,20 +81,10 @@ const seedPartnerSchema = new mongoose.Schema({
     },
     
     // Exclusion Groups (NEW - for filtering)
+    // Dynamic array - accepts any custom string values
     exclusionGroups: [{
         type: String,
-        enum: [
-            'Non-Alternative',
-            'Inactive',
-            'Low Priority',
-            'Out of Stock',
-            'Price Too High',
-            'Quality Issues',
-            'Slow Response',
-            'Compliance Issues',
-            'Archived',
-            'Custom'
-        ]
+        trim: true
     }],
     
     // Priority Level
@@ -115,24 +101,10 @@ const seedPartnerSchema = new mongoose.Schema({
     },
     
     // Seed Specializations
+    // Dynamic array - accepts any custom string values
     seedTypes: [{
         type: String,
-        enum: [
-            'Vegetable Seeds',
-            'Flower Seeds', 
-            'Herb Seeds',
-            'Grain Seeds',
-            'Cover Crop Seeds',
-            'Organic Seeds',
-            'Hybrid Seeds',
-            'Heirloom Seeds',
-            'GMO Seeds',
-            'Native Seeds',
-            'Wildflower Seeds',
-            'Lawn & Turf Seeds',
-            'Regional Specialty Seeds',
-            'Other'
-        ]
+        trim: true
     }],
     
     // Detailed Seed Offerings - Crop Level
@@ -395,23 +367,7 @@ const seedPartnerSchema = new mongoose.Schema({
     references: [{
         sourceType: {
             type: String,
-            enum: [
-                'Company Website',
-                'USDA Database',
-                'State Agriculture Department',
-                'Industry Directory',
-                'Direct Contact',
-                'Trade Show',
-                'Referral',
-                'Online Research',
-                'LinkedIn',
-                'Better Business Bureau',
-                'Customer Review',
-                'Industry Publication',
-                'International Database',
-                'Embassy/Trade Office',
-                'Other'
-            ]
+            trim: true
         },
         sourceUrl: String,
         sourceDescription: String,

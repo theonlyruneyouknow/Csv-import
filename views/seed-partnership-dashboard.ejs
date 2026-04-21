@@ -196,6 +196,7 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
 
         .table-header {
@@ -560,6 +561,10 @@
                     <i class="fas fa-leaf"></i>
                     <span>Seed Catalog</span>
                 </a>
+                <a href="/staged-partners/review" class="pod-button" style="background: linear-gradient(135deg, #ffc107, #ff9800);">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span>Review Staging</span>
+                </a>
                 <a href="/seed-partners/new" class="btn btn-primary-custom">
                     <i class="fas fa-plus"></i> Add New Partner
                 </a>
@@ -674,28 +679,40 @@
             </form>
         </div>
 
-        <!-- Exclusion Groups Filter -->
-        <div class="filters-section" style="margin-top: 15px; padding: 15px;">
-            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
-                    <input type="checkbox" id="showExcluded" style="cursor: pointer;" />
-                    <span style="font-weight: 600; font-size: 14px; color: #666;">Show Excluded Partners</span>
-                </label>
-                <div style="flex: 1; min-width: 300px;">
-                    <select id="exclusionGroupsFilter" multiple style="width: 100%; height: 100px;">
-                        <% availableExclusionGroups.forEach(function(group) { %>
-                            <option value="<%= group %>"><%= group %> (<%= stats.byExclusionGroup[group] || 0 %>)</option>
-                        <% }) %>
-                    </select>
-                    <small style="color: #999; display: block; margin-top: 5px;">Select groups to hide (Ctrl/Cmd+Click for multiple)</small>
-                </div>
-            </div>
-        </div>
-
         <!-- Partners Table -->
         <div class="partners-section">
-            <div class="table-header">
+            <div class="table-header" style="display: flex; align-items: center; justify-content: space-between;">
                 <h2><i class="fas fa-building"></i> Partner Companies (<span id="visibleCount"><%= partners.length %></span>)</h2>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; margin: 0;">
+                        <input type="checkbox" id="showExcluded" style="cursor: pointer;" />
+                        <span style="font-weight: 600; font-size: 14px; color: #666;">Show Excluded <span id="excludedCount" style="color: #999;"></span></span>
+                    </label>
+                    <button id="createExclusionGroupBtn" onclick="createNewExclusionGroup()" style="background: #6c757d; border: 1px solid #5a6268; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: 600; color: white; font-size: 13px; transition: all 0.2s;" onmouseover="this.style.background='#5a6268'" onmouseout="this.style.background='#6c757d'" title="Create New Exclusion Group">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button id="toggleExclusionGroups" style="background: #f8f9fa; border: 1px solid #ddd; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: 600; color: #495057; font-size: 13px; transition: all 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'" title="Toggle Exclusion Groups">
+                        Ex <span id="exclusionToggleArrow">▼</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="exclusionGroupsPanel" style="display: none; position: absolute; right: 20px; background: white; border: 1px solid #ddd; border-radius: 4px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; min-width: 350px; margin-top: 5px;">
+                <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #495057;">Exclusion Groups</h4>
+                
+                <!-- Filter List -->
+                <select id="exclusionGroupsFilter" multiple size="8" style="width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 5px; font-size: 13px; background: white;">
+                    <% availableExclusionGroups.forEach(function(group) { %>
+                        <option value="<%= group %>" style="padding: 5px;"><%= group %> (<%= stats.byExclusionGroup[group] || 0 %>)</option>
+                    <% }) %>
+                    <% if (availableExclusionGroups.length === 0) { %>
+                        <option disabled style="color: #999; padding: 5px;">No exclusion groups yet</option>
+                    <% } %>
+                </select>
+                <small style="color: #999; display: block; margin-top: 8px;">
+                    Select groups to hide (Ctrl/Cmd+Click for multiple)<br>
+                    <em>To create new groups, expand a partner and add groups there</em>
+                </small>
             </div>
 
             <% if (partners.length === 0) { %>
@@ -1038,6 +1055,36 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                
+                                                <!-- Exclusion Groups Section -->
+                                                <div class="detail-section" style="grid-column: 1 / -1; border-left-color: #dc3545;">
+                                                    <h4><i class="fas fa-ban"></i> Exclusion Groups</h4>
+                                                    <div class="detail-item" style="flex: 1;">
+                                                        <div class="detail-value">
+                                                            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px;">
+                                                                <% if (partner.exclusionGroups && partner.exclusionGroups.length > 0) { %>
+                                                                    <% partner.exclusionGroups.forEach(function(group) { %>
+                                                                        <span style="background: #dc3545; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-flex; align-items: center; gap: 5px;">
+                                                                            <%= group %>
+                                                                            <button onclick="removeExclusionGroup('<%= partner._id %>', '<%= group %>')" style="background: none; border: none; color: white; cursor: pointer; padding: 0; font-size: 14px;" title="Remove">×</button>
+                                                                        </span>
+                                                                    <% }) %>
+                                                                <% } else { %>
+                                                                    <span style="color: #999; font-style: italic;">No exclusion groups assigned</span>
+                                                                <% } %>
+                                                            </div>
+                                                            <div style="display: flex; gap: 5px; align-items: flex-start;">
+                                                                <select id="newGroupInput-<%= partner._id %>" multiple size="4" style="flex: 1; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; min-width: 200px;" class="exclusion-group-selector">
+                                                                    <!-- Options populated dynamically -->
+                                                                </select>
+                                                                <button onclick="addExclusionGroup('<%= partner._id %>')" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; white-space: nowrap; align-self: flex-start;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
+                                                                    Add Selected
+                                                                </button>
+                                                            </div>
+                                                            <small style="color: #999; display: block; margin-top: 5px;">Select one or more groups (Ctrl/Cmd+Click for multiple). Use the minus (−) button above to create new groups.</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <!-- Personal Notes Section -->
@@ -1129,47 +1176,102 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Initialize exclusion toggle from localStorage (default: hide excluded)
-        const showExcludedCheckbox = document.getElementById('showExcluded');
-        const exclusionGroupsFilter = document.getElementById('exclusionGroupsFilter');
-        const savedExcludedState = localStorage.getItem('showExcluded');
-        const savedSelectedGroups = localStorage.getItem('selectedExclusionGroups');
-        
-        showExcludedCheckbox.checked = savedExcludedState === 'true';
-        
-        // Restore selected exclusion groups
-        if (savedSelectedGroups) {
-            const groups = JSON.parse(savedSelectedGroups);
-            Array.from(exclusionGroupsFilter.options).forEach(option => {
-                if (groups.includes(option.value)) {
-                    option.selected = true;
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize exclusion toggle from localStorage (default: hide excluded)
+            const showExcludedCheckbox = document.getElementById('showExcluded');
+            const exclusionGroupsFilter = document.getElementById('exclusionGroupsFilter');
+            const savedExcludedState = localStorage.getItem('showExcluded');
+            const savedSelectedGroups = localStorage.getItem('selectedExclusionGroups');
+            
+            // Merge master exclusion groups from localStorage with database groups
+            const masterGroups = JSON.parse(localStorage.getItem('masterExclusionGroups') || '[]');
+            const dbGroups = Array.from(exclusionGroupsFilter.options).map(opt => opt.value).filter(v => v);
+            
+            // Combine and deduplicate
+            const allGroups = [...new Set([...masterGroups, ...dbGroups])].sort();
+            
+            // Rebuild the dropdown with all groups
+            if (allGroups.length > 0) {
+                // Get current counts from database groups
+                const groupCounts = {};
+                Array.from(exclusionGroupsFilter.options).forEach(opt => {
+                    const match = opt.textContent.match(/\((\d+)\)/);
+                    if (match && opt.value) {
+                        groupCounts[opt.value] = match[1];
+                    }
+                });
+                
+                // Clear and rebuild
+                exclusionGroupsFilter.innerHTML = '';
+                allGroups.forEach(group => {
+                    const option = document.createElement('option');
+                    option.value = group;
+                    option.textContent = `${group} (${groupCounts[group] || 0})`;
+                    option.style.padding = '5px';
+                    exclusionGroupsFilter.appendChild(option);
+                });
+            }
+            
+            showExcludedCheckbox.checked = savedExcludedState === 'true';
+            
+            // Restore selected exclusion groups
+            if (savedSelectedGroups) {
+                const groups = JSON.parse(savedSelectedGroups);
+                Array.from(exclusionGroupsFilter.options).forEach(option => {
+                    if (groups.includes(option.value)) {
+                        option.selected = true;
+                    }
+                });
+            }
+            
+            // Apply filter on page load
+            applyExclusionFilter();
+            
+            // Toggle excluded partners visibility
+            showExcludedCheckbox.addEventListener('change', function() {
+                localStorage.setItem('showExcluded', this.checked);
+                applyExclusionFilter();
+            });
+            
+            // Handle exclusion groups selection
+            exclusionGroupsFilter.addEventListener('change', function() {
+                const selectedGroups = Array.from(this.selectedOptions).map(opt => opt.value);
+                localStorage.setItem('selectedExclusionGroups', JSON.stringify(selectedGroups));
+                applyExclusionFilter();
+            });
+            
+            // Toggle exclusion groups panel
+            const toggleExclusionGroupsBtn = document.getElementById('toggleExclusionGroups');
+            const exclusionGroupsPanel = document.getElementById('exclusionGroupsPanel');
+            const exclusionToggleArrow = document.getElementById('exclusionToggleArrow');
+            
+            if (toggleExclusionGroupsBtn && exclusionGroupsPanel && exclusionToggleArrow) {
+                toggleExclusionGroupsBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const isHidden = exclusionGroupsPanel.style.display === 'none' || exclusionGroupsPanel.style.display === '';
+                    exclusionGroupsPanel.style.display = isHidden ? 'block' : 'none';
+                    exclusionToggleArrow.textContent = isHidden ? '\u25b2' : '\u25bc'; // ▲ when expanded, ▼ when collapsed
+                });
+            }
+            
+            // Close panel when clicking outside
+            document.addEventListener('click', function(e) {
+                if (exclusionGroupsPanel && 
+                    exclusionGroupsPanel.style.display === 'block' && 
+                    !exclusionGroupsPanel.contains(e.target) && 
+                    !toggleExclusionGroupsBtn.contains(e.target)) {
+                    exclusionGroupsPanel.style.display = 'none';
+                    exclusionToggleArrow.textContent = '\u25bc'; // ▼
                 }
             });
-        }
-        
-        // Apply filter on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            applyExclusionFilter();
-        });
-        
-        // Toggle excluded partners visibility
-        showExcludedCheckbox.addEventListener('change', function() {
-            localStorage.setItem('showExcluded', this.checked);
-            applyExclusionFilter();
-        });
-        
-        // Handle exclusion groups selection
-        exclusionGroupsFilter.addEventListener('change', function() {
-            const selectedGroups = Array.from(this.selectedOptions).map(opt => opt.value);
-            localStorage.setItem('selectedExclusionGroups', JSON.stringify(selectedGroups));
-            applyExclusionFilter();
-        });
-        
-        function applyExclusionFilter() {
-            const showExcluded = showExcludedCheckbox.checked;
-            const selectedGroups = Array.from(exclusionGroupsFilter.selectedOptions).map(opt => opt.value);
-            const allRows = document.querySelectorAll('.partner-main-row, .expandable-row');
-            let visibleCount = 0;
+            
+            function applyExclusionFilter() {
+                const showExcluded = showExcludedCheckbox.checked;
+                const selectedGroups = Array.from(exclusionGroupsFilter.selectedOptions).map(opt => opt.value);
+                const allRows = document.querySelectorAll('.partner-main-row, .expandable-row');
+                let visibleCount = 0;
+                let excludedCount = 0;
             
             allRows.forEach(row => {
                 const exclusionGroupsStr = row.dataset.exclusionGroups || '';
@@ -1183,6 +1285,10 @@
                 
                 if (shouldHide) {
                     row.style.display = 'none';
+                    // Count excluded main rows only
+                    if (row.classList.contains('partner-main-row')) {
+                        excludedCount++;
+                    }
                 } else {
                     row.style.display = '';
                 }
@@ -1195,32 +1301,182 @@
             
             // Update visible count
             document.getElementById('visibleCount').textContent = visibleCount;
+            
+            // Update excluded count
+            const excludedCountEl = document.getElementById('excludedCount');
+            if (excludedCount > 0) {
+                excludedCountEl.textContent = '(' + excludedCount + ')';
+            } else {
+                excludedCountEl.textContent = '';
+            }
         }
         
-        // Toggle expand/collapse row
-                const isNonAlt = status === 'Non-Alternative';
-                
-                if (isNonAlt) {
-                    nonAltCount++;
-                    if (!showNonAlt) {
-                        row.style.display = 'none';
-                        hiddenCount++;
-                    } else {
-                        row.style.display = '';
+        }); // End of DOMContentLoaded
+        
+        // ============================================
+        // EXCLUSION GROUPS MANAGEMENT
+        // ============================================
+        
+        async function addExclusionGroup(partnerId) {
+            const select = document.getElementById('newGroupInput-' + partnerId);
+            
+            if (!select) {
+                alert('Error: Selector not found');
+                return;
+            }
+            
+            // Get all selected options
+            const selectedGroups = Array.from(select.selectedOptions).map(opt => opt.value);
+            
+            if (selectedGroups.length === 0) {
+                alert('Please select at least one exclusion group');
+                return;
+            }
+            
+            try {
+                // Add each selected group to the partner
+                for (const groupName of selectedGroups) {
+                    const response = await fetch(`/seed-partners/api/partners/${partnerId}/exclusion-groups`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ groupName })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!data.success) {
+                        alert('Error adding group "' + groupName + '": ' + data.error);
+                        return;
                     }
-                } else {
-                    row.style.display = '';
                 }
                 
-                // Count visible main rows only
-                if (row.classList.contains('partner-main-row') && row.style.display !== 'none') {
-                    visibleCount++;
+                location.reload(); // Reload to show updated groups
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error adding exclusion groups: ' + error.message);
+            }
+        }
+        
+        async function removeExclusionGroup(partnerId, groupName) {
+            if (!confirm(`Remove "${groupName}" from this partner?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/seed-partners/api/partners/${partnerId}/exclusion-groups/${encodeURIComponent(groupName)}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    location.reload(); // Reload to show updated groups
+                } else {
+                    alert('Error removing group: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error removing exclusion group');
+            }
+        }
+        
+        // Create new exclusion group (adds to master list)
+        function createNewExclusionGroup() {
+            const groupName = prompt('Enter name for new exclusion group:');
+            
+            if (!groupName || !groupName.trim()) {
+                return; // User cancelled or entered empty string
+            }
+            
+            const trimmedName = groupName.trim();
+            
+            // Get existing master list from localStorage
+            let masterGroups = JSON.parse(localStorage.getItem('masterExclusionGroups') || '[]');
+            
+            // Check if already exists
+            if (masterGroups.includes(trimmedName)) {
+                alert(`Exclusion group "${trimmedName}" already exists!`);
+                return;
+            }
+            
+            // Add to master list
+            masterGroups.push(trimmedName);
+            masterGroups.sort(); // Keep alphabetically sorted
+            
+            // Save back to localStorage
+            localStorage.setItem('masterExclusionGroups', JSON.stringify(masterGroups));
+            
+            // Add to the dropdown
+            const dropdown = document.getElementById('exclusionGroupsFilter');
+            if (dropdown) {
+                const option = document.createElement('option');
+                option.value = trimmedName;
+                option.textContent = `${trimmedName} (0)`;
+                option.style.padding = '5px';
+                
+                // Remove "No exclusion groups yet" message if present
+                const noGroupsOption = dropdown.querySelector('option[disabled]');
+                if (noGroupsOption) {
+                    noGroupsOption.remove();
+                }
+                
+                // Insert in alphabetical order
+                let inserted = false;
+                for (let i = 0; i < dropdown.options.length; i++) {
+                    if (dropdown.options[i].value > trimmedName) {
+                        dropdown.insertBefore(option, dropdown.options[i]);
+                        inserted = true;
+                        break;
+                    }
+                }
+                if (!inserted) {
+                    dropdown.appendChild(option);
+                }
+            }
+            
+            alert(`Exclusion group "${trimmedName}" created! You can now assign it to partners.`);
+            
+            // Update all visible exclusion group selectors
+            populateExclusionGroupSelectors();
+        }
+        
+        // Populate exclusion group selectors for partners
+        function populateExclusionGroupSelectors() {
+            // Get master list of all available groups
+            const masterGroups = JSON.parse(localStorage.getItem('masterExclusionGroups') || '[]');
+            const dropdown = document.getElementById('exclusionGroupsFilter');
+            const dbGroups = dropdown ? Array.from(dropdown.options).map(opt => opt.value).filter(v => v) : [];
+            
+            // Combine and deduplicate
+            const allGroups = [...new Set([...masterGroups, ...dbGroups])].sort();
+            
+            // Update all partner exclusion group selectors
+            document.querySelectorAll('.exclusion-group-selector').forEach(selector => {
+                // Get partner's current groups from the data attribute
+                const partnerId = selector.id.replace('newGroupInput-', '');
+                const partnerRow = document.querySelector(`[data-partner-id="${partnerId}"]`);
+                const currentGroups = partnerRow ? (partnerRow.dataset.exclusionGroups || '').split(',').filter(g => g) : [];
+                
+                // Clear and repopulate
+                selector.innerHTML = '';
+                
+                allGroups.forEach(group => {
+                    // Don't show groups that are already assigned
+                    if (!currentGroups.includes(group)) {
+                        const option = document.createElement('option');
+                        option.value = group;
+                        option.textContent = group;
+                        selector.appendChild(option);
+                    }
+                });
+                
+                if (selector.options.length === 0) {
+                    const option = document.createElement('option');
+                    option.disabled = true;
+                    option.textContent = 'All groups assigned or create new ones';
+                    selector.appendChild(option);
                 }
             });
-            
-            // Update counts
-            document.getElementById('visibleCount').textContent = visibleCount;
-            document.getElementById('nonAltCount').textContent = nonAltCount;
         }
         
         // Toggle expand/collapse row
@@ -1236,6 +1492,9 @@
                 // Expanding - show the row first
                 expandRow.classList.add('show');
                 expandBtn.classList.add('expanded');
+                
+                // Populate the exclusion group selector for this partner
+                populateExclusionGroupSelectors();
                 
                 // Gentle scroll only if row is way off screen
                 setTimeout(() => {
