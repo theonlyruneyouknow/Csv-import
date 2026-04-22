@@ -160,7 +160,7 @@ const oregonCompanies = [
 async function addOregonCompanies() {
     try {
         console.log('\n🌱 Adding Oregon seed companies to staging...\n');
-        
+
         // Check if any already exist
         for (const company of oregonCompanies) {
             const exists = await StagedPartner.findOne({ companyName: company.companyName });
@@ -168,31 +168,31 @@ async function addOregonCompanies() {
                 console.log(`⚠️  ${company.companyName} already exists in staging (status: ${exists.reviewStatus})`);
                 continue;
             }
-            
+
             const staged = new StagedPartner(company);
             await staged.save();
             console.log(`✅ Added ${company.companyName} to staging for review`);
         }
-        
+
         console.log('\n✨ Complete! Oregon companies added to staging.');
         console.log('\n📋 Next steps:');
         console.log('   1. Start the server: npm start');
         console.log('   2. Navigate to: http://localhost:3001/staged-partners/review');
         console.log('   3. Review and approve/reject each company\n');
-        
+
         // Show summary
         const pending = await StagedPartner.countDocuments({ reviewStatus: 'pending' });
         const needsInfo = await StagedPartner.countDocuments({ reviewStatus: 'needs_info' });
         const approved = await StagedPartner.countDocuments({ reviewStatus: 'approved' });
         const rejected = await StagedPartner.countDocuments({ reviewStatus: 'rejected' });
-        
+
         console.log('📊 Staging Summary:');
         console.log(`   Pending Review: ${pending}`);
         console.log(`   Needs Info: ${needsInfo}`);
         console.log(`   Approved: ${approved}`);
         console.log(`   Rejected: ${rejected}`);
         console.log('');
-        
+
     } catch (error) {
         console.error('❌ Error adding companies:', error);
     } finally {

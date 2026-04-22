@@ -57,7 +57,7 @@ function generateAllStateCompanies() {
         'WI': { name: 'Wisconsin', nickname: 'Badger', cities: ['Milwaukee', 'Madison', 'Green Bay', 'Kenosha', 'Racine', 'Appleton', 'Waukesha', 'Eau Claire'] },
         'WY': { name: 'Wyoming', nickname: 'Equality', cities: ['Cheyenne', 'Casper', 'Laramie', 'Gillette', 'Rock Springs', 'Sheridan', 'Green River', 'Evanston'] }
     };
-    
+
     const companyTemplates = [
         { prefix: 'Heritage', suffix: 'Seeds', specialty: 'Heirloom' },
         { prefix: 'Pioneer', suffix: 'Seed Company', specialty: 'Regional' },
@@ -68,14 +68,14 @@ function generateAllStateCompanies() {
         { prefix: 'Heartland', suffix: 'Seeds', specialty: 'Cover Crops' },
         { prefix: 'Frontier', suffix: 'Garden Seeds', specialty: 'Open-Pollinated' }
     ];
-    
+
     const result = [];
-    
+
     Object.entries(allStates).forEach(([code, data]) => {
         for (let i = 0; i < 8; i++) {
             const template = companyTemplates[i];
             const companyName = `${data.nickname} ${template.suffix}`;
-            
+
             result.push({
                 company: companyName,
                 city: data.cities[i],
@@ -91,7 +91,7 @@ function generateAllStateCompanies() {
             });
         }
     });
-    
+
     return result;
 }
 
@@ -99,22 +99,22 @@ async function rebuildAllStates() {
     try {
         await mongoose.connect(process.env.MONGODB_URI);
         console.log('✅ Connected to MongoDB\n');
-        
+
         const db = mongoose.connection.db;
         const collection = db.collection('usseedpartners');
-        
+
         // Drop and rebuild
         console.log('🗑️  Dropping existing collection...\n');
-        await collection.drop().catch(() => {});
-        
+        await collection.drop().catch(() => { });
+
         const allCompanies = generateAllStateCompanies();
-        
+
         console.log(`📦 Generating ${allCompanies.length} companies (8 per state × 50 states)\n`);
-        
+
         const documents = allCompanies.map((company, globalIndex) => {
             const isActive = Math.random() > 0.75;
             const verScore = company.verified === 'High' ? 65 : (company.verified === 'Medium' ? 40 : 15);
-            
+
             return {
                 companyName: company.company,
                 partnerCode: `US-${company.stateCode}-${String(company.stateIndex).padStart(3, '0')}`,
@@ -159,39 +159,39 @@ async function rebuildAllStates() {
                 updatedAt: new Date()
             };
         });
-        
+
         console.log(`📦 Inserting ${documents.length} companies...\n`);
-        
+
         const result = await collection.insertMany(documents);
-        
+
         console.log(`✅ Successfully inserted ${result.insertedCount} companies!\n`);
-        
+
         // Statistics
         const byState = {};
         documents.forEach(d => {
             byState[d.stateCode] = (byState[d.stateCode] || 0) + 1;
         });
-        
+
         console.log('📊 FINAL Statistics:');
         console.log(`   Total Companies: ${result.insertedCount}`);
         console.log(`   States Covered: ${Object.keys(byState).length}/50`);
         console.log(`   Companies per State: 8\n`);
-        
+
         console.log('🎯 GOAL ACHIEVED: 8 companies per state across all 50 states!\n');
-        
+
         console.log('📍 Sample States:');
         ['CA', 'TX', 'NY', 'FL', 'IL'].forEach(state => {
             console.log(`   ${state}: ${byState[state]} companies ✓`);
         });
-        
+
         console.log('\n🌐 Sample Companies:');
         documents.slice(0, 5).forEach((doc, i) => {
             console.log(`   ${i + 1}. ${doc.companyName} - ${doc.city}, ${doc.stateCode}`);
             console.log(`      Code: ${doc.partnerCode} |${doc.businessDetails.website}`);
         });
-        
+
         console.log('\n✅ Database rebuild complete! Refresh dashboard at http://localhost:3001/us-seed-partners\n');
-        
+
     } catch (error) {
         console.error('❌ Error:', error);
     } finally {

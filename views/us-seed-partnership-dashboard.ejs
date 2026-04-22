@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+        rel="stylesheet" />
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -280,10 +282,25 @@
             font-weight: 600;
         }
 
-        .badge.prospective { background: #fff3cd; color: #856404; }
-        .badge.active { background: #d4edda; color: #155724; }
-        .badge.on-hold { background: #f8d7da; color: #721c24; }
-        .badge.inactive { background: #e2e3e5; color: #383d41; }
+        .badge.prospective {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.on-hold {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge.inactive {
+            background: #e2e3e5;
+            color: #383d41;
+        }
 
         /* Verification Badges */
         .verification-badge {
@@ -517,6 +534,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <!-- Header -->
@@ -545,27 +563,37 @@
         <div class="stats-grid">
             <div class="stat-card total">
                 <i class="fas fa-flag stat-icon" style="color: #1e3c72;"></i>
-                <div class="stat-number"><%= stats.total %></div>
+                <div class="stat-number">
+                    <%= stats.total %>
+                </div>
                 <div class="stat-label">Total State Partners</div>
             </div>
             <div class="stat-card active">
                 <i class="fas fa-check-circle stat-icon" style="color: #28a745;"></i>
-                <div class="stat-number"><%= stats.active %></div>
+                <div class="stat-number">
+                    <%= stats.active %>
+                </div>
                 <div class="stat-label">Active Partnerships</div>
             </div>
             <div class="stat-card prospective">
                 <i class="fas fa-eye stat-icon" style="color: #ffc107;"></i>
-                <div class="stat-number"><%= stats.prospective %></div>
+                <div class="stat-number">
+                    <%= stats.prospective %>
+                </div>
                 <div class="stat-label">Prospective</div>
             </div>
             <div class="stat-card priority">
                 <i class="fas fa-star stat-icon" style="color: #dc3545;"></i>
-                <div class="stat-number"><%= stats.highPriority %></div>
+                <div class="stat-number">
+                    <%= stats.highPriority %>
+                </div>
                 <div class="stat-label">High Priority</div>
             </div>
             <div class="stat-card websites">
                 <i class="fas fa-globe stat-icon" style="color: #17a2b8;"></i>
-                <div class="stat-number"><%= stats.withWebsites %></div>
+                <div class="stat-number">
+                    <%= stats.withWebsites %>
+                </div>
                 <div class="stat-label">With Websites</div>
             </div>
         </div>
@@ -578,23 +606,25 @@
 
             <!-- Search and Filters -->
             <div class="search-filter-bar">
-                <input type="text" class="search-input" id="searchInput" placeholder="Search by company name, state, or code...">
+                <input type="text" class="search-input" id="searchInput"
+                    placeholder="Search by company name, state, or code...">
                 <select class="filter-select" id="statusFilter">
                     <option value="">All Statuses</option>
-                    <option value="Active" <%= filters.status === 'Active' ? 'selected' : '' %>>Active</option>
-                    <option value="Prospective" <%= filters.status === 'Prospective' ? 'selected' : '' %>>Prospective</option>
-                    <option value="On Hold" <%= filters.status === 'On Hold' ? 'selected' : '' %>>On Hold</option>
-                    <option value="Inactive" <%= filters.status === 'Inactive' ? 'selected' : '' %>>Inactive</option>
+                    <option value="Active" <%=filters.status==='Active' ? 'selected' : '' %>>Active</option>
+                    <option value="Prospective" <%=filters.status==='Prospective' ? 'selected' : '' %>>Prospective
+                    </option>
+                    <option value="On Hold" <%=filters.status==='On Hold' ? 'selected' : '' %>>On Hold</option>
+                    <option value="Inactive" <%=filters.status==='Inactive' ? 'selected' : '' %>>Inactive</option>
                 </select>
                 <select class="filter-select" id="regionFilter" style="width: 160px;">
                     <option value="">All Regions</option>
-                    <option value="Northeast" <%= filters.region === 'Northeast' ? 'selected' : '' %>>Northeast</option>
-                    <option value="Southeast" <%= filters.region === 'Southeast' ? 'selected' : '' %>>Southeast</option>
-                    <option value="Midwest" <%= filters.region === 'Midwest' ? 'selected' : '' %>>Midwest</option>
-                    <option value="Southwest" <%= filters.region === 'Southwest' ? 'selected' : '' %>>Southwest</option>
-                    <option value="West" <%= filters.region === 'West' ? 'selected' : '' %>>West</option>
-                    <option value="Pacific" <%= filters.region === 'Pacific' ? 'selected' : '' %>>Pacific</option>
-                    <option value="Mountain" <%= filters.region === 'Mountain' ? 'selected' : '' %>>Mountain</option>
+                    <option value="Northeast" <%=filters.region==='Northeast' ? 'selected' : '' %>>Northeast</option>
+                    <option value="Southeast" <%=filters.region==='Southeast' ? 'selected' : '' %>>Southeast</option>
+                    <option value="Midwest" <%=filters.region==='Midwest' ? 'selected' : '' %>>Midwest</option>
+                    <option value="Southwest" <%=filters.region==='Southwest' ? 'selected' : '' %>>Southwest</option>
+                    <option value="West" <%=filters.region==='West' ? 'selected' : '' %>>West</option>
+                    <option value="Pacific" <%=filters.region==='Pacific' ? 'selected' : '' %>>Pacific</option>
+                    <option value="Mountain" <%=filters.region==='Mountain' ? 'selected' : '' %>>Mountain</option>
                 </select>
                 <select class="filter-select" id="stateFilter" multiple="multiple" style="width: 250px;">
                     <option value="AL">Alabama (AL)</option>
@@ -666,26 +696,40 @@
                 </thead>
                 <tbody id="partnersTableBody">
                     <% partners.forEach(function(partner) { %>
-                        <tr class="partner-row" data-partner-id="<%= partner._id %>" data-region="<%= partner.region || '' %>" data-state="<%= partner.stateCode || '' %>" onclick="toggleExpandRow('<%= partner._id %>')">
+                        <tr class="partner-row" data-partner-id="<%= partner._id %>"
+                            data-region="<%= partner.region || '' %>" data-state="<%= partner.stateCode || '' %>"
+                            onclick="toggleExpandRow('<%= partner._id %>')">
                             <td>
                                 <div class="company-name" style="display: flex; align-items: center; gap: 6px;">
                                     <% if (partner.businessDetails && partner.businessDetails.website) { %>
-                                        <a href="<%= partner.businessDetails.website %>" target="_blank" class="icon-inline globe" onclick="event.stopPropagation();" title="Visit Website">
+                                        <a href="<%= partner.businessDetails.website %>" target="_blank"
+                                            class="icon-inline globe" onclick="event.stopPropagation();"
+                                            title="Visit Website">
                                             <i class="fas fa-globe"></i>
                                         </a>
-                                    <% } %>
-                                    <i class="fas fa-building icon-inline building"></i>
-                                    <span><%= partner.companyName %></span>
+                                        <% } %>
+                                            <i class="fas fa-building icon-inline building"></i>
+                                            <span>
+                                                <%= partner.companyName %>
+                                            </span>
                                 </div>
                             </td>
                             <td>
-                                <span style="font-weight: 500; color: #2c3e50;"><%= partner.city || 'N/A' %></span>
+                                <span style="font-weight: 500; color: #2c3e50;">
+                                    <%= partner.city || 'N/A' %>
+                                </span>
                             </td>
                             <td>
-                                <span class="state-badge"><%= partner.stateCode %></span>
-                                <small style="color: #666; display: block; margin-top: 3px;"><%= partner.state %></small>
+                                <span class="state-badge">
+                                    <%= partner.stateCode %>
+                                </span>
+                                <small style="color: #666; display: block; margin-top: 3px;">
+                                    <%= partner.state %>
+                                </small>
                             </td>
-                            <td><strong><%= partner.partnerCode %></strong></td>
+                            <td><strong>
+                                    <%= partner.partnerCode %>
+                                </strong></td>
                             <td>
                                 <span class="badge <%= partner.status.toLowerCase().replace(' ', '-') %>">
                                     <%= partner.status %>
@@ -693,52 +737,55 @@
                             </td>
                             <td>
                                 <span class="priority-stars">
-                                    <% for(let i = 0; i < partner.priority; i++) { %>
+                                    <% for(let i=0; i < partner.priority; i++) { %>
                                         <i class="fas fa-star"></i>
-                                    <% } %>
+                                        <% } %>
                                 </span>
                             </td>
                             <td>
-                                <% 
-                                const verScore = partner.verifiedInformation?.overallVerificationScore || 0;
-                                let verBadge = 'needs-verification';
-                                let verText = 'Unverified';
-                                let verIcon = 'fa-question-circle';
-                                if (verScore >= 80) {
+                                <% const verScore=partner.verifiedInformation?.overallVerificationScore || 0; let
+                                    verBadge='needs-verification' ; let verText='Unverified' ; let
+                                    verIcon='fa-question-circle' ; if (verScore>= 80) {
                                     verBadge = 'fully-verified';
                                     verText = verScore + '%';
                                     verIcon = 'fa-check-circle';
-                                } else if (verScore >= 40) {
+                                    } else if (verScore >= 40) {
                                     verBadge = 'partially-verified';
                                     verText = verScore + '%';
                                     verIcon = 'fa-exclamation-circle';
-                                }
-                                %>
-                                <span class="verification-badge <%= verBadge %>" title="Verification Score: <%= verScore %>%">
-                                    <i class="fas <%= verIcon %>"></i> <%= verText %>
-                                </span>
+                                    }
+                                    %>
+                                    <span class="verification-badge <%= verBadge %>"
+                                        title="Verification Score: <%= verScore %>%">
+                                        <i class="fas <%= verIcon %>"></i>
+                                        <%= verText %>
+                                    </span>
                             </td>
                             <td>
                                 <div class="seed-catalog-compact">
-                                    <% if (partner.seedOfferings && partner.seedOfferings.vegetables && partner.seedOfferings.vegetables.length > 0) { %>
+                                    <% if (partner.seedOfferings && partner.seedOfferings.vegetables &&
+                                        partner.seedOfferings.vegetables.length> 0) { %>
                                         <span class="catalog-count vegetables">
                                             🥕 <%= partner.seedOfferings.vegetables.length %>
                                         </span>
-                                    <% } %>
-                                    <% if (partner.seedOfferings && partner.seedOfferings.flowers && partner.seedOfferings.flowers.length > 0) { %>
-                                        <span class="catalog-count flowers">
-                                            🌸 <%= partner.seedOfferings.flowers.length %>
-                                        </span>
-                                    <% } %>
-                                    <% if (partner.seedOfferings && partner.seedOfferings.herbs && partner.seedOfferings.herbs.length > 0) { %>
-                                        <span class="catalog-count herbs">
-                                            🌿 <%= partner.seedOfferings.herbs.length %>
-                                        </span>
-                                    <% } %>
+                                        <% } %>
+                                            <% if (partner.seedOfferings && partner.seedOfferings.flowers &&
+                                                partner.seedOfferings.flowers.length> 0) { %>
+                                                <span class="catalog-count flowers">
+                                                    🌸 <%= partner.seedOfferings.flowers.length %>
+                                                </span>
+                                                <% } %>
+                                                    <% if (partner.seedOfferings && partner.seedOfferings.herbs &&
+                                                        partner.seedOfferings.herbs.length> 0) { %>
+                                                        <span class="catalog-count herbs">
+                                                            🌿 <%= partner.seedOfferings.herbs.length %>
+                                                        </span>
+                                                        <% } %>
                                 </div>
                             </td>
                             <td>
-                                <button class="quick-edit-btn" onclick="event.stopPropagation(); showQuickEdit('<%= partner._id %>')">
+                                <button class="quick-edit-btn"
+                                    onclick="event.stopPropagation(); showQuickEdit('<%= partner._id %>')">
                                     <i class="fas fa-edit"></i> Quick Edit
                                 </button>
                             </td>
@@ -751,213 +798,299 @@
                                             <span class="detail-label">Primary Contact</span>
                                             <span class="detail-value">
                                                 <%= partner.primaryContact?.name || 'Not set' %>
-                                                <% if (partner.primaryContact?.email) { %>
-                                                    <br><small><%= partner.primaryContact.email %></small>
-                                                <% } %>
+                                                    <% if (partner.primaryContact?.email) { %>
+                                                        <br><small>
+                                                            <%= partner.primaryContact.email %>
+                                                        </small>
+                                                        <% } %>
                                             </span>
                                         </div>
                                         <div class="detail-item">
                                             <span class="detail-label">Phone</span>
-                                            <span class="detail-value"><%= partner.primaryContact?.phone || 'Not set' %></span>
+                                            <span class="detail-value">
+                                                <%= partner.primaryContact?.phone || 'Not set' %>
+                                            </span>
                                         </div>
                                         <div class="detail-item">
                                             <span class="detail-label">Region</span>
-                                            <span class="detail-value"><%= partner.region %></span>
+                                            <span class="detail-value">
+                                                <%= partner.region %>
+                                            </span>
                                         </div>
                                         <div class="detail-item">
                                             <span class="detail-label">Partnership Type</span>
-                                            <span class="detail-value"><%= partner.partnershipType %></span>
+                                            <span class="detail-value">
+                                                <%= partner.partnershipType %>
+                                            </span>
                                         </div>
                                         <div class="detail-item">
-                <span class="detail-label">Address</span>
+                                            <span class="detail-label">Address</span>
                                             <span class="detail-value">
                                                 <% if (partner.address && partner.address.city) { %>
-                                                    <%= partner.address.street %>, <%= partner.address.city %>, <%= partner.address.state %> <%= partner.address.zipCode %>
-                                                <% } else { %>
-                                                    Not set
-                                                <% } %>
+                                                    <%= partner.address.street %>, <%= partner.address.city %>, <%=
+                                                                partner.address.state %>
+                                                                <%= partner.address.zipCode %>
+                                                                    <% } else { %>
+                                                                        Not set
+                                                                        <% } %>
                                             </span>
                                         </div>
                                         <div class="detail-item">
                                             <span class="detail-label">Personal Notes</span>
-                                            <span class="detail-value"><%= partner.personalNotes || 'No notes' %></span>
+                                            <span class="detail-value">
+                                                <%= partner.personalNotes || 'No notes' %>
+                                            </span>
                                         </div>
                                     </div>
 
                                     <!-- Seed Catalog Section -->
                                     <div class="seed-catalog-section">
                                         <h4><i class="fas fa-leaf"></i> Seed Catalog</h4>
-                                        
-                                        <% if (partner.seedOfferings && (partner.seedOfferings.vegetables.length > 0 || partner.seedOfferings.flowers.length > 0 || partner.seedOfferings.herbs.length > 0)) { %>
-                                            <% if (partner.seedOfferings.vegetables && partner.seedOfferings.vegetables.length > 0) { %>
+
+                                        <% if (partner.seedOfferings && (partner.seedOfferings.vegetables.length> 0 ||
+                                            partner.seedOfferings.flowers.length > 0 ||
+                                            partner.seedOfferings.herbs.length > 0)) { %>
+                                            <% if (partner.seedOfferings.vegetables &&
+                                                partner.seedOfferings.vegetables.length> 0) { %>
                                                 <div class="catalog-category">
-                                                    <h5 style="color: #e65100;">🥕 Vegetables (<%= partner.seedOfferings.vegetables.length %>)</h5>
+                                                    <h5 style="color: #e65100;">🥕 Vegetables (<%=
+                                                            partner.seedOfferings.vegetables.length %>)</h5>
                                                     <div class="seed-tags">
                                                         <% partner.seedOfferings.vegetables.forEach(function(veg) { %>
-                                                            <span class="seed-tag vegetable"><%= veg %></span>
-                                                        <% }); %>
+                                                            <span class="seed-tag vegetable">
+                                                                <%= veg %>
+                                                            </span>
+                                                            <% }); %>
                                                     </div>
                                                 </div>
-                                            <% } %>
-                                            
-                                            <% if (partner.seedOfferings.flowers && partner.seedOfferings.flowers.length > 0) { %>
-                                                <div class="catalog-category">
-                                                    <h5 style="color: #c2185b;">🌸 Flowers (<%= partner.seedOfferings.flowers.length %>)</h5>
-                                                    <div class="seed-tags">
-                                                        <% partner.seedOfferings.flowers.forEach(function(flower) { %>
-                                                            <span class="seed-tag flower"><%= flower %></span>
-                                                        <% }); %>
-                                                    </div>
-                                                </div>
-                                            <% } %>
-                                            
-                                            <% if (partner.seedOfferings.herbs && partner.seedOfferings.herbs.length > 0) { %>
-                                                <div class="catalog-category">
-                                                    <h5 style="color: #2e7d32;">🌿 Herbs (<%= partner.seedOfferings.herbs.length %>)</h5>
-                                                    <div class="seed-tags">
-                                                        <% partner.seedOfferings.herbs.forEach(function(herb) { %>
-                                                            <span class="seed-tag herb"><%= herb %></span>
-                                                        <% }); %>
-                                                    </div>
-                                                </div>
-                                            <% } %>
-                                        <% } else { %>
-                                            <p style="color: #666; font-style: italic;">No seed offerings recorded yet.</p>
-                                        <% } %>
+                                                <% } %>
+
+                                                    <% if (partner.seedOfferings.flowers &&
+                                                        partner.seedOfferings.flowers.length> 0) { %>
+                                                        <div class="catalog-category">
+                                                            <h5 style="color: #c2185b;">🌸 Flowers (<%=
+                                                                    partner.seedOfferings.flowers.length %>)</h5>
+                                                            <div class="seed-tags">
+                                                                <% partner.seedOfferings.flowers.forEach(function(flower)
+                                                                    { %>
+                                                                    <span class="seed-tag flower">
+                                                                        <%= flower %>
+                                                                    </span>
+                                                                    <% }); %>
+                                                            </div>
+                                                        </div>
+                                                        <% } %>
+
+                                                            <% if (partner.seedOfferings.herbs &&
+                                                                partner.seedOfferings.herbs.length> 0) { %>
+                                                                <div class="catalog-category">
+                                                                    <h5 style="color: #2e7d32;">🌿 Herbs (<%=
+                                                                            partner.seedOfferings.herbs.length %>)</h5>
+                                                                    <div class="seed-tags">
+                                                                        <% partner.seedOfferings.herbs.forEach(function(herb)
+                                                                            { %>
+                                                                            <span class="seed-tag herb">
+                                                                                <%= herb %>
+                                                                            </span>
+                                                                            <% }); %>
+                                                                    </div>
+                                                                </div>
+                                                                <% } %>
+                                                                    <% } else { %>
+                                                                        <p style="color: #666; font-style: italic;">No
+                                                                            seed offerings recorded yet.</p>
+                                                                        <% } %>
                                     </div>
 
                                     <!-- Verification Information Section -->
                                     <% if (partner.verifiedInformation) { %>
-                                    <div class="verification-section" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-                                        <h4><i class="fas fa-shield-alt"></i> Verification Status</h4>
-                                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 12px;">
-                                            <div class="verification-item">
-                                                <strong>Overall Score:</strong>
-                                                <% const vScore = partner.verifiedInformation.overallVerificationScore || 0; %>
-                                                <span class="verification-badge <%= vScore >= 80 ? 'fully-verified' : (vScore >= 40 ? 'partially-verified' : 'needs-verification') %>" style="margin-left: 8px;">
-                                                    <%= vScore %>%
-                                                </span>
-                                            </div>
-                                            <% if (partner.verifiedInformation.companyNameVerified?.isVerified) { %>
-                                            <div class="verification-item">
-                                                <i class="fas fa-check-circle" style="color: #28a745;"></i> Company Name Verified
-                                                <% if (partner.verifiedInformation.companyNameVerified.verifiedDate) { %>
-                                                    <br><small style="color: #666;">Verified: <%= new Date(partner.verifiedInformation.companyNameVerified.verifiedDate).toLocaleDateString() %></small>
-                                                <% } %>
-                                            </div>
-                                            <% } %>
-                                            <% if (partner.verifiedInformation.websiteVerified?.isVerified) { %>
-                                            <div class="verification-item">
-                                                <i class="fas fa-check-circle" style="color: #28a745;"></i> Website Verified
-                                            </div>
-                                            <% } %>
-                                            <% if (partner.verifiedInformation.businessLicenseVerified?.isVerified) { %>
-                                            <div class="verification-item">
-                                                <i class="fas fa-check-circle" style="color: #28a745;"></i> Business License Verified
-                                                <% if (partner.verifiedInformation.businessLicenseVerified.licenseNumber) { %>
-                                                    <br><small style="color: #666;">License: <%= partner.verifiedInformation.businessLicenseVerified.licenseNumber %></small>
-                                                <% } %>
-                                            </div>
-                                            <% } %>
-                                        </div>
-                                    </div>
-                                    <% } %>
-
-                                    <!-- References & Sources Section -->
-                                    <% if (partner.references && partner.references.length > 0) { %>
-                                    <div class="references-section" style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px;">
-                                        <h4><i class="fas fa-book"></i> References & Sources (<%= partner.references.length %>)</h4>
-                                        <div style="margin-top: 12px;">
-                                            <% partner.references.forEach(function(ref, idx) { %>
-                                                <div class="reference-item" style="padding: 10px; background: white; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                                                    <div>
-                                                        <strong><i class="fas fa-link" style="color: #666;"></i> <%= ref.sourceType %></strong>
-                                                        <% if (ref.sourceDescription) { %>
-                                                            <br><small style="color: #666;"><%= ref.sourceDescription %></small>
-                                                        <% } %>
-                                                        <% if (ref.sourceUrl) { %>
-                                                            <br><a href="<%= ref.sourceUrl %>" target="_blank" style="font-size: 12px; color: #007bff;"><%= ref.sourceUrl %></a>
-                                                        <% } %>
-                                                    </div>
-                                                    <div style="text-align: right;">
-                                                        <span class="badge" style="background: <%= ref.reliability === 'High' ? '#28a745' : (ref.reliability === 'Medium' ? '#ffc107' : '#6c757d') %>; color: white; font-size: 10px;">
-                                                            <%= ref.reliability %> Reliability
+                                        <div class="verification-section"
+                                            style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                            <h4><i class="fas fa-shield-alt"></i> Verification Status</h4>
+                                            <div
+                                                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 12px;">
+                                                <div class="verification-item">
+                                                    <strong>Overall Score:</strong>
+                                                    <% const vScore=partner.verifiedInformation.overallVerificationScore
+                                                        || 0; %>
+                                                        <span
+                                                            class="verification-badge <%= vScore >= 80 ? 'fully-verified' : (vScore >= 40 ? 'partially-verified' : 'needs-verification') %>"
+                                                            style="margin-left: 8px;">
+                                                            <%= vScore %>%
                                                         </span>
-                                                        <% if (ref.dateCollected) { %>
-                                                            <br><small style="color: #999; font-size: 11px;">Collected: <%= new Date(ref.dateCollected).toLocaleDateString() %></small>
-                                                        <% } %>
+                                                </div>
+                                                <% if (partner.verifiedInformation.companyNameVerified?.isVerified) { %>
+                                                    <div class="verification-item">
+                                                        <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                                                        Company Name Verified
+                                                        <% if
+                                                            (partner.verifiedInformation.companyNameVerified.verifiedDate)
+                                                            { %>
+                                                            <br><small style="color: #666;">Verified: <%= new
+                                                                    Date(partner.verifiedInformation.companyNameVerified.verifiedDate).toLocaleDateString()
+                                                                    %></small>
+                                                            <% } %>
+                                                    </div>
+                                                    <% } %>
+                                                        <% if (partner.verifiedInformation.websiteVerified?.isVerified)
+                                                            { %>
+                                                            <div class="verification-item">
+                                                                <i class="fas fa-check-circle"
+                                                                    style="color: #28a745;"></i> Website Verified
+                                                            </div>
+                                                            <% } %>
+                                                                <% if
+                                                                    (partner.verifiedInformation.businessLicenseVerified?.isVerified)
+                                                                    { %>
+                                                                    <div class="verification-item">
+                                                                        <i class="fas fa-check-circle"
+                                                                            style="color: #28a745;"></i> Business
+                                                                        License Verified
+                                                                        <% if
+                                                                            (partner.verifiedInformation.businessLicenseVerified.licenseNumber)
+                                                                            { %>
+                                                                            <br><small style="color: #666;">License: <%=
+                                                                                    partner.verifiedInformation.businessLicenseVerified.licenseNumber
+                                                                                    %></small>
+                                                                            <% } %>
+                                                                    </div>
+                                                                    <% } %>
+                                            </div>
+                                        </div>
+                                        <% } %>
+
+                                            <!-- References & Sources Section -->
+                                            <% if (partner.references && partner.references.length> 0) { %>
+                                                <div class="references-section"
+                                                    style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px;">
+                                                    <h4><i class="fas fa-book"></i> References & Sources (<%=
+                                                            partner.references.length %>)</h4>
+                                                    <div style="margin-top: 12px;">
+                                                        <% partner.references.forEach(function(ref, idx) { %>
+                                                            <div class="reference-item"
+                                                                style="padding: 10px; background: white; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                                                                <div>
+                                                                    <strong><i class="fas fa-link"
+                                                                            style="color: #666;"></i>
+                                                                        <%= ref.sourceType %>
+                                                                    </strong>
+                                                                    <% if (ref.sourceDescription) { %>
+                                                                        <br><small style="color: #666;">
+                                                                            <%= ref.sourceDescription %>
+                                                                        </small>
+                                                                        <% } %>
+                                                                            <% if (ref.sourceUrl) { %>
+                                                                                <br><a href="<%= ref.sourceUrl %>"
+                                                                                    target="_blank"
+                                                                                    style="font-size: 12px; color: #007bff;">
+                                                                                    <%= ref.sourceUrl %>
+                                                                                </a>
+                                                                                <% } %>
+                                                                </div>
+                                                                <div style="text-align: right;">
+                                                                    <span class="badge"
+                                                                        style="background: <%= ref.reliability === 'High' ? '#28a745' : (ref.reliability === 'Medium' ? '#ffc107' : '#6c757d') %>; color: white; font-size: 10px;">
+                                                                        <%= ref.reliability %> Reliability
+                                                                    </span>
+                                                                    <% if (ref.dateCollected) { %>
+                                                                        <br><small
+                                                                            style="color: #999; font-size: 11px;">Collected:
+                                                                            <%= new
+                                                                                Date(ref.dateCollected).toLocaleDateString()
+                                                                                %></small>
+                                                                        <% } %>
+                                                                </div>
+                                                            </div>
+                                                            <% }); %>
                                                     </div>
                                                 </div>
-                                            <% }); %>
-                                        </div>
-                                    </div>
-                                    <% } %>
+                                                <% } %>
 
-                                    <!-- Quick Edit Form -->
-                                    <div class="quick-edit-form" id="quick-edit-<%= partner._id %>">
-                                        <h4>Quick Edit - <%= partner.companyName %></h4>
-                                        <form onsubmit="submitQuickEdit(event, '<%= partner._id %>')">
-                                            <div class="form-row">
-                                                <div class="form-group">
-                                                    <label>Company Name</label>
-                                                    <input type="text" name="companyName" value="<%= partner.companyName %>">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Website</label>
-                                                    <input type="url" name="website" value="<%= partner.businessDetails?.website || '' %>">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Status</label>
-                                                    <select name="status">
-                                                        <option value="Prospective" <%= partner.status === 'Prospective' ? 'selected' : '' %>>Prospective</option>
-                                                        <option value="Active" <%= partner.status === 'Active' ? 'selected' : '' %>>Active</option>
-                                                        <option value="On Hold" <%= partner.status === 'On Hold' ? 'selected' : '' %>>On Hold</option>
-                                                        <option value="Inactive" <%= partner.status === 'Inactive' ? 'selected' : '' %>>Inactive</option>
-                                                    </select>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Priority (1-5)</label>
-                                                    <select name="priority">
-                                                        <option value="1" <%= partner.priority === 1 ? 'selected' : '' %>>1 - Low</option>
-                                                        <option value="2" <%= partner.priority === 2 ? 'selected' : '' %>>2</option>
-                                                        <option value="3" <%= partner.priority === 3 ? 'selected' : '' %>>3 - Medium</option>
-                                                        <option value="4" <%= partner.priority === 4 ? 'selected' : '' %>>4</option>
-                                                        <option value="5" <%= partner.priority === 5 ? 'selected' : '' %>>5 - High</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="form-row">
-                                                <div class="form-group">
-                                                    <label>Contact Name</label>
-                                                    <input type="text" name="primaryContactName" value="<%= partner.primaryContact?.name || '' %>">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Contact Email</label>
-                                                    <input type="email" name="primaryContactEmail" value="<%= partner.primaryContact?.email || '' %>">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Contact Phone</label>
-                                                    <input type="tel" name="primaryContactPhone" value="<%= partner.primaryContact?.phone || '' %>">
-                                                </div>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Personal Notes</label>
-                                                <textarea name="personalNotes" rows="3"><%= partner
+                                                    <!-- Quick Edit Form -->
+                                                    <div class="quick-edit-form" id="quick-edit-<%= partner._id %>">
+                                                        <h4>Quick Edit - <%= partner.companyName %>
+                                                        </h4>
+                                                        <form onsubmit="submitQuickEdit(event, '<%= partner._id %>')">
+                                                            <div class="form-row">
+                                                                <div class="form-group">
+                                                                    <label>Company Name</label>
+                                                                    <input type="text" name="companyName"
+                                                                        value="<%= partner.companyName %>">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label>Website</label>
+                                                                    <input type="url" name="website"
+                                                                        value="<%= partner.businessDetails?.website || '' %>">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label>Status</label>
+                                                                    <select name="status">
+                                                                        <option value="Prospective"
+                                                                            <%=partner.status==='Prospective'
+                                                                            ? 'selected' : '' %>>Prospective</option>
+                                                                        <option value="Active"
+                                                                            <%=partner.status==='Active' ? 'selected'
+                                                                            : '' %>>Active</option>
+                                                                        <option value="On Hold"
+                                                                            <%=partner.status==='On Hold' ? 'selected'
+                                                                            : '' %>>On Hold</option>
+                                                                        <option value="Inactive"
+                                                                            <%=partner.status==='Inactive' ? 'selected'
+                                                                            : '' %>>Inactive</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label>Priority (1-5)</label>
+                                                                    <select name="priority">
+                                                                        <option value="1" <%=partner.priority===1
+                                                                            ? 'selected' : '' %>>1 - Low</option>
+                                                                        <option value="2" <%=partner.priority===2
+                                                                            ? 'selected' : '' %>>2</option>
+                                                                        <option value="3" <%=partner.priority===3
+                                                                            ? 'selected' : '' %>>3 - Medium</option>
+                                                                        <option value="4" <%=partner.priority===4
+                                                                            ? 'selected' : '' %>>4</option>
+                                                                        <option value="5" <%=partner.priority===5
+                                                                            ? 'selected' : '' %>>5 - High</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-row">
+                                                                <div class="form-group">
+                                                                    <label>Contact Name</label>
+                                                                    <input type="text" name="primaryContactName"
+                                                                        value="<%= partner.primaryContact?.name || '' %>">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label>Contact Email</label>
+                                                                    <input type="email" name="primaryContactEmail"
+                                                                        value="<%= partner.primaryContact?.email || '' %>">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label>Contact Phone</label>
+                                                                    <input type="tel" name="primaryContactPhone"
+                                                                        value="<%= partner.primaryContact?.phone || '' %>">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label>Personal Notes</label>
+                                                                <textarea name="personalNotes" rows="3"><%= partner
 
 .personalNotes || '' %></textarea>
-                                            </div>
-                                            <div class="form-actions">
-                                                <button type="button" class="btn-cancel" onclick="hideQuickEdit('<%= partner._id %>')">Cancel</button>
-                                                <button type="submit" class="btn-save">
-                                                    <i class="fas fa-save"></i> Save Changes
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
+                                                            </div>
+                                                            <div class="form-actions">
+                                                                <button type="button" class="btn-cancel"
+                                                                    onclick="hideQuickEdit('<%= partner._id %>')">Cancel</button>
+                                                                <button type="submit" class="btn-save">
+                                                                    <i class="fas fa-save"></i> Save Changes
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
                                 </div>
                             </td>
                         </tr>
-                    <% }); %>
+                        <% }); %>
                 </tbody>
             </table>
         </div>
@@ -971,12 +1104,12 @@
         function toggleExpandRow(partnerId) {
             const expandRow = document.getElementById(`expand-${partnerId}`);
             const isCurrentlyExpanded = expandRow.classList.contains('show');
-            
+
             // Close all other expanded rows
             document.querySelectorAll('.expandable-content').forEach(row => {
                 row.classList.remove('show');
             });
-            
+
             // Toggle current row
             if (!isCurrentlyExpanded) {
                 expandRow.classList.add('show');
@@ -993,7 +1126,7 @@
             form.classList.add('show');
             // Scroll to the form
             setTimeout(() => {
-               form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }, 100);
         }
 
@@ -1009,7 +1142,7 @@
             const form = event.target;
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
-            
+
             try {
                 const response = await fetch(`/us-seed-partners/${partnerId}/quick-update`, {
                     method: 'POST',
@@ -1018,9 +1151,9 @@
                     },
                     body: JSON.stringify(data)
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     alert('Partner updated successfully!');
                     window.location.reload();
@@ -1034,20 +1167,20 @@
         }
 
         // Search functionality
-        document.getElementById('searchInput').addEventListener('keyup', function() {
+        document.getElementById('searchInput').addEventListener('keyup', function () {
             filterTable();
         });
 
-        document.getElementById('statusFilter').addEventListener('change', function() {
+        document.getElementById('statusFilter').addEventListener('change', function () {
             filterTable();
         });
 
-        document.getElementById('regionFilter').addEventListener('change', function() {
+        document.getElementById('regionFilter').addEventListener('change', function () {
             filterTable();
         });
 
         // Initialize Select2 for state filter
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#stateFilter').select2({
                 theme: 'bootstrap-5',
                 placeholder: 'Filter by State(s)...',
@@ -1055,8 +1188,8 @@
                 closeOnSelect: false,
                 width: '250px'
             });
-            
-            $('#stateFilter').on('change', function() {
+
+            $('#stateFilter').on('change', function () {
                 filterTable();
             });
         });
@@ -1066,9 +1199,9 @@
             const statusFilter = document.getElementById('statusFilter').value;
             const regionFilter = document.getElementById('regionFilter').value;
             const stateFilter = $('#stateFilter').val() || []; // Get array of selected states
-            
+
             const rows = document.querySelectorAll('.partner-row');
-            
+
             rows.forEach(row => {
                 const companyName = row.querySelector('.company-name span').textContent.toLowerCase();
                 const state = row.querySelector('.state-badge').textContent.toLowerCase();
@@ -1076,32 +1209,32 @@
                 const status = row.querySelector('.badge').textContent.trim();
                 const region = row.dataset.region || '';
                 const stateCode = row.dataset.state || '';
-                
+
                 const partnerId = row.dataset.partnerId;
                 const expandRow = document.getElementById(`expand-${partnerId}`);
-                
+
                 let showRow = true;
-                
+
                 // Search filter
                 if (searchTerm && !companyName.includes(searchTerm) && !state.includes(searchTerm) && !code.includes(searchTerm)) {
                     showRow = false;
                 }
-                
+
                 // Status filter
                 if (statusFilter && status !== statusFilter) {
                     showRow = false;
                 }
-                
+
                 // Region filter
                 if (regionFilter && region !== regionFilter) {
                     showRow = false;
                 }
-                
+
                 // State filter (multi-select)
                 if (stateFilter.length > 0 && !stateFilter.includes(stateCode)) {
                     showRow = false;
                 }
-                
+
                 if (showRow) {
                     row.style.display = '';
                     if (expandRow) expandRow.style.display = '';
@@ -1113,4 +1246,5 @@
         }
     </script>
 </body>
+
 </html>

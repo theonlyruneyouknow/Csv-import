@@ -221,7 +221,7 @@ const recipeUpload = multer({
         const allowedTypes = /jpeg|jpg|png|gif/;
         const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
         const mimetype = allowedTypes.test(file.mimetype);
-        
+
         if (mimetype && extname) {
             return cb(null, true);
         } else {
@@ -238,7 +238,7 @@ app.post('/api/recipes', recipeUpload.single('image'), async (req, res) => {
         console.log('File:', req.file);
 
         const Recipe = require('./models/Recipe');
-        
+
         // Parse JSON fields
         const ingredients = req.body.ingredients ? JSON.parse(req.body.ingredients) : [];
         const instructions = req.body.instructions ? JSON.parse(req.body.instructions) : [];
@@ -287,17 +287,17 @@ app.post('/api/recipes', recipeUpload.single('image'), async (req, res) => {
         await recipe.save();
 
         console.log('✅ Recipe created successfully:', recipe._id);
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             message: 'Recipe created successfully!',
-            recipeId: recipe._id 
+            recipeId: recipe._id
         });
 
     } catch (error) {
         console.error('❌ Error creating recipe:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: error.message || 'Error creating recipe' 
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Error creating recipe'
         });
     }
 });
@@ -310,9 +310,9 @@ app.get('/api/recipes', async (req, res) => {
         res.json({ success: true, recipes });
     } catch (error) {
         console.error('❌ Error fetching recipes:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error fetching recipes' 
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching recipes'
         });
     }
 });
@@ -322,20 +322,20 @@ app.get('/api/recipes/:id', async (req, res) => {
     try {
         const Recipe = require('./models/Recipe');
         const recipe = await Recipe.findById(req.params.id);
-        
+
         if (!recipe) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Recipe not found' 
+            return res.status(404).json({
+                success: false,
+                message: 'Recipe not found'
             });
         }
-        
+
         res.json({ success: true, recipe });
     } catch (error) {
         console.error('❌ Error fetching recipe:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error fetching recipe' 
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching recipe'
         });
     }
 });
@@ -345,11 +345,11 @@ app.put('/api/recipes/:id', recipeUpload.single('image'), async (req, res) => {
     try {
         const Recipe = require('./models/Recipe');
         const recipe = await Recipe.findById(req.params.id);
-        
+
         if (!recipe) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Recipe not found' 
+            return res.status(404).json({
+                success: false,
+                message: 'Recipe not found'
             });
         }
 
@@ -396,19 +396,19 @@ app.put('/api/recipes/:id', recipeUpload.single('image'), async (req, res) => {
         });
 
         await recipe.save();
-        
+
         console.log('✅ Recipe updated successfully:', recipe._id);
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             message: 'Recipe updated successfully!',
-            recipe 
+            recipe
         });
 
     } catch (error) {
         console.error('❌ Error updating recipe:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: error.message || 'Error updating recipe' 
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Error updating recipe'
         });
     }
 });
@@ -418,11 +418,11 @@ app.delete('/api/recipes/:id', async (req, res) => {
     try {
         const Recipe = require('./models/Recipe');
         const recipe = await Recipe.findByIdAndDelete(req.params.id);
-        
+
         if (!recipe) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Recipe not found' 
+            return res.status(404).json({
+                success: false,
+                message: 'Recipe not found'
             });
         }
 
@@ -433,18 +433,18 @@ app.delete('/api/recipes/:id', async (req, res) => {
                 fs.unlinkSync(imagePath);
             }
         }
-        
+
         console.log('✅ Recipe deleted successfully:', recipe._id);
-        res.json({ 
-            success: true, 
-            message: 'Recipe deleted successfully!' 
+        res.json({
+            success: true,
+            message: 'Recipe deleted successfully!'
         });
 
     } catch (error) {
         console.error('❌ Error deleting recipe:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error deleting recipe' 
+        res.status(500).json({
+            success: false,
+            message: 'Error deleting recipe'
         });
     }
 });
@@ -1089,7 +1089,7 @@ app.get('/statistics/debug/list-all', async (req, res) => {
             .select('periodType periodStart periodEnd generatedAt purchaseOrders.total lineItems.total')
             .sort({ periodStart: -1 })
             .limit(50);
-        
+
         res.json({
             success: true,
             count: allStats.length,
@@ -1422,14 +1422,14 @@ app.post('/api/keepalive', (req, res) => {
     if (req.isAuthenticated()) {
         // Touch the session to refresh its expiration
         req.session.touch();
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             authenticated: true,
             sessionID: req.sessionID ? req.sessionID.substring(0, 8) + '...' : null
         });
     } else {
-        res.status(401).json({ 
-            success: false, 
+        res.status(401).json({
+            success: false,
             authenticated: false,
             message: 'Session expired'
         });
@@ -1466,7 +1466,7 @@ app.post('/api/import-netsuite', ensureAuthenticated, async (req, res) => {
 
         // Parse the pasted NetSuite data
         const lines = data.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-        
+
         if (lines.length < 2) {
             return res.status(400).json({ success: false, error: 'Insufficient data. Please paste the line items table with headers.' });
         }
@@ -1474,7 +1474,7 @@ app.post('/api/import-netsuite', ensureAuthenticated, async (req, res) => {
         // Detect format: headers in single line (tab-separated) or separate lines
         const firstLine = lines[0];
         const isTabDelimited = firstLine.includes('\t');
-        
+
         let headers = [];
         let dataStartIndex = 0;
 
@@ -1488,7 +1488,7 @@ app.post('/api/import-netsuite', ensureAuthenticated, async (req, res) => {
             // Look for common header patterns
             const headerPatterns = ['Item', 'Vendor Name', 'Quantity', 'Description', 'Rate', 'Amount'];
             let headerEndIndex = 0;
-            
+
             for (let i = 0; i < Math.min(lines.length, 20); i++) {
                 if (headerPatterns.some(pattern => lines[i].toLowerCase().includes(pattern.toLowerCase()))) {
                     headers.push(lines[i]);
@@ -1498,7 +1498,7 @@ app.post('/api/import-netsuite', ensureAuthenticated, async (req, res) => {
                     break;
                 }
             }
-            
+
             dataStartIndex = headerEndIndex;
             console.log('   Format: Separate line headers');
         }
@@ -1510,7 +1510,7 @@ app.post('/api/import-netsuite', ensureAuthenticated, async (req, res) => {
         const lineItems = [];
         for (let i = dataStartIndex; i < lines.length; i++) {
             const line = lines[i];
-            
+
             // Skip lines that look like totals or empty
             if (!line || line.toLowerCase().includes('total') || line.length < 10) {
                 continue;
@@ -1518,7 +1518,7 @@ app.post('/api/import-netsuite', ensureAuthenticated, async (req, res) => {
 
             // Split by tabs if tab-delimited
             const values = isTabDelimited ? line.split('\t') : [line];
-            
+
             if (values.length >= 3) {
                 // Extract key fields (adjust indices based on your NetSuite format)
                 const item = values[0] || '';
@@ -1677,7 +1677,7 @@ app.get('/simple-test-route', (req, res) => {
 app.get('/manage-po-urls', ensureAuthenticated, ensureApproved, (req, res) => {
     console.log('🔗 === MANAGE PO URLS ROUTE HIT ===');
     console.log('🔗 User:', req.user?.username);
-    
+
     try {
         res.render('manage-urls', {
             user: req.user
@@ -1695,7 +1695,7 @@ app.get('/manage-email-templates', ensureAuthenticated, ensureApproved, (req, re
     console.log('📧 User:', req.user?.username);
     console.log('📧 User approved:', req.user?.approved);
     console.log('📧 Attempting to render: email-templates');
-    
+
     try {
         res.render('email-templates', {
             user: req.user
@@ -1711,7 +1711,7 @@ app.get('/manage-email-templates', ensureAuthenticated, ensureApproved, (req, re
 app.get('/test-email-templates', (req, res) => {
     console.log('🧪 === TEST EMAIL TEMPLATES ROUTE HIT (NO AUTH) ===');
     console.log('🧪 Attempting to render: email-templates');
-    
+
     try {
         res.render('email-templates', {
             user: { username: 'test', approved: true }
@@ -1734,13 +1734,13 @@ app.get('/food-dashboard', ensureAuthenticated, ensureApproved, async (req, res)
         // Get basic stats for the dashboard
         const recipes = await Recipe.countDocuments();
         const favoriteRecipes = await Recipe.countDocuments({ isFavorite: true });
-        
+
         // Shopping lists stats
-        const activeLists = await ShoppingList.countDocuments({ 
-            status: { $in: ['Planning', 'Ready', 'Shopping'] } 
+        const activeLists = await ShoppingList.countDocuments({
+            status: { $in: ['Planning', 'Ready', 'Shopping'] }
         });
-        const shoppingLists = await ShoppingList.find({ 
-            status: { $in: ['Planning', 'Ready', 'Shopping'] } 
+        const shoppingLists = await ShoppingList.find({
+            status: { $in: ['Planning', 'Ready', 'Shopping'] }
         });
         const itemsPending = shoppingLists.reduce((total, list) => {
             return total + list.items.filter(item => !item.isPurchased).length;
@@ -1751,13 +1751,13 @@ app.get('/food-dashboard', ensureAuthenticated, ensureApproved, async (req, res)
 
         // Meal plan stats
         const mealPlans = await MealPlan.countDocuments();
-        const activeMealPlans = await MealPlan.find({ 
-            endDate: { $gte: new Date() } 
+        const activeMealPlans = await MealPlan.find({
+            endDate: { $gte: new Date() }
         });
         const mealsPlanned = activeMealPlans.reduce((total, plan) => {
             return total + (plan.meals ? plan.meals.length : 0);
         }, 0);
-        
+
         // Calculate days ahead for meal plans
         let maxDaysAhead = 0;
         activeMealPlans.forEach(plan => {
@@ -2291,13 +2291,13 @@ app.use((err, req, res, next) => {
 app.use((req, res) => {
     // If it's an AJAX/API request, return JSON error instead of redirect
     if (req.xhr || req.headers.accept?.indexOf('json') > -1 || req.path.startsWith('/api')) {
-        return res.status(404).json({ 
+        return res.status(404).json({
             success: false,
             error: 'Not found',
-            path: req.originalUrl 
+            path: req.originalUrl
         });
     }
-    
+
     req.flash('info', `The page "${req.originalUrl}" was not found. Here's what you can do from here:`);
     res.redirect('/splash');
 });
@@ -2836,38 +2836,38 @@ cron.schedule('0 0 * * *', async () => {
     try {
         const DailyStatistics = require('./models/DailyStatistics');
         const PurchaseOrder = require('./models/PurchaseOrder');
-        
+
         // Generate yesterday's stats (the day that just ended)
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         yesterday.setHours(0, 0, 0, 0);
-        
+
         const today = new Date(yesterday);
         today.setDate(today.getDate() + 1);
-        
+
         // Check if stats already exist
         const existingStats = await DailyStatistics.findOne({
             periodType: 'daily',
             periodStart: yesterday,
             periodEnd: today
         });
-        
+
         if (!existingStats) {
             // Trigger generation by making internal call
             // Use 127.0.0.1 which works in all environments
             const host = process.env.RENDER ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` : `http://127.0.0.1:${PORT}`;
             const fetch = require('node-fetch');
-            
+
             const response = await fetch(`${host}/statistics/generate-stats`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    force: true, 
+                body: JSON.stringify({
+                    force: true,
                     periodType: 'daily',
                     referenceDate: yesterday.toISOString()
                 })
             });
-            
+
             const result = await response.json();
             if (result.success) {
                 console.log('✅ Daily statistics auto-generated for', yesterday.toDateString());

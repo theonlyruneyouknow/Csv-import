@@ -169,30 +169,30 @@ async function addCompaniesToStaging() {
     try {
         await mongoose.connect(process.env.MONGODB_URI);
         console.log('✅ Connected to MongoDB');
-        
+
         let added = 0;
         let skipped = 0;
-        
+
         for (const company of newCompanies) {
             // Check for duplicates
-            const existing = await StagedPartner.findOne({ 
-                companyName: company.companyName 
+            const existing = await StagedPartner.findOne({
+                companyName: company.companyName
             });
-            
+
             if (existing) {
                 console.log(`⏭️  Skipped ${company.companyName} - already in staging`);
                 skipped++;
                 continue;
             }
-            
+
             const newEntry = new StagedPartner(company);
             await newEntry.save();
             console.log(`✅ Added ${company.companyName} (${company.city}, ${company.stateCode}) to staging`);
             added++;
         }
-        
+
         console.log(`\n✨ Complete! Added ${added} companies, skipped ${skipped} duplicates.\n`);
-        
+
         // Show summary
         const counts = {
             pending: await StagedPartner.countDocuments({ reviewStatus: 'pending' }),
@@ -200,20 +200,20 @@ async function addCompaniesToStaging() {
             rejected: await StagedPartner.countDocuments({ reviewStatus: 'rejected' }),
             needs_info: await StagedPartner.countDocuments({ reviewStatus: 'needs_info' })
         };
-        
+
         console.log('📊 Staging Summary:');
         console.log(`   Pending Review: ${counts.pending}`);
         console.log(`   Needs Info: ${counts.needs_info}`);
         console.log(`   Approved: ${counts.approved}`);
         console.log(`   Rejected: ${counts.rejected}\n`);
-        
+
         console.log('🗺️  Geographic Coverage:');
         console.log('   Virginia: Southern Exposure Seed Exchange');
         console.log('   New York: Hudson Valley Seed Company');
         console.log('   Iowa: Seed Savers Exchange');
         console.log('   Maine: Pinetree Garden Seeds');
         console.log('   North Carolina: Annie\'s Heirloom Seeds\n');
-        
+
         process.exit(0);
     } catch (error) {
         console.error('❌ Error:', error);

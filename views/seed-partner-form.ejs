@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= isEdit ? 'Edit Partner' : 'New Partner' %> - World Seed Partnership</title>
+    <title>
+        <%= isEdit ? 'Edit Partner' : 'New Partner' %> - World Seed Partnership
+    </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -149,6 +152,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="form-header">
@@ -159,7 +163,7 @@
         </div>
 
         <form action="<%= isEdit ? `/seed-partners/${partner._id}/edit` : '/seed-partners/new' %>" method="POST">
-            
+
             <!-- Top Action Buttons -->
             <div class="top-actions">
                 <a href="/seed-partners" class="btn-cancel">
@@ -180,14 +184,13 @@
                 <div class="row">
                     <div class="col-md-8 mb-3">
                         <label class="form-label">Company Name <span class="required">*</span></label>
-                        <input type="text" class="form-control" name="companyName" 
-                               value="<%= isEdit ? partner.companyName : '' %>" required>
+                        <input type="text" class="form-control" name="companyName"
+                            value="<%= isEdit ? partner.companyName : '' %>" required>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Partner Code <span class="required">*</span></label>
-                        <input type="text" class="form-control" name="partnerCode" 
-                               value="<%= isEdit ? partner.partnerCode : '' %>" required
-                               placeholder="e.g., DSI-NL-001">
+                        <input type="text" class="form-control" name="partnerCode"
+                            value="<%= isEdit ? partner.partnerCode : '' %>" required placeholder="e.g., DSI-NL-001">
                     </div>
                 </div>
                 <div class="row">
@@ -195,54 +198,74 @@
                         <label class="form-label">Partnership Type <span class="required">*</span></label>
                         <select class="form-select" name="partnershipType" required>
                             <option value="">Select Type</option>
-                            <option value="International Supplier" <%= isEdit && partner.partnershipType === 'International Supplier' ? 'selected' : '' %>>International Supplier</option>
-                            <option value="Domestic Supplier" <%= isEdit && partner.partnershipType === 'Domestic Supplier' ? 'selected' : '' %>>Domestic Supplier</option>
-                            <option value="International Client" <%= isEdit && partner.partnershipType === 'International Client' ? 'selected' : '' %>>International Client</option>
-                            <option value="Domestic Client" <%= isEdit && partner.partnershipType === 'Domestic Client' ? 'selected' : '' %>>Domestic Client</option>
-                            <option value="Both Supplier & Client" <%= isEdit && partner.partnershipType === 'Both Supplier & Client' ? 'selected' : '' %>>Both Supplier & Client</option>
+                            <option value="International Supplier" <%=isEdit &&
+                                partner.partnershipType==='International Supplier' ? 'selected' : '' %>>International
+                                Supplier</option>
+                            <option value="Domestic Supplier" <%=isEdit && partner.partnershipType==='Domestic Supplier'
+                                ? 'selected' : '' %>>Domestic Supplier</option>
+                            <option value="International Client" <%=isEdit &&
+                                partner.partnershipType==='International Client' ? 'selected' : '' %>>International
+                                Client</option>
+                            <option value="Domestic Client" <%=isEdit && partner.partnershipType==='Domestic Client'
+                                ? 'selected' : '' %>>Domestic Client</option>
+                            <option value="Both Supplier & Client" <%=isEdit &&
+                                partner.partnershipType==='Both Supplier & Client' ? 'selected' : '' %>>Both Supplier &
+                                Client</option>
                         </select>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Status <span class="required">*</span></label>
                         <select class="form-select" name="status" required>
-                            <option value="Prospective" <%= isEdit && partner.status === 'Prospective' ? 'selected' : '' %>>Prospective</option>
-                            <option value="Active" <%= isEdit && partner.status === 'Active' ? 'selected' : '' %>>Active</option>
-                            <option value="On Hold" <%= isEdit && partner.status === 'On Hold' ? 'selected' : '' %>>On Hold</option>
-                            <option value="Inactive" <%= isEdit && partner.status === 'Inactive' ? 'selected' : '' %>>Inactive</option>
-                            <option value="Terminated" <%= isEdit && partner.status === 'Terminated' ? 'selected' : '' %>>Terminated</option>
-                            <option value="Non-Alternative" <%= isEdit && partner.status === 'Non-Alternative' ? 'selected' : '' %>>Non-Alternative</option>
+                            <option value="Prospective" <%=isEdit && partner.status==='Prospective' ? 'selected' : '' %>
+                                >Prospective</option>
+                            <option value="Active" <%=isEdit && partner.status==='Active' ? 'selected' : '' %>>Active
+                            </option>
+                            <option value="On Hold" <%=isEdit && partner.status==='On Hold' ? 'selected' : '' %>>On Hold
+                            </option>
+                            <option value="Inactive" <%=isEdit && partner.status==='Inactive' ? 'selected' : '' %>
+                                >Inactive</option>
+                            <option value="Terminated" <%=isEdit && partner.status==='Terminated' ? 'selected' : '' %>
+                                >Terminated</option>
+                            <option value="Non-Alternative" <%=isEdit && partner.status==='Non-Alternative' ? 'selected'
+                                : '' %>>Non-Alternative</option>
                         </select>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Country <span class="required">*</span></label>
-                        <input type="text" class="form-control" name="country" 
-                               value="<%= isEdit ? partner.country : '' %>" required>
+                        <input type="text" class="form-control" name="country"
+                            value="<%= isEdit ? partner.country : '' %>" required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Region <span class="required">*</span></label>
                         <select class="form-select" name="region" required>
                             <option value="">Select Region</option>
-                            <option value="North America" <%= isEdit && partner.region === 'North America' ? 'selected' : '' %>>North America</option>
-                            <option value="South America" <%= isEdit && partner.region === 'South America' ? 'selected' : '' %>>South America</option>
-                            <option value="Europe" <%= isEdit && partner.region === 'Europe' ? 'selected' : '' %>>Europe</option>
-                            <option value="Asia" <%= isEdit && partner.region === 'Asia' ? 'selected' : '' %>>Asia</option>
-                            <option value="Africa" <%= isEdit && partner.region === 'Africa' ? 'selected' : '' %>>Africa</option>
-                            <option value="Australia/Oceania" <%= isEdit && partner.region === 'Australia/Oceania' ? 'selected' : '' %>>Australia/Oceania</option>
-                            <option value="Middle East" <%= isEdit && partner.region === 'Middle East' ? 'selected' : '' %>>Middle East</option>
+                            <option value="North America" <%=isEdit && partner.region==='North America' ? 'selected'
+                                : '' %>>North America</option>
+                            <option value="South America" <%=isEdit && partner.region==='South America' ? 'selected'
+                                : '' %>>South America</option>
+                            <option value="Europe" <%=isEdit && partner.region==='Europe' ? 'selected' : '' %>>Europe
+                            </option>
+                            <option value="Asia" <%=isEdit && partner.region==='Asia' ? 'selected' : '' %>>Asia</option>
+                            <option value="Africa" <%=isEdit && partner.region==='Africa' ? 'selected' : '' %>>Africa
+                            </option>
+                            <option value="Australia/Oceania" <%=isEdit && partner.region==='Australia/Oceania'
+                                ? 'selected' : '' %>>Australia/Oceania</option>
+                            <option value="Middle East" <%=isEdit && partner.region==='Middle East' ? 'selected' : '' %>
+                                >Middle East</option>
                         </select>
                     </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Priority (1-5, where 1 is highest)</label>
                     <input type="number" class="form-control" name="priority" min="1" max="5"
-                           value="<%= isEdit ? partner.priority : 3 %>">
+                        value="<%= isEdit ? partner.priority : 3 %>">
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Personal Notes</label>
                     <textarea class="form-control" name="personalNotes" rows="3"
-                              placeholder="Add your personal notes about this company..."><%= isEdit && partner.personalNotes ? partner.personalNotes : '' %></textarea>
+                        placeholder="Add your personal notes about this company..."><%= isEdit && partner.personalNotes ? partner.personalNotes : '' %></textarea>
                     <small class="form-text text-muted">Private notes for your reference about this partner</small>
                 </div>
             </div>
@@ -254,20 +277,20 @@
                     Seed Specializations
                 </div>
                 <div class="seed-types-checkboxes">
-                    <% 
-                    const seedTypeOptions = [
-                        'Vegetable Seeds', 'Flower Seeds', 'Herb Seeds', 'Grain Seeds',
-                        'Cover Crop Seeds', 'Organic Seeds', 'Hybrid Seeds', 'Heirloom Seeds',
-                        'GMO Seeds', 'Native Seeds', 'Wildflower Seeds', 'Lawn & Turf Seeds', 'Other'
-                    ];
-                    seedTypeOptions.forEach(seedType => { 
-                    %>
+                    <% const seedTypeOptions=[ 'Vegetable Seeds' , 'Flower Seeds' , 'Herb Seeds' , 'Grain Seeds'
+                        , 'Cover Crop Seeds' , 'Organic Seeds' , 'Hybrid Seeds' , 'Heirloom Seeds' , 'GMO Seeds'
+                        , 'Native Seeds' , 'Wildflower Seeds' , 'Lawn & Turf Seeds' , 'Other' ];
+                        seedTypeOptions.forEach(seedType=> {
+                        %>
                         <div class="seed-type-option">
-                            <input type="checkbox" name="seedTypes" value="<%= seedType %>" id="seed-<%= seedType.replace(/\s/g, '') %>"
-                                   <%= isEdit && partner.seedTypes && partner.seedTypes.includes(seedType) ? 'checked' : '' %>>
-                            <label for="seed-<%= seedType.replace(/\s/g, '') %>"><%= seedType %></label>
+                            <input type="checkbox" name="seedTypes" value="<%= seedType %>"
+                                id="seed-<%= seedType.replace(/\s/g, '') %>" <%=isEdit && partner.seedTypes &&
+                                partner.seedTypes.includes(seedType) ? 'checked' : '' %>>
+                            <label for="seed-<%= seedType.replace(/\s/g, '') %>">
+                                <%= seedType %>
+                            </label>
                         </div>
-                    <% }) %>
+                        <% }) %>
                 </div>
             </div>
 
@@ -280,43 +303,43 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Name</label>
-                        <input type="text" class="form-control" name="primaryContactName" 
-                               value="<%= isEdit && partner.primaryContact ? partner.primaryContact.name : '' %>">
+                        <input type="text" class="form-control" name="primaryContactName"
+                            value="<%= isEdit && partner.primaryContact ? partner.primaryContact.name : '' %>">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Title</label>
-                        <input type="text" class="form-control" name="primaryContactTitle" 
-                               value="<%= isEdit && partner.primaryContact ? partner.primaryContact.title : '' %>">
+                        <input type="text" class="form-control" name="primaryContactTitle"
+                            value="<%= isEdit && partner.primaryContact ? partner.primaryContact.title : '' %>">
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Email</label>
-                        <input type="email" class="form-control" name="primaryContactEmail" 
-                               value="<%= isEdit && partner.primaryContact ? partner.primaryContact.email : '' %>">
+                        <input type="email" class="form-control" name="primaryContactEmail"
+                            value="<%= isEdit && partner.primaryContact ? partner.primaryContact.email : '' %>">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Phone</label>
-                        <input type="tel" class="form-control" name="primaryContactPhone" 
-                               value="<%= isEdit && partner.primaryContact ? partner.primaryContact.phone : '' %>">
+                        <input type="tel" class="form-control" name="primaryContactPhone"
+                            value="<%= isEdit && partner.primaryContact ? partner.primaryContact.phone : '' %>">
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Mobile</label>
-                        <input type="tel" class="form-control" name="primaryContactMobile" 
-                               value="<%= isEdit && partner.primaryContact ? partner.primaryContact.mobile : '' %>">
+                        <input type="tel" class="form-control" name="primaryContactMobile"
+                            value="<%= isEdit && partner.primaryContact ? partner.primaryContact.mobile : '' %>">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">WhatsApp</label>
-                        <input type="tel" class="form-control" name="primaryContactWhatsapp" 
-                               value="<%= isEdit && partner.primaryContact ? partner.primaryContact.whatsapp : '' %>">
+                        <input type="tel" class="form-control" name="primaryContactWhatsapp"
+                            value="<%= isEdit && partner.primaryContact ? partner.primaryContact.whatsapp : '' %>">
                     </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Preferred Language</label>
-                    <input type="text" class="form-control" name="primaryContactLanguage" 
-                           value="<%= isEdit && partner.primaryContact ? partner.primaryContact.preferredLanguage : 'English' %>">
+                    <input type="text" class="form-control" name="primaryContactLanguage"
+                        value="<%= isEdit && partner.primaryContact ? partner.primaryContact.preferredLanguage : 'English' %>">
                 </div>
             </div>
 
@@ -328,29 +351,29 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Street Address</label>
-                    <input type="text" class="form-control" name="addressStreet" 
-                           value="<%= isEdit && partner.address ? partner.address.street : '' %>">
+                    <input type="text" class="form-control" name="addressStreet"
+                        value="<%= isEdit && partner.address ? partner.address.street : '' %>">
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Street Address 2</label>
-                    <input type="text" class="form-control" name="addressStreet2" 
-                           value="<%= isEdit && partner.address ? partner.address.street2 : '' %>">
+                    <input type="text" class="form-control" name="addressStreet2"
+                        value="<%= isEdit && partner.address ? partner.address.street2 : '' %>">
                 </div>
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label">City</label>
-                        <input type="text" class="form-control" name="addressCity" 
-                               value="<%= isEdit && partner.address ? partner.address.city : '' %>">
+                        <input type="text" class="form-control" name="addressCity"
+                            value="<%= isEdit && partner.address ? partner.address.city : '' %>">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label">State/Province</label>
-                        <input type="text" class="form-control" name="addressState" 
-                               value="<%= isEdit && partner.address ? partner.address.state : '' %>">
+                        <input type="text" class="form-control" name="addressState"
+                            value="<%= isEdit && partner.address ? partner.address.state : '' %>">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Postal Code</label>
-                        <input type="text" class="form-control" name="addressPostalCode" 
-                               value="<%= isEdit && partner.address ? partner.address.postalCode : '' %>">
+                        <input type="text" class="form-control" name="addressPostalCode"
+                            value="<%= isEdit && partner.address ? partner.address.postalCode : '' %>">
                     </div>
                 </div>
             </div>
@@ -364,23 +387,24 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Website</label>
-                        <input type="url" class="form-control" name="website" 
-                               value="<%= isEdit && partner.businessDetails ? partner.businessDetails.website : '' %>">
+                        <input type="url" class="form-control" name="website"
+                            value="<%= isEdit && partner.businessDetails ? partner.businessDetails.website : '' %>">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Year Established</label>
                         <input type="number" class="form-control" name="yearEstablished" min="1800" max="2025"
-                               value="<%= isEdit && partner.businessDetails ? partner.businessDetails.yearEstablished : '' %>">
+                            value="<%= isEdit && partner.businessDetails ? partner.businessDetails.yearEstablished : '' %>">
                     </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Number of Employees</label>
-                    <input type="text" class="form-control" name="numberOfEmployees" 
-                           value="<%= isEdit && partner.businessDetails ? partner.businessDetails.numberOfEmployees : '' %>">
+                    <input type="text" class="form-control" name="numberOfEmployees"
+                        value="<%= isEdit && partner.businessDetails ? partner.businessDetails.numberOfEmployees : '' %>">
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Company Profile</label>
-                    <textarea class="form-control" name="companyProfile" rows="4"><%= isEdit && partner.businessDetails ? partner.businessDetails.companyProfile : '' %></textarea>
+                    <textarea class="form-control" name="companyProfile"
+                        rows="4"><%= isEdit && partner.businessDetails ? partner.businessDetails.companyProfile : '' %></textarea>
                 </div>
             </div>
 
@@ -393,30 +417,47 @@
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Currency</label>
-                        <input type="text" class="form-control" name="currency" 
-                               value="<%= isEdit && partner.financialTerms ? partner.financialTerms.currency : 'USD' %>">
+                        <input type="text" class="form-control" name="currency"
+                            value="<%= isEdit && partner.financialTerms ? partner.financialTerms.currency : 'USD' %>">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Payment Terms</label>
                         <select class="form-select" name="paymentTerms">
                             <option value="">Select Terms</option>
-                            <option value="NET 30" <%= isEdit && partner.financialTerms && partner.financialTerms.paymentTerms === 'NET 30' ? 'selected' : '' %>>NET 30</option>
-                            <option value="NET 60" <%= isEdit && partner.financialTerms && partner.financialTerms.paymentTerms === 'NET 60' ? 'selected' : '' %>>NET 60</option>
-                            <option value="NET 90" <%= isEdit && partner.financialTerms && partner.financialTerms.paymentTerms === 'NET 90' ? 'selected' : '' %>>NET 90</option>
-                            <option value="Prepayment" <%= isEdit && partner.financialTerms && partner.financialTerms.paymentTerms === 'Prepayment' ? 'selected' : '' %>>Prepayment</option>
-                            <option value="COD" <%= isEdit && partner.financialTerms && partner.financialTerms.paymentTerms === 'COD' ? 'selected' : '' %>>COD</option>
-                            <option value="Letter of Credit" <%= isEdit && partner.financialTerms && partner.financialTerms.paymentTerms === 'Letter of Credit' ? 'selected' : '' %>>Letter of Credit</option>
+                            <option value="NET 30" <%=isEdit && partner.financialTerms &&
+                                partner.financialTerms.paymentTerms==='NET 30' ? 'selected' : '' %>>NET 30</option>
+                            <option value="NET 60" <%=isEdit && partner.financialTerms &&
+                                partner.financialTerms.paymentTerms==='NET 60' ? 'selected' : '' %>>NET 60</option>
+                            <option value="NET 90" <%=isEdit && partner.financialTerms &&
+                                partner.financialTerms.paymentTerms==='NET 90' ? 'selected' : '' %>>NET 90</option>
+                            <option value="Prepayment" <%=isEdit && partner.financialTerms &&
+                                partner.financialTerms.paymentTerms==='Prepayment' ? 'selected' : '' %>>Prepayment
+                            </option>
+                            <option value="COD" <%=isEdit && partner.financialTerms &&
+                                partner.financialTerms.paymentTerms==='COD' ? 'selected' : '' %>>COD</option>
+                            <option value="Letter of Credit" <%=isEdit && partner.financialTerms &&
+                                partner.financialTerms.paymentTerms==='Letter of Credit' ? 'selected' : '' %>>Letter of
+                                Credit</option>
                         </select>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Payment Method</label>
                         <select class="form-select" name="preferredPaymentMethod">
                             <option value="">Select Method</option>
-                            <option value="Wire Transfer" <%= isEdit && partner.financialTerms && partner.financialTerms.preferredPaymentMethod === 'Wire Transfer' ? 'selected' : '' %>>Wire Transfer</option>
-                            <option value="ACH" <%= isEdit && partner.financialTerms && partner.financialTerms.preferredPaymentMethod === 'ACH' ? 'selected' : '' %>>ACH</option>
-                            <option value="Check" <%= isEdit && partner.financialTerms && partner.financialTerms.preferredPaymentMethod === 'Check' ? 'selected' : '' %>>Check</option>
-                            <option value="Credit Card" <%= isEdit && partner.financialTerms && partner.financialTerms.preferredPaymentMethod === 'Credit Card' ? 'selected' : '' %>>Credit Card</option>
-                            <option value="Letter of Credit" <%= isEdit && partner.financialTerms && partner.financialTerms.preferredPaymentMethod === 'Letter of Credit' ? 'selected' : '' %>>Letter of Credit</option>
+                            <option value="Wire Transfer" <%=isEdit && partner.financialTerms &&
+                                partner.financialTerms.preferredPaymentMethod==='Wire Transfer' ? 'selected' : '' %>
+                                >Wire Transfer</option>
+                            <option value="ACH" <%=isEdit && partner.financialTerms &&
+                                partner.financialTerms.preferredPaymentMethod==='ACH' ? 'selected' : '' %>>ACH</option>
+                            <option value="Check" <%=isEdit && partner.financialTerms &&
+                                partner.financialTerms.preferredPaymentMethod==='Check' ? 'selected' : '' %>>Check
+                            </option>
+                            <option value="Credit Card" <%=isEdit && partner.financialTerms &&
+                                partner.financialTerms.preferredPaymentMethod==='Credit Card' ? 'selected' : '' %>
+                                >Credit Card</option>
+                            <option value="Letter of Credit" <%=isEdit && partner.financialTerms &&
+                                partner.financialTerms.preferredPaymentMethod==='Letter of Credit' ? 'selected' : '' %>
+                                >Letter of Credit</option>
                         </select>
                     </div>
                 </div>
@@ -433,32 +474,44 @@
                         <label class="form-label">Shipping Method</label>
                         <select class="form-select" name="preferredShippingMethod">
                             <option value="">Select Method</option>
-                            <option value="Air Freight" <%= isEdit && partner.tradeDetails && partner.tradeDetails.preferredShippingMethod === 'Air Freight' ? 'selected' : '' %>>Air Freight</option>
-                            <option value="Sea Freight" <%= isEdit && partner.tradeDetails && partner.tradeDetails.preferredShippingMethod === 'Sea Freight' ? 'selected' : '' %>>Sea Freight</option>
-                            <option value="Ground" <%= isEdit && partner.tradeDetails && partner.tradeDetails.preferredShippingMethod === 'Ground' ? 'selected' : '' %>>Ground</option>
-                            <option value="Express Courier" <%= isEdit && partner.tradeDetails && partner.tradeDetails.preferredShippingMethod === 'Express Courier' ? 'selected' : '' %>>Express Courier</option>
+                            <option value="Air Freight" <%=isEdit && partner.tradeDetails &&
+                                partner.tradeDetails.preferredShippingMethod==='Air Freight' ? 'selected' : '' %>>Air
+                                Freight</option>
+                            <option value="Sea Freight" <%=isEdit && partner.tradeDetails &&
+                                partner.tradeDetails.preferredShippingMethod==='Sea Freight' ? 'selected' : '' %>>Sea
+                                Freight</option>
+                            <option value="Ground" <%=isEdit && partner.tradeDetails &&
+                                partner.tradeDetails.preferredShippingMethod==='Ground' ? 'selected' : '' %>>Ground
+                            </option>
+                            <option value="Express Courier" <%=isEdit && partner.tradeDetails &&
+                                partner.tradeDetails.preferredShippingMethod==='Express Courier' ? 'selected' : '' %>
+                                >Express Courier</option>
                         </select>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Incoterms</label>
                         <select class="form-select" name="incoterms">
                             <option value="">Select Incoterms</option>
-                            <option value="FOB" <%= isEdit && partner.tradeDetails && partner.tradeDetails.incoterms === 'FOB' ? 'selected' : '' %>>FOB</option>
-                            <option value="CIF" <%= isEdit && partner.tradeDetails && partner.tradeDetails.incoterms === 'CIF' ? 'selected' : '' %>>CIF</option>
-                            <option value="DDP" <%= isEdit && partner.tradeDetails && partner.tradeDetails.incoterms === 'DDP' ? 'selected' : '' %>>DDP</option>
-                            <option value="DAP" <%= isEdit && partner.tradeDetails && partner.tradeDetails.incoterms === 'DAP' ? 'selected' : '' %>>DAP</option>
+                            <option value="FOB" <%=isEdit && partner.tradeDetails &&
+                                partner.tradeDetails.incoterms==='FOB' ? 'selected' : '' %>>FOB</option>
+                            <option value="CIF" <%=isEdit && partner.tradeDetails &&
+                                partner.tradeDetails.incoterms==='CIF' ? 'selected' : '' %>>CIF</option>
+                            <option value="DDP" <%=isEdit && partner.tradeDetails &&
+                                partner.tradeDetails.incoterms==='DDP' ? 'selected' : '' %>>DDP</option>
+                            <option value="DAP" <%=isEdit && partner.tradeDetails &&
+                                partner.tradeDetails.incoterms==='DAP' ? 'selected' : '' %>>DAP</option>
                         </select>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Lead Time (days)</label>
-                        <input type="number" class="form-control" name="averageLeadTime" 
-                               value="<%= isEdit && partner.tradeDetails ? partner.tradeDetails.averageLeadTime : '' %>">
+                        <input type="number" class="form-control" name="averageLeadTime"
+                            value="<%= isEdit && partner.tradeDetails ? partner.tradeDetails.averageLeadTime : '' %>">
                     </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Minimum Order Quantity</label>
-                    <input type="text" class="form-control" name="minimumOrderQuantity" 
-                           value="<%= isEdit && partner.tradeDetails ? partner.tradeDetails.minimumOrderQuantity : '' %>">
+                    <input type="text" class="form-control" name="minimumOrderQuantity"
+                        value="<%= isEdit && partner.tradeDetails ? partner.tradeDetails.minimumOrderQuantity : '' %>">
                 </div>
             </div>
 
@@ -474,9 +527,9 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Tags (comma-separated)</label>
-                    <input type="text" class="form-control" name="tags" 
-                           value="<%= isEdit && partner.tags ? partner.tags.join(', ') : '' %>"
-                           placeholder="e.g., organic, high-priority, european-supplier">
+                    <input type="text" class="form-control" name="tags"
+                        value="<%= isEdit && partner.tags ? partner.tags.join(', ') : '' %>"
+                        placeholder="e.g., organic, high-priority, european-supplier">
                 </div>
             </div>
 
@@ -493,4 +546,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

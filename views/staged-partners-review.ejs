@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <title>
+        <%= title %>
+    </title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-        
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -26,30 +29,30 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             overflow: hidden;
         }
-        
+
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 30px;
         }
-        
+
         .header h1 {
             font-size: 28px;
             margin-bottom: 10px;
         }
-        
+
         .header p {
             opacity: 0.9;
             font-size: 14px;
         }
-        
+
         .status-tabs {
             display: flex;
             background: #f8f9fa;
             border-bottom: 2px solid #e9ecef;
             padding: 0 30px;
         }
-        
+
         .status-tab {
             padding: 15px 25px;
             cursor: pointer;
@@ -63,17 +66,17 @@
             align-items: center;
             gap: 8px;
         }
-        
+
         .status-tab.active {
             border-bottom-color: #667eea;
             color: #667eea;
             background: white;
         }
-        
+
         .status-tab:hover {
             background: #fff;
         }
-        
+
         .badge {
             background: #e9ecef;
             color: #495057;
@@ -82,35 +85,35 @@
             font-size: 12px;
             font-weight: 600;
         }
-        
+
         .status-tab.active .badge {
             background: #667eea;
             color: white;
         }
-        
+
         .content {
             padding: 30px;
         }
-        
+
         .empty-state {
             text-align: center;
             padding: 60px 20px;
             color: #6c757d;
         }
-        
+
         .empty-state svg {
             width: 80px;
             height: 80px;
             margin-bottom: 20px;
             opacity: 0.5;
         }
-        
+
         .staged-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
-        
+
         .staged-table th {
             background: #f8f9fa;
             padding: 12px;
@@ -120,37 +123,37 @@
             border-bottom: 2px solid #dee2e6;
             font-size: 13px;
         }
-        
+
         .staged-table td {
             padding: 15px 12px;
             border-bottom: 1px solid #e9ecef;
             font-size: 14px;
         }
-        
+
         .staged-table tr:hover {
             background: #f8f9fa;
         }
-        
+
         .company-name {
             font-weight: 600;
             color: #212529;
         }
-        
+
         .location {
             color: #6c757d;
             font-size: 13px;
         }
-        
+
         .website-link {
             color: #667eea;
             text-decoration: none;
             font-size: 13px;
         }
-        
+
         .website-link:hover {
             text-decoration: underline;
         }
-        
+
         .verified-badge {
             display: inline-flex;
             align-items: center;
@@ -162,7 +165,7 @@
             font-size: 11px;
             font-weight: 600;
         }
-        
+
         .unverified-badge {
             display: inline-flex;
             align-items: center;
@@ -174,12 +177,12 @@
             font-size: 11px;
             font-weight: 600;
         }
-        
+
         .action-buttons {
             display: flex;
             gap: 8px;
         }
-        
+
         .btn {
             padding: 8px 16px;
             border: none;
@@ -191,61 +194,61 @@
             text-decoration: none;
             display: inline-block;
         }
-        
+
         .btn-approve {
             background: #28a745;
             color: white;
         }
-        
+
         .btn-approve:hover {
             background: #218838;
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
         }
-        
+
         .btn-reject {
             background: #dc3545;
             color: white;
         }
-        
+
         .btn-reject:hover {
             background: #c82333;
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
         }
-        
+
         .btn-info {
             background: #ffc107;
             color: #212529;
         }
-        
+
         .btn-info:hover {
             background: #e0a800;
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
         }
-        
+
         .btn-delete {
             background: #6c757d;
             color: white;
         }
-        
+
         .btn-delete:hover {
             background: #5a6268;
         }
-        
+
         .timestamp {
             font-size: 12px;
             color: #6c757d;
         }
-        
+
         .notes {
             font-size: 13px;
             color: #495057;
             font-style: italic;
             margin-top: 5px;
         }
-        
+
         .modal {
             display: none;
             position: fixed;
@@ -256,13 +259,13 @@
             background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
         }
-        
+
         .modal.active {
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        
+
         .modal-content {
             background: white;
             border-radius: 12px;
@@ -271,23 +274,23 @@
             width: 90%;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
-        
+
         .modal-header {
             font-size: 20px;
             font-weight: 600;
             margin-bottom: 15px;
         }
-        
+
         .modal-body {
             margin-bottom: 20px;
         }
-        
+
         .modal-footer {
             display: flex;
             gap: 10px;
             justify-content: flex-end;
         }
-        
+
         textarea {
             width: 100%;
             padding: 12px;
@@ -298,30 +301,30 @@
             resize: vertical;
             min-height: 100px;
         }
-        
+
         textarea:focus {
             outline: none;
             border-color: #667eea;
         }
-        
+
         .btn-secondary {
             background: #6c757d;
             color: white;
         }
-        
+
         .btn-secondary:hover {
             background: #5a6268;
         }
-        
+
         .btn-primary {
             background: #667eea;
             color: white;
         }
-        
+
         .btn-primary:hover {
             background: #5568d3;
         }
-        
+
         .back-link {
             display: inline-block;
             margin-bottom: 20px;
@@ -329,133 +332,175 @@
             text-decoration: none;
             font-weight: 500;
         }
-        
+
         .back-link:hover {
             text-decoration: underline;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
             <a href="/seed-partners" class="back-link">← Back to Partners Dashboard</a>
-            <h1><%= title %></h1>
+            <h1>
+                <%= title %>
+            </h1>
             <p>Review and approve new partner submissions before they go live</p>
         </div>
-        
+
         <div class="status-tabs">
-            <a href="/staged-partners/review?status=pending" class="status-tab <%= currentStatus === 'pending' ? 'active' : '' %>">
+            <a href="/staged-partners/review?status=pending"
+                class="status-tab <%= currentStatus === 'pending' ? 'active' : '' %>">
                 Pending Review
-                <span class="badge"><%= counts.pending %></span>
+                <span class="badge">
+                    <%= counts.pending %>
+                </span>
             </a>
-            <a href="/staged-partners/review?status=needs_info" class="status-tab <%= currentStatus === 'needs_info' ? 'active' : '' %>">
+            <a href="/staged-partners/review?status=needs_info"
+                class="status-tab <%= currentStatus === 'needs_info' ? 'active' : '' %>">
                 Needs Info
-                <span class="badge"><%= counts.needs_info %></span>
+                <span class="badge">
+                    <%= counts.needs_info %>
+                </span>
             </a>
-            <a href="/staged-partners/review?status=approved" class="status-tab <%= currentStatus === 'approved' ? 'active' : '' %>">
+            <a href="/staged-partners/review?status=approved"
+                class="status-tab <%= currentStatus === 'approved' ? 'active' : '' %>">
                 Approved
-                <span class="badge"><%= counts.approved %></span>
+                <span class="badge">
+                    <%= counts.approved %>
+                </span>
             </a>
-            <a href="/staged-partners/review?status=rejected" class="status-tab <%= currentStatus === 'rejected' ? 'active' : '' %>">
+            <a href="/staged-partners/review?status=rejected"
+                class="status-tab <%= currentStatus === 'rejected' ? 'active' : '' %>">
                 Rejected
-                <span class="badge"><%= counts.rejected %></span>
+                <span class="badge">
+                    <%= counts.rejected %>
+                </span>
             </a>
         </div>
-        
+
         <div class="content">
-            <% if (stagedPartners.length === 0) { %>
+            <% if (stagedPartners.length===0) { %>
                 <div class="empty-state">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
                     </svg>
-                    <h3>No <%= currentStatus.replace('_', ' ') %> partners</h3>
+                    <h3>No <%= currentStatus.replace('_', ' ' ) %> partners</h3>
                     <p>There are no partners with this status at the moment.</p>
                 </div>
-            <% } else { %>
-                <table class="staged-table">
-                    <thead>
-                        <tr>
-                            <th>Company</th>
-                            <th>Location</th>
-                            <th>Website</th>
-                            <th>Submitted</th>
-                            <% if (currentStatus !== 'pending') { %>
-                                <th>Reviewed</th>
-                            <% } %>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% stagedPartners.forEach(partner => { %>
+                <% } else { %>
+                    <table class="staged-table">
+                        <thead>
                             <tr>
-                                <td>
-                                    <div class="company-name"><%= partner.companyName %></div>
-                                    <% if (partner.seedTypes && partner.seedTypes.length > 0) { %>
-                                        <div class="location"><%= partner.seedTypes.join(', ') %></div>
+                                <th>Company</th>
+                                <th>Location</th>
+                                <th>Website</th>
+                                <th>Submitted</th>
+                                <% if (currentStatus !=='pending' ) { %>
+                                    <th>Reviewed</th>
+                                    <% } %>
+                                        <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% stagedPartners.forEach(partner=> { %>
+                                <tr>
+                                    <td>
+                                        <div class="company-name">
+                                            <%= partner.companyName %>
+                                        </div>
+                                        <% if (partner.seedTypes && partner.seedTypes.length> 0) { %>
+                                            <div class="location">
+                                                <%= partner.seedTypes.join(', ') %></div>
                                     <% } %>
                                 </td>
                                 <td>
-                                    <div><%= partner.city || '' %><%= partner.city && partner.state ? ', ' : '' %><%= partner.state || '' %></div>
+                                    <div><%= partner.city || '' %><%= partner.city && partner.state ? '
+                                                    , ' : '' %><%= partner.state || '' %></div>
                                     <div class="location"><%= partner.country %></div>
                                 </td>
                                 <td>
                                     <% if (partner.businessDetails && partner.businessDetails.website) { %>
                                         <a href="<%= partner.businessDetails.website %>" target="_blank" class="website-link">
-                                            <%= partner.businessDetails.website.replace('https://', '').replace('http://', '') %>
-                                        </a>
-                                        <br>
-                                        <% if (partner.sourceVerification && partner.sourceVerification.websiteVerified) { %>
-                                            <span class="verified-badge">✓ Verified</span>
-                                        <% } else { %>
-                                            <span class="unverified-badge">⚠ Not verified</span>
-                                        <% } %>
-                                    <% } else { %>
-                                        <span class="location">No website</span>
-                                    <% } %>
-                                </td>
-                                <td>
-                                    <div><%= partner.submittedBy %></div>
-                                    <div class="timestamp"><%= new Date(partner.submittedAt).toLocaleDateString() %></div>
-                                </td>
-                                <% if (currentStatus !== 'pending') { %>
-                                    <td>
-                                        <% if (partner.reviewedBy) { %>
-                                            <div><%= partner.reviewedBy %></div>
-                                            <div class="timestamp"><%= new Date(partner.reviewedAt).toLocaleDateString() %></div>
-                                        <% } %>
-                                        <% if (partner.reviewNotes) { %>
-                                            <div class="notes"><%= partner.reviewNotes %></div>
-                                        <% } %>
+                                            <%= partner.businessDetails.website.replace(' https://', ''
+                                                    ).replace('http://', '' ) %>
+                                                    </a>
+                                                    <br>
+                                                    <% if (partner.sourceVerification &&
+                                                        partner.sourceVerification.websiteVerified) { %>
+                                                        <span class="verified-badge">✓ Verified</span>
+                                                        <% } else { %>
+                                                            <span class="unverified-badge">⚠ Not verified</span>
+                                                            <% } %>
+                                                                <% } else { %>
+                                                                    <span class="location">No website</span>
+                                                                    <% } %>
                                     </td>
-                                <% } %>
-                                <td>
-                                    <div class="action-buttons">
-                                        <% if (currentStatus === 'pending' || currentStatus === 'needs_info') { %>
-                                            <button class="btn btn-approve" onclick="approvePartner('<%= partner._id %>', '<%= partner.companyName.replace(/'/g, "\\'") %>')">
-                                                ✓ Accept
-                                            </button>
-                                            <button class="btn btn-reject" onclick="rejectPartner('<%= partner._id %>', '<%= partner.companyName.replace(/'/g, "\\'") %>')">
-                                                ✗ Reject
-                                            </button>
-                                            <button class="btn btn-info" onclick="requestInfo('<%= partner._id %>', '<%= partner.companyName.replace(/'/g, "\\'") %>')">
-                                                ? More Info
-                                            </button>
+                                    <td>
+                                        <div>
+                                            <%= partner.submittedBy %>
+                                        </div>
+                                        <div class="timestamp">
+                                            <%= new Date(partner.submittedAt).toLocaleDateString() %>
+                                        </div>
+                                    </td>
+                                    <% if (currentStatus !=='pending' ) { %>
+                                        <td>
+                                            <% if (partner.reviewedBy) { %>
+                                                <div>
+                                                    <%= partner.reviewedBy %>
+                                                </div>
+                                                <div class="timestamp">
+                                                    <%= new Date(partner.reviewedAt).toLocaleDateString() %>
+                                                </div>
+                                                <% } %>
+                                                    <% if (partner.reviewNotes) { %>
+                                                        <div class="notes">
+                                                            <%= partner.reviewNotes %>
+                                                        </div>
+                                                        <% } %>
+                                        </td>
                                         <% } %>
-                                        <% if (currentStatus === 'rejected') { %>
-                                            <button class="btn btn-delete" onclick="deletePartner('<%= partner._id %>', '<%= partner.companyName.replace(/'/g, "\\'") %>')">
-                                                🗑 Delete
-                                            </button>
-                                        <% } %>
-                                    </div>
-                                </td>
-                            </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-            <% } %>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <% if (currentStatus==='pending' || currentStatus==='needs_info' ) {
+                                                        %>
+                                                        <button class="btn btn-approve"
+                                                            onclick="approvePartner('<%= partner._id %>', '<%= partner.companyName.replace(/'/g, "
+                                                            \\'") %>')">
+                                                            ✓ Accept
+                                                        </button>
+                                                        <button class="btn btn-reject"
+                                                            onclick="rejectPartner('<%= partner._id %>', '<%= partner.companyName.replace(/'/g, "
+                                                            \\'") %>')">
+                                                            ✗ Reject
+                                                        </button>
+                                                        <button class="btn btn-info"
+                                                            onclick="requestInfo('<%= partner._id %>', '<%= partner.companyName.replace(/'/g, "
+                                                            \\'") %>')">
+                                                            ? More Info
+                                                        </button>
+                                                        <% } %>
+                                                            <% if (currentStatus==='rejected' ) { %>
+                                                                <button class="btn btn-delete"
+                                                                    onclick="deletePartner('<%= partner._id %>', '<%= partner.companyName.replace(/'/g, "
+                                                                    \\'") %>')">
+                                                                    🗑 Delete
+                                                                </button>
+                                                                <% } %>
+                                                </div>
+                                            </td>
+                                </tr>
+                                <% }) %>
+                        </tbody>
+                    </table>
+                    <% } %>
         </div>
     </div>
-    
+
     <!-- Reject Modal -->
     <div id="rejectModal" class="modal">
         <div class="modal-content">
@@ -470,7 +515,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Request Info Modal -->
     <div id="infoModal" class="modal">
         <div class="modal-content">
@@ -485,130 +530,130 @@
             </div>
         </div>
     </div>
-    
+
     <script>
         let currentPartnerId = null;
-        
+
         function approvePartner(id, name) {
             if (!confirm(`Are you sure you want to approve ${name} and add them to the active partners database?`)) {
                 return;
             }
-            
+
             fetch(`/staged-partners/approve/${id}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    window.location.reload();
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert('Error approving partner');
-            });
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error approving partner');
+                });
         }
-        
+
         function rejectPartner(id, name) {
             currentPartnerId = id;
             document.getElementById('rejectCompanyName').textContent = name;
             document.getElementById('rejectNotes').value = '';
             document.getElementById('rejectModal').classList.add('active');
         }
-        
+
         function confirmReject() {
             const notes = document.getElementById('rejectNotes').value;
-            
+
             fetch(`/staged-partners/reject/${currentPartnerId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ notes: notes })
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    closeModal('rejectModal');
-                    window.location.reload();
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert('Error rejecting partner');
-            });
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        closeModal('rejectModal');
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error rejecting partner');
+                });
         }
-        
+
         function requestInfo(id, name) {
             currentPartnerId = id;
             document.getElementById('infoCompanyName').textContent = name;
             document.getElementById('infoNotes').value = '';
             document.getElementById('infoModal').classList.add('active');
         }
-        
+
         function confirmRequestInfo() {
             const notes = document.getElementById('infoNotes').value;
-            
+
             if (!notes.trim()) {
                 alert('Please specify what information you need');
                 return;
             }
-            
+
             fetch(`/staged-partners/request-info/${currentPartnerId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ notes: notes })
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    closeModal('infoModal');
-                    window.location.reload();
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert('Error requesting info');
-            });
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        closeModal('infoModal');
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error requesting info');
+                });
         }
-        
+
         function deletePartner(id, name) {
             if (!confirm(`Are you sure you want to permanently delete ${name} from staging? This cannot be undone.`)) {
                 return;
             }
-            
+
             fetch(`/staged-partners/delete/${id}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' }
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    window.location.reload();
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert('Error deleting partner');
-            });
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error deleting partner');
+                });
         }
-        
+
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
             currentPartnerId = null;
         }
-        
+
         // Close modal on background click
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
@@ -620,4 +665,5 @@
         });
     </script>
 </body>
+
 </html>

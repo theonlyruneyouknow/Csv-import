@@ -11,7 +11,7 @@ async function checkData() {
         console.log('✅ Connected to MongoDB\n');
 
         const partner = await SeedPartner.findOne({ companyName: 'Suttons Seeds' });
-        
+
         console.log('Company:', partner.companyName);
         console.log('\nSeed Offerings:');
         console.log('Vegetables:', partner.seedOfferings?.vegetables || 'NONE');

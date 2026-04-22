@@ -13,7 +13,7 @@ const stagedPartnerSchema = new mongoose.Schema({
         trim: true,
         uppercase: true
     },
-    
+
     // Geographic Classification
     isDomestic: {
         type: Boolean,
@@ -27,7 +27,7 @@ const stagedPartnerSchema = new mongoose.Schema({
     state: String,
     stateCode: String,
     city: String,
-    
+
     // Partnership details
     partnershipType: {
         type: String,
@@ -38,10 +38,10 @@ const stagedPartnerSchema = new mongoose.Schema({
         enum: ['Prospective', 'Active', 'On Hold', 'Inactive', 'Terminated', 'Non-Alternative'],
         default: 'Prospective'
     },
-    
+
     // Seed information
     seedTypes: [String],
-    
+
     // Business details
     businessDetails: {
         website: String,
@@ -49,7 +49,7 @@ const stagedPartnerSchema = new mongoose.Schema({
         numberOfEmployees: String,
         companyProfile: String
     },
-    
+
     // Contact information
     primaryContact: {
         name: String,
@@ -57,7 +57,7 @@ const stagedPartnerSchema = new mongoose.Schema({
         email: String,
         phone: String
     },
-    
+
     // STAGING-SPECIFIC FIELDS
     reviewStatus: {
         type: String,
@@ -65,29 +65,29 @@ const stagedPartnerSchema = new mongoose.Schema({
         default: 'pending',
         index: true
     },
-    
+
     submittedBy: {
         type: String,
         default: 'System Research'
     },
-    
+
     submittedAt: {
         type: Date,
         default: Date.now
     },
-    
+
     reviewedBy: String,
     reviewedAt: Date,
-    
+
     reviewNotes: String,
-    
+
     sourceVerification: {
         websiteVerified: Boolean,
         verifiedAt: Date,
         verificationMethod: String,
         verificationNotes: String
     },
-    
+
     researchNotes: {
         type: String,
         default: ''

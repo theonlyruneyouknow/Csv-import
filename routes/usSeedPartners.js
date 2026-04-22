@@ -10,29 +10,29 @@ const { ensureAuthenticated } = require('../middleware/auth');
 router.get('/', ensureAuthenticated, async (req, res) => {
     try {
         console.log('🇺🇸 Loading US Seed Partnership Dashboard...');
-        
+
         // Get filter parameters
         const statusFilter = req.query.status;
         const typeFilter = req.query.type;
         const regionFilter = req.query.region;
         const stateFilter = req.query.state;
-        
+
         // Build query
         let query = {};
         if (statusFilter) query.status = statusFilter;
         if (typeFilter) query.partnershipType = typeFilter;
         if (regionFilter) query.region = regionFilter;
         if (stateFilter) query.state = stateFilter;
-        
+
         // Get all partners
         const allPartners = await USSeedPartner.find(query).sort({ state: 1 });
-        
+
         console.log(`🔍 Query: ${JSON.stringify(query)}`);
         console.log(`📊 Database returned: ${allPartners.length} partners`);
         if (allPartners.length > 0) {
             console.log(`📝 First partner: ${allPartners[0].companyName} (${allPartners[0].state})`);
         }
-        
+
         // Calculate statistics
         const stats = {
             total: allPartners.length,
@@ -42,7 +42,7 @@ router.get('/', ensureAuthenticated, async (req, res) => {
             highPriority: allPartners.filter(p => p.priority >= 4).length,
             withWebsites: allPartners.filter(p => p.businessDetails?.website).length
         };
-        
+
         // Group by region
         const byRegion = {
             'Northeast': allPartners.filter(p => p.region === 'Northeast').length,
@@ -53,10 +53,10 @@ router.get('/', ensureAuthenticated, async (req, res) => {
             'Pacific': allPartners.filter(p => p.region === 'Pacific').length,
             'Mountain': allPartners.filter(p => p.region === 'Mountain').length
         };
-        
+
         console.log(`✅ Found ${stats.total} US partners`);
         console.log(`📊 Stats: Active=${stats.active}, Prospective=${stats.prospective}, HighPriority=${stats.highPriority}`);
-        
+
         res.render('us-seed-partnership-dashboard', {
             partners: allPartners,
             stats: stats,
@@ -69,7 +69,7 @@ router.get('/', ensureAuthenticated, async (req, res) => {
             },
             user: req.user
         });
-        
+
     } catch (error) {
         console.error('Error loading US seed partners dashboard:', error);
         res.status(500).send('Error loading dashboard: ' + error.message);
@@ -82,19 +82,19 @@ router.get('/', ensureAuthenticated, async (req, res) => {
 router.get('/catalog', ensureAuthenticated, async (req, res) => {
     try {
         console.log('🌱 Loading US Seed Catalog search page...');
-        
+
         // Get all US partners with seed offerings (Active and Prospective)
         const partners = await USSeedPartner.find({});
-        
+
         console.log(`📊 Found ${partners.length} US partners for catalog`);
-        
+
         // Build comprehensive catalog
         const catalog = {
             vegetables: {},
             flowers: {},
             herbs: {}
         };
-        
+
         // Aggregate all offerings
         partners.forEach(partner => {
             if (partner.seedOfferings) {
@@ -116,7 +116,7 @@ router.get('/catalog', ensureAuthenticated, async (req, res) => {
                         });
                     });
                 }
-                
+
                 // Flowers
                 if (partner.seedOfferings.flowers) {
                     partner.seedOfferings.flowers.forEach(flower => {
@@ -135,7 +135,7 @@ router.get('/catalog', ensureAuthenticated, async (req, res) => {
                         });
                     });
                 }
-                
+
                 // Herbs
                 if (partner.seedOfferings.herbs) {
                     partner.seedOfferings.herbs.forEach(herb => {
@@ -156,16 +156,16 @@ router.get('/catalog', ensureAuthenticated, async (req, res) => {
                 }
             }
         });
-        
+
         // Sort crop types alphabetically
         const sortedCatalog = {
             vegetables: Object.keys(catalog.vegetables).sort(),
             flowers: Object.keys(catalog.flowers).sort(),
             herbs: Object.keys(catalog.herbs).sort()
         };
-        
+
         console.log(`🌱 Catalog built: ${sortedCatalog.vegetables.length} vegetables, ${sortedCatalog.flowers.length} flowers, ${sortedCatalog.herbs.length} herbs`);
-        
+
         // Stats
         const stats = {
             totalVegetables: sortedCatalog.vegetables.length,
@@ -173,14 +173,14 @@ router.get('/catalog', ensureAuthenticated, async (req, res) => {
             totalHerbs: sortedCatalog.herbs.length,
             totalPartners: partners.length
         };
-        
+
         res.render('us-seed-catalog', {
             catalog: catalog,
             sortedCatalog: sortedCatalog,
             stats: stats,
             user: req.user
         });
-        
+
     } catch (error) {
         console.error('Error loading US seed catalog:', error);
         res.status(500).send('Error loading catalog: ' + error.message);
@@ -193,16 +193,16 @@ router.get('/catalog', ensureAuthenticated, async (req, res) => {
 router.get('/:id', ensureAuthenticated, async (req, res) => {
     try {
         const partner = await USSeedPartner.findById(req.params.id);
-        
+
         if (!partner) {
             return res.status(404).send('US Partner not found');
         }
-        
+
         res.render('us-seed-partner-detail', {
             partner: partner,
             user: req.user
         });
-        
+
     } catch (error) {
         console.error('Error loading US partner details:', error);
         res.status(500).send('Error loading partner: ' + error.message);
@@ -224,7 +224,7 @@ router.post('/:id/quick-update', ensureAuthenticated, async (req, res) => {
             priority,
             personalNotes
         } = req.body;
-        
+
         const updateData = {
             companyName,
             status,
@@ -233,7 +233,7 @@ router.post('/:id/quick-update', ensureAuthenticated, async (req, res) => {
             lastUpdatedBy: req.user.username,
             updatedAt: new Date()
         };
-        
+
         // Update nested fields
         if (primaryContactName || primaryContactEmail || primaryContactPhone) {
             updateData.primaryContact = {};
@@ -241,23 +241,23 @@ router.post('/:id/quick-update', ensureAuthenticated, async (req, res) => {
             if (primaryContactEmail) updateData.primaryContact.email = primaryContactEmail;
             if (primaryContactPhone) updateData.primaryContact.phone = primaryContactPhone;
         }
-        
+
         if (website) {
             updateData.businessDetails = { website };
         }
-        
+
         const partner = await USSeedPartner.findByIdAndUpdate(
             req.params.id,
             updateData,
             { new: true, runValidators: true }
         );
-        
+
         res.json({
             success: true,
             message: 'Partner updated successfully',
             partner: partner
         });
-        
+
     } catch (error) {
         console.error('Error updating US partner:', error);
         res.status(500).json({
@@ -273,7 +273,7 @@ router.post('/:id/quick-update', ensureAuthenticated, async (req, res) => {
 router.post('/:id/update-status', ensureAuthenticated, async (req, res) => {
     try {
         const { status } = req.body;
-        
+
         const partner = await USSeedPartner.findByIdAndUpdate(
             req.params.id,
             {
@@ -283,13 +283,13 @@ router.post('/:id/update-status', ensureAuthenticated, async (req, res) => {
             },
             { new: true }
         );
-        
+
         res.json({
             success: true,
             message: 'Status updated successfully',
             partner: partner
         });
-        
+
     } catch (error) {
         console.error('Error updating status:', error);
         res.status(500).json({
@@ -305,7 +305,7 @@ router.post('/:id/update-status', ensureAuthenticated, async (req, res) => {
 router.post('/:id/update-priority', ensureAuthenticated, async (req, res) => {
     try {
         const { priority } = req.body;
-        
+
         const partner = await USSeedPartner.findByIdAndUpdate(
             req.params.id,
             {
@@ -315,13 +315,13 @@ router.post('/:id/update-priority', ensureAuthenticated, async (req, res) => {
             },
             { new: true }
         );
-        
+
         res.json({
             success: true,
             message: 'Priority updated successfully',
             partner: partner
         });
-        
+
     } catch (error) {
         console.error('Error updating priority:', error);
         res.status(500).json({

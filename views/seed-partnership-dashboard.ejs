@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -544,6 +545,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <!-- Header -->
@@ -557,11 +559,13 @@
                     <span>←</span>
                     <span>P.O.D.</span>
                 </a>
-                <a href="/seed-partners/catalog?view=<%= stickyViewMode %>" class="pod-button" style="background: linear-gradient(135deg, #28a745, #558b2f);">
+                <a href="/seed-partners/catalog?view=<%= stickyViewMode %>" class="pod-button"
+                    style="background: linear-gradient(135deg, #28a745, #558b2f);">
                     <i class="fas fa-leaf"></i>
                     <span>Seed Catalog</span>
                 </a>
-                <a href="/staged-partners/review" class="pod-button" style="background: linear-gradient(135deg, #ffc107, #ff9800);">
+                <a href="/staged-partners/review" class="pod-button"
+                    style="background: linear-gradient(135deg, #ffc107, #ff9800);">
                     <i class="fas fa-clipboard-check"></i>
                     <span>Review Staging</span>
                 </a>
@@ -575,13 +579,19 @@
         <div class="filters-section" style="margin-bottom: 15px; padding: 15px;">
             <div style="display: flex; gap: 10px; justify-content: center; align-items: center;">
                 <span style="font-weight: 600; color: #666; margin-right: 10px;">View:</span>
-                <a href="/seed-partners?view=all" class="btn <%= currentFilters.view === 'all' ? 'btn-primary' : 'btn-secondary' %>" style="min-width: 150px;">
+                <a href="/seed-partners?view=all"
+                    class="btn <%= currentFilters.view === 'all' ? 'btn-primary' : 'btn-secondary' %>"
+                    style="min-width: 150px;">
                     <i class="fas fa-globe"></i> All Partners (<%= stats.allPartnersTotal %>)
                 </a>
-                <a href="/seed-partners?view=international" class="btn <%= currentFilters.view === 'international' ? 'btn-primary' : 'btn-secondary' %>" style="min-width: 150px;">
+                <a href="/seed-partners?view=international"
+                    class="btn <%= currentFilters.view === 'international' ? 'btn-primary' : 'btn-secondary' %>"
+                    style="min-width: 150px;">
                     <i class="fas fa-earth-americas"></i> International (<%= stats.international %>)
                 </a>
-                <a href="/seed-partners?view=domestic" class="btn <%= currentFilters.view === 'domestic' ? 'btn-primary' : 'btn-secondary' %>" style="min-width: 150px;">
+                <a href="/seed-partners?view=domestic"
+                    class="btn <%= currentFilters.view === 'domestic' ? 'btn-primary' : 'btn-secondary' %>"
+                    style="min-width: 150px;">
                     <i class="fas fa-flag-usa"></i> Domestic (<%= stats.domestic %>)
                 </a>
             </div>
@@ -591,27 +601,37 @@
         <div class="stats-grid">
             <div class="stat-card total">
                 <i class="fas fa-handshake stat-icon"></i>
-                <div class="stat-number"><%= stats.total %></div>
+                <div class="stat-number">
+                    <%= stats.total %>
+                </div>
                 <div class="stat-label">Total Partners</div>
             </div>
             <div class="stat-card international">
                 <i class="fas fa-globe stat-icon"></i>
-                <div class="stat-number"><%= stats.international %></div>
+                <div class="stat-number">
+                    <%= stats.international %>
+                </div>
                 <div class="stat-label">International</div>
             </div>
             <div class="stat-card domestic">
                 <i class="fas fa-home stat-icon"></i>
-                <div class="stat-number"><%= stats.domestic %></div>
+                <div class="stat-number">
+                    <%= stats.domestic %>
+                </div>
                 <div class="stat-label">Domestic</div>
             </div>
             <div class="stat-card active">
                 <i class="fas fa-check-circle stat-icon"></i>
-                <div class="stat-number"><%= stats.active %></div>
+                <div class="stat-number">
+                    <%= stats.active %>
+                </div>
                 <div class="stat-label">Active</div>
             </div>
             <div class="stat-card prospective">
                 <i class="fas fa-clock stat-icon"></i>
-                <div class="stat-number"><%= stats.prospective %></div>
+                <div class="stat-number">
+                    <%= stats.prospective %>
+                </div>
                 <div class="stat-label">Prospective</div>
             </div>
             <div class="stat-card value">
@@ -633,42 +653,54 @@
                     <div class="filter-group">
                         <label>Status</label>
                         <select name="status" class="form-select" onchange="this.form.submit()">
-                            <option value="all" <%= currentFilters.status === 'all' ? 'selected' : '' %>>All Statuses</option>
-                            <% uniqueStatuses.forEach(status => { %>
-                                <option value="<%= status %>" <%= currentFilters.status === status ? 'selected' : '' %>><%= status %></option>
-                            <% }) %>
+                            <option value="all" <%=currentFilters.status==='all' ? 'selected' : '' %>>All Statuses
+                            </option>
+                            <% uniqueStatuses.forEach(status=> { %>
+                                <option value="<%= status %>" <%=currentFilters.status===status ? 'selected' : '' %>><%=
+                                        status %>
+                                </option>
+                                <% }) %>
                         </select>
                     </div>
                     <div class="filter-group">
                         <label>Partnership Type</label>
                         <select name="type" class="form-select" onchange="this.form.submit()">
-                            <option value="all" <%= currentFilters.type === 'all' ? 'selected' : '' %>>All Types</option>
-                            <% uniqueTypes.forEach(type => { %>
-                                <option value="<%= type %>" <%= currentFilters.type === type ? 'selected' : '' %>><%= type %></option>
-                            <% }) %>
+                            <option value="all" <%=currentFilters.type==='all' ? 'selected' : '' %>>All Types</option>
+                            <% uniqueTypes.forEach(type=> { %>
+                                <option value="<%= type %>" <%=currentFilters.type===type ? 'selected' : '' %>><%= type
+                                        %>
+                                </option>
+                                <% }) %>
                         </select>
                     </div>
                     <div class="filter-group">
                         <label>Region</label>
                         <select name="region" class="form-select" onchange="this.form.submit()">
-                            <option value="all" <%= currentFilters.region === 'all' ? 'selected' : '' %>>All Regions</option>
-                            <% uniqueRegions.forEach(region => { %>
-                                <option value="<%= region %>" <%= currentFilters.region === region ? 'selected' : '' %>><%= region %></option>
-                            <% }) %>
+                            <option value="all" <%=currentFilters.region==='all' ? 'selected' : '' %>>All Regions
+                            </option>
+                            <% uniqueRegions.forEach(region=> { %>
+                                <option value="<%= region %>" <%=currentFilters.region===region ? 'selected' : '' %>><%=
+                                        region %>
+                                </option>
+                                <% }) %>
                         </select>
                     </div>
                     <div class="filter-group">
                         <label>Country</label>
                         <select name="country" class="form-select" onchange="this.form.submit()">
-                            <option value="all" <%= currentFilters.country === 'all' ? 'selected' : '' %>>All Countries</option>
-                            <% uniqueCountries.forEach(country => { %>
-                                <option value="<%= country %>" <%= currentFilters.country === country ? 'selected' : '' %>><%= country %></option>
-                            <% }) %>
+                            <option value="all" <%=currentFilters.country==='all' ? 'selected' : '' %>>All Countries
+                            </option>
+                            <% uniqueCountries.forEach(country=> { %>
+                                <option value="<%= country %>" <%=currentFilters.country===country ? 'selected' : '' %>>
+                                    <%= country %>
+                                </option>
+                                <% }) %>
                         </select>
                     </div>
                     <div class="filter-group">
                         <label>Search</label>
-                        <input type="text" name="search" class="form-control" placeholder="Company name, code..." value="<%= currentFilters.search %>">
+                        <input type="text" name="search" class="form-control" placeholder="Company name, code..."
+                            value="<%= currentFilters.search %>">
                     </div>
                     <div class="filter-group" style="display: flex; align-items: flex-end;">
                         <button type="submit" class="btn btn-primary w-100">
@@ -682,32 +714,46 @@
         <!-- Partners Table -->
         <div class="partners-section">
             <div class="table-header" style="display: flex; align-items: center; justify-content: space-between;">
-                <h2><i class="fas fa-building"></i> Partner Companies (<span id="visibleCount"><%= partners.length %></span>)</h2>
+                <h2><i class="fas fa-building"></i> Partner Companies (<span id="visibleCount">
+                        <%= partners.length %>
+                    </span>)</h2>
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; margin: 0;">
+                    <label
+                        style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; margin: 0;">
                         <input type="checkbox" id="showExcluded" style="cursor: pointer;" />
-                        <span style="font-weight: 600; font-size: 14px; color: #666;">Show Excluded <span id="excludedCount" style="color: #999;"></span></span>
+                        <span style="font-weight: 600; font-size: 14px; color: #666;">Show Excluded <span
+                                id="excludedCount" style="color: #999;"></span></span>
                     </label>
-                    <button id="createExclusionGroupBtn" onclick="createNewExclusionGroup()" style="background: #6c757d; border: 1px solid #5a6268; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: 600; color: white; font-size: 13px; transition: all 0.2s;" onmouseover="this.style.background='#5a6268'" onmouseout="this.style.background='#6c757d'" title="Create New Exclusion Group">
+                    <button id="createExclusionGroupBtn" onclick="createNewExclusionGroup()"
+                        style="background: #6c757d; border: 1px solid #5a6268; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: 600; color: white; font-size: 13px; transition: all 0.2s;"
+                        onmouseover="this.style.background='#5a6268'" onmouseout="this.style.background='#6c757d'"
+                        title="Create New Exclusion Group">
                         <i class="fas fa-minus"></i>
                     </button>
-                    <button id="toggleExclusionGroups" style="background: #f8f9fa; border: 1px solid #ddd; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: 600; color: #495057; font-size: 13px; transition: all 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'" title="Toggle Exclusion Groups">
+                    <button id="toggleExclusionGroups"
+                        style="background: #f8f9fa; border: 1px solid #ddd; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: 600; color: #495057; font-size: 13px; transition: all 0.2s;"
+                        onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'"
+                        title="Toggle Exclusion Groups">
                         Ex <span id="exclusionToggleArrow">▼</span>
                     </button>
                 </div>
             </div>
-            
-            <div id="exclusionGroupsPanel" style="display: none; position: absolute; right: 20px; background: white; border: 1px solid #ddd; border-radius: 4px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; min-width: 350px; margin-top: 5px;">
+
+            <div id="exclusionGroupsPanel"
+                style="display: none; position: absolute; right: 20px; background: white; border: 1px solid #ddd; border-radius: 4px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; min-width: 350px; margin-top: 5px;">
                 <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #495057;">Exclusion Groups</h4>
-                
+
                 <!-- Filter List -->
-                <select id="exclusionGroupsFilter" multiple size="8" style="width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 5px; font-size: 13px; background: white;">
+                <select id="exclusionGroupsFilter" multiple size="8"
+                    style="width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 5px; font-size: 13px; background: white;">
                     <% availableExclusionGroups.forEach(function(group) { %>
-                        <option value="<%= group %>" style="padding: 5px;"><%= group %> (<%= stats.byExclusionGroup[group] || 0 %>)</option>
-                    <% }) %>
-                    <% if (availableExclusionGroups.length === 0) { %>
-                        <option disabled style="color: #999; padding: 5px;">No exclusion groups yet</option>
-                    <% } %>
+                        <option value="<%= group %>" style="padding: 5px;">
+                            <%= group %> (<%= stats.byExclusionGroup[group] || 0 %>)
+                        </option>
+                        <% }) %>
+                            <% if (availableExclusionGroups.length===0) { %>
+                                <option disabled style="color: #999; padding: 5px;">No exclusion groups yet</option>
+                                <% } %>
                 </select>
                 <small style="color: #999; display: block; margin-top: 8px;">
                     Select groups to hide (Ctrl/Cmd+Click for multiple)<br>
@@ -715,7 +761,7 @@
                 </small>
             </div>
 
-            <% if (partners.length === 0) { %>
+            <% if (partners.length===0) { %>
                 <div class="no-partners">
                     <i class="fas fa-users"></i>
                     <h3>No Partners Found</h3>
@@ -724,238 +770,294 @@
                         <i class="fas fa-plus"></i> Add First Partner
                     </a>
                 </div>
-            <% } else { %>
-                <div class="table-responsive">
-                    <table class="partners-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 40px;"></th>
-                                <th>Priority</th>
-                                <th>Company Name</th>
-                                <% if (currentFilters.view === 'domestic') { %>
-                                    <th>State/City</th>
-                                <% } %>
-                                <th>Country/Region</th>
-                                <th>Type</th>
-                                <th>Status</th>
-                                <th>Seed Catalog</th>
-                                <th>Contact</th>
-                                <th>Last Order</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% partners.forEach((partner, index) => { %>
-                                <tr data-status="<%= partner.status %>" 
-                                    data-exclusion-groups="<%= (partner.exclusionGroups || []).join(',') %>" 
-                                    data-partner-id="<%= partner._id %>"
-                                    class="partner-main-row">
-                                    <td>
-                                        <i class="fas fa-chevron-right expand-btn" onclick="toggleExpand('<%= partner._id %>')" title="Show more details"></i>
-                                    </td>
-                                    <td>
-                                        <% for(let i = 0; i < partner.priority; i++) { %>
-                                            <i class="fas fa-star priority-star"></i>
+                <% } else { %>
+                    <div class="table-responsive">
+                        <table class="partners-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;"></th>
+                                    <th>Priority</th>
+                                    <th>Company Name</th>
+                                    <% if (currentFilters.view==='domestic' ) { %>
+                                        <th>State/City</th>
                                         <% } %>
-                                    </td>
-                                    <td>
-                                        <div style="display: flex; align-items: center; gap: 6px;">
-                                            <% if (partner.businessDetails && partner.businessDetails.website) { %>
-                                                <a href="<%= partner.businessDetails.website %>" target="_blank" rel="noopener noreferrer" style="color: #667eea; font-size: 14px; display: inline-flex;" title="Visit website: <%= partner.businessDetails.website %>">
-                                                    <i class="fas fa-globe"></i>
-                                                </a>
-                                            <% } %>
-                                            <a href="/seed-partners/<%= partner._id %>" class="partner-name" style="display: inline-flex; align-items: center; gap: 8px;">
-                                                <i class="fas fa-building"></i>
-                                                <span><%= partner.companyName %></span>
-                                            </a>
-                                        </div>
-                                        <div style="font-size: 11px; color: #999; margin-top: 2px;">
-                                            <%= partner.partnerCode %>
-                                        </div>
-                                    </td>
-                                    <% if (currentFilters.view === 'domestic') { %>
-                                        <td>
-                                            <% if (partner.state) { %>
-                                                <div style="font-weight: 600; color: #667eea;"><%= partner.stateCode || partner.state %></div>
-                                                <% if (partner.city) { %>
-                                                    <div style="font-size: 11px; color: #999;"><%= partner.city %></div>
-                                                <% } %>
-                                            <% } else { %>
-                                                <span style="color: #999;">N/A</span>
-                                            <% } %>
-                                        </td>
-                                    <% } %>
-                                    <td>
-                                        <div><%= partner.country %></div>
-                                        <div style="font-size: 11px; color: #999;"><%= partner.region %></div>
-                                    </td>
-                                    <td>
-                                        <span class="badge <%= partner.partnershipType.includes('International') ? 'international' : 'domestic' %>">
-                                            <%= partner.partnershipType.replace('Supplier', 'Sup').replace('Client', 'Cli') %>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge <%= partner.status.toLowerCase().replace(' ', '-') %>">
-                                            <%= partner.status %>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="seed-types">
-                                            <% if (partner.seedOfferings && (partner.seedOfferings.vegetables.length > 0 || partner.seedOfferings.flowers.length > 0 || partner.seedOfferings.herbs.length > 0)) { %>
-                                                <% if (partner.seedOfferings.vegetables && partner.seedOfferings.vegetables.length > 0) { %>
-                                                    <span class="seed-type-tag" style="background: #fff3e0; color: #e65100; border: 1px solid #ffcc80;">
-                                                        🥕 <%= partner.seedOfferings.vegetables.length %>
-                                                    </span>
-                                                <% } %>
-                                                <% if (partner.seedOfferings.flowers && partner.seedOfferings.flowers.length > 0) { %>
-                                                    <span class="seed-type-tag" style="background: #fce4ec; color: #c2185b; border: 1px solid #f8bbd0;">
-                                                        🌸 <%= partner.seedOfferings.flowers.length %>
-                                                    </span>
-                                                <% } %>
-                                                <% if (partner.seedOfferings.herbs && partner.seedOfferings.herbs.length > 0) { %>
-                                                    <span class="seed-type-tag" style="background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7;">
-                                                        🌿 <%= partner.seedOfferings.herbs.length %>
-                                                    </span>
-                                                <% } %>
-                                            <% } else { %>
-                                                <span style="color: #999; font-size: 12px;">No catalog</span>
-                                            <% } %>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <% if (partner.primaryContact && partner.primaryContact.name) { %>
-                                            <div style="font-size: 13px;"><%= partner.primaryContact.name %></div>
-                                            <% if (partner.primaryContact.email) { %>
-                                                <div style="font-size: 11px; color: #999;">
-                                                    <i class="fas fa-envelope"></i> <%= partner.primaryContact.email %>
-                                                </div>
-                                            <% } %>
-                                        <% } else { %>
-                                            <span style="color: #999; font-size: 12px;">No contact</span>
-                                        <% } %>
-                                    </td>
-                                    <td>
-                                        <% if (partner.lastOrderDate) { %>
-                                            <%= new Date(partner.lastOrderDate).toLocaleDateString() %>
-                                            <div style="font-size: 11px; color: #999;">
-                                                (<%= partner.daysSinceLastOrder() %> days ago)
-                                            </div>
-                                        <% } else { %>
-                                            <span style="color: #999;">No orders</span>
-                                        <% } %>
-                                    </td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <a href="/seed-partners/<%= partner._id %>" class="btn-sm-custom btn-view">
-                                                <i class="fas fa-eye"></i> View
-                                            </a>
-                                            <a href="/seed-partners/<%= partner._id %>/edit" class="btn-sm-custom btn-edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                        </div>
-                                    </td>
+                                            <th>Country/Region</th>
+                                            <th>Type</th>
+                                            <th>Status</th>
+                                            <th>Seed Catalog</th>
+                                            <th>Contact</th>
+                                            <th>Last Order</th>
+                                            <th>Actions</th>
                                 </tr>
-                                <!-- Expandable Row -->
-                                <tr class="expandable-row" id="expand-<%= partner._id %>" 
-                                    data-status="<%= partner.status %>" 
-                                    data-exclusion-groups="<%= (partner.exclusionGroups || []).join(',') %>"
-                                    data-partner-id="<%= partner._id %>">
-                                    <td colspan="10">
-                                        <div class="expanded-content">
-                                            <div class="details-grid">
-                                                <!-- Basic Information -->
-                                                <div class="detail-section">
-                                                    <h4><i class="fas fa-info-circle"></i> Company Details</h4>
-                                                    <div class="detail-item">
-                                                        <span class="detail-label">Legal Name</span>
-                                                        <div class="detail-value editable" data-field="legalName" data-partner="<%= partner._id %>">
-                                                            <%= partner.legalName || 'Not specified' %>
-                                                        </div>
+                            </thead>
+                            <tbody>
+                                <% partners.forEach((partner, index)=> { %>
+                                    <tr data-status="<%= partner.status %>"
+                                        data-exclusion-groups="<%= (partner.exclusionGroups || []).join(',') %>"
+                                        data-partner-id="<%= partner._id %>" class="partner-main-row">
+                                        <td>
+                                            <i class="fas fa-chevron-right expand-btn"
+                                                onclick="toggleExpand('<%= partner._id %>')"
+                                                title="Show more details"></i>
+                                        </td>
+                                        <td>
+                                            <% for(let i=0; i < partner.priority; i++) { %>
+                                                <i class="fas fa-star priority-star"></i>
+                                                <% } %>
+                                        </td>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 6px;">
+                                                <% if (partner.businessDetails && partner.businessDetails.website) { %>
+                                                    <a href="<%= partner.businessDetails.website %>" target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        style="color: #667eea; font-size: 14px; display: inline-flex;"
+                                                        title="Visit website: <%= partner.businessDetails.website %>">
+                                                        <i class="fas fa-globe"></i>
+                                                    </a>
+                                                    <% } %>
+                                                        <a href="/seed-partners/<%= partner._id %>" class="partner-name"
+                                                            style="display: inline-flex; align-items: center; gap: 8px;">
+                                                            <i class="fas fa-building"></i>
+                                                            <span>
+                                                                <%= partner.companyName %>
+                                                            </span>
+                                                        </a>
+                                            </div>
+                                            <div style="font-size: 11px; color: #999; margin-top: 2px;">
+                                                <%= partner.partnerCode %>
+                                            </div>
+                                        </td>
+                                        <% if (currentFilters.view==='domestic' ) { %>
+                                            <td>
+                                                <% if (partner.state) { %>
+                                                    <div style="font-weight: 600; color: #667eea;">
+                                                        <%= partner.stateCode || partner.state %>
                                                     </div>
-                                                    <div class="detail-item">
-                                                        <span class="detail-label">Website</span>
-                                                        <div class="detail-value">
-                                                            <% if (partner.businessDetails && partner.businessDetails.website) { %>
-                                                                <a href="<%= partner.businessDetails.website %>" target="_blank" style="color: #667eea;">
-                                                                    <i class="fas fa-external-link-alt"></i> <%= partner.businessDetails.website %>
-                                                                </a>
+                                                    <% if (partner.city) { %>
+                                                        <div style="font-size: 11px; color: #999;">
+                                                            <%= partner.city %>
+                                                        </div>
+                                                        <% } %>
                                                             <% } else { %>
-                                                                Not specified
+                                                                <span style="color: #999;">N/A</span>
+                                                                <% } %>
+                                            </td>
+                                            <% } %>
+                                                <td>
+                                                    <div>
+                                                        <%= partner.country %>
+                                                    </div>
+                                                    <div style="font-size: 11px; color: #999;">
+                                                        <%= partner.region %>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        class="badge <%= partner.partnershipType.includes('International') ? 'international' : 'domestic' %>">
+                                                        <%= partner.partnershipType.replace('Supplier', 'Sup'
+                                                            ).replace('Client', 'Cli' ) %>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        class="badge <%= partner.status.toLowerCase().replace(' ', '-') %>">
+                                                        <%= partner.status %>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="seed-types">
+                                                        <% if (partner.seedOfferings &&
+                                                            (partner.seedOfferings.vegetables.length> 0 ||
+                                                            partner.seedOfferings.flowers.length > 0 ||
+                                                            partner.seedOfferings.herbs.length > 0)) { %>
+                                                            <% if (partner.seedOfferings.vegetables &&
+                                                                partner.seedOfferings.vegetables.length> 0) { %>
+                                                                <span class="seed-type-tag"
+                                                                    style="background: #fff3e0; color: #e65100; border: 1px solid #ffcc80;">
+                                                                    🥕 <%= partner.seedOfferings.vegetables.length %>
+                                                                </span>
+                                                                <% } %>
+                                                                    <% if (partner.seedOfferings.flowers &&
+                                                                        partner.seedOfferings.flowers.length> 0) { %>
+                                                                        <span class="seed-type-tag"
+                                                                            style="background: #fce4ec; color: #c2185b; border: 1px solid #f8bbd0;">
+                                                                            🌸 <%= partner.seedOfferings.flowers.length
+                                                                                %>
+                                                                        </span>
+                                                                        <% } %>
+                                                                            <% if (partner.seedOfferings.herbs &&
+                                                                                partner.seedOfferings.herbs.length> 0) {
+                                                                                %>
+                                                                                <span class="seed-type-tag"
+                                                                                    style="background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7;">
+                                                                                    🌿 <%=
+                                                                                        partner.seedOfferings.herbs.length
+                                                                                        %>
+                                                                                </span>
+                                                                                <% } %>
+                                                                                    <% } else { %>
+                                                                                        <span
+                                                                                            style="color: #999; font-size: 12px;">No
+                                                                                            catalog</span>
+                                                                                        <% } %>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <% if (partner.primaryContact && partner.primaryContact.name) { %>
+                                                        <div style="font-size: 13px;">
+                                                            <%= partner.primaryContact.name %>
+                                                        </div>
+                                                        <% if (partner.primaryContact.email) { %>
+                                                            <div style="font-size: 11px; color: #999;">
+                                                                <i class="fas fa-envelope"></i>
+                                                                <%= partner.primaryContact.email %>
+                                                            </div>
                                                             <% } %>
+                                                                <% } else { %>
+                                                                    <span style="color: #999; font-size: 12px;">No
+                                                                        contact</span>
+                                                                    <% } %>
+                                                </td>
+                                                <td>
+                                                    <% if (partner.lastOrderDate) { %>
+                                                        <%= new Date(partner.lastOrderDate).toLocaleDateString() %>
+                                                            <div style="font-size: 11px; color: #999;">
+                                                                (<%= partner.daysSinceLastOrder() %> days ago)
+                                                            </div>
+                                                            <% } else { %>
+                                                                <span style="color: #999;">No orders</span>
+                                                                <% } %>
+                                                </td>
+                                                <td>
+                                                    <div class="action-buttons">
+                                                        <a href="/seed-partners/<%= partner._id %>"
+                                                            class="btn-sm-custom btn-view">
+                                                            <i class="fas fa-eye"></i> View
+                                                        </a>
+                                                        <a href="/seed-partners/<%= partner._id %>/edit"
+                                                            class="btn-sm-custom btn-edit">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                    </tr>
+                                    <!-- Expandable Row -->
+                                    <tr class="expandable-row" id="expand-<%= partner._id %>"
+                                        data-status="<%= partner.status %>"
+                                        data-exclusion-groups="<%= (partner.exclusionGroups || []).join(',') %>"
+                                        data-partner-id="<%= partner._id %>">
+                                        <td colspan="10">
+                                            <div class="expanded-content">
+                                                <div class="details-grid">
+                                                    <!-- Basic Information -->
+                                                    <div class="detail-section">
+                                                        <h4><i class="fas fa-info-circle"></i> Company Details</h4>
+                                                        <div class="detail-item">
+                                                            <span class="detail-label">Legal Name</span>
+                                                            <div class="detail-value editable" data-field="legalName"
+                                                                data-partner="<%= partner._id %>">
+                                                                <%= partner.legalName || 'Not specified' %>
+                                                            </div>
+                                                        </div>
+                                                        <div class="detail-item">
+                                                            <span class="detail-label">Website</span>
+                                                            <div class="detail-value">
+                                                                <% if (partner.businessDetails &&
+                                                                    partner.businessDetails.website) { %>
+                                                                    <a href="<%= partner.businessDetails.website %>"
+                                                                        target="_blank" style="color: #667eea;">
+                                                                        <i class="fas fa-external-link-alt"></i>
+                                                                        <%= partner.businessDetails.website %>
+                                                                    </a>
+                                                                    <% } else { %>
+                                                                        Not specified
+                                                                        <% } %>
+                                                            </div>
+                                                        </div>
+                                                        <div class="detail-item">
+                                                            <span class="detail-label">Founded</span>
+                                                            <div class="detail-value editable"
+                                                                data-field="yearEstablished"
+                                                                data-partner="<%= partner._id %>">
+                                                                <%= (partner.businessDetails &&
+                                                                    partner.businessDetails.yearEstablished)
+                                                                    || 'Not specified' %>
+                                                            </div>
+                                                        </div>
+                                                        <div class="detail-item">
+                                                            <span class="detail-label">Company Size</span>
+                                                            <div class="detail-value">
+                                                                <%= (partner.businessDetails &&
+                                                                    partner.businessDetails.numberOfEmployees)
+                                                                    || 'Not specified' %>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div class="detail-item">
-                                                        <span class="detail-label">Founded</span>
-                                                        <div class="detail-value editable" data-field="yearEstablished" data-partner="<%= partner._id %>">
-                                                            <%= (partner.businessDetails && partner.businessDetails.yearEstablished) || 'Not specified' %>
-                                                        </div>
-                                                    </div>
-                                                    <div class="detail-item">
-                                                        <span class="detail-label">Company Size</span>
-                                                        <div class="detail-value">
-                                                            <%= (partner.businessDetails && partner.businessDetails.numberOfEmployees) || 'Not specified' %>
-                                                        </div>
-                                                    </div>
-                                                </div>
 
-                                                <!-- Contact Information -->
-                                                <div class="detail-section">
-                                                    <h4><i class="fas fa-address-book"></i> Contact & Location</h4>
-                                                    <div class="detail-item">
-                                                        <span class="detail-label">Full Address</span>
-                                                        <div class="detail-value">
-                                                            <% if (partner.address) { %>
-                                                                <%= partner.address.street || '' %><br>
-                                                                <%= partner.address.city || '' %>, <%= partner.address.state || '' %> <%= partner.address.postalCode || '' %><br>
-                                                                <%= partner.address.country || '' %>
-                                                            <% } else { %>
-                                                                Not specified
-                                                            <% } %>
+                                                    <!-- Contact Information -->
+                                                    <div class="detail-section">
+                                                        <h4><i class="fas fa-address-book"></i> Contact & Location</h4>
+                                                        <div class="detail-item">
+                                                            <span class="detail-label">Full Address</span>
+                                                            <div class="detail-value">
+                                                                <% if (partner.address) { %>
+                                                                    <%= partner.address.street || '' %><br>
+                                                                        <%= partner.address.city || '' %>, <%=
+                                                                                partner.address.state || '' %>
+                                                                                <%= partner.address.postalCode || '' %>
+                                                                                    <br>
+                                                                                    <%= partner.address.country || '' %>
+                                                                                        <% } else { %>
+                                                                                            Not specified
+                                                                                            <% } %>
+                                                            </div>
+                                                        </div>
+                                                        <div class="detail-item">
+                                                            <span class="detail-label">Phone</span>
+                                                            <div class="detail-value">
+                                                                <%= partner.phone || 'Not specified' %>
+                                                            </div>
+                                                        </div>
+                                                        <div class="detail-item">
+                                                            <span class="detail-label">Email</span>
+                                                            <div class="detail-value">
+                                                                <%= partner.email || 'Not specified' %>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div class="detail-item">
-                                                        <span class="detail-label">Phone</span>
-                                                        <div class="detail-value">
-                                                            <%= partner.phone || 'Not specified' %>
-                                                        </div>
-                                                    </div>
-                                                    <div class="detail-item">
-                                                        <span class="detail-label">Email</span>
-                                                        <div class="detail-value">
-                                                            <%= partner.email || 'Not specified' %>
-                                                        </div>
-                                                    </div>
-                                                </div>
 
-                                                <!-- Seed Specializations -->
-                                                <div class="detail-section">
-                                                    <h4><i class="fas fa-seedling"></i> Seed Specializations</h4>
-                                                    <div class="detail-item">
-                                                        <span class="detail-label">All Seed Types</span>
-                                                        <div class="detail-value">
-                                                            <% if (partner.seedTypes && partner.seedTypes.length > 0) { %>
-                                                                <div class="seed-types">
-                                                                    <% partner.seedTypes.forEach(seedType => { %>
-                                                                        <span class="seed-type-tag"><%= seedType %></span>
-                                                                    <% }) %>
-                                                                </div>
-                                                            <% } else { %>
-                                                                Not specified
-                                                            <% } %>
+                                                    <!-- Seed Specializations -->
+                                                    <div class="detail-section">
+                                                        <h4><i class="fas fa-seedling"></i> Seed Specializations</h4>
+                                                        <div class="detail-item">
+                                                            <span class="detail-label">All Seed Types</span>
+                                                            <div class="detail-value">
+                                                                <% if (partner.seedTypes && partner.seedTypes.length> 0)
+                                                                    { %>
+                                                                    <div class="seed-types">
+                                                                        <% partner.seedTypes.forEach(seedType=> { %>
+                                                                            <span class="seed-type-tag">
+                                                                                <%= seedType %>
+                                                                            </span>
+                                                                            <% }) %>
+                                                                    </div>
+                                                                    <% } else { %>
+                                                                        Not specified
+                                                                        <% } %>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="detail-item">
-                                                        <span class="detail-label">Organic Certified</span>
-                                                        <div class="detail-value">
-                                                            <%= partner.organicCertified ? 'Yes' : 'No' %>
+                                                        <div class="detail-item">
+                                                            <span class="detail-label">Organic Certified</span>
+                                                            <div class="detail-value">
+                                                                <%= partner.organicCertified ? 'Yes' : 'No' %>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="detail-item">
-                                                        <span class="detail-label">Certifications</span>
-                                                        <div class="detail-value">
-                                                            <% if (partner.certifications && partner.certifications.length > 0) { %>
-                                                                <%= partner.certifications.join(', ') %>
+                                                        <div class="detail-item">
+                                                            <span class="detail-label">Certifications</span>
+                                                            <div class="detail-value">
+                                                                <% if (partner.certifications &&
+                                                                    partner.certifications.length> 0) { %>
+                                                                    <%= partner.certifications.join(', ') %>
                                                             <% } else { %>
                                                                 None listed
                                                             <% } %>
@@ -1039,158 +1141,218 @@
                                                     <div class="detail-item">
                                                         <span class="detail-label">Payment Terms</span>
                                                         <div class="detail-value">
-                                                            <%= (partner.financialTerms && partner.financialTerms.paymentTerms) || 'Not specified' %>
+                                                            <%= (partner.financialTerms && partner.financialTerms.paymentTerms) || '
+                                                                        Not specified' %>
+                                                            </div>
+                                                        </div>
+                                                        <div class="detail-item">
+                                                            <span class="detail-label">Payment Method</span>
+                                                            <div class="detail-value">
+                                                                <%= (partner.financialTerms &&
+                                                                    partner.financialTerms.preferredPaymentMethod)
+                                                                    || 'Not specified' %>
+                                                            </div>
+                                                        </div>
+                                                        <div class="detail-item">
+                                                            <span class="detail-label">Currency</span>
+                                                            <div class="detail-value">
+                                                                <%= (partner.financialTerms &&
+                                                                    partner.financialTerms.currency) || 'USD' %>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div class="detail-item">
-                                                        <span class="detail-label">Payment Method</span>
-                                                        <div class="detail-value">
-                                                            <%= (partner.financialTerms && partner.financialTerms.preferredPaymentMethod) || 'Not specified' %>
-                                                        </div>
-                                                    </div>
-                                                    <div class="detail-item">
-                                                        <span class="detail-label">Currency</span>
-                                                        <div class="detail-value">
-                                                            <%= (partner.financialTerms && partner.financialTerms.currency) || 'USD' %>
+
+                                                    <!-- Exclusion Groups Section -->
+                                                    <div class="detail-section"
+                                                        style="grid-column: 1 / -1; border-left-color: #dc3545;">
+                                                        <h4><i class="fas fa-ban"></i> Exclusion Groups</h4>
+                                                        <div class="detail-item" style="flex: 1;">
+                                                            <div class="detail-value">
+                                                                <div
+                                                                    style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px;">
+                                                                    <% if (partner.exclusionGroups &&
+                                                                        partner.exclusionGroups.length> 0) { %>
+                                                                        <% partner.exclusionGroups.forEach(function(group)
+                                                                            { %>
+                                                                            <span
+                                                                                style="background: #dc3545; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-flex; align-items: center; gap: 5px;">
+                                                                                <%= group %>
+                                                                                    <button
+                                                                                        onclick="removeExclusionGroup('<%= partner._id %>', '<%= group %>')"
+                                                                                        style="background: none; border: none; color: white; cursor: pointer; padding: 0; font-size: 14px;"
+                                                                                        title="Remove">×</button>
+                                                                            </span>
+                                                                            <% }) %>
+                                                                                <% } else { %>
+                                                                                    <span
+                                                                                        style="color: #999; font-style: italic;">No
+                                                                                        exclusion groups assigned</span>
+                                                                                    <% } %>
+                                                                </div>
+                                                                <div
+                                                                    style="display: flex; gap: 5px; align-items: flex-start;">
+                                                                    <select id="newGroupInput-<%= partner._id %>"
+                                                                        multiple size="4"
+                                                                        style="flex: 1; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; min-width: 200px;"
+                                                                        class="exclusion-group-selector">
+                                                                        <!-- Options populated dynamically -->
+                                                                    </select>
+                                                                    <button
+                                                                        onclick="addExclusionGroup('<%= partner._id %>')"
+                                                                        style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; white-space: nowrap; align-self: flex-start;"
+                                                                        onmouseover="this.style.background='#c82333'"
+                                                                        onmouseout="this.style.background='#dc3545'">
+                                                                        Add Selected
+                                                                    </button>
+                                                                </div>
+                                                                <small
+                                                                    style="color: #999; display: block; margin-top: 5px;">Select
+                                                                    one or more groups (Ctrl/Cmd+Click for multiple).
+                                                                    Use the minus (−) button above to create new
+                                                                    groups.</small>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                
-                                                <!-- Exclusion Groups Section -->
-                                                <div class="detail-section" style="grid-column: 1 / -1; border-left-color: #dc3545;">
-                                                    <h4><i class="fas fa-ban"></i> Exclusion Groups</h4>
-                                                    <div class="detail-item" style="flex: 1;">
-                                                        <div class="detail-value">
-                                                            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px;">
-                                                                <% if (partner.exclusionGroups && partner.exclusionGroups.length > 0) { %>
-                                                                    <% partner.exclusionGroups.forEach(function(group) { %>
-                                                                        <span style="background: #dc3545; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-flex; align-items: center; gap: 5px;">
-                                                                            <%= group %>
-                                                                            <button onclick="removeExclusionGroup('<%= partner._id %>', '<%= group %>')" style="background: none; border: none; color: white; cursor: pointer; padding: 0; font-size: 14px;" title="Remove">×</button>
-                                                                        </span>
-                                                                    <% }) %>
-                                                                <% } else { %>
-                                                                    <span style="color: #999; font-style: italic;">No exclusion groups assigned</span>
-                                                                <% } %>
+
+                                                <!-- Personal Notes Section -->
+                                                <% if (partner.personalNotes) { %>
+                                                    <div class="personal-notes-display">
+                                                        <strong><i class="fas fa-sticky-note"></i> Personal
+                                                            Notes:</strong><br>
+                                                        <%= partner.personalNotes %>
+                                                    </div>
+                                                    <% } %>
+
+                                                        <!-- Inline Edit Form (Hidden by default) -->
+                                                        <div id="edit-form-<%= partner._id %>"
+                                                            style="display: none; margin-top: 20px; padding: 20px; background: white; border-radius: 8px; border: 2px solid #667eea;">
+                                                            <h4 style="color: #667eea; margin-bottom: 15px;">
+                                                                <i class="fas fa-edit"></i> Quick Edit
+                                                            </h4>
+                                                            <div
+                                                                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                                                                <div>
+                                                                    <label class="detail-label">Legal Name</label>
+                                                                    <input type="text" class="edit-input"
+                                                                        id="edit-legalName-<%= partner._id %>"
+                                                                        value="<%= partner.legalName || '' %>">
+                                                                </div>
+                                                                <div>
+                                                                    <label class="detail-label">Website</label>
+                                                                    <input type="url" class="edit-input"
+                                                                        id="edit-website-<%= partner._id %>"
+                                                                        value="<%= (partner.businessDetails && partner.businessDetails.website) || '' %>"
+                                                                        placeholder="https://example.com">
+                                                                </div>
+                                                                <div>
+                                                                    <label class="detail-label">Year Established</label>
+                                                                    <input type="number" class="edit-input"
+                                                                        id="edit-yearEstablished-<%= partner._id %>"
+                                                                        value="<%= (partner.businessDetails && partner.businessDetails.yearEstablished) || '' %>">
+                                                                </div>
+                                                                <div>
+                                                                    <label class="detail-label">Priority (1-5)</label>
+                                                                    <input type="number" class="edit-input" min="1"
+                                                                        max="5" id="edit-priority-<%= partner._id %>"
+                                                                        value="<%= partner.priority || 3 %>">
+                                                                </div>
+                                                                <div>
+                                                                    <label class="detail-label">Status</label>
+                                                                    <select class="edit-input"
+                                                                        id="edit-status-<%= partner._id %>">
+                                                                        <option value="Prospective"
+                                                                            <%=partner.status==='Prospective'
+                                                                            ? 'selected' : '' %>>Prospective</option>
+                                                                        <option value="Active"
+                                                                            <%=partner.status==='Active' ? 'selected'
+                                                                            : '' %>>Active</option>
+                                                                        <option value="On Hold"
+                                                                            <%=partner.status==='On Hold' ? 'selected'
+                                                                            : '' %>>On Hold</option>
+                                                                        <option value="Inactive"
+                                                                            <%=partner.status==='Inactive' ? 'selected'
+                                                                            : '' %>>Inactive</option>
+                                                                        <option value="Non-Alternative"
+                                                                            <%=partner.status==='Non-Alternative'
+                                                                            ? 'selected' : '' %>>Non-Alternative
+                                                                        </option>
+                                                                    </select>
+                                                                </div>
                                                             </div>
-                                                            <div style="display: flex; gap: 5px; align-items: flex-start;">
-                                                                <select id="newGroupInput-<%= partner._id %>" multiple size="4" style="flex: 1; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; min-width: 200px;" class="exclusion-group-selector">
-                                                                    <!-- Options populated dynamically -->
-                                                                </select>
-                                                                <button onclick="addExclusionGroup('<%= partner._id %>')" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; white-space: nowrap; align-self: flex-start;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
-                                                                    Add Selected
+                                                            <div style="margin-top: 15px;">
+                                                                <label class="detail-label">Personal Notes</label>
+                                                                <textarea class="edit-input"
+                                                                    id="edit-personalNotes-<%= partner._id %>" rows="3"
+                                                                    style="resize: vertical;"><%= partner.personalNotes || '' %></textarea>
+                                                            </div>
+                                                            <div class="inline-edit-buttons">
+                                                                <button class="btn-sm-custom btn-save"
+                                                                    onclick="saveInlineEdit('<%= partner._id %>')">
+                                                                    <i class="fas fa-save"></i> Save Changes
+                                                                </button>
+                                                                <button class="btn-sm-custom btn-cancel"
+                                                                    onclick="cancelInlineEdit('<%= partner._id %>')">
+                                                                    <i class="fas fa-times"></i> Cancel
                                                                 </button>
                                                             </div>
-                                                            <small style="color: #999; display: block; margin-top: 5px;">Select one or more groups (Ctrl/Cmd+Click for multiple). Use the minus (−) button above to create new groups.</small>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                            </div>
 
-                                            <!-- Personal Notes Section -->
-                                            <% if (partner.personalNotes) { %>
-                                                <div class="personal-notes-display">
-                                                    <strong><i class="fas fa-sticky-note"></i> Personal Notes:</strong><br>
-                                                    <%= partner.personalNotes %>
-                                                </div>
-                                            <% } %>
-
-                                            <!-- Inline Edit Form (Hidden by default) -->
-                                            <div id="edit-form-<%= partner._id %>" style="display: none; margin-top: 20px; padding: 20px; background: white; border-radius: 8px; border: 2px solid #667eea;">
-                                                <h4 style="color: #667eea; margin-bottom: 15px;">
-                                                    <i class="fas fa-edit"></i> Quick Edit
-                                                </h4>
-                                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                                                    <div>
-                                                        <label class="detail-label">Legal Name</label>
-                                                        <input type="text" class="edit-input" id="edit-legalName-<%= partner._id %>" value="<%= partner.legalName || '' %>">
-                                                    </div>
-                                                    <div>
-                                                        <label class="detail-label">Website</label>
-                                                        <input type="url" class="edit-input" id="edit-website-<%= partner._id %>" value="<%= (partner.businessDetails && partner.businessDetails.website) || '' %>" placeholder="https://example.com">
-                                                    </div>
-                                                    <div>
-                                                        <label class="detail-label">Year Established</label>
-                                                        <input type="number" class="edit-input" id="edit-yearEstablished-<%= partner._id %>" value="<%= (partner.businessDetails && partner.businessDetails.yearEstablished) || '' %>">
-                                                    </div>
-                                                    <div>
-                                                        <label class="detail-label">Priority (1-5)</label>
-                                                        <input type="number" class="edit-input" min="1" max="5" id="edit-priority-<%= partner._id %>" value="<%= partner.priority || 3 %>">
-                                                    </div>
-                                                    <div>
-                                                        <label class="detail-label">Status</label>
-                                                        <select class="edit-input" id="edit-status-<%= partner._id %>">
-                                                            <option value="Prospective" <%= partner.status === 'Prospective' ? 'selected' : '' %>>Prospective</option>
-                                                            <option value="Active" <%= partner.status === 'Active' ? 'selected' : '' %>>Active</option>
-                                                            <option value="On Hold" <%= partner.status === 'On Hold' ? 'selected' : '' %>>On Hold</option>
-                                                            <option value="Inactive" <%= partner.status === 'Inactive' ? 'selected' : '' %>>Inactive</option>
-                                                            <option value="Non-Alternative" <%= partner.status === 'Non-Alternative' ? 'selected' : '' %>>Non-Alternative</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div style="margin-top: 15px;">
-                                                    <label class="detail-label">Personal Notes</label>
-                                                    <textarea class="edit-input" id="edit-personalNotes-<%= partner._id %>" rows="3" style="resize: vertical;"><%= partner.personalNotes || '' %></textarea>
-                                                </div>
-                                                <div class="inline-edit-buttons">
-                                                    <button class="btn-sm-custom btn-save" onclick="saveInlineEdit('<%= partner._id %>')">
-                                                        <i class="fas fa-save"></i> Save Changes
-                                                    </button>
-                                                    <button class="btn-sm-custom btn-cancel" onclick="cancelInlineEdit('<%= partner._id %>')">
-                                                        <i class="fas fa-times"></i> Cancel
-                                                    </button>
-                                                </div>
+                                                        <!-- Quick Edit Button -->
+                                                        <div style="margin-top: 15px;">
+                                                            <button class="btn-sm-custom btn-edit"
+                                                                onclick="showInlineEdit('<%= partner._id %>')">
+                                                                <i class="fas fa-pencil-alt"></i> Quick Edit
+                                                            </button>
+                                                        </div>
                                             </div>
-
-                                            <!-- Quick Edit Button -->
-                                            <div style="margin-top: 15px;">
-                                                <button class="btn-sm-custom btn-edit" onclick="showInlineEdit('<%= partner._id %>')">
-                                                    <i class="fas fa-pencil-alt"></i> Quick Edit
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
-            <% } %>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <% } %>
         </div>
 
         <!-- Regional Distribution (Optional Visual) -->
-        <% if (Object.keys(stats.byRegion).length > 0) { %>
+        <% if (Object.keys(stats.byRegion).length> 0) { %>
             <div class="filters-section" style="margin-top: 25px;">
                 <h3><i class="fas fa-map-marked-alt"></i> Partners by Region</h3>
                 <div class="region-grid">
-                    <% Object.keys(stats.byRegion).sort((a, b) => stats.byRegion[b] - stats.byRegion[a]).forEach(region => { %>
+                    <% Object.keys(stats.byRegion).sort((a, b)=> stats.byRegion[b] - stats.byRegion[a]).forEach(region
+                        => { %>
                         <div class="region-item">
-                            <div class="region-count"><%= stats.byRegion[region] %></div>
-                            <div class="region-name"><%= region %></div>
+                            <div class="region-count">
+                                <%= stats.byRegion[region] %>
+                            </div>
+                            <div class="region-name">
+                                <%= region %>
+                            </div>
                         </div>
-                    <% }) %>
+                        <% }) %>
                 </div>
             </div>
-        <% } %>
+            <% } %>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Wait for DOM to be ready
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Initialize exclusion toggle from localStorage (default: hide excluded)
             const showExcludedCheckbox = document.getElementById('showExcluded');
             const exclusionGroupsFilter = document.getElementById('exclusionGroupsFilter');
             const savedExcludedState = localStorage.getItem('showExcluded');
             const savedSelectedGroups = localStorage.getItem('selectedExclusionGroups');
-            
+
             // Merge master exclusion groups from localStorage with database groups
             const masterGroups = JSON.parse(localStorage.getItem('masterExclusionGroups') || '[]');
             const dbGroups = Array.from(exclusionGroupsFilter.options).map(opt => opt.value).filter(v => v);
-            
+
             // Combine and deduplicate
             const allGroups = [...new Set([...masterGroups, ...dbGroups])].sort();
-            
+
             // Rebuild the dropdown with all groups
             if (allGroups.length > 0) {
                 // Get current counts from database groups
@@ -1201,7 +1363,7 @@
                         groupCounts[opt.value] = match[1];
                     }
                 });
-                
+
                 // Clear and rebuild
                 exclusionGroupsFilter.innerHTML = '';
                 allGroups.forEach(group => {
@@ -1212,9 +1374,9 @@
                     exclusionGroupsFilter.appendChild(option);
                 });
             }
-            
+
             showExcludedCheckbox.checked = savedExcludedState === 'true';
-            
+
             // Restore selected exclusion groups
             if (savedSelectedGroups) {
                 const groups = JSON.parse(savedSelectedGroups);
@@ -1224,115 +1386,115 @@
                     }
                 });
             }
-            
+
             // Apply filter on page load
             applyExclusionFilter();
-            
+
             // Toggle excluded partners visibility
-            showExcludedCheckbox.addEventListener('change', function() {
+            showExcludedCheckbox.addEventListener('change', function () {
                 localStorage.setItem('showExcluded', this.checked);
                 applyExclusionFilter();
             });
-            
+
             // Handle exclusion groups selection
-            exclusionGroupsFilter.addEventListener('change', function() {
+            exclusionGroupsFilter.addEventListener('change', function () {
                 const selectedGroups = Array.from(this.selectedOptions).map(opt => opt.value);
                 localStorage.setItem('selectedExclusionGroups', JSON.stringify(selectedGroups));
                 applyExclusionFilter();
             });
-            
+
             // Toggle exclusion groups panel
             const toggleExclusionGroupsBtn = document.getElementById('toggleExclusionGroups');
             const exclusionGroupsPanel = document.getElementById('exclusionGroupsPanel');
             const exclusionToggleArrow = document.getElementById('exclusionToggleArrow');
-            
+
             if (toggleExclusionGroupsBtn && exclusionGroupsPanel && exclusionToggleArrow) {
-                toggleExclusionGroupsBtn.addEventListener('click', function(e) {
+                toggleExclusionGroupsBtn.addEventListener('click', function (e) {
                     e.stopPropagation();
                     const isHidden = exclusionGroupsPanel.style.display === 'none' || exclusionGroupsPanel.style.display === '';
                     exclusionGroupsPanel.style.display = isHidden ? 'block' : 'none';
                     exclusionToggleArrow.textContent = isHidden ? '\u25b2' : '\u25bc'; // ▲ when expanded, ▼ when collapsed
                 });
             }
-            
+
             // Close panel when clicking outside
-            document.addEventListener('click', function(e) {
-                if (exclusionGroupsPanel && 
-                    exclusionGroupsPanel.style.display === 'block' && 
-                    !exclusionGroupsPanel.contains(e.target) && 
+            document.addEventListener('click', function (e) {
+                if (exclusionGroupsPanel &&
+                    exclusionGroupsPanel.style.display === 'block' &&
+                    !exclusionGroupsPanel.contains(e.target) &&
                     !toggleExclusionGroupsBtn.contains(e.target)) {
                     exclusionGroupsPanel.style.display = 'none';
                     exclusionToggleArrow.textContent = '\u25bc'; // ▼
                 }
             });
-            
+
             function applyExclusionFilter() {
                 const showExcluded = showExcludedCheckbox.checked;
                 const selectedGroups = Array.from(exclusionGroupsFilter.selectedOptions).map(opt => opt.value);
                 const allRows = document.querySelectorAll('.partner-main-row, .expandable-row');
                 let visibleCount = 0;
                 let excludedCount = 0;
-            
-            allRows.forEach(row => {
-                const exclusionGroupsStr = row.dataset.exclusionGroups || '';
-                const partnerGroups = exclusionGroupsStr ? exclusionGroupsStr.split(',') : [];
-                
-                // Check if this partner has any of the selected exclusion groups
-                const hasSelectedGroup = selectedGroups.some(group => partnerGroups.includes(group));
-                
-                // Hide if: exclusion filtering is active (!showExcluded) AND partner has a selected exclusion group
-                const shouldHide = selectedGroups.length > 0 && !showExcluded && hasSelectedGroup;
-                
-                if (shouldHide) {
-                    row.style.display = 'none';
-                    // Count excluded main rows only
-                    if (row.classList.contains('partner-main-row')) {
-                        excludedCount++;
+
+                allRows.forEach(row => {
+                    const exclusionGroupsStr = row.dataset.exclusionGroups || '';
+                    const partnerGroups = exclusionGroupsStr ? exclusionGroupsStr.split(',') : [];
+
+                    // Check if this partner has any of the selected exclusion groups
+                    const hasSelectedGroup = selectedGroups.some(group => partnerGroups.includes(group));
+
+                    // Hide if: exclusion filtering is active (!showExcluded) AND partner has a selected exclusion group
+                    const shouldHide = selectedGroups.length > 0 && !showExcluded && hasSelectedGroup;
+
+                    if (shouldHide) {
+                        row.style.display = 'none';
+                        // Count excluded main rows only
+                        if (row.classList.contains('partner-main-row')) {
+                            excludedCount++;
+                        }
+                    } else {
+                        row.style.display = '';
                     }
+
+                    // Count visible main rows only
+                    if (row.classList.contains('partner-main-row') && row.style.display !== 'none') {
+                        visibleCount++;
+                    }
+                });
+
+                // Update visible count
+                document.getElementById('visibleCount').textContent = visibleCount;
+
+                // Update excluded count
+                const excludedCountEl = document.getElementById('excludedCount');
+                if (excludedCount > 0) {
+                    excludedCountEl.textContent = '(' + excludedCount + ')';
                 } else {
-                    row.style.display = '';
+                    excludedCountEl.textContent = '';
                 }
-                
-                // Count visible main rows only
-                if (row.classList.contains('partner-main-row') && row.style.display !== 'none') {
-                    visibleCount++;
-                }
-            });
-            
-            // Update visible count
-            document.getElementById('visibleCount').textContent = visibleCount;
-            
-            // Update excluded count
-            const excludedCountEl = document.getElementById('excludedCount');
-            if (excludedCount > 0) {
-                excludedCountEl.textContent = '(' + excludedCount + ')';
-            } else {
-                excludedCountEl.textContent = '';
             }
-        }
-        
+
         }); // End of DOMContentLoaded
-        
+
         // ============================================
         // EXCLUSION GROUPS MANAGEMENT
         // ============================================
-        
+
         async function addExclusionGroup(partnerId) {
             const select = document.getElementById('newGroupInput-' + partnerId);
-            
+
             if (!select) {
                 alert('Error: Selector not found');
                 return;
             }
-            
+
             // Get all selected options
             const selectedGroups = Array.from(select.selectedOptions).map(opt => opt.value);
-            
+
             if (selectedGroups.length === 0) {
                 alert('Please select at least one exclusion group');
                 return;
             }
-            
+
             try {
                 // Add each selected group to the partner
                 for (const groupName of selectedGroups) {
@@ -1341,34 +1503,34 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ groupName })
                     });
-                    
+
                     const data = await response.json();
-                    
+
                     if (!data.success) {
                         alert('Error adding group "' + groupName + '": ' + data.error);
                         return;
                     }
                 }
-                
+
                 location.reload(); // Reload to show updated groups
             } catch (error) {
                 console.error('Error:', error);
                 alert('Error adding exclusion groups: ' + error.message);
             }
         }
-        
+
         async function removeExclusionGroup(partnerId, groupName) {
             if (!confirm(`Remove "${groupName}" from this partner?`)) {
                 return;
             }
-            
+
             try {
                 const response = await fetch(`/seed-partners/api/partners/${partnerId}/exclusion-groups/${encodeURIComponent(groupName)}`, {
                     method: 'DELETE'
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     location.reload(); // Reload to show updated groups
                 } else {
@@ -1379,33 +1541,33 @@
                 alert('Error removing exclusion group');
             }
         }
-        
+
         // Create new exclusion group (adds to master list)
         function createNewExclusionGroup() {
             const groupName = prompt('Enter name for new exclusion group:');
-            
+
             if (!groupName || !groupName.trim()) {
                 return; // User cancelled or entered empty string
             }
-            
+
             const trimmedName = groupName.trim();
-            
+
             // Get existing master list from localStorage
             let masterGroups = JSON.parse(localStorage.getItem('masterExclusionGroups') || '[]');
-            
+
             // Check if already exists
             if (masterGroups.includes(trimmedName)) {
                 alert(`Exclusion group "${trimmedName}" already exists!`);
                 return;
             }
-            
+
             // Add to master list
             masterGroups.push(trimmedName);
             masterGroups.sort(); // Keep alphabetically sorted
-            
+
             // Save back to localStorage
             localStorage.setItem('masterExclusionGroups', JSON.stringify(masterGroups));
-            
+
             // Add to the dropdown
             const dropdown = document.getElementById('exclusionGroupsFilter');
             if (dropdown) {
@@ -1413,13 +1575,13 @@
                 option.value = trimmedName;
                 option.textContent = `${trimmedName} (0)`;
                 option.style.padding = '5px';
-                
+
                 // Remove "No exclusion groups yet" message if present
                 const noGroupsOption = dropdown.querySelector('option[disabled]');
                 if (noGroupsOption) {
                     noGroupsOption.remove();
                 }
-                
+
                 // Insert in alphabetical order
                 let inserted = false;
                 for (let i = 0; i < dropdown.options.length; i++) {
@@ -1433,33 +1595,33 @@
                     dropdown.appendChild(option);
                 }
             }
-            
+
             alert(`Exclusion group "${trimmedName}" created! You can now assign it to partners.`);
-            
+
             // Update all visible exclusion group selectors
             populateExclusionGroupSelectors();
         }
-        
+
         // Populate exclusion group selectors for partners
         function populateExclusionGroupSelectors() {
             // Get master list of all available groups
             const masterGroups = JSON.parse(localStorage.getItem('masterExclusionGroups') || '[]');
             const dropdown = document.getElementById('exclusionGroupsFilter');
             const dbGroups = dropdown ? Array.from(dropdown.options).map(opt => opt.value).filter(v => v) : [];
-            
+
             // Combine and deduplicate
             const allGroups = [...new Set([...masterGroups, ...dbGroups])].sort();
-            
+
             // Update all partner exclusion group selectors
             document.querySelectorAll('.exclusion-group-selector').forEach(selector => {
                 // Get partner's current groups from the data attribute
                 const partnerId = selector.id.replace('newGroupInput-', '');
                 const partnerRow = document.querySelector(`[data-partner-id="${partnerId}"]`);
                 const currentGroups = partnerRow ? (partnerRow.dataset.exclusionGroups || '').split(',').filter(g => g) : [];
-                
+
                 // Clear and repopulate
                 selector.innerHTML = '';
-                
+
                 allGroups.forEach(group => {
                     // Don't show groups that are already assigned
                     if (!currentGroups.includes(group)) {
@@ -1469,7 +1631,7 @@
                         selector.appendChild(option);
                     }
                 });
-                
+
                 if (selector.options.length === 0) {
                     const option = document.createElement('option');
                     option.disabled = true;
@@ -1478,12 +1640,12 @@
                 }
             });
         }
-        
+
         // Toggle expand/collapse row
         function toggleExpand(partnerId) {
             const expandRow = document.getElementById('expand-' + partnerId);
             const expandBtn = event.target;
-            
+
             if (expandRow.classList.contains('show')) {
                 // Collapsing - just hide the row
                 expandRow.classList.remove('show');
@@ -1492,21 +1654,21 @@
                 // Expanding - show the row first
                 expandRow.classList.add('show');
                 expandBtn.classList.add('expanded');
-                
+
                 // Populate the exclusion group selector for this partner
                 populateExclusionGroupSelectors();
-                
+
                 // Gentle scroll only if row is way off screen
                 setTimeout(() => {
                     const mainRow = expandBtn.closest('tr');
                     if (mainRow) {
                         const rect = mainRow.getBoundingClientRect();
-                        
+
                         // Only scroll if the row is way down the page or above viewport
                         if (rect.top > 300 || rect.top < -100) {
                             const yOffset = -120;
                             const y = mainRow.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                            
+
                             window.scrollTo({
                                 top: Math.max(0, y),
                                 behavior: 'smooth'
@@ -1521,12 +1683,12 @@
         function showInlineEdit(partnerId) {
             const editForm = document.getElementById('edit-form-' + partnerId);
             editForm.style.display = 'block';
-            
+
             // Immediately and aggressively scroll to show the entire Quick Edit form
             setTimeout(() => {
                 // Position the Quick Edit header near the top to ensure buttons are visible
                 const scrollTarget = editForm.getBoundingClientRect().top + window.pageYOffset - 120;
-                
+
                 window.scrollTo({
                     top: Math.max(0, scrollTarget),
                     behavior: 'smooth'
@@ -1583,11 +1745,11 @@
         }
 
         // Editable field click handler (optional feature for future enhancement)
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const editableFields = document.querySelectorAll('.detail-value.editable');
-            
+
             editableFields.forEach(field => {
-                field.addEventListener('click', function() {
+                field.addEventListener('click', function () {
                     // Future: implement direct field editing
                     // For now, just show the edit form
                     const partnerId = this.dataset.partner;
@@ -1597,4 +1759,5 @@
         });
     </script>
 </body>
+
 </html>

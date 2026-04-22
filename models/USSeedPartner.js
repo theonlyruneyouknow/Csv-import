@@ -17,7 +17,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
         uppercase: true,
         unique: true
     },
-    
+
     // Partnership Type (US Domestic)
     partnershipType: {
         type: String,
@@ -25,14 +25,14 @@ const usSeedPartnerSchema = new mongoose.Schema({
         required: true,
         default: 'Domestic Supplier'
     },
-    
+
     // Partnership Status
     status: {
         type: String,
         enum: ['Prospective', 'Active', 'On Hold', 'Inactive', 'Terminated'],
         default: 'Prospective'
     },
-    
+
     // US State (Required - One partner per state)
     state: {
         type: String,
@@ -50,7 +50,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
             'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
         ]
     },
-    
+
     // State Abbreviation
     stateCode: {
         type: String,
@@ -58,26 +58,26 @@ const usSeedPartnerSchema = new mongoose.Schema({
         uppercase: true,
         maxlength: 2
     },
-    
+
     // City (Primary location)
     city: {
         type: String,
         trim: true
     },
-    
+
     // Region (US Regions)
     region: {
         type: String,
         enum: ['Northeast', 'Southeast', 'Midwest', 'Southwest', 'West', 'Pacific', 'Mountain'],
         required: true
     },
-    
+
     // Seed Specializations
     seedTypes: [{
         type: String,
         enum: [
             'Vegetable Seeds',
-            'Flower Seeds', 
+            'Flower Seeds',
             'Herb Seeds',
             'Grain Seeds',
             'Cover Crop Seeds',
@@ -91,7 +91,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
             'Other'
         ]
     }],
-    
+
     // Detailed Seed Offerings - Crop Level
     seedOfferings: {
         vegetables: [{
@@ -107,7 +107,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
             // Common herb types
         }]
     },
-    
+
     // Certifications and Compliance
     certifications: [{
         certificationType: {
@@ -134,7 +134,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
             default: false
         }
     }],
-    
+
     // Contact Information
     primaryContact: {
         name: String,
@@ -148,7 +148,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
             default: 'Email'
         }
     },
-    
+
     secondaryContact: {
         name: String,
         title: String,
@@ -156,7 +156,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
         phone: String,
         mobile: String
     },
-    
+
     // Multiple additional contacts
     additionalContacts: [{
         name: String,
@@ -170,7 +170,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
             enum: ['Sales', 'Customer Service', 'Quality Control', 'Logistics', 'Management', 'Technical Support', 'Other']
         }
     }],
-    
+
     // Company Address
     address: {
         street: String,
@@ -180,7 +180,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
         zipCode: String,
         county: String
     },
-    
+
     // Shipping/Receiving Address (if different)
     shippingAddress: {
         street: String,
@@ -190,7 +190,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
         zipCode: String,
         specialInstructions: String
     },
-    
+
     // Business Details
     businessDetails: {
         registrationNumber: String,
@@ -206,7 +206,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
         instagram: String,
         companyProfile: String // Detailed description
     },
-    
+
     // Financial Terms
     financialTerms: {
         currency: {
@@ -229,7 +229,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
             routingNumber: String
         }
     },
-    
+
     // Shipping Details
     shippingDetails: {
         preferredCarrier: {
@@ -245,7 +245,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
             default: false
         }
     },
-    
+
     // Quality and Compliance
     qualityMetrics: {
         germinationRate: Number, // Average percentage
@@ -262,7 +262,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
             max: 5
         }
     },
-    
+
     // Partnership History
     partnershipStartDate: Date,
     partnershipEndDate: Date,
@@ -275,7 +275,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    
+
     // Performance Tracking
     performanceMetrics: {
         onTimeDeliveryRate: Number, // Percentage
@@ -291,7 +291,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
             max: 5
         }
     },
-    
+
     // Documents and Attachments
     documents: [{
         documentType: {
@@ -320,7 +320,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
         expiryDate: Date,
         notes: String
     }],
-    
+
     // Information Sources & References
     references: [{
         sourceType: {
@@ -355,7 +355,7 @@ const usSeedPartnerSchema = new mongoose.Schema({
         },
         notes: String
     }],
-    
+
     // Verified Information Tracking
     verifiedInformation: {
         companyNameVerified: {
@@ -409,13 +409,13 @@ const usSeedPartnerSchema = new mongoose.Schema({
             default: 0
         }
     },
-    
+
     // Notes and Communication Log
     notes: {
         type: String,
         default: ''
     },
-    
+
     communicationLog: [{
         date: {
             type: Date,
@@ -435,16 +435,16 @@ const usSeedPartnerSchema = new mongoose.Schema({
         followUpDate: Date,
         loggedBy: String
     }],
-    
+
     // Internal Notes (Private)
     internalNotes: {
         type: String,
         default: ''
     },
-    
+
     // Tags for easy filtering
     tags: [String],
-    
+
     // Priority Level
     priority: {
         type: Number,
@@ -452,25 +452,25 @@ const usSeedPartnerSchema = new mongoose.Schema({
         max: 5,
         default: 3
     },
-    
+
     // Personal Notes
     personalNotes: {
         type: String,
         trim: true
     },
-    
+
     // Assigned Team Member
     assignedTo: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    
+
     // Active/Inactive Status
     isActive: {
         type: Boolean,
         default: true
     },
-    
+
     // Metadata
     createdBy: String,
     createdAt: {
@@ -498,21 +498,21 @@ usSeedPartnerSchema.index({ isActive: 1 });
 usSeedPartnerSchema.index({ priority: 1 });
 
 // Virtual for full address
-usSeedPartnerSchema.virtual('fullAddress').get(function() {
+usSeedPartnerSchema.virtual('fullAddress').get(function () {
     const addr = this.address;
     if (!addr || !addr.street) return '';
-    
+
     let parts = [addr.street];
     if (addr.street2) parts.push(addr.street2);
     if (addr.city) parts.push(addr.city);
     if (addr.state) parts.push(addr.state);
     if (addr.zipCode) parts.push(addr.zipCode);
-    
+
     return parts.join(', ');
 });
 
 // Virtual for display name with state
-usSeedPartnerSchema.virtual('displayName').get(function() {
+usSeedPartnerSchema.virtual('displayName').get(function () {
     return `${this.companyName} (${this.stateCode})`;
 });
 

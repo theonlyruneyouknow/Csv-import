@@ -7,13 +7,13 @@ async function testRoute() {
     try {
         await mongoose.connect('mongodb://localhost:27017/tsc-purchasing');
         console.log('✅ Connected to MongoDB\n');
-        
+
         // Simulate what the dashboard route does
         const query = {};
         const allPartners = await USSeedPartner.find(query).sort({ state: 1 });
-        
+
         console.log(`📊 Query returned ${allPartners.length} partners\n`);
-        
+
         if (allPartners.length === 0) {
             console.log('⚠️  No partners returned by query!');
         } else {
@@ -28,7 +28,7 @@ async function testRoute() {
                 console.log(`   Flowers: ${p.seedOfferings?.flowers?.length || 0}`);
                 console.log(`   Herbs: ${p.seedOfferings?.herbs?.length || 0}`);
             });
-            
+
             // Calculate stats like the route does
             const stats = {
                 total: allPartners.length,
@@ -38,7 +38,7 @@ async function testRoute() {
                 highPriority: allPartners.filter(p => p.priority >= 4).length,
                 withWebsites: allPartners.filter(p => p.businessDetails?.website).length
             };
-            
+
             console.log('\n\n📈 Stats (as dashboard would show):');
             console.log(`   Total: ${stats.total}`);
             console.log(`   Active: ${stats.active}`);
@@ -46,10 +46,10 @@ async function testRoute() {
             console.log(`   High Priority: ${stats.highPriority}`);
             console.log(`   With Websites: ${stats.withWebsites}`);
         }
-        
+
         await mongoose.connection.close();
         console.log('\n✅ Test complete');
-        
+
     } catch (error) {
         console.error('❌ Error:', error.message);
         console.error(error.stack);

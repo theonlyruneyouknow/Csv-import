@@ -57,14 +57,14 @@ const statePartners = [
 ];
 
 const vegetables = [
-    'Tomatoes', 'Peppers', 'Cucumbers', 'Squash', 'Zucchini', 'Beans', 'Peas', 'Lettuce', 
-    'Spinach', 'Kale', 'Broccoli', 'Cauliflower', 'Cabbage', 'Carrots', 'Radishes', 
+    'Tomatoes', 'Peppers', 'Cucumbers', 'Squash', 'Zucchini', 'Beans', 'Peas', 'Lettuce',
+    'Spinach', 'Kale', 'Broccoli', 'Cauliflower', 'Cabbage', 'Carrots', 'Radishes',
     'Beets', 'Onions', 'Garlic', 'Potatoes', 'Sweet Potatoes', 'Eggplant', 'Okra',
     'Corn', 'Pumpkins', 'Melons', 'Watermelon'
 ];
 
 const flowers = [
-    'Sunflowers', 'Marigolds', 'Zinnias', 'Cosmos', 'Nasturtiums', 'Sweet Peas', 
+    'Sunflowers', 'Marigolds', 'Zinnias', 'Cosmos', 'Nasturtiums', 'Sweet Peas',
     'Petunias', 'Impatiens', 'Begonias', 'Dahlias', 'Lilies', 'Tulips', 'Daffodils',
     'Roses', 'Lavender', 'Poppies', 'Morning Glory'
 ];
@@ -83,9 +83,9 @@ async function insertDirect() {
     try {
         await mongoose.connect(process.env.MONGODB_URI);
         console.log('✅ Connected\n');
-        
+
         const db = mongoose.connection.db;
-        
+
         // Drop collection if exists
         try {
             await db.collection('usseedpartners').drop();
@@ -93,14 +93,14 @@ async function insertDirect() {
         } catch (e) {
             console.log('ℹ️  Collection doesn\'t exist yet\n');
         }
-        
+
         // Create full documents
         const documents = statePartners.map((partner, idx) => {
             const isActive = Math.random() > 0.3;
             const vegCount = Math.floor(Math.random() * 15) + 10;
             const flowerCount = Math.floor(Math.random() * 10) + 5;
             const herbCount = Math.floor(Math.random() * 8) + 3;
-            
+
             return {
                 companyName: partner.companyName,
                 partnerCode: `US-${partner.stateCode}`,
@@ -125,20 +125,20 @@ async function insertDirect() {
                 updatedAt: new Date()
             };
         });
-        
+
         console.log(`📦 Inserting ${documents.length} partners directly...`);
-        
+
         const result = await db.collection('usseedpartners').insertMany(documents);
-        
+
         console.log(`✅ Successfully inserted ${result.insertedCount} partners!\n`);
-        
+
         // Verify
         const count = await db.collection('usseedpartners').countDocuments();
         console.log(`📊 Verification: ${count} partners in collection`);
-        
+
         const sample = await db.collection('usseedpartners').findOne();
         console.log(`📝 Sample: ${sample.companyName} (${sample.state})`);
-        
+
     } catch (error) {
         console.error('❌ Error:', error);
     } finally {

@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ 
+const upload = multer({
     storage: storage,
     limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
     fileFilter: function (req, file, cb) {
@@ -30,7 +30,7 @@ const upload = multer({
         const filetypes = /jpeg|jpg|png|pdf|doc|docx|xls|xlsx/;
         const mimetype = filetypes.test(file.mimetype);
         const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-        
+
         if (mimetype && extname) {
             return cb(null, true);
         }
@@ -44,7 +44,7 @@ const upload = multer({
 router.get('/', ensureAuthenticated, async (req, res) => {
     try {
         console.log('🌍 Loading World Seed Partnership Dashboard...');
-        
+
         // Get filter parameters with session persistence
         // If view is explicitly set in query, use it and save to session
         // Otherwise, use session value or default to 'all'
@@ -56,7 +56,7 @@ router.get('/', ensureAuthenticated, async (req, res) => {
             // Restore from session or default to 'all'
             viewMode = req.session.partnerViewMode || 'all';
         }
-        
+
         console.log(`📍 View Mode: ${viewMode} (from ${req.query.view ? 'query' : 'session'})`);
         const statusFilter = req.query.status;
         const typeFilter = req.query.type;
@@ -64,10 +64,10 @@ router.get('/', ensureAuthenticated, async (req, res) => {
         const countryFilter = req.query.country;
         const searchTerm = req.query.search;
         const excludedGroups = req.query.exclude ? req.query.exclude.split(',') : [];
-        
+
         // Build query  
         let query = { isActive: true };
-        
+
         // Apply view mode filter
         if (viewMode === 'international') {
             query.isDomestic = { $ne: true };
@@ -75,12 +75,12 @@ router.get('/', ensureAuthenticated, async (req, res) => {
             query.isDomestic = true;
         }
         // 'all' = no isDomestic filter
-        
+
         // Apply exclusion groups filter
         if (excludedGroups.length > 0) {
             query.exclusionGroups = { $nin: excludedGroups };
         }
-        
+
         if (statusFilter && statusFilter !== 'all') {
             query.status = statusFilter;
         }
@@ -102,16 +102,16 @@ router.get('/', ensureAuthenticated, async (req, res) => {
                 { tags: { $regex: searchTerm, $options: 'i' } }
             ];
         }
-        
+
         // Fetch partners
         const partners = await SeedPartner.find(query)
             .sort({ priority: 1, companyName: 1 });
-        
+
         // Calculate statistics
         const allPartnersCount = await SeedPartner.countDocuments({ isActive: true });
         const domesticCount = await SeedPartner.countDocuments({ isActive: true, isDomestic: true });
         const internationalCount = await SeedPartner.countDocuments({ isActive: true, isDomestic: { $ne: true } });
-        
+
         const stats = {
             total: partners.length,
             allPartnersTotal: allPartnersCount,
@@ -126,19 +126,19 @@ router.get('/', ensureAuthenticated, async (req, res) => {
             bySeedType: {},
             byExclusionGroup: {}
         };
-        
+
         // Group by region
         partners.forEach(partner => {
             stats.byRegion[partner.region] = (stats.byRegion[partner.region] || 0) + 1;
             stats.byCountry[partner.country] = (stats.byCountry[partner.country] || 0) + 1;
-            
+
             // Count seed types
             if (partner.seedTypes && partner.seedTypes.length > 0) {
                 partner.seedTypes.forEach(seedType => {
                     stats.bySeedType[seedType] = (stats.bySeedType[seedType] || 0) + 1;
                 });
             }
-            
+
             // Count exclusion groups
             if (partner.exclusionGroups && partner.exclusionGroups.length > 0) {
                 partner.exclusionGroups.forEach(group => {
@@ -146,13 +146,13 @@ router.get('/', ensureAuthenticated, async (req, res) => {
                 });
             }
         });
-        
+
         // Get unique values for filters
         const uniqueStatuses = ['Prospective', 'Active', 'On Hold', 'Inactive', 'Terminated', 'Non-Alternative'];
         const uniqueTypes = ['International Supplier', 'Domestic Supplier', 'International Client', 'Domestic Client', 'Both Supplier & Client'];
         const uniqueRegions = [...new Set(partners.map(p => p.region))].sort();
         const uniqueCountries = [...new Set(partners.map(p => p.country))].sort();
-        
+
         // Get available exclusion groups dynamically from all partners
         const allExclusionGroups = new Set();
         partners.forEach(partner => {
@@ -161,9 +161,9 @@ router.get('/', ensureAuthenticated, async (req, res) => {
             }
         });
         const availableExclusionGroups = Array.from(allExclusionGroups).sort();
-        
+
         console.log(`✅ Loaded ${partners.length} seed partners (View: ${viewMode})`);
-        
+
         res.render('seed-partnership-dashboard', {
             partners,
             stats,
@@ -184,7 +184,7 @@ router.get('/', ensureAuthenticated, async (req, res) => {
             stickyViewMode: viewMode,
             user: req.user
         });
-        
+
     } catch (error) {
         console.error('❌ Error loading seed partnership dashboard:', error);
         res.status(500).send('Error loading dashboard: ' + error.message);
@@ -227,7 +227,7 @@ router.get('/api/partners/:id', ensureAuthenticated, async (req, res) => {
 router.get('/catalog', ensureAuthenticated, async (req, res) => {
     try {
         console.log('🌱 Loading Seed Catalog search page...');
-        
+
         // Get filter parameters with session persistence
         // If view is explicitly set in query, use it and save to session
         // Otherwise, use session value or default to 'all'
@@ -239,12 +239,12 @@ router.get('/catalog', ensureAuthenticated, async (req, res) => {
             // Restore from session or default to 'all'
             viewMode = req.session.partnerViewMode || 'all';
         }
-        
+
         console.log(`📍 Catalog View Mode: ${viewMode} (from ${req.query.view ? 'query' : 'session'})`);
-        
+
         // Build query based on view mode
         let query = { isActive: true };
-        
+
         // Apply view mode filter
         if (viewMode === 'international') {
             query.isDomestic = { $ne: true };
@@ -252,17 +252,17 @@ router.get('/catalog', ensureAuthenticated, async (req, res) => {
             query.isDomestic = true;
         }
         // 'all' = no isDomestic filter
-        
+
         // Get filtered partners with seed offerings
         const partners = await SeedPartner.find(query);
-        
+
         // Build comprehensive catalog
         const catalog = {
             vegetables: {},
             flowers: {},
             herbs: {}
         };
-        
+
         // Aggregate all offerings
         partners.forEach(partner => {
             if (partner.seedOfferings) {
@@ -283,7 +283,7 @@ router.get('/catalog', ensureAuthenticated, async (req, res) => {
                         });
                     });
                 }
-                
+
                 // Flowers
                 if (partner.seedOfferings.flowers) {
                     partner.seedOfferings.flowers.forEach(flower => {
@@ -301,7 +301,7 @@ router.get('/catalog', ensureAuthenticated, async (req, res) => {
                         });
                     });
                 }
-                
+
                 // Herbs
                 if (partner.seedOfferings.herbs) {
                     partner.seedOfferings.herbs.forEach(herb => {
@@ -321,19 +321,19 @@ router.get('/catalog', ensureAuthenticated, async (req, res) => {
                 }
             }
         });
-        
+
         // Sort crop types alphabetically
         const sortedCatalog = {
             vegetables: Object.keys(catalog.vegetables).sort(),
             flowers: Object.keys(catalog.flowers).sort(),
             herbs: Object.keys(catalog.herbs).sort()
         };
-        
+
         // Calculate partner statistics for all view modes
         const allPartnersCount = await SeedPartner.countDocuments({ isActive: true });
         const domesticPartnersCount = await SeedPartner.countDocuments({ isActive: true, isDomestic: true });
         const internationalPartnersCount = await SeedPartner.countDocuments({ isActive: true, isDomestic: { $ne: true } });
-        
+
         // Stats
         const stats = {
             totalVegetables: sortedCatalog.vegetables.length,
@@ -344,9 +344,9 @@ router.get('/catalog', ensureAuthenticated, async (req, res) => {
             domesticPartnersCount: domesticPartnersCount,
             internationalPartnersCount: internationalPartnersCount
         };
-        
+
         console.log(`✅ Loaded seed catalog (View: ${viewMode}, Partners: ${partners.length})`);
-        
+
         res.render('seed-catalog', {
             catalog: catalog,
             sortedCatalog: sortedCatalog,
@@ -355,7 +355,7 @@ router.get('/catalog', ensureAuthenticated, async (req, res) => {
             stickyViewMode: viewMode,
             user: req.user
         });
-        
+
     } catch (error) {
         console.error('❌ Error loading seed catalog:', error);
         console.error('Stack trace:', error.stack);
@@ -385,7 +385,7 @@ router.get('/new', ensureAuthenticated, async (req, res) => {
 router.post('/new', ensureAuthenticated, async (req, res) => {
     try {
         console.log('Creating new seed partner:', req.body.companyName);
-        
+
         const partnerData = {
             companyName: req.body.companyName,
             partnerCode: req.body.partnerCode,
@@ -435,13 +435,13 @@ router.post('/new', ensureAuthenticated, async (req, res) => {
             createdBy: req.user ? req.user.email : 'system',
             lastUpdatedBy: req.user ? req.user.email : 'system'
         };
-        
+
         const newPartner = new SeedPartner(partnerData);
         await newPartner.save();
-        
+
         console.log('✅ Created new seed partner:', newPartner.companyName);
         res.redirect('/seed-partners/' + newPartner._id);
-        
+
     } catch (error) {
         console.error('❌ Error creating seed partner:', error);
         res.status(500).send('Error creating partner: ' + error.message);
@@ -455,22 +455,22 @@ router.post('/new', ensureAuthenticated, async (req, res) => {
 router.get('/:id', ensureAuthenticated, async (req, res) => {
     try {
         const partner = await SeedPartner.findById(req.params.id);
-        
+
         if (!partner) {
             return res.status(404).send('Partner not found');
         }
-        
+
         // Calculate additional metrics
         const daysSinceLastOrder = partner.daysSinceLastOrder();
         const expiringCertifications = partner.getExpiringCertifications();
-        
+
         res.render('seed-partner-detail', {
             partner,
             daysSinceLastOrder,
             expiringCertifications,
             user: req.user
         });
-        
+
     } catch (error) {
         console.error('Error loading partner detail:', error);
         res.status(500).send('Error loading partner: ' + error.message);
@@ -484,17 +484,17 @@ router.get('/:id', ensureAuthenticated, async (req, res) => {
 router.get('/:id/edit', ensureAuthenticated, async (req, res) => {
     try {
         const partner = await SeedPartner.findById(req.params.id);
-        
+
         if (!partner) {
             return res.status(404).send('Partner not found');
         }
-        
+
         res.render('seed-partner-form', {
             partner,
             isEdit: true,
             user: req.user
         });
-        
+
     } catch (error) {
         console.error('Error loading edit form:', error);
         res.status(500).send('Error loading form: ' + error.message);
@@ -507,14 +507,14 @@ router.get('/:id/edit', ensureAuthenticated, async (req, res) => {
 router.post('/:id/quick-update', ensureAuthenticated, async (req, res) => {
     try {
         const partner = await SeedPartner.findById(req.params.id);
-        
+
         if (!partner) {
             return res.status(404).json({ success: false, message: 'Partner not found' });
         }
 
         // Update only the fields that can be quick-edited
         const { legalName, website, yearEstablished, priority, status, personalNotes } = req.body;
-        
+
         if (legalName !== undefined) partner.legalName = legalName;
         if (website !== undefined) {
             if (!partner.businessDetails) partner.businessDetails = {};
@@ -529,10 +529,10 @@ router.post('/:id/quick-update', ensureAuthenticated, async (req, res) => {
         if (personalNotes !== undefined) partner.personalNotes = personalNotes;
 
         await partner.save();
-        
+
         console.log(`✅ Quick update successful for partner: ${partner.companyName}`);
         res.json({ success: true, message: 'Partner updated successfully' });
-        
+
     } catch (error) {
         console.error('Error in quick update:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -543,11 +543,11 @@ router.post('/:id/quick-update', ensureAuthenticated, async (req, res) => {
 router.post('/:id/edit', ensureAuthenticated, async (req, res) => {
     try {
         const partner = await SeedPartner.findById(req.params.id);
-        
+
         if (!partner) {
             return res.status(404).json({ success: false, error: 'Partner not found' });
         }
-        
+
         // Update fields
         partner.companyName = req.body.companyName;
         partner.partnerCode = req.body.partnerCode;
@@ -556,7 +556,7 @@ router.post('/:id/edit', ensureAuthenticated, async (req, res) => {
         partner.country = req.body.country;
         partner.region = req.body.region;
         partner.seedTypes = req.body.seedTypes || [];
-        
+
         partner.primaryContact = {
             name: req.body.primaryContactName,
             title: req.body.primaryContactTitle,
@@ -566,7 +566,7 @@ router.post('/:id/edit', ensureAuthenticated, async (req, res) => {
             whatsapp: req.body.primaryContactWhatsapp,
             preferredLanguage: req.body.primaryContactLanguage || 'English'
         };
-        
+
         partner.address = {
             street: req.body.addressStreet,
             street2: req.body.addressStreet2,
@@ -575,38 +575,38 @@ router.post('/:id/edit', ensureAuthenticated, async (req, res) => {
             postalCode: req.body.addressPostalCode,
             country: req.body.country
         };
-        
+
         partner.businessDetails = {
             website: req.body.website,
             companyProfile: req.body.companyProfile,
             yearEstablished: req.body.yearEstablished,
             numberOfEmployees: req.body.numberOfEmployees
         };
-        
+
         partner.financialTerms = {
             currency: req.body.currency || 'USD',
             ...(req.body.paymentTerms && { paymentTerms: req.body.paymentTerms }),
             ...(req.body.preferredPaymentMethod && { preferredPaymentMethod: req.body.preferredPaymentMethod })
         };
-        
+
         partner.tradeDetails = {
             ...(req.body.preferredShippingMethod && { preferredShippingMethod: req.body.preferredShippingMethod }),
             ...(req.body.incoterms && { incoterms: req.body.incoterms }),
             averageLeadTime: req.body.averageLeadTime,
             minimumOrderQuantity: req.body.minimumOrderQuantity
         };
-        
+
         partner.notes = req.body.notes || '';
         partner.tags = req.body.tags ? req.body.tags.split(',').map(t => t.trim()) : [];
         partner.priority = req.body.priority || 3;
         partner.personalNotes = req.body.personalNotes || '';
         partner.lastUpdatedBy = req.user ? req.user.email : 'system';
-        
+
         await partner.save();
-        
+
         console.log('✅ Updated seed partner:', partner.companyName);
         res.redirect('/seed-partners/' + partner._id);
-        
+
     } catch (error) {
         console.error('❌ Error updating seed partner:', error);
         res.status(500).send('Error updating partner: ' + error.message);
@@ -620,18 +620,18 @@ router.post('/:id/edit', ensureAuthenticated, async (req, res) => {
 router.post('/:id/delete', ensureAuthenticated, async (req, res) => {
     try {
         const partner = await SeedPartner.findById(req.params.id);
-        
+
         if (!partner) {
             return res.status(404).json({ success: false, error: 'Partner not found' });
         }
-        
+
         partner.isActive = false;
         partner.lastUpdatedBy = req.user ? req.user.email : 'system';
         await partner.save();
-        
+
         console.log('✅ Deactivated seed partner:', partner.companyName);
         res.json({ success: true });
-        
+
     } catch (error) {
         console.error('❌ Error deleting seed partner:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -646,11 +646,11 @@ router.post('/:id/delete', ensureAuthenticated, async (req, res) => {
 router.post('/:id/communication', ensureAuthenticated, async (req, res) => {
     try {
         const partner = await SeedPartner.findById(req.params.id);
-        
+
         if (!partner) {
             return res.status(404).json({ success: false, error: 'Partner not found' });
         }
-        
+
         partner.communicationLog.push({
             date: new Date(),
             contactPerson: req.body.contactPerson,
@@ -661,12 +661,12 @@ router.post('/:id/communication', ensureAuthenticated, async (req, res) => {
             followUpDate: req.body.followUpDate ? new Date(req.body.followUpDate) : null,
             loggedBy: req.user ? req.user.email : 'system'
         });
-        
+
         await partner.save();
-        
+
         console.log('✅ Added communication log to:', partner.companyName);
         res.json({ success: true });
-        
+
     } catch (error) {
         console.error('❌ Error adding communication log:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -680,15 +680,15 @@ router.post('/:id/communication', ensureAuthenticated, async (req, res) => {
 router.post('/:id/documents', ensureAuthenticated, upload.single('document'), async (req, res) => {
     try {
         const partner = await SeedPartner.findById(req.params.id);
-        
+
         if (!partner) {
             return res.status(404).json({ success: false, error: 'Partner not found' });
         }
-        
+
         if (!req.file) {
             return res.status(400).json({ success: false, error: 'No file uploaded' });
         }
-        
+
         partner.documents.push({
             documentType: req.body.documentType,
             fileName: req.file.originalname,
@@ -697,12 +697,12 @@ router.post('/:id/documents', ensureAuthenticated, upload.single('document'), as
             expiryDate: req.body.expiryDate ? new Date(req.body.expiryDate) : null,
             notes: req.body.documentNotes || ''
         });
-        
+
         await partner.save();
-        
+
         console.log('✅ Uploaded document to:', partner.companyName);
         res.json({ success: true, document: partner.documents[partner.documents.length - 1] });
-        
+
     } catch (error) {
         console.error('❌ Error uploading document:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -717,11 +717,11 @@ router.post('/:id/documents', ensureAuthenticated, upload.single('document'), as
 router.post('/:id/certifications', ensureAuthenticated, async (req, res) => {
     try {
         const partner = await SeedPartner.findById(req.params.id);
-        
+
         if (!partner) {
             return res.status(404).json({ success: false, error: 'Partner not found' });
         }
-        
+
         partner.certifications.push({
             certificationType: req.body.certificationType,
             certificateNumber: req.body.certificateNumber,
@@ -731,12 +731,12 @@ router.post('/:id/certifications', ensureAuthenticated, async (req, res) => {
             documentUrl: req.body.documentUrl || '',
             verified: req.body.verified === 'true'
         });
-        
+
         await partner.save();
-        
+
         console.log('✅ Added certification to:', partner.companyName);
         res.json({ success: true });
-        
+
     } catch (error) {
         console.error('❌ Error adding certification:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -751,17 +751,17 @@ router.post('/:id/certifications', ensureAuthenticated, async (req, res) => {
 router.post('/:id/update-status', ensureAuthenticated, async (req, res) => {
     try {
         const partner = await SeedPartner.findById(req.params.id);
-        
+
         if (!partner) {
             return res.status(404).json({ success: false, error: 'Partner not found' });
         }
-        
+
         partner.status = req.body.status;
         partner.lastUpdatedBy = req.user ? req.user.email : 'system';
         await partner.save();
-        
+
         res.json({ success: true });
-        
+
     } catch (error) {
         console.error('❌ Error updating status:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -772,17 +772,17 @@ router.post('/:id/update-status', ensureAuthenticated, async (req, res) => {
 router.post('/:id/update-priority', ensureAuthenticated, async (req, res) => {
     try {
         const partner = await SeedPartner.findById(req.params.id);
-        
+
         if (!partner) {
             return res.status(404).json({ success: false, error: 'Partner not found' });
         }
-        
+
         partner.priority = req.body.priority;
         partner.lastUpdatedBy = req.user ? req.user.email : 'system';
         await partner.save();
-        
+
         res.json({ success: true });
-        
+
     } catch (error) {
         console.error('❌ Error updating priority:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -797,27 +797,27 @@ router.post('/:id/update-priority', ensureAuthenticated, async (req, res) => {
 router.post('/api/partners/:id/exclusion-groups', ensureAuthenticated, async (req, res) => {
     try {
         const { groupName } = req.body;
-        
+
         if (!groupName || groupName.trim() === '') {
             return res.status(400).json({ success: false, error: 'Group name is required' });
         }
-        
+
         const partner = await SeedPartner.findById(req.params.id);
         if (!partner) {
             return res.status(404).json({ success: false, error: 'Partner not found' });
         }
-        
+
         // Initialize exclusionGroups if it doesn't exist
         if (!partner.exclusionGroups) {
             partner.exclusionGroups = [];
         }
-        
+
         // Add group if not already present
         if (!partner.exclusionGroups.includes(groupName)) {
             partner.exclusionGroups.push(groupName);
             await partner.save();
         }
-        
+
         res.json({ success: true, exclusionGroups: partner.exclusionGroups });
     } catch (error) {
         console.error('Error adding exclusion group:', error);
@@ -829,17 +829,17 @@ router.post('/api/partners/:id/exclusion-groups', ensureAuthenticated, async (re
 router.delete('/api/partners/:id/exclusion-groups/:groupName', ensureAuthenticated, async (req, res) => {
     try {
         const { groupName } = req.params;
-        
+
         const partner = await SeedPartner.findById(req.params.id);
         if (!partner) {
             return res.status(404).json({ success: false, error: 'Partner not found' });
         }
-        
+
         if (partner.exclusionGroups) {
             partner.exclusionGroups = partner.exclusionGroups.filter(g => g !== groupName);
             await partner.save();
         }
-        
+
         res.json({ success: true, exclusionGroups: partner.exclusionGroups });
     } catch (error) {
         console.error('Error removing exclusion group:', error);
@@ -852,13 +852,13 @@ router.get('/api/exclusion-groups', ensureAuthenticated, async (req, res) => {
     try {
         const partners = await SeedPartner.find({ isActive: true });
         const allGroups = new Set();
-        
+
         partners.forEach(partner => {
             if (partner.exclusionGroups && Array.isArray(partner.exclusionGroups)) {
                 partner.exclusionGroups.forEach(group => allGroups.add(group));
             }
         });
-        
+
         res.json({ success: true, groups: Array.from(allGroups).sort() });
     } catch (error) {
         console.error('Error fetching exclusion groups:', error);

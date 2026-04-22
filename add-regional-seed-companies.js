@@ -308,10 +308,10 @@ const regionalCompanies = [
 async function addRegionalCompanies() {
     try {
         console.log('\n🌎 Adding regional US seed companies to staging...\n');
-        
+
         let addedCount = 0;
         let skippedCount = 0;
-        
+
         for (const company of regionalCompanies) {
             // Check if already exists in staging
             const existsInStaging = await StagedPartner.findOne({ companyName: company.companyName });
@@ -320,21 +320,21 @@ async function addRegionalCompanies() {
                 skippedCount++;
                 continue;
             }
-            
+
             const staged = new StagedPartner(company);
             await staged.save();
             console.log(`✅ Added ${company.companyName} (${company.city}, ${company.stateCode}) to staging`);
             addedCount++;
         }
-        
+
         console.log(`\n✨ Complete! Added ${addedCount} companies, skipped ${skippedCount} duplicates.\n`);
-        
+
         // Show summary by region
         const pending = await StagedPartner.countDocuments({ reviewStatus: 'pending' });
         const needsInfo = await StagedPartner.countDocuments({ reviewStatus: 'needs_info' });
         const approved = await StagedPartner.countDocuments({ reviewStatus: 'approved' });
         const rejected = await StagedPartner.countDocuments({ reviewStatus: 'rejected' });
-        
+
         console.log('📊 Staging Summary:');
         console.log(`   Pending Review: ${pending}`);
         console.log(`   Needs Info: ${needsInfo}`);
@@ -349,7 +349,7 @@ async function addRegionalCompanies() {
         console.log(`   Vermont: High Mowing Organic (Wolcott)`);
         console.log(`   Arizona: Native Seeds/SEARCH (Tucson)`);
         console.log('\n📋 Next: Navigate to http://localhost:3001/staged-partners/review to review\n');
-        
+
     } catch (error) {
         console.error('❌ Error adding companies:', error);
     } finally {

@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= partner.companyName %> - Partner Details</title>
+    <title>
+        <%= partner.companyName %> - Partner Details
+    </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -56,11 +59,30 @@
             font-weight: 600;
         }
 
-        .badge.active { background: #d4edda; color: #155724; }
-        .badge.prospective { background: #fff3cd; color: #856404; }
-        .badge.on-hold { background: #f8d7da; color: #721c24; }
-        .badge.inactive { background: #e2e3e5; color: #383d41; }
-        .badge.non-alternative { background: #ffeaa7; color: #d63031; }
+        .badge.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.prospective {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge.on-hold {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge.inactive {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .badge.non-alternative {
+            background: #ffeaa7;
+            color: #d63031;
+        }
 
         .action-buttons {
             display: flex;
@@ -294,6 +316,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <!-- Header -->
@@ -312,12 +335,13 @@
                             <%= partner.partnerCode %>
                         </span>
                         <span class="badge" style="background: #e2e3e5; color: #383d41;">
-                            <i class="fas fa-globe"></i> <%= partner.country %>
+                            <i class="fas fa-globe"></i>
+                            <%= partner.country %>
                         </span>
                         <div class="priority-display">
-                            <% for(let i = 0; i < partner.priority; i++) { %>
+                            <% for(let i=0; i < partner.priority; i++) { %>
                                 <i class="fas fa-star priority-star"></i>
-                            <% } %>
+                                <% } %>
                         </div>
                     </div>
                 </div>
@@ -325,7 +349,8 @@
                     <a href="/us-seed-partners" class="btn-custom btn-back">
                         <i class="fas fa-arrow-left"></i> Back to US Dashboard
                     </a>
-                    <a href="/us-seed-partners/catalog" class="btn-custom" style="background: linear-gradient(135deg, #28a745, #558b2f); color: white;">
+                    <a href="/us-seed-partners/catalog" class="btn-custom"
+                        style="background: linear-gradient(135deg, #28a745, #558b2f); color: white;">
                         <i class="fas fa-leaf"></i> Seed Catalog
                     </a>
                     <a href="/us-seed-partners/<%= partner._id %>/edit" class="btn-custom btn-edit">
@@ -365,159 +390,191 @@
                         <h3><i class="fas fa-handshake"></i> Partnership Details</h3>
                         <div class="info-row">
                             <div class="info-label">Partnership Type</div>
-                            <div class="info-value"><%= partner.partnershipType %></div>
+                            <div class="info-value">
+                                <%= partner.partnershipType %>
+                            </div>
                         </div>
                         <div class="info-row">
                             <div class="info-label">Region</div>
-                            <div class="info-value"><%= partner.region %></div>
+                            <div class="info-value">
+                                <%= partner.region %>
+                            </div>
                         </div>
                         <div class="info-row">
                             <div class="info-label">Partnership Start</div>
                             <div class="info-value">
-                                <%= partner.partnershipStartDate ? new Date(partner.partnershipStartDate).toLocaleDateString() : 'Not set' %>
+                                <%= partner.partnershipStartDate ? new
+                                    Date(partner.partnershipStartDate).toLocaleDateString() : 'Not set' %>
                             </div>
                         </div>
                         <div class="info-row">
                             <div class="info-label">Last Order Date</div>
                             <div class="info-value">
-                                <%= partner.lastOrderDate ? new Date(partner.lastOrderDate).toLocaleDateString() : 'No orders yet' %>
-                                <% if (daysSinceLastOrder !== null) { %>
-                                    (<%= daysSinceLastOrder %> days ago)
-                                <% } %>
+                                <%= partner.lastOrderDate ? new Date(partner.lastOrderDate).toLocaleDateString()
+                                    : 'No orders yet' %>
+                                    <% if (daysSinceLastOrder !==null) { %>
+                                        (<%= daysSinceLastOrder %> days ago)
+                                            <% } %>
                             </div>
                         </div>
                     </div>
 
                     <div class="info-card">
                         <h3><i class="fas fa-seedling"></i> Seed Specializations</h3>
-                        <% if (partner.seedTypes && partner.seedTypes.length > 0) { %>
+                        <% if (partner.seedTypes && partner.seedTypes.length> 0) { %>
                             <div class="seed-types-grid">
-                                <% partner.seedTypes.forEach(seedType => { %>
-                                    <span class="seed-type-badge"><%= seedType %></span>
-                                <% }) %>
+                                <% partner.seedTypes.forEach(seedType=> { %>
+                                    <span class="seed-type-badge">
+                                        <%= seedType %>
+                                    </span>
+                                    <% }) %>
                             </div>
-                        <% } else { %>
-                            <p style="color: #999;">No seed types specified</p>
-                        <% } %>
+                            <% } else { %>
+                                <p style="color: #999;">No seed types specified</p>
+                                <% } %>
                     </div>
 
                     <!-- Detailed Seed Catalog -->
-                    <% if (partner.seedOfferings && (partner.seedOfferings.vegetables.length > 0 || partner.seedOfferings.flowers.length > 0 || partner.seedOfferings.herbs.length > 0)) { %>
+                    <% if (partner.seedOfferings && (partner.seedOfferings.vegetables.length> 0 ||
+                        partner.seedOfferings.flowers.length > 0 || partner.seedOfferings.herbs.length > 0)) { %>
                         <div class="info-card" style="border-left: 4px solid #28a745;">
                             <h3 style="color: #28a745;"><i class="fas fa-leaf"></i> Seed Catalog Offerings</h3>
-                            
-                            <% if (partner.seedOfferings.vegetables && partner.seedOfferings.vegetables.length > 0) { %>
+
+                            <% if (partner.seedOfferings.vegetables && partner.seedOfferings.vegetables.length> 0) { %>
                                 <div style="margin-bottom: 20px;">
                                     <h4 style="color: #ff6b35; font-size: 16px; margin-bottom: 10px;">
                                         🥕 Vegetables (<%= partner.seedOfferings.vegetables.length %>)
                                     </h4>
                                     <div style="display: flex; flex-wrap: wrap; gap: 6px;">
                                         <% partner.seedOfferings.vegetables.forEach(function(veg) { %>
-                                            <span style="background: #fff3e0; color: #e65100; padding: 5px 12px; border-radius: 12px; font-size: 12px; border: 1px solid #ffcc80;">
+                                            <span
+                                                style="background: #fff3e0; color: #e65100; padding: 5px 12px; border-radius: 12px; font-size: 12px; border: 1px solid #ffcc80;">
                                                 <%= veg %>
                                             </span>
-                                        <% }); %>
+                                            <% }); %>
                                     </div>
                                 </div>
-                            <% } %>
-
-                            <% if (partner.seedOfferings.flowers && partner.seedOfferings.flowers.length > 0) { %>
-                                <div style="margin-bottom: 20px;">
-                                    <h4 style="color: #e91e63; font-size: 16px; margin-bottom: 10px;">
-                                        🌸 Flowers (<%= partner.seedOfferings.flowers.length %>)
-                                    </h4>
-                                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                                        <% partner.seedOfferings.flowers.forEach(function(flower) { %>
-                                            <span style="background: #fce4ec; color: #c2185b; padding: 5px 12px; border-radius: 12px; font-size: 12px; border: 1px solid #f8bbd0;">
-                                                <%= flower %>
-                                            </span>
-                                        <% }); %>
-                                    </div>
-                                </div>
-                            <% } %>
-
-                            <% if (partner.seedOfferings.herbs && partner.seedOfferings.herbs.length > 0) { %>
-                                <div style="margin-bottom: 0;">
-                                    <h4 style="color: #558b2f; font-size: 16px; margin-bottom: 10px;">
-                                        🌿 Herbs (<%= partner.seedOfferings.herbs.length %>)
-                                    </h4>
-                                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                                        <% partner.seedOfferings.herbs.forEach(function(herb) { %>
-                                            <span style="background: #e8f5e9; color: #2e7d32; padding: 5px 12px; border-radius: 12px; font-size: 12px; border: 1px solid #a5d6a7;">
-                                                <%= herb %>
-                                            </span>
-                                        <% }); %>
-                                    </div>
-                                </div>
-                            <% } %>
-                        </div>
-                    <% } %>
-
-                    <div class="info-card">
-                        <h3><i class="fas fa-dollar-sign"></i> Business Metrics</h3>
-                        <div class="info-row">
-                            <div class="info-label">Total Orders Placed</div>
-                            <div class="info-value"><%= partner.totalOrdersPlaced || 0 %></div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Total Order Value</div>
-                            <div class="info-value">$<%= (partner.totalOrderValue || 0).toLocaleString() %></div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Currency</div>
-                            <div class="info-value"><%= partner.financialTerms?.currency || 'USD' %></div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Payment Terms</div>
-                            <div class="info-value"><%= partner.financialTerms?.paymentTerms || 'Not set' %></div>
-                        </div>
-                    </div>
-
-                    <div class="info-card">
-                        <h3><i class="fas fa-building"></i> Business Details</h3>
-                        <div class="info-row">
-                            <div class="info-label">Website</div>
-                            <div class="info-value">
-                                <% if (partner.businessDetails?.website) { %>
-                                    <a href="<%= partner.businessDetails.website %>" target="_blank">
-                                        <%= partner.businessDetails.website %>
-                                    </a>
-                                <% } else { %>
-                                    Not provided
                                 <% } %>
+
+                                    <% if (partner.seedOfferings.flowers && partner.seedOfferings.flowers.length> 0) {
+                                        %>
+                                        <div style="margin-bottom: 20px;">
+                                            <h4 style="color: #e91e63; font-size: 16px; margin-bottom: 10px;">
+                                                🌸 Flowers (<%= partner.seedOfferings.flowers.length %>)
+                                            </h4>
+                                            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                                <% partner.seedOfferings.flowers.forEach(function(flower) { %>
+                                                    <span
+                                                        style="background: #fce4ec; color: #c2185b; padding: 5px 12px; border-radius: 12px; font-size: 12px; border: 1px solid #f8bbd0;">
+                                                        <%= flower %>
+                                                    </span>
+                                                    <% }); %>
+                                            </div>
+                                        </div>
+                                        <% } %>
+
+                                            <% if (partner.seedOfferings.herbs && partner.seedOfferings.herbs.length> 0)
+                                                { %>
+                                                <div style="margin-bottom: 0;">
+                                                    <h4 style="color: #558b2f; font-size: 16px; margin-bottom: 10px;">
+                                                        🌿 Herbs (<%= partner.seedOfferings.herbs.length %>)
+                                                    </h4>
+                                                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                                        <% partner.seedOfferings.herbs.forEach(function(herb) { %>
+                                                            <span
+                                                                style="background: #e8f5e9; color: #2e7d32; padding: 5px 12px; border-radius: 12px; font-size: 12px; border: 1px solid #a5d6a7;">
+                                                                <%= herb %>
+                                                            </span>
+                                                            <% }); %>
+                                                    </div>
+                                                </div>
+                                                <% } %>
+                        </div>
+                        <% } %>
+
+                            <div class="info-card">
+                                <h3><i class="fas fa-dollar-sign"></i> Business Metrics</h3>
+                                <div class="info-row">
+                                    <div class="info-label">Total Orders Placed</div>
+                                    <div class="info-value">
+                                        <%= partner.totalOrdersPlaced || 0 %>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Total Order Value</div>
+                                    <div class="info-value">$<%= (partner.totalOrderValue || 0).toLocaleString() %>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Currency</div>
+                                    <div class="info-value">
+                                        <%= partner.financialTerms?.currency || 'USD' %>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Payment Terms</div>
+                                    <div class="info-value">
+                                        <%= partner.financialTerms?.paymentTerms || 'Not set' %>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Year Established</div>
-                            <div class="info-value"><%= partner.businessDetails?.yearEstablished || 'Not provided' %></div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Number of Employees</div>
-                            <div class="info-value"><%= partner.businessDetails?.numberOfEmployees || 'Not provided' %></div>
-                        </div>
-                    </div>
+
+                            <div class="info-card">
+                                <h3><i class="fas fa-building"></i> Business Details</h3>
+                                <div class="info-row">
+                                    <div class="info-label">Website</div>
+                                    <div class="info-value">
+                                        <% if (partner.businessDetails?.website) { %>
+                                            <a href="<%= partner.businessDetails.website %>" target="_blank">
+                                                <%= partner.businessDetails.website %>
+                                            </a>
+                                            <% } else { %>
+                                                Not provided
+                                                <% } %>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Year Established</div>
+                                    <div class="info-value">
+                                        <%= partner.businessDetails?.yearEstablished || 'Not provided' %>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Number of Employees</div>
+                                    <div class="info-value">
+                                        <%= partner.businessDetails?.numberOfEmployees || 'Not provided' %>
+                                    </div>
+                                </div>
+                            </div>
                 </div>
 
                 <% if (partner.businessDetails?.companyProfile) { %>
                     <div class="info-card" style="margin-top: 20px;">
                         <h3><i class="fas fa-file-alt"></i> Company Profile</h3>
-                        <p><%= partner.businessDetails.companyProfile %></p>
+                        <p>
+                            <%= partner.businessDetails.companyProfile %>
+                        </p>
                     </div>
-                <% } %>
-                
-                <% if (partner.personalNotes) { %>
-                    <div class="info-card" style="margin-top: 20px; background: #fff9e6; border-left: 4px solid #ffc107;">
-                        <h3><i class="fas fa-sticky-note"></i> Personal Notes</h3>
-                        <p style="white-space: pre-wrap;"><%= partner.personalNotes %></p>
-                    </div>
-                <% } %>
+                    <% } %>
 
-                <% if (partner.notes) { %>
-                    <div class="info-card" style="margin-top: 20px;">
-                        <h3><i class="fas fa-sticky-note"></i> Notes</h3>
-                        <p><%= partner.notes %></p>
-                    </div>
-                <% } %>
+                        <% if (partner.personalNotes) { %>
+                            <div class="info-card"
+                                style="margin-top: 20px; background: #fff9e6; border-left: 4px solid #ffc107;">
+                                <h3><i class="fas fa-sticky-note"></i> Personal Notes</h3>
+                                <p style="white-space: pre-wrap;">
+                                    <%= partner.personalNotes %>
+                                </p>
+                            </div>
+                            <% } %>
+
+                                <% if (partner.notes) { %>
+                                    <div class="info-card" style="margin-top: 20px;">
+                                        <h3><i class="fas fa-sticky-note"></i> Notes</h3>
+                                        <p>
+                                            <%= partner.notes %>
+                                        </p>
+                                    </div>
+                                    <% } %>
             </div>
 
             <!-- Contact Information Tab -->
@@ -528,37 +585,51 @@
                         <% if (partner.primaryContact?.name) { %>
                             <div class="info-row">
                                 <div class="info-label">Name</div>
-                                <div class="info-value"><%= partner.primaryContact.name %></div>
+                                <div class="info-value">
+                                    <%= partner.primaryContact.name %>
+                                </div>
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Title</div>
-                                <div class="info-value"><%= partner.primaryContact.title || 'Not specified' %></div>
+                                <div class="info-value">
+                                    <%= partner.primaryContact.title || 'Not specified' %>
+                                </div>
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Email</div>
                                 <div class="info-value">
-                                    <a href="mailto:<%= partner.primaryContact.email %>"><%= partner.primaryContact.email %></a>
+                                    <a href="mailto:<%= partner.primaryContact.email %>">
+                                        <%= partner.primaryContact.email %>
+                                    </a>
                                 </div>
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Phone</div>
-                                <div class="info-value"><%= partner.primaryContact.phone || 'Not provided' %></div>
+                                <div class="info-value">
+                                    <%= partner.primaryContact.phone || 'Not provided' %>
+                                </div>
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Mobile</div>
-                                <div class="info-value"><%= partner.primaryContact.mobile || 'Not provided' %></div>
+                                <div class="info-value">
+                                    <%= partner.primaryContact.mobile || 'Not provided' %>
+                                </div>
                             </div>
                             <div class="info-row">
                                 <div class="info-label">WhatsApp</div>
-                                <div class="info-value"><%= partner.primaryContact.whatsapp || 'Not provided' %></div>
+                                <div class="info-value">
+                                    <%= partner.primaryContact.whatsapp || 'Not provided' %>
+                                </div>
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Preferred Language</div>
-                                <div class="info-value"><%= partner.primaryContact.preferredLanguage || 'English' %></div>
+                                <div class="info-value">
+                                    <%= partner.primaryContact.preferredLanguage || 'English' %>
+                                </div>
                             </div>
-                        <% } else { %>
-                            <p style="color: #999;">No primary contact information</p>
-                        <% } %>
+                            <% } else { %>
+                                <p style="color: #999;">No primary contact information</p>
+                                <% } %>
                     </div>
 
                     <div class="info-card">
@@ -566,112 +637,132 @@
                         <% if (partner.address?.street) { %>
                             <p>
                                 <%= partner.address.street %><br>
-                                <% if (partner.address.street2) { %>
-                                    <%= partner.address.street2 %><br>
-                                <% } %>
-                                <%= partner.address.city %>, <%= partner.address.state %> <%= partner.address.postalCode %><br>
-                                <%= partner.address.state %> <%= partner.address.zipCode %>
+                                    <% if (partner.address.street2) { %>
+                                        <%= partner.address.street2 %><br>
+                                            <% } %>
+                                                <%= partner.address.city %>, <%= partner.address.state %>
+                                                        <%= partner.address.postalCode %><br>
+                                                            <%= partner.address.state %>
+                                                                <%= partner.address.zipCode %>
                             </p>
-                        <% } else { %>
-                            <p style="color: #999;">No address information</p>
-                        <% } %>
+                            <% } else { %>
+                                <p style="color: #999;">No address information</p>
+                                <% } %>
                     </div>
                 </div>
             </div>
 
             <!-- Certifications Tab -->
             <div class="tab-content" id="certifications-tab">
-                <% if (expiringCertifications.length > 0) { %>
+                <% if (expiringCertifications.length> 0) { %>
                     <div class="alert-warning">
                         <strong><i class="fas fa-exclamation-triangle"></i> Warning:</strong>
                         <%= expiringCertifications.length %> certification(s) expiring within 30 days!
                     </div>
-                <% } %>
+                    <% } %>
 
-                <% if (partner.certifications && partner.certifications.length > 0) { %>
-                    <div class="certifications-list">
-                        <% partner.certifications.forEach(cert => { %>
-                            <div class="cert-card">
-                                <div class="cert-header">
-                                    <div class="cert-title"><%= cert.certificationType %></div>
-                                    <% if (cert.verified) { %>
-                                        <div class="cert-verified">
-                                            <i class="fas fa-check-circle"></i> Verified
+                        <% if (partner.certifications && partner.certifications.length> 0) { %>
+                            <div class="certifications-list">
+                                <% partner.certifications.forEach(cert=> { %>
+                                    <div class="cert-card">
+                                        <div class="cert-header">
+                                            <div class="cert-title">
+                                                <%= cert.certificationType %>
+                                            </div>
+                                            <% if (cert.verified) { %>
+                                                <div class="cert-verified">
+                                                    <i class="fas fa-check-circle"></i> Verified
+                                                </div>
+                                                <% } %>
                                         </div>
-                                    <% } %>
-                                </div>
-                                <div class="info-row">
-                                    <div class="info-label">Certificate Number</div>
-                                    <div class="info-value"><%= cert.certificateNumber || 'Not provided' %></div>
-                                </div>
-                                <div class="info-row">
-                                    <div class="info-label">Issuing Authority</div>
-                                    <div class="info-value"><%= cert.issuingAuthority || 'Not provided' %></div>
-                                </div>
-                                <div class="info-row">
-                                    <div class="info-label">Issue Date</div>
-                                    <div class="info-value">
-                                        <%= cert.issueDate ? new Date(cert.issueDate).toLocaleDateString() : 'Not provided' %>
+                                        <div class="info-row">
+                                            <div class="info-label">Certificate Number</div>
+                                            <div class="info-value">
+                                                <%= cert.certificateNumber || 'Not provided' %>
+                                            </div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">Issuing Authority</div>
+                                            <div class="info-value">
+                                                <%= cert.issuingAuthority || 'Not provided' %>
+                                            </div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">Issue Date</div>
+                                            <div class="info-value">
+                                                <%= cert.issueDate ? new Date(cert.issueDate).toLocaleDateString()
+                                                    : 'Not provided' %>
+                                            </div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">Expiry Date</div>
+                                            <div class="info-value">
+                                                <%= cert.expiryDate ? new Date(cert.expiryDate).toLocaleDateString()
+                                                    : 'Not provided' %>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="info-row">
-                                    <div class="info-label">Expiry Date</div>
-                                    <div class="info-value">
-                                        <%= cert.expiryDate ? new Date(cert.expiryDate).toLocaleDateString() : 'Not provided' %>
-                                    </div>
-                                </div>
+                                    <% }) %>
                             </div>
-                        <% }) %>
-                    </div>
-                <% } else { %>
-                    <p style="text-align: center; color: #999; padding: 40px;">No certifications on file</p>
-                <% } %>
+                            <% } else { %>
+                                <p style="text-align: center; color: #999; padding: 40px;">No certifications on file</p>
+                                <% } %>
             </div>
 
             <!-- Communications Tab -->
             <div class="tab-content" id="communications-tab">
-                <% if (partner.communicationLog && partner.communicationLog.length > 0) { %>
+                <% if (partner.communicationLog && partner.communicationLog.length> 0) { %>
                     <div class="communication-log">
-                        <% partner.communicationLog.reverse().forEach(log => { %>
+                        <% partner.communicationLog.reverse().forEach(log=> { %>
                             <div class="log-entry">
                                 <div class="log-header">
                                     <div>
-                                        <strong><%= log.subject %></strong>
+                                        <strong>
+                                            <%= log.subject %>
+                                        </strong>
                                         <div class="log-date">
-                                            <%= new Date(log.date).toLocaleDateString() %> - 
-                                            <%= log.contactPerson %>
+                                            <%= new Date(log.date).toLocaleDateString() %> -
+                                                <%= log.contactPerson %>
                                         </div>
                                     </div>
-                                    <div class="log-method"><%= log.method %></div>
+                                    <div class="log-method">
+                                        <%= log.method %>
+                                    </div>
                                 </div>
-                                <p><%= log.summary %></p>
+                                <p>
+                                    <%= log.summary %>
+                                </p>
                                 <% if (log.followUpRequired) { %>
                                     <div style="color: #f39c12; font-size: 13px; margin-top: 8px;">
                                         <i class="fas fa-bell"></i> Follow-up required
                                         <% if (log.followUpDate) { %>
                                             by <%= new Date(log.followUpDate).toLocaleDateString() %>
-                                        <% } %>
+                                                <% } %>
                                     </div>
-                                <% } %>
+                                    <% } %>
                             </div>
-                        <% }) %>
+                            <% }) %>
                     </div>
-                <% } else { %>
-                    <p style="text-align: center; color: #999; padding: 40px;">No communication history</p>
-                <% } %>
+                    <% } else { %>
+                        <p style="text-align: center; color: #999; padding: 40px;">No communication history</p>
+                        <% } %>
             </div>
 
             <!-- Documents Tab -->
             <div class="tab-content" id="documents-tab">
-                <% if (partner.documents && partner.documents.length > 0) { %>
+                <% if (partner.documents && partner.documents.length> 0) { %>
                     <div class="documents-grid">
-                        <% partner.documents.forEach(doc => { %>
+                        <% partner.documents.forEach(doc=> { %>
                             <div class="document-card">
                                 <div style="display: flex; align-items: center;">
                                     <i class="fas fa-file-pdf doc-icon" style="color: #dc3545;"></i>
                                     <div>
-                                        <strong><%= doc.documentType %></strong><br>
-                                        <small style="color: #999;"><%= doc.fileName %></small><br>
+                                        <strong>
+                                            <%= doc.documentType %>
+                                        </strong><br>
+                                        <small style="color: #999;">
+                                            <%= doc.fileName %>
+                                        </small><br>
                                         <small style="color: #999;">
                                             Uploaded: <%= new Date(doc.uploadDate).toLocaleDateString() %>
                                         </small>
@@ -683,11 +774,11 @@
                                     </button>
                                 </div>
                             </div>
-                        <% }) %>
+                            <% }) %>
                     </div>
-                <% } else { %>
-                    <p style="text-align: center; color: #999; padding: 40px;">No documents uploaded</p>
-                <% } %>
+                    <% } else { %>
+                        <p style="text-align: center; color: #999; padding: 40px;">No documents uploaded</p>
+                        <% } %>
             </div>
 
             <!-- Performance Tab -->
@@ -712,9 +803,9 @@
                             <div class="info-value">
                                 <% if (partner.performanceMetrics?.responsivenesRating) { %>
                                     <%= partner.performanceMetrics.responsivenesRating %>/5
-                                <% } else { %>
-                                    Not rated
-                                <% } %>
+                                        <% } else { %>
+                                            Not rated
+                                            <% } %>
                             </div>
                         </div>
                         <div class="info-row">
@@ -722,9 +813,9 @@
                             <div class="info-value">
                                 <% if (partner.performanceMetrics?.overallRating) { %>
                                     <%= partner.performanceMetrics.overallRating %>/5
-                                <% } else { %>
-                                    Not rated
-                                <% } %>
+                                        <% } else { %>
+                                            Not rated
+                                            <% } %>
                             </div>
                         </div>
                     </div>
@@ -746,9 +837,8 @@
                         <div class="info-row">
                             <div class="info-label">Last Quality Audit</div>
                             <div class="info-value">
-                                <%= partner.qualityMetrics?.lastQualityAuditDate ? 
-                                    new Date(partner.qualityMetrics.lastQualityAuditDate).toLocaleDateString() : 
-                                    'Never' %>
+                                <%= partner.qualityMetrics?.lastQualityAuditDate ? new
+                                    Date(partner.qualityMetrics.lastQualityAuditDate).toLocaleDateString() : 'Never' %>
                             </div>
                         </div>
                         <div class="info-row">
@@ -769,15 +859,15 @@
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
-            
+
             // Remove active class from all buttons
             document.querySelectorAll('.tab-button').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
+
             // Show selected tab
             document.getElementById(tabName + '-tab').classList.add('active');
-            
+
             // Activate button
             event.target.classList.add('active');
         }
@@ -785,4 +875,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

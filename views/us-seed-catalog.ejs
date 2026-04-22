@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -354,10 +355,25 @@
             font-weight: 600;
         }
 
-        .badge.prospective { background: #fff3cd; color: #856404; }
-        .badge.active { background: #d4edda; color: #155724; }
-        .badge.on-hold { background: #f8d7da; color: #721c24; }
-        .badge.inactive { background: #e2e3e5; color: #383d41; }
+        .badge.prospective {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.on-hold {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge.inactive {
+            background: #e2e3e5;
+            color: #383d41;
+        }
 
         .search-box {
             margin-bottom: 20px;
@@ -377,6 +393,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <!-- Header -->
@@ -397,22 +414,30 @@
         <div class="stats-grid">
             <div class="stat-card vegetables">
                 <i class="fas fa-carrot stat-icon" style="color: #ff6b35;"></i>
-                <div class="stat-number"><%= stats.totalVegetables %></div>
+                <div class="stat-number">
+                    <%= stats.totalVegetables %>
+                </div>
                 <div class="stat-label">Vegetable Types</div>
             </div>
             <div class="stat-card flowers">
                 <i class="fas fa-flower stat-icon" style="color: #e91e63;"></i>
-                <div class="stat-number"><%= stats.totalFlowers %></div>
+                <div class="stat-number">
+                    <%= stats.totalFlowers %>
+                </div>
                 <div class="stat-label">Flower Types</div>
             </div>
             <div class="stat-card herbs">
                 <i class="fas fa-spa stat-icon" style="color: #558b2f;"></i>
-                <div class="stat-number"><%= stats.totalHerbs %></div>
+                <div class="stat-number">
+                    <%= stats.totalHerbs %>
+                </div>
                 <div class="stat-label">Herb Types</div>
             </div>
             <div class="stat-card total">
                 <i class="fas fa-building stat-icon" style="color: #667eea;"></i>
-                <div class="stat-number"><%= stats.totalPartners %></div>
+                <div class="stat-number">
+                    <%= stats.totalPartners %>
+                </div>
                 <div class="stat-label">Total Partners</div>
             </div>
         </div>
@@ -438,15 +463,21 @@
             <!-- Vegetables Tab -->
             <div id="vegetables-tab" class="tab-content active">
                 <div class="search-box">
-                    <input type="text" class="search-input" id="search-vegetables" placeholder="Search vegetables... (e.g., Tomatoes, Carrots)" onkeyup="searchCrops('vegetables')">
+                    <input type="text" class="search-input" id="search-vegetables"
+                        placeholder="Search vegetables... (e.g., Tomatoes, Carrots)"
+                        onkeyup="searchCrops('vegetables')">
                 </div>
                 <div class="crops-grid" id="vegetables-grid">
                     <% sortedCatalog.vegetables.forEach(function(veg) { %>
                         <div class="crop-card vegetables" onclick="showPartners('vegetables', '<%= veg %>')">
-                            <span class="crop-name"><%= veg %></span>
-                            <span class="partner-count"><%= catalog.vegetables[veg].length %></span>
+                            <span class="crop-name">
+                                <%= veg %>
+                            </span>
+                            <span class="partner-count">
+                                <%= catalog.vegetables[veg].length %>
+                            </span>
                         </div>
-                    <% }); %>
+                        <% }); %>
                 </div>
                 <div id="vegetables-partners" class="partners-list"></div>
             </div>
@@ -454,15 +485,20 @@
             <!-- Flowers Tab -->
             <div id="flowers-tab" class="tab-content">
                 <div class="search-box">
-                    <input type="text" class="search-input" id="search-flowers" placeholder="Search flowers... (e.g., Sunflowers, Marigolds)" onkeyup="searchCrops('flowers')">
+                    <input type="text" class="search-input" id="search-flowers"
+                        placeholder="Search flowers... (e.g., Sunflowers, Marigolds)" onkeyup="searchCrops('flowers')">
                 </div>
                 <div class="crops-grid" id="flowers-grid">
                     <% sortedCatalog.flowers.forEach(function(flower) { %>
                         <div class="crop-card flowers" onclick="showPartners('flowers', '<%= flower %>')">
-                            <span class="crop-name"><%= flower %></span>
-                            <span class="partner-count"><%= catalog.flowers[flower].length %></span>
+                            <span class="crop-name">
+                                <%= flower %>
+                            </span>
+                            <span class="partner-count">
+                                <%= catalog.flowers[flower].length %>
+                            </span>
                         </div>
-                    <% }); %>
+                        <% }); %>
                 </div>
                 <div id="flowers-partners" class="partners-list"></div>
             </div>
@@ -470,15 +506,20 @@
             <!-- Herbs Tab -->
             <div id="herbs-tab" class="tab-content">
                 <div class="search-box">
-                    <input type="text" class="search-input" id="search-herbs" placeholder="Search herbs... (e.g., Basil, Parsley)" onkeyup="searchCrops('herbs')">
+                    <input type="text" class="search-input" id="search-herbs"
+                        placeholder="Search herbs... (e.g., Basil, Parsley)" onkeyup="searchCrops('herbs')">
                 </div>
                 <div class="crops-grid" id="herbs-grid">
                     <% sortedCatalog.herbs.forEach(function(herb) { %>
                         <div class="crop-card herbs" onclick="showPartners('herbs', '<%= herb %>')">
-                            <span class="crop-name"><%= herb %></span>
-                            <span class="partner-count"><%= catalog.herbs[herb].length %></span>
+                            <span class="crop-name">
+                                <%= herb %>
+                            </span>
+                            <span class="partner-count">
+                                <%= catalog.herbs[herb].length %>
+                            </span>
                         </div>
-                    <% }); %>
+                        <% }); %>
                 </div>
                 <div id="herbs-partners" class="partners-list"></div>
             </div>
@@ -488,7 +529,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Store catalog data
-        const catalogData = <%- JSON.stringify(catalog) %>;
+        const catalogData = <% - JSON.stringify(catalog) %>;
         let currentCategory = 'vegetables';
         let currentCrop = null;
 
@@ -503,13 +544,13 @@
             document.getElementById(`${category}-tab`).classList.add('active');
 
             currentCategory = category;
-            
+
             // Clear search
             document.getElementById(`search-${category}`).value = '';
-            
+
             // Hide partners list
             document.querySelectorAll('.partners-list').forEach(list => list.classList.remove('show'));
-            
+
             // Deselect all crop cards
             document.querySelectorAll('.crop-card').forEach(card => card.classList.remove('selected'));
         }
@@ -527,7 +568,7 @@
 
             // Build partners HTML
             let html = `<h3><i class="fas fa-building"></i> ${partners.length} Partner${partners.length !== 1 ? 's' : ''} offering ${cropName}</h3>`;
-            
+
             partners.forEach(partner => {
                 const statusClass = partner.status.toLowerCase().replace(' ', '-');
                 html += `
@@ -583,4 +624,5 @@
         }
     </script>
 </body>
+
 </html>

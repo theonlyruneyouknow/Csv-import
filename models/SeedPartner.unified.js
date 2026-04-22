@@ -17,14 +17,14 @@ const seedPartnerSchema = new mongoose.Schema({
         uppercase: true,
         unique: true
     },
-    
+
     // Geographic Classification
     isDomestic: {
         type: Boolean,
         default: false,
         index: true
     },
-    
+
     // Country and Region (Required for all)
     country: {
         type: String,
@@ -41,7 +41,7 @@ const seedPartnerSchema = new mongoose.Schema({
         ],
         required: true
     },
-    
+
     // US-Specific Fields (Optional - only for domestic partners)
     state: {
         type: String,
@@ -69,21 +69,21 @@ const seedPartnerSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    
+
     // Partnership Type
     partnershipType: {
         type: String,
         enum: ['International Supplier', 'Domestic Supplier', 'International Client', 'Domestic Client', 'Both Supplier & Client'],
         required: true
     },
-    
+
     // Partnership Status
     status: {
         type: String,
         enum: ['Prospective', 'Active', 'On Hold', 'Inactive', 'Terminated', 'Non-Alternative'],
         default: 'Prospective'
     },
-    
+
     // Exclusion Groups (NEW - for filtering)
     exclusionGroups: [{
         type: String,
@@ -100,7 +100,7 @@ const seedPartnerSchema = new mongoose.Schema({
             'Custom'
         ]
     }],
-    
+
     // Priority Level
     priority: {
         type: Number,
@@ -108,18 +108,18 @@ const seedPartnerSchema = new mongoose.Schema({
         max: 5,
         default: 3
     },
-    
+
     isActive: {
         type: Boolean,
         default: true
     },
-    
+
     // Seed Specializations
     seedTypes: [{
         type: String,
         enum: [
             'Vegetable Seeds',
-            'Flower Seeds', 
+            'Flower Seeds',
             'Herb Seeds',
             'Grain Seeds',
             'Cover Crop Seeds',
@@ -134,14 +134,14 @@ const seedPartnerSchema = new mongoose.Schema({
             'Other'
         ]
     }],
-    
+
     // Detailed Seed Offerings - Crop Level
     seedOfferings: {
         vegetables: [{ type: String }],
         flowers: [{ type: String }],
         herbs: [{ type: String }]
     },
-    
+
     // Certifications and Compliance
     certifications: [{
         certificationType: {
@@ -170,7 +170,7 @@ const seedPartnerSchema = new mongoose.Schema({
             default: false
         }
     }],
-    
+
     // Contact Information
     primaryContact: {
         name: String,
@@ -189,7 +189,7 @@ const seedPartnerSchema = new mongoose.Schema({
             default: 'Email'
         }
     },
-    
+
     secondaryContact: {
         name: String,
         title: String,
@@ -197,7 +197,7 @@ const seedPartnerSchema = new mongoose.Schema({
         phone: String,
         mobile: String
     },
-    
+
     // Multiple additional contacts
     additionalContacts: [{
         name: String,
@@ -211,7 +211,7 @@ const seedPartnerSchema = new mongoose.Schema({
             enum: ['Sales', 'Procurement', 'Customer Service', 'Quality Control', 'Logistics', 'Finance', 'Management', 'Technical', 'Technical Support', 'Other']
         }
     }],
-    
+
     // Company Address
     address: {
         street: String,
@@ -223,7 +223,7 @@ const seedPartnerSchema = new mongoose.Schema({
         county: String,
         country: String
     },
-    
+
     // Shipping/Receiving Address (if different)
     shippingAddress: {
         street: String,
@@ -237,7 +237,7 @@ const seedPartnerSchema = new mongoose.Schema({
         customsBroker: String,
         specialInstructions: String
     },
-    
+
     // Business Details
     businessDetails: {
         registrationNumber: String,
@@ -255,7 +255,7 @@ const seedPartnerSchema = new mongoose.Schema({
         instagram: String,
         companyProfile: String
     },
-    
+
     // Financial Terms
     financialTerms: {
         currency: {
@@ -280,7 +280,7 @@ const seedPartnerSchema = new mongoose.Schema({
             iban: String
         }
     },
-    
+
     // Import/Export Details (primarily for international)
     tradeDetails: {
         importLicenseNumber: String,
@@ -305,7 +305,7 @@ const seedPartnerSchema = new mongoose.Schema({
             default: false
         }
     },
-    
+
     // Quality and Compliance
     qualityMetrics: {
         germinationRate: Number, // Average percentage
@@ -332,7 +332,7 @@ const seedPartnerSchema = new mongoose.Schema({
             resolution: String
         }]
     },
-    
+
     // Partnership History
     partnershipStartDate: Date,
     partnershipEndDate: Date,
@@ -345,7 +345,7 @@ const seedPartnerSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    
+
     // Performance Tracking
     performanceMetrics: {
         onTimeDeliveryRate: Number, // Percentage
@@ -361,7 +361,7 @@ const seedPartnerSchema = new mongoose.Schema({
             max: 5
         }
     },
-    
+
     // Documents and Attachments
     documents: [{
         documentType: {
@@ -390,7 +390,7 @@ const seedPartnerSchema = new mongoose.Schema({
         expiryDate: Date,
         notes: String
     }],
-    
+
     // Information Sources & References (from US model)
     references: [{
         sourceType: {
@@ -427,7 +427,7 @@ const seedPartnerSchema = new mongoose.Schema({
         },
         notes: String
     }],
-    
+
     // Verified Information Tracking (from US model)
     verifiedInformation: {
         companyNameVerified: {
@@ -481,13 +481,13 @@ const seedPartnerSchema = new mongoose.Schema({
             default: 0
         }
     },
-    
+
     // Notes and Communication Log
     notes: {
         type: String,
         default: ''
     },
-    
+
     communicationLog: [{
         date: {
             type: Date,
@@ -507,10 +507,10 @@ const seedPartnerSchema = new mongoose.Schema({
         followUpDate: Date,
         attachments: [String]
     }],
-    
+
     // Tags for easy searching and grouping
     tags: [String],
-    
+
     // Metadata
     createdBy: String,
     lastModifiedBy: String
@@ -532,27 +532,27 @@ seedPartnerSchema.index({ priority: 1 });
 seedPartnerSchema.index({ exclusionGroups: 1 });
 
 // Virtual for full address
-seedPartnerSchema.virtual('fullAddress').get(function() {
+seedPartnerSchema.virtual('fullAddress').get(function () {
     const addr = this.address;
     if (!addr || !addr.street) return '';
-    
+
     let parts = [addr.street];
     if (addr.street2) parts.push(addr.street2);
     if (addr.city) parts.push(addr.city);
     if (addr.state) parts.push(addr.state);
     if (addr.postalCode || addr.zipCode) parts.push(addr.postalCode || addr.zipCode);
     if (addr.country && addr.country !== 'United States') parts.push(addr.country);
-    
+
     return parts.join(', ');
 });
 
 // Virtual to check if partner is domestic
-seedPartnerSchema.virtual('isUSPartner').get(function() {
+seedPartnerSchema.virtual('isUSPartner').get(function () {
     return this.country === 'United States' || this.isDomestic === true;
 });
 
 // Method to calculate days since last order
-seedPartnerSchema.methods.daysSinceLastOrder = function() {
+seedPartnerSchema.methods.daysSinceLastOrder = function () {
     if (!this.lastOrderDate) return null;
     const now = new Date();
     const diffTime = Math.abs(now - this.lastOrderDate);
@@ -561,17 +561,17 @@ seedPartnerSchema.methods.daysSinceLastOrder = function() {
 };
 
 // Method to check if certifications are expiring soon
-seedPartnerSchema.methods.getExpiringCertifications = function() {
+seedPartnerSchema.methods.getExpiringCertifications = function () {
     const now = new Date();
     const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
-    
+
     return this.certifications.filter(cert => {
         return cert.expiryDate && cert.expiryDate <= thirtyDaysFromNow;
     });
 };
 
 // Method to check if partner should be excluded based on groups
-seedPartnerSchema.methods.shouldBeExcluded = function(selectedGroups) {
+seedPartnerSchema.methods.shouldBeExcluded = function (selectedGroups) {
     if (!selectedGroups || selectedGroups.length === 0) return false;
     return this.exclusionGroups.some(group => selectedGroups.includes(group));
 };
