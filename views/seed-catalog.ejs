@@ -46,6 +46,47 @@
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        /* View Mode Filters */
+        .view-mode-filters {
+            display: flex;
+            gap: 8px;
+            background: #f8f9fa;
+            padding: 6px;
+            border-radius: 8px;
+        }
+        
+        .view-mode-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: #666;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .view-mode-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+        
+        .view-mode-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .view-mode-btn i {
+            font-size: 16px;
         }
 
         .btn-back {
@@ -386,7 +427,23 @@
                 Seed Catalog Browser
             </h1>
             <div class="header-actions">
-                <a href="/seed-partners" class="btn-back">
+                <!-- View Mode Filters -->
+                <div class="view-mode-filters">
+                    <a href="/seed-partners/catalog?view=all" class="view-mode-btn <%= currentView === 'all' ? 'active' : '' %>">
+                        <i class="fas fa-globe"></i>
+                        <span>All (<%= stats.allPartnersCount %>)</span>
+                    </a>
+                    <a href="/seed-partners/catalog?view=domestic" class="view-mode-btn <%= currentView === 'domestic' ? 'active' : '' %>">
+                        <i class="fas fa-flag-usa"></i>
+                        <span>Domestic (<%= stats.domesticPartnersCount %>)</span>
+                    </a>
+                    <a href="/seed-partners/catalog?view=international" class="view-mode-btn <%= currentView === 'international' ? 'active' : '' %>">
+                        <i class="fas fa-earth-americas"></i>
+                        <span>International (<%= stats.internationalPartnersCount %>)</span>
+                    </a>
+                </div>
+                
+                <a href="/seed-partners?view=<%= stickyViewMode %>" class="btn-back">
                     <i class="fas fa-arrow-left"></i>
                     <span>Back to Partners</span>
                 </a>
@@ -413,7 +470,15 @@
             <div class="stat-card total">
                 <i class="fas fa-building stat-icon" style="color: #667eea;"></i>
                 <div class="stat-number"><%= stats.totalPartners %></div>
-                <div class="stat-label">Total Partners</div>
+                <div class="stat-label">
+                    <% if (currentView === 'domestic') { %>
+                        Domestic Partners
+                    <% } else if (currentView === 'international') { %>
+                        International Partners
+                    <% } else { %>
+                        Total Partners
+                    <% } %>
+                </div>
             </div>
         </div>
 

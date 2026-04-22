@@ -45,8 +45,19 @@ router.get('/', ensureAuthenticated, async (req, res) => {
     try {
         console.log('🌍 Loading World Seed Partnership Dashboard...');
         
-        // Get filter parameters
-        const viewMode = req.query.view || 'all'; // international, domestic, or all
+        // Get filter parameters with session persistence
+        // If view is explicitly set in query, use it and save to session
+        // Otherwise, use session value or default to 'all'
+        let viewMode = req.query.view;
+        if (viewMode) {
+            // Save to session for sticky behavior
+            req.session.partnerViewMode = viewMode;
+        } else {
+            // Restore from session or default to 'all'
+            viewMode = req.session.partnerViewMode || 'all';
+        }
+        
+        console.log(`📍 View Mode: ${viewMode} (from ${req.query.view ? 'query' : 'session'})`);
         const statusFilter = req.query.status;
         const typeFilter = req.query.type;
         const regionFilter = req.query.region;
@@ -170,6 +181,7 @@ router.get('/', ensureAuthenticated, async (req, res) => {
                 search: searchTerm || '',
                 exclude: excludedGroups
             },
+            stickyViewMode: viewMode,
             user: req.user
         });
         
@@ -216,8 +228,33 @@ router.get('/catalog', ensureAuthenticated, async (req, res) => {
     try {
         console.log('🌱 Loading Seed Catalog search page...');
         
-        // Get all partners with seed offerings
-        const partners = await SeedPartner.find({ isActive: true });
+        // Get filter parameters with session persistence
+        // If view is explicitly set in query, use it and save to session
+        // Otherwise, use session value or default to 'all'
+        let viewMode = req.query.view;
+        if (viewMode) {
+            // Save to session for sticky behavior
+            req.session.partnerViewMode = viewMode;
+        } else {
+            // Restore from session or default to 'all'
+            viewMode = req.session.partnerViewMode || 'all';
+        }
+        
+        console.log(`📍 Catalog View Mode: ${viewMode} (from ${req.query.view ? 'query' : 'session'})`);
+        
+        // Build query based on view mode
+        let query = { isActive: true };
+        
+        // Apply view mode filter
+        if (viewMode === 'international') {
+            query.isDomestic = { $ne: true };
+        } else if (viewMode === 'domestic') {
+            query.isDomestic = true;
+        }
+        // 'all' = no isDomestic filter
+        
+        // Get filtered partners with seed offerings
+        const partners = await SeedPartner.find(query);
         
         // Build comprehensive catalog
         const catalog = {
@@ -292,24 +329,37 @@ router.get('/catalog', ensureAuthenticated, async (req, res) => {
             herbs: Object.keys(catalog.herbs).sort()
         };
         
+        // Calculate partner statistics for all view modes
+        const allPartnersCount = await SeedPartner.countDocuments({ isActive: true });
+        const domesticPartnersCount = await SeedPartner.countDocuments({ isActive: true, isDomestic: true });
+        const internationalPartnersCount = await SeedPartner.countDocuments({ isActive: true, isDomestic: { $ne: true } });
+        
         // Stats
         const stats = {
             totalVegetables: sortedCatalog.vegetables.length,
             totalFlowers: sortedCatalog.flowers.length,
             totalHerbs: sortedCatalog.herbs.length,
-            totalPartners: partners.length
+            totalPartners: partners.length,
+            allPartnersCount: allPartnersCount,
+            domesticPartnersCount: domesticPartnersCount,
+            internationalPartnersCount: internationalPartnersCount
         };
+        
+        console.log(`✅ Loaded seed catalog (View: ${viewMode}, Partners: ${partners.length})`);
         
         res.render('seed-catalog', {
             catalog: catalog,
             sortedCatalog: sortedCatalog,
             stats: stats,
+            currentView: viewMode,
+            stickyViewMode: viewMode,
             user: req.user
         });
         
     } catch (error) {
-        console.error('Error loading seed catalog:', error);
-        res.status(500).send('Error loading catalog: ' + error.message);
+        console.error('❌ Error loading seed catalog:', error);
+        console.error('Stack trace:', error.stack);
+        res.status(500).send(`Error loading catalog: ${error.message}<br><br><pre>${error.stack}</pre>`);
     }
 });
 
