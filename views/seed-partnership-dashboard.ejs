@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Seed Partnership Dashboard</title>
+    <title>Seed Home Import Partnership Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -552,7 +552,7 @@
         <div class="header">
             <h1>
                 <i class="fas fa-globe-americas"></i>
-                World Seed Partnership
+                Seed Home Import Partnership
             </h1>
             <div class="header-actions">
                 <a href="/purchase-orders" class="pod-button">
@@ -653,11 +653,10 @@
                     <div class="filter-group">
                         <label>Status</label>
                         <select name="status" class="form-select" onchange="this.form.submit()">
-                            <option value="all" <%=currentFilters.status==='all' ? 'selected' : '' %>>All Statuses
+                            <option value="all" <%= currentFilters.status === 'all' ? 'selected' : '' %>>All Statuses
                             </option>
-                            <% uniqueStatuses.forEach(status=> { %>
-                                <option value="<%= status %>" <%=currentFilters.status===status ? 'selected' : '' %>><%=
-                                        status %>
+                            <% uniqueStatuses.forEach(function(status) { %>
+                                <option value="<%= status %>" <%= currentFilters.status === status ? 'selected' : '' %>><%= status %>
                                 </option>
                                 <% }) %>
                         </select>
@@ -665,10 +664,9 @@
                     <div class="filter-group">
                         <label>Partnership Type</label>
                         <select name="type" class="form-select" onchange="this.form.submit()">
-                            <option value="all" <%=currentFilters.type==='all' ? 'selected' : '' %>>All Types</option>
-                            <% uniqueTypes.forEach(type=> { %>
-                                <option value="<%= type %>" <%=currentFilters.type===type ? 'selected' : '' %>><%= type
-                                        %>
+                            <option value="all" <%= currentFilters.type === 'all' ? 'selected' : '' %>>All Types</option>
+                            <% uniqueTypes.forEach(function(type) { %>
+                                <option value="<%= type %>" <%= currentFilters.type === type ? 'selected' : '' %>><%= type %>
                                 </option>
                                 <% }) %>
                         </select>
@@ -676,11 +674,10 @@
                     <div class="filter-group">
                         <label>Region</label>
                         <select name="region" class="form-select" onchange="this.form.submit()">
-                            <option value="all" <%=currentFilters.region==='all' ? 'selected' : '' %>>All Regions
+                            <option value="all" <%= currentFilters.region === 'all' ? 'selected' : '' %>>All Regions
                             </option>
-                            <% uniqueRegions.forEach(region=> { %>
-                                <option value="<%= region %>" <%=currentFilters.region===region ? 'selected' : '' %>><%=
-                                        region %>
+                            <% uniqueRegions.forEach(function(region) { %>
+                                <option value="<%= region %>" <%= currentFilters.region === region ? 'selected' : '' %>><%= region %>
                                 </option>
                                 <% }) %>
                         </select>
@@ -688,11 +685,10 @@
                     <div class="filter-group">
                         <label>Country</label>
                         <select name="country" class="form-select" onchange="this.form.submit()">
-                            <option value="all" <%=currentFilters.country==='all' ? 'selected' : '' %>>All Countries
+                            <option value="all" <%= currentFilters.country === 'all' ? 'selected' : '' %>>All Countries
                             </option>
-                            <% uniqueCountries.forEach(country=> { %>
-                                <option value="<%= country %>" <%=currentFilters.country===country ? 'selected' : '' %>>
-                                    <%= country %>
+                            <% uniqueCountries.forEach(function(country) { %>
+                                <option value="<%= country %>" <%= currentFilters.country === country ? 'selected' : '' %>><%= country %>
                                 </option>
                                 <% }) %>
                         </select>
@@ -751,7 +747,7 @@
                             <%= group %> (<%= stats.byExclusionGroup[group] || 0 %>)
                         </option>
                         <% }) %>
-                            <% if (availableExclusionGroups.length===0) { %>
+                            <% if (availableExclusionGroups.length === 0) { %>
                                 <option disabled style="color: #999; padding: 5px;">No exclusion groups yet</option>
                                 <% } %>
                 </select>
@@ -761,7 +757,7 @@
                 </small>
             </div>
 
-            <% if (partners.length===0) { %>
+            <% if (partners.length === 0) { %>
                 <div class="no-partners">
                     <i class="fas fa-users"></i>
                     <h3>No Partners Found</h3>
@@ -778,7 +774,7 @@
                                     <th style="width: 40px;"></th>
                                     <th>Priority</th>
                                     <th>Company Name</th>
-                                    <% if (currentFilters.view==='domestic' ) { %>
+                                    <% if (currentFilters.view === 'domestic') { %>
                                         <th>State/City</th>
                                         <% } %>
                                             <th>Country/Region</th>
@@ -791,7 +787,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <% partners.forEach((partner, index)=> { %>
+                                <% partners.forEach(function(partner, index) { %>
                                     <tr data-status="<%= partner.status %>"
                                         data-exclusion-groups="<%= (partner.exclusionGroups || []).join(',') %>"
                                         data-partner-id="<%= partner._id %>" class="partner-main-row">
@@ -827,7 +823,7 @@
                                                 <%= partner.partnerCode %>
                                             </div>
                                         </td>
-                                        <% if (currentFilters.view==='domestic' ) { %>
+                                        <% if (currentFilters.view === 'domestic') { %>
                                             <td>
                                                 <% if (partner.state) { %>
                                                     <div style="font-weight: 600; color: #667eea;">
@@ -854,8 +850,7 @@
                                                 <td>
                                                     <span
                                                         class="badge <%= partner.partnershipType.includes('International') ? 'international' : 'domestic' %>">
-                                                        <%= partner.partnershipType.replace('Supplier', 'Sup'
-                                                            ).replace('Client', 'Cli' ) %>
+                                                        <%= partner.partnershipType.replace('Supplier', 'Sup').replace('Client', 'Cli') %>
                                                     </span>
                                                 </td>
                                                 <td>
@@ -867,32 +862,26 @@
                                                 <td>
                                                     <div class="seed-types">
                                                         <% if (partner.seedOfferings &&
-                                                            (partner.seedOfferings.vegetables.length> 0 ||
+                                                            (partner.seedOfferings.vegetables.length > 0 ||
                                                             partner.seedOfferings.flowers.length > 0 ||
                                                             partner.seedOfferings.herbs.length > 0)) { %>
                                                             <% if (partner.seedOfferings.vegetables &&
-                                                                partner.seedOfferings.vegetables.length> 0) { %>
+                                                                partner.seedOfferings.vegetables.length > 0) { %>
                                                                 <span class="seed-type-tag"
                                                                     style="background: #fff3e0; color: #e65100; border: 1px solid #ffcc80;">
                                                                     🥕 <%= partner.seedOfferings.vegetables.length %>
                                                                 </span>
                                                                 <% } %>
-                                                                    <% if (partner.seedOfferings.flowers &&
-                                                                        partner.seedOfferings.flowers.length> 0) { %>
+                                                                    <% if (partner.seedOfferings.flowers && partner.seedOfferings.flowers.length > 0) { %>
                                                                         <span class="seed-type-tag"
                                                                             style="background: #fce4ec; color: #c2185b; border: 1px solid #f8bbd0;">
-                                                                            🌸 <%= partner.seedOfferings.flowers.length
-                                                                                %>
+                                                                            🌸 <%= partner.seedOfferings.flowers.length %>
                                                                         </span>
                                                                         <% } %>
-                                                                            <% if (partner.seedOfferings.herbs &&
-                                                                                partner.seedOfferings.herbs.length> 0) {
-                                                                                %>
+                                                                            <% if (partner.seedOfferings.herbs && partner.seedOfferings.herbs.length > 0) { %>
                                                                                 <span class="seed-type-tag"
                                                                                     style="background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7;">
-                                                                                    🌿 <%=
-                                                                                        partner.seedOfferings.herbs.length
-                                                                                        %>
+                                                                                    🌿 <%= partner.seedOfferings.herbs.length %>
                                                                                 </span>
                                                                                 <% } %>
                                                                                     <% } else { %>
@@ -979,17 +968,13 @@
                                                             <div class="detail-value editable"
                                                                 data-field="yearEstablished"
                                                                 data-partner="<%= partner._id %>">
-                                                                <%= (partner.businessDetails &&
-                                                                    partner.businessDetails.yearEstablished)
-                                                                    || 'Not specified' %>
+                                                                <%= (partner.businessDetails && partner.businessDetails.yearEstablished) || 'Not specified' %>
                                                             </div>
                                                         </div>
                                                         <div class="detail-item">
                                                             <span class="detail-label">Company Size</span>
                                                             <div class="detail-value">
-                                                                <%= (partner.businessDetails &&
-                                                                    partner.businessDetails.numberOfEmployees)
-                                                                    || 'Not specified' %>
+                                                                <%= (partner.businessDetails && partner.businessDetails.numberOfEmployees) || 'Not specified' %>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1032,10 +1017,9 @@
                                                         <div class="detail-item">
                                                             <span class="detail-label">All Seed Types</span>
                                                             <div class="detail-value">
-                                                                <% if (partner.seedTypes && partner.seedTypes.length> 0)
-                                                                    { %>
+                                                                <% if (partner.seedTypes && partner.seedTypes.length > 0) { %>
                                                                     <div class="seed-types">
-                                                                        <% partner.seedTypes.forEach(seedType=> { %>
+                                                                        <% partner.seedTypes.forEach(function(seedType) { %>
                                                                             <span class="seed-type-tag">
                                                                                 <%= seedType %>
                                                                             </span>
@@ -1056,7 +1040,7 @@
                                                             <span class="detail-label">Certifications</span>
                                                             <div class="detail-value">
                                                                 <% if (partner.certifications &&
-                                                                    partner.certifications.length> 0) { %>
+                                                                    partner.certifications.length > 0) { %>
                                                                     <%= partner.certifications.join(', ') %>
                                                             <% } else { %>
                                                                 None listed
@@ -1141,23 +1125,19 @@
                                                     <div class="detail-item">
                                                         <span class="detail-label">Payment Terms</span>
                                                         <div class="detail-value">
-                                                            <%= (partner.financialTerms && partner.financialTerms.paymentTerms) || '
-                                                                        Not specified' %>
+                                                            <%= (partner.financialTerms && partner.financialTerms.paymentTerms) || 'Not specified' %>
                                                             </div>
                                                         </div>
                                                         <div class="detail-item">
                                                             <span class="detail-label">Payment Method</span>
                                                             <div class="detail-value">
-                                                                <%= (partner.financialTerms &&
-                                                                    partner.financialTerms.preferredPaymentMethod)
-                                                                    || 'Not specified' %>
+                                                                <%= (partner.financialTerms && partner.financialTerms.preferredPaymentMethod) || 'Not specified' %>
                                                             </div>
                                                         </div>
                                                         <div class="detail-item">
                                                             <span class="detail-label">Currency</span>
                                                             <div class="detail-value">
-                                                                <%= (partner.financialTerms &&
-                                                                    partner.financialTerms.currency) || 'USD' %>
+                                                                <%= (partner.financialTerms && partner.financialTerms.currency) || 'USD' %>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1171,9 +1151,8 @@
                                                                 <div
                                                                     style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px;">
                                                                     <% if (partner.exclusionGroups &&
-                                                                        partner.exclusionGroups.length> 0) { %>
-                                                                        <% partner.exclusionGroups.forEach(function(group)
-                                                                            { %>
+                                                                        partner.exclusionGroups.length > 0) { %>
+                                                                        <% partner.exclusionGroups.forEach(function(group) { %>
                                                                             <span
                                                                                 style="background: #dc3545; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-flex; align-items: center; gap: 5px;">
                                                                                 <%= group %>
@@ -1261,21 +1240,11 @@
                                                                     <label class="detail-label">Status</label>
                                                                     <select class="edit-input"
                                                                         id="edit-status-<%= partner._id %>">
-                                                                        <option value="Prospective"
-                                                                            <%=partner.status==='Prospective'
-                                                                            ? 'selected' : '' %>>Prospective</option>
-                                                                        <option value="Active"
-                                                                            <%=partner.status==='Active' ? 'selected'
-                                                                            : '' %>>Active</option>
-                                                                        <option value="On Hold"
-                                                                            <%=partner.status==='On Hold' ? 'selected'
-                                                                            : '' %>>On Hold</option>
-                                                                        <option value="Inactive"
-                                                                            <%=partner.status==='Inactive' ? 'selected'
-                                                                            : '' %>>Inactive</option>
-                                                                        <option value="Non-Alternative"
-                                                                            <%=partner.status==='Non-Alternative'
-                                                                            ? 'selected' : '' %>>Non-Alternative
+                                                                        <option value="Prospective" <%= partner.status === 'Prospective' ? 'selected' : '' %>>Prospective</option>
+                                                                        <option value="Active" <%= partner.status === 'Active' ? 'selected' : '' %>>Active</option>
+                                                                        <option value="On Hold" <%= partner.status === 'On Hold' ? 'selected' : '' %>>On Hold</option>
+                                                                        <option value="Inactive" <%= partner.status === 'Inactive' ? 'selected' : '' %>>Inactive</option>
+                                                                        <option value="Non-Alternative" <%= partner.status === 'Non-Alternative' ? 'selected' : '' %>>Non-Alternative
                                                                         </option>
                                                                     </select>
                                                                 </div>
@@ -1316,12 +1285,11 @@
         </div>
 
         <!-- Regional Distribution (Optional Visual) -->
-        <% if (Object.keys(stats.byRegion).length> 0) { %>
+        <% if (Object.keys(stats.byRegion).length > 0) { %>
             <div class="filters-section" style="margin-top: 25px;">
                 <h3><i class="fas fa-map-marked-alt"></i> Partners by Region</h3>
                 <div class="region-grid">
-                    <% Object.keys(stats.byRegion).sort((a, b)=> stats.byRegion[b] - stats.byRegion[a]).forEach(region
-                        => { %>
+                    <% Object.keys(stats.byRegion).sort(function(a, b) { return stats.byRegion[b] - stats.byRegion[a]; }).forEach(function(region) { %>
                         <div class="region-item">
                             <div class="region-count">
                                 <%= stats.byRegion[region] %>

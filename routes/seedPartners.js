@@ -43,7 +43,7 @@ const upload = multer({
 // ============================================
 router.get('/', ensureAuthenticated, async (req, res) => {
     try {
-        console.log('🌍 Loading World Seed Partnership Dashboard...');
+        console.log('🌍 Loading Seed Home Import Partnership Dashboard...');
 
         // Get filter parameters with session persistence
         // If view is explicitly set in query, use it and save to session

@@ -56,14 +56,18 @@ console.log('🔄 Loading seed catalog routes...');
 const seedCatalogRoutes = require('./routes/seedCatalog');
 console.log('✅ Seed catalog routes loaded successfully');
 
+console.log('🔄 Loading Wild West Seed catalog routes...');
+const wildwestCatalogRoutes = require('./routes/wildwestCatalog');
+console.log('✅ Wild West Seed catalog routes loaded successfully');
+
 console.log('🔄 Loading dropshipment tracking routes...');
 const dropshipmentRoutes = require('./routes/dropshipments');
 console.log('✅ Dropshipment tracking routes loaded successfully');
 
-console.log('🔄 Loading World Seed Partnership routes...');
+console.log('🔄 Loading Seed Home Import Partnership routes...');
 const SeedPartner = require('./models/SeedPartner'); // Register model
 const seedPartnerRoutes = require('./routes/seedPartners');
-console.log('✅ World Seed Partnership routes loaded successfully');
+console.log('✅ Seed Home Import Partnership routes loaded successfully');
 
 console.log('🔄 Loading US Seed Partnership routes...');
 const USSeedPartner = require('./models/USSeedPartner'); // Register model  
@@ -1074,7 +1078,7 @@ app.use('/shipments', ensureAuthenticated, ensureApproved, shipmentRoutes); // N
 app.use('/organic-vendors', ensureAuthenticated, ensureApproved, organicVendorRoutes);
 app.use('/vendors', ensureAuthenticated, ensureApproved, vendorRoutes);
 app.use('/enhanced-vendors', ensureAuthenticated, ensureApproved, enhancedVendorRoutes);
-app.use('/seed-partners', ensureAuthenticated, ensureApproved, seedPartnerRoutes); // NEW: World Seed Partnership
+app.use('/seed-partners', ensureAuthenticated, ensureApproved, seedPartnerRoutes); // NEW: Seed Home Import Partnership
 app.use('/us-seed-partners', ensureAuthenticated, ensureApproved, usSeedPartnerRoutes); // NEW: US Seed Partnership
 app.use('/staged-partners', ensureAuthenticated, ensureApproved, stagedPartnerRoutes); // NEW: Partner Staging/Approval
 app.use('/tasks', ensureAuthenticated, ensureApproved, taskRoutes);
@@ -1116,6 +1120,7 @@ app.use('/statistics', ensureAuthenticated, ensureApproved, require('./routes/st
 app.use('/forms', ensureAuthenticated, ensureApproved, formRoutes); // NEW: Forms management
 app.use('/excel-files', ensureAuthenticated, ensureApproved, excelFileRoutes); // NEW: SharePoint Excel integration
 app.use('/seed-catalog', ensureAuthenticated, ensureApproved, seedCatalogRoutes); // NEW: AI Seed Catalog
+app.use('/wildwest', wildwestCatalogRoutes); // NEW: Wild West Seed Product Catalog
 app.use('/dropshipments', ensureAuthenticated, ensureApproved, dropshipmentRoutes); // NEW: Dropshipment Tracking
 app.use('/dropship', ensureAuthenticated, ensureApproved, dropshipRoutes);
 app.use('/dropship-test', ensureAuthenticated, ensureApproved, dropshipTestRoutes);
