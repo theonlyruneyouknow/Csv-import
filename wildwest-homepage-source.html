@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wild West Seed Catalog</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+        .category-card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+        }
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .category-icon {
+            font-size: 3rem;
+            color: #667eea;
+        }
+        .product-card {
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        .product-card:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            transform: translateY(-3px);
+        }
+        .product-card img {
+            height: 250px;
+            object-fit: cover;
+            width: 100%;
+        }
+        .product-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/wildwest">
+                <i class="bi bi-flower1"></i> Wild West Seed Catalog
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/wildwest">Home</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <h1 class="display-3 fw-bold mb-3">Wild West Seed Catalog</h1>
+            <p class="lead mb-4">Premium Quality Seeds for Your Garden</p>
+            <form action="/wildwest/search" method="GET" class="d-flex justify-content-center">
+                <div class="input-group" style="max-width: 600px;">
+                    <input type="text" class="form-control form-control-lg" name="q" placeholder="Search seeds..." required>
+                    <button class="btn btn-light btn-lg" type="submit">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Categories Section -->
+    <div class="container my-5">
+        <h2 class="text-center mb-5">Browse by Category</h2>
+        <div class="row g-4">
+            <!-- Vegetables -->
+            <div class="col-md-6 col-lg-3">
+                <a href="/wildwest/category/vegetable-seeds" class="text-decoration-none">
+                    <div class="card category-card shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="category-icon mb-3">
+                                <i class="bi bi-basket"></i>
+                            </div>
+                            <h3 class="card-title h5 mb-2">Vegetable Seeds</h3>
+                            <p class="text-muted">
+                                6 varieties
+                            </p>
+                            <p class="small text-secondary">
+                                Tomatoes, Peppers, Beans, Lettuce & More
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Flowers -->
+            <div class="col-md-6 col-lg-3">
+                <a href="/wildwest/category/flower-seeds" class="text-decoration-none">
+                    <div class="card category-card shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="category-icon mb-3">
+                                <i class="bi bi-flower2"></i>
+                            </div>
+                            <h3 class="card-title h5 mb-2">Flower Seeds</h3>
+                            <p class="text-muted">
+                                5 varieties
+                            </p>
+                            <p class="small text-secondary">
+                                Sunflowers, Zinnias, Cosmos & More
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Herbs -->
+            <div class="col-md-6 col-lg-3">
+                <a href="/wildwest/category/herbs" class="text-decoration-none">
+                    <div class="card category-card shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="category-icon mb-3">
+                                <i class="bi bi-tree"></i>
+                            </div>
+                            <h3 class="card-title h5 mb-2">Herb Seeds</h3>
+                            <p class="text-muted">
+                                5 varieties
+                            </p>
+                            <p class="small text-secondary">
+                                Basil, Oregano, Thyme & More
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Wildflower Mixes -->
+            <div class="col-md-6 col-lg-3">
+                <a href="/wildwest/category/wild-flower-mixes" class="text-decoration-none">
+                    <div class="card category-card shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="category-icon mb-3">
+                                <i class="bi bi-flower3"></i>
+                            </div>
+                            <h3 class="card-title h5 mb-2">Wildflower Mixes</h3>
+                            <p class="text-muted">
+                                5 mixes
+                            </p>
+                            <p class="small text-secondary">
+                                Regional & Special Use Blends
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Products Section -->
+    
+    <div class="bg-light py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Featured Products</h2>
+            <div class="row g-4">
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card product-card shadow-sm">
+                        <div class="position-relative">
+                            
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgODAwIDYwMCI+CiAgICAgICAgPHJlY3QgZmlsbD0iI0ZGRDcwMCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI2MDAiLz4KICAgICAgICA8dGV4dCBmaWxsPSIjMzMzMzMzIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSI1MCUiIHk9IjUwJSIgZHk9Ii4zZW0iPvCfkJ0gQmVlIE1peCAxPC90ZXh0PgogICAgPC9zdmc+" 
+                                 class="card-img-top" 
+                                 alt="Bee Mix Wildflowers"
+                                 loading="lazy"
+                                 style="max-width: 100%; height: auto; object-fit: cover;">
+                            
+                            
+                            <span class="product-badge">Organic</span>
+                            
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Bee Mix Wildflowers</h5>
+                            
+                            <p class="text-secondary small mb-3">
+                                <i class="bi bi-tag"></i> Wildflower Mix
+                                
+                                - Special Use
+                                
+                            </p>
+                            <a href="/wildwest/product/bee-mix-wildflowers" class="btn btn-outline-primary btn-sm w-100">
+                                View Details <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card product-card shadow-sm">
+                        <div class="position-relative">
+                            
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgODAwIDYwMCI+CiAgICAgICAgPHJlY3QgZmlsbD0iIzQxNjlFMSIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI2MDAiLz4KICAgICAgICA8dGV4dCBmaWxsPSIjRkZGRkZGIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSI1MCUiIHk9IjUwJSIgZHk9Ii4zZW0iPvCfjLsgVGV4YXMgTWl4IDE8L3RleHQ+CiAgICA8L3N2Zz4=" 
+                                 class="card-img-top" 
+                                 alt="Texas Wildflower Mix"
+                                 loading="lazy"
+                                 style="max-width: 100%; height: auto; object-fit: cover;">
+                            
+                            
+                            <span class="product-badge">Featured</span>
+                            
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Texas Wildflower Mix</h5>
+                            
+                            <p class="text-secondary small mb-3">
+                                <i class="bi bi-tag"></i> Wildflower Mix
+                                
+                                - Regional
+                                
+                            </p>
+                            <a href="/wildwest/product/texas-wildflower-mix" class="btn btn-outline-primary btn-sm w-100">
+                                View Details <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card product-card shadow-sm">
+                        <div class="position-relative">
+                            
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgODAwIDYwMCI+CiAgICAgICAgPHJlY3QgZmlsbD0iI0ZGNjM0NyIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI2MDAiLz4KICAgICAgICA8dGV4dCBmaWxsPSIjRkZGRkZGIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSI1MCUiIHk9IjUwJSIgZHk9Ii4zZW0iPvCfjLwgQW5udWFsIE1peCAxPC90ZXh0PgogICAgPC9zdmc+" 
+                                 class="card-img-top" 
+                                 alt="All Annual Wildflower Mix"
+                                 loading="lazy"
+                                 style="max-width: 100%; height: auto; object-fit: cover;">
+                            
+                            
+                            <span class="product-badge">Featured</span>
+                            
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">All Annual Wildflower Mix</h5>
+                            
+                            <p class="text-secondary small mb-3">
+                                <i class="bi bi-tag"></i> Wildflower Mix
+                                
+                                - Special Use
+                                
+                            </p>
+                            <a href="/wildwest/product/all-annual-wildflower-mix" class="btn btn-outline-primary btn-sm w-100">
+                                View Details <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card product-card shadow-sm">
+                        <div class="position-relative">
+                            
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgODAwIDYwMCI+CiAgICAgICAgPHJlY3QgZmlsbD0iI0ZGNjlCNCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI2MDAiLz4KICAgICAgICA8dGV4dCBmaWxsPSIjRkZGRkZGIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSI1MCUiIHk9IjUwJSIgZHk9Ii4zZW0iPvCfposgQnV0dGVyZmx5IE1peCAxPC90ZXh0PgogICAgPC9zdmc+" 
+                                 class="card-img-top" 
+                                 alt="Butterfly &amp; Hummingbird Mix"
+                                 loading="lazy"
+                                 style="max-width: 100%; height: auto; object-fit: cover;">
+                            
+                            
+                            <span class="product-badge">Featured</span>
+                            
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Butterfly &amp; Hummingbird Mix</h5>
+                            
+                            <p class="text-secondary small mb-3">
+                                <i class="bi bi-tag"></i> Wildflower Mix
+                                
+                                - Special Use
+                                
+                            </p>
+                            <a href="/wildwest/product/butterfly-hummingbird-mix" class="btn btn-outline-primary btn-sm w-100">
+                                View Details <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card product-card shadow-sm">
+                        <div class="position-relative">
+                            
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgODAwIDYwMCI+CiAgICAgICAgPHJlY3QgZmlsbD0iIzkzNzBEQiIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI2MDAiLz4KICAgICAgICA8dGV4dCBmaWxsPSIjRkZGRkZGIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSI1MCUiIHk9IjUwJSIgZHk9Ii4zZW0iPvCfqrsgTGF2ZW5kZXIgMTwvdGV4dD4KICAgIDwvc3ZnPg==" 
+                                 class="card-img-top" 
+                                 alt="English Lavender"
+                                 loading="lazy"
+                                 style="max-width: 100%; height: auto; object-fit: cover;">
+                            
+                            
+                            <span class="product-badge">Organic</span>
+                            
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">English Lavender</h5>
+                            
+                            <p class="text-muted small mb-2">
+                                <em>Lavandula angustifolia</em>
+                            </p>
+                            
+                            <p class="text-secondary small mb-3">
+                                <i class="bi bi-tag"></i> Herb
+                                
+                                - Lavender
+                                
+                            </p>
+                            <a href="/wildwest/product/english-lavender" class="btn btn-outline-primary btn-sm w-100">
+                                View Details <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card product-card shadow-sm">
+                        <div class="position-relative">
+                            
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgODAwIDYwMCI+CiAgICAgICAgPHJlY3QgZmlsbD0iIzAwNjQwMCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI2MDAiLz4KICAgICAgICA8dGV4dCBmaWxsPSIjRkZGRkZGIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSI1MCUiIHk9IjUwJSIgZHk9Ii4zZW0iPvCfjL8gTGFyZ2UgQmFzaWwgMTwvdGV4dD4KICAgIDwvc3ZnPg==" 
+                                 class="card-img-top" 
+                                 alt="Italian Large Leaf Basil"
+                                 loading="lazy"
+                                 style="max-width: 100%; height: auto; object-fit: cover;">
+                            
+                            
+                            <span class="product-badge">Featured</span>
+                            
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Italian Large Leaf Basil</h5>
+                            
+                            <p class="text-muted small mb-2">
+                                <em>Ocimum basilicum</em>
+                            </p>
+                            
+                            <p class="text-secondary small mb-3">
+                                <i class="bi bi-tag"></i> Herb
+                                
+                                - Basil
+                                
+                            </p>
+                            <a href="/wildwest/product/italian-large-leaf-basil" class="btn btn-outline-primary btn-sm w-100">
+                                View Details <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card product-card shadow-sm">
+                        <div class="position-relative">
+                            
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgODAwIDYwMCI+CiAgICAgICAgPHJlY3QgZmlsbD0iIzIyOEIyMiIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI2MDAiLz4KICAgICAgICA8dGV4dCBmaWxsPSIjRkZGRkZGIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSI1MCUiIHk9IjUwJSIgZHk9Ii4zZW0iPvCfjL8gQmFzaWwgMTwvdGV4dD4KICAgIDwvc3ZnPg==" 
+                                 class="card-img-top" 
+                                 alt="Genovese Basil"
+                                 loading="lazy"
+                                 style="max-width: 100%; height: auto; object-fit: cover;">
+                            
+                            
+                            <span class="product-badge">Organic</span>
+                            
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Genovese Basil</h5>
+                            
+                            <p class="text-muted small mb-2">
+                                <em>Ocimum basilicum</em>
+                            </p>
+                            
+                            <p class="text-secondary small mb-3">
+                                <i class="bi bi-tag"></i> Herb
+                                
+                                - Basil
+                                
+                            </p>
+                            <a href="/wildwest/product/genovese-basil" class="btn btn-outline-primary btn-sm w-100">
+                                View Details <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card product-card shadow-sm">
+                        <div class="position-relative">
+                            
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgODAwIDYwMCI+CiAgICAgICAgPHJlY3QgZmlsbD0iI0ZGMTQ5MyIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI2MDAiLz4KICAgICAgICA8dGV4dCBmaWxsPSIjRkZGRkZGIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSI1MCUiIHk9IjUwJSIgZHk9Ii4zZW0iPvCfjLogWmlubmlhIDE8L3RleHQ+CiAgICA8L3N2Zz4=" 
+                                 class="card-img-top" 
+                                 alt="State Fair Mix Zinnia"
+                                 loading="lazy"
+                                 style="max-width: 100%; height: auto; object-fit: cover;">
+                            
+                            
+                            <span class="product-badge">Organic</span>
+                            
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">State Fair Mix Zinnia</h5>
+                            
+                            <p class="text-muted small mb-2">
+                                <em>Zinnia elegans</em>
+                            </p>
+                            
+                            <p class="text-secondary small mb-3">
+                                <i class="bi bi-tag"></i> Flower
+                                
+                                - Zinnias
+                                
+                            </p>
+                            <a href="/wildwest/product/state-fair-mix-zinnia" class="btn btn-outline-primary btn-sm w-100">
+                                View Details <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card product-card shadow-sm">
+                        <div class="position-relative">
+                            
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgODAwIDYwMCI+CiAgICAgICAgPHJlY3QgZmlsbD0iIzZBNUFDRCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI2MDAiLz4KICAgICAgICA8dGV4dCBmaWxsPSIjRkZGRkZGIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSI1MCUiIHk9IjUwJSIgZHk9Ii4zZW0iPvCfjLogTGFya3NwdXIgMTwvdGV4dD4KICAgIDwvc3ZnPg==" 
+                                 class="card-img-top" 
+                                 alt="Giant Imperial Larkspur"
+                                 loading="lazy"
+                                 style="max-width: 100%; height: auto; object-fit: cover;">
+                            
+                            
+                            <span class="product-badge">Featured</span>
+                            
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Giant Imperial Larkspur</h5>
+                            
+                            <p class="text-muted small mb-2">
+                                <em>Consolida ajacis</em>
+                            </p>
+                            
+                            <p class="text-secondary small mb-3">
+                                <i class="bi bi-tag"></i> Flower
+                                
+                                - Larkspur
+                                
+                            </p>
+                            <a href="/wildwest/product/giant-imperial-larkspur" class="btn btn-outline-primary btn-sm w-100">
+                                View Details <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card product-card shadow-sm">
+                        <div class="position-relative">
+                            
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgODAwIDYwMCI+CiAgICAgICAgPHJlY3QgZmlsbD0iI0ZGNjlCNCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI2MDAiLz4KICAgICAgICA8dGV4dCBmaWxsPSIjRkZGRkZGIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSI1MCUiIHk9IjUwJSIgZHk9Ii4zZW0iPvCfjLggQ29zbW9zIDE8L3RleHQ+CiAgICA8L3N2Zz4=" 
+                                 class="card-img-top" 
+                                 alt="Sensation Mix Cosmos"
+                                 loading="lazy"
+                                 style="max-width: 100%; height: auto; object-fit: cover;">
+                            
+                            
+                            <span class="product-badge">Featured</span>
+                            
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Sensation Mix Cosmos</h5>
+                            
+                            <p class="text-muted small mb-2">
+                                <em>Cosmos bipinnatus</em>
+                            </p>
+                            
+                            <p class="text-secondary small mb-3">
+                                <i class="bi bi-tag"></i> Flower
+                                
+                                - Cosmos
+                                
+                            </p>
+                            <a href="/wildwest/product/sensation-mix-cosmos" class="btn btn-outline-primary btn-sm w-100">
+                                View Details <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card product-card shadow-sm">
+                        <div class="position-relative">
+                            
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgODAwIDYwMCI+CiAgICAgICAgPHJlY3QgZmlsbD0iI0ZGRDcwMCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI2MDAiLz4KICAgICAgICA8dGV4dCBmaWxsPSIjMzMzMzMzIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSI1MCUiIHk9IjUwJSIgZHk9Ii4zZW0iPvCfjLsgU3VuZmxvd2VyIDE8L3RleHQ+CiAgICA8L3N2Zz4=" 
+                                 class="card-img-top" 
+                                 alt="Autumn Beauty Sunflower"
+                                 loading="lazy"
+                                 style="max-width: 100%; height: auto; object-fit: cover;">
+                            
+                            
+                            <span class="product-badge">Organic</span>
+                            
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Autumn Beauty Sunflower</h5>
+                            
+                            <p class="text-muted small mb-2">
+                                <em>Helianthus annuus</em>
+                            </p>
+                            
+                            <p class="text-secondary small mb-3">
+                                <i class="bi bi-tag"></i> Flower
+                                
+                                - Sunflowers
+                                
+                            </p>
+                            <a href="/wildwest/product/autumn-beauty-sunflower" class="btn btn-outline-primary btn-sm w-100">
+                                View Details <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3">
+                    <div class="card product-card shadow-sm">
+                        <div class="position-relative">
+                            
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgODAwIDYwMCI+CiAgICAgICAgPHJlY3QgZmlsbD0iIzkwRUU5MCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI2MDAiLz4KICAgICAgICA8dGV4dCBmaWxsPSIjMzMzMzMzIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSI1MCUiIHk9IjUwJSIgZHk9Ii4zZW0iPvCfpawgTGV0dHVjZSAxPC90ZXh0PgogICAgPC9zdmc+" 
+                                 class="card-img-top" 
+                                 alt="Black Seeded Simpson Lettuce"
+                                 loading="lazy"
+                                 style="max-width: 100%; height: auto; object-fit: cover;">
+                            
+                            
+                            <span class="product-badge">Organic</span>
+                            
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Black Seeded Simpson Lettuce</h5>
+                            
+                            <p class="text-muted small mb-2">
+                                <em>Lactuca sativa</em>
+                            </p>
+                            
+                            <p class="text-secondary small mb-3">
+                                <i class="bi bi-tag"></i> Vegetable
+                                
+                                - Lettuce - Leaf
+                                
+                            </p>
+                            <a href="/wildwest/product/black-seeded-simpson-lettuce" class="btn btn-outline-primary btn-sm w-100">
+                                View Details <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">© 2024 Wild West Seed Catalog | Premium Quality Seeds</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

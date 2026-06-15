@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= product.productName %> | Wild West Seed Catalog</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .product-gallery {
+            position: sticky;
+            top: 20px;
+        }
+        .main-image {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .thumbnail {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        .thumbnail:hover, .thumbnail.active {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+        .badge-custom {
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .info-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .product-card {
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        .product-card:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            transform: translateY(-3px);
+        }
+        .product-card img {
+            height: 200px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/wildwest">
+                <i class="bi bi-flower1"></i> Wild West Seed Catalog
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/wildwest">Home</a>
+                    </li>
+                    <% if (user) { %>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/wildwest/admin">
+                            <i class="bi bi-gear"></i> Admin
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/wildwest/admin/edit/<%= product._id %>">
+                            <i class="bi bi-pencil"></i> Edit
+                        </a>
+                    </li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/wildwest">Home</a></li>
+                <li class="breadcrumb-item"><a href="/wildwest/category/<%= product.category.toLowerCase().replace(/ /g, '-') %>"><%= product.category %></a></li>
+                <li class="breadcrumb-item active"><%= product.productName %></li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <!-- Product Gallery -->
+            <div class="col-lg-6 mb-4">
+                <div class="product-gallery">
+                    <% if (product.images && product.images.length > 0) { %>
+                    <img id="mainImage" 
+                         src="<%- product.images[0].url %>" 
+                         class="main-image mb-3" 
+                         alt="<%= product.productName %>"
+                         style="max-width: 100%; height: auto; object-fit: contain;">
+                    
+                    <% if (product.images.length > 1) { %>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <% product.images.forEach(function(img, index) { %>
+                        <img src="<%- img.url %>" 
+                             class="thumbnail <%= index === 0 ? 'active' : '' %>" 
+                             alt="<%= product.productName %>" 
+                             loading="lazy"
+                             onclick="changeMainImage('<%- img.url %>', this)"
+                             style="object-fit: cover;">
+                        <% }) %>
+                    </div>
+                    <% } %>
+                    <% } else { %>
+                    <div class="main-image bg-secondary text-white d-flex align-items-center justify-content-center">
+                        <div class="text-center">
+                            <i class="bi bi-image" style="font-size: 5rem;"></i>
+                            <p class="mt-3">No image available</p>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Product Details -->
+            <div class="col-lg-6">
+                <% if (product.getDisplayBadge()) { %>
+                <span class="badge-custom mb-3 d-inline-block">
+                    <%= product.getDisplayBadge() %>
+                </span>
+                <% } %>
+
+                <h1 class="mb-2"><%= product.productName %></h1>
+                
+                <% if (product.scientificName) { %>
+                <p class="text-muted h5 mb-3">
+                    <em><%= product.scientificName %></em>
+                </p>
+                <% } %>
+
+                <div class="mb-4">
+                    <span class="badge bg-primary me-2">
+                        <i class="bi bi-tag"></i> <%= product.category %>
+                    </span>
+                    <% if (product.subcategory) { %>
+                    <span class="badge bg-secondary me-2">
+                        <%= product.subcategory %>
+                    </span>
+                    <% } %>
+                    <% if (product.specifications && product.specifications.organic) { %>
+                    <span class="badge bg-success me-2">
+                        <i class="bi bi-check-circle"></i> Organic
+                    </span>
+                    <% } %>
+                    <% if (product.specifications && product.specifications.nongmo) { %>
+                    <span class="badge bg-info me-2">Non-GMO</span>
+                    <% } %>
+                </div>
+
+                <!-- Availability -->
+                <div class="info-card">
+                    <h5 class="mb-3">
+                        <i class="bi bi-box-seam"></i> Availability
+                    </h5>
+                    <p class="mb-0">
+                        <strong>Status:</strong>
+                        <% if (product.inStock) { %>
+                        <span class="badge bg-success">In Stock</span>
+                        <% } else { %>
+                        <span class="badge bg-danger">Out of Stock</span>
+                        <% } %>
+                    </p>
+                    <% if (product.availability) { %>
+                    <p class="mb-0 mt-2">
+                        <strong>Availability:</strong> <%= product.availability %>
+                    </p>
+                    <% } %>
+                </div>
+
+                <!-- Description -->
+                <% if (product.description) { %>
+                <div class="info-card">
+                    <h5 class="mb-3">
+                        <i class="bi bi-card-text"></i> Description
+                    </h5>
+                    <p class="mb-0"><%= product.description %></p>
+                </div>
+                <% } %>
+
+                <!-- Growing Information -->
+                <% if (product.growingInfo) { %>
+                <div class="info-card">
+                    <h5 class="mb-3">
+                        <i class="bi bi-sun"></i> Growing Information
+                    </h5>
+                    <div class="row g-3">
+                        <% if (product.growingInfo.daysToMaturity) { %>
+                        <div class="col-6">
+                            <strong>Days to Maturity:</strong><br>
+                            <%= product.growingInfo.daysToMaturity %> days
+                        </div>
+                        <% } %>
+                        <% if (product.growingInfo.sunRequirement) { %>
+                        <div class="col-6">
+                            <strong>Sun:</strong><br>
+                            <%= product.growingInfo.sunRequirement %>
+                        </div>
+                        <% } %>
+                        <% if (product.growingInfo.waterRequirement) { %>
+                        <div class="col-6">
+                            <strong>Water:</strong><br>
+                            <%= product.growingInfo.waterRequirement %>
+                        </div>
+                        <% } %>
+                        <% if (product.growingInfo.spacing) { %>
+                        <div class="col-6">
+                            <strong>Spacing:</strong><br>
+                            <%= product.growingInfo.spacing %>
+                        </div>
+                        <% } %>
+                        <% if (product.growingInfo.height) { %>
+                        <div class="col-6">
+                            <strong>Height:</strong><br>
+                            <%= product.growingInfo.height %>
+                        </div>
+                        <% } %>
+                        <% if (product.growingInfo.hardiness) { %>
+                        <div class="col-6">
+                            <strong>Hardiness:</strong><br>
+                            <%= product.growingInfo.hardiness %>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+                <% } %>
+
+                <!-- Tags -->
+                <% if (product.tags && product.tags.length > 0) { %>
+                <div class="mb-3">
+                    <strong>Tags:</strong>
+                    <% product.tags.forEach(function(tag) { %>
+                    <span class="badge bg-light text-dark me-1"><%= tag %></span>
+                    <% }) %>
+                </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Related Products -->
+        <% if (relatedProducts && relatedProducts.length > 0) { %>
+        <div class="mt-5">
+            <h3 class="mb-4">Related Products</h3>
+            <div class="row g-4">
+                <% relatedProducts.forEach(function(related) { %>
+                <div class="col-6 col-md-3">
+                    <div class="card product-card shadow-sm">
+                        <% if (related.primaryImage) { %>
+                        <img src="<%- related.primaryImage %>" 
+                             class="card-img-top" 
+                             alt="<%= related.productName %>"
+                             loading="lazy"
+                             style="object-fit: cover;">
+                        <% } else { %>
+                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="bi bi-image" style="font-size: 2rem;"></i>
+                        </div>
+                        <% } %>
+                        <div class="card-body">
+                            <h6 class="card-title"><%= related.productName %></h6>
+                            <% if (related.scientificName) { %>
+                            <p class="small text-muted mb-2">
+                                <em><%= related.scientificName %></em>
+                            </p>
+                            <% } %>
+                            <a href="/wildwest/product/<%= related.slug %>" class="btn btn-outline-primary btn-sm w-100">
+                                View
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+            </div>
+        </div>
+        <% } %>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">© 2024 Wild West Seed Catalog | Premium Quality Seeds</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function changeMainImage(url, element) {
+            document.getElementById('mainImage').src = url;
+            document.querySelectorAll('.thumbnail').forEach(function(thumb) {
+                thumb.classList.remove('active');
+            });
+            element.classList.add('active');
+        }
+    </script>
+</body>
+</html>
