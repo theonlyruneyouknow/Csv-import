@@ -1404,22 +1404,53 @@ app.get('/api/get-netsuite-url', ensureAuthenticated, ensureApproved, (req, res)
 app.use('/food-test', foodRoutes);
 app.use('/api', ensureAuthenticated, ensureApproved, purchaseOrderRoutes); // API routes for AJAX calls
 
-// Root route - show splash page for visitors, redirect authenticated users
-app.get('/', (req, res) => {
-    if (!req.isAuthenticated()) {
-        return res.render('splash', {
-            user: null,
-            messages: {
-                error: req.flash('error'),
-                success: req.flash('success'),
-                info: req.flash('info')
-            }
+// Root route - show module grid for all users
+app.get('/', async (req, res) => {
+    let user = req.user;
+    
+    // If user is logged in but doesn't have module preferences, initialize them
+    if (user && (!user.modulePreferences || user.modulePreferences.length === 0)) {
+        try {
+            const User = require('./models/User');
+            const defaultModules = ['po', 'vendors', 'seeds', 'wildwest', 'food', 'household', 'story', 'medicine', 'bulletin', 'hymns', 'grocery', 'photos'];
+            await User.findByIdAndUpdate(user._id, {
+                modulePreferences: defaultModules
+            });
+            user.modulePreferences = defaultModules;
+        } catch (error) {
+            console.error('Error initializing module preferences:', error);
+        }
+    }
+    
+    res.render('module-grid', {
+        user: user,
+        messages: {
+            error: req.flash('error'),
+            success: req.flash('success'),
+            info: req.flash('info')
+        }
+    });
+});
+
+// Save user module preferences
+app.post('/api/module-preferences', ensureAuthenticated, async (req, res) => {
+    try {
+        const { moduleOrder } = req.body;
+        
+        if (!Array.isArray(moduleOrder) || moduleOrder.length === 0) {
+            return res.status(400).json({ success: false, message: 'Invalid module order' });
+        }
+        
+        const User = require('./models/User');
+        await User.findByIdAndUpdate(req.user._id, {
+            modulePreferences: moduleOrder
         });
+        
+        res.json({ success: true, message: 'Module preferences saved' });
+    } catch (error) {
+        console.error('Error saving module preferences:', error);
+        res.status(500).json({ success: false, message: 'Error saving preferences' });
     }
-    if (req.user.status !== 'approved') {
-        return res.redirect('/auth/pending-approval');
-    }
-    res.redirect('/purchase-orders');
 });
 
 // Session keepalive endpoint - refreshes session for active users

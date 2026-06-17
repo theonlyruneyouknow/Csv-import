@@ -80,6 +80,11 @@ const upload = multer({
     }
 });
 
+// Root greatestjoy route - redirect to dashboard
+router.get('/', ensureAuthenticated, (req, res) => {
+    res.redirect('/greatestjoy/dashboard');
+});
+
 // Dashboard - view all media
 router.get('/dashboard', ensureAuthenticated, async (req, res) => {
     try {

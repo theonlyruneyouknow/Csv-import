@@ -22,6 +22,11 @@ const ensureGroceryAccess = (req, res, next) => {
     next();
 };
 
+// Root grocery route - redirect to dashboard
+router.get('/', ensureGroceryAccess, (req, res) => {
+    res.redirect('/grocery/dashboard');
+});
+
 // ===== DASHBOARD =====
 router.get('/dashboard', ensureGroceryAccess, async (req, res) => {
     try {

@@ -27,6 +27,27 @@ async function ensureHousehold(req, res, next) {
     }
 }
 
+// Root household route - redirect to appropriate page
+router.get('/', async (req, res) => {
+    try {
+        // Check if user has a household
+        if (!req.user.household) {
+            return res.redirect('/household/setup?needsHousehold=true');
+        }
+        
+        const household = await Household.findById(req.user.household);
+        if (!household || !household.isActive) {
+            return res.redirect('/household/setup?needsHousehold=true');
+        }
+        
+        // User has an active household, go to dashboard
+        return res.redirect('/household/dashboard');
+    } catch (error) {
+        console.error('Error in household root route:', error);
+        res.status(500).send('Error loading household');
+    }
+});
+
 // Household setup page
 router.get('/setup', async (req, res) => {
     try {

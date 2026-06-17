@@ -16,6 +16,11 @@ const ensureStoryAccess = (req, res, next) => {
     next();
 };
 
+// Root story route - redirect to projects page
+router.get('/', ensureStoryAccess, (req, res) => {
+    res.redirect('/story/projects');
+});
+
 // Story Dashboard
 router.get('/dashboard', ensureStoryAccess, async (req, res) => {
     try {

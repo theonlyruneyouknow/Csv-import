@@ -150,6 +150,16 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Household',
         default: null
+    },
+    
+    // Module grid customization
+    modulePreferences: {
+        type: [String],
+        default: [
+            'po', 'vendors', 'seeds', 'wildwest',
+            'food', 'household', 'story', 'medicine',
+            'bulletin', 'hymns', 'grocery', 'photos'
+        ]
     }
 }, {
     timestamps: true

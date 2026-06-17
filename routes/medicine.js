@@ -19,6 +19,11 @@ const ensureMedicineAccess = (req, res, next) => {
     next();
 };
 
+// Root medicine route - redirect to dashboard
+router.get('/', ensureMedicineAccess, (req, res) => {
+    res.redirect('/medicine/dashboard');
+});
+
 // Medicine Dashboard
 router.get('/dashboard', ensureMedicineAccess, async (req, res) => {
     try {

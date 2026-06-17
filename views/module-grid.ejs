@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Modules - TSC Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-hover-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .navbar-brand i {
+            margin-right: 0.5rem;
+            color: #ffd700;
+        }
+
+        .btn-login, .btn-customize {
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            border: none;
+            transition: all 0.3s ease;
+            margin-left: 0.5rem;
+        }
+
+        .btn-login:hover, .btn-customize:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+            color: #764ba2;
+        }
+
+        .btn-customize {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-customize:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .btn-customize.active {
+            background: #ffd700;
+            color: #667eea;
+        }
+
+        .customization-controls {
+            display: none;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .customization-controls.active {
+            display: block;
+        }
+
+        .btn-save, .btn-cancel, .btn-reset {
+            margin: 0 0.5rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-save {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-reset {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background: #c0392b;
+        }
+
+        .main-container {
+            padding: 3rem 0;
+        }
+
+        .page-title {
+            color: white;
+            text-align: center;
+            margin-bottom: 3rem;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            margin-top: -2rem;
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1200px) {
+            .module-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .module-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .module-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .module-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            min-height: 180px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--module-color), var(--module-color-light));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+            border-color: var(--module-color);
+        }
+
+        .module-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Customization mode styles */
+        .module-grid.customizing .module-card {
+            cursor: move;
+        }
+
+        .module-grid.customizing .module-card.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+        .module-grid.customizing .module-card.drag-over {
+            border: 2px dashed var(--module-color);
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .drag-handle {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #95a5a6;
+            font-size: 1.2rem;
+            display: none;
+        }
+
+        .module-grid.customizing .drag-handle {
+            display: block;
+        }
+
+        .module-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--module-color);
+            transition: transform 0.3s ease;
+        }
+
+        .module-card:hover .module-icon {
+            transform: scale(1.1);
+        }
+
+        .module-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+
+        .module-desc {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin: 0;
+        }
+
+        .module-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--module-color);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        /* Module-specific colors */
+        [data-module="po"] { --module-color: #3498db; --module-color-light: #5dade2; }
+        [data-module="vendors"] { --module-color: #e74c3c; --module-color-light: #ec7063; }
+        [data-module="seeds"] { --module-color: #27ae60; --module-color-light: #52be80; }
+        [data-module="wildwest"] { --module-color: #d68910; --module-color-light: #f39c12; }
+        [data-module="food"] { --module-color: #16a085; --module-color-light: #48c9b0; }
+        [data-module="household"] { --module-color: #8e44ad; --module-color-light: #a569bd; }
+        [data-module="story"] { --module-color: #2980b9; --module-color-light: #5499c7; }
+        [data-module="medicine"] { --module-color: #c0392b; --module-color-light: #cd6155; }
+        [data-module="bulletin"] { --module-color: #f39c12; --module-color-light: #f8c471; }
+        [data-module="hymns"] { --module-color: #9b59b6; --module-color-light: #bb8fce; }
+        [data-module="grocery"] { --module-color: #1abc9c; --module-color-light: #76d7c4; }
+        [data-module="photos"] { --module-color: #e91e63; --module-color-light: #f06292; }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 3rem;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .custom-toast {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            margin-bottom: 1rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-layer-group"></i>
+                TSC Management System
+            </a>
+            <div class="ms-auto d-flex align-items-center">
+                <% if (user) { %>
+                    <button id="customizeBtn" class="btn btn-customize">
+                        <i class="fas fa-edit"></i> Customize
+                    </button>
+                    <a href="/purchase-orders" class="btn btn-login">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                <% } else { %>
+                    <a href="/auth/login" class="btn btn-login">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="container">
+            <h1 class="page-title">Application Modules</h1>
+            <p class="page-subtitle">
+                <span id="normalSubtitle">Select a module to explore</span>
+                <span id="customSubtitle" style="display: none;">Drag modules to rearrange them</span>
+            </p>
+
+            <!-- Customization Controls -->
+            <div id="customizationControls" class="customization-controls">
+                <button id="saveBtn" class="btn btn-save">
+                    <i class="fas fa-save"></i> Save Layout
+                </button>
+                <button id="cancelBtn" class="btn btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button id="resetBtn" class="btn btn-reset">
+                    <i class="fas fa-undo"></i> Reset to Default
+                </button>
+            </div>
+
+            <div id="moduleGrid" class="module-grid"></div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p>
+                    <% if (!user) { %>
+                        <a href="/auth/login">Login</a> to access full features and customize your layout
+                    <% } else { %>
+                        Welcome back, <%= user.firstName || user.username %>!
+                    <% } %>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Module definitions
+        const moduleDefinitions = {
+            'po': {
+                url: '/purchase-orders',
+                icon: 'fas fa-file-invoice',
+                title: 'Purchase Orders',
+                desc: 'Manage POs and tracking'
+            },
+            'vendors': {
+                url: '/vendors',
+                icon: 'fas fa-building',
+                title: 'Vendors',
+                desc: 'Vendor management'
+            },
+            'seeds': {
+                url: '/seed-partners',
+                icon: 'fas fa-seedling',
+                title: 'Seed Partners',
+                desc: 'International partnerships'
+            },
+            'wildwest': {
+                url: '/wildwest',
+                icon: 'fas fa-book-open',
+                title: 'Wild West Catalog',
+                desc: 'Seed product catalog'
+            },
+            'food': {
+                url: '/food',
+                icon: 'fas fa-utensils',
+                title: 'Food Items',
+                desc: 'Recipe & ingredient management'
+            },
+            'household': {
+                url: '/household',
+                icon: 'fas fa-home',
+                title: 'Household',
+                desc: 'Household management'
+            },
+            'story': {
+                url: '/story',
+                icon: 'fas fa-book',
+                title: 'Story Projects',
+                desc: 'Creative writing projects'
+            },
+            'medicine': {
+                url: '/medicine',
+                icon: 'fas fa-pills',
+                title: 'Medicine',
+                desc: 'Health tracking'
+            },
+            'bulletin': {
+                url: '/bulletin',
+                icon: 'fas fa-sticky-note',
+                title: 'Bulletin Board',
+                desc: 'Notes and announcements'
+            },
+            'hymns': {
+                url: '/hymns',
+                icon: 'fas fa-music',
+                title: 'Hymns',
+                desc: 'Hymn library'
+            },
+            'grocery': {
+                url: '/grocery',
+                icon: 'fas fa-shopping-cart',
+                title: 'Grocery',
+                desc: 'Shopping lists'
+            },
+            'photos': {
+                url: '/greatestjoy',
+                icon: 'fas fa-images',
+                title: 'GreatestJoy',
+                desc: 'Photo library & albums'
+            }
+        };
+
+        // Default module order
+        const defaultModuleOrder = ['po', 'vendors', 'seeds', 'wildwest', 'food', 'household', 'story', 'medicine', 'bulletin', 'hymns', 'grocery', 'photos'];
+        
+        // Get user's module preferences or use default
+        const userPrefsRaw = <%- user && user.modulePreferences ? JSON.stringify(user.modulePreferences) : 'null' %>;
+        let moduleOrder = Array.isArray(userPrefsRaw) && userPrefsRaw.length > 0 ? userPrefsRaw : [...defaultModuleOrder];
+        let originalOrder = [...moduleOrder];
+        let isCustomizing = false;
+        let draggedElement = null;
+        
+        console.log('User prefs raw:', userPrefsRaw);
+        console.log('Module order:', moduleOrder);
+
+        // Render modules
+        function renderModules() {
+            try {
+                console.log('Rendering modules...');
+                const grid = document.getElementById('moduleGrid');
+                if (!grid) {
+                    console.error('Module grid element not found!');
+                    return;
+                }
+                
+                grid.innerHTML = '';
+                
+                if (!moduleOrder || moduleOrder.length === 0) {
+                    console.error('Module order is empty or invalid');
+                    moduleOrder = [...defaultModuleOrder];
+                }
+                
+                console.log('Rendering', moduleOrder.length, 'modules');
+                
+                moduleOrder.forEach(moduleKey => {
+                    const module = moduleDefinitions[moduleKey];
+                    if (!module) {
+                        console.warn('Module not found:', moduleKey);
+                        return;
+                    }
+                    
+                    const card = document.createElement('a');
+                    card.href = module.url;
+                    card.className = 'module-card';
+                    card.setAttribute('data-module', moduleKey);
+                    card.draggable = isCustomizing;
+                    
+                    card.innerHTML = `
+                        <i class="fas fa-grip-vertical drag-handle"></i>
+                        <i class="${module.icon} module-icon"></i>
+                        <div class="module-title">${module.title}</div>
+                        <p class="module-desc">${module.desc}</p>
+                    `;
+                    
+                    // Prevent navigation when customizing
+                    if (isCustomizing) {
+                        card.onclick = (e) => e.preventDefault();
+                    }
+                    
+                    // Drag and drop events
+                    card.addEventListener('dragstart', handleDragStart);
+                    card.addEventListener('dragend', handleDragEnd);
+                    card.addEventListener('dragover', handleDragOver);
+                    card.addEventListener('drop', handleDrop);
+                    card.addEventListener('dragleave', handleDragLeave);
+                    
+                    grid.appendChild(card);
+                });
+                
+                console.log('Modules rendered successfully');
+            } catch (error) {
+                console.error('Error rendering modules:', error);
+            }
+        }
+
+        // Drag and drop handlers
+        function handleDragStart(e) {
+            if (!isCustomizing) return;
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.module-card').forEach(card => {
+                card.classList.remove('drag-over');
+            });
+        }
+
+        function handleDragOver(e) {
+            if (!isCustomizing) return;
+            if (e.preventDefault) e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            
+            if (this !== draggedElement) {
+                this.classList.add('drag-over');
+            }
+            return false;
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            if (!isCustomizing) return;
+            if (e.stopPropagation) e.stopPropagation();
+            
+            if (draggedElement !== this) {
+                const draggedModule = draggedElement.getAttribute('data-module');
+                const targetModule = this.getAttribute('data-module');
+                
+                const draggedIndex = moduleOrder.indexOf(draggedModule);
+                const targetIndex = moduleOrder.indexOf(targetModule);
+                
+                // Swap positions
+                moduleOrder.splice(draggedIndex, 1);
+                moduleOrder.splice(targetIndex, 0, draggedModule);
+                
+                renderModules();
+            }
+            
+            this.classList.remove('drag-over');
+            return false;
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const container = document.querySelector('.toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'custom-toast';
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}" style="color: ${type === 'success' ? '#27ae60' : '#e74c3c'}"></i>
+                <span style="margin-left: 0.5rem;">${message}</span>
+            `;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Toggle customization mode
+        <% if (user) { %>
+        document.getElementById('customizeBtn').addEventListener('click', function() {
+            isCustomizing = !isCustomizing;
+            const grid = document.getElementById('moduleGrid');
+            const controls = document.getElementById('customizationControls');
+            const btn = this;
+            const normalSub = document.getElementById('normalSubtitle');
+            const customSub = document.getElementById('customSubtitle');
+            
+            if (isCustomizing) {
+                grid.classList.add('customizing');
+                controls.classList.add('active');
+                btn.classList.add('active');
+                btn.innerHTML = '<i class="fas fa-times"></i> Customizing...';
+                normalSub.style.display = 'none';
+                customSub.style.display = 'inline';
+            } else {
+                grid.classList.remove('customizing');
+                controls.classList.remove('active');
+                btn.classList.remove('active');
+                btn.innerHTML = '<i class="fas fa-edit"></i> Customize';
+                normalSub.style.display = 'inline';
+                customSub.style.display = 'none';
+            }
+            
+            renderModules();
+        });
+
+        // Save layout
+        document.getElementById('saveBtn').addEventListener('click', async function() {
+            try {
+                const response = await fetch('/api/module-preferences', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ moduleOrder })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    originalOrder = [...moduleOrder];
+                    showToast('Layout saved successfully!');
+                    
+                    // Exit customization mode
+                    document.getElementById('customizeBtn').click();
+                } else {
+                    showToast(data.message || 'Error saving layout', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving preferences:', error);
+                showToast('Error saving layout', 'error');
+            }
+        });
+
+        // Cancel customization
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            moduleOrder = [...originalOrder];
+            document.getElementById('customizeBtn').click();
+            renderModules();
+        });
+
+        // Reset to default
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            if (confirm('Reset to default layout?')) {
+                moduleOrder = [...defaultModuleOrder];
+                renderModules();
+            }
+        });
+        <% } %>
+
+        // Initial render
+        console.log('Script loaded, waiting for DOM...');
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('DOM ready, rendering modules');
+                renderModules();
+            });
+        } else {
+            console.log('DOM already ready, rendering modules immediately');
+            renderModules();
+        }
+    </script>
+</body>
+</html>
