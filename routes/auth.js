@@ -191,7 +191,7 @@ router.post('/logout', ensureAuthenticated, async (req, res) => {
         if (err) {
             return next(err);
         }
-        req.flash('success', 'You have been logged out successfully. Thank you for using TSC Management System!');
+        req.flash('success', 'You have been logged out successfully. Thank you for using Become (BCMS)!');
         res.redirect('/splash');
     });
 });
@@ -219,7 +219,7 @@ router.get('/logout', (req, res) => {
             if (err) {
                 console.error('Logout error:', err);
             }
-            req.flash('success', 'You have been logged out successfully. Thank you for using TSC Management System!');
+            req.flash('success', 'You have been logged out successfully. Thank you for using Become (BCMS)!');
             res.redirect('/splash');
         });
     }).catch(err => {
@@ -228,7 +228,7 @@ router.get('/logout', (req, res) => {
             if (err) {
                 console.error('Logout error:', err);
             }
-            req.flash('success', 'You have been logged out successfully. Thank you for using TSC Management System!');
+            req.flash('success', 'You have been logged out successfully. Thank you for using Become (BCMS)!');
             res.redirect('/splash');
         });
     });
@@ -796,12 +796,12 @@ router.post('/admin/users/invite', ensureAuthenticated, requireRole(['admin', 'm
         try {
             await emailService.sendEmail({
                 to: email,
-                subject: 'You\'re Invited to TSC Management System',
+                subject: 'You\'re Invited to Become (BCMS)',
                 html: `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                         <h2 style="color: #333;">You're Invited!</h2>
                         <p>Hello${firstName ? ' ' + firstName : ''},</p>
-                        <p>${req.user.firstName} ${req.user.lastName} has invited you to join the TSC Management System.</p>
+                        <p>${req.user.firstName} ${req.user.lastName} has invited you to join the Business Communication Management System (Become).</p>
                         <p><strong>Role:</strong> ${role || 'user'}</p>
                         <p>Click the button below to accept your invitation and create your account:</p>
                         <div style="text-align: center; margin: 30px 0;">
@@ -965,14 +965,14 @@ router.post('/accept-invite/:token', async (req, res) => {
         try {
             await emailService.sendEmail({
                 to: user.email,
-                subject: 'Welcome to TSC Management System',
+                subject: 'Welcome to Become (BCMS)',
                 html: `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                         <h2 style="color: #333;">Welcome, ${user.firstName}!</h2>
                         <p>Your account has been successfully created and approved.</p>
                         <p><strong>Username:</strong> ${user.username}</p>
                         <p><strong>Role:</strong> ${user.role}</p>
-                        <p>You can now log in to access the TSC Management System.</p>
+                        <p>You can now log in to access the Business Communication Management System.</p>
                         <div style="text-align: center; margin: 30px 0;">
                             <a href="${req.protocol}://${req.get('host')}/auth/login" style="background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Log In Now</a>
                         </div>
@@ -1011,11 +1011,11 @@ router.post('/admin/users/:id/resend-invite', ensureAuthenticated, requireRole([
         
         await emailService.sendEmail({
             to: user.invitedEmail,
-            subject: 'Reminder: You\'re Invited to TSC Management System',
+            subject: 'Reminder: You\'re Invited to Become (BCMS)',
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                     <h2 style="color: #333;">Reminder: You're Invited!</h2>
-                    <p>This is a reminder that you've been invited to join the TSC Management System.</p>
+                    <p>This is a reminder that you've been invited to join the Business Communication Management System (Become).</p>
                     <p><strong>Role:</strong> ${user.role}</p>
                     <p>Click the button below to accept your invitation and create your account:</p>
                     <div style="text-align: center; margin: 30px 0;">

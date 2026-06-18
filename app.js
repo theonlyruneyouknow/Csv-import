@@ -1658,7 +1658,7 @@ app.get('/splash', (req, res) => {
 
 // Welcome route for new users
 app.get('/welcome', (req, res) => {
-    req.flash('success', 'Welcome to TSC Management System! Please sign in to get started.');
+    req.flash('success', 'Welcome to Become (BCMS)! Please sign in to get started.');
     res.redirect('/splash');
 });
 

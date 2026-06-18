@@ -1,10 +1,10 @@
 // Splash page configuration
 module.exports = {
     company: {
-        name: 'TSC Management System',
+        name: 'Become (BCMS)',
         tagline: 'Streamline Your Business Operations',
-        description: 'Welcome to TSC\'s comprehensive purchase order management system. Efficiently manage your orders, track inventory, and collaborate with your team in a secure, user-friendly environment.',
-        supportEmail: 'support@tsc.com',
+        description: 'Welcome to the Business Communication Management System. Efficiently manage your orders, track inventory, and collaborate with your team in a secure, user-friendly environment.',
+        supportEmail: 'support@bcms.com',
         founded: 2023
     },
     
@@ -27,8 +27,8 @@ module.exports = {
     ],
     
     messages: {
-        welcome: 'Welcome to TSC Management System! Please sign in to get started.',
-        logoutSuccess: 'You have been logged out successfully. Thank you for using TSC Management System!',
+        welcome: 'Welcome to Become (BCMS)! Please sign in to get started.',
+        logoutSuccess: 'You have been logged out successfully. Thank you for using Become (BCMS)!',
         alreadyLoggedOut: 'You are already logged out.',
         pageNotFound: 'The page you requested was not found. Here\'s what you can do from here:'
     },

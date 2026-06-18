@@ -31,7 +31,7 @@ router.post('/send', async (req, res) => {
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                     <div style="border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px;">
-                        <h2 style="color: #007bff; margin: 0;">TSC Purchase Order System</h2>
+                        <h2 style="color: #007bff; margin: 0;">Become (BCMS)</h2>
                         <p style="margin: 5px 0 0 0; color: #666;">From: ${req.user.firstName} ${req.user.lastName} (${req.user.email})</p>
                     </div>
                     
@@ -40,7 +40,7 @@ router.post('/send', async (req, res) => {
                     </div>
                     
                     <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #666; font-size: 12px;">
-                        <p>This email was sent from the TSC Purchase Order System by ${req.user.firstName} ${req.user.lastName}.</p>
+                        <p>This email was sent from the Business Communication Management System by ${req.user.firstName} ${req.user.lastName}.</p>
                         ${priority !== 'normal' ? `<p><strong>Priority: ${priority.toUpperCase()}</strong></p>` : ''}
                     </div>
                 </div>

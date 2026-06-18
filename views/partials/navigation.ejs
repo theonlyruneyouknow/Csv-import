@@ -1,11 +1,26 @@
 <!-- Navigation Container -->
 <div class="navigation-container">
-    <!-- Dashboard Button -->
+    <!-- Modules Home Dropdown -->
     <div class="nav-section">
-        <a href="/purchase-orders" class="nav-accordion-btn <%= currentPage === 'purchase-orders' ? 'active' : '' %>"
-            style="text-decoration: none;">
-            🏠 Dashboard
-        </a>
+        <button class="nav-accordion-btn" onclick="toggleAccordion('modulesHomeAccordion')" title="All Modules" style="min-width: auto; padding: 10px 14px;">
+            🏠 <span class="accordion-icon">▼</span>
+        </button>
+        <div id="modulesHomeAccordion" class="nav-accordion-content">
+            <a href="/purchase-orders" class="nav-accordion-item <%= currentPage === 'purchase-orders' ? 'active' : '' %>">📄 Purchase Orders</a>
+            <a href="/vendors" class="nav-accordion-item <%= currentPage === 'vendors' ? 'active' : '' %>">🏢 Vendors</a>
+            <a href="/seed-partners" class="nav-accordion-item <%= currentPage === 'seed-partners' ? 'active' : '' %>">🌍 Seed Partners</a>
+            <a href="/wildwest" class="nav-accordion-item <%= currentPage === 'wildwest' ? 'active' : '' %>">📖 Wild West Catalog</a>
+            <a href="/food" class="nav-accordion-item <%= currentPage === 'food' ? 'active' : '' %>">🍽️ Food Items</a>
+            <a href="/household" class="nav-accordion-item <%= currentPage === 'household' ? 'active' : '' %>">🏘️ Household</a>
+            <a href="/story" class="nav-accordion-item <%= currentPage === 'story' ? 'active' : '' %>">📖 Story Projects</a>
+            <a href="/medicine" class="nav-accordion-item <%= currentPage === 'medicine' ? 'active' : '' %>">💊 Medicine</a>
+            <a href="/bulletin" class="nav-accordion-item <%= currentPage === 'bulletin' ? 'active' : '' %>">📌 Bulletin Board</a>
+            <a href="/hymns" class="nav-accordion-item <%= currentPage === 'hymns' ? 'active' : '' %>">🎵 Hymns</a>
+            <a href="/grocery" class="nav-accordion-item <%= currentPage === 'grocery' ? 'active' : '' %>">🛒 Grocery</a>
+            <a href="/greatestjoy" class="nav-accordion-item <%= currentPage === 'greatestjoy' ? 'active' : '' %>">📸 GreatestJoy</a>
+            <div class="nav-accordion-divider"></div>
+            <a href="/modules" class="nav-accordion-item">⚡ All Modules</a>
+        </div>
     </div>
 
     <!-- Dashboards Accordion -->

@@ -4440,11 +4440,27 @@
         <div class="header">
             <h1>Purchase Orders Dashboard</h1>
             <div class="navigation-container">
-                <!-- Dashboard Button -->
+                <!-- Modules Home Dropdown -->
                 <div class="nav-section">
-                    <a href="/purchase-orders" class="nav-accordion-btn active" style="text-decoration: none;">
-                        🏠 Dashboard
-                    </a>
+                    <button class="nav-accordion-btn" onclick="toggleAccordion('modulesHomeAccordion')" title="All Modules" style="min-width: auto; padding: 10px 14px;">
+                        🏠 <span class="accordion-icon">▼</span>
+                    </button>
+                    <div id="modulesHomeAccordion" class="nav-accordion-content">
+                        <a href="/purchase-orders" class="nav-accordion-item active">📄 Purchase Orders</a>
+                        <a href="/vendors" class="nav-accordion-item">🏢 Vendors</a>
+                        <a href="/seed-partners" class="nav-accordion-item">🌍 Seed Partners</a>
+                        <a href="/wildwest" class="nav-accordion-item">📖 Wild West Catalog</a>
+                        <a href="/food" class="nav-accordion-item">🍽️ Food Items</a>
+                        <a href="/household" class="nav-accordion-item">🏘️ Household</a>
+                        <a href="/story" class="nav-accordion-item">📖 Story Projects</a>
+                        <a href="/medicine" class="nav-accordion-item">💊 Medicine</a>
+                        <a href="/bulletin" class="nav-accordion-item">📌 Bulletin Board</a>
+                        <a href="/hymns" class="nav-accordion-item">🎵 Hymns</a>
+                        <a href="/grocery" class="nav-accordion-item">🛒 Grocery</a>
+                        <a href="/greatestjoy" class="nav-accordion-item">📸 GreatestJoy</a>
+                        <div class="nav-accordion-divider"></div>
+                        <a href="/modules" class="nav-accordion-item">⚡ All Modules</a>
+                    </div>
                 </div>
 
                 <!-- Managers Accordion -->
