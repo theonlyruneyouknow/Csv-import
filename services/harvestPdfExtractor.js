@@ -16,14 +16,14 @@ function toNumber(value) {
 function parseDate(dateString) {
     if (!dateString) return null;
     const trimmed = String(dateString).trim();
-    
+
     // Try common date patterns
     const patterns = [
         /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,  // MM/DD/YYYY or MM-DD-YYYY
         /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/,  // YYYY/MM/DD
         /(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{1,2}),?\s+(\d{4})/i  // Month DD, YYYY
     ];
-    
+
     for (const pattern of patterns) {
         const match = trimmed.match(pattern);
         if (match) {
@@ -33,7 +33,7 @@ function parseDate(dateString) {
             }
         }
     }
-    
+
     return null;
 }
 
@@ -68,20 +68,20 @@ function findKnownUpcInString(body) {
             }
         }
     }
-    
+
     return { found: false, prefix: null, position: -1, upc: '', manufacturer: null };
 }
 
 function correctUpcTo12Digits(upc) {
     if (!upc) return { value: '', corrected: false, method: null };
-    
+
     const cleaned = String(upc).replace(/[^\d]/g, '');
-    
+
     // Already 12 digits
     if (cleaned.length === 12) {
         return { value: cleaned, corrected: false, method: 'valid' };
     }
-    
+
     // More than 12 digits - try to find valid 12-digit sequence
     if (cleaned.length > 12) {
         const prefix = cleaned.substring(0, 6);
@@ -92,7 +92,7 @@ function correctUpcTo12Digits(upc) {
         // Try taking last 12 digits
         return { value: cleaned.substring(cleaned.length - 12), corrected: true, method: 'trimmed_suffix' };
     }
-    
+
     // Less than 12 digits - try padding
     if (cleaned.length < 12) {
         const prefix = cleaned.substring(0, Math.min(6, cleaned.length));
@@ -102,7 +102,7 @@ function correctUpcTo12Digits(upc) {
             return { value: padded, corrected: true, method: 'padded_right' };
         }
     }
-    
+
     // Return original if unable to correct
     return { value: cleaned, corrected: false, method: 'cannot_correct' };
 }
@@ -112,18 +112,18 @@ function calculateMissingQuantityReceived(quantity, quantityReceived, unitPrice,
     if (quantityReceived !== null && quantityReceived !== undefined) {
         return { value: quantityReceived, calculated: false, method: null };
     }
-    
+
     // PRIORITY: Calculate from extended amount (most reliable)
     if (amount !== null && unitPrice !== null && unitPrice !== 0) {
         const calculated = Math.round((amount / unitPrice) * 100) / 100;
         return { value: calculated, calculated: true, method: 'calculated_from_amount' };
     }
-    
+
     // If we have quantity, assume most orders have same qty ordered = qty received
     if (quantity !== null && quantity !== undefined) {
         return { value: quantity, calculated: false, method: 'default_from_quantity' };
     }
-    
+
     // Unable to determine
     return { value: null, calculated: false, method: null };
 }
@@ -162,7 +162,7 @@ function parseAcknowledgementLineItemAdvanced(compact, extendedAmountLookup) {
     let quantity = null;
     let quantityReceived = null;
     let amount = prices.amount;
-    
+
     const extendedAmount = extendedAmountLookup ? extendedAmountLookup[lineNumber] : null;
     if (extendedAmount && prices.unitPrice) {
         quantity = Math.round(extendedAmount / prices.unitPrice);
@@ -174,12 +174,12 @@ function parseAcknowledgementLineItemAdvanced(compact, extendedAmountLookup) {
     // Now remove (digit count of quantity) digits from the end of body
     let sku = body;
     let upc = '';
-    
+
     if (quantity !== null) {
         const qtyDigitCount = String(quantity).length;
         // Remove that many digits from end
         const trimmedBody = body.slice(0, -qtyDigitCount);
-        
+
         // Last 12 digits of trimmed = UPC
         if (trimmedBody.length >= 12) {
             const lastChars = trimmedBody.slice(-12);
@@ -263,46 +263,46 @@ function extractExtendedAmounts(text) {
      *   [line item details start: 1HGC72836...]
      */
     const extendedAmounts = {};
-    
+
     // Find "Printed:" - this marks the start of amounts section
     const printedMatch = text.match(/Printed:\s*(\d{2}\/\d{2}\/\d{2}\s+\d{1,2}:\d{2}\s+[AP]M)/);
     if (!printedMatch) {
         console.log('[PDF Extractor] No "Printed:" line found');
         return extendedAmounts;
     }
-    
+
     console.log(`[PDF Extractor] Found Printed line: ${printedMatch[0]}`);
-    
+
     // Find the position after the last "Printed:" line
     const lastPrintedIndex = text.lastIndexOf(printedMatch[0]);
     const afterPrinted = text.substring(lastPrintedIndex + printedMatch[0].length);
-    
+
     // Split into lines
     const lines = afterPrinted.split(/[\r\n]+/);
-    
+
     let lineNumber = 1;
     let foundAmounts = 0;
-    
+
     for (let i = 0; i < lines.length && foundAmounts < 500; i++) {
         const trimmed = lines[i].trim();
-        
+
         // Skip empty lines and header-like text
         if (!trimmed || /^(Ln|#|Product|Customer|SKU|UPC|Quantity|U\/M|Retail|Unit|Price|Extended|Amount|Printed)/i.test(trimmed)) {
             continue;
         }
-        
+
         // Stop at page markers or line item details (starts with 1-2 digits followed by letters)
         if (/^Page\s+\d+\s+of\s+\d+/i.test(trimmed) || /^\d{1,2}[A-Z]/i.test(trimmed)) {
             console.log(`[PDF Extractor] Stopped at line item: ${trimmed.substring(0, 50)}`);
             break;
         }
-        
+
         // Stop if we see "Lines Total" or similar totals markers (these appear on same line as extended amount)
         if (/Lines\s+Total|Lines\s+Ordered|Freight|GrandTotal|Grand\s+Total/i.test(trimmed)) {
             console.log(`[PDF Extractor] Stopped at totals line: ${trimmed.substring(0, 50)}`);
             break;
         }
-        
+
         // Try to parse as a decimal amount (currency format)
         const amountMatch = trimmed.match(/^(\d+(?:,\d{3})*(?:\.\d{2})?)(?:\s|$)/);
         if (amountMatch) {
@@ -315,7 +315,7 @@ function extractExtendedAmounts(text) {
             }
         }
     }
-    
+
     console.log(`[PDF Extractor] RESULT: Extracted ${Object.keys(extendedAmounts).length} extended amounts`);
     return extendedAmounts;
 }
@@ -467,7 +467,7 @@ function extractAcknowledgementLineItems(text) {
         let quantity = null;
         let quantityReceived = null;
         let amount = prices.amount;
-        
+
         const extendedAmount = extendedAmountLookup ? extendedAmountLookup[lineNumber] : null;
         if (extendedAmount && prices.unitPrice) {
             quantity = Math.round(extendedAmount / prices.unitPrice);
@@ -479,11 +479,11 @@ function extractAcknowledgementLineItems(text) {
         // Remove (digit count of quantity) digits from the end
         let sku = body;
         let upc = '';
-        
+
         if (quantity !== null) {
             const qtyDigitCount = String(quantity).length;
             const trimmedBody = body.slice(0, -qtyDigitCount);
-            
+
             // Last 12 digits = UPC
             if (trimmedBody.length >= 12) {
                 const lastChars = trimmedBody.slice(-12);
@@ -523,7 +523,7 @@ function extractAcknowledgementLineItems(text) {
 
         // Try advanced parser first (with known UPC prefix matching)
         const parsedRow = parseAcknowledgementLineItemAdvanced(compact, extendedAmountLookup);
-        
+
         if (!parsedRow) {
             console.log(`[PDF Extractor] Advanced parser returned null for: ${compact.substring(0, 50)}...`);
             // Fallback to original parser
@@ -531,7 +531,7 @@ function extractAcknowledgementLineItems(text) {
             if (!fallbackRow) {
                 continue;
             }
-            
+
             let description = '';
             const nextLine = (lines[i + 1] || '').trim();
             if (nextLine && !/^\d+[A-Z]/.test(nextLine.replace(/\s+/g, ''))) {

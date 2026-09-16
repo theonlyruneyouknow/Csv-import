@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <title>
+        <%= title %>
+    </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root {
@@ -220,399 +223,556 @@
         }
     </style>
 </head>
+
 <body>
     <main class="shell">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
                 <h2 class="mb-1">Harvest Intake Document</h2>
-                <div class="text-muted">Processed <%= new Date(doc.createdAt).toLocaleString() %></div>
+                <div class="text-muted">Processed <%= new Date(doc.createdAt).toLocaleString() %>
+                </div>
             </div>
             <div class="d-flex gap-2">
                 <a class="btn btn-outline-secondary" href="/harvest/dashboard">Back to Dashboard</a>
                 <a class="btn btn-outline-success" href="#confirmed-catalog">Compare with Confirmed Catalog</a>
                 <% if (nextDocWithUnconfirmed && nextDocWithUnconfirmed.documentId) { %>
-                    <button
-                        class="btn btn-outline-success"
-                        type="button"
-                        id="goToNextDocumentButton"
+                    <button class="btn btn-outline-success" type="button" id="goToNextDocumentButton"
                         data-next-document-id="<%= nextDocWithUnconfirmed.documentId %>">
                         Go to Next Document
                     </button>
-                <% } %>
-                <% if (hasSafePdf) { %>
-                    <a class="btn btn-success" href="/harvest/document/<%= doc._id %>/pdf" target="_blank">Open PDF in New Tab</a>
-                <% } %>
+                    <% } %>
+                        <% if (hasSafePdf) { %>
+                            <a class="btn btn-success" href="/harvest/document/<%= doc._id %>/pdf" target="_blank">Open
+                                PDF in New Tab</a>
+                            <% } %>
             </div>
         </div>
 
         <% if (nextDocWithUnconfirmed && nextDocWithUnconfirmed.documentId) { %>
             <div class="next-doc-meta">
-                Next: <%= nextDocWithUnconfirmed.poNumber || nextDocWithUnconfirmed.acknowledgementNumber || nextDocWithUnconfirmed.orderNumber || nextDocWithUnconfirmed.fileName || 'Document' %>
-                (<%= nextDocWithUnconfirmed.unconfirmedLineCount || 0 %> unconfirmed)
+                Next: <%= nextDocWithUnconfirmed.poNumber || nextDocWithUnconfirmed.acknowledgementNumber ||
+                    nextDocWithUnconfirmed.orderNumber || nextDocWithUnconfirmed.fileName || 'Document' %>
+                    (<%= nextDocWithUnconfirmed.unconfirmedLineCount || 0 %> unconfirmed)
             </div>
-        <% } %>
+            <% } %>
 
-        <section class="card-harvest">
-            <div class="section-header mb-3">
-                <h5 class="mb-0">Extracted Fields</h5>
-                <button class="btn btn-outline-secondary btn-sm" type="button" data-toggle-target="section-extracted-fields">Hide</button>
-            </div>
-            <div class="row section-body" id="section-extracted-fields">
-                <div class="col-md-3">
-                    <div class="label">Source</div>
-                    <div class="value"><%= doc.sourceType %></div>
-                </div>
-                <div class="col-md-3">
-                    <div class="label">PO Number</div>
-                    <div class="value mono"><%= doc.extracted.poNumber || '-' %></div>
-                </div>
-                <div class="col-md-3">
-                    <div class="label">Acknowledgement #</div>
-                    <div class="value mono"><%= doc.extracted.acknowledgementNumber || '-' %></div>
-                </div>
-                <div class="col-md-3">
-                    <div class="label">Order #</div>
-                    <div class="value mono"><%= doc.extracted.orderNumber || '-' %></div>
-                </div>
-                <div class="col-md-3">
-                    <div class="label">Vendor</div>
-                    <div class="value"><%= doc.extracted.vendor || '-' %></div>
-                </div>
-                <div class="col-md-3">
-                    <div class="label">Confidence</div>
-                    <div class="value"><%= Math.round((doc.extracted.confidence || 0) * 100) %>%</div>
-                </div>
-                <div class="col-md-3">
-                    <div class="label">Order Date</div>
-                    <div class="value"><%= doc.extracted.orderDate || '-' %></div>
-                </div>
-                <div class="col-md-3">
-                    <div class="label">Total Amount</div>
-                    <div class="value"><%= doc.extracted.totalAmount !== null ? doc.extracted.totalAmount : '-' %></div>
-                </div>
-                <div class="col-md-3">
-                    <div class="label">Matched PO</div>
-                    <div class="value">
-                        <% if (doc.matchSummary && doc.matchSummary.purchaseOrderId) { %>
-                            <a href="/purchase-orders/<%= doc.matchSummary.purchaseOrderId._id %>"><%= doc.matchSummary.purchaseOrderNumber || 'Open PO' %></a>
-                        <% } else { %>
-                            -
-                        <% } %>
+                <section class="card-harvest">
+                    <div class="section-header mb-3">
+                        <h5 class="mb-0">Extracted Fields</h5>
+                        <button class="btn btn-outline-secondary btn-sm" type="button"
+                            data-toggle-target="section-extracted-fields">Hide</button>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="label">Status</div>
-                    <div class="value"><%= doc.status %></div>
-                </div>
-                <div class="col-md-3">
-                    <div class="label">External Order Ref</div>
-                    <div class="value mono"><%= doc.extracted.externalOrderRef || '-' %></div>
-                </div>
-                <div class="col-md-3">
-                    <div class="label">Customer</div>
-                    <div class="value"><%= doc.extracted.customerName || '-' %></div>
-                </div>
-                <div class="col-md-3">
-                    <div class="label">Customer Email</div>
-                    <div class="value mono"><%= doc.extracted.customerEmail || '-' %></div>
-                </div>
-            </div>
-        </section>
-
-        <section class="card-harvest">
-            <div class="section-header mb-2">
-                <div class="d-flex align-items-center gap-2">
-                    <h5 class="mb-0">Extracted Line Items Table</h5>
-                    <button class="btn btn-outline-success btn-sm" type="button" id="jumpNextUnconfirmedToggleButton">Auto Jump: Off</button>
-                    <div class="size-controls">
-                        <button class="btn btn-outline-secondary btn-sm" type="button" data-resize-target="lineItems" data-resize-delta="-80">-</button>
-                        <span class="size-label" id="lineItemsSizeLabel">360px</span>
-                        <button class="btn btn-outline-secondary btn-sm" type="button" data-resize-target="lineItems" data-resize-delta="80">+</button>
-                        <button class="btn btn-outline-secondary btn-sm" type="button" data-resize-reset="lineItems">Reset</button>
-                    </div>
-                </div>
-                <button class="btn btn-outline-secondary btn-sm" type="button" data-toggle-target="section-line-items">Hide</button>
-            </div>
-            <div class="section-body" id="section-line-items">
-                <% if (!doc.extracted || !doc.extracted.lineItems || doc.extracted.lineItems.length === 0) { %>
-                    <div class="text-muted">No line items were extracted from this document.</div>
-                <% } else { %>
-                    <div class="section-scroll-panel" id="lineItemsScrollPanel">
-                        <div class="table-responsive">
-                        <table class="table table-sm align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Line #</th>
-                                    <th>Product</th>
-                                    <th>UPC</th>
-                                    <th>Description</th>
-                                    <th class="text-end">Qty Ordered</th>
-                                    <th class="text-end">Qty Received</th>
-                                    <th>Qty U/M</th>
-                                    <th class="text-end">Retail Price</th>
-                                    <th class="text-end">Unit Price</th>
-                                    <th class="text-end">Extended Amount</th>
-                                    <th>Confirm</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% doc.extracted.lineItems.forEach((item, idx) => { %>
-                                    <tr data-line-row="<%= idx %>" data-is-confirmed="<%= item.isConfirmedProduct ? 'true' : 'false' %>">
-                                        <td><%= item.lineNumber !== null && item.lineNumber !== undefined ? item.lineNumber : '-' %></td>
-                                        <td>
-                                            <input class="form-control form-control-sm mono line-input" data-field="sku" data-line-index="<%= idx %>" value="<%= item.sku || '' %>">
-                                        </td>
-                                        <td>
-                                            <input class="form-control form-control-sm mono line-input" data-field="upc" data-line-index="<%= idx %>" value="<%= item.upc || '' %>">
-                                        </td>
-                                        <td>
-                                            <input class="form-control form-control-sm line-input" data-field="description" data-line-index="<%= idx %>" value="<%= item.description || '' %>">
-                                        </td>
-                                        <td class="text-end"><%= item.quantity !== null && item.quantity !== undefined ? item.quantity : '-' %></td>
-                                        <td class="text-end"><%= item.quantityReceived !== null && item.quantityReceived !== undefined ? item.quantityReceived : '-' %></td>
-                                        <td><%= item.qtyUom || '-' %></td>
-                                        <td class="text-end"><%= item.retailPrice !== null && item.retailPrice !== undefined ? item.retailPrice : '-' %></td>
-                                        <td class="text-end"><%= item.unitPrice !== null && item.unitPrice !== undefined ? item.unitPrice : '-' %></td>
-                                        <td class="text-end"><%= item.amount !== null && item.amount !== undefined ? item.amount : '-' %></td>
-                                        <td>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <button class="btn btn-outline-success btn-sm" type="button" data-confirm-line="<%= idx %>">Confirm</button>
-                                                <% if (item.isConfirmedProduct) { %>
-                                                    <span class="confirm-pill">Confirmed</span>
-                                                <% } %>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <% }); %>
-                            </tbody>
-                        </table>
-                        </div>
-                    </div>
-                <% } %>
-            </div>
-        </section>
-
-        <section class="card-harvest">
-            <div class="section-header mb-2">
-                <h5 class="mb-0">Original PO PDF</h5>
-                <button class="btn btn-outline-secondary btn-sm" type="button" data-toggle-target="section-original-pdf">Hide</button>
-            </div>
-            <div class="section-body" id="section-original-pdf">
-                <% if (hasSafePdf) { %>
-                    <div class="pdf-toolbar">
-                        <button class="btn btn-outline-secondary btn-sm" type="button" data-pdf-zoom-change="-10">-</button>
-                        <span class="pdf-zoom-label" id="pdfZoomLabel">100%</span>
-                        <button class="btn btn-outline-secondary btn-sm" type="button" data-pdf-zoom-change="10">+</button>
-                        <button class="btn btn-outline-secondary btn-sm" type="button" data-pdf-zoom-reset="true">Reset</button>
-                        <div class="size-controls ms-1">
-                            <button class="btn btn-outline-secondary btn-sm" type="button" data-resize-target="pdfPanel" data-resize-delta="-120">-</button>
-                            <span class="size-label" id="pdfPanelSizeLabel">520px</span>
-                            <button class="btn btn-outline-secondary btn-sm" type="button" data-resize-target="pdfPanel" data-resize-delta="120">+</button>
-                            <button class="btn btn-outline-secondary btn-sm" type="button" data-resize-reset="pdfPanel">Reset</button>
-                        </div>
-                        <small class="text-muted">Zoom is saved for this document.</small>
-                    </div>
-                    <div class="pdf-scroll-panel" id="pdfScrollPanel">
-                        <iframe class="pdf-frame" id="pdfFrame" src="/harvest/document/<%= doc._id %>/pdf#zoom=100"></iframe>
-                    </div>
-                <% } else { %>
-                    <div class="alert alert-warning mb-0">PDF is not available for this document.</div>
-                <% } %>
-            </div>
-        </section>
-
-        <section class="card-harvest">
-            <div class="section-header mb-3">
-                <h5 class="mb-0">Linked Records</h5>
-                <button class="btn btn-outline-secondary btn-sm" type="button" data-toggle-target="section-linked-records">Hide</button>
-            </div>
-            <div class="row section-body" id="section-linked-records">
-                <div class="col-md-4">
-                    <div class="label">Linked Vendor</div>
-                    <div class="value mono"><%= (doc.entityLinks && doc.entityLinks.vendorName) || '-' %></div>
-                </div>
-                <div class="col-md-4">
-                    <div class="label">Customer</div>
-                    <div class="value"><%= (doc.entityLinks && doc.entityLinks.customerName) || '-' %></div>
-                </div>
-                <div class="col-md-4">
-                    <div class="label">Customer Email</div>
-                    <div class="value mono"><%= (doc.entityLinks && doc.entityLinks.customerEmail) || '-' %></div>
-                </div>
-                <div class="col-md-4">
-                    <div class="label">Link Confidence</div>
-                    <div class="value"><%= Math.round((((doc.entityLinks && doc.entityLinks.linkConfidence) || 0) * 100)) %>%</div>
-                </div>
-                <div class="col-md-8">
-                    <div class="label">Related Dropshipments</div>
-                    <div class="value"><%= (doc.entityLinks && doc.entityLinks.dropshipmentIds && doc.entityLinks.dropshipmentIds.length) || 0 %></div>
-                </div>
-            </div>
-        </section>
-
-        <section class="card-harvest">
-            <div class="section-header mb-2">
-                <h5 class="mb-0">Line Item Matching</h5>
-                <button class="btn btn-outline-secondary btn-sm" type="button" data-toggle-target="section-line-matching">Hide</button>
-            </div>
-            <div class="section-body" id="section-line-matching">
-                <% if (!doc.lineItemMatches || doc.lineItemMatches.length === 0) { %>
-                    <div class="text-muted">No parsed line items were matched.</div>
-                <% } else { %>
-                    <div class="table-responsive">
-                        <table class="table table-sm align-middle">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Parsed SKU</th>
-                                    <th>Description</th>
-                                    <th class="text-end">Parsed Qty</th>
-                                    <th>Match Type</th>
-                                    <th>System SKU</th>
-                                    <th class="text-end">Expected</th>
-                                    <th class="text-end">Received</th>
-                                    <th class="text-end">Open</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% doc.lineItemMatches.forEach(row => { %>
-                                    <tr>
-                                        <td><%= row.parsedIndex + 1 %></td>
-                                        <td class="mono"><%= row.parsedSku || '-' %></td>
-                                        <td><%= row.parsedDescription || '-' %></td>
-                                        <td class="text-end"><%= row.parsedQuantity !== null ? row.parsedQuantity : '-' %></td>
-                                        <td><%= row.matchType %></td>
-                                        <td class="mono"><%= row.matchedSku || '-' %></td>
-                                        <td class="text-end"><%= row.expectedQuantity !== null ? row.expectedQuantity : '-' %></td>
-                                        <td class="text-end"><%= row.receivedQuantity !== null ? row.receivedQuantity : '-' %></td>
-                                        <td class="text-end"><%= row.openQuantity !== null ? row.openQuantity : '-' %></td>
-                                    </tr>
-                                <% }); %>
-                            </tbody>
-                        </table>
-                    </div>
-                <% } %>
-            </div>
-        </section>
-
-        <section class="card-harvest" id="confirmed-catalog">
-            <div class="section-header mb-2">
-                <div>
-                    <h5 class="mb-0">Confirmed Catalog Comparison</h5>
-                    <div class="review-summary">
-                        <%= confirmedCatalog ? confirmedCatalog.uniqueItems : 0 %> confirmed items loaded for comparison.
-                    </div>
-                </div>
-                <button class="btn btn-outline-secondary btn-sm" type="button" data-toggle-target="section-confirmed-catalog">Hide</button>
-            </div>
-            <div class="section-body" id="section-confirmed-catalog">
-                <div class="compare-grid">
-                    <div class="compare-stack">
-                        <div class="d-flex justify-content-between align-items-center gap-2">
-                            <div>
-                                <h6 class="mb-0">Unconfirmed Items</h6>
-                                <div class="review-summary"><%= reviewItems ? reviewItems.length : 0 %> items need review in this document.</div>
+                    <div class="row section-body" id="section-extracted-fields">
+                        <div class="col-md-3">
+                            <div class="label">Source</div>
+                            <div class="value">
+                                <%= doc.sourceType %>
                             </div>
-                            <small class="text-muted">Top suggestions are ranked by UPC, SKU, and description overlap.</small>
                         </div>
-
-                        <% if (!reviewItems || reviewItems.length === 0) { %>
-                            <div class="alert alert-success mb-0">All product rows in this document are already confirmed.</div>
-                        <% } else { %>
-                            <div class="compare-stack">
-                                <% reviewItems.forEach(item => { %>
-                                    <article class="suggestion-card">
-                                        <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
-                                            <div>
-                                                <strong>Line <%= item.lineNumber !== null && item.lineNumber !== undefined ? item.lineNumber : item.lineIndex + 1 %></strong>
-                                                <div class="mono"><%= item.sku || '-' %></div>
-                                            </div>
-                                            <span class="suggestion-score"><%= item.suggestions && item.suggestions[0] ? item.suggestions[0].score : 0 %>% match</span>
-                                        </div>
-                                        <div class="mb-2"><%= item.description || '-' %></div>
-                                        <div class="review-summary">UPC: <span class="mono"><%= item.upc || '-' %></span> | Qty: <%= item.quantity !== null && item.quantity !== undefined ? item.quantity : '-' %> <%= item.qtyUom || '' %></div>
-                                        <% if (!item.suggestions || item.suggestions.length === 0) { %>
-                                            <div class="text-muted mt-2">No likely confirmed match found yet.</div>
-                                        <% } else { %>
-                                            <div class="mt-2">
-                                                <% item.suggestions.forEach(match => { %>
-                                                    <div class="mb-2 p-2 border rounded bg-light-subtle">
-                                                        <div class="d-flex justify-content-between align-items-center gap-2">
-                                                            <strong><%= match.description || match.product || '-' %></strong>
-                                                            <span class="suggestion-score"><%= match.score %>%</span>
-                                                        </div>
-                                                        <div class="mono small">UPC: <%= match.upc || '-' %> | SKU: <%= match.sku || '-' %> | Occurrences: <%= match.count || 0 %></div>
-                                                        <div class="match-tags">
-                                                            <% (match.reasons || []).forEach(reason => { %>
-                                                                <span class="match-tag"><%= reason %></span>
-                                                            <% }); %>
-                                                        </div>
-                                                    </div>
-                                                <% }); %>
-                                            </div>
-                                        <% } %>
-                                    </article>
-                                <% }); %>
+                        <div class="col-md-3">
+                            <div class="label">PO Number</div>
+                            <div class="value mono">
+                                <%= doc.extracted.poNumber || '-' %>
                             </div>
-                        <% } %>
-                    </div>
-
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
-                            <div>
-                                <h6 class="mb-0">Confirmed Catalog</h6>
-                                <div class="review-summary">Search the confirmed item list while reviewing unconfirmed rows.</div>
-                            </div>
-                            <input id="catalogSearchInput" class="form-control form-control-sm catalog-search" type="search" placeholder="Filter catalog...">
                         </div>
-                        <div class="catalog-table-wrap">
-                            <table class="table table-sm align-middle mb-0" id="confirmedCatalogTable">
-                                <thead class="table-light sticky-top">
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>UPC</th>
-                                        <th>SKU</th>
-                                        <th class="text-end">Count</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% if (!confirmedCatalog || !confirmedCatalog.confirmedRows || confirmedCatalog.confirmedRows.length === 0) { %>
-                                        <tr>
-                                            <td colspan="4" class="text-muted">No confirmed catalog items were found.</td>
-                                        </tr>
+                        <div class="col-md-3">
+                            <div class="label">Acknowledgement #</div>
+                            <div class="value mono">
+                                <%= doc.extracted.acknowledgementNumber || '-' %>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="label">Order #</div>
+                            <div class="value mono">
+                                <%= doc.extracted.orderNumber || '-' %>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="label">Vendor</div>
+                            <div class="value">
+                                <%= doc.extracted.vendor || '-' %>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="label">Confidence</div>
+                            <div class="value">
+                                <%= Math.round((doc.extracted.confidence || 0) * 100) %>%
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="label">Order Date</div>
+                            <div class="value">
+                                <%= doc.extracted.orderDate || '-' %>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="label">Total Amount</div>
+                            <div class="value">
+                                <%= doc.extracted.totalAmount !==null ? doc.extracted.totalAmount : '-' %>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="label">Matched PO</div>
+                            <div class="value">
+                                <% if (doc.matchSummary && doc.matchSummary.purchaseOrderId) { %>
+                                    <a href="/purchase-orders/<%= doc.matchSummary.purchaseOrderId._id %>">
+                                        <%= doc.matchSummary.purchaseOrderNumber || 'Open PO' %>
+                                    </a>
                                     <% } else { %>
-                                        <% confirmedCatalog.confirmedRows.forEach(item => { %>
-                                            <tr class="catalog-row" data-catalog-search="<%= ((item.description || item.product || '') + ' ' + (item.upc || '') + ' ' + (item.sku || '')).toLowerCase() %>">
-                                                <td>
-                                                    <div><%= item.description || item.product || '-' %></div>
-                                                    <small class="text-muted"><%= item.poNumbers ? item.poNumbers.size : 0 %> PO(s)</small>
-                                                </td>
-                                                <td class="mono"><%= item.upc || '-' %></td>
-                                                <td class="mono"><%= item.sku || '-' %></td>
-                                                <td class="text-end"><%= item.count || 0 %></td>
-                                            </tr>
-                                        <% }); %>
-                                    <% } %>
-                                </tbody>
-                            </table>
+                                        -
+                                        <% } %>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="label">Status</div>
+                            <div class="value">
+                                <%= doc.status %>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="label">External Order Ref</div>
+                            <div class="value mono">
+                                <%= doc.extracted.externalOrderRef || '-' %>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="label">Customer</div>
+                            <div class="value">
+                                <%= doc.extracted.customerName || '-' %>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="label">Customer Email</div>
+                            <div class="value mono">
+                                <%= doc.extracted.customerEmail || '-' %>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </section>
+                </section>
 
-        <section class="card-harvest">
-            <div class="section-header mb-2">
-                <h5 class="mb-0">Parsed Text</h5>
-                <button class="btn btn-outline-secondary btn-sm" type="button" data-toggle-target="section-parsed-text">Hide</button>
-            </div>
-            <div class="mono section-body" id="section-parsed-text"><%= parsedText || 'No parsed text available.' %></div>
-        </section>
+                <section class="card-harvest">
+                    <div class="section-header mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <h5 class="mb-0">Extracted Line Items Table</h5>
+                            <button class="btn btn-outline-success btn-sm" type="button"
+                                id="jumpNextUnconfirmedToggleButton">Auto Jump: Off</button>
+                            <div class="size-controls">
+                                <button class="btn btn-outline-secondary btn-sm" type="button"
+                                    data-resize-target="lineItems" data-resize-delta="-80">-</button>
+                                <span class="size-label" id="lineItemsSizeLabel">360px</span>
+                                <button class="btn btn-outline-secondary btn-sm" type="button"
+                                    data-resize-target="lineItems" data-resize-delta="80">+</button>
+                                <button class="btn btn-outline-secondary btn-sm" type="button"
+                                    data-resize-reset="lineItems">Reset</button>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline-secondary btn-sm" type="button"
+                            data-toggle-target="section-line-items">Hide</button>
+                    </div>
+                    <div class="section-body" id="section-line-items">
+                        <% if (!doc.extracted || !doc.extracted.lineItems || doc.extracted.lineItems.length===0) { %>
+                            <div class="text-muted">No line items were extracted from this document.</div>
+                            <% } else { %>
+                                <div class="section-scroll-panel" id="lineItemsScrollPanel">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm align-middle">
+                                            <thead>
+                                                <tr>
+                                                    <th>Line #</th>
+                                                    <th>Product</th>
+                                                    <th>UPC</th>
+                                                    <th>Description</th>
+                                                    <th class="text-end">Qty Ordered</th>
+                                                    <th class="text-end">Qty Received</th>
+                                                    <th>Qty U/M</th>
+                                                    <th class="text-end">Retail Price</th>
+                                                    <th class="text-end">Unit Price</th>
+                                                    <th class="text-end">Extended Amount</th>
+                                                    <th>Confirm</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% doc.extracted.lineItems.forEach((item, idx)=> { %>
+                                                    <tr data-line-row="<%= idx %>"
+                                                        data-is-confirmed="<%= item.isConfirmedProduct ? 'true' : 'false' %>">
+                                                        <td>
+                                                            <%= item.lineNumber !==null && item.lineNumber !==undefined
+                                                                ? item.lineNumber : '-' %>
+                                                        </td>
+                                                        <td>
+                                                            <input class="form-control form-control-sm mono line-input"
+                                                                data-field="sku" data-line-index="<%= idx %>"
+                                                                value="<%= item.sku || '' %>">
+                                                        </td>
+                                                        <td>
+                                                            <input class="form-control form-control-sm mono line-input"
+                                                                data-field="upc" data-line-index="<%= idx %>"
+                                                                value="<%= item.upc || '' %>">
+                                                        </td>
+                                                        <td>
+                                                            <input class="form-control form-control-sm line-input"
+                                                                data-field="description" data-line-index="<%= idx %>"
+                                                                value="<%= item.description || '' %>">
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <%= item.quantity !==null && item.quantity !==undefined ?
+                                                                item.quantity : '-' %>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <%= item.quantityReceived !==null && item.quantityReceived
+                                                                !==undefined ? item.quantityReceived : '-' %>
+                                                        </td>
+                                                        <td>
+                                                            <%= item.qtyUom || '-' %>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <%= item.retailPrice !==null && item.retailPrice
+                                                                !==undefined ? item.retailPrice : '-' %>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <%= item.unitPrice !==null && item.unitPrice !==undefined ?
+                                                                item.unitPrice : '-' %>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <%= item.amount !==null && item.amount !==undefined ?
+                                                                item.amount : '-' %>
+                                                        </td>
+                                                        <td>
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <button class="btn btn-outline-success btn-sm"
+                                                                    type="button"
+                                                                    data-confirm-line="<%= idx %>">Confirm</button>
+                                                                <% if (item.isConfirmedProduct) { %>
+                                                                    <span class="confirm-pill">Confirmed</span>
+                                                                    <% } %>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <% }); %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <% } %>
+                    </div>
+                </section>
+
+                <section class="card-harvest">
+                    <div class="section-header mb-2">
+                        <h5 class="mb-0">Original PO PDF</h5>
+                        <button class="btn btn-outline-secondary btn-sm" type="button"
+                            data-toggle-target="section-original-pdf">Hide</button>
+                    </div>
+                    <div class="section-body" id="section-original-pdf">
+                        <% if (hasSafePdf) { %>
+                            <div class="pdf-toolbar">
+                                <button class="btn btn-outline-secondary btn-sm" type="button"
+                                    data-pdf-zoom-change="-10">-</button>
+                                <span class="pdf-zoom-label" id="pdfZoomLabel">100%</span>
+                                <button class="btn btn-outline-secondary btn-sm" type="button"
+                                    data-pdf-zoom-change="10">+</button>
+                                <button class="btn btn-outline-secondary btn-sm" type="button"
+                                    data-pdf-zoom-reset="true">Reset</button>
+                                <div class="size-controls ms-1">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button"
+                                        data-resize-target="pdfPanel" data-resize-delta="-120">-</button>
+                                    <span class="size-label" id="pdfPanelSizeLabel">520px</span>
+                                    <button class="btn btn-outline-secondary btn-sm" type="button"
+                                        data-resize-target="pdfPanel" data-resize-delta="120">+</button>
+                                    <button class="btn btn-outline-secondary btn-sm" type="button"
+                                        data-resize-reset="pdfPanel">Reset</button>
+                                </div>
+                                <small class="text-muted">Zoom is saved for this document.</small>
+                            </div>
+                            <div class="pdf-scroll-panel" id="pdfScrollPanel">
+                                <iframe class="pdf-frame" id="pdfFrame"
+                                    src="/harvest/document/<%= doc._id %>/pdf#zoom=100"></iframe>
+                            </div>
+                            <% } else { %>
+                                <div class="alert alert-warning mb-0">PDF is not available for this document.</div>
+                                <% } %>
+                    </div>
+                </section>
+
+                <section class="card-harvest">
+                    <div class="section-header mb-3">
+                        <h5 class="mb-0">Linked Records</h5>
+                        <button class="btn btn-outline-secondary btn-sm" type="button"
+                            data-toggle-target="section-linked-records">Hide</button>
+                    </div>
+                    <div class="row section-body" id="section-linked-records">
+                        <div class="col-md-4">
+                            <div class="label">Linked Vendor</div>
+                            <div class="value mono">
+                                <%= (doc.entityLinks && doc.entityLinks.vendorName) || '-' %>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="label">Customer</div>
+                            <div class="value">
+                                <%= (doc.entityLinks && doc.entityLinks.customerName) || '-' %>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="label">Customer Email</div>
+                            <div class="value mono">
+                                <%= (doc.entityLinks && doc.entityLinks.customerEmail) || '-' %>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="label">Link Confidence</div>
+                            <div class="value">
+                                <%= Math.round((((doc.entityLinks && doc.entityLinks.linkConfidence) || 0) * 100)) %>%
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="label">Related Dropshipments</div>
+                            <div class="value">
+                                <%= (doc.entityLinks && doc.entityLinks.dropshipmentIds &&
+                                    doc.entityLinks.dropshipmentIds.length) || 0 %>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card-harvest">
+                    <div class="section-header mb-2">
+                        <h5 class="mb-0">Line Item Matching</h5>
+                        <button class="btn btn-outline-secondary btn-sm" type="button"
+                            data-toggle-target="section-line-matching">Hide</button>
+                    </div>
+                    <div class="section-body" id="section-line-matching">
+                        <% if (!doc.lineItemMatches || doc.lineItemMatches.length===0) { %>
+                            <div class="text-muted">No parsed line items were matched.</div>
+                            <% } else { %>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Parsed SKU</th>
+                                                <th>Description</th>
+                                                <th class="text-end">Parsed Qty</th>
+                                                <th>Match Type</th>
+                                                <th>System SKU</th>
+                                                <th class="text-end">Expected</th>
+                                                <th class="text-end">Received</th>
+                                                <th class="text-end">Open</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% doc.lineItemMatches.forEach(row=> { %>
+                                                <tr>
+                                                    <td>
+                                                        <%= row.parsedIndex + 1 %>
+                                                    </td>
+                                                    <td class="mono">
+                                                        <%= row.parsedSku || '-' %>
+                                                    </td>
+                                                    <td>
+                                                        <%= row.parsedDescription || '-' %>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <%= row.parsedQuantity !==null ? row.parsedQuantity : '-' %>
+                                                    </td>
+                                                    <td>
+                                                        <%= row.matchType %>
+                                                    </td>
+                                                    <td class="mono">
+                                                        <%= row.matchedSku || '-' %>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <%= row.expectedQuantity !==null ? row.expectedQuantity : '-' %>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <%= row.receivedQuantity !==null ? row.receivedQuantity : '-' %>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <%= row.openQuantity !==null ? row.openQuantity : '-' %>
+                                                    </td>
+                                                </tr>
+                                                <% }); %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <% } %>
+                    </div>
+                </section>
+
+                <section class="card-harvest" id="confirmed-catalog">
+                    <div class="section-header mb-2">
+                        <div>
+                            <h5 class="mb-0">Confirmed Catalog Comparison</h5>
+                            <div class="review-summary">
+                                <%= confirmedCatalog ? confirmedCatalog.uniqueItems : 0 %> confirmed items loaded for
+                                    comparison.
+                            </div>
+                        </div>
+                        <button class="btn btn-outline-secondary btn-sm" type="button"
+                            data-toggle-target="section-confirmed-catalog">Hide</button>
+                    </div>
+                    <div class="section-body" id="section-confirmed-catalog">
+                        <div class="compare-grid">
+                            <div class="compare-stack">
+                                <div class="d-flex justify-content-between align-items-center gap-2">
+                                    <div>
+                                        <h6 class="mb-0">Unconfirmed Items</h6>
+                                        <div class="review-summary">
+                                            <%= reviewItems ? reviewItems.length : 0 %> items need review in this
+                                                document.
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Top suggestions are ranked by UPC, SKU, and description
+                                        overlap.</small>
+                                </div>
+
+                                <% if (!reviewItems || reviewItems.length===0) { %>
+                                    <div class="alert alert-success mb-0">All product rows in this document are already
+                                        confirmed.</div>
+                                    <% } else { %>
+                                        <div class="compare-stack">
+                                            <% reviewItems.forEach(item=> { %>
+                                                <article class="suggestion-card">
+                                                    <div
+                                                        class="d-flex justify-content-between align-items-start gap-2 mb-1">
+                                                        <div>
+                                                            <strong>Line <%= item.lineNumber !==null && item.lineNumber
+                                                                    !==undefined ? item.lineNumber : item.lineIndex + 1
+                                                                    %></strong>
+                                                            <div class="mono">
+                                                                <%= item.sku || '-' %>
+                                                            </div>
+                                                        </div>
+                                                        <span class="suggestion-score">
+                                                            <%= item.suggestions && item.suggestions[0] ?
+                                                                item.suggestions[0].score : 0 %>% match
+                                                        </span>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <%= item.description || '-' %>
+                                                    </div>
+                                                    <div class="review-summary">UPC: <span class="mono">
+                                                            <%= item.upc || '-' %>
+                                                        </span> | Qty: <%= item.quantity !==null && item.quantity
+                                                            !==undefined ? item.quantity : '-' %>
+                                                            <%= item.qtyUom || '' %>
+                                                    </div>
+                                                    <% if (!item.suggestions || item.suggestions.length===0) { %>
+                                                        <div class="text-muted mt-2">No likely confirmed match found
+                                                            yet.</div>
+                                                        <% } else { %>
+                                                            <div class="mt-2">
+                                                                <% item.suggestions.forEach(match=> { %>
+                                                                    <div
+                                                                        class="mb-2 p-2 border rounded bg-light-subtle">
+                                                                        <div
+                                                                            class="d-flex justify-content-between align-items-center gap-2">
+                                                                            <strong>
+                                                                                <%= match.description || match.product
+                                                                                    || '-' %>
+                                                                            </strong>
+                                                                            <span class="suggestion-score">
+                                                                                <%= match.score %>%
+                                                                            </span>
+                                                                        </div>
+                                                                        <div class="mono small">UPC: <%= match.upc
+                                                                                || '-' %> | SKU: <%= match.sku || '-' %>
+                                                                                    | Occurrences: <%= match.count || 0
+                                                                                        %>
+                                                                        </div>
+                                                                        <div class="match-tags">
+                                                                            <% (match.reasons || []).forEach(reason=> {
+                                                                                %>
+                                                                                <span class="match-tag">
+                                                                                    <%= reason %>
+                                                                                </span>
+                                                                                <% }); %>
+                                                                        </div>
+                                                                    </div>
+                                                                    <% }); %>
+                                                            </div>
+                                                            <% } %>
+                                                </article>
+                                                <% }); %>
+                                        </div>
+                                        <% } %>
+                            </div>
+
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                    <div>
+                                        <h6 class="mb-0">Confirmed Catalog</h6>
+                                        <div class="review-summary">Search the confirmed item list while reviewing
+                                            unconfirmed rows.</div>
+                                    </div>
+                                    <input id="catalogSearchInput" class="form-control form-control-sm catalog-search"
+                                        type="search" placeholder="Filter catalog...">
+                                </div>
+                                <div class="catalog-table-wrap">
+                                    <table class="table table-sm align-middle mb-0" id="confirmedCatalogTable">
+                                        <thead class="table-light sticky-top">
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>UPC</th>
+                                                <th>SKU</th>
+                                                <th class="text-end">Count</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% if (!confirmedCatalog || !confirmedCatalog.confirmedRows ||
+                                                confirmedCatalog.confirmedRows.length===0) { %>
+                                                <tr>
+                                                    <td colspan="4" class="text-muted">No confirmed catalog items were
+                                                        found.</td>
+                                                </tr>
+                                                <% } else { %>
+                                                    <% confirmedCatalog.confirmedRows.forEach(item=> { %>
+                                                        <tr class="catalog-row"
+                                                            data-catalog-search="<%= ((item.description || item.product || '') + ' ' + (item.upc || '') + ' ' + (item.sku || '')).toLowerCase() %>">
+                                                            <td>
+                                                                <div>
+                                                                    <%= item.description || item.product || '-' %>
+                                                                </div>
+                                                                <small class="text-muted">
+                                                                    <%= item.poNumbers ? item.poNumbers.size : 0 %>
+                                                                        PO(s)
+                                                                </small>
+                                                            </td>
+                                                            <td class="mono">
+                                                                <%= item.upc || '-' %>
+                                                            </td>
+                                                            <td class="mono">
+                                                                <%= item.sku || '-' %>
+                                                            </td>
+                                                            <td class="text-end">
+                                                                <%= item.count || 0 %>
+                                                            </td>
+                                                        </tr>
+                                                        <% }); %>
+                                                            <% } %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card-harvest">
+                    <div class="section-header mb-2">
+                        <h5 class="mb-0">Parsed Text</h5>
+                        <button class="btn btn-outline-secondary btn-sm" type="button"
+                            data-toggle-target="section-parsed-text">Hide</button>
+                    </div>
+                    <div class="mono section-body" id="section-parsed-text">
+                        <%= parsedText || 'No parsed text available.' %>
+                    </div>
+                </section>
     </main>
 
     <script>
         const documentId = '<%= doc._id %>';
-        const serverAutoJumpEnabled = <%- (typeof savedAutoJumpEnabled === 'undefined' || savedAutoJumpEnabled === null) ? 'null' : JSON.stringify(savedAutoJumpEnabled) %>;
+        const serverAutoJumpEnabled = <% - (typeof savedAutoJumpEnabled === 'undefined' || savedAutoJumpEnabled === null) ? 'null' : JSON.stringify(savedAutoJumpEnabled) %>;
         const sectionStateKey = `harvest:section-state:${documentId}`;
         const pdfZoomKey = `harvest:pdf-zoom:${documentId}`;
         const scrollYKey = `harvest:scroll-y:${documentId}`;
@@ -756,7 +916,7 @@
 
         const jumpNextUnconfirmedToggleButton = document.getElementById('jumpNextUnconfirmedToggleButton');
         const goToNextDocumentButton = document.getElementById('goToNextDocumentButton');
-        const nextDocFromServer = <%- JSON.stringify(nextDocWithUnconfirmed || null) %>;
+        const nextDocFromServer = <% - JSON.stringify(nextDocWithUnconfirmed || null) %>;
 
         function isAutoJumpEnabled() {
             const stored = localStorage.getItem(jumpAutoEnabledKey);
@@ -776,7 +936,7 @@
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({ autoJumpEnabled: Boolean(enabled) })
-            }).catch(() => {});
+            }).catch(() => { });
         }
 
         function updateAutoJumpToggleUi() {
@@ -1084,4 +1244,5 @@
         });
     </script>
 </body>
+
 </html>

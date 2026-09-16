@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <title>
+        <%= title %>
+    </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root {
@@ -264,6 +267,7 @@
         }
     </style>
 </head>
+
 <body>
     <main class="shell">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -279,32 +283,38 @@
         <section class="card-harvest">
             <div class="hero">
                 <h1>All Products Catalog</h1>
-                <p>Complete list of all items extracted from harvest intake documents, sorted by product description.</p>
+                <p>Complete list of all items extracted from harvest intake documents, sorted by product description.
+                </p>
                 <div class="stat-row">
                     <div class="stat-badge">
-                        Total: <strong><%= totalProducts %></strong> items
+                        Total: <strong>
+                            <%= totalProducts %>
+                        </strong> items
                     </div>
                     <div class="stat-badge">
-                        Confirmed: <strong><%= confirmedCount %></strong>
+                        Confirmed: <strong>
+                            <%= confirmedCount %>
+                        </strong>
                     </div>
                     <div class="stat-badge">
-                        Unconfirmed: <strong><%= unconfirmedCount %></strong>
+                        Unconfirmed: <strong>
+                            <%= unconfirmedCount %>
+                        </strong>
                     </div>
                 </div>
             </div>
 
             <div class="control-bar">
-                <input 
-                    type="text" 
-                    class="form-control search-input" 
-                    id="productSearch" 
-                    placeholder="Search by product name, UPC, SKU, or acknowledgement #..."
-                >
+                <input type="text" class="form-control search-input" id="productSearch"
+                    placeholder="Search by product name, UPC, SKU, or acknowledgement #...">
                 <div class="filter-controls">
                     <button class="btn btn-sm btn-outline-secondary" id="filterAll" data-filter="">All</button>
-                    <button class="btn btn-sm btn-outline-success" id="filterConfirmed" data-filter="confirmed">Confirmed</button>
-                    <button class="btn btn-sm btn-outline-warning" id="filterUnconfirmed" data-filter="unconfirmed">Unconfirmed</button>
-                    <button class="btn btn-sm btn-outline-danger" id="filterInvalidUpc" data-filter="invalid-upc">Invalid UPCs (≠12)</button>
+                    <button class="btn btn-sm btn-outline-success" id="filterConfirmed"
+                        data-filter="confirmed">Confirmed</button>
+                    <button class="btn btn-sm btn-outline-warning" id="filterUnconfirmed"
+                        data-filter="unconfirmed">Unconfirmed</button>
+                    <button class="btn btn-sm btn-outline-danger" id="filterInvalidUpc"
+                        data-filter="invalid-upc">Invalid UPCs (≠12)</button>
                 </div>
             </div>
 
@@ -323,39 +333,53 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% products.forEach((product, index) => { %>
-                            <tr class="product-row" data-product="<%= (product.product || '').toLowerCase() %>" data-upc="<%= (product.upc || '').toLowerCase() %>" data-sku="<%= (product.sku || '').toLowerCase() %>" data-ack="<%= (product.acknowledgementNumber || '').toLowerCase() %>" data-status="<%= product.isConfirmed ? 'confirmed' : 'unconfirmed' %>" data-index="<%= index %>">
-                                <td><%= product.product || '-' %></td>
-                                <td class="upc-cell">
-                                    <% const upcLength = (product.upc || '').length; %>
-                                    <% const isInvalidUpc = product.upc && upcLength !== 12; %>
-                                    <span class="mono <%= isInvalidUpc ? 'invalid-upc' : '' %>">
-                                        <%= product.upc || '-' %>
-                                        <% if (isInvalidUpc) { %>
-                                            <span class="upc-warning" title="UPC should be 12 digits, this has <%= upcLength %>">⚠</span>
-                                        <% } %>
-                                    </span>
+                        <% products.forEach((product, index)=> { %>
+                            <tr class="product-row" data-product="<%= (product.product || '').toLowerCase() %>"
+                                data-upc="<%= (product.upc || '').toLowerCase() %>"
+                                data-sku="<%= (product.sku || '').toLowerCase() %>"
+                                data-ack="<%= (product.acknowledgementNumber || '').toLowerCase() %>"
+                                data-status="<%= product.isConfirmed ? 'confirmed' : 'unconfirmed' %>"
+                                data-index="<%= index %>">
+                                <td>
+                                    <%= product.product || '-' %>
                                 </td>
-                                <td class="mono"><%= product.sku || '-' %></td>
-                                <td class="text-end"><%= product.qtyOrdered %></td>
-                                <td class="text-end"><%= product.qtyReceived %></td>
-                                <td class="mono"><%= product.acknowledgementNumber %></td>
+                                <td class="upc-cell">
+                                    <% const upcLength=(product.upc || '' ).length; %>
+                                        <% const isInvalidUpc=product.upc && upcLength !==12; %>
+                                            <span class="mono <%= isInvalidUpc ? 'invalid-upc' : '' %>">
+                                                <%= product.upc || '-' %>
+                                                    <% if (isInvalidUpc) { %>
+                                                        <span class="upc-warning"
+                                                            title="UPC should be 12 digits, this has <%= upcLength %>">⚠</span>
+                                                        <% } %>
+                                            </span>
+                                </td>
+                                <td class="mono">
+                                    <%= product.sku || '-' %>
+                                </td>
+                                <td class="text-end">
+                                    <%= product.qtyOrdered %>
+                                </td>
+                                <td class="text-end">
+                                    <%= product.qtyReceived %>
+                                </td>
+                                <td class="mono">
+                                    <%= product.acknowledgementNumber %>
+                                </td>
                                 <td>
                                     <% if (product.isConfirmed) { %>
                                         <span class="status-confirmed">Confirmed</span>
-                                    <% } else { %>
-                                        <span class="status-unconfirmed">Unconfirmed</span>
-                                    <% } %>
+                                        <% } else { %>
+                                            <span class="status-unconfirmed">Unconfirmed</span>
+                                            <% } %>
                                 </td>
                                 <td class="action-cell">
-                                    <button class="btn btn-sm btn-outline-primary btn-confirm" 
-                                        data-index="<%= index %>" 
-                                        type="button" 
-                                        data-bs-toggle="modal" 
+                                    <button class="btn btn-sm btn-outline-primary btn-confirm" data-index="<%= index %>"
+                                        type="button" data-bs-toggle="modal"
                                         data-bs-target="#editConfirmModal">Edit</button>
                                 </td>
                             </tr>
-                        <% }); %>
+                            <% }); %>
                     </tbody>
                 </table>
             </div>
@@ -369,7 +393,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Wait for DOM to load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             console.log('DOM fully loaded');
 
             const searchInput = document.getElementById('productSearch');
@@ -377,7 +401,7 @@
             const rows = document.querySelectorAll('.product-row');
 
             let currentFilter = localStorage.getItem('harvestProductsFilter') || '';
-            let products = <%- JSON.stringify(products) %>;
+            let products = <% - JSON.stringify(products) %>;
             let selectedProductIndex = null;
             let originalProduct = null;
 
@@ -397,12 +421,12 @@
                     // Highlight the row briefly
                     nextRow.style.background = '#fff4dc';
                     nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    
+
                     // Remove highlight after 2 seconds
                     setTimeout(() => {
                         nextRow.style.background = '';
                     }, 2000);
-                    
+
                     return true;
                 }
                 return false;
@@ -427,10 +451,10 @@
                     const ack = row.dataset.ack || '';
                     const status = row.dataset.status || '';
 
-                    const matchesSearch = !searchTerm || 
-                        product.includes(searchTerm) || 
-                        upc.includes(searchTerm) || 
-                        sku.includes(searchTerm) || 
+                    const matchesSearch = !searchTerm ||
+                        product.includes(searchTerm) ||
+                        upc.includes(searchTerm) ||
+                        sku.includes(searchTerm) ||
                         ack.includes(searchTerm);
 
                     let matchesFilter = true;
@@ -472,7 +496,7 @@
             // Edit/Confirm modal handling
             const editConfirmModal = document.getElementById('editConfirmModal');
             console.log('Modal element:', editConfirmModal);
-            
+
             if (!editConfirmModal) {
                 console.error('Modal element not found!');
                 return;
@@ -484,12 +508,12 @@
             const matchingContainer = document.getElementById('matchingItems');
 
             console.log('Input elements found - Product:', productInput, 'UPC:', upcInput, 'SKU:', skuInput, 'Matching:', matchingContainer);
-            
+
             // Listen for modal show event to populate fields
-            editConfirmModal.addEventListener('show.bs.modal', function(e) {
+            editConfirmModal.addEventListener('show.bs.modal', function (e) {
                 const btn = e.relatedTarget;
                 console.log('Modal show event fired, button:', btn);
-                
+
                 if (!btn) {
                     console.warn('No button found');
                     return;
@@ -502,7 +526,7 @@
                 if (index >= 0 && index < products.length) {
                     const product = products[index];
                     console.log('Found product:', product);
-                    
+
                     selectedProductIndex = index;
                     originalProduct = { ...product }; // Store original values for comparison
 
@@ -619,14 +643,14 @@
                         btn.addEventListener('click', () => {
                             const confirmedIdx = parseInt(btn.dataset.confirmedIndex, 10);
                             const confirmedProduct = confirmedMatches[confirmedIdx];
-                            
+
                             // Auto-fill form with confirmed product data
                             productInput.value = confirmedProduct.product || '';
                             upcInput.value = confirmedProduct.upc || '';
                             skuInput.value = confirmedProduct.sku || '';
-                            
+
                             console.log('Copied from confirmed:', confirmedProduct);
-                            
+
                             // Scroll to top of modal to show updated fields
                             matchingContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         });
@@ -684,7 +708,7 @@
                         if (result.success) {
                             const count = result.confirmedCount || result.updatedCount;
                             alert(`Confirmed ${count} item(s)`);
-                            
+
                             // Close modal and reload with scroll parameter
                             const modal = bootstrap.Modal.getInstance(editConfirmModal);
                             if (modal) modal.hide();
@@ -703,7 +727,7 @@
                 });
 
                 // Update button text based on modal content
-                editConfirmModal.addEventListener('show.bs.modal', function(e) {
+                editConfirmModal.addEventListener('show.bs.modal', function (e) {
                     setTimeout(() => {
                         if (originalProduct) {
                             if (originalProduct.isConfirmed) {
@@ -730,7 +754,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-warning mb-3">
-                        <strong>⚠ Important:</strong> The Acknowledgement # will NOT be changed. Only Product, UPC, and SKU are being updated.
+                        <strong>⚠ Important:</strong> The Acknowledgement # will NOT be changed. Only Product, UPC, and
+                        SKU are being updated.
                     </div>
 
                     <div class="mb-3">
@@ -749,10 +774,12 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-harvest" id="confirmProductBtn">Confirm All Matching Items</button>
+                    <button type="button" class="btn btn-harvest" id="confirmProductBtn">Confirm All Matching
+                        Items</button>
                 </div>
             </div>
         </div>
     </div>
 </body>
+
 </html>

@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <title>
+        <%= title %>
+    </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root {
@@ -102,9 +105,20 @@
             font-weight: 600;
         }
 
-        .status-processed { background: #d7f3e4; color: #155b3b; }
-        .status-needs_review { background: #ffe0d5; color: #7e2f14; }
-        .status-reconciled { background: #dbe7ff; color: #1f3f86; }
+        .status-processed {
+            background: #d7f3e4;
+            color: #155b3b;
+        }
+
+        .status-needs_review {
+            background: #ffe0d5;
+            color: #7e2f14;
+        }
+
+        .status-reconciled {
+            background: #dbe7ff;
+            color: #1f3f86;
+        }
 
         .table {
             --bs-table-bg: transparent;
@@ -134,47 +148,66 @@
         }
 
         @media (max-width: 900px) {
-            .stat, .two-col, .full {
+
+            .stat,
+            .two-col,
+            .full {
                 grid-column: span 12;
             }
         }
     </style>
 </head>
+
 <body>
     <main class="shell">
         <section class="hero">
             <h1>Harvest Procurement Console</h1>
-            <p>Ingest vendor PO PDFs from Gmail or manual upload, extract data, and reconcile against receiving to prevent sellouts.</p>
+            <p>Ingest vendor PO PDFs from Gmail or manual upload, extract data, and reconcile against receiving to
+                prevent sellouts.</p>
             <div class="d-flex flex-wrap gap-2 mt-3">
                 <% if (reviewDoc) { %>
-                    <a class="btn btn-harvest" href="/harvest/document/<%= reviewDoc._id %>">Review Next Unconfirmed Document</a>
-                <% } else { %>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle align-self-center">No unconfirmed documents right now</span>
-                <% } %>
-                <a class="btn btn-outline-secondary" href="/harvest/products">View All Products</a>
-                <a class="btn btn-outline-secondary" href="/harvest/api/reconciliation-summary" target="_blank">Open JSON Summary</a>
+                    <a class="btn btn-harvest" href="/harvest/document/<%= reviewDoc._id %>">Review Next Unconfirmed
+                        Document</a>
+                    <% } else { %>
+                        <span
+                            class="badge bg-success-subtle text-success border border-success-subtle align-self-center">No
+                            unconfirmed documents right now</span>
+                        <% } %>
+                            <a class="btn btn-outline-secondary" href="/harvest/products">View All Products</a>
+                            <a class="btn btn-outline-secondary" href="/harvest/api/reconciliation-summary"
+                                target="_blank">Open JSON Summary</a>
             </div>
         </section>
 
         <section class="grid mb-3">
             <article class="card stat">
-                <h3><%= stats.totalDocs || 0 %></h3>
+                <h3>
+                    <%= stats.totalDocs || 0 %>
+                </h3>
                 <small>Total Harvest Intake Documents</small>
             </article>
             <article class="card stat">
-                <h3><%= stats.matchedDocs || 0 %></h3>
+                <h3>
+                    <%= stats.matchedDocs || 0 %>
+                </h3>
                 <small>Matched to Existing Purchase Orders</small>
             </article>
             <article class="card stat">
-                <h3><%= stats.needsReviewDocs || 0 %></h3>
+                <h3>
+                    <%= stats.needsReviewDocs || 0 %>
+                </h3>
                 <small>Needs Review</small>
             </article>
             <article class="card stat">
-                <h3><%= stats.totalUnconfirmedProducts || 0 %></h3>
+                <h3>
+                    <%= stats.totalUnconfirmedProducts || 0 %>
+                </h3>
                 <small>Products Needing Confirmation</small>
             </article>
             <article class="card stat">
-                <h3><%= stats.docsNeedingConfirmation || 0 %></h3>
+                <h3>
+                    <%= stats.docsNeedingConfirmation || 0 %>
+                </h3>
                 <small>Docs With Unconfirmed Products</small>
             </article>
         </section>
@@ -185,10 +218,12 @@
                 <form id="manualUploadForm" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label class="form-label">Vendor PO PDF(s)</label>
-                        <input type="file" class="form-control" name="pdfFile" accept="application/pdf,.pdf" multiple required>
+                        <input type="file" class="form-control" name="pdfFile" accept="application/pdf,.pdf" multiple
+                            required>
                     </div>
                     <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="manualAllowIncrement" name="allowIncrement" value="true">
+                        <input class="form-check-input" type="checkbox" id="manualAllowIncrement" name="allowIncrement"
+                            value="true">
                         <label class="form-check-label" for="manualAllowIncrement">
                             Upload as updated version (increment revision if this filename already exists)
                         </label>
@@ -200,7 +235,8 @@
 
             <article class="card two-col">
                 <h5>Gmail Attachment Intake</h5>
-                <p class="mb-2">Use Gmail UID from the email-client inbox view. Harvest will ingest the first PDF attachment unless you specify one.</p>
+                <p class="mb-2">Use Gmail UID from the email-client inbox view. Harvest will ingest the first PDF
+                    attachment unless you specify one.</p>
                 <form id="gmailIngestForm">
                     <div class="row g-2">
                         <div class="col-md-4">
@@ -217,7 +253,8 @@
                         </div>
                     </div>
                     <div class="form-check mt-3">
-                        <input class="form-check-input" type="checkbox" id="gmailAllowIncrement" name="allowIncrement" value="true">
+                        <input class="form-check-input" type="checkbox" id="gmailAllowIncrement" name="allowIncrement"
+                            value="true">
                         <label class="form-check-label" for="gmailAllowIncrement">
                             Ingest as updated version when attachment filename already exists
                         </label>
@@ -231,42 +268,49 @@
         <section class="grid mb-3">
             <article class="card two-col">
                 <h5>Open SKU Risk Snapshot</h5>
-                <% if (!openLineItemSummary || openLineItemSummary.length === 0) { %>
+                <% if (!openLineItemSummary || openLineItemSummary.length===0) { %>
                     <p class="mb-0">No open SKU quantities found.</p>
-                <% } else { %>
-                    <div class="table-responsive">
-                        <table class="table table-sm align-middle">
-                            <thead>
-                                <tr>
-                                    <th>SKU</th>
-                                    <th class="text-end">Open Qty</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% openLineItemSummary.forEach(row => { %>
+                    <% } else { %>
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle">
+                                <thead>
                                     <tr>
-                                        <td class="mono"><%= row._id %></td>
-                                        <td class="text-end"><%= row.openQty %></td>
+                                        <th>SKU</th>
+                                        <th class="text-end">Open Qty</th>
                                     </tr>
-                                <% }); %>
-                            </tbody>
-                        </table>
-                    </div>
-                <% } %>
+                                </thead>
+                                <tbody>
+                                    <% openLineItemSummary.forEach(row=> { %>
+                                        <tr>
+                                            <td class="mono">
+                                                <%= row._id %>
+                                            </td>
+                                            <td class="text-end">
+                                                <%= row.openQty %>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                        <% } %>
             </article>
 
             <article class="card two-col">
                 <h5>Next Workflow Step</h5>
                 <p>Phase 1 is now active: PDF intake and PO matching.</p>
-                <p class="mb-2">Use the review button above to open the next document with unconfirmed items and compare it against the confirmed catalog.</p>
-                <p class="mb-0">Phase 2 can connect sales (Shopify/POS export) to compute coverage days and reorder recommendations per SKU.</p>
+                <p class="mb-2">Use the review button above to open the next document with unconfirmed items and compare
+                    it against the confirmed catalog.</p>
+                <p class="mb-0">Phase 2 can connect sales (Shopify/POS export) to compute coverage days and reorder
+                    recommendations per SKU.</p>
             </article>
         </section>
 
         <section class="card full">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="mb-0">Recent Intake Documents</h5>
-                <a class="btn btn-outline-secondary btn-sm" href="/harvest/api/reconciliation-summary" target="_blank">JSON Summary API</a>
+                <a class="btn btn-outline-secondary btn-sm" href="/harvest/api/reconciliation-summary"
+                    target="_blank">JSON Summary API</a>
             </div>
             <div class="table-responsive">
                 <table class="table table-sm align-middle">
@@ -284,108 +328,158 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% if (!docs || docs.length === 0) { %>
-                            <tr><td colspan="9">No documents processed yet.</td></tr>
-                        <% } %>
-                        <% (docs || []).forEach(doc => { %>
+                        <% if (!docs || docs.length===0) { %>
                             <tr>
-                                <td><%= new Date(doc.createdAt).toLocaleString() %></td>
-                                <td><%= doc.sourceType %></td>
-                                <td class="mono">
-                                    <%= doc.file.originalName %>
-                                    <span class="badge bg-secondary ms-1">v<%= (doc.file && doc.file.revisionNumber) ? doc.file.revisionNumber : 1 %></span>
-                                    <% if (doc.isLatestRevision === false) { %>
-                                        <span class="badge bg-light text-dark border ms-1">superseded</span>
-                                    <% } %>
-                                </td>
-                                <td class="mono"><%= doc.extracted.poNumber || '-' %></td>
-                                <td>
-                                    <% if (doc.matchSummary && doc.matchSummary.purchaseOrderId) { %>
-                                        <a href="/purchase-orders/<%= doc.matchSummary.purchaseOrderId._id %>"><%= doc.matchSummary.purchaseOrderNumber || 'Open PO' %></a>
-                                    <% } else { %>
-                                        -
-                                    <% } %>
-                                </td>
-                                <td><%= Math.round((doc.extracted.confidence || 0) * 100) %>%</td>
-                                <td>
-                                    <% if ((doc.unconfirmedLineCount || 0) > 0) { %>
-                                        <span class="badge bg-warning text-dark"><%= doc.unconfirmedLineCount %></span>
-                                    <% } else { %>
-                                        <span class="badge bg-success">0</span>
-                                    <% } %>
-                                </td>
-                                <td>
-                                    <span class="status-pill status-<%= doc.status %>"><%= doc.status %></span>
-                                </td>
-                                <td>
-                                    <div class="d-flex gap-1">
-                                        <a class="btn btn-outline-secondary btn-sm" href="/harvest/document/<%= doc._id %>">View</a>
-                                        <button
-                                            class="btn btn-outline-primary btn-sm"
-                                            type="button"
-                                            data-preview-toggle="preview-<%= doc._id %>">
-                                            Preview
-                                        </button>
-                                        <button
-                                            class="btn btn-outline-success btn-sm"
-                                            type="button"
-                                            data-reparse-id="<%= doc._id %>">
-                                            Re-parse
-                                        </button>
-                                    </div>
-                                </td>
+                                <td colspan="9">No documents processed yet.</td>
                             </tr>
-                            <tr id="preview-<%= doc._id %>" class="preview-row">
-                                <td colspan="9">
-                                    <div class="mb-2">
-                                        <span class="preview-label">Ack #</span>
-                                        <span class="mono"><%= doc.extracted.acknowledgementNumber || '-' %></span>
-                                        <span class="preview-label ms-3">Order #</span>
-                                        <span class="mono"><%= doc.extracted.orderNumber || '-' %></span>
-                                        <span class="preview-label ms-3">Customer</span>
-                                        <span><%= doc.extracted.customerName || '-' %></span>
-                                    </div>
-                                    <% if (!doc.extracted || !doc.extracted.lineItems || doc.extracted.lineItems.length === 0) { %>
-                                        <div class="text-muted">No extracted line items for this document.</div>
-                                    <% } else { %>
-                                        <div class="table-responsive">
-                                            <table class="table table-sm align-middle mb-0">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Line #</th>
-                                                        <th>Product</th>
-                                                        <th>UPC</th>
-                                                        <th>Description</th>
-                                                        <th class="text-end">Qty Ordered</th>
-                                                        <th class="text-end">Qty Received</th>
-                                                        <th>Qty U/M</th>
-                                                        <th class="text-end">Retail</th>
-                                                        <th class="text-end">Unit</th>
-                                                        <th class="text-end">Extended</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <% doc.extracted.lineItems.forEach(item => { %>
-                                                        <tr>
-                                                            <td><%= item.lineNumber !== null && item.lineNumber !== undefined ? item.lineNumber : '-' %></td>
-                                                            <td class="mono"><%= item.sku || '-' %></td>
-                                                            <td class="mono"><%= item.upc || '-' %></td>
-                                                            <td><%= item.description || '-' %></td>
-                                                            <td class="text-end"><%= item.quantity !== null && item.quantity !== undefined ? item.quantity : '-' %></td>
-                                                            <td class="text-end"><%= item.quantityReceived !== null && item.quantityReceived !== undefined ? item.quantityReceived : '-' %></td>
-                                                            <td><%= item.qtyUom || '-' %></td>
-                                                            <td class="text-end"><%= item.retailPrice !== null && item.retailPrice !== undefined ? item.retailPrice : '-' %></td>
-                                                            <td class="text-end"><%= item.unitPrice !== null && item.unitPrice !== undefined ? item.unitPrice : '-' %></td>
-                                                            <td class="text-end"><%= item.amount !== null && item.amount !== undefined ? item.amount : '-' %></td>
-                                                        </tr>
-                                                    <% }); %>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    <% } %>
-                                </td>
-                            </tr>
-                        <% }); %>
+                            <% } %>
+                                <% (docs || []).forEach(doc=> { %>
+                                    <tr>
+                                        <td>
+                                            <%= new Date(doc.createdAt).toLocaleString() %>
+                                        </td>
+                                        <td>
+                                            <%= doc.sourceType %>
+                                        </td>
+                                        <td class="mono">
+                                            <%= doc.file.originalName %>
+                                                <span class="badge bg-secondary ms-1">v<%= (doc.file &&
+                                                        doc.file.revisionNumber) ? doc.file.revisionNumber : 1 %></span>
+                                                <% if (doc.isLatestRevision===false) { %>
+                                                    <span class="badge bg-light text-dark border ms-1">superseded</span>
+                                                    <% } %>
+                                        </td>
+                                        <td class="mono">
+                                            <%= doc.extracted.poNumber || '-' %>
+                                        </td>
+                                        <td>
+                                            <% if (doc.matchSummary && doc.matchSummary.purchaseOrderId) { %>
+                                                <a href="/purchase-orders/<%= doc.matchSummary.purchaseOrderId._id %>">
+                                                    <%= doc.matchSummary.purchaseOrderNumber || 'Open PO' %>
+                                                </a>
+                                                <% } else { %>
+                                                    -
+                                                    <% } %>
+                                        </td>
+                                        <td>
+                                            <%= Math.round((doc.extracted.confidence || 0) * 100) %>%
+                                        </td>
+                                        <td>
+                                            <% if ((doc.unconfirmedLineCount || 0)> 0) { %>
+                                                <span class="badge bg-warning text-dark">
+                                                    <%= doc.unconfirmedLineCount %>
+                                                </span>
+                                                <% } else { %>
+                                                    <span class="badge bg-success">0</span>
+                                                    <% } %>
+                                        </td>
+                                        <td>
+                                            <span class="status-pill status-<%= doc.status %>">
+                                                <%= doc.status %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-1">
+                                                <a class="btn btn-outline-secondary btn-sm"
+                                                    href="/harvest/document/<%= doc._id %>">View</a>
+                                                <button class="btn btn-outline-primary btn-sm" type="button"
+                                                    data-preview-toggle="preview-<%= doc._id %>">
+                                                    Preview
+                                                </button>
+                                                <button class="btn btn-outline-success btn-sm" type="button"
+                                                    data-reparse-id="<%= doc._id %>">
+                                                    Re-parse
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="preview-<%= doc._id %>" class="preview-row">
+                                        <td colspan="9">
+                                            <div class="mb-2">
+                                                <span class="preview-label">Ack #</span>
+                                                <span class="mono">
+                                                    <%= doc.extracted.acknowledgementNumber || '-' %>
+                                                </span>
+                                                <span class="preview-label ms-3">Order #</span>
+                                                <span class="mono">
+                                                    <%= doc.extracted.orderNumber || '-' %>
+                                                </span>
+                                                <span class="preview-label ms-3">Customer</span>
+                                                <span>
+                                                    <%= doc.extracted.customerName || '-' %>
+                                                </span>
+                                            </div>
+                                            <% if (!doc.extracted || !doc.extracted.lineItems ||
+                                                doc.extracted.lineItems.length===0) { %>
+                                                <div class="text-muted">No extracted line items for this document.</div>
+                                                <% } else { %>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm align-middle mb-0">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Line #</th>
+                                                                    <th>Product</th>
+                                                                    <th>UPC</th>
+                                                                    <th>Description</th>
+                                                                    <th class="text-end">Qty Ordered</th>
+                                                                    <th class="text-end">Qty Received</th>
+                                                                    <th>Qty U/M</th>
+                                                                    <th class="text-end">Retail</th>
+                                                                    <th class="text-end">Unit</th>
+                                                                    <th class="text-end">Extended</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <% doc.extracted.lineItems.forEach(item=> { %>
+                                                                    <tr>
+                                                                        <td>
+                                                                            <%= item.lineNumber !==null &&
+                                                                                item.lineNumber !==undefined ?
+                                                                                item.lineNumber : '-' %>
+                                                                        </td>
+                                                                        <td class="mono">
+                                                                            <%= item.sku || '-' %>
+                                                                        </td>
+                                                                        <td class="mono">
+                                                                            <%= item.upc || '-' %>
+                                                                        </td>
+                                                                        <td>
+                                                                            <%= item.description || '-' %>
+                                                                        </td>
+                                                                        <td class="text-end">
+                                                                            <%= item.quantity !==null && item.quantity
+                                                                                !==undefined ? item.quantity : '-' %>
+                                                                        </td>
+                                                                        <td class="text-end">
+                                                                            <%= item.quantityReceived !==null &&
+                                                                                item.quantityReceived !==undefined ?
+                                                                                item.quantityReceived : '-' %>
+                                                                        </td>
+                                                                        <td>
+                                                                            <%= item.qtyUom || '-' %>
+                                                                        </td>
+                                                                        <td class="text-end">
+                                                                            <%= item.retailPrice !==null &&
+                                                                                item.retailPrice !==undefined ?
+                                                                                item.retailPrice : '-' %>
+                                                                        </td>
+                                                                        <td class="text-end">
+                                                                            <%= item.unitPrice !==null && item.unitPrice
+                                                                                !==undefined ? item.unitPrice : '-' %>
+                                                                        </td>
+                                                                        <td class="text-end">
+                                                                            <%= item.amount !==null && item.amount
+                                                                                !==undefined ? item.amount : '-' %>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <% }); %>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <% } %>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
                     </tbody>
                 </table>
             </div>
@@ -458,7 +552,7 @@
                         `✓ Qty Received: ${dataQuality.itemsWithQtyReceived}/${extracted.lineItemCount}\n` +
                         `✓ Extended Amt: ${dataQuality.itemsWithAmount}/${extracted.lineItemCount}\n` +
                         `✓ Unit Price: ${dataQuality.itemsWithPrice}/${extracted.lineItemCount}`;
-                    
+
                     alert(alertMsg);
                     window.location.reload();
                 } catch (error) {
@@ -548,4 +642,5 @@
         });
     </script>
 </body>
+
 </html>

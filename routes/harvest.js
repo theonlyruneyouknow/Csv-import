@@ -805,14 +805,14 @@ router.post('/document/:id/reparse', async (req, res) => {
         }
 
         const updated = await reparseExistingDocument(doc);
-        
+
         // Analyze what was extracted
         const lineItems = updated.extracted?.lineItems || [];
         const itemsWithQtyOrdered = lineItems.filter(item => item.quantity !== null && item.quantity !== undefined).length;
         const itemsWithQtyReceived = lineItems.filter(item => item.quantityReceived !== null && item.quantityReceived !== undefined).length;
         const itemsWithAmount = lineItems.filter(item => item.amount !== null && item.amount !== undefined).length;
         const itemsWithPrice = lineItems.filter(item => item.unitPrice !== null && item.unitPrice !== undefined).length;
-        
+
         return res.json({
             success: true,
             message: 'Document re-parsed successfully',
@@ -893,10 +893,10 @@ router.get('/document/:id/debug-raw-text', async (req, res) => {
         }
 
         const rawText = await harvestPdfExtractor.extractRawTextFromFile(safePath);
-        
+
         // Find and highlight the Extended Amount section
         const extendedIndex = rawText.indexOf('Extended');
-        const snippet = extendedIndex >= 0 
+        const snippet = extendedIndex >= 0
             ? rawText.substring(Math.max(0, extendedIndex - 200), Math.min(rawText.length, extendedIndex + 1000))
             : '[EXTENDED AMOUNT SECTION NOT FOUND]';
 
@@ -1381,7 +1381,7 @@ router.get('/products', async (req, res) => {
         docs.forEach(doc => {
             const ackNumber = doc.extracted?.acknowledgementNumber || doc.extracted?.poNumber || doc.extracted?.orderNumber || '-';
             const vendor = doc.extracted?.vendor || '';
-            
+
             if (doc.extracted?.lineItems && Array.isArray(doc.extracted.lineItems)) {
                 doc.extracted.lineItems.forEach(item => {
                     allProducts.push({
@@ -1464,17 +1464,17 @@ router.post('/products/confirm', async (req, res) => {
 
                 if (isMatch && !item.isConfirmedProduct) {
                     console.log(`[CONFIRM] Confirming item: OLD=${item.description}/${item.upc}/${item.sku}`);
-                    
+
                     // Update to new values
                     if (newDescription) doc.extracted.lineItems[i].description = newDescription;
                     if (newUpc) doc.extracted.lineItems[i].upc = newUpc;
                     if (newSku) doc.extracted.lineItems[i].sku = newSku;
-                    
+
                     // Mark as confirmed
                     doc.extracted.lineItems[i].isConfirmedProduct = true;
                     doc.extracted.lineItems[i].confirmedBy = username;
                     doc.extracted.lineItems[i].confirmedAt = new Date();
-                    
+
                     console.log(`[CONFIRM] \t→ NEW=${newDescription || item.description}/${newUpc || item.upc}/${newSku || item.sku}`);
                     confirmedCount++;
                     itemsChangedInDoc++;
@@ -1545,7 +1545,7 @@ router.post('/products/update-confirmed', async (req, res) => {
                     if (newDescription) doc.extracted.lineItems[i].description = newDescription;
                     if (newUpc) doc.extracted.lineItems[i].upc = newUpc;
                     if (newSku) doc.extracted.lineItems[i].sku = newSku;
-                    
+
                     // Keep confirmed status, update last edit timestamp
                     doc.extracted.lineItems[i].confirmedBy = username;
                     doc.extracted.lineItems[i].confirmedAt = new Date();
