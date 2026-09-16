@@ -11,6 +11,7 @@ const harvestLineItemSchema = new mongoose.Schema({
     retailPrice: { type: Number, default: null },
     unitPrice: { type: Number, default: null },
     amount: { type: Number, default: null },
+    shipDate: { type: Date, default: null },
     isConfirmedProduct: { type: Boolean, default: false },
     productReferenceId: {
         type: mongoose.Schema.Types.ObjectId,

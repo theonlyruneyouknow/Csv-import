@@ -12,6 +12,7 @@ const Vendor = require('../models/Vendor');
 const Dropshipment = require('../models/Dropshipment');
 const gmailImapService = require('../services/gmailImapService');
 const harvestPdfExtractor = require('../services/harvestPdfExtractor');
+const { loadHarvestConfirmedCatalog } = require('../services/harvestConfirmedCatalog');
 
 const uploadDir = path.join(__dirname, '../uploads/harvest-documents');
 
@@ -588,6 +589,8 @@ router.get('/dashboard', async (req, res) => {
             };
         });
 
+        const reviewDoc = docs.find(doc => (doc.unconfirmedLineCount || 0) > 0) || null;
+
         const [totalDocs, matchedDocs, needsReviewDocs, confirmationStats] = await Promise.all([
             HarvestIntakeDocument.countDocuments(),
             HarvestIntakeDocument.countDocuments({ 'matchSummary.purchaseOrderId': { $ne: null } }),
@@ -689,6 +692,7 @@ router.get('/dashboard', async (req, res) => {
             title: 'Harvest Dashboard',
             user: req.user,
             docs,
+            reviewDoc,
             stats: {
                 totalDocs,
                 matchedDocs,
@@ -728,6 +732,26 @@ router.get('/document/:id', async (req, res) => {
         }
 
         const nextDocWithUnconfirmed = await findNextDocumentWithUnconfirmedItems(doc);
+        const confirmedCatalog = await loadHarvestConfirmedCatalog();
+        const lineItems = doc.extracted && Array.isArray(doc.extracted.lineItems)
+            ? doc.extracted.lineItems
+            : [];
+
+        const reviewItems = lineItems
+            .map((item, index) => ({
+                ...item,
+                lineIndex: index,
+                suggestions: confirmedCatalog.findConfirmedMatches(item, 5)
+            }))
+            .filter(item => {
+                const hasProductData = Boolean(
+                    String(item.sku || '').trim() ||
+                    String(item.upc || '').trim() ||
+                    String(item.description || '').trim()
+                );
+
+                return hasProductData && item.isConfirmedProduct !== true;
+            });
 
         res.render('harvest-document-view', {
             title: 'Harvest Intake Document',
@@ -738,7 +762,9 @@ router.get('/document/:id', async (req, res) => {
             savedAutoJumpEnabled: doc.uiPreferences && typeof doc.uiPreferences.autoJumpEnabled === 'boolean'
                 ? doc.uiPreferences.autoJumpEnabled
                 : null,
-            nextDocWithUnconfirmed
+            nextDocWithUnconfirmed,
+            confirmedCatalog,
+            reviewItems
         });
     } catch (error) {
         console.error('Harvest document detail error:', error);
@@ -779,6 +805,14 @@ router.post('/document/:id/reparse', async (req, res) => {
         }
 
         const updated = await reparseExistingDocument(doc);
+        
+        // Analyze what was extracted
+        const lineItems = updated.extracted?.lineItems || [];
+        const itemsWithQtyOrdered = lineItems.filter(item => item.quantity !== null && item.quantity !== undefined).length;
+        const itemsWithQtyReceived = lineItems.filter(item => item.quantityReceived !== null && item.quantityReceived !== undefined).length;
+        const itemsWithAmount = lineItems.filter(item => item.amount !== null && item.amount !== undefined).length;
+        const itemsWithPrice = lineItems.filter(item => item.unitPrice !== null && item.unitPrice !== undefined).length;
+        
         return res.json({
             success: true,
             message: 'Document re-parsed successfully',
@@ -787,12 +821,95 @@ router.post('/document/:id/reparse', async (req, res) => {
                 poNumber: updated.extracted.poNumber || '',
                 acknowledgementNumber: updated.extracted.acknowledgementNumber || '',
                 orderNumber: updated.extracted.orderNumber || '',
-                lineItemCount: Array.isArray(updated.extracted.lineItems) ? updated.extracted.lineItems.length : 0
+                lineItemCount: Array.isArray(updated.extracted.lineItems) ? updated.extracted.lineItems.length : 0,
+                dataQuality: {
+                    itemsWithQtyOrdered,
+                    itemsWithQtyReceived,
+                    itemsWithAmount,
+                    itemsWithPrice
+                },
+                sampleItems: lineItems.slice(0, 3).map(item => ({
+                    lineNum: item.lineNumber,
+                    desc: (item.description || '').substring(0, 30),
+                    qty: item.quantity,
+                    qtyRcv: item.quantityReceived,
+                    amt: item.amount,
+                    price: item.unitPrice
+                }))
             }
         });
     } catch (error) {
         console.error('Harvest reparse error:', error);
         return res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Debug: Get full extracted data for a document
+router.get('/document/:id/debug-extracted', async (req, res) => {
+    try {
+        const doc = await HarvestIntakeDocument.findById(req.params.id);
+        if (!doc) {
+            return res.status(404).json({ error: 'Document not found' });
+        }
+
+        const lineItems = doc.extracted?.lineItems || [];
+        return res.json({
+            documentId: doc._id,
+            poNumber: doc.extracted?.poNumber,
+            acknowledgementNumber: doc.extracted?.acknowledgementNumber,
+            totalLineItems: lineItems.length,
+            items: lineItems.map((item, idx) => ({
+                index: idx + 1,
+                lineNumber: item.lineNumber,
+                description: item.description,
+                upc: item.upc,
+                sku: item.sku,
+                quantity: item.quantity,
+                quantityReceived: item.quantityReceived,
+                qtyUom: item.qtyUom,
+                retailPrice: item.retailPrice,
+                unitPrice: item.unitPrice,
+                amount: item.amount,
+                _metadata: item._metadata
+            }))
+        });
+    } catch (error) {
+        console.error('Debug endpoint error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Debug: Get raw PDF text (for troubleshooting extraction)
+router.get('/document/:id/debug-raw-text', async (req, res) => {
+    try {
+        const doc = await HarvestIntakeDocument.findById(req.params.id);
+        if (!doc) {
+            return res.status(404).json({ error: 'Document not found' });
+        }
+
+        const safePath = resolveSafeHarvestFilePath(doc.file && doc.file.filePath);
+        if (!safePath) {
+            return res.status(400).json({ error: 'Invalid file path' });
+        }
+
+        const rawText = await harvestPdfExtractor.extractRawTextFromFile(safePath);
+        
+        // Find and highlight the Extended Amount section
+        const extendedIndex = rawText.indexOf('Extended');
+        const snippet = extendedIndex >= 0 
+            ? rawText.substring(Math.max(0, extendedIndex - 200), Math.min(rawText.length, extendedIndex + 1000))
+            : '[EXTENDED AMOUNT SECTION NOT FOUND]';
+
+        return res.json({
+            fileName: doc.file?.fileName || 'unknown',
+            totalChars: rawText.length,
+            hasExtendedAmountSection: rawText.includes('Extended'),
+            extendedAmountSnippet: snippet,
+            fullText: rawText  // Send full text for inspection
+        });
+    } catch (error) {
+        console.error('Debug raw text error:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
@@ -1249,6 +1366,205 @@ router.get('/api/reconciliation-summary', async (req, res) => {
         });
     } catch (error) {
         console.error('Harvest reconciliation summary error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+router.get('/products', async (req, res) => {
+    try {
+        const docs = await HarvestIntakeDocument.find()
+            .select('extracted.lineItems extracted.acknowledgementNumber extracted.poNumber extracted.orderNumber extracted.vendor')
+            .lean();
+
+        // Flatten all line items with their document metadata
+        const allProducts = [];
+        docs.forEach(doc => {
+            const ackNumber = doc.extracted?.acknowledgementNumber || doc.extracted?.poNumber || doc.extracted?.orderNumber || '-';
+            const vendor = doc.extracted?.vendor || '';
+            
+            if (doc.extracted?.lineItems && Array.isArray(doc.extracted.lineItems)) {
+                doc.extracted.lineItems.forEach(item => {
+                    allProducts.push({
+                        product: item.description || '-',
+                        upc: item.upc || '-',
+                        sku: item.sku || '-',
+                        qtyOrdered: item.quantity !== null ? item.quantity : '-',
+                        qtyReceived: item.quantityReceived !== null ? item.quantityReceived : '-',
+                        acknowledgementNumber: ackNumber,
+                        vendor,
+                        isConfirmed: item.isConfirmedProduct === true,
+                        description: item.description || ''
+                    });
+                });
+            }
+        });
+
+        // Sort by description (product) ascending
+        allProducts.sort((a, b) => (a.product || '').localeCompare(b.product || ''));
+
+        res.render('harvest-products', {
+            title: 'All Products',
+            user: req.user,
+            products: allProducts,
+            totalProducts: allProducts.length,
+            confirmedCount: allProducts.filter(p => p.isConfirmed).length,
+            unconfirmedCount: allProducts.filter(p => !p.isConfirmed).length
+        });
+    } catch (error) {
+        console.error('Harvest products page error:', error);
+        res.status(500).send('Error loading products');
+    }
+});
+
+router.post('/products/confirm', async (req, res) => {
+    try {
+        const { oldDescription, oldUpc, oldSku, newDescription, newUpc, newSku } = req.body;
+        const username = req.user ? req.user.username : 'Unknown User';
+
+        if (!oldDescription && !oldUpc && !oldSku) {
+            return res.status(400).json({ success: false, error: 'Must provide at least old description, UPC, or SKU.' });
+        }
+
+        console.log(`[CONFIRM] Searching for OLD values: description="${oldDescription}", upc="${oldUpc}", sku="${oldSku}"`);
+        console.log(`[CONFIRM] Will update to NEW values: description="${newDescription}", upc="${newUpc}", sku="${newSku}"`);
+
+        // Find all documents with line items matching the OLD criteria
+        const docs = await HarvestIntakeDocument.find({
+            $or: [
+                oldDescription ? { 'extracted.lineItems.description': oldDescription } : null,
+                oldUpc ? { 'extracted.lineItems.upc': oldUpc } : null,
+                oldSku ? { 'extracted.lineItems.sku': oldSku } : null
+            ].filter(q => q !== null)
+        });
+
+        console.log(`[CONFIRM] Found ${docs.length} documents to check`);
+
+        let confirmedCount = 0;
+        let docsSaved = 0;
+
+        for (const doc of docs) {
+            if (!doc.extracted?.lineItems) continue;
+
+            let itemsChangedInDoc = 0;
+
+            for (let i = 0; i < doc.extracted.lineItems.length; i++) {
+                const item = doc.extracted.lineItems[i];
+                let isMatch = false;
+
+                // Check if item matches OLD values
+                if (oldDescription && (item.description || '').trim() === (oldDescription || '').trim()) {
+                    isMatch = true;
+                }
+                if (oldUpc && item.upc === oldUpc && oldUpc) {
+                    isMatch = true;
+                }
+                if (oldSku && item.sku === oldSku && oldSku) {
+                    isMatch = true;
+                }
+
+                if (isMatch && !item.isConfirmedProduct) {
+                    console.log(`[CONFIRM] Confirming item: OLD=${item.description}/${item.upc}/${item.sku}`);
+                    
+                    // Update to new values
+                    if (newDescription) doc.extracted.lineItems[i].description = newDescription;
+                    if (newUpc) doc.extracted.lineItems[i].upc = newUpc;
+                    if (newSku) doc.extracted.lineItems[i].sku = newSku;
+                    
+                    // Mark as confirmed
+                    doc.extracted.lineItems[i].isConfirmedProduct = true;
+                    doc.extracted.lineItems[i].confirmedBy = username;
+                    doc.extracted.lineItems[i].confirmedAt = new Date();
+                    
+                    console.log(`[CONFIRM] \t→ NEW=${newDescription || item.description}/${newUpc || item.upc}/${newSku || item.sku}`);
+                    confirmedCount++;
+                    itemsChangedInDoc++;
+                } else if (isMatch && item.isConfirmedProduct) {
+                    console.log(`[CONFIRM] Item already confirmed: ${item.description} (UPC: ${item.upc}, SKU: ${item.sku})`);
+                }
+            }
+
+            if (itemsChangedInDoc > 0) {
+                await doc.save();
+                docsSaved++;
+                console.log(`[CONFIRM] Saved document (${itemsChangedInDoc} items updated)`);
+            }
+        }
+
+        console.log(`[CONFIRM] Total: ${confirmedCount} items confirmed, ${docsSaved} documents saved`);
+
+        return res.json({
+            success: true,
+            message: `Confirmed ${confirmedCount} item(s).`,
+            confirmedCount
+        });
+    } catch (error) {
+        console.error('Harvest confirm product error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+router.post('/products/update-confirmed', async (req, res) => {
+    try {
+        const { oldDescription, oldUpc, oldSku, newDescription, newUpc, newSku } = req.body;
+        const username = req.user ? req.user.username : 'Unknown User';
+
+        if ((!oldDescription && !oldUpc && !oldSku) || (!newDescription && !newUpc && !newSku)) {
+            return res.status(400).json({ success: false, error: 'Must provide old and new values.' });
+        }
+
+        // Find all documents with line items matching the OLD criteria
+        const docs = await HarvestIntakeDocument.find({
+            $or: [
+                oldDescription ? { 'extracted.lineItems.description': oldDescription } : null,
+                oldUpc ? { 'extracted.lineItems.upc': oldUpc } : null,
+                oldSku ? { 'extracted.lineItems.sku': oldSku } : null
+            ].filter(q => q !== null)
+        });
+
+        let updatedCount = 0;
+
+        for (const doc of docs) {
+            if (!doc.extracted?.lineItems) continue;
+
+            for (let i = 0; i < doc.extracted.lineItems.length; i++) {
+                const item = doc.extracted.lineItems[i];
+                let isMatch = false;
+
+                if (oldDescription && (item.description || '').trim() === (oldDescription || '').trim()) {
+                    isMatch = true;
+                }
+                if (oldUpc && item.upc === oldUpc && oldUpc) {
+                    isMatch = true;
+                }
+                if (oldSku && item.sku === oldSku && oldSku) {
+                    isMatch = true;
+                }
+
+                if (isMatch) {
+                    // Update with new values
+                    if (newDescription) doc.extracted.lineItems[i].description = newDescription;
+                    if (newUpc) doc.extracted.lineItems[i].upc = newUpc;
+                    if (newSku) doc.extracted.lineItems[i].sku = newSku;
+                    
+                    // Keep confirmed status, update last edit timestamp
+                    doc.extracted.lineItems[i].confirmedBy = username;
+                    doc.extracted.lineItems[i].confirmedAt = new Date();
+                    updatedCount++;
+                }
+            }
+
+            if (updatedCount > 0) {
+                await doc.save();
+            }
+        }
+
+        return res.json({
+            success: true,
+            message: `Updated ${updatedCount} item(s).`,
+            updatedCount
+        });
+    } catch (error) {
+        console.error('Harvest update confirmed product error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
