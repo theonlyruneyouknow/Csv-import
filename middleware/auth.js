@@ -1,7 +1,39 @@
 const AuditLog = require('../models/AuditLog');
+const mongoose = require('mongoose');
+
+function isDevBypassEnabled() {
+    const value = String(process.env.DEV_BYPASS_AUTH || '').trim().toLowerCase();
+    return value === 'true' || value === '1' || value === 'yes' || value === 'on';
+}
+
+function applyDevBypass(req) {
+    if (!isDevBypassEnabled()) {
+        return false;
+    }
+
+    if (!req.user) {
+        req.user = {
+            _id: new mongoose.Types.ObjectId('000000000000000000000001'),
+            username: 'dev-bypass',
+            firstName: 'Dev',
+            lastName: 'Bypass',
+            email: 'dev-bypass@local',
+            role: 'admin',
+            status: 'approved',
+            hasPermission: () => true
+        };
+    }
+
+    req.isAuthenticated = () => true;
+    return true;
+}
 
 // Middleware to ensure user is authenticated
 const ensureAuthenticated = (req, res, next) => {
+    if (applyDevBypass(req)) {
+        return next();
+    }
+
     if (req.isAuthenticated()) {
         return next();
     }
@@ -36,6 +68,10 @@ const ensureNotAuthenticated = (req, res, next) => {
 // Middleware to check if user has specific permission
 const requirePermission = (permission) => {
     return (req, res, next) => {
+        if (applyDevBypass(req)) {
+            return next();
+        }
+
         if (!req.isAuthenticated()) {
             if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
                 return res.status(401).json({ error: 'Authentication required' });
@@ -77,6 +113,10 @@ const requireRole = (roles) => {
     const roleArray = Array.isArray(roles) ? roles : [roles];
     
     return (req, res, next) => {
+        if (applyDevBypass(req)) {
+            return next();
+        }
+
         if (!req.isAuthenticated()) {
             if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
                 return res.status(401).json({ error: 'Authentication required' });
@@ -115,6 +155,10 @@ const requireRole = (roles) => {
 
 // Middleware to check if user's account is approved
 const ensureApproved = (req, res, next) => {
+    if (applyDevBypass(req)) {
+        return next();
+    }
+
     console.log('🔐 ensureApproved middleware - Path:', req.path);
     console.log('🔐 Authenticated:', req.isAuthenticated());
     

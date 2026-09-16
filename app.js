@@ -33,6 +33,7 @@ const bulletinRoutes = require('./routes/bulletin');
 const hymnRoutes = require('./routes/hymns');
 const ebmRoutes = require('./routes/ebm');
 const groceryRoutes = require('./routes/grocery');
+const harvestRoutes = require('./routes/harvest');
 const greatestjoyRoutes = require('./routes/greatestjoy');
 const greatestjoyOAuthRoutes = require('./routes/greatestjoy-oauth');
 const familycirclesRoutes = require('./routes/familycircles');
@@ -1362,6 +1363,7 @@ app.use('/bulletin', bulletinRoutes); // Temporarily remove auth for testing
 app.use('/hymns', hymnRoutes); // Remove authentication requirement for hymn search
 app.use('/ebm', ensureAuthenticated, ensureApproved, ebmRoutes);
 app.use('/grocery', ensureAuthenticated, ensureApproved, groceryRoutes);
+app.use('/harvest', ensureAuthenticated, ensureApproved, harvestRoutes);
 app.use('/greatestjoy', ensureAuthenticated, ensureApproved, greatestjoyOAuthRoutes); // OAuth routes (must come before general routes)
 app.use('/greatestjoy', ensureAuthenticated, ensureApproved, greatestjoyRoutes);
 app.use('/greatestjoy/familycircles', ensureAuthenticated, ensureApproved, familycirclesRoutes);

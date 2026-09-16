@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --harvest-soil: #6b4f35;
+            --harvest-leaf: #1f6f4a;
+            --harvest-cream: #fff9ee;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle at 20% 20%, #ffeec6 0%, #f4c98d 40%, #d9a86e 100%);
+            color: #2b2118;
+        }
+
+        .shell {
+            max-width: 1250px;
+            margin: 0 auto;
+            padding: 24px 16px 36px;
+        }
+
+        .card-harvest {
+            background: var(--harvest-cream);
+            border: 1px solid rgba(107, 79, 53, 0.16);
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            margin-bottom: 14px;
+        }
+
+        .mono {
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .pdf-frame {
+            width: 100%;
+            height: 1400px;
+            border: 1px solid rgba(107, 79, 53, 0.2);
+            border-radius: 10px;
+            background: #f7f2e8;
+        }
+
+        .section-scroll-panel {
+            height: 360px;
+            min-height: 140px;
+            max-height: 1100px;
+            overflow: auto;
+            border: 1px solid rgba(107, 79, 53, 0.14);
+            border-radius: 10px;
+            background: #fffdf8;
+            padding: 8px;
+            resize: vertical;
+        }
+
+        .pdf-scroll-panel {
+            height: 520px;
+            min-height: 220px;
+            max-height: 1700px;
+            overflow: auto;
+            border: 1px solid rgba(107, 79, 53, 0.14);
+            border-radius: 10px;
+            background: #fffdf8;
+            padding: 8px;
+            resize: vertical;
+        }
+
+        .size-controls {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .size-label {
+            font-size: 0.8rem;
+            color: #654f3b;
+            min-width: 48px;
+            text-align: center;
+        }
+
+        .pdf-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .pdf-zoom-label {
+            min-width: 56px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .label {
+            color: #654f3b;
+            font-size: 0.84rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 2px;
+        }
+
+        .value {
+            margin-bottom: 10px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-body.is-hidden {
+            display: none;
+        }
+
+        .line-input {
+            min-width: 130px;
+        }
+
+        .confirm-pill {
+            font-size: 0.74rem;
+            color: #155b3b;
+            background: #d7f3e4;
+            border-radius: 999px;
+            padding: 2px 8px;
+            display: inline-block;
+        }
+
+        .line-row-focus {
+            outline: 2px solid #1f6f4a;
+            outline-offset: -2px;
+            background: #eef9f2;
+            transition: background-color 0.25s ease;
+        }
+
+        .next-doc-meta {
+            font-size: 0.82rem;
+            color: #5f7a68;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2 class="mb-1">Harvest Intake Document</h2>
+                <div class="text-muted">Processed <%= new Date(doc.createdAt).toLocaleString() %></div>
+            </div>
+            <div class="d-flex gap-2">
+                <a class="btn btn-outline-secondary" href="/harvest/dashboard">Back to Dashboard</a>
+                <% if (nextDocWithUnconfirmed && nextDocWithUnconfirmed.documentId) { %>
+                    <button
+                        class="btn btn-outline-success"
+                        type="button"
+                        id="goToNextDocumentButton"
+                        data-next-document-id="<%= nextDocWithUnconfirmed.documentId %>">
+                        Go to Next Document
+                    </button>
+                <% } %>
+                <% if (hasSafePdf) { %>
+                    <a class="btn btn-success" href="/harvest/document/<%= doc._id %>/pdf" target="_blank">Open PDF in New Tab</a>
+                <% } %>
+            </div>
+        </div>
+
+        <% if (nextDocWithUnconfirmed && nextDocWithUnconfirmed.documentId) { %>
+            <div class="next-doc-meta">
+                Next: <%= nextDocWithUnconfirmed.poNumber || nextDocWithUnconfirmed.acknowledgementNumber || nextDocWithUnconfirmed.orderNumber || nextDocWithUnconfirmed.fileName || 'Document' %>
+                (<%= nextDocWithUnconfirmed.unconfirmedLineCount || 0 %> unconfirmed)
+            </div>
+        <% } %>
+
+        <section class="card-harvest">
+            <div class="section-header mb-3">
+                <h5 class="mb-0">Extracted Fields</h5>
+                <button class="btn btn-outline-secondary btn-sm" type="button" data-toggle-target="section-extracted-fields">Hide</button>
+            </div>
+            <div class="row section-body" id="section-extracted-fields">
+                <div class="col-md-3">
+                    <div class="label">Source</div>
+                    <div class="value"><%= doc.sourceType %></div>
+                </div>
+                <div class="col-md-3">
+                    <div class="label">PO Number</div>
+                    <div class="value mono"><%= doc.extracted.poNumber || '-' %></div>
+                </div>
+                <div class="col-md-3">
+                    <div class="label">Acknowledgement #</div>
+                    <div class="value mono"><%= doc.extracted.acknowledgementNumber || '-' %></div>
+                </div>
+                <div class="col-md-3">
+                    <div class="label">Order #</div>
+                    <div class="value mono"><%= doc.extracted.orderNumber || '-' %></div>
+                </div>
+                <div class="col-md-3">
+                    <div class="label">Vendor</div>
+                    <div class="value"><%= doc.extracted.vendor || '-' %></div>
+                </div>
+                <div class="col-md-3">
+                    <div class="label">Confidence</div>
+                    <div class="value"><%= Math.round((doc.extracted.confidence || 0) * 100) %>%</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="label">Order Date</div>
+                    <div class="value"><%= doc.extracted.orderDate || '-' %></div>
+                </div>
+                <div class="col-md-3">
+                    <div class="label">Total Amount</div>
+                    <div class="value"><%= doc.extracted.totalAmount !== null ? doc.extracted.totalAmount : '-' %></div>
+                </div>
+                <div class="col-md-3">
+                    <div class="label">Matched PO</div>
+                    <div class="value">
+                        <% if (doc.matchSummary && doc.matchSummary.purchaseOrderId) { %>
+                            <a href="/purchase-orders/<%= doc.matchSummary.purchaseOrderId._id %>"><%= doc.matchSummary.purchaseOrderNumber || 'Open PO' %></a>
+                        <% } else { %>
+                            -
+                        <% } %>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="label">Status</div>
+                    <div class="value"><%= doc.status %></div>
+                </div>
+                <div class="col-md-3">
+                    <div class="label">External Order Ref</div>
+                    <div class="value mono"><%= doc.extracted.externalOrderRef || '-' %></div>
+                </div>
+                <div class="col-md-3">
+                    <div class="label">Customer</div>
+                    <div class="value"><%= doc.extracted.customerName || '-' %></div>
+                </div>
+                <div class="col-md-3">
+                    <div class="label">Customer Email</div>
+                    <div class="value mono"><%= doc.extracted.customerEmail || '-' %></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card-harvest">
+            <div class="section-header mb-2">
+                <div class="d-flex align-items-center gap-2">
+                    <h5 class="mb-0">Extracted Line Items Table</h5>
+                    <button class="btn btn-outline-success btn-sm" type="button" id="jumpNextUnconfirmedToggleButton">Auto Jump: Off</button>
+                    <div class="size-controls">
+                        <button class="btn btn-outline-secondary btn-sm" type="button" data-resize-target="lineItems" data-resize-delta="-80">-</button>
+                        <span class="size-label" id="lineItemsSizeLabel">360px</span>
+                        <button class="btn btn-outline-secondary btn-sm" type="button" data-resize-target="lineItems" data-resize-delta="80">+</button>
+                        <button class="btn btn-outline-secondary btn-sm" type="button" data-resize-reset="lineItems">Reset</button>
+                    </div>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm" type="button" data-toggle-target="section-line-items">Hide</button>
+            </div>
+            <div class="section-body" id="section-line-items">
+                <% if (!doc.extracted || !doc.extracted.lineItems || doc.extracted.lineItems.length === 0) { %>
+                    <div class="text-muted">No line items were extracted from this document.</div>
+                <% } else { %>
+                    <div class="section-scroll-panel" id="lineItemsScrollPanel">
+                        <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Line #</th>
+                                    <th>Product</th>
+                                    <th>UPC</th>
+                                    <th>Description</th>
+                                    <th class="text-end">Qty Ordered</th>
+                                    <th class="text-end">Qty Received</th>
+                                    <th>Qty U/M</th>
+                                    <th class="text-end">Retail Price</th>
+                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-end">Extended Amount</th>
+                                    <th>Confirm</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% doc.extracted.lineItems.forEach((item, idx) => { %>
+                                    <tr data-line-row="<%= idx %>" data-is-confirmed="<%= item.isConfirmedProduct ? 'true' : 'false' %>">
+                                        <td><%= item.lineNumber !== null && item.lineNumber !== undefined ? item.lineNumber : '-' %></td>
+                                        <td>
+                                            <input class="form-control form-control-sm mono line-input" data-field="sku" data-line-index="<%= idx %>" value="<%= item.sku || '' %>">
+                                        </td>
+                                        <td>
+                                            <input class="form-control form-control-sm mono line-input" data-field="upc" data-line-index="<%= idx %>" value="<%= item.upc || '' %>">
+                                        </td>
+                                        <td>
+                                            <input class="form-control form-control-sm line-input" data-field="description" data-line-index="<%= idx %>" value="<%= item.description || '' %>">
+                                        </td>
+                                        <td class="text-end"><%= item.quantity !== null && item.quantity !== undefined ? item.quantity : '-' %></td>
+                                        <td class="text-end"><%= item.quantityReceived !== null && item.quantityReceived !== undefined ? item.quantityReceived : '-' %></td>
+                                        <td><%= item.qtyUom || '-' %></td>
+                                        <td class="text-end"><%= item.retailPrice !== null && item.retailPrice !== undefined ? item.retailPrice : '-' %></td>
+                                        <td class="text-end"><%= item.unitPrice !== null && item.unitPrice !== undefined ? item.unitPrice : '-' %></td>
+                                        <td class="text-end"><%= item.amount !== null && item.amount !== undefined ? item.amount : '-' %></td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <button class="btn btn-outline-success btn-sm" type="button" data-confirm-line="<%= idx %>">Confirm</button>
+                                                <% if (item.isConfirmedProduct) { %>
+                                                    <span class="confirm-pill">Confirmed</span>
+                                                <% } %>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </section>
+
+        <section class="card-harvest">
+            <div class="section-header mb-2">
+                <h5 class="mb-0">Original PO PDF</h5>
+                <button class="btn btn-outline-secondary btn-sm" type="button" data-toggle-target="section-original-pdf">Hide</button>
+            </div>
+            <div class="section-body" id="section-original-pdf">
+                <% if (hasSafePdf) { %>
+                    <div class="pdf-toolbar">
+                        <button class="btn btn-outline-secondary btn-sm" type="button" data-pdf-zoom-change="-10">-</button>
+                        <span class="pdf-zoom-label" id="pdfZoomLabel">100%</span>
+                        <button class="btn btn-outline-secondary btn-sm" type="button" data-pdf-zoom-change="10">+</button>
+                        <button class="btn btn-outline-secondary btn-sm" type="button" data-pdf-zoom-reset="true">Reset</button>
+                        <div class="size-controls ms-1">
+                            <button class="btn btn-outline-secondary btn-sm" type="button" data-resize-target="pdfPanel" data-resize-delta="-120">-</button>
+                            <span class="size-label" id="pdfPanelSizeLabel">520px</span>
+                            <button class="btn btn-outline-secondary btn-sm" type="button" data-resize-target="pdfPanel" data-resize-delta="120">+</button>
+                            <button class="btn btn-outline-secondary btn-sm" type="button" data-resize-reset="pdfPanel">Reset</button>
+                        </div>
+                        <small class="text-muted">Zoom is saved for this document.</small>
+                    </div>
+                    <div class="pdf-scroll-panel" id="pdfScrollPanel">
+                        <iframe class="pdf-frame" id="pdfFrame" src="/harvest/document/<%= doc._id %>/pdf#zoom=100"></iframe>
+                    </div>
+                <% } else { %>
+                    <div class="alert alert-warning mb-0">PDF is not available for this document.</div>
+                <% } %>
+            </div>
+        </section>
+
+        <section class="card-harvest">
+            <div class="section-header mb-3">
+                <h5 class="mb-0">Linked Records</h5>
+                <button class="btn btn-outline-secondary btn-sm" type="button" data-toggle-target="section-linked-records">Hide</button>
+            </div>
+            <div class="row section-body" id="section-linked-records">
+                <div class="col-md-4">
+                    <div class="label">Linked Vendor</div>
+                    <div class="value mono"><%= (doc.entityLinks && doc.entityLinks.vendorName) || '-' %></div>
+                </div>
+                <div class="col-md-4">
+                    <div class="label">Customer</div>
+                    <div class="value"><%= (doc.entityLinks && doc.entityLinks.customerName) || '-' %></div>
+                </div>
+                <div class="col-md-4">
+                    <div class="label">Customer Email</div>
+                    <div class="value mono"><%= (doc.entityLinks && doc.entityLinks.customerEmail) || '-' %></div>
+                </div>
+                <div class="col-md-4">
+                    <div class="label">Link Confidence</div>
+                    <div class="value"><%= Math.round((((doc.entityLinks && doc.entityLinks.linkConfidence) || 0) * 100)) %>%</div>
+                </div>
+                <div class="col-md-8">
+                    <div class="label">Related Dropshipments</div>
+                    <div class="value"><%= (doc.entityLinks && doc.entityLinks.dropshipmentIds && doc.entityLinks.dropshipmentIds.length) || 0 %></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card-harvest">
+            <div class="section-header mb-2">
+                <h5 class="mb-0">Line Item Matching</h5>
+                <button class="btn btn-outline-secondary btn-sm" type="button" data-toggle-target="section-line-matching">Hide</button>
+            </div>
+            <div class="section-body" id="section-line-matching">
+                <% if (!doc.lineItemMatches || doc.lineItemMatches.length === 0) { %>
+                    <div class="text-muted">No parsed line items were matched.</div>
+                <% } else { %>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Parsed SKU</th>
+                                    <th>Description</th>
+                                    <th class="text-end">Parsed Qty</th>
+                                    <th>Match Type</th>
+                                    <th>System SKU</th>
+                                    <th class="text-end">Expected</th>
+                                    <th class="text-end">Received</th>
+                                    <th class="text-end">Open</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% doc.lineItemMatches.forEach(row => { %>
+                                    <tr>
+                                        <td><%= row.parsedIndex + 1 %></td>
+                                        <td class="mono"><%= row.parsedSku || '-' %></td>
+                                        <td><%= row.parsedDescription || '-' %></td>
+                                        <td class="text-end"><%= row.parsedQuantity !== null ? row.parsedQuantity : '-' %></td>
+                                        <td><%= row.matchType %></td>
+                                        <td class="mono"><%= row.matchedSku || '-' %></td>
+                                        <td class="text-end"><%= row.expectedQuantity !== null ? row.expectedQuantity : '-' %></td>
+                                        <td class="text-end"><%= row.receivedQuantity !== null ? row.receivedQuantity : '-' %></td>
+                                        <td class="text-end"><%= row.openQuantity !== null ? row.openQuantity : '-' %></td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } %>
+            </div>
+        </section>
+
+        <section class="card-harvest">
+            <div class="section-header mb-2">
+                <h5 class="mb-0">Parsed Text</h5>
+                <button class="btn btn-outline-secondary btn-sm" type="button" data-toggle-target="section-parsed-text">Hide</button>
+            </div>
+            <div class="mono section-body" id="section-parsed-text"><%= parsedText || 'No parsed text available.' %></div>
+        </section>
+    </main>
+
+    <script>
+        const documentId = '<%= doc._id %>';
+        const serverAutoJumpEnabled = <%- (typeof savedAutoJumpEnabled === 'undefined' || savedAutoJumpEnabled === null) ? 'null' : JSON.stringify(savedAutoJumpEnabled) %>;
+        const sectionStateKey = `harvest:section-state:${documentId}`;
+        const pdfZoomKey = `harvest:pdf-zoom:${documentId}`;
+        const scrollYKey = `harvest:scroll-y:${documentId}`;
+        const lineItemsScrollKey = `harvest:line-items-scroll:${documentId}`;
+        const pdfPanelScrollKey = `harvest:pdf-panel-scroll:${documentId}`;
+        const jumpStateKey = `harvest:jump-last-line:${documentId}`;
+        const jumpAutoEnabledKey = `harvest:jump-auto-enabled:${documentId}`;
+        const jumpAutoEnabledLegacyKey = 'harvest:jump-auto-enabled';
+        const jumpAutoPendingKey = `harvest:jump-auto-pending:${documentId}`;
+        const nextDocRedirectKey = 'harvest:next-doc-redirect-target';
+        const lineItemsHeightKey = `harvest:line-items-height:${documentId}`;
+        const pdfPanelHeightKey = `harvest:pdf-panel-height:${documentId}`;
+        const lineItemsTopFocusKey = 'harvest:focus-line-items-on-open';
+
+        function restoreScrollPosition() {
+            const storedY = Number(sessionStorage.getItem(scrollYKey) || 0);
+            if (Number.isFinite(storedY) && storedY > 0) {
+                window.scrollTo({ top: storedY, left: 0, behavior: 'auto' });
+            }
+        }
+
+        function rememberScrollPosition() {
+            sessionStorage.setItem(scrollYKey, String(window.scrollY || 0));
+        }
+
+        function restorePanelScroll(panel, key) {
+            if (!panel) return;
+            const storedTop = Number(sessionStorage.getItem(key) || 0);
+            if (Number.isFinite(storedTop) && storedTop > 0) {
+                panel.scrollTop = storedTop;
+            }
+        }
+
+        function bindPanelScrollPersistence(panel, key) {
+            if (!panel) return;
+            restorePanelScroll(panel, key);
+            panel.addEventListener('scroll', () => {
+                sessionStorage.setItem(key, String(panel.scrollTop || 0));
+            }, { passive: true });
+        }
+
+        restoreScrollPosition();
+
+        window.addEventListener('scroll', () => {
+            rememberScrollPosition();
+        }, { passive: true });
+
+        window.addEventListener('beforeunload', () => {
+            rememberScrollPosition();
+        });
+
+        const lineItemsScrollPanel = document.getElementById('lineItemsScrollPanel');
+        const pdfScrollPanel = document.getElementById('pdfScrollPanel');
+        const lineItemsSizeLabel = document.getElementById('lineItemsSizeLabel');
+        const pdfPanelSizeLabel = document.getElementById('pdfPanelSizeLabel');
+        bindPanelScrollPersistence(lineItemsScrollPanel, lineItemsScrollKey);
+        bindPanelScrollPersistence(pdfScrollPanel, pdfPanelScrollKey);
+
+        function clampValue(value, min, max) {
+            return Math.max(min, Math.min(max, value));
+        }
+
+        function applyLineItemsHeight(height) {
+            if (!lineItemsScrollPanel) return;
+            const clamped = clampValue(height, 140, 1100);
+            lineItemsScrollPanel.style.height = `${clamped}px`;
+            localStorage.setItem(lineItemsHeightKey, String(clamped));
+            if (lineItemsSizeLabel) lineItemsSizeLabel.textContent = `${clamped}px`;
+        }
+
+        function applyPdfPanelHeight(height) {
+            if (!pdfScrollPanel) return;
+            const clamped = clampValue(height, 220, 1700);
+            pdfScrollPanel.style.height = `${clamped}px`;
+            localStorage.setItem(pdfPanelHeightKey, String(clamped));
+            if (pdfPanelSizeLabel) pdfPanelSizeLabel.textContent = `${clamped}px`;
+        }
+
+        const initialLineHeight = Number(localStorage.getItem(lineItemsHeightKey) || 360);
+        const initialPdfHeight = Number(localStorage.getItem(pdfPanelHeightKey) || 520);
+        applyLineItemsHeight(initialLineHeight);
+        applyPdfPanelHeight(initialPdfHeight);
+
+        document.querySelectorAll('[data-resize-target]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const target = button.getAttribute('data-resize-target');
+                const delta = Number(button.getAttribute('data-resize-delta') || 0);
+
+                if (target === 'lineItems' && lineItemsScrollPanel) {
+                    const current = Number(localStorage.getItem(lineItemsHeightKey) || lineItemsScrollPanel.offsetHeight || 360);
+                    applyLineItemsHeight(current + delta);
+                    sessionStorage.setItem(lineItemsScrollKey, String(lineItemsScrollPanel.scrollTop || 0));
+                }
+
+                if (target === 'pdfPanel' && pdfScrollPanel) {
+                    const current = Number(localStorage.getItem(pdfPanelHeightKey) || pdfScrollPanel.offsetHeight || 520);
+                    applyPdfPanelHeight(current + delta);
+                    sessionStorage.setItem(pdfPanelScrollKey, String(pdfScrollPanel.scrollTop || 0));
+                }
+            });
+        });
+
+        document.querySelectorAll('[data-resize-reset]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const target = button.getAttribute('data-resize-reset');
+                if (target === 'lineItems') {
+                    applyLineItemsHeight(360);
+                }
+                if (target === 'pdfPanel') {
+                    applyPdfPanelHeight(520);
+                }
+            });
+        });
+
+        if (lineItemsScrollPanel && typeof ResizeObserver !== 'undefined') {
+            const lineObserver = new ResizeObserver(() => {
+                const currentHeight = Math.round(lineItemsScrollPanel.getBoundingClientRect().height);
+                applyLineItemsHeight(currentHeight);
+            });
+            lineObserver.observe(lineItemsScrollPanel);
+        }
+
+        if (pdfScrollPanel && typeof ResizeObserver !== 'undefined') {
+            const pdfObserver = new ResizeObserver(() => {
+                const currentHeight = Math.round(pdfScrollPanel.getBoundingClientRect().height);
+                applyPdfPanelHeight(currentHeight);
+            });
+            pdfObserver.observe(pdfScrollPanel);
+        }
+
+        const jumpNextUnconfirmedToggleButton = document.getElementById('jumpNextUnconfirmedToggleButton');
+        const goToNextDocumentButton = document.getElementById('goToNextDocumentButton');
+        const nextDocFromServer = <%- JSON.stringify(nextDocWithUnconfirmed || null) %>;
+
+        function isAutoJumpEnabled() {
+            const stored = localStorage.getItem(jumpAutoEnabledKey);
+            if (stored === null) {
+                return serverAutoJumpEnabled === true;
+            }
+            return stored === 'true';
+        }
+
+        function persistAutoJumpEnabled(enabled) {
+            localStorage.setItem(jumpAutoEnabledKey, String(enabled));
+            fetch(`/harvest/document/${encodeURIComponent(documentId)}/preferences`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ autoJumpEnabled: Boolean(enabled) })
+            }).catch(() => {});
+        }
+
+        function updateAutoJumpToggleUi() {
+            if (!jumpNextUnconfirmedToggleButton) return;
+            const enabled = isAutoJumpEnabled();
+            jumpNextUnconfirmedToggleButton.textContent = enabled ? 'Auto Jump: On' : 'Auto Jump: Off';
+            jumpNextUnconfirmedToggleButton.classList.toggle('btn-success', enabled);
+            jumpNextUnconfirmedToggleButton.classList.toggle('btn-outline-success', !enabled);
+        }
+
+        function getUnconfirmedRows() {
+            return Array.from(document.querySelectorAll('[data-line-row]')).filter((row) => {
+                return row.getAttribute('data-is-confirmed') !== 'true';
+            });
+        }
+
+        function focusLineRow(row) {
+            if (!row) return;
+
+            row.classList.add('line-row-focus');
+            setTimeout(() => row.classList.remove('line-row-focus'), 1600);
+
+            if (lineItemsScrollPanel) {
+                const panelRect = lineItemsScrollPanel.getBoundingClientRect();
+                const rowRect = row.getBoundingClientRect();
+                const offset = rowRect.top - panelRect.top;
+                lineItemsScrollPanel.scrollTop += offset - 80;
+                sessionStorage.setItem(lineItemsScrollKey, String(lineItemsScrollPanel.scrollTop || 0));
+            } else {
+                row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            }
+
+            const firstInput = row.querySelector('input[data-field="sku"], input[data-field="upc"], input[data-field="description"]');
+            if (firstInput) {
+                firstInput.focus();
+                if (typeof firstInput.select === 'function') firstInput.select();
+            }
+        }
+
+        function ensureLineItemsSectionVisible() {
+            const sectionBody = document.getElementById('section-line-items');
+            const toggleButton = document.querySelector('[data-toggle-target="section-line-items"]');
+            if (!sectionBody) return;
+
+            if (sectionBody.classList.contains('is-hidden')) {
+                sectionBody.classList.remove('is-hidden');
+                if (toggleButton) toggleButton.textContent = 'Hide';
+                sectionState['section-line-items'] = false;
+                saveSectionState();
+            }
+        }
+
+        function goToDocumentWithLineItemsAtTop(targetDocId) {
+            if (!targetDocId) return;
+            sessionStorage.setItem(nextDocRedirectKey, String(targetDocId));
+            sessionStorage.setItem(lineItemsTopFocusKey, 'true');
+            window.location.href = `/harvest/document/${encodeURIComponent(targetDocId)}?focus=line-items`;
+        }
+
+        function jumpToNextUnconfirmed(options = {}) {
+            const silent = Boolean(options.silent);
+            const unconfirmedRows = getUnconfirmedRows();
+            if (unconfirmedRows.length === 0) {
+                if (!silent && nextDocFromServer && nextDocFromServer.documentId) {
+                    const shouldGoNext = window.confirm('All extracted products in this document are confirmed. Go to the next document with unconfirmed items?');
+                    if (shouldGoNext) {
+                        goToDocumentWithLineItemsAtTop(nextDocFromServer.documentId);
+                    }
+                }
+                return;
+            }
+
+            ensureLineItemsSectionVisible();
+
+            const lastLineIndex = Number(sessionStorage.getItem(jumpStateKey) || -1);
+            let targetRow = unconfirmedRows[0];
+
+            for (const row of unconfirmedRows) {
+                const index = Number(row.getAttribute('data-line-row'));
+                if (Number.isFinite(index) && index > lastLineIndex) {
+                    targetRow = row;
+                    break;
+                }
+            }
+
+            const selectedIndex = Number(targetRow.getAttribute('data-line-row'));
+            if (Number.isFinite(selectedIndex)) {
+                sessionStorage.setItem(jumpStateKey, String(selectedIndex));
+            }
+
+            focusLineRow(targetRow);
+        }
+
+        function ensureStoredAutoJumpPreference() {
+            const currentDocValue = localStorage.getItem(jumpAutoEnabledKey);
+            if (currentDocValue === null) {
+                const legacyValue = localStorage.getItem(jumpAutoEnabledLegacyKey);
+                if (legacyValue !== null) {
+                    localStorage.setItem(jumpAutoEnabledKey, legacyValue);
+                    localStorage.removeItem(jumpAutoEnabledLegacyKey);
+                } else if (serverAutoJumpEnabled !== null) {
+                    localStorage.setItem(jumpAutoEnabledKey, String(serverAutoJumpEnabled));
+                }
+            }
+        }
+
+        updateAutoJumpToggleUi();
+        ensureStoredAutoJumpPreference();
+        updateAutoJumpToggleUi();
+
+        if (jumpNextUnconfirmedToggleButton) {
+            jumpNextUnconfirmedToggleButton.addEventListener('click', () => {
+                const nextValue = !isAutoJumpEnabled();
+                persistAutoJumpEnabled(nextValue);
+                updateAutoJumpToggleUi();
+                if (nextValue) {
+                    jumpToNextUnconfirmed({ silent: true });
+                }
+            });
+        }
+
+        const shouldAutoJumpNow = isAutoJumpEnabled() && sessionStorage.getItem(jumpAutoPendingKey) === 'true';
+        if (shouldAutoJumpNow) {
+            sessionStorage.removeItem(jumpAutoPendingKey);
+            window.setTimeout(() => jumpToNextUnconfirmed({ silent: true }), 120);
+        }
+
+        const pendingNextDocRedirect = sessionStorage.getItem(nextDocRedirectKey);
+        if (pendingNextDocRedirect && pendingNextDocRedirect === documentId) {
+            sessionStorage.removeItem(nextDocRedirectKey);
+        }
+
+        if (goToNextDocumentButton && nextDocFromServer && nextDocFromServer.documentId) {
+            goToNextDocumentButton.addEventListener('click', () => {
+                goToDocumentWithLineItemsAtTop(nextDocFromServer.documentId);
+            });
+        }
+
+        const urlFocus = new URLSearchParams(window.location.search).get('focus');
+        const shouldFocusLineItems = urlFocus === 'line-items' || sessionStorage.getItem(lineItemsTopFocusKey) === 'true';
+        if (shouldFocusLineItems) {
+            sessionStorage.removeItem(lineItemsTopFocusKey);
+            window.setTimeout(() => {
+                ensureLineItemsSectionVisible();
+                const sectionBody = document.getElementById('section-line-items');
+                if (sectionBody) {
+                    sectionBody.scrollIntoView({ block: 'start', behavior: 'auto' });
+                }
+            }, 60);
+        }
+
+        let sectionState = {};
+        try {
+            sectionState = JSON.parse(localStorage.getItem(sectionStateKey) || '{}');
+        } catch (error) {
+            sectionState = {};
+        }
+
+        function saveSectionState() {
+            localStorage.setItem(sectionStateKey, JSON.stringify(sectionState));
+        }
+
+        document.querySelectorAll('[data-toggle-target]').forEach((button) => {
+            const targetId = button.getAttribute('data-toggle-target');
+            const sectionBody = document.getElementById(targetId);
+            if (!sectionBody) return;
+
+            if (sectionState[targetId] === true) {
+                sectionBody.classList.add('is-hidden');
+                button.textContent = 'View';
+            } else {
+                sectionBody.classList.remove('is-hidden');
+                button.textContent = 'Hide';
+            }
+
+            button.addEventListener('click', () => {
+                const hidden = sectionBody.classList.toggle('is-hidden');
+                button.textContent = hidden ? 'View' : 'Hide';
+                sectionState[targetId] = hidden;
+                saveSectionState();
+            });
+        });
+
+        const pdfFrame = document.getElementById('pdfFrame');
+        const pdfZoomLabel = document.getElementById('pdfZoomLabel');
+        const basePdfUrl = `/harvest/document/${encodeURIComponent(documentId)}/pdf`;
+
+        function clampPdfZoom(value) {
+            return Math.max(50, Math.min(250, value));
+        }
+
+        let pdfZoom = clampPdfZoom(Number(localStorage.getItem(pdfZoomKey) || 125));
+
+        function applyPdfZoom() {
+            if (!pdfFrame || !pdfZoomLabel) return;
+            pdfZoomLabel.textContent = `${pdfZoom}%`;
+            pdfFrame.src = `${basePdfUrl}#zoom=${pdfZoom}`;
+            localStorage.setItem(pdfZoomKey, String(pdfZoom));
+        }
+
+        if (pdfFrame && pdfZoomLabel) {
+            pdfFrame.addEventListener('load', () => {
+                restorePanelScroll(pdfScrollPanel, pdfPanelScrollKey);
+            });
+
+            applyPdfZoom();
+
+            document.querySelectorAll('[data-pdf-zoom-change]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const delta = Number(button.getAttribute('data-pdf-zoom-change') || 0);
+                    pdfZoom = clampPdfZoom(pdfZoom + delta);
+                    applyPdfZoom();
+                });
+            });
+
+            const resetButton = document.querySelector('[data-pdf-zoom-reset]');
+            if (resetButton) {
+                resetButton.addEventListener('click', () => {
+                    pdfZoom = 125;
+                    applyPdfZoom();
+                });
+            }
+        }
+
+        document.querySelectorAll('[data-confirm-line]').forEach((button) => {
+            button.addEventListener('click', async () => {
+                const lineIndex = Number(button.getAttribute('data-confirm-line'));
+                if (!Number.isInteger(lineIndex)) return;
+
+                const skuInput = document.querySelector(`[data-field="sku"][data-line-index="${lineIndex}"]`);
+                const upcInput = document.querySelector(`[data-field="upc"][data-line-index="${lineIndex}"]`);
+                const descInput = document.querySelector(`[data-field="description"][data-line-index="${lineIndex}"]`);
+
+                const payload = {
+                    lineIndex,
+                    sku: skuInput ? skuInput.value : '',
+                    upc: upcInput ? upcInput.value : '',
+                    description: descInput ? descInput.value : ''
+                };
+
+                const previousText = button.textContent;
+                button.disabled = true;
+                button.textContent = 'Saving...';
+                rememberScrollPosition();
+                if (isAutoJumpEnabled()) {
+                    sessionStorage.setItem(jumpAutoPendingKey, 'true');
+                    sessionStorage.setItem(jumpStateKey, String(lineIndex));
+                }
+
+                try {
+                    if (lineItemsScrollPanel) {
+                        sessionStorage.setItem(lineItemsScrollKey, String(lineItemsScrollPanel.scrollTop || 0));
+                    }
+                    if (pdfScrollPanel) {
+                        sessionStorage.setItem(pdfPanelScrollKey, String(pdfScrollPanel.scrollTop || 0));
+                    }
+                    const response = await fetch(`/harvest/document/${encodeURIComponent(documentId)}/confirm-product`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const contentType = (response.headers.get('content-type') || '').toLowerCase();
+                    if (!contentType.includes('application/json')) {
+                        throw new Error('Unexpected server response while saving confirmation.');
+                    }
+
+                    const result = await response.json();
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.error || 'Failed to save product confirmation.');
+                    }
+
+                    if (isAutoJumpEnabled()) {
+                        const nextDocResponse = await fetch(`/harvest/document/${encodeURIComponent(documentId)}/next-unconfirmed`, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+
+                        if (nextDocResponse.ok) {
+                            const nextDocResult = await nextDocResponse.json();
+                            const nextDoc = nextDocResult && nextDocResult.success ? nextDocResult.nextDoc : null;
+                            if (nextDoc && Array.from(document.querySelectorAll('[data-line-row]')).filter((row) => row.getAttribute('data-is-confirmed') !== 'true').length <= 1) {
+                                const shouldGoNext = window.confirm('Last unconfirmed line item saved. Go to the next document with unconfirmed items?');
+                                if (shouldGoNext) {
+                                    goToDocumentWithLineItemsAtTop(nextDoc.documentId);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                    window.location.reload();
+                } catch (error) {
+                    alert(error.message);
+                    button.disabled = false;
+                    button.textContent = previousText;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
